@@ -338,7 +338,7 @@ extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int 
 /*
   Misc stuff
 
-  change_mem()    see header of implementation for usage
+  change_mem[2]() see header of implementation for usage
   ansi_init ()    initialize ANSI output
   ansi_strip ()   strip ANSI codes from a string
   gauge()         init_time == time when gauge() was first started or when
@@ -361,8 +361,24 @@ extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int 
   handle_registered_funcs() calls all the registered functions
   wait2           wait (sleep) a specified number of milliseconds
 */
+typedef struct st_cm_set
+{
+  char *data;
+  int size;
+} st_cm_set_t;
+
+typedef struct st_cm_pattern
+{
+  char *search, wildcard, escape, *replace;
+  int search_size, replace_size, offset;
+  st_cm_set_t *sets;
+} st_cm_pattern_t;
+
 extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
                        char wc, char esc, char *newstr, int newsize, int offset, ...);
+extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
+                        char wc, char esc, char *newstr, int newsize,
+                        int offset, st_cm_set_t *sets);
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);

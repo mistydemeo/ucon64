@@ -1436,7 +1436,13 @@ Same here.
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;
-  int bytesread, n = 0;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "snescopy.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
   puts ("Attempting crack...");
 
@@ -1462,6 +1468,21 @@ Same here.
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
+      // First use the extra patterns, so that their precedence is higher than
+      //  the built-in patterns
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        {
+          n += change_mem2 (buffer, bytesread,
+                            patterns[n2].search,
+                            patterns[n2].search_size,
+                            patterns[n2].wildcard,
+                            patterns[n2].escape,
+                            patterns[n2].replace,
+                            patterns[n2].replace_size,
+                            patterns[n2].offset,
+                            patterns[n2].sets);
+        }
+
       // SRAM
       if (snes_sramsize == 8 * 1024)            // 8 kB == 64 kb
         {
@@ -1536,6 +1557,7 @@ Same here.
     }
   fclose (srcfile);
   fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
 
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);
@@ -1565,7 +1587,13 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;
-  int bytesread, n = 0;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "snespal.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
   puts ("Attempting to fix PAL protection code...");
 
@@ -1591,6 +1619,19 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {
+      // First use the extra patterns, so that their precedence is higher than
+      //  the built-in patterns
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
+
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, -6);
@@ -1604,6 +1645,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
     }
   fclose (srcfile);
   fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
 
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);
@@ -1648,7 +1690,13 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;
-  int bytesread, n = 0;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "snesntsc.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
   puts ("Attempting to fix NTSC protection code...");
 
@@ -1674,6 +1722,19 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {
+      // First use the extra patterns, so that their precedence is higher than
+      //  the built-in patterns
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
+
       n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\xf0", 5, '\x01', '\x02', "\x80", 1, 0,
                        "\x29\x89", 2);
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, 0);
@@ -1712,6 +1773,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
     }
   fclose (srcfile);
   fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
 
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);
@@ -1759,7 +1821,13 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;
-  int bytesread, n = 0;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "snesslow.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
   puts ("Attempting SlowROM fix...");
 
@@ -1785,6 +1853,19 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
+      // First use the extra patterns, so that their precedence is higher than
+      //  the built-in patterns
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
+
       n += change_mem (buffer, bytesread, "!\x0d\x42", 3, '*', '!', "\x9c", 1, -2,
                        "\x8c\x8d\x8e\x8f", 4);
       n += change_mem (buffer, bytesread, "\x01\x0d\x42", 3, '*', '!', "\x00", 1, -2);
@@ -1802,6 +1883,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
     }
   fclose (srcfile);
   fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
 
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);

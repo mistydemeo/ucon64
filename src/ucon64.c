@@ -49,6 +49,9 @@ write programs in C
 #ifdef  __linux__
 #include <sys/io.h>
 #endif
+#ifdef  _WIN32
+#include <windows.h>
+#endif
 
 #ifdef  DEBUG
 #warning DEBUG active
@@ -482,8 +485,8 @@ main (int argc, char **argv)
 
   // $HOME/.ucon64/ ?
   strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
-#ifdef  __CYGWIN__
-  strcpy (ucon64.configdir, cygwin_fix (ucon64.configdir));
+#if     defined __CYGWIN__
+  strcpy (ucon64.configdir, fix_character_set (ucon64.configdir));
 #endif
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
@@ -491,8 +494,8 @@ main (int argc, char **argv)
   // DAT file handling
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "datdir", buf, ""));
-#ifdef  __CYGWIN__
-  strcpy (ucon64.datdir, cygwin_fix (ucon64.datdir));
+#if     defined __CYGWIN__
+  strcpy (ucon64.datdir, fix_character_set (ucon64.datdir));
 #endif
   strcpy (buf, ucon64.datdir);
   realpath2 (buf, ucon64.datdir);
@@ -532,7 +535,7 @@ main (int argc, char **argv)
   memset (&arg, 0, sizeof (st_args_t) * UCON64_MAX_ARGS);
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
-      if (c == '?') // getopt() returns 0x3f ('?') when a unknown option was given
+      if (c == '?') // getopt() returns 0x3f ('?') when an unknown option was given
         {
           fprintf (stderr,
                "Try '%s " OPTION_LONG_S "help' for more information.\n",
@@ -562,8 +565,14 @@ main (int argc, char **argv)
     for (; rom_index < argc; rom_index++)
       {
         int result = 0;
+#ifndef _WIN32
         struct dirent *ep;
         DIR *dp;
+#else
+        char search_pattern[FILENAME_MAX];
+        WIN32_FIND_DATA find_data;
+        HANDLE dp;
+#endif
         char *path = argv[rom_index];
 
         if (stat (path, &fstate) != -1)
@@ -572,19 +581,41 @@ main (int argc, char **argv)
               result = ucon64_process_rom (argv[rom_index]);
             else if (S_ISDIR (fstate.st_mode))  // a dir?
               {
+#ifndef _WIN32
                 if ((dp = opendir (path)))
-                  while ((ep = readdir (dp)))
-                    {
-                      sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, ep->d_name);
-                      if (stat (buf, &fstate) != -1)
-                        if (S_ISREG (fstate.st_mode))
-                          {
-                            result = ucon64_process_rom (buf);
-                            if (result == 1)
-                              break;
-                          }
-                    }
-                  closedir (dp);
+                  {
+                    while ((ep = readdir (dp)))
+                      {
+                        sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, ep->d_name);
+                        if (stat (buf, &fstate) != -1)
+                          if (S_ISREG (fstate.st_mode))
+                            {
+                              result = ucon64_process_rom (buf);
+                              if (result == 1)
+                                break;
+                            }
+                      }
+                    closedir (dp);
+                  }
+#else
+                sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*", path);
+                if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
+                  {
+                    do
+                      {
+                        sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, find_data.cFileName);
+                        if (stat (buf, &fstate) != -1)
+                          if (S_ISREG (fstate.st_mode))
+                            {
+                              result = ucon64_process_rom (buf);
+                              if (result == 1)
+                                break;
+                            }
+                      }
+                    while (FindNextFile (dp, &find_data));
+                    FindClose (dp);
+                  }
+#endif
               }
             else
               result = ucon64_process_rom(argv[rom_index]);
@@ -693,7 +724,6 @@ ucon64_execute_options (void)
         ucon64_switches (arg[x].val, arg[x].optarg);
     }
 
-
 #ifdef  PARALLEL
     /*
       The copier options need root privileges for ucon64_parport_init()
@@ -712,7 +742,6 @@ ucon64_execute_options (void)
         privileges_droppped = 1;                // call drop_privileges() only once
       }
 #endif
-
 
   for (x = 0; arg[x].val; x++)
     {
@@ -809,14 +838,17 @@ ucon64_rom_handling (void)
     no_rom = 1;
   else if (S_ISREG (fstate.st_mode) != TRUE)
     no_rom = 1;
+#if 0
+  // printing an error message for files of 0 bytes only confuses people
   else if (!fstate.st_size)
     no_rom = 1;
+#endif
 
   if (no_rom)
     {
       if (!(ucon64.flags & WF_NO_ROM))
         {
-          fprintf (stderr, "ERROR: This option requires a file argument\n");
+          fprintf (stderr, "ERROR: This option requires a file argument (ROM/image/SRAM file/directory)\n");
           return -1;
         }
       return 0;
@@ -1452,6 +1484,8 @@ ucon64_usage (int argc, char *argv[])
 #if     defined __MSDOS__
     "discmage.dxe";
 #elif   defined __CYGWIN__
+    "discmage.dll";
+#elif   defined _WIN32
     "discmage.dll";
 #elif   defined __unix__ || defined __BEOS__
     "libdiscmage.so";

@@ -606,8 +606,8 @@ pce_compare (const void *key, const void *found)
       return ((st_pce_data_t *) key)->crc32 - ((st_pce_data_t *) found)->crc32;
     does *not* work correctly for all cases.
   */
-  return ((int64_t) ((st_pce_data_t *) key)->crc32 -
-          (int64_t) ((st_pce_data_t *) found)->crc32) / 2;
+  return (int) (((int64_t) ((st_pce_data_t *) key)->crc32 -
+                 (int64_t) ((st_pce_data_t *) found)->crc32) / 2);
 }
 
 

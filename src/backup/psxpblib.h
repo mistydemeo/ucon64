@@ -31,11 +31,10 @@
 #endif
 
 
-
 // outportb() and inportb() are only present in uCON64 if PARALLEL is defined
 
-#define psx_outportb(P, B) outportb(P, B)
-#define psx_inportb(P) inportb(P)
+#define psx_outportb(P, B) outportb((unsigned short) (P), (unsigned char) (B))
+#define psx_inportb(P) inportb((unsigned short) (P))
 
 #ifdef  _PSXPB_DJGPP_
 #include <stdlib.h>
@@ -76,7 +75,7 @@
 
 #define PSX_MAX_DATA     30     /* maximum possible length of controller packet in bytes */
 
-                            /* JAP code  EUR code    Name */
+                                /* JAP code  EUR code    Name */
 
 #define PSX_MOUSE        1      /* SCPH-1030 SCPH-????   Mouse */
 #define PSX_NEGCON       2      /* SLPH-0001 SLEH-0003   Namco neGcon
@@ -97,7 +96,7 @@
                                    SCPH-???? SCPH-1180 E Analog Controller - Analog Green Mode */
 #define PSX_GUNCON       6      /* SLPH-???? SLEH-0007   Namco G-con45 */
 #define PSX_ANALOG_RED   7      /* SCPH-1150 SCPH-1200 E Dual Shock Analog Controller - Analog Red Mode */
-                            /* SCPH-???? SCPH-1180 E Analog Controller - Analog Red Mode */
+                                /* SCPH-???? SCPH-1180 E Analog Controller - Analog Red Mode */
 #define PSX_JOGCON       14     /* SLPH-???? SLEH-0020   Namco Jogcon */
 /*#define PSX_MULTITAP   17    SCPH-1070 SCPH-1070 E Multi tap */
 
@@ -163,9 +162,6 @@ typedef struct
   unsigned char icon_frames;
 }
 PSX_MCB_INFO;
-
-
-
 
 
 /* sets clock for conport connected to parallel port base */

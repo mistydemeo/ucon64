@@ -117,10 +117,10 @@ const st_usage_t fal_usage[] =
 //  5. If no diff get device Manuf ID for flash.
 //  6. If no Manuf ID detected then report no cart backup available.
 
-#define outpb(p,v)  outportb(p,v); iodelay()
-#define inpb(p)   inportb(p)
-#define outpw(p,v)  outportw(p,v); iodelay()
-#define inpw(p)   inportw(p)
+#define outpb(p, v) outportb((unsigned short) (p), (unsigned char) (v)); iodelay()
+#define inpb(p)     inportb((unsigned short) (p))
+#define outpw(p, v) outportw((unsigned short) (p), (unsigned char) (v)); iodelay()
+#define inpw(p)     inportw((unsigned short) (p))
 
 //#define HEADER_LENGTH 0xc0
 //#define OUTBUFLEN 256                   // Must be a multiple of 2! (ex:64,128,256...)
@@ -692,7 +692,7 @@ BackupROM (FILE * fp, int SizekW)
   WriteFlash (0, INTEL28F_READARRAY);   // Set flash (intel 28F640J3A) Read Mode
 
   starttime = time (NULL);
-  for (i = 0; i < (SizekW >> 8); i++)
+  for (i = 0; i < (u32) (SizekW >> 8); i++)
     {
       SetCartAddr (i << 8);     // Set cart base addr to 0
       l4021d0 (3);
@@ -866,7 +866,7 @@ GetFileByte (FILE * fp)
 }
 
 int
-GetFileSize (FILE * fp)
+GetFileSize2 (FILE * fp) // the name "GetFileSize" conflicts with a Windows function
 {
   int FileSize;
 
@@ -947,7 +947,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
   time_t starttime;
 
   // Get file size
-  FileSize = GetFileSize (fp);
+  FileSize = GetFileSize2 (fp);
 
   printf ("Erasing Visoly non-turbo flash cart...\n\n");
 
@@ -1073,7 +1073,7 @@ ProgramTurboIntelFlash (FILE * fp)
   time_t starttime;
 
   // Get file size
-  FileSize = GetFileSize (fp);
+  FileSize = GetFileSize2 (fp);
 
   printf ("Erasing Visoly turbo flash cart...\n\n");
 
@@ -1194,7 +1194,7 @@ ProgramSharpFlash (FILE * fp)
   time_t starttime;
 
   // Get file size
-  FileSize = GetFileSize (fp);
+  FileSize = GetFileSize2 (fp);
 
   printf ("Erasing flash cart...\n\n");
 

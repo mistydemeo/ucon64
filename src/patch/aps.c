@@ -187,7 +187,7 @@ readN64header (void)
 
 
 static void
-readsizeheader (int modsize)
+readsizeheader (int modsize, const char *modname)
 {
   int orgsize, i;
 
@@ -199,9 +199,14 @@ readsizeheader (int modsize)
     {
       if (orgsize < modsize)
         {
-          if (ftruncate (fileno (n64aps_modfile), orgsize) != 0)
+          fclose (n64aps_modfile);
+          if (truncate (modname, orgsize) != 0)
             fprintf (stderr, "ERROR: Truncate failed\n");
-          fflush (n64aps_modfile);
+          if ((n64aps_modfile = fopen (modname, "rb")) == NULL)
+            {
+              fprintf (stderr, "ERROR: Could not open %s after truncation\n", modname);
+              exit (1);
+            }
         }
       else
         {
@@ -279,7 +284,7 @@ aps_apply (const char *mod, const char *apsname)
 
   readstdheader ();
   readN64header ();
-  readsizeheader (size);
+  readsizeheader (size, modname);
 
   readpatch ();
 

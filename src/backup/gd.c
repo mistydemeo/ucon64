@@ -52,17 +52,17 @@ const st_usage_t gd_usage[] =
 
 #ifdef PARALLEL
 #define BUFFERSIZE      8192
-#define OK 0
-#define ERROR 1
+#define GD_OK 0
+#define GD_ERROR 1
 
 static void init_io (unsigned int port);
 static void deinit_io (void);
 static void io_error (void);
 static void gd_checkabort (int status);
 static void gd3_send_byte (unsigned char data);
-static void gd3_send_bytes (unsigned len, unsigned char *data);
+static void gd3_send_bytes (int len, unsigned char *data);
 static int gd3_send_prolog_byte (unsigned char data);
-static int gd3_send_prolog_bytes (unsigned len, unsigned char *data);
+static int gd3_send_prolog_bytes (int len, unsigned char *data);
 static int gd3_send_unit_prolog (int header, unsigned size);
 
 typedef struct st_gd3_memory_unit
@@ -172,17 +172,17 @@ void
 gd3_send_byte (unsigned char data)
 {
   // Wait until SF3 is not busy
-  while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0)
+  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
     ;
 
-  outportb (gd_port, data);                     // set data
-  outportb (gd_port + PARPORT_CONTROL, 5);      // Clock data out to SF3
-  outportb (gd_port + PARPORT_CONTROL, 4);
+  outportb ((unsigned short) gd_port, data);    // set data
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
 }
 
 
 void
-gd3_send_bytes (unsigned len, unsigned char *data)
+gd3_send_bytes (int len, unsigned char *data)
 {
   int i = len;
 
@@ -211,45 +211,45 @@ gd3_send_prolog_byte (unsigned char data)
   // Wait until SF3 is not busy
   do
     {
-      if ((inportb (gd_port + PARPORT_STATUS) & 0x08) == 0)
-        return ERROR;
+      if ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x08) == 0)
+        return GD_ERROR;
     }
-  while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0);
+  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0);
 
-  outportb (gd_port, data);                     // set data
-  outportb (gd_port + PARPORT_CONTROL, 5);      // Clock data out to SF3
-  outportb (gd_port + PARPORT_CONTROL, 4);
+  outportb ((unsigned short) gd_port, data);    // set data
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
 
-  return OK;
+  return GD_OK;
 }
 
 
 int
-gd3_send_prolog_bytes (unsigned len, unsigned char *data)
+gd3_send_prolog_bytes (int len, unsigned char *data)
 {
   int i = len;
 
   for (i = 0; i < len; i++)
     {
-      if (gd3_send_prolog_byte (*data++) == ERROR)
-        return ERROR;
+      if (gd3_send_prolog_byte (*data++) == GD_ERROR)
+        return GD_ERROR;
     }
-  return OK;
+  return GD_OK;
 }
 
 
 int
 gd3_send_unit_prolog (int header, unsigned size)
 {
-  if (gd3_send_prolog_byte (0x00) == ERROR)
-    return ERROR;
-  if (gd3_send_prolog_byte ((header != 0) ? 0x02 : 0x00) == ERROR)
-    return ERROR;
-  if (gd3_send_prolog_byte (size >> 16) == ERROR) // 0x10 = 8Mbit
-    return ERROR;
-  if (gd3_send_prolog_byte (0x00) == ERROR)
-    return ERROR;
-  return OK;
+  if (gd3_send_prolog_byte (0x00) == GD_ERROR)
+    return GD_ERROR;
+  if (gd3_send_prolog_byte ((unsigned char) ((header != 0) ? 0x02 : 0x00)) == GD_ERROR)
+    return GD_ERROR;
+  if (gd3_send_prolog_byte ((unsigned char) (size >> 16)) == GD_ERROR) // 0x10 = 8Mbit
+    return GD_ERROR;
+  if (gd3_send_prolog_byte (0x00) == GD_ERROR)
+    return GD_ERROR;
+  return GD_OK;
 }
 
 
@@ -358,9 +358,9 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   gd_starttime = time (NULL);
 
   // Send the ROM to the hardware
-  if (gd3_send_prolog_bytes (4, "DSF3") == ERROR)
+  if (gd3_send_prolog_bytes (4, "DSF3") == GD_ERROR)
     io_error ();
-  if (gd3_send_prolog_byte ((unsigned char) num_units) == ERROR)
+  if (gd3_send_prolog_byte ((unsigned char) num_units) == GD_ERROR)
     io_error ();
 
   printf ("Press q to abort\n\n");
@@ -391,15 +391,15 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
         }
 
       send_header = (i == 0) ? 1 : 0;
-      if (gd3_send_unit_prolog (send_header, gd3_dram_unit[i].size) == ERROR)
+      if (gd3_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)
         io_error ();
-      if (gd3_send_prolog_bytes (11, gd3_dram_unit[i].name) == ERROR)
+      if (gd3_send_prolog_bytes (11, gd3_dram_unit[i].name) == GD_ERROR)
         io_error ();
       if (send_header)
         {
           // Send the Game Doctor 512 byte header
           fread (buffer, 1, GD_HEADER_LEN, file);
-          if (gd3_send_prolog_bytes (GD_HEADER_LEN, buffer) == ERROR)
+          if (gd3_send_prolog_bytes (GD_HEADER_LEN, buffer) == GD_ERROR)
             io_error ();
           gd_bytessend += GD_HEADER_LEN;
         }

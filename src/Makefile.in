@@ -1,6 +1,7 @@
 .PHONY: all clean distclean install uninstall
 
 @DEFINE_DLOPEN_MAKE@
+@DEFINE_ZLIB_MAKE@
 
 CC=@CC@
 
@@ -59,7 +60,6 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
         backup/mgd.o backup/smd.o backup/swc.o backup/dex.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
-@DEFINE_ZLIB_MAKE@
 ifdef ZLIB
 OBJECTS+=unzip.o miscz.o
 endif

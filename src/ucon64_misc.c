@@ -405,10 +405,10 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   these options "know" the console
 */
-  {UCON64_1991, UCON64_GEN, genesis_usage, WF_DEFAULT},
+  {UCON64_1991, UCON64_GEN, genesis_usage,     WF_DEFAULT},
   {UCON64_B0, UCON64_LYNX, lynx_usage,         WF_DEFAULT},
   {UCON64_B1, UCON64_LYNX, lynx_usage,         WF_DEFAULT},
-  {UCON64_BIOS, UCON64_NG, neogeo_usage,   WF_DEFAULT},
+  {UCON64_BIOS, UCON64_NG, neogeo_usage,       WF_DEFAULT},
   {UCON64_BOT, UCON64_N64, n64_usage,          WF_DEFAULT},
   {UCON64_CRP, UCON64_GBA, gba_usage,          WF_DEFAULT},
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
@@ -431,14 +431,14 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_MULTI, UCON64_GBA, gba_usage,        WF_STOP},
-//  {UCON64_MVS, UCON64_NG, neogeo_usage,    WF_DEFAULT},
-  {UCON64_N2, UCON64_GEN, genesis_usage,   WF_DEFAULT},
+//  {UCON64_MVS, UCON64_NG, neogeo_usage,        WF_DEFAULT},
+  {UCON64_N2, UCON64_GEN, genesis_usage,       WF_DEFAULT},
   {UCON64_N2GB, UCON64_GB, gameboy_usage,      WF_DEFAULT},
   {UCON64_NROT, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_PASOFAMI, UCON64_NES, nes_usage,     WF_DEFAULT},
   {UCON64_ROTL, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_ROTR, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
-  {UCON64_SAM, UCON64_NG, neogeo_usage,    WF_DEFAULT},
+  {UCON64_SAM, UCON64_NG, neogeo_usage,        WF_DEFAULT},
   {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT},
   {UCON64_SMG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
@@ -470,8 +470,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSMD, UCON64_UNKNOWN, smd_usage,     WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
 #else
-  {UCON64_XSMD, UCON64_GEN, smd_usage,     WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSMDS, UCON64_GEN, smd_usage,    WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSMD, UCON64_GEN, smd_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSMDS, UCON64_GEN, smd_usage,        WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
 #endif
   {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
@@ -482,13 +482,13 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   these options do not (need to) know the console or work for more than one
 */
-  {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage,       WF_DEFAULT},
-  {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage,       0},
+  {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
+  {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, 0},
   {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  0},
-  {UCON64_ISOFIX, UCON64_UNKNOWN, libdm_usage,        WF_DEFAULT},
-  {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,         0},
-  {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,        0},
-  {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_ISOFIX, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
+  {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  0},
+  {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    0},
+  {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
 
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
@@ -548,36 +548,36 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   force recognition switches
 */
-  {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,        WF_SWITCH},
+  {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
 
-  {UCON64_3DO, UCON64_3DO, real3do_usage,  WF_SWITCH},
-  {UCON64_ATA, UCON64_ATA, atari_usage,      WF_SWITCH},
+  {UCON64_3DO, UCON64_3DO, real3do_usage,      WF_SWITCH},
+  {UCON64_ATA, UCON64_ATA, atari_usage,        WF_SWITCH},
 //  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},
 //  {UCON64_CDI, UCON64_CDI, cdi_usage,          WF_SWITCH},
   {UCON64_COLECO, UCON64_COLECO, coleco_usage, WF_SWITCH},
   {UCON64_DC, UCON64_DC, dc_usage,             WF_SWITCH},
   {UCON64_GB, UCON64_GB, gameboy_usage,        WF_SWITCH},
   {UCON64_GBA, UCON64_GBA, gba_usage,          WF_SWITCH},
-  {UCON64_GC, UCON64_GC, gc_usage,       WF_SWITCH},
-  {UCON64_GEN, UCON64_GEN, genesis_usage,  WF_SWITCH},
+  {UCON64_GC, UCON64_GC, gc_usage,             WF_SWITCH},
+  {UCON64_GEN, UCON64_GEN, genesis_usage,      WF_SWITCH},
   {UCON64_GP32, UCON64_GP32, gp32_usage,       WF_SWITCH},
   {UCON64_INTELLI, UCON64_INTELLI, intelli_usage, WF_SWITCH},
-  {UCON64_JAG, UCON64_JAG, jaguar_usage,    WF_SWITCH},
+  {UCON64_JAG, UCON64_JAG, jaguar_usage,       WF_SWITCH},
   {UCON64_LYNX, UCON64_LYNX, lynx_usage,       WF_SWITCH},
   {UCON64_N64, UCON64_N64, n64_usage,          WF_SWITCH},
   {UCON64_NES, UCON64_NES, nes_usage,          WF_SWITCH},
-  {UCON64_NG, UCON64_NG, neogeo_usage,     WF_SWITCH},
-  {UCON64_NGP, UCON64_NGP, ngp_usage, WF_SWITCH},
+  {UCON64_NG, UCON64_NG, neogeo_usage,         WF_SWITCH},
+  {UCON64_NGP, UCON64_NGP, ngp_usage,          WF_SWITCH},
   {UCON64_PCE, UCON64_PCE, pcengine_usage,     WF_SWITCH},
   {UCON64_PS2, UCON64_PS2, ps2_usage,          WF_SWITCH},
   {UCON64_PSX, UCON64_PSX, psx_usage,          WF_SWITCH},
-  {UCON64_S16, UCON64_S16, s16_usage,     WF_SWITCH},
-  {UCON64_SAT, UCON64_SAT, sat_usage,       WF_SWITCH},
+  {UCON64_S16, UCON64_S16, s16_usage,          WF_SWITCH},
+  {UCON64_SAT, UCON64_SAT, sat_usage,          WF_SWITCH},
   {UCON64_SMS, UCON64_SMS, sms_usage,          WF_SWITCH},
   {UCON64_SNES, UCON64_SNES, snes_usage,       WF_SWITCH},
-  {UCON64_SWAN, UCON64_SWAN, swan_usage, WF_SWITCH},
-  {UCON64_VBOY, UCON64_VBOY, vboy_usage, WF_SWITCH},
-  {UCON64_VEC, UCON64_VEC, vectrex_usage,  WF_SWITCH},
+  {UCON64_SWAN, UCON64_SWAN, swan_usage,       WF_SWITCH},
+  {UCON64_VBOY, UCON64_VBOY, vboy_usage,       WF_SWITCH},
+  {UCON64_VEC, UCON64_VEC, vectrex_usage,      WF_SWITCH},
   {UCON64_XBOX, UCON64_XBOX, xbox_usage,       WF_SWITCH},
 /*
   other switches
@@ -1171,6 +1171,7 @@ close_io_port (void)
 #endif
 
 
+#ifndef _WIN32
 unsigned char
 inportb (unsigned short port)
 {
@@ -1255,6 +1256,7 @@ outportw (unsigned short port, unsigned short word)
   );
 #endif
 }
+#endif // ifndef _WIN32
 
 
 #define DETECT_MAX_CNT 1000
@@ -1381,7 +1383,8 @@ ucon64_parport_init (unsigned int port)
     }                                           //  causes core dump
 #endif // __linux__ || __FreeBSD__
 
-  outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
+  outportb ((unsigned short) (port + PARPORT_CONTROL), 
+            inportb ((unsigned short) (port + PARPORT_CONTROL)) & 0x0f);
   // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
 #ifdef  __linux__
@@ -1412,7 +1415,7 @@ ucon64_gauge (time_t init_time, int pos, int size)
     return gauge (init_time, pos, size);
   else
     {
-      int percentage = (100LL * pos) / size;
+      int percentage = (int) ((((int64_t) 100) * pos) / size);
 
       printf ("%u\n", percentage);
       fflush (stdout);
@@ -1439,7 +1442,7 @@ ucon64_testsplit (const char *filename)
                                                 // else if x == 1 change char behind '.'
 
       if (buf > p ||                            // filename starts with a period
-          p - buf > strlen (buf) - 1)           // filename ends with a period
+          p - buf > ((int) strlen (buf)) - 1)   // filename ends with a period
         continue;
 
       while (!access (buf, F_OK))
@@ -1523,6 +1526,10 @@ ucon64_configfile (void)
                  "datdir=~\n"
 #elif   defined __CYGWIN__
                  "discmage_path=~/discmage.dll\n"
+                 "configdir=~\n"
+                 "datdir=~\n"
+#elif   defined _WIN32
+                 "discmage_path=~\\discmage.dll\n"
                  "configdir=~\n"
                  "datdir=~\n"
 #elif   defined __unix__ || defined __BEOS__
@@ -1624,6 +1631,8 @@ ucon64_configfile (void)
         "~\\discmage.dxe"                       // realpath2() expands the tilde
 #elif   defined __CYGWIN__
         "~/discmage.dll"
+#elif   defined _WIN32
+        "~\\discmage.dll"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/discmage.so"
 #else
@@ -1636,6 +1645,8 @@ ucon64_configfile (void)
         "~"                                     // realpath2() expands the tilde
 #elif   defined __CYGWIN__
         "~"
+#elif   defined _WIN32
+        "~"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64"
 #else
@@ -1647,6 +1658,8 @@ ucon64_configfile (void)
 #if     defined __MSDOS__
         "~"                                     // realpath2() expands the tilde
 #elif   defined __CYGWIN__
+        "~"
+#elif   defined _WIN32
         "~"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/dat"

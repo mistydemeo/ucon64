@@ -123,8 +123,8 @@ int verify = TRUE;
 
 #define  MESSAGE(body) printf body
 
-#define  INPUT(port)       inportb(port)
-#define  OUTPUT(port,data) outportb(port,data)
+#define  INPUT(port)        inportb((unsigned short) (port))
+#define  OUTPUT(port, data) outportb((unsigned short) (port), (unsigned char) (data))
 
 
 #if 0
@@ -257,16 +257,16 @@ lynxit_write_page (unsigned char page)
 void
 lynxit_counter_reset (void)
 {
-  lynxit_write_control (control_register | CTRL_CTR_RST);
-  lynxit_write_control (control_register & (CTRL_CTR_RST ^ 0xff));
+  lynxit_write_control ((unsigned char) (control_register | CTRL_CTR_RST));
+  lynxit_write_control ((unsigned char) (control_register & (CTRL_CTR_RST ^ 0xff)));
 }
 
 
 void
 lynxit_counter_increment (void)
 {
-  lynxit_write_control (control_register & (CTRL_CTR_CLKB ^ 0xff));
-  lynxit_write_control (control_register | CTRL_CTR_CLKB);
+  lynxit_write_control ((unsigned char) (control_register & (CTRL_CTR_CLKB ^ 0xff)));
+  lynxit_write_control ((unsigned char) (control_register | CTRL_CTR_CLKB));
 }
 
 
@@ -279,11 +279,11 @@ cart_read_byte (unsigned int cart)
 
   if (cart == BANK0)
     {
-      lynxit_write_control (control_register & (0xff ^ CTRL_BANK0B));
+      lynxit_write_control ((unsigned char) (control_register & (0xff ^ CTRL_BANK0B)));
     }
   else
     {
-      lynxit_write_control (control_register & (0xff ^ CTRL_BANK1B));
+      lynxit_write_control ((unsigned char) (control_register & (0xff ^ CTRL_BANK1B)));
     }
 
   // Clock byte into shift register with load
@@ -308,11 +308,11 @@ cart_read_byte (unsigned int cart)
 
   if (cart == BANK0)
     {
-      lynxit_write_control (control_register | CTRL_BANK0B);
+      lynxit_write_control ((unsigned char) (control_register | CTRL_BANK0B));
     }
   else
     {
-      lynxit_write_control (control_register | CTRL_BANK1B);
+      lynxit_write_control ((unsigned char) (control_register | CTRL_BANK1B));
     }
 
 #if 0
@@ -346,7 +346,7 @@ cart_write_byte (unsigned int cart, unsigned char data)
 
   // Assert write enable (active low)
 
-  lynxit_write_control (control_register & (0xff ^ CTRL_WR_EN));
+  lynxit_write_control ((unsigned char) (control_register & (0xff ^ CTRL_WR_EN)));
 
   // Assert output enable
 
@@ -356,13 +356,13 @@ cart_write_byte (unsigned int cart, unsigned char data)
 
   if (cart == BANK0)
     {
-      lynxit_write_control (control_register & (0xff ^ CTRL_BANK0B));
-      lynxit_write_control (control_register | CTRL_BANK0B);
+      lynxit_write_control ((unsigned char) (control_register & (0xff ^ CTRL_BANK0B)));
+      lynxit_write_control ((unsigned char) (control_register | CTRL_BANK0B));
     }
   else
     {
-      lynxit_write_control (control_register & (0xff ^ CTRL_BANK1B));
-      lynxit_write_control (control_register | CTRL_BANK1B);
+      lynxit_write_control ((unsigned char) (control_register & (0xff ^ CTRL_BANK1B)));
+      lynxit_write_control ((unsigned char) (control_register | CTRL_BANK1B));
     }
 
   // Clear output enable
@@ -371,7 +371,7 @@ cart_write_byte (unsigned int cart, unsigned char data)
 
   // Clear write enable
 
-  lynxit_write_control (control_register | CTRL_WR_EN);
+  lynxit_write_control ((unsigned char) (control_register | CTRL_WR_EN));
 
 }
 
@@ -382,7 +382,7 @@ cart_read_page (unsigned int cart, unsigned int page_number,
 {
   unsigned int loop;
 
-  lynxit_write_page (page_number);
+  lynxit_write_page ((unsigned char) page_number);
   lynxit_counter_reset ();
 
   for (loop = 0; loop < page_size; loop++)

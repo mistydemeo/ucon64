@@ -27,14 +27,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"                     // MBIT
 
 #ifdef  PARALLEL
-#define out1byte(p,x)   outportb(p,x)
-#define in1byte(p)      inportb(p)
 
-// DJGPP (DOS) has these, but it's better that all code uses the same functions
+/*
+  DJGPP (DOS) has these, but it's better that all code uses the same functions.
+  However, we make an exception for the Visual C++ port so that inpout32.dll
+  might work (I (dbjh) have not been successful yet).
+*/
+#ifndef _WIN32
 extern unsigned char inportb (unsigned short port);
 extern unsigned short inportw (unsigned short port);
 extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
+#else
+#include <conio.h>
+#define inportb inp
+#define inportw inpw
+#define outportb outp
+#define outportw outpw
+#endif
+
 #endif // PARALLEL
 
 #define PARPORT_DATA    0                       // output

@@ -83,13 +83,13 @@ ffe_send_block (unsigned short address, unsigned char *buffer, int len)
 {
   int checksum = 0x81, n;
 
-  ffe_send_command (0, address, len);
+  ffe_send_command (0, address, (unsigned short) len);
   for (n = 0; n < len; n++)
     {
       ffe_sendb (buffer[n]);
       checksum ^= buffer[n];
     }
-  ffe_sendb (checksum);
+  ffe_sendb ((unsigned char) checksum);
 }
 
 
@@ -99,7 +99,7 @@ ffe_send_command0 (unsigned short address, unsigned char byte)
 {
   ffe_send_command (0, address, 1);
   ffe_sendb (byte);
-  ffe_sendb (0x81 ^ byte);
+  ffe_sendb ((unsigned char) (0x81 ^ byte));
 }
 
 
@@ -110,11 +110,11 @@ ffe_send_command (unsigned char command_code, unsigned short a, unsigned short l
   ffe_sendb (0xaa);
   ffe_sendb (0x96);
   ffe_sendb (command_code);
-  ffe_sendb (a);                                // low byte
-  ffe_sendb (a >> 8);                           // high byte
-  ffe_sendb (l);                                // low byte
-  ffe_sendb (l >> 8);                           // high byte
-  ffe_sendb (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8)); // checksum
+  ffe_sendb ((unsigned char) a);                // low byte
+  ffe_sendb ((unsigned char) (a >> 8));         // high byte
+  ffe_sendb ((unsigned char) l);                // low byte
+  ffe_sendb ((unsigned char) (l >> 8));         // high byte
+  ffe_sendb ((unsigned char) (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8))); // checksum
 }
 
 
@@ -122,8 +122,9 @@ void
 ffe_sendb (unsigned char byte)
 {
   ffe_wait_for_ready ();
-  outportb (ffe_port + PARPORT_DATA, byte);
-  outportb (ffe_port + PARPORT_CONTROL, inportb (ffe_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
+  outportb ((unsigned short) (ffe_port + PARPORT_DATA), byte);
+  outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
+            inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
   ffe_wait_for_ready ();                        // necessary if followed by ffe_receiveb()
 }
 
@@ -133,7 +134,7 @@ ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
 {
   int checksum = 0x81, n, m;
 
-  ffe_send_command (1, address, len);
+  ffe_send_command (1, address, (unsigned short) len);
   for (n = 0; n < len; n++)
     {
       buffer[n] = ffe_receiveb ();
@@ -152,10 +153,12 @@ ffe_receiveb (void)
 {
   unsigned char byte;
 
-  byte = (ffe_wait_while_busy () & INPUT_MASK) >> 3; // receive low nibble
-  outportb (ffe_port + PARPORT_CONTROL, inportb (ffe_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
-  byte |= (ffe_wait_while_busy () & INPUT_MASK) << 1; // receive high nibble
-  outportb (ffe_port + PARPORT_CONTROL, inportb (ffe_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
+  byte = (unsigned char) ((ffe_wait_while_busy () & INPUT_MASK) >> 3); // receive low nibble
+  outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
+            inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
+  byte |= (unsigned char) ((ffe_wait_while_busy () & INPUT_MASK) << 1); // receive high nibble
+  outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
+            inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
 
   return byte;
 }
@@ -169,7 +172,7 @@ ffe_wait_while_busy (void)
 
   do
     {
-      input = inportb (ffe_port + PARPORT_STATUS);
+      input = inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
       n_try++;
     }
   while (input & IBUSY_BIT && n_try < N_TRY_MAX);
@@ -199,7 +202,7 @@ ffe_wait_for_ready (void)
 
   do
     {
-      input = inportb (ffe_port + PARPORT_STATUS);
+      input = inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
       n_try++;
     }
   while (!(input & IBUSY_BIT) && n_try < N_TRY_MAX);

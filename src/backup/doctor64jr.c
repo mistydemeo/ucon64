@@ -397,10 +397,8 @@ static unsigned long init_time = 0, size = 0, pos = 0;
 //static void drjr_init_port (void);
 //static void drjr_end_port (void);
 static void dump_buffer (void);
-static char write_32k (unsigned short int hi_word,
-                       unsigned short int lo_word);
-static char verify_32k (unsigned short int hi_word,
-                        unsigned short int lo_word);
+static char write_32k (unsigned short int hi_word, unsigned short int lo_word);
+static char verify_32k (unsigned short int hi_word, unsigned short int lo_word);
 static void read_adr (void);
 //static void read_some (void);
 //static unsigned char drjr_check_card (void);
@@ -485,14 +483,14 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
   unsigned short int i, j;
   unsigned short int fix, temp;
   init_port ();
-  set_ai_data (3, 0x10 | (hi_word >> 8));
-  set_ai_data (2, (hi_word & 0xff));
+  set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
+  set_ai_data (2, (unsigned char) hi_word);
   for (i = 0; i < 0x40; i++)
     {
       unpass = 3;
       while (unpass)
         {
-          set_ai_data (1, ((i << 1) | lo_word));
+          set_ai_data (1, (unsigned char) ((i << 1) | lo_word));
           set_ai_data (0, 0);
           set_ai (4);           // set address index=4
           set_data_write        // ninit=0, nWrite=0
@@ -530,7 +528,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
               if (pass1)
                 {
 //             printf("@");
-                  set_ai_data (1, ((i << 1) | lo_word | 1));
+                  set_ai_data (1, (unsigned char) ((i << 1) | lo_word | 1));
                   set_ai_data (0, 0xf8);
                   set_ai (4);
                   set_data_read // ninit=0, nWrite=1
@@ -554,8 +552,8 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
               outportb (port_a, 0x0b);  // set all pin=0 for debug
 //          if (disp_on) printf("*");
               init_port ();
-              set_ai_data (3, 0x10 | (hi_word >> 8));
-              set_ai_data (2, (hi_word & 0xff));
+              set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
+              set_ai_data (2, (unsigned char) hi_word);
               if (unpass == 0)
                 return (1);
             }
@@ -578,16 +576,16 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
   unsigned short int i, j, temp;
   unsigned short int fix;
   init_port ();
-  set_ai_data (3, 0x10 | (hi_word >> 8));
-  set_ai_data (2, (hi_word & 0xff));
-//   set_ai_data(3,0x10);
-//   set_ai_data(2,hi_word);
+  set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
+  set_ai_data (2, (unsigned char) hi_word);
+//   set_ai_data (3, 0x10);
+//   set_ai_data (2, (unsigned char) hi_word);
   for (i = 0; i < 0x40; i++)
     {
       unpass = 3;
       while (unpass)
         {
-          set_ai_data (1, ((i << 1) | lo_word));
+          set_ai_data (1, (unsigned char) ((i << 1) | lo_word));
           set_ai_data (0, 0);
           set_ai (4);
           set_data_read         // ninit=0, nwrite=1
@@ -602,8 +600,8 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
                   outportb (port_a, 0x0b);      // all pin=0 for debug
 //             if (disp_on) printf("#");
                   init_port ();
-                  set_ai_data (3, 0x10 | (hi_word >> 8));
-                  set_ai_data (2, (hi_word & 0xff));
+                  set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
+                  set_ai_data (2, (unsigned char) hi_word);
                   unpass--;
                   if (unpass == 0)
                     return (1);
@@ -814,13 +812,13 @@ test_dram (void)
   printf ("DRAM testing...");
   for (page = 0; page < pages; page++)
     {
-      gen_pat_32k (page * 2);
+      gen_pat_32k ((unsigned short int) (page * 2));
       if (write_32k (page, 0))
         return (0);
       else
         printf ("w");
       fflush (stdout);
-      gen_pat_32k (page * 2 + 1);
+      gen_pat_32k ((unsigned short int) (page * 2 + 1));
       if (write_32k (page, 0x80))
         return (0);
       else
@@ -829,13 +827,13 @@ test_dram (void)
     }
   for (page = 0; page < pages; page++)
     {
-      gen_pat_32k (page * 2);
+      gen_pat_32k ((unsigned short int) (page * 2));
       if (verify_32k (page, 0))
         return (0);
       else
         printf ("v");
       fflush (stdout);
-      gen_pat_32k (page * 2 + 1);
+      gen_pat_32k ((unsigned short int) (page * 2 + 1));
       if (verify_32k (page, 0x80))
         return (0);
       else

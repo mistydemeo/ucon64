@@ -5006,8 +5006,8 @@ nes_compare (const void *key, const void *found)
       return ((st_nes_data_t *) key)->crc32 - ((st_nes_data_t *) found)->crc32;
     does *not* work correctly for all cases.
   */
-  return ((int64_t) ((st_nes_data_t *) key)->crc32 -
-          (int64_t) ((st_nes_data_t *) found)->crc32) / 2;
+  return (int) (((int64_t) ((st_nes_data_t *) key)->crc32 -
+                 (int64_t) ((st_nes_data_t *) found)->crc32) / 2);
 }
 
 
@@ -5089,7 +5089,8 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 #endif
   do
     {
-      memcpy (&chunk_header, rom_buffer + pos, sizeof (chunk_header)); // fread (&chunk_header, 1, sizeof (chunk_header), file);
+      // fread (&chunk_header, 1, sizeof (chunk_header), file);
+      memcpy (&chunk_header, rom_buffer + pos, sizeof (chunk_header));
       pos += sizeof (chunk_header);
 #ifdef  WORDS_BIGENDIAN
       chunk_header.length = bswap_32 (chunk_header.length);
@@ -5105,7 +5106,8 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 #endif
       if (chunk_header.id != id)
         {
-          if (pos + chunk_header.length >= rom_size) // (fseek (file, chunk_header.length, SEEK_CUR) != 0) // fseek() clears EOF indicator
+          // (fseek (file, chunk_header.length, SEEK_CUR) != 0) // fseek() clears EOF indicator
+          if ((signed int) (pos + chunk_header.length) >= rom_size)
             break;
           else
             pos += chunk_header.length;
@@ -5136,7 +5138,8 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
   unif_chunk->length = chunk_header.length;
   unif_chunk->data = &((unsigned char *) unif_chunk)[sizeof (st_unif_chunk_t)];
 
-  memcpy (unif_chunk->data, rom_buffer + pos, chunk_header.length); // fread (unif_chunk->data, 1, chunk_header.length, file);
+  // fread (unif_chunk->data, 1, chunk_header.length, file);
+  memcpy (unif_chunk->data, rom_buffer + pos, chunk_header.length);
   pos += chunk_header.length;
 #ifdef  DEBUG_READ_CHUNK
   printf ("exit2\n");
@@ -5205,7 +5208,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
   number[n - prev_n] = 0;
-  info->day = strtol (number, NULL, 10);
+  info->day = (unsigned char) strtol (number, NULL, 10);
 
   n++;
   prev_n = n;
@@ -5214,7 +5217,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
   number[n - prev_n] = 0;
-  info->month = strtol (number, NULL, 10);
+  info->month = (unsigned char) strtol (number, NULL, 10);
 
   n++;
   prev_n = n;
@@ -5223,7 +5226,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
   number[n - prev_n] = 0;
-  info->year = strtol (number, NULL, 10);
+  info->year = (unsigned char) strtol (number, NULL, 10);
 
   // handle newline, possibly in DOS format
   prev_n = n;
@@ -6778,7 +6781,7 @@ nes_init (st_rominfo_t *rominfo)
         {                                       //  for detecting FFE images
           x = q_fgetc (ucon64.rom, 0) * 8192;
           x += q_fgetc (ucon64.rom, 1) * 8192 << 8;
-          if (ucon64.file_size - UNKNOWN_HEADER_LEN == x &&
+          if (ucon64.file_size - UNKNOWN_HEADER_LEN == (unsigned int) x &&
               q_fgetc (ucon64.rom, 8) == 0xaa && q_fgetc (ucon64.rom, 9) == 0xbb)
             {
               type = FFE;

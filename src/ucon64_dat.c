@@ -922,9 +922,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);
 
-  printf ("  %d Bytes (%.4f Mb)\n",
-          dat->fsize,
-          TOMBIT_F (dat->fsize));
+  printf ("  %d Bytes (%.4f Mb)\n", dat->fsize, TOMBIT_F (dat->fsize));
 
   if (dat->misc[0])
     printf ("  %s\n", dat->misc);

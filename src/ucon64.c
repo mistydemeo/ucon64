@@ -117,7 +117,7 @@ const struct option options[] = {
     {"c", 1, 0, UCON64_C},
 #ifdef  DISCMAGE
     {"cdmage", 1, 0, UCON64_CDMAGE},
-#endif    
+#endif
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"chk", 0, 0, UCON64_CHK},
@@ -170,6 +170,7 @@ const struct option options[] = {
     {"hex", 0, 0, UCON64_HEX},
     {"hi", 0, 0, UCON64_HI},
     {"i", 0, 0, UCON64_I},
+    {"id", 0, 0, UCON64_ID},
     {"idppf", 1, 0, UCON64_IDPPF},
     {"ines", 0, 0, UCON64_INES},
     {"ineshd", 0, 0, UCON64_INESHD},
@@ -777,7 +778,8 @@ ucon64_execute_options (void)
   ucon64.use_dump_info =
   ucon64.console =
   ucon64.do_not_calc_crc =
-  ucon64.crc_big_files = UCON64_UNKNOWN;
+  ucon64.crc_big_files =
+  ucon64.id = UCON64_UNKNOWN;
 
   ucon64.file_size =
   ucon64.crc32 =

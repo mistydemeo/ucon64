@@ -137,7 +137,7 @@ typedef struct
 #endif
   unsigned int parport;                         // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
-  
+
 #ifdef  ANSI_COLOR
   int ansi_color;
 #endif
@@ -145,7 +145,7 @@ typedef struct
   int frontend;                                 // flag if uCON64 was started by a frontend
 #ifdef  DISCMAGE
   int discmage_enabled;                         // flag if discmage DLL is loaded
-#endif  
+#endif
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
 
@@ -161,15 +161,16 @@ typedef struct
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   /*
     These values override values in st_rominfo_t. Use UCON64_ISSET()
-    to check them. When adding new ones don't forget to update ucon64_flush()
+    to check them. When adding new ones don't forget to update ucon64_execute_options()
     too.
   */
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
+  int interleaved;                              // ROM is interleaved (swapped)
+  int id;                                       // generate unique name (currently
+                                                //  only used by snes_gd3())
+  // the following values are for the SNES, NES and the Genesis
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
-  int interleaved;                              // ROM is interleaved (swapped)
-
-  // the following values are for the SNES, NES and the Genesis
   int part_size;                                // SNES split part size
   int split;                                    // ROM is split
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump

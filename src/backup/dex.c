@@ -47,14 +47,14 @@ static int print_data = 0x378;
 #define TAP 1
 #define DELAY 4
 
-char *
+static char *
 read_block (int block_num, char *data)
 {
   data = psx_memcard_read_block (print_data, CONPORT, TAP, DELAY, block_num);
   return data;
 }
 
-int
+static int
 write_block (int block_num, char *data)
 {
   return psx_memcard_write_block (print_data, CONPORT, TAP, DELAY, block_num,

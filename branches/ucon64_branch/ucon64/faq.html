@@ -106,7 +106,7 @@ Q34: <a href="#34">How do I enable or disable colors in the display output of
 Q35: <a href="#35">When I try to convert a large number of files using
    wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
 <br>
-Q36: <a href="#36">Does uCON64 support DAT (GoodXXXX, RomCenter, etc.) files?</a><br>
+Q36: <a href="#36">Does uCON64 support DAT (RomCenter/GoodXXXX) files?</a><br>
 <br>
 Q37: <a href="#37">Some SNES games do not work on my Super Pro Fighter Q(+).
    What can I do about that?</a><br>
@@ -219,7 +219,7 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    &amp; zip support)<br>
    1.) Run the configure script "configure".<br>
    If you want default settings type:<br>
-   &nbsp;&nbsp; ./configure<br>
+   &nbsp;&nbsp; ./configure<br>
    Otherwise you have to pass options to the configure script. To see which
    features can be controlled with the configure script, type:<br>
    &nbsp;&nbsp; ./configure --help<br>
@@ -314,12 +314,12 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    <b>Visual C++</b><br>
    Start a command shell or "prompt" and go to the correct directory. If you
    have compiled uCON64 in the same directory before, first type:<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6 clean<br>
+   &nbsp;&nbsp; nmake /f Makefile.vc6 clean<br>
 <br>
    If you want to compile the source code including discmage, type:<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6<br>
+   &nbsp;&nbsp; nmake /f Makefile.vc6<br>
    If you do not want to compile discmage the last command should like this:<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6 ucon64.exe<br>
+   &nbsp;&nbsp; nmake /f Makefile.vc6 ucon64.exe<br>
 <br>
    Under GNU/Linux, DOS and Windows you could use UPX to compress the
    executable. UPX is available from
@@ -467,7 +467,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <table border="1">
   <tr>
-    <th><tt>variable name<tt></th>
+    <th><tt>variable name</tt></th>
     <th><tt>meaning</tt></th>
   </tr>
   <tr>
@@ -743,7 +743,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    </td></tr>
    </table>
    </form>
-   <tt><br>
+   <br>
 <br>
 <p>
 <a name="17"><b>Q17</b>: Where do I get ROMs/Games?</a><br>
@@ -913,12 +913,11 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
    How do I know what board name to use?</a><br>
 <b>A</b>: The file
-   <a href="http://www.parodius.com/~veilleux/boardtable.txt" target="_blank">
-   http://www.parodius.com/~veilleux/boardtable.txt</a> contains a table where
-   you can find what game uses what board. The file
-   <a href="http://www.parodius.com/~veilleux/boardnames" target="_blank">
-   http://www.parodius.com/~veilleux/boardnames</a> contains a list of all
-   known board names.<br>
+   <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/ucon64/ucon64/src/console/boardtable.txt?rev=1.1" target="_blank">
+   boardtable.txt</a> contains a table where you can find what game uses what
+   board. The file
+   <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/ucon64/ucon64/src/console/boardnames?rev=1.1" target="_blank">
+   boardnames</a> contains a list of all known board names.<br>
 <br>
 <p>
 <a name="31"><b>Q31</b>: How do I convert a NES ROM from Pasofami to FFE? Or
@@ -961,7 +960,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <p>
 <a name="33"><b>Q33</b>: How do I specify that a NES game in UNIF format
    supports multiple controller types?</a><br>
-<b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line.
+<b>A</b>: Use the -ctrl switch multiple times on the <i>same</i> command line.
    For example, to specify that a game supports the controller types "regular
    joypad" and "power pad" you should use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
@@ -1002,8 +1001,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    processed and not only the files before the crash.<br>
 <br>
 <p>
-<a name="36"><b>Q36</b>: Does uCON64 support DAT (GoodXXXX, RomCenter, etc.)
-   files?</a><br>
+<a name="36"><b>Q36</b>: Does uCON64 support DAT (RomCenter/GoodXXXX) files?</a><br>
 <b>A</b>: Yes, starting with version 1.9.8beta8 it does. First use the option
    -version to see which configuration file uCON64 uses
    (see <a href="#25">question 25</a>). Then open that file in an editor and
@@ -1238,10 +1236,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    Seriously, let me first state that it would not be helpful if people would
    start creating DAT files from their ROM collections and publish them without
    some form of coordination. At the time of this writing (2 June 2003)
-   Cowering's GoodXXXX utilities are the standard for most consoles.
-   Unfortunately, for SNES ROMs he uses the SNES check sum calculation
-   algorithm which is unreliable. There are a few known cases of dumps which
-   are bad but which are identified by GoodSNES as good.<br>
+   Cowering's GoodXXXX utilities are the standard for most consoles.<br>
    In order to create a DAT file first make sure that all the ROMs you want to
    create a DAT file from, have the name you want them to have. This is
    important as DAT files are used not only for identification, but also for
@@ -1263,7 +1258,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <table border="1">
   <tr>
-    <th><tt>console<tt></th>
+    <th><tt>console</tt></th>
     <th><tt>DAT file name prefix</tt></th>
   </tr>
   <tr>
@@ -1369,7 +1364,6 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
 -->
 </table>
-</tt><tt> <!-- browser bug? -->
 <br>
    You can create a DAT file from a subset of the files in a directory by
    explicitly specifying the files on the command line:<br>
@@ -1405,19 +1399,20 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <p>
 <a name="44"><b>Q44</b>: What tools do you recommend besides uCON64?</a><br>
-<b>A</b>: For SNES, only <a href="http://nsrt.znes.org" target="_blank">NSRT</a>
-   (Nach's SNES ROM Tools). That is, starting from version 3.0 Release
-   Candidate 1. NSRT has some features that uCON64 does not have. The two most
-   interesting features are arguably that it is able to fix some hacked ROM
-   dumps and that it has an internal database which is spend a lot of effort on
-   to have it contain only correct entries (as opposed to GoodSNES and the
-   GoodSNES DAT files). What the second feature is concerned let us remind you
-   that the quality of uCON64's ROM database support stands or falls with the
-   quality of the DAT files. So, if you would create a DAT file of a ROM dump
-   collection processed with NSRT uCON64 would get a SNES database that is
-   similar to the one in NSRT. See <a href="#43">question 43</a>. Another
-   advantage NSRT has over uCON64 (as seen from a SNES user's viewpoint) is
-   that it is written only for SNES.<br>
+<b>A</b>: For SNES, only
+   <a href="http://nsrt.edgeemu.com" target="_blank">NSRT</a> (Nach's SNES ROM
+   Tools). That is, starting from version 3.0 Release Candidate 1. NSRT has some
+   features that uCON64 does not have. The two most interesting features are
+   arguably that it is able to fix some hacked ROM dumps and that it has an
+   internal database which is spend a lot of effort on to have it contain only
+   correct entries (as opposed to GoodSNES and the GoodSNES DAT files). What the
+   second feature is concerned let us remind you that the quality of uCON64's
+   ROM database support stands or falls with the quality of the DAT files. So,
+   if you would create a DAT file of a ROM dump collection processed with NSRT
+   uCON64 would get a SNES database that is similar to the one in NSRT. See
+   <a href="#43">question 43</a>. Another advantage NSRT has over uCON64 (as
+   seen from a SNES user's viewpoint) is that it is written only for SNES. NSRT
+   also handles some strange formats that uCON64 does not handle.<br>
 <br>
 <p>
 <a name="45"><b>Q45</b>: What is an interleaved ROM?</a><br>
@@ -1582,8 +1577,8 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    Afterwards you can find a file in Game Doctor format in the directory
    convert and the split parts in the directory split. Modify the scripts above
    if you want them to make uCON64 write its output to other directories. Do
-   *not* make GD3DIR or SPLITDIR point to the current directory or to your SNES
-   ROM directory as the scripts will remove all files in the directories
+   <i>not</i> make GD3DIR or SPLITDIR point to the current directory or to your
+   SNES ROM directory as the scripts will remove all files in the directories
    pointed to by GD3DIR or SPLITDIR. Starting with empty directories is the
    main reason why the scripts work (actually, this is only true for GD3DIR).<br>
 <br>
@@ -1673,7 +1668,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    path</i>. It is the path to follow in the directory structure to get to the
    file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. "..\.." is a <i>relative
    path</i>. In c:\roms\snes "..\.." refers to another directory than in
-   c:\roms\snes\gd3 (c:\ and c:\roms repectively). To change the current
+   c:\roms\snes\gd3 (c:\ and c:\roms respectively). To change the current
    directory to c:\roms\snes type:<br>
    &nbsp;&nbsp;cd ..<br>
    Say you want to convert Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc to
@@ -1713,7 +1708,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    First the current directory is changed to c:\. Then the directory "test" is
    created. Then the current directory is changed to "test". Then the file
    c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
-   mana.swc. Then an evironment variable with the name parport is set to the
+   mana.swc. Then an environment variable with the name parport is set to the
    value 378. Then uCON64 is used to transfer mana.swc to a Super Wild Card
    while using parallel port address 0x378. Then the file mana.swc is removed.
    Finally the directory "test" is removed.<br>
@@ -1755,3 +1750,4 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <br>
 </tt></body></html>
+

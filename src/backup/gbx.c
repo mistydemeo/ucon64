@@ -2,6 +2,7 @@
 gbx.c - Gameboy Xchanger support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2001 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -20,103 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "gbx.h"
 #include <stdio.h>
-
-extern char *file_name;
-extern char pocket_camera;
-extern unsigned long maxfilesize;
-extern unsigned char eeprom_type;
-extern unsigned char mbc1_exp;
-extern char port_type;
-extern int (*report_progress)(int);
-extern void (*report_status)(char *status);
-
-extern unsigned int port_8,port_9,port_a,port_b,port_c;
-
-char check_port(void);
-void init_port(void);
-char check_eeprom(void);
-char write_cart_from_file(void);
-void backup(void);
-void end_port(void);
-
-int backup_cart(char *fname, int (*progress)(int), void (status)(char *status))
-{
-	int rc = 0;
-	file_name = fname;
-	port_type = 0;
-	if(check_port() == 0) {
-		init_port();
-		check_eeprom();
-		report_progress = progress;
-		report_status = status;
-		backup();
-		report_progress = NULL;
-		report_status = NULL;
-		end_port();
-		return rc;
-	} else
-		return -3;
-}
-
-
-int send_file(char *fname, int (*progress)(int), void (status)(char *status))
-{
-	int rc;
-	file_name = fname;
-	port_type = 0;
-	if(check_port() == 0) {
-		init_port();
-		check_eeprom();
-		printf("XChanger with %dMbit cart present!\n", eeprom_type);
-		if(eeprom_type != 0) {
-			report_progress = progress;
-			report_status = status;
-			rc = write_cart_from_file();
-			report_progress = NULL;
-			report_status = NULL;
-			end_port();
-			return rc;
-		} else {
-			end_port();
-			return -4;
-		}
-	} else
-		return -3;
-
-}
-
-int xchanger_status(void)
-{
-	port_type = 0;
-	if(check_port() == 0) {
-		init_port();
-		check_eeprom();
-		if(eeprom_type != 0) {
-			end_port();
-			return 2;
-		} else {
-			end_port();
-			return 1;
-		}
-	} else
-		return 0;
-	
-}
-
-void init_xchanger(void)
-{
-	pocket_camera = 0;
-	mbc1_exp = 0;
-	eeprom_type = 0;
-	maxfilesize = 524288*16;
-	file_name = "";
-
-	port_8 = 0x378;
-	port_9 = 0x379;
-	port_a = 0x37a;
-	port_b = 0x37b;
-	port_c = 0x37c;
-}
 
 /* Modified version of gbt15.c - (C) Bung Enterprises */
 
@@ -469,7 +373,7 @@ volatile void delay_10us()
 //      usleep(1);      /* TODO */
 //printf("x\n");
 	long x;
-	for(x = 0; x < 0x3000; x++);
+	for(x = 0; x < 0x3000; x++);            // 0x2000
 }
 
 volatile void delay_100us()
@@ -2327,6 +2231,75 @@ void test_intel(void)
 
 }
 
+
+/*
+  uCON64 code below
+*/
+
+int backup_cart(char *fname, int (*progress)(int), void (status)(char *status))
+{
+	int rc = 0;
+	file_name = fname;
+	port_type = 0;
+	if(check_port() == 0) {
+		init_port();
+		check_eeprom();
+		report_progress = progress;
+		report_status = status;
+		backup();
+		report_progress = NULL;
+		report_status = NULL;
+		end_port();
+		return rc;
+	} else
+		return -3;
+}
+
+
+int send_file(char *fname, int (*progress)(int), void (status)(char *status))
+{
+	int rc;
+	file_name = fname;
+	port_type = 0;
+	if(check_port() == 0) {
+		init_port();
+		check_eeprom();
+		printf("XChanger with %dMbit cart present!\n", eeprom_type);
+		if(eeprom_type != 0) {
+			report_progress = progress;
+			report_status = status;
+			rc = write_cart_from_file();
+			report_progress = NULL;
+			report_status = NULL;
+			end_port();
+			return rc;
+		} else {
+			end_port();
+			return -4;
+		}
+	} else
+		return -3;
+
+}
+
+int xchanger_status(void)
+{
+	port_type = 0;
+	if(check_port() == 0) {
+		init_port();
+		check_eeprom();
+		if(eeprom_type != 0) {
+			end_port();
+			return 2;
+		} else {
+			end_port();
+			return 1;
+		}
+	} else
+		return 0;
+	
+}
+
 int prog_func(int p)
 {
 	putchar('.');
@@ -2338,28 +2311,47 @@ void status_func(char *line)
 	printf("%s\n", line);
 }
 
+void gbx_init(unsigned int parport)
+{
+	pocket_camera = 0;
+	mbc1_exp = 0;
+	eeprom_type = 0;
+	maxfilesize = 524288*16;
+	file_name = "";
+
+	port_8 = parport;
+	port_9 = parport + 1;
+	port_a = parport + 2;
+	port_b = parport + 3;
+	port_c = parport + 4;
+}
+
+int gbx_read(char *filename, unsigned int parport)
+{
+  gbx_init(parport);
+  return backup_cart(filename, prog_func, status_func);
+}
+                        
+int gbx_write(char *filename, unsigned int parport)
+{
+  gbx_init(parport);
+  return send_file(filename, prog_func, status_func);
+}
+
 int gbx_usage(int argc,char *argv[])
 {
-  if (argcmp(argc,argv,"-help"))
-    printf("\n%s\n",gbx_TITLE);
+  if (argcmp(argc, argv, "-help"))
+    printf("\n%s\n", gbx_TITLE);
 
-  printf("TODO:  -xgbx    send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
+  printf("  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
+         "                receives automatically when $ROM does not exist\n"
+         "TODO:  -xgbxs   send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n");
 
-  if (argcmp(argc,argv,"-help"))
+  if (argcmp(argc, argv, "-help"))
   {
   //TODO more info like technical info about cabeling and stuff for the copier
   }
 
   return 0;
-}
-
-int gbx_read(char *filename, unsigned int parport)
-{
-  return backup_cart(filename, prog_func, status_func);
-}
-                        
-int gbx_write(char *filename, long start, long len, unsigned int parport)
-{
-  return send_file(filename, prog_func, status_func);
 }

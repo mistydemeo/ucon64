@@ -1136,7 +1136,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                                "version=\r\n"
                                "[GAMES]\r\n",
                                console_name,
-                               t->tm_mday, t->tm_mon, t->tm_year + 1900,
+                               t->tm_mday, t->tm_mon + 1, t->tm_year + 1900,
                                plugin,
                                console_name);
     } // first_file

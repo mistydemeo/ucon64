@@ -779,8 +779,12 @@ snes_gd3 (st_rominfo_t *rominfo)
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
   p = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf",
-           total4Mbparts * 4);
+  n = ((size + MBIT - 1) / MBIT);
+  if (n == 20)
+    n = 24;
+  else if (n > 32 && n < 48)
+    n = 48;
+  sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf", n);
   strcat (dest_name, p);
   // avoid trouble with filenames containing spaces
   len = strlen (dest_name);
@@ -803,14 +807,14 @@ snes_gd3 (st_rominfo_t *rominfo)
           fprintf (stderr, "ERROR: This ROM seems to be interleaved\n");
           return -1;
         }
-      if (total4Mbparts > 12)
+      if (size > 48 * MBIT)
         {
           fprintf (stderr, "ERROR: This ROM > 48 Mbit -- conversion not yet implemented\n");
           return -1;
         }
-      if (n4Mbparts < 1)
+      if (size < 2 * MBIT)
         {
-          fprintf (stderr, "ERROR: This ROM < 4 Mbit -- conversion not yet implemented\n");
+          fprintf (stderr, "ERROR: This ROM < 2 Mbit -- conversion not yet implemented\n");
           return -1;
         }
 
@@ -861,7 +865,10 @@ snes_gd3 (st_rominfo_t *rominfo)
       //  (Liberty or Death, Brandish). May not be necessary
 
       // interleave the image
-      newsize = 4 * total4Mbparts * MBIT;
+      if (n4Mbparts)
+        newsize = 4 * total4Mbparts * MBIT;
+      else
+        newsize = ((size + MBIT - 1) / MBIT) * MBIT;
       pad = (newsize - size) / 2;
 
       if (!(srcbuf = (unsigned char *) malloc (size)))
@@ -1959,7 +1966,8 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
         }
       if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
           snes_header.map_type == 0x35 || snes_header.map_type == 0x3a ||
-          snes_header.bs_map_type == 0x21 || snes_header.bs_map_type == 0x31)
+          snes_header.bs_map_type == 0x21 || snes_header.bs_map_type == 0x31 ||
+          snes_header.bs_map_type == 0x20)      // BS Satella2 1 (J)
         interleaved = 1;
     }
 

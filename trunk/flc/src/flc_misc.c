@@ -19,7 +19,12 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -27,7 +32,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
-#include "config.h"
 #include "misc.h"
 #include "flc.h"
 #include "flc_misc.h"
@@ -47,7 +51,7 @@ extract (st_sub_t *file)
   for (x = 0; x < FID_LINES_MAX; x++)
     file->file_id[x][0] = 0;
 
-  strncpy (file->file_id[0], basename2 (file->fullpath), 46);
+  strncpy (file->file_id[0], basename (file->fullpath), 46);
     file->file_id[0][46] = 0;
 
   file->checked = 'N';

@@ -20,13 +20,17 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "config.h"
 #include "getopt.h"
 #include "misc.h"
 #include "flc.h"
@@ -228,7 +232,7 @@ main (int argc, char *argv[])
       file_p->sub.size = puffer.st_size;
       file_p->sub.checked = 'N';
       strcpy (file_p->sub.fullpath, buf);
-      strcpy (file_p->sub.name, basename2 (buf));
+      strcpy (file_p->sub.name, basename (buf));
       extract (&file_p->sub);
     }
   (void) closedir (dp);

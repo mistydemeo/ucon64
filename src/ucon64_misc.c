@@ -206,14 +206,14 @@ filepad (const char *filename, long start, long unit)
 
 
 long
-filetestpad (const char *filename)
+filetestpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   long size, x;
   int y;
   char *buf;
 
-  size = quickftell (filename);
+  size = rominfo->file_size;
 
   if (!(buf = (char *) malloc ((size + 2) * sizeof (char))))
     return -1;
@@ -541,7 +541,6 @@ ucon64_bin2iso (const char *image, int track_mode)
 #ifdef TODO
 #warning TODO nrg2iso and cdi2iso
 #endif
-
   int seek_header, seek_ecc, sector_size;
   long i, size;
   char buf[MAXBUFSIZE];
@@ -669,7 +668,7 @@ ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
 {
 #if 0
   struct dirent *ep;
-  struct stat puffer;
+  struct stat fstate;
   char buf[FILENAME_MAX], cwd[FILENAME_MAX];
 
 #ifdef UNZIP
@@ -685,13 +684,14 @@ ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
   sprintf (buf, "%s" FILE_SEPARATOR_S "%s", cwd, archive);
 //  strcpy (buf, archive);
 
-  if (!(*dp = opendir2 (buf, configfile, NULL, NULL))) return archive;
+  if (!(*dp = opendir2 (buf, configfile, NULL, NULL)))
+    return archive;
 
   chdir (buf);
 
   while ((ep = readdir (*dp)))  //find rom in dp and return it as romname
-    if (!stat (ep->d_name, &puffer))
-      if (S_ISREG (puffer.st_mode))
+    if (!stat (ep->d_name, &fstate))
+      if (S_ISREG (fstate.st_mode))
         {
           sprintf (romname, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
           chdir (cwd);
@@ -770,18 +770,19 @@ ucon64_mktoc (st_rominfo_t *rominfo)
 {
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   FILE *fh;
-  int result;
+  int result, fsize;
 
   result = ucon64_trackmode_probe (ucon64.rom);
+  fsize = quickftell (ucon64.rom);
 
   sprintf (buf, "%s\n" "\n" "\n" "// Track 1\n"
            "TRACK %s\n"
            "NO COPY\n"
-           "DATAFILE \"%s\" %ld// length in bytes: %ld\n",
+           "DATAFILE \"%s\" %d// length in bytes: %d\n",
            (!strnicmp (ucon64.file, "MODE1", 5) ? "CD_ROM" : "CD_ROM_XA"),
-           (!strnicmp (ucon64.file, "MODE", 4) ? ucon64.file : 
+           (!strnicmp (ucon64.file, "MODE", 4) ? ucon64.file :
            (result != -1) ? track_modes[result].cdrdao : "MODE2_RAW"),
-           ucon64.rom, quickftell (ucon64.rom), quickftell (ucon64.rom));
+           ucon64.rom, fsize, fsize);
   printf ("%s\n", buf);
 
   strcpy (buf2, ucon64.rom);
@@ -895,7 +896,7 @@ int ucon64_e (const char *romfile)
 
 
 int
-ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console)
+ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console)
 {
   int result;
   char buf[MAXBUFSIZE];
@@ -937,9 +938,9 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
 
     case UCON64_LS:
     default:
-      strftime (buf, 13, "%b %d %H:%M", localtime (&puffer->st_mtime));
+      strftime (buf, 13, "%b %d %H:%M", localtime (&fstate->st_mtime));
       printf ("%-31.31s %10ld %s %s\n", mkprint(rominfo.name, ' '),
-            (long) puffer->st_size, buf, ucon64.rom);
+            (long) fstate->st_size, buf, ucon64.rom);
       fflush (stdout);
       break;
     }
@@ -951,7 +952,7 @@ int
 ucon64_ls (const char *path, int mode)
 {
   struct dirent *ep;
-  struct stat puffer;
+  struct stat fstate;
   char dir[FILENAME_MAX];
   char old_dir[FILENAME_MAX];
   DIR *dp;
@@ -962,10 +963,10 @@ ucon64_ls (const char *path, int mode)
   if (path)
     if (path[0])
       {
-        if (!stat (path, &puffer))
+        if (!stat (path, &fstate))
           {
-            if (S_ISREG (puffer.st_mode))
-              return ucon64_ls_main (path, &puffer, mode, console);
+            if (S_ISREG (fstate.st_mode))
+              return ucon64_ls_main (path, &fstate, mode, console);
           }
         strcpy (dir, path);
       }
@@ -980,9 +981,9 @@ ucon64_ls (const char *path, int mode)
   chdir (dir);
 
   while ((ep = readdir (dp)))
-    if (!stat (ep->d_name, &puffer))
-      if (S_ISREG (puffer.st_mode))
-        ucon64_ls_main (ep->d_name, &puffer, mode, console);
+    if (!stat (ep->d_name, &fstate))
+      if (S_ISREG (fstate.st_mode))
+        ucon64_ls_main (ep->d_name, &fstate, mode, console);
 
   closedir (dp);
 
@@ -1107,7 +1108,7 @@ ucon64_configfile (void)
           printf ("OK\n\n");
         }
     }
-  else if (strtol (getProperty (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_VERSION )
+  else if (strtol (getProperty (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_VERSION)
     {
       strcpy (buf2, ucon64.configfile);
       setext (buf2, ".OLD");

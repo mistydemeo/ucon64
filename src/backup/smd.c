@@ -235,8 +235,7 @@ smd_main (int argc, char **argv)
 void
 smd_wait_busy (int state)
 {
-  int timeout = 0x2000;
-  int busy = (inportb (lpt + PARPORT_STATUS) >> 7) & 1;
+  int timeout = 0x2000, busy = (inportb (lpt + PARPORT_STATUS) >> 7) & 1;
 
   while ((busy == state) && (timeout))
     {
@@ -293,10 +292,7 @@ smd_recieve_byte (void)
 void
 smd_send_command (uint8 parameter, uint16 address, uint16 length)
 {
-  uint8 temp;
-  uint8 count;
-  uint8 checksum = 0x81;
-  uint8 packet[5];
+  uint8 temp, count, checksum = 0x81, packet[5];
 
   packet[0] = parameter;
   packet[1] = (address & 0xFF);
@@ -417,12 +413,8 @@ interleave_buffer (uint8 * buffer, int size)
 int
 load_smd (const char *filename)
 {
-  uint8 header[0x200];
-  uint8 count;
-  uint8 *buf;
-  int file_size;
-  int block_size;
-  int is_smd = 0;
+  uint8 header[0x200], count, *buf;
+  int file_size, block_size, is_smd = 0;
   FILE *fd = NULL;
   time_t starttime;
 
@@ -432,9 +424,7 @@ load_smd (const char *filename)
     return 0;
 
   /* Get file size */
-  fseek (fd, 0, SEEK_END);
-  file_size = ftell (fd);
-  fseek (fd, 0, SEEK_SET);
+  file_size = quickftell (filename);
 
   /* Load SMD header */
   if (EXTCMP (filename, ".smd") == 0)
@@ -746,7 +736,7 @@ smd_write_sram (const char *filename, unsigned int parport)
   lpt = parport;
 
   load_sram (filename);
-                
+
   return 0;
 }
 #endif // BACKUP

@@ -3,8 +3,9 @@ ppf.c - Playstation Patch Format support for uCON64
 
 written by ???? - ???? Icarus/Paradox
                   2001 NoisyB (noisyb@gmx.net)
+                  2002 dbjh
 
-
+                  
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -135,19 +136,9 @@ ID AREA, because it is located after the PATCH DATA!
 int
 makeppf_main (int argc, const char *argv[])
 {
-#define null 0
-
-  FILE *originalbin;
-  FILE *patchedbin;
-  FILE *ppffile;
-  FILE *fileid = NULL;
-  char desc[52];
-  char block[1025];
-  char fileidbuf[3073];
-  char enc = 1;
-  char obuf[512];
-  char pbuf[512];
-  char cbuf[512];
+  FILE *originalbin, *patchedbin, *ppffile, *fileid = NULL;
+  char desc[52], block[1025], fileidbuf[3073], enc = 1,
+       obuf[512], pbuf[512], cbuf[512];
   unsigned char anz;            /* Hell YES! UNSIGNED CHAR! */
   int i, z, a, x, y, osize, psize, fsize, seekpos = 0, pos;
 
@@ -161,22 +152,20 @@ makeppf_main (int argc, const char *argv[])
 
   /* Open all neccessary files */
   originalbin = fopen (argv[1], "rb");
-  if (originalbin == null)
+  if (originalbin == NULL)
     {
       printf ("File %s does not exist. (Original BIN)\n", argv[1]);
       exit (0);
     }
   patchedbin = fopen (argv[2], "rb");
-  if (patchedbin == null)
+  if (patchedbin == NULL)
     {
       printf ("File %s does not exist. (Patched BIN)\n", argv[2]);
       fclose (originalbin);
       exit (0);
     }
-  fseek (originalbin, 0, SEEK_END);
-  osize = ftell (originalbin);
-  fseek (patchedbin, 0, SEEK_END);
-  psize = ftell (patchedbin);
+  osize = quickftell (argv[1]);
+  psize = quickftell (argv[2]);
   if (osize != psize)
     {
       fprintf (stderr, "ERROR: Filesize does not match\n");
@@ -187,7 +176,7 @@ makeppf_main (int argc, const char *argv[])
   if (argc >= 5)
     {
       fileid = fopen (argv[4], "rb");
-      if (fileid == null)
+      if (fileid == NULL)
         {
           fprintf (stderr, "ERROR: File %s does not exist. (File_id.diz)\n", argv[4]);
           fclose (patchedbin);
@@ -196,7 +185,7 @@ makeppf_main (int argc, const char *argv[])
         }
     }
   ppffile = fopen (argv[3], "wb+");
-  if (ppffile == null)
+  if (ppffile == NULL)
     {
       fprintf (stderr, "ERROR: Could not create file %s\n", argv[3]);
       if (argc >= 5)
@@ -303,10 +292,8 @@ makeppf_main (int argc, const char *argv[])
   /* was a file_id.diz argument present? */
   if (argc >= 5)
     {
-      printf ("Adding file_id.diz .. ");
-      fseek (fileid, 0, SEEK_END);
-      fsize = ftell (fileid);
-      fseek (fileid, 0, SEEK_SET);
+      printf ("Adding file_id.diz ...");
+      fsize = quickftell (argv[4]);
       if (fsize > 3072)
         fsize = 3072;           /* File id only up to 3072 bytes! */
       fread (fileidbuf, fsize, 1, fileid);
@@ -340,20 +327,10 @@ makeppf_main (int argc, const char *argv[])
 int
 applyppf_main (int argc, const char *argv[])
 {
-#define null 0
-
-  FILE *binfile;
-  FILE *ppffile;
-  char buffer[5];
-  char method, in;
-  char desc[50];
-  char diz[3072];
-  int dizlen, binlen, dizyn, dizlensave = 0;
-  char ppfmem[512];
-  int count, seekpos, pos, anz;
-  char ppfblock[1025];
-  char binblock[1025];
-
+  FILE *binfile, *ppffile;
+  char buffer[5], method, in, desc[50], diz[3072],
+       ppfmem[512], ppfblock[1025], binblock[1025];
+  int dizlen, binlen, dizyn, dizlensave = 0, count, seekpos, pos, anz, ppfsize;
 
 //        printf("ApplyPPF v2.0 for Linux/Unix (c) Icarus/Paradox\n");
   if (argc == 1)
@@ -361,20 +338,20 @@ applyppf_main (int argc, const char *argv[])
 #if 0
       printf("Usage: ApplyPPF <Binfile> <PPF-File>\n");
       exit (0);
-#endif      
+#endif
       return -1;
     }
 
   /* Open the bin and ppf file */
   binfile = fopen (argv[1], "rb+");
-  if (binfile == null)
+  if (binfile == NULL)
     {
       printf ("File %s does not exist.\n", argv[1]);
       exit (0);
     }
 
   ppffile = fopen (argv[2], "rb");
-  if (ppffile == null)
+  if (ppffile == NULL)
     {
       printf ("File %s does not exist.\n", argv[2]);
       exit (0);
@@ -382,7 +359,6 @@ applyppf_main (int argc, const char *argv[])
 
   /* Is it a PPF File ? */
   fread (buffer, 3, 1, ppffile);
-
   if (strncmp ("PPF", buffer, 3))
     {
       printf ("File %s is *NO* PPF file.\n", argv[2]);
@@ -390,6 +366,8 @@ applyppf_main (int argc, const char *argv[])
       fclose (binfile);
       exit (0);
     }
+
+  ppfsize = quickftell (argv[2]);
 
   /* What encoding Method? PPF1.0 or PPF2.0? */
   fseek (ppffile, 5, SEEK_SET);
@@ -409,8 +387,7 @@ applyppf_main (int argc, const char *argv[])
 
       /* Calculate the count for patching the image later */
       /* Easy calculation on a PPF1.0 Patch! */
-      fseek (ppffile, 0, SEEK_END);
-      count = ftell (ppffile);
+      count = ppfsize;
       count -= 56;
       seekpos = 56;
       printf ("Patching ... ");
@@ -424,7 +401,7 @@ applyppf_main (int argc, const char *argv[])
       printf ("Enc. Method    : %d (PPF2.0)\n", method);
       printf ("Description    : %s\n", desc);
 
-      fseek (ppffile, -8, SEEK_END);
+      fseek (ppffile, ppfsize - 8, SEEK_SET);
       fread (buffer, 4, 1, ppffile);
 
       /* Is there a File id ?! */
@@ -437,7 +414,7 @@ applyppf_main (int argc, const char *argv[])
         {
           printf ("File_id.diz    : yes, showing...\n");
           fread (&dizlen, 4, 1, ppffile);
-          fseek (ppffile, -dizlen - 20, SEEK_END);
+          fseek (ppffile, ppfsize - dizlen - 20, SEEK_SET);
           fread (diz, dizlen, 1, ppffile);
           diz[dizlen - 7] = '\0';
           printf ("%s\n", diz);
@@ -447,8 +424,7 @@ applyppf_main (int argc, const char *argv[])
       /* Do the BINfile size check! */
       fseek (ppffile, 56, SEEK_SET);
       fread (&dizlen, 4, 1, ppffile);
-      fseek (binfile, 0, SEEK_END);
-      binlen = ftell (binfile);
+      binlen = quickftell (argv[1]);
       if (dizlen != binlen)
         {
           fprintf (stderr, "ERROR: the size of the IMAGE is not %d Bytes\n", dizlen);
@@ -472,9 +448,7 @@ applyppf_main (int argc, const char *argv[])
         }
 
       /* Calculate the count for patching the image later */
-      fseek (ppffile, 0, SEEK_END);
-      count = ftell (ppffile);
-
+      count = ppfsize;
       if (dizyn == 0)
         {
           count -= 1084;
@@ -491,17 +465,14 @@ applyppf_main (int argc, const char *argv[])
       fflush (stdout);
       break;
     default:
-
       /* Enc. Method wasnt 0 or 1 i bet you wont see this */
       printf ("Unknown Encodingmethod! - check for updates.\n");
       fclose (ppffile);
       fclose (binfile);
       exit (0);
-
     }
 
   /* Patch the Image */
-
   do
     {
       fseek (ppffile, seekpos, SEEK_SET);       /* seek to patchdataentry */
@@ -526,20 +497,16 @@ applyppf_main (int argc, const char *argv[])
 int
 addppfid (const char *filename)
 {
-  long fsize;
-  long pos = 0;
-
-  char fileidbuf[3072];
-  char buf[4095];
+  long fsize, pos = 0;
+  char fileidbuf[3072], buf[4095];
 
   printf ("Adding file_id.diz .. ");
   fsize = quickftell (filename);
-  quickfread (fileidbuf, 0, (fsize > 3072)?3072:fsize, ucon64.file);
+  quickfread (fileidbuf, 0, (fsize > 3072) ? 3072 : fsize, ucon64.file);
   fileidbuf[fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 
-  pos =
-    filencmp (filename, 0, quickftell (filename), "@BEGIN_FILE_ID.DIZ", 18, -1);
+  pos = filencmp (filename, 0, quickftell (filename), "@BEGIN_FILE_ID.DIZ", 18, -1);
   if (pos == -1)
     pos = quickftell (filename);
   truncate (filename, pos);

@@ -97,7 +97,7 @@ Type the following command line at dos prompts at C:\N64 directory:
    C:\N64>CD64COMM -p310 -g -fgame.bin -sb2000000 -l800000
 
 4. Download file GAME.BIN to CD64 DRAM ADDRESS and using Parallel Port Adaptor
-   at ECP PRINTER PORT 1 (LPT1). 
+   at ECP PRINTER PORT 1 (LPT1).
    C:\N64>CD64COMM -p378 -t -fgame.bin -sb4000000
 
 5. Download file GAME.BIN to CD64 DRAM ADDRESS and using Parallel Port Adaptor
@@ -318,7 +318,7 @@ void test_key (void)
 // reset ecp mode
                                         outportb (ecp_reg, ecp_mode);
                                 }
-                                                                        
+
                         printf ("\nQuitting program!!\n");
                         exit (13);
                 }
@@ -755,10 +755,8 @@ int send (char comm, unsigned long saddr, char *str)
                 printf ("\nfailed to set up buffer for %s\n", str);
                 exit (2);
         }
-        
-        fseek (in, 0, SEEK_END);
-        flength=ftell (in);
-        fseek (in, 0, SEEK_SET);
+
+        flength=quickftell (str);
 
         if ((flength&0x00000003)!=0)
         {

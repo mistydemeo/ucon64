@@ -1343,24 +1343,24 @@ ucon64_options (int c, const char *optarg)
     case UCON64_POKE:
       ucon64_file_handler (dest_name, src_name, 0);
       q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
-      {
-        sscanf (optarg, "%x:%x", &x, &value);
-        if (x >= ucon64.file_size)
-          {
-            fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
-            remove (dest_name);
-            break;
-          }
-        printf ("\n");
-        buf[0] = q_fgetc (dest_name, x);
-        mem_hexdump (buf, 1, x);
 
-        q_fputc (dest_name, x, value, "r+b");
+      sscanf (optarg, "%x:%x", &x, &value);
+      if (x >= ucon64.file_size)
+        {
+          fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
+          remove (dest_name);
+          break;
+        }
+      printf ("\n");
+      buf[0] = q_fgetc (dest_name, x);
+      mem_hexdump (buf, 1, x);
 
-        buf[0] = value;
-        mem_hexdump (buf, 1, x);
-        printf ("\n");
-      }
+      q_fputc (dest_name, x, value, "r+b");
+
+      buf[0] = value;
+      mem_hexdump (buf, 1, x);
+      printf ("\n");
+
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;

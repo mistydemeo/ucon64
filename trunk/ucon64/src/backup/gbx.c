@@ -95,7 +95,7 @@ const st_usage_t gbx_usage[] =
 typedef enum { UNKNOWN_MBC, BUNG, ROM, MBC1, MBC2, MBC3, MBC5, CAMERA, ROCKET } mbc_t;
 typedef enum { UNKNOWN_EEPROM, WINBOND, MX, INTEL } eeprom_t;
 
-static unsigned short int port_8, port_9, port_a, port_b, port_c;
+static unsigned short int port_8, port_9, port_a, port_b, port_c, rocket_game_no;
 static unsigned char buffer[32768], rocket_logodata[] = {
   0x11, 0x23, 0xf1, 0x1e, 0x01, 0x22, 0xf0, 0x00,
   0x08, 0x99, 0x78, 0x00, 0x08, 0x11, 0x9a, 0x48,
@@ -241,7 +241,7 @@ read_data (void)
 static void
 init_port (void)
 {
-#if 0 // Or perhaps only for ppdev? - dbjh
+#if 0
   outportb (port_9, 1);                         // clear EPP time flag
 #endif
   set_ai_data ((unsigned char) 2, 0);           // rst=0, wei=0(dis.), rdi=0(dis.)
@@ -467,14 +467,14 @@ wait_status (void)
 
   while ((temp & 0xfc) != 0x80)
     {
-      if ((temp & 0x20) == 0x20)
+      if ((temp & 0x20) == 0x20 && port_mode == UCON64_SPP)
         {
-          fputs ("ERROR: Erase failed\n", stderr);
+          fputs ("\nERROR: Erase failed\n", stderr);
           return -1;
         }
       if ((temp & 0x10) == 0x10)
         {
-          fputs ("ERROR: Programming failed\n", stderr);
+          fputs ("\nERROR: Programming failed\n", stderr);
           return -2;
         }
       temp = read_data ();
@@ -546,8 +546,8 @@ intel_check_status (void)
       time_out--;
       if (time_out == 0)
         {
-          fprintf (stderr, "ERROR: Intel read status time out\n"
-                           "       Status = %x\n", intel_read_status ());
+          fprintf (stderr, "\nERROR: Intel read status time out\n"
+                             "       Status = %x\n", intel_read_status ());
           out_adr_data (0, 0x50);               // clear status register
           return -1;
         }
@@ -566,8 +566,8 @@ intel_block_erase (unsigned int block)
       time_out--;
       if (time_out == 0)
         {
-          fprintf (stderr, "ERROR: Intel block erase time out\n"
-                           "       Status = %x\n", intel_read_status ());
+          fprintf (stderr, "\nERROR: Intel block erase time out\n"
+                             "       Status = %x\n", intel_read_status ());
           return -1;
         }
     }
@@ -579,8 +579,8 @@ intel_block_erase (unsigned int block)
       time_out--;
       if (time_out == 0)
         {
-          fprintf (stderr, "ERROR: Intel block erase time out at %x\n"
-                           "       Status = %x\n", block, intel_read_status ());
+          fprintf (stderr, "\nERROR: Intel block erase time out at %x\n"
+                             "       Status = %x\n", block, intel_read_status ());
           out_adr_data (block, 0x50);           // clear status register
           fprintf (stderr, "       Status = %x\n", intel_read_status ());
           return -1;
@@ -591,8 +591,8 @@ intel_block_erase (unsigned int block)
     return 0;
   else
     {
-      fprintf (stderr, "ERROR: Intel block erase error at %x\n"
-                       "       Status = %x\n", block, intel_read_status ());
+      fprintf (stderr, "\nERROR: Intel block erase error at %x\n"
+                         "       Status = %x\n", block, intel_read_status ());
       out_adr_data (block, 0x50);               // clear status register
       fprintf (stderr, "       Status = %x\n", intel_read_status ());
       out_adr_data (0x0000, 0xff);              // read array
@@ -710,7 +710,7 @@ check_mbc (void)
       unsigned char rom_type = buffer[0x47];
 
       if (memcmp (buffer + 4, rocket_logodata, GB_LOGODATA_LEN) == 0)
-        mbc_type = ROCKET;
+        mbc_type = ROCKET;                      // rom_type == 0x97 || rom_type == 0x99
       else if (rom_type == 0)
         mbc_type = ROM;
       else if ((rom_type >= 1 && rom_type <= 3) || rom_type == 0xff)
@@ -746,8 +746,10 @@ check_card (void)
     fputs ("NOTE: Rocket Games cartridge detected\n", stdout);
   else if (memcmp (buffer + 4, gb_logodata, GB_LOGODATA_LEN) != 0)
     {
-      fputs ("NOTE: Cartridge does not contain official Nintendo logo data\n", stdout);
+      fputs ("ERROR: Cartridge does not contain official Nintendo logo data\n", stderr);
       mem_hexdump (buffer, 0x50, 0x100);
+      end_port ();
+      exit (1);
     }
 
   memcpy (game_name, buffer + 0x34, 15);
@@ -755,10 +757,10 @@ check_card (void)
   printf ("Game name: \"%s\"\n", game_name);
 
   if (buffer[0x48] > 8)                         // ROM size
-    printf ("NOTE: Strange ROM size byte value in header (0x%x)\n", buffer[0x48]);
+    printf ("NOTE: Strange ROM size byte value in header (0x%02x)\n", buffer[0x48]);
 
   if (buffer[0x49] > 5)                         // SRAM size
-    printf ("NOTE: Strange RAM size byte value in header (0x%x)\n", buffer[0x49]);
+    printf ("NOTE: Strange RAM size byte value in header (0x%02x)\n", buffer[0x49]);
 
 /*
   // [47] = ROM type
@@ -769,7 +771,7 @@ check_card (void)
   for (i = 0x34; i < 0x4d; i++)
     sum += ~buffer[i];
   if (buffer[0x4d] != sum)
-    printf ("NOTE: Incorrect header checksum (0x%x), should be 0x%x\n",
+    printf ("NOTE: Incorrect header checksum (0x%02x), should be 0x%02x\n",
             buffer[0x4d], sum);
 
   return (1 << (buffer[0x48] > 8 ? 9 : buffer[0x48])) * 32 * 1024;
@@ -844,6 +846,7 @@ static void
 read_eeprom_16k (unsigned int bank)
 {
   int idx = 0, i, j;
+  char game_name[16];
 
   set_bank2 (bank);
   for (j = 0; j < 64; j++)
@@ -858,6 +861,40 @@ read_eeprom_16k (unsigned int bank)
       set_data_read
       for (i = 0; i < 256; i++)                 // page = 256
         buffer[idx + i] = read_data ();
+
+      /*
+        One can select the game in 2-in-1 cartridges by writing the game number
+        to 0x3fc0. This has been verified for 2 cartridges with ROM type byte
+        value 0x99. Maybe there exist other Rocket Games n-in-1 games with a
+        different ROM type byte value. That's why we don't check for that
+        specific ROM type byte value.
+      */
+      if (mbc_type == ROCKET && j == 1)
+        if (memcmp (buffer + 0x104, rocket_logodata, GB_LOGODATA_LEN) == 0)
+          {
+            set_adr (0x3fc0);
+            out_byte ((unsigned char) rocket_game_no++);
+            if (bank)
+              {
+                // Reread the last page, because the page data came from the
+                //  previously selected game (data is "mirrored"). This does not
+                //  apply to the first game.
+                set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40));
+                set_ai_data ((unsigned char) 0, 0);
+                set_ai_data ((unsigned char) 2, 0x81);
+                set_ai (3);
+                set_data_read
+                for (i = 0; i < 256; i++)
+                  buffer[idx + i] = read_data ();
+
+                // remove last gauge
+                fputs ("\r                                                                              \r", stdout);
+                memcpy (game_name, buffer + 0x134, 15);
+                game_name[15] = 0;
+                printf ("Found another game: \"%s\"\n\n", game_name);
+              }
+          }
+
       idx += 256;
     }
 }
@@ -880,14 +917,12 @@ verify_eeprom_16k (unsigned int bank)
       set_ai (3);                               // read/write data
       set_data_read
       for (i = 0; i < 256; i++)
-        {
-          if (read_data () != buffer[idx + i])
-            {
-              printf ("WARNING: Verify error at %ulx\n",
-                      (bank * 16384) + (j * 256) + i);
-              return -1;
-            }
-        }
+        if (read_data () != buffer[idx + i])
+          {
+            printf ("\nWARNING: Verify error at %ulx\n",
+                    (bank * 16384) + (j * 256) + i);
+            return -1;
+          }
       idx += 256;
     }
 
@@ -927,7 +962,7 @@ win_write_eeprom_16k (unsigned int bank)
           set_ai_data ((unsigned char) 2, 0x80); // disable wr/rd inc.
           set_ai_data ((unsigned char) 0, 0xff); // point to xxff
           if (data_polling ())
-            fputs ("WARNING: Write error\n", stdout);  // was: "Write error check (d6)"
+            fputs ("\nWARNING: Write error\n", stdout); // was: "Write error check (d6)"
 
           wr_done = 0;
 
@@ -937,17 +972,15 @@ win_write_eeprom_16k (unsigned int bank)
           set_ai (3);                           // read/write data
           set_data_read
           for (i = 0; i < 256; i++)
-            {
-              if (read_data () != buffer[idx + i])
-                {
-                  err_cnt--;
-                  wr_done = 1;
-                  break;
-                }
-            }
+            if (read_data () != buffer[idx + i])
+              {
+                err_cnt--;
+                wr_done = 1;
+                break;
+              }
           if (err_cnt == 0)
             {
-              fputs ("ERROR: Programming failed after retry\n", stderr);
+              fputs ("\nERROR: Programming failed after retry\n", stderr);
               return -1;
             }
         }
@@ -1008,14 +1041,12 @@ page_write_128 (unsigned int bank, unsigned char hi_lo, int j, int idx)
       set_ai_data ((unsigned char) 2, 0x81);    // enable inc.
       set_ai (3);                               // read/write data
       set_data_read
-      for (i = 0; i < 128; i++)
-        {                                       // page=128
-          if (read_data () != buffer[idx + i])
-            {
-              verify_ok = 0;                    // verify error
-              break;
-            }
-        }
+      for (i = 0; i < 128; i++)                 // page = 128
+        if (read_data () != buffer[idx + i])
+          {
+            verify_ok = 0;                      // verify error
+            break;
+          }
       if (verify_ok)
         break;
       else
@@ -1023,7 +1054,7 @@ page_write_128 (unsigned int bank, unsigned char hi_lo, int j, int idx)
           retry--;
           if (retry == 0)
             {
-              fputs ("ERROR: Programming failed after retry\n", stderr);
+              fputs ("\nERROR: Programming failed after retry\n", stderr);
               return -1;
             }
         }
@@ -1080,8 +1111,8 @@ intel_byte_write_32 (unsigned int block_adr, int idx)
 
       if (intel_check_status ())
         {
-          fprintf (stderr, "ERROR: Intel byte write command time out\n"
-                           "       Status = %x\n", intel_read_status ());
+          fprintf (stderr, "\nERROR: Intel byte write command time out\n"
+                             "       Status = %x\n", intel_read_status ());
 //          dump_intel_data ();
           return -1;
         }
@@ -1109,8 +1140,8 @@ intel_buffer_write_32 (unsigned int block_adr, int idx)
       time_out--;
       if (time_out == 0)
         {
-          fprintf (stderr, "ERROR: Intel buffer write command time out\n"
-                           "       Status = %x\n", intel_read_status ());
+          fprintf (stderr, "\nERROR: Intel buffer write command time out\n"
+                             "       Status = %x\n", intel_read_status ());
 //          dump_intel_data ();
           return -1;
         }
@@ -1140,10 +1171,8 @@ intel_write_eeprom_16k (unsigned int bank)
   int idx, j;
 
   if ((bank & 0x07) == 0)
-    {
-      if (intel_block_erase (block_adr))
-        return -1;
-    }
+    if (intel_block_erase (block_adr))
+      return -1;
 
 //  set_adr_long (block_adr, 0);                  // set real address
   for (j = 0; j < 512; j++)
@@ -1152,16 +1181,16 @@ intel_write_eeprom_16k (unsigned int bank)
 //      if (intel_byte_write_32 (block_adr, idx)) return -1;
       if (intel_buffer_write_32 (block_adr, idx))
         {
-          fprintf (stderr, "ERROR: Write error\n"
-                           "       Status = %x\n", intel_read_status ());
+          fprintf (stderr, "\nERROR: Write error\n"
+                             "       Status = %x\n", intel_read_status ());
           return -1;
         }
     }
 
   if (intel_check_status ())
     {
-      fprintf (stderr, "ERROR: Intel buffer write command error\n"
-                       "       Status = %x\n", intel_read_status ());
+      fprintf (stderr, "\nERROR: Intel buffer write command error\n"
+                         "       Status = %x\n", intel_read_status ());
 //      dump_intel_data();
       return -1;
     }
@@ -1380,13 +1409,11 @@ test_sram_v (int n_banks)
           set_ai (3);                           // point to data r/w port
           set_data_read
           for (i = 0; i < 256; i++)
-            {
-              if (read_data () != buffer[i + idx])
-                {
-                  fputs ("ERROR: SRAM verify error\n", stderr);
-                  return -1;
-                }
-            }
+            if (read_data () != buffer[i + idx])
+              {
+                fputs ("ERROR: SRAM verify error\n", stderr);
+                return -1;
+              }
           set_ai_data ((unsigned char) 2, 0x80); // disable inc
           idx += 256;
         }
@@ -1540,7 +1567,7 @@ verify_card_from_file (const char *filename, unsigned int parport)
 */
       if (verify_eeprom_16k (bank))
         {
-          printf ("\nVerify card error at bank %x\n", bank);
+          printf ("Verify card error at bank %x\n", bank);
           fclose (file);
           exit (1);
         }
@@ -1560,6 +1587,7 @@ gbx_init (unsigned int parport, int read_header)
   int i;
 
   eeprom_type = UNKNOWN_EEPROM;
+  rocket_game_no = 0;
 
   port_8 = parport;
   port_9 = parport + 1;
@@ -1634,7 +1662,7 @@ gbx_read_rom (const char *filename, unsigned int parport)
     {
       read_eeprom_16k (bank);
       if (verify_eeprom_16k (bank))
-        printf ("\nVerify card error at bank %x\n", bank);
+        printf ("Verify card error at bank %x\n", bank);
 
       fwrite (buffer, 1, 0x4000, file);
       n_bytes += 16 * 1024;
@@ -1701,7 +1729,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
         }
       if (write_eeprom_16k (bank))
         {
-          fprintf (stderr, "\nERROR: Write card error at bank %x\n", bank);
+          fprintf (stderr, "ERROR: Write card error at bank %x\n", bank);
           fclose (file);
           end_port ();
           exit (1);
@@ -1711,7 +1739,8 @@ gbx_write_rom (const char *filename, unsigned int parport)
     }
 
 #if 0 // write_eeprom_16k() already calls verify_eeprom_16k() (indirectly)...
-  printf ("\r                                                                              \r"); // remove last gauge
+  // remove last gauge
+  fputs ("\r                                                                              \r", stdout);
   fputs ("Verifying card...\n", stdout);
   fseek (file, 0, SEEK_SET);
   n_bytes = 0;
@@ -1727,7 +1756,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
         }
       if (verify_eeprom_16k (bank))
         {
-          fprintf (stderr, "\nERROR: Verify card error at bank %x\n", bank);
+          fprintf (stderr, "ERROR: Verify card error at bank %x\n", bank);
           fclose (file);
           end_port ();
           exit (1);

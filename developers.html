@@ -257,7 +257,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    and creator of the game that can be used to fill ucon64.c/main()/rom. SNES
    ROM files are an example of this type of file. For other ROM file types this
    information is not present inside the ROM file. NES ROMs are an example of
-   that type. In that case uCON64 uses a large database in db.h to make it
+   that type. In that case uCON64 uses a large database in db.c to make it
    possible to display the country, creator and full name of the game.
    ucon64.c/ucon64_init() calls the function ucon64_db.c/ucon64_dbsearch() that
    uses the CRC32 of the ROM file data to find the required information in the

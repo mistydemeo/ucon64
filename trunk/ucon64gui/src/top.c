@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "config.h"
 #include "ucon64gui.h"
 #include "html2gui/src/html2gui.h"
 #include "top.h"

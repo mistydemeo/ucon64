@@ -1,5 +1,5 @@
 /*
-config.h - config file for uCON64gui
+config.h - config file for uCON64
 
 written by 2002 NoisyB (noisyb@gmx.net)
 
@@ -20,7 +20,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef CONFIG_H
 #define CONFIG_H
 
-//#define USE_HTML4
+/*
+  enables/disables the internal ROM database
 
+  comment this and uCON64 will be only ~200kB in size but won't recognize
+  ROMs for NES and other systems where ROMs have no internal header
+*/
+#define DB
+
+/*
+  enables/disables support for parallel port backup units
+
+  comment this if your hardware has no parallel port
+*/
+#define BACKUP
+
+
+#ifndef __MSDOS__ //AFAIK there is no Cdrdao for MSDOS
+/*
+  enables/disables support for cd backups
+
+  comment this if there is no Cdrdao (http://cdrdao.sourceforge.net)
+  port for your platform available
+*/
+#define BACKUP_CD
+
+#endif // __MSDOS__
 
 #endif // CONFIG_H

@@ -22,9 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 //#include <unistd.h>
 #include <stdlib.h>
-
+#include "config.h"
 #include "html2gui/src/html2gui.h"
-
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64gui.h"
@@ -221,7 +220,7 @@ main (int argc, char *argv[])
 /*
    configfile handling
 */
-  sprintf (ucon64gui.configfile, "%s%c"
+  sprintf (ucon64gui.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
            "ucon64.cfg"
 #else
@@ -235,7 +234,7 @@ main (int argc, char *argv[])
             */
            ".ucon64rc"
 #endif
-           , getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+           , getchd (buf2, FILENAME_MAX));
 
 
   h2g_start (argc, argv);

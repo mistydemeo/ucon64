@@ -1,0 +1,88 @@
+<html><head><title>CHANGES</title></head><body bgcolor="#c0c0c0"><tt><pre>
+the original uCON for snes and genesis was written by chicken & chp in ~1995
+
+1.9.x	development versions
+
+1.9.0	completely re-written
+	this is the first real version with support for the most consoles
+
+1.9.1	bug fixes
+	fixed the -xv64 routine for receive and emulation on N64
+	cosmetical changes
+	removed the stupid curses GUI
+	optimized noisette.h for speed
+	added more OPTIONS and CONSOLE SYSTEMS
+
+1.9.2   started to add missing Sega System16(A/B)/System 18/dual 68000 support
+	-xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)
+	removed -xmp3 option for Songboy (latest informations say that it will be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)
+	(TODO:  -xmp3    send MP3 file(s) to SongBoy (MP3 player for Gameboy))
+	removed options which were added by mistake (like parallel transfer for Z64) 
+	added -ispad (looks for repeating bytes at the end of a probably padded ROM)
+	added -rn (some people might find it useful)
+	added -mg, -bin and 'show ROM' support for PC-Engine
+	added -usms for Jos Kwanten's ultraSMS an Sega Master System/GameGear Emulator for the Nintendo 64
+	fixed aps (GRRNNNNN!!!)
+	added an universal frontend (in java) for all platforms and all programs that need a filename
+	added CD32, CD-i and Real 3DO support
+	added -bin and -ffe option for Sega Master System/GameGear
+	added database for NES roms (that enlarged the ucon64 executable by 190kb grnnn...)
+					"You gotta do what you gotta do." (Futurama)
+	added -db and -dbv database commands... now everyone can check if the
+	uCON64 version he uses has new database entries for a console system
+
+1.9.3   added -mka create APS patch support
+	added -na change APS description
+	added -hd, -nhd switches for SMS/Gamegear
+	added auto-detection and some information for Jaguar ROMs
+	added -ssc convert to Super Smart Card (GameBoy)
+	fixed/added -chk fix checksum (GameBoy)
+	added -gg gamegenie support for Super Nintendo
+	cleaned up the usage output
+	added -chk fix checksum for Super Nintendo/Super Famicon
+	removed most CDROM based consoles from usage since ucon64 could support them only by showing some informations about the CDROM itself (option -cdrom)
+	added -gd3 convert to Professor SF(2) Game Doctor SF3/6/7 (autojoin)
+	added -gdf fix Professor SF(2) Game Doctor SF3/6/7 savegame problems
+
+1.9.4	included all databases for every console system that has ROMs without a header with text
+	added 324 entries to sms database	
+	added -sam convert SAM/M.A.M.E. sound to WAV; $ROM=SAMFILE
+	added -b2i convert BIN/RAW(2352)/Mode2(2336) to ISO; $ROM=BIN_IMAGE
+	added -ppf apply PPF patch (<=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE
+	added -nppf change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
+	added -mkppf create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE
+	added -ip extract ip0000.bin (GD-ROM header/256 bytes); $ROM=/dev/<cdrom>
+	added -fds convert FAM to Famicon DiskSystem/FDS (diskimage)
+	changed the faq a bit
+	overworked the whole tool to make it easier to develop
+	searched a new site for it (ucon64.sourceforge.net)
+
+1.9.5	after the update release of 1.9.4 i had a closer look at my sources
+	and realized that my style heavily changed since 1.9.3 the result is
+	that i had to make more changes in the source starting from ucon64.c
+	Gilligan wrote a nice routine to read out NeoGeo Pocket roms (added)
+	reorganized the whole source
+	uCON64 is from now on cartridge only/CD based console systems will be supported in another project (see: ucon64.sourceforge.net)
+	added Gameboy Advance support
+	added (GBA) -n change ROM name; $FILE=NEWNAME
+	added (GBA) -logo restore ROM logo character data 0x04-0x9F
+	added (GBA) -chk fix ROM checksum
+	added (GB/GameGear/NES) -gg apply GameGenie code (permanent)
+	added (GB/GameGear/NES/GEN/SNES) -gge encode GameGenie code
+	added (GB/GameGear/NES/GEN/SNES) -gge decode GameGenie code
+	added (LYNX) -lyx convert to LYX/RAW (strip 64 Bytes LNX header)
+	added (LYNX) -lnx convert to LNX (uses default values for the header)
+	added (LYNX) -n change ROM name (LNX only); $FILE=NEWNAME
+	added (LYNX) -nrot set no rotation (LNX only)
+	added (LYNX) -rotl set rotation left (LNX only)
+	added (LYNX) -rotr set rotation right (LNX only)
+	added (LYNX) -b0 change Bank0 kBytes size (LNX only); $FILE={0,64,128,256,512}
+	added (LYNX) -b1 change Bank1 kBytes size (LNX only); $FILE={0,64,128,256,512}
+	added -idppf change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
+	added -strip strip Bytes from end of ROM; $FILE=VALUE
+	added -e emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)
+	added (GBA) -sram patch ROM for SRAM saving
+	added (GBA) -crp slow down Flash Advance Linker access for ROM (crash patch)
+	added (GBA) -strip strip Bytes from end of ROM (use -ispad before); $FILE=VALUE
+	added (GBA) -xfal send/receive to/from Flash Advance Linker; $FILE=PORT
+</pre></tt></body></html>

@@ -2654,12 +2654,13 @@ snes_init (st_rominfo_t *rominfo)
       sprintf (buf, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> 4 + 1) * 4);
       strcat (rominfo->misc, buf);
 
+      x = snes_header.bs_type >> 4;
       sprintf (buf, "ROM type: (%x) %s\n", snes_header.bs_type,
-        snes_bstype[(snes_header.bs_type >> 4) & 3]);
+        x > 3 ? "Unknown" : snes_bstype[x]);
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "ROM speed: %s\n",
-        ((snes_header.bs_makeup >> 4) & 3) == 3 ? "120ns (FastROM)" : "200ns (SlowROM)");
+        ((snes_header.bs_makeup >> 4) & 3) > 2 ? "120ns (FastROM)" : "200ns (SlowROM)");
       strcat (rominfo->misc, buf);
     }
 

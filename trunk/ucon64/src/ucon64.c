@@ -440,8 +440,6 @@ main (int argc, char **argv)
 #ifdef  ANSI_COLOR
   ucon64.ansi_color = ((!strcmp (get_property (ucon64.configfile, "ansi_color", buf, "1"), "1")) ?
                1 : 0);
-#else
-  ucon64.ansi_color = 0;
 #endif
 
 //  ucon64.type =
@@ -1027,6 +1025,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 
       sprintf (buf, fstr,
         rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
+#ifdef  ANSI_COLOR
       printf (buf,
         ucon64.ansi_color ?
           ((rominfo->current_internal_crc == rominfo->internal_crc) ?
@@ -1036,6 +1035,13 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
         rominfo->current_internal_crc,
         (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
         rominfo->internal_crc);
+#else
+      printf (buf,
+        (rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad",
+        rominfo->current_internal_crc,
+        (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
+        rominfo->internal_crc);
+#endif
 
       if (rominfo->internal_crc2[0])
         {

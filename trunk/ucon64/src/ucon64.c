@@ -686,6 +686,83 @@ rom.console=
                                                     rom.console;
 }
 
+if (argcmp(argc, argv, "-e"))
+{
+  char *property;
+#ifdef	__DOS__
+  strcpy(buf, "ucon64.cfg");
+#else
+  sprintf(buf, "%s%c.ucon64rc", getenv("HOME"), FILE_SEPARATOR);
+#endif
+
+  if (rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
+    sprintf(buf3, "emulate_%s", &forceargs[rom.console][1]);
+  else
+  {
+    printf("ERROR: could not auto detect the right ROM/console type; please try the\n"
+	   "\"-<CONSOLE> force recognition\" option next time\n");
+
+    return(-1);
+        
+  }
+
+  if (access(buf, F_OK) == -1)
+  {
+    printf("ERROR: %s does not exist\n", buf);
+    return(-1);
+  }
+
+  property = getProperty(buf, buf3, buf2, NULL);        // buf2 also contains property value
+  if (property == NULL)
+  {
+    printf("ERROR: could not find the correct settings (%s) in\n"
+           "       %s\n"
+           "       please fix that or use the \"-<CONSOLE> force recognition\" option next\n"
+           "       time if the wrong ROM/console type was detected\n",
+           buf3, buf);
+    return(-1);
+  }
+
+  sprintf(buf, "%s %s", buf2, rom.file);
+  for (x = 0; x < argc; x++)
+  {
+    if (strdcmp(argv[x], "-e") && strdcmp(argv[x], getarg(argc,argv,ucon64_NAME)) &&
+        strdcmp(argv[x], rom.file))
+    {
+      sprintf(buf2, ((!strdcmp(argv[x], rom.rom)) ? " \"%s\"" : /*" %s"*/""), argv[x]);
+      strcat(buf, buf2);
+    }
+  }
+
+  printf("%s\n", buf);
+  fflush(stdout);
+  sync();
+
+  x = system(buf);
+#ifndef __DOS__
+  x >>= 8;                                      // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under Linux & BeOS)
+
+#if 1
+  // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
+
+  // under WinDOS, system() immediately returns with exit code 0 when starting
+  //  a Windows executable (as if a fork() happened) it also returns 0 when the
+  //  exe could not be started
+  if (x != 127 && x != -1 && x != 0)    // 127 && -1 are system() errors, rest are exit codes
+  {
+    printf("ERROR: the Emulator returned an error code (%d)\n"
+           "       maybe %s is corrupt...\n"
+           "       or use the \"-<CONSOLE> force recognition\" option next time\n",
+           (int) x, rom.rom);
+    return(x);
+  }
+#endif
+
+return(0);
+}
+
+
 switch(rom.console)
 {
 case ucon64_GB:
@@ -977,81 +1054,6 @@ default:
 break;
 }
 
-if (argcmp(argc, argv, "-e"))
-{
-  char *property;
-#ifdef	__DOS__
-  strcpy(buf, "ucon64.cfg");
-#else
-  sprintf(buf, "%s%c.ucon64rc", getenv("HOME"), FILE_SEPARATOR);
-#endif
-
-  if (rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
-    sprintf(buf3, "emulate_%s", &forceargs[rom.console][1]);
-  else
-  {
-    printf("ERROR: could not auto detect the right ROM/console type; please use the\n"
-	   "\"-<CONSOLE> force recognition\" option next time\n");
-
-    return(-1);
-        
-  }
-
-  if (access(buf, F_OK) == -1)
-  {
-    printf("ERROR: %s does not exist\n", buf);
-    return(-1);
-  }
-
-  property = getProperty(buf, buf3, buf2, NULL);        // buf2 also contains property value
-  if (property == NULL)
-  {
-    printf("ERROR: could not find the correct settings (%s) in\n"
-           "       %s\n"
-           "       please fix that or use the \"-<CONSOLE> force recognition\" option next\n"
-           "       time if the wrong ROM/console type was detected\n",
-           buf3, buf);
-    return(-1);
-  }
-
-  sprintf(buf, "%s %s", buf2, rom.file);
-  for (x = 0; x < argc; x++)
-  {
-    if (strdcmp(argv[x], "-e") && strdcmp(argv[x], getarg(argc,argv,ucon64_NAME)) &&
-        strdcmp(argv[x], rom.file))
-    {
-      sprintf(buf2, ((!strdcmp(argv[x], rom.rom)) ? " \"%s\"" : /*" %s"*/""), argv[x]);
-      strcat(buf, buf2);
-    }
-  }
-
-  printf("%s\n", buf);
-  fflush(stdout);
-  sync();
-
-  x = system(buf);
-#ifndef __DOS__
-  x >>= 8;                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under Linux & BeOS)
-
-#if 1
-  // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
-
-  // under WinDOS, system() immediately returns with exit code 0 when starting
-  //  a Windows executable (as if a fork() happened) it also returns 0 when the
-  //  exe could not be started
-  if (x != 127 && x != -1 && x != 0)    // 127 && -1 are system() errors, rest are exit codes
-  {
-    printf("ERROR: the Emulator returned an error code (%d)\n"
-           "       maybe %s is corrupt...\n"
-           "       or use the \"-<CONSOLE> force recognition\" option next time\n",
-           (int) x, rom.rom);
-    return(x);
-  }
-#endif
-
-return(0);
-}
 
 return(0);
 }

@@ -174,10 +174,8 @@ int i, z, a, x, y, osize, psize, fsize, seekpos=0, pos;
         exit(0);
         }
 
-        printf("Enter PPF-Patch description (max. 50 chars):\n[---------1o--------2o--------3o--------4o---------]\n ");
-        fgets(desc, 50, stdin);
         for(i=0;i<50;i++){
-        if(desc[i]==0x00) desc[i]=0x20;
+        desc[i]=0x20;
         }
 
 	/* creating PPF2.0 header */
@@ -282,8 +280,6 @@ int i, z, a, x, y, osize, psize, fsize, seekpos=0, pos;
  */
  
  
-#include <stdio.h>
-#include <string.h>
 int applyppf_main(int argc, char *argv[])
 {
 #define null 0
@@ -388,14 +384,11 @@ char binblock[1025];
                          fseek(binfile, 0, SEEK_END);
                          binlen=ftell(binfile);
                          if(dizlen!=binlen){
-                         printf("The size of the BIN file isnt correct\nCONTINUE though? (y/n): ");
-                         in=getc(stdin);
-                         if(in!='y'&&in!='Y'){
+                         printf("ERROR: the size of the IMAGE is not %d Bytes\n",dizlen);
                          fclose(ppffile);
                          fclose(binfile);
-                         printf("\nAborted...\n");
-                         exit(0);
-                         }}
+                         return -1;
+                         }
 
 			 /* do the Binaryblock check! this check is 100% secure! */
                          fseek(ppffile, 60, SEEK_SET);
@@ -405,15 +398,10 @@ char binblock[1025];
                          in=memcmp(ppfblock, binblock, 1024);
                          if(in!=0)
                          {
-                           printf("The BINfile does not seem to be the right one\nCONTINUE though? (Suggestion: NO) (y/n): ");
-                           in=getc(stdin);
-                           if(in!='y'&&in!='Y')
-                           {
+                           printf("ERROR: this patch does not belong to this IMAGE\n");
                              fclose(ppffile);
                              fclose(binfile);
-                             printf("\nAborted...\n");
-                             exit(0);
-                           }
+				return -1;
                          }
 
 			 /* Calculate the count for patching the image later */
@@ -452,7 +440,6 @@ char binblock[1025];
         fread(&pos, 4, 1, ppffile);	    /* Get POS for binfile */
         
         fread(&anz, 1, 1, ppffile);         /* How many byte do we have to write? */
-//printf("%ld %ld\n",pos,anz);fflush(stdout);
         fread(ppfmem, anz, 1, ppffile);     /* And this is WHAT we have to write */
         fseek(binfile, pos, SEEK_SET);      /* Go to the right position in the BINfile */
         fwrite(ppfmem, anz, 1, binfile);    /* write 'anz' bytes to that pos from our ppfmem */

@@ -72,6 +72,11 @@ Q28: <a href="#28">I tried to send a ROM dump to my copier under Windows&nbsp;XP
 Q29: <a href="#29">I want to convert a NES ROM in iNES format to UNIF. How do I know
    what board name to use?</a><br>
 <br>
+Q30: <a href="#30">How do I convert a NES ROM from Pasofami to FFE? Or from
+   UNIF to Pasofami?</a><br>
+<br>
+Q31: <a href="#31">How do I specify dumper information when converting to UNIF?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -371,6 +376,40 @@ Q29: <a href="#29">I want to convert a NES ROM in iNES format to UNIF. How do I 
    <a href="http://www.parodius.com/~veilleux/boardnames" target="_blank">
    http://www.parodius.com/~veilleux/boardnames</a> contains a list of all known board
    names.<br>
+<br>
+<p>
+<a name="30"><b>Q30</b>: How do I convert a NES ROM from Pasofami to FFE? Or from
+   UNIF to Pasofami?</a><br>
+<b>A</b>: Use iNES as intermediate format. So, to do the conversion Pasofami -> FFE, do this
+  conversion instead: first Pasofami -> iNES and then iNES -> FFE.<br>
+  To answer the second question, to do the conversion UNIF -> Pasofami do this: UNIF -> iNES
+  and then iNES -> Pasofami.<br>
+<br>
+<p>
+<a name="31"><b>Q31</b>: How do I specify dumper information when converting to UNIF?</a><br>
+<b>A</b>: Create a text file with three lines. The first line should contain the name (or
+  "handle") of the person who dumped the cartridge. This line may be 99 characters long at
+  maximum. The next line should contain the date when the cartridge was dumped. The format is
+  dd-mm-yyyy. Instead of the hyphen (-) you may also use the slash (/). If day or month
+  is smaller than 10 you may use 1 or 2 digits, for example:<br>
+  &nbsp;&nbsp; 02/02/2002<br>
+  or<br>
+  &nbsp;&nbsp; 2-2-2002<br>
+  The third and last line should contain information about the dumping means that was used.
+  This line may also contain 99 characters at maximum. Here is an example info file:<br>
+  &nbsp;&nbsp Dirk &#60;noisyb@gmx.net&#62;<br>
+  &nbsp;&nbsp 26-7-2002<br>
+  &nbsp;&nbsp Custom build hardware<br>
+  To get this information in a UNIF file, you should use the -dumpinfo switch in combination
+  with the -unif option. Say you store the dumper information in the file info.txt. This
+  would get the info in a UNIF file:<br>
+  &nbsp;&nbsp ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
+  If you already have a UNIF file the command line looks almost the same:<br>
+  &nbsp;&nbsp ucon64 -unif smb.unf -dumpinfo info.txt<br>
+  For an existing UNIF file you needn't specify the board name, but you might want to
+  specify it if you want to change the board name in the file. Afterwards run uCON64 on the
+  newly written ROM to see if you were successful. uCON64's display output should contain a
+  dump info section now.
 <br>
 <p>
 <br>

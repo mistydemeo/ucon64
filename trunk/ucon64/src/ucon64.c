@@ -586,8 +586,9 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       if (rominfo->copier_usage[1])
         {
           strcpy (buf, rominfo->copier_usage[1]);
-          printf ("  %s\n\n", mkprint (buf, '.'));
+          printf ("  %s\n", mkprint (buf, '.'));
         }
+      printf ("\n");
     }
 
   if (rominfo->header_len)

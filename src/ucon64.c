@@ -462,6 +462,8 @@ main (int argc, char **argv)
   ucon64.do_not_calc_crc =
   ucon64.crc_big_files = UCON64_UNKNOWN;
 
+  ucon64.good_enabled = 0; // --good
+
   ucon64.rom =
   ucon64.file =
   ucon64.mapr =

@@ -26,17 +26,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern "C" {
 #endif
 
-#ifdef __sun
-#ifdef __SVR4
-#define __solaris__
-#endif
-#endif
 
 #include <limits.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
 #include <dirent.h>
 #include "config.h"                             // ZLIB, ANSI_COLOR support
+#include "compat.h"
 
 #ifdef  ZLIB
 #include <zlib.h>
@@ -66,63 +62,6 @@ extern int fputc2 (int character, FILE *file);
 
 #endif
 
-#ifdef  __CYGWIN__
-#include <sys/types.h>
-typedef u_int8_t uint8_t;
-typedef u_int16_t uint16_t;
-typedef u_int32_t uint32_t;
-typedef u_int64_t uint64_t;
-#elif   defined __MSDOS__
-typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
-typedef unsigned long long int uint64_t;
-#else
-#include <inttypes.h>                           // int32_t and uint32_t
-#endif
-
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef MAXBUFSIZE
-#define MAXBUFSIZE 32768
-#endif // MAXBUFSIZE
-
-#ifndef ARGS_MAX
-#define ARGS_MAX 128
-#endif // ARGS_MAX
-
-#ifndef MIN
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#endif
-#ifndef MAX
-#define MAX(a,b) ((a)>(b)?(a):(b))
-#endif
-
-#define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
-
-//#define RANDOM(min, max) ((rand () % (max - min)) + min)
-
-#define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
-
-#ifdef WORDS_BIGENDIAN
-#undef WORDS_BIGENDIAN
-#endif
-
-#if     defined _LIBC || defined __GLIBC__
-  #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
-    #define WORDS_BIGENDIAN 1
-  #endif
-#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || defined __APPLE__
-  #define WORDS_BIGENDIAN 1
-#endif
 
 #ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__,
   #define CURRENT_OS_S "MSDOS"                  //  because DJGPP defines both
@@ -159,40 +98,6 @@ typedef unsigned long long int uint64_t;
 #else
   #define CURRENT_OS_S "?"
 #endif
-
-
-#ifdef WORDS_BIGENDIAN
-#define me2be_16(x) (x)
-#define me2be_32(x) (x)
-#define me2be_64(x) (x)
-#define me2be_n(x,n) 
-#define me2le_16(x) (bswap_16(x))
-#define me2le_32(x) (bswap_32(x))
-#define me2le_64(x) (bswap_64(x))
-#define me2le_n(x,n) (mem_swap(x,n))
-#else
-#define me2be_16(x) (bswap_16(x))
-#define me2be_32(x) (bswap_32(x))
-#define me2be_64(x) (bswap_64(x))
-#define me2be_n(x,n) (mem_swap(x,n))
-#define me2le_16(x) (x)
-#define me2le_32(x) (x)
-#define me2le_64(x) (x)
-#define me2le_n(x,n) 
-#endif
-
-
-#ifdef __MSDOS__
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
-#else
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
-#endif
-
-#define OPTION '-'
-#define OPTION_S " -"
-#define OPTION_LONG_S "--"
 
 
 #if (defined __unix__ || defined __BEOS__ || defined AMIGA)
@@ -234,8 +139,6 @@ extern char *strlwr (char *str);
 extern char *strtrim (char *str);
 extern char *mkprint (char *str, const unsigned char replacement);
 extern char *mkfile (char *str, const unsigned char replacement);
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
 #define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))

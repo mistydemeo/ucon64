@@ -54,7 +54,6 @@ const char *ucon64gui_title = "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCO
 
 static void ucon64gui_root (void);
 //static void ucon64gui_system (void);
-static void ucon64gui_output (char *output);
 ucon64gui_t ucon64gui;
 
 const struct htk_option long_options[] = {
@@ -448,8 +447,9 @@ htk_request (const char *uri, const char *query)
 #endif
   printf ("system (%s);\n\n", buf);
   fflush (stdout);
+  system ("xterm -e ucon64");
 
-  ucon64gui_output(ucon64gui.ucon64_output);
+//  ucon64gui_output(ucon64gui.ucon64_output);
           break;
         }
     }

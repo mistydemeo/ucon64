@@ -420,12 +420,11 @@ memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildca
 }
 
 
-#if 0
+#if 1
 void *
-mem_swap (void *add, uint32_t bit, uint32_t n)
+mem_swap (void *add, uint32_t n)
 {
   uint32_t pos = 0;
-  uint32_t increment = bit / 8;
   unsigned char *a = add, c;
 
   for (; pos + 1 < n; pos += 2)
@@ -439,9 +438,10 @@ mem_swap (void *add, uint32_t bit, uint32_t n)
 }
 #else
 void *
-mem_swap (void *add, uint32_t n)
+mem_swap (void *add, uint32_t bit, uint32_t n)
 {
   uint32_t pos = 0;
+  uint32_t increment = bit / 8;
   unsigned char *a = add, c;
 
   for (; pos + 1 < n; pos += 2)

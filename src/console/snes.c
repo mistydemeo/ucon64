@@ -2653,7 +2653,7 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
 
       // misc stuff
-      sprintf (buf, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> 4 + 1) * 4);
+      sprintf (buf, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> (4 + 1)) * 4);
       strcat (rominfo->misc, buf);
 
       x = snes_header.bs_type >> 4;

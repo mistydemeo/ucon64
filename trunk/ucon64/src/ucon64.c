@@ -834,6 +834,12 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 );
 }
 
+printf(
+	"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
+	,ucon64_dbsize(ucon64_UNKNOWN)
+	,ucon64_dbsize(ucon64_UNKNOWN)-ucon64_DBSIZE
+);
+
 printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 	"     %s -help|less (to see everything in less)\n"
 	"     give the force recognition option a try if something went wrong\n"

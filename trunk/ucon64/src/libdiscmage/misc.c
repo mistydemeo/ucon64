@@ -2695,219 +2695,132 @@ fdopen (int fd, const char *mode)
 #endif // _WIN32
   
 
-#if 0                                           // currently not used
-char ***
-strargv (int *argc, char ***argv, char *cmdline, int separator_char)
+int
+argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 {
-//this will be replaced by argz_extract() soon
-  int i = 0;
-  char buf[MAXBUFSIZE];
+//TODO replace with argz_extract() 
+//#ifdef  DEBUG
+  int pos = 0;
+//#endif
+  int argc = 0;
 
-  if (*cmd)
-    for (; (argv[i] = strtok (!i?cmd:NULL, " ")) && i < (argc - 1); i++)
-      ;
-  return NULL;
-}
-#endif
+  if (!str)
+    return 0;
+  if (!str[0])
+    return 0;
 
+  for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
+    argc < (max_args - 1); argc++);
 
-static char
-from_hex (char c)
-{
-  return c >= '0' && c <= '9' ? c - '0' : c >= 'A' && c <= 'F' ? c - 'A' + 10 : c - 'a' + 10;   /* accept small letters just in case */
+//#ifdef  DEBUG
+  fprintf (stderr, "argc:     %d\n", argc);
+  for (pos = 0; pos < argc; pos++)
+    fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
+  fprintf (stderr, "\n");
+
+  fflush (stderr);
+//#endif
+
+  return argc;
 }
 
 
 char *
-url_unescape_string (char *outbuf, const char *inbuf)
-#if 0
+strunesc (char *dest, const char *src)
 {
-  unsigned char c;
+  unsigned int c;
+  char *p = dest;
 
-  for (; ((c = *inbuf++)); *outbuf++ = c)
-    if (c == '%')
-      {
-        unsigned char c1 = *inbuf++;
-        unsigned char c2 = *inbuf++;
+  if (!src)
+    return NULL;
+  if (!src[0])
+    return "";
 
-        if (((c1 >= '0' && c1 <= '9') || (c1 >= 'A' && c1 <= 'F')) &&
-            ((c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'F')))
-          {
-            c1 -= (c1 >= '0' && c1 <= '9') ? '0' : 'A';
-
-            c2 -= (c2 >= '0' && c2 <= '9') ? '0' : 'A';
-
-            c = (c1 << 4) + c2;
-          }
-      }
-  return outbuf;
-}
-#else
-{
-  char *p = NULL;
-  char *q = NULL;
-  static char blank[] = "";
-
-  strcpy (outbuf, inbuf);
-  p = (char *) outbuf;
-  q = (char *) outbuf;
-
-  if (!outbuf)
-    return (blank);
-  while (*p)
+  while ((c = *src++))
     {
-      if (*p == '%')
+      if (c == '%')
         {
-          p++;
-          if (*p)
-            *q = from_hex (*p++) * 16;
-          if (*p)
-            *q = (*q + from_hex (*p++));
-          q++;
-        }
-      else
-        {
-          if (*p == '+')
-            {
-              *q++ = ' ';
-              p++;
-            }
-          else
-            {
-              *q++ = *p++;
-            }
-        }
-    }
+          unsigned char buf[4];
 
-  *q++ = 0;
-  return outbuf;
+          buf[0] = *src++;
+          buf[1] = *src++;
+          buf[2] = 0;
+        
+          sscanf (buf, "%x", &c);
+        }
+
+       *p++ = c;
+     }
+  *p = 0;
+  
+  return dest;
 }
-#endif
 
 
-int
-url_escape_string (char *outbuf, const char *inbuf)
-#if 0
+char *
+stresc (char *dest, const char *src)
 {
+//TODO: what if the src was already escaped?
   unsigned char c;
-  const unsigned char *positiv = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789" "-_.!~" // mark characters
+  char *p = dest;
+  const unsigned char *positiv =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+    "abcdefghijklmnopqrstuvwxyz"
+    "0123456789"
+#if 1
+    "+/"
+#else
+    "-_.!~"                     // mark characters
     "*\\()%"                    // do not touch escape character
     ";/?:@"                     // reserved characters
     "&=+$,"                     // see RFC 2396
-//  "\x7f ... \xff"    fareast laurluages(Chinese, Korean, Japanese)
-    "\x00";                     // \0 too
+//  "\x7f ... \xff"    far east languages(Chinese, Korean, Japanese)
+#endif
+    ;
 
-  while ((c = *inbuf++))
+  if (!src)
+    return NULL;
+  if (!src[0])
+    return "";
+            
+  while ((c = *src++))
     if (strchr (positiv, c) != NULL || c >= 0x7f)
-      *outbuf++ = c;
+      *p++ = c;
     else
       {
-        /* all others will be escaped */
-        unsigned char c1 = ((c & 0xf0) >> 4);
-        unsigned char c2 = (c & 0x0f);
-
-        c1 += (c1 < 10) ? '0' : 'A';
-        c2 += (c2 < 10) ? '0' : 'A';
-
-        *outbuf++ = '%';
-        *outbuf++ = c1;
-        *outbuf++ = c2;
+        sprintf (p, "%%%02X", c);
+        p += 3;
       }
-  return outbuf;
+  *p = 0;
+
+  return dest;
 }
-#else
+
+
+//#ifdef  DEBUG
+static void
+strurl_test (st_strurl_t *url)
 {
-  char *bufcoded = (char *) inbuf;
-  char *bufplain = outbuf;
-//TODO: replace MAXBUFSIZE
-  int outbufsize = MAXBUFSIZE;
-  static char six2pr[64] = {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
-  };
+  fprintf (stderr, "url_s:    %s\n", url->url_s);
+  fprintf (stderr, "protocol: %s\n", url->protocol);
+  fprintf (stderr, "hostname: %s\n", url->host);
+  fprintf (stderr, "file:     %s\n", url->file);
+  fprintf (stderr, "port:     %d\n", url->port);
+  fprintf (stderr, "user:     %s\n", url->user);
+  fprintf (stderr, "pass:     %s\n", url->pass);
 
-  static unsigned char pr2six[256];
-
-  /* siurlle character decode */
-#define DEC(c) pr2six[(int)c]
-#define _DECODE_MAXVAL 63
-
-  static int first = 1;
-
-  int nbytesdecoded, j;
-  char *bufin = bufcoded;
-  unsigned char *bufout = (unsigned char *) bufplain;
-  int nprbytes;
-
-  /*
-     ** If this is the first call, initialize the mappiurl table.
-     ** This code should work even on non-ASCII machines.
-   */
-  if (first)
-    {
-      first = 0;
-      for (j = 0; j < 256; j++)
-        pr2six[j] = _DECODE_MAXVAL + 1;
-      for (j = 0; j < 64; j++)
-        pr2six[(int) six2pr[j]] = (unsigned char) j;
-    }
-
-  /* Strip leadiurl whitespace. */
-
-  while (*bufcoded == ' ' || *bufcoded == '\t')
-    bufcoded++;
-
-  /*
-     ** Figure out how many characters are in the input buffer.
-     ** If this would decode into more bytes than would fit into
-     ** the output buffer, adjust the number of input bytes downwards.
-   */
-  bufin = bufcoded;
-  while (pr2six[(int) *(bufin++)] <= _DECODE_MAXVAL);
-  nprbytes = bufin - bufcoded - 1;
-  nbytesdecoded = ((nprbytes + 3) / 4) * 3;
-  if (nbytesdecoded > outbufsize)
-    {
-      nprbytes = (outbufsize * 4) / 3;
-    }
-  bufin = bufcoded;
-
-  while (nprbytes > 0)
-    {
-      *(bufout++) = (unsigned char) (DEC (*bufin) << 2 | DEC (bufin[1]) >> 4);
-      *(bufout++) =
-        (unsigned char) (DEC (bufin[1]) << 4 | DEC (bufin[2]) >> 2);
-      *(bufout++) = (unsigned char) (DEC (bufin[2]) << 6 | DEC (bufin[3]));
-      bufin += 4;
-      nprbytes -= 4;
-    }
-  if (nprbytes & 03)
-    {
-      if (pr2six[(int) bufin[-2]] > _DECODE_MAXVAL)
-        {
-          nbytesdecoded -= 2;
-        }
-      else
-        {
-          nbytesdecoded -= 1;
-        }
-    }
-  bufplain[nbytesdecoded] = 0;
-  return (nbytesdecoded);
+  fflush (stderr);
 }
-#endif
+//#endif
 
 
-st_url_t *
-strurl (st_url_t *url, const char *url_s)
+st_strurl_t *
+strurl (st_strurl_t *url, const char *url_s)
 {
 #define ANONYMOUS_S "anonymous"
-  int pos, pos2;
+#define LOCALHOST_S "localhost"
+  int pos = 0, pos2 = 0;
   char *p = NULL, *p2 = NULL, *p3 = NULL;
-  char buf[MAXBUFSIZE];
 
   if (!url)
     return NULL;
@@ -2916,231 +2829,103 @@ strurl (st_url_t *url, const char *url_s)
   if (!url_s[0])
     return NULL;
 
-  // Initialisation of the URL container members
-  memset (url, 0, sizeof (st_url_t));
+//#ifdef  DEBUG
+  fprintf (stderr, "%s\n\n", url_s);
+//#endif
 
-  url_unescape_string (buf, url_s);
-  url_s = (const char *) &buf;
-  printf ("%s\n\n", url_s);
-
-  // Copy the url in the URL container
-  if (!(url->url = strdup (url_s)))
+  memset (url, 0, sizeof (st_strurl_t));
+  strcpy (url->url_s, url_s);
+  url->port = -1;
+  
+// look for "://"
+  if ((p = strstr (url_s, "://")))
     {
-      fprintf (stderr, "ERROR: Memory allocation failed\n");
-      return NULL;
+// extract the protocol
+      pos = p - url_s;
+      strncpy (url->protocol, url_s, pos);
+      url->protocol[pos] = 0;
+
+// jump the "://"
+      p += 3;
+      pos += 3;
     }
+  else
+    p = (char *) url_s;
 
-  // extract the protocol
-  p = strstr (url_s, "://");
-  if (p == NULL)
+// check if a user:pass is given
+  if ((p2 = strchr (p, '@')))
     {
-      fprintf (stderr, "ERROR: Not an URL\n");
-      return NULL;
-    }
-  pos = p - url_s;
-  url->protocol = (char *) malloc (pos + 1);
-  strncpy (url->protocol, url_s, pos);
-  if (url->protocol == NULL)
-    {
-      fprintf (stderr, "ERROR: Memory allocation failed\n");
-      return NULL;
-    }
-  url->protocol[pos] = '\0';
-
-  // jump the "://"
-  p += 3;
-  pos += 3;
-
-  // check if a user:pass is given
-  p2 = strstr (p, "@");
-  if (p2 != NULL)
-    {
-      // We got somethiurl, at least a user...
       int len = p2 - p;
-      url->user = (char *) malloc (len + 1);
-      if (url->user == NULL)
-        {
-          fprintf (stderr, "ERROR: Memory allocation failed\n");
-          return NULL;
-        }
       strncpy (url->user, p, len);
-      url->user[len] = '\0';
+      url->user[len] = 0;
 
-      p3 = strstr (p, ":");
+      p3 = strchr (p, ':');
       if (p3 != NULL && p3 < p2)
         {
-          // We also have a pass
           int len2 = p2 - p3 - 1;
-          url->user[p3 - p] = '\0';
-          url->pass = (char *) malloc (len2 + 1);
-          if (url->pass == NULL)
-            {
-              fprintf (stderr, "ERROR: Memory allocation failed\n");
-              return NULL;
-            }
+
+          url->user[p3 - p] = 0;
           strncpy (url->pass, p3 + 1, len2);
-          url->pass[len2] = '\0';
+          url->pass[len2] = 0;
         }
       p = p2 + 1;
       pos = p - url_s;
     }
 
-  if (!url->user)
-    {
-      url->user = (char *) malloc (strlen (ANONYMOUS_S) + 2);
-      strcpy (url->user, ANONYMOUS_S);
-
-      url->pass = (char *) malloc (strlen (ANONYMOUS_S) + 2);
-      strcpy (url->pass, ANONYMOUS_S);
-    }
-
-  // look if the port is given
-  p2 = strstr (p, ":");
-  // If the : is after the first / it isn't the port
-  p3 = strstr (p, "/");
+// look if the port is given
+  p2 = strchr (p, ':');  // If the : is after the first / it isn't the port
+  p3 = strchr (p, '/');
   if (p3 && p3 - p2 < 0)
     p2 = NULL;
-  if (p2 == NULL)
+  if (!p2) 
     {
-      // No port is given
-      url->port = !strnicmp (url->protocol, "ftp", 3) ? 21 : 80;
-      // Look if a path is given
-      p2 = strstr (p, "/");
-      if (p2 == NULL)
-        {
-          // No path/filename
-          // So we have an URL like http://www.hostname.com
-          pos2 = strlen (url_s);
-        }
-      else
-        {
-          // We have an URL like http://www.hostname.com/file.txt
-          pos2 = p2 - url_s;
-        }
+      pos2 = 
+        (p2 = strchr (p, '/')) ?  // Look if a path is given
+        (p2 - url_s) :  // We have an URL like http://www.hostname.com/file.txt
+        strlen (url_s);  // No path/filename
+                         // So we have an URL like http://www.hostname.com
     }
   else
     {
-      // We have an URL beginniurl like http://www.hostname.com:1212
-      // Get the port number
-      url->port = atoi (p2 + 1);
+      // We have an URL beginning like http://www.hostname.com:1212
+      url->port = atoi (p2 + 1);  // Get the port number
       pos2 = p2 - url_s;
     }
-  // copy the hostname in the URL container
-  url->host = (char *) malloc (pos2 - pos + 1);
-  if (url->host == NULL)
-    {
-      fprintf (stderr, "ERROR: Memory allocation failed\n");
-      return NULL;
-    }
+
+// copy the hostname into st_strurl_t
   strncpy (url->host, p, pos2 - pos);
-  url->host[pos2 - pos] = '\0';
+  url->host[pos2 - pos] = 0;
 
-  // Look if a path is given
-  p2 = strstr (p, "/");
-  if (p2 != NULL)
-    {
-      // A path/filename is given
-      // check if it's not a trailiurl '/'
-      if (strlen (p2) > 1)
-        {
-          // copy the path/filename in the URL container
-          url->file = strdup (p2);
-          if (url->file == NULL)
-            {
-              fprintf (stderr, "ERROR: Memory allocation failed\n");
-              return NULL;
-            }
-        }
-    }
+// look if a path is given
+  if ((p2 = strchr (p, '/')))
+    if (strlen (p2) > 1)  // A path/filename is given check if it's not a trailing '/'
+#if 1
+      strunesc (url->file, p2); // copy the path/filename into st_strurl_t
+#else
+      strcpy (url->file, p2);  // copy the path/filename into st_strurl_t
+#endif
 
-  // Check if a filenme was given or set, else set it with '/'
-  if (url->file == NULL)
-    {
-      url->file = (char *) malloc (2);
-      if (url->file == NULL)
-        {
-          fprintf (stderr, "ERROR: Memory allocation failed\n");
-          return NULL;
-        }
-      strcpy (url->file, "/");
-    }
+// defaults
+  if (!url->protocol[0])
+    strcpy (url->protocol, "http");
+#if 0
+  if (!url->user[0])
+    strcpy (url->user, ANONYMOUS_S);
+  if (!url->pass[0])
+    strcpy (url->pass, ANONYMOUS_S);
+#endif
+  if (!url->host)
+    strcpy (url->host, LOCALHOST_S);
+  if (url->port == -1 && !strnicmp (url->protocol, "http", 3)) 
+    url->port = 80;
+#if 0
+  if (!url->file[0])
+    strcpy (url->file, "/");
+#endif    
 
 //#ifdef  DEBUG
-  fprintf (stderr, "url_s:      %s\n", url->url);
-  fprintf (stderr, "protocol: %s\n", url->protocol);
-  fprintf (stderr, "hostname: %s\n", url->host);
-  fprintf (stderr, "file:     %s\n", url->file);
-  fprintf (stderr, "port:     %d\n", url->port);
-  fprintf (stderr, "user:     %s\n", url->user);
-  fprintf (stderr, "pass:     %s\n", url->pass);
+  strurl_test (url);
 //#endif
 
   return url;
 }
-
-#if 0
-char *
-url_to_cmd (const char *url_s)
-// turn query into a cmdline
-{
-  int x = 0, c = 0;
-  char buf[6];
-  static char buf2[MAXBUFSIZE];
-  st_url_t url;
-  char *p = NULL;
-  
-  if (!strurl (&url, url_s))
-    return NULL;
-
-  for (x = 0; x < (int) strlen (url.file); x++)
-    {
-      p = NULL;
-      switch (url.file[x])
-        {
-          case '?':
-          case '&':
-          case '+':
-            p = " ";
-            break;
-
-          case '%':
-            sscanf (&url.file[x + 1], "%02x", &c);
-            sprintf (buf, "%c", c);
-            x += 2;
-            break;
-
-          default:
-            sprintf (buf, "%c", url.file[x]);
-            break;
-        }
-
-      strcat (buf2, p ? p : buf);
-    }
-
-  return buf2;
-}
-
-
-int
-cmd_to_argv (const char *cmd, char ***argv_p, int max_args)
-// argz_extract clone
-{
-  int argc;
-  static char *argv[4096 + 1]; // 4096 cmdline options should be sufficient
-  char buf[MAXBUFSIZE];
-
-  if (!cmd)
-    return -1;
-
-  strcpy (buf, cmd);
-  max_args = MIN (4096, max_args);
-
-  for (argc = 0;
-       (argv[argc] = strtok (!argc ? buf : NULL, " ")) && argc < max_args;
-       argc++);
-
-  argv_p = &argv;
-
-  return argc;
-}
-#endif

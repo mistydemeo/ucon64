@@ -233,30 +233,33 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <br>
 <p>
 <a name="6"><b>Q6</b>: How is the source of uCON64 organized?</a><br>
-<b>A</b>: Note that the following information is "under construction". It will
-   soon be updated.<br>
-   The heart of uCON64 is ucon64.c/ucon64.rominfo. This <i>struct</i> is
-   designed to hold all information you could get from a ROM.<br>
+<b>A</b>: The heart of uCON64 is ucon64.h/st_ucon64_t. This <i>struct</i> is
+   designed to hold all workflow relevant informations and it has pointers
+   to different structs which will be != NULL depending on which type or
+   format uCON64 did detect for the current ROM. libdiscmage (if compiled)
+   is involved in this process as well.<br><br>
    uCON64 starts with the name of a ROM and possibly some arguments. Then it
    checks if a configuration file exists and creates one if that is not the
-   case. uCON64 uses the configuration file to set some members of another
-   important structure, ucon64.c/ucon64. For example the value of
+   case. For example the value of
    ucon64.parport, the variable that contains the I/O address of the parallel
    port, will initially be set to the value that is found in the configuration
    file.<br>
-   Then it scans the command line for switches. Switches are command line
+   After these initial functions every ROM will be processed.<br><br>
+   Processing a ROM.<br>
+   The command line will be scanned for switches. Switches are command line
    arguments that will not result in an action by themselves, but they
-   influence the other type of command line arguments, options. uCON64
-   initializes ucon64.c/ucon64, based on the switches. This code can be found
-   in ucon64_opts.c/ucon64_switches(). This is also the place where
-   ucon64.c/ucon64.quiet is set. This variable determines whether or not uCON64
-   displays ROM information.<br>
-<!--
-   The latter calls the init function for all the supported console types if
-   the user didn't use a force console switch.
--->
-   For example the init function for SNES is console/snes.c/snes_init(), for
-   NES console/nes.c/nes_init(). Each init function tries to determine if the
+   influence the other type of command line arguments, options. <br>
+   uCON64 sets some other values in ucon64.h/st_ucon64_t, based on the
+   switches. This code can be found in ucon64_opts.c/ucon64_switches(). 
+   This is also the place where ucon64.c/ucon64.quiet is set. This variable 
+   determines whether or not uCON64 displays ROM information.<br>
+   Then uCON64 starts scanning the command line for options. This code can be
+   found in ucon64_opts.c/ucon64_options(). From this code almost all
+   operations of uCON64 are executed. Under Unix this is also the point where
+   root privileges are given up with a call to misc.c/drop_privileges().<br>
+   First uCON64 tries to find out what console system the ROM belongs to using
+   for example the init function for SNES (console/snes.c/snes_init() or
+   console/nes.c/nes_init() for NES). Each init function tries to determine if the
    ROM file belongs to its console type. If that is the case it returns 0,
    otherwise -1.<br>
    Some ROM file types contain information such as the internal name, country
@@ -275,10 +278,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    For some options it doesn't make sense to display ROM info. If one of those
    options has been specified on the command line
    (ucon64.c/ucon64.flags & WF_NFO) will be zero.<br>
-   Then uCON64 starts scanning the command line for options. This code can be
-   found in ucon64_opts.c/ucon64_options(). From this code almost all
-   operations of uCON64 are executed. Under Unix this is also the point where
-   root privileges are given up with a call to misc.c/drop_privileges().<br>
+   After all this the option will be executed (ucon64_opts.c/ucon64_options()).<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: What coding style is preferred?</a><br>

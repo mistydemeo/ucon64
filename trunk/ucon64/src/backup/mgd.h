@@ -21,8 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "../ucon64.h"
 
-#define mgd_TITLE "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n"
-                   "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
+#define mgd_TITLE "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n" \
+                   "19XX Bung Enterprises Ltd http://www.bung.com.hk\n" \
                    "?Makko Toys Co., Ltd.?"
 
 int mgd_usage(int argc,char *argv[]);

@@ -757,17 +757,29 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
         case UCON64_LSV:
           if (!result) ucon64_nfo (&rominfo);
           break;
-#if 0
-//TODO renamer!
-        case UCON64_REN:
+
+        case UCON64_RROM:
           if (ucon64.console != UCON64_UNKNOWN)
-//                        && ucon64.console != UCON64_KNOWN)
             {
-              strcpy (buf, &ucon64.rom[findlast (ucon64.rom, ".") + 1]);
-              printf ("%s.%s\n", rom.name, buf);
+              sprintf (buf, "%s.%s", strtrim (rominfo.name), getext (ucon64.rom));
+              printf ("Renaming %s to %s\n", ucon64.rom, mkfile (strlwr (buf), '_'));
+              rename (ucon64.rom, strlwr (buf));
             }
           break;
-#endif
+
+        case UCON64_RR83:
+          if (ucon64.console != UCON64_UNKNOWN)
+            {
+              strcpy (buf, strtrim (rominfo.name));
+              buf[8] = 0;
+              strcat (buf, ".");
+              strcat (buf, getext (ucon64.rom));
+              buf[12] = 0;
+              printf ("Renaming %s to %s\n", ucon64.rom, mkfile (strlwr (buf), '_'));
+              rename (ucon64.rom, strlwr (buf));
+            }
+          break;
+
         case UCON64_LS:
         default:
           strftime (buf, 13, "%b %d %H:%M", localtime (&puffer->st_mtime));

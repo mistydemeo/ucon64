@@ -89,7 +89,11 @@ const st_usage_t genesis_usage[] =
     {"multi", "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
                       "truncated to SIZE Mbit; file with loader must be specified\n"
                       "first, then all the ROMs, multi-game file to create last"},
-    {"pal", NULL, "enable region function (PAL/NTSC); use with -multi"},
+    {"region=CODE", NULL, "enable region function; use with -multi\n"
+                     "CODE='0' force NTSC/Japan for all games\n"
+                     "CODE='1' force NTSC/U.S.A. for all games\n"
+                     "CODE='2' force PAL for all games\n"
+                     "CODE='x' use whatever setting games expect"},
     {NULL, NULL, NULL}
   };
 
@@ -107,7 +111,7 @@ typedef struct st_genesis_header
 
 static st_genesis_header_t genesis_header;
 static genesis_file_t type;
-static int genesis_rom_size, genesis_has_ram, genesis_tv_standard;
+static int genesis_rom_size, genesis_has_ram, genesis_tv_standard, genesis_japanese;
 
 
 genesis_file_t
@@ -904,19 +908,26 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   else
     flags |= 4;                                 // set T (no SRAM)
 
-  // AAAHH!!! E, P and V are driving me NUTS! I'll just wait for bug reports...
-  if (genesis_tv_standard == 1)
-    flags |= 0x10;                              // set P(AL)
-
-  // I (dbjh) don't know if the next compound statement is correct when -pal
-  //  is specified
-  if (UCON64_ISSET (ucon64.tv_standard))
+  /*
+    J(apan) would probably be a more logical name for bit E(urope). I (dbjh)
+    base that on information of SamIAm. According to him there are three types
+    of the console:
+    American Genesis                  NTSC/no Japanese switch
+    Japanese Genesis                  NTSC/Japanese switch
+    Mega Drive (rest of the world?)   PAL/no Japanese switch
+    So, besides PAL and NTSC there is the variable whether the console contains
+    a Japanese "switch". The region function is used to make the game "think"
+    it's running on another type of console. For example, a Japanese game
+    running on a (European) Mega Drive should have the P and E bit set to 0.
+  */
+  if (UCON64_ISSET (ucon64.region))
     {
+      if (!genesis_japanese)
+        flags |= 0x20;                          // set E(urope)
+      if (genesis_tv_standard == 1)
+        flags |= 0x10;                          // set P(AL)
+
       flags |= 8;                               // set V (enable region function)
-      if (genesis_tv_standard == 0)
-        flags &= ~0x30;                         // clear E(uro) & P(AL)
-      else // genesis_tv_standard == 1
-        flags |= 0x30;                          // set E(uro) & P(AL)
     }
 
   fputc (flags, destfile);                      // 0x1f = flags
@@ -957,6 +968,20 @@ genesis_multi (int truncate_size, char *fname)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
       return -1;
     }
+
+  // do this check here, because one error message is enough (not for every game)
+  if (UCON64_ISSET (ucon64.region))
+    switch (ucon64.region)
+      {
+      case 0:                                   // NTSC/Japan
+      case 1:                                   // NTSC/U.S.A.
+      case 2:                                   // PAL
+      case 256:
+        break;
+      default:
+        printf ("WARNING: Invalid region code specified, using values games expect\n");
+      }
+
   printf ("Creating multi-game file: %s\n", destname);
 
   file_no = 0;
@@ -991,6 +1016,27 @@ genesis_multi (int truncate_size, char *fname)
               modify ucon64.console temporarily only to be able to help detect
               problems with incorrect files.
       */
+      if (UCON64_ISSET (ucon64.region))
+        switch (ucon64.region)
+          {
+          case 0:                               // NTSC/Japan
+            genesis_tv_standard = 0;
+            genesis_japanese = 1;
+            break;
+          case 1:                               // NTSC/U.S.A.
+            genesis_tv_standard = 0;
+            genesis_japanese = 0;
+            break;
+          case 2:                               // PAL
+            genesis_tv_standard = 1;
+            genesis_japanese = 0;
+            break;
+          case 256:
+            // Do nothing. Use whatever values we found for genesis_tv_standard and
+            //  genesis_japanese.
+            break;
+          // no default case, because we already checked value of ucon64.region
+          }
 
       if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
         {
@@ -1313,6 +1359,8 @@ genesis_init (st_rominfo_t *rominfo)
     }
 
   genesis_tv_standard = 1;              // default to PAL; NTSC has higher precedence
+  genesis_japanese = 0;
+
   country[0] = 0;
   // ROM country
   for (x = 0; x < 5; x++)
@@ -1321,7 +1369,9 @@ genesis_init (st_rominfo_t *rominfo)
 
       if ((x > 0 && country_code == 0) || country_code == ' ')
         continue;
-      if (country_code == 'J' || country_code == 'U' || country_code == '4')
+      if (country_code == 'J')
+        genesis_japanese = 1;
+      if (genesis_japanese || country_code == 'U' || country_code == '4')
         genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil ('4') use NTSC
       strcat (country, NULL_TO_UNKNOWN_S
                (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));

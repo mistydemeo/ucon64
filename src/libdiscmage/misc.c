@@ -2550,14 +2550,12 @@ q_fswap (const char *filename, int start, int len, swap_t type)
         mem_swap_w (buf, seg_len);
       fseek (fh, -seg_len, SEEK_CUR);
       fwrite (buf, 1, seg_len, fh);
-#if     defined DJGPP || defined __solaris__
       /*
         This appears to be a bug in DJGPP and Solaris. Without an extra call to
         fseek() a part of the file won't be swapped (DJGPP: after 8 MB, Solaris:
         after 12 MB).
       */
       fseek (fh, 0, SEEK_CUR);
-#endif
     }
 
   fclose (fh);

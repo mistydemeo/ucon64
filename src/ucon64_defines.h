@@ -201,6 +201,7 @@ enum {
   UCON64_PPF,
   UCON64_Q,
   UCON64_QQ,                                    // already reserved ;-)
+  UCON64_REGION,
   UCON64_RENAME,
   UCON64_RROM,
   UCON64_RR83,

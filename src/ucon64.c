@@ -264,6 +264,7 @@ const struct option options[] = {
     {"psx", 0, 0, UCON64_PSX},
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
+    {"region", 1, 0, UCON64_REGION},
     {"rename", 0, 0, UCON64_RENAME},
 #ifdef  DISCMAGE
     {"rip", 1, 0, UCON64_RIP},
@@ -797,24 +798,25 @@ ucon64_execute_options (void)
 #endif
   ucon64.rominfo = NULL;
 
-  ucon64.buheader_len =
-  ucon64.interleaved =
-  ucon64.split =
-  ucon64.part_size =
-  ucon64.snes_header_base =
-  ucon64.snes_hirom =
+  ucon64.battery =
   ucon64.bs_dump =
+  ucon64.buheader_len =
+  ucon64.console =
   ucon64.controller =
   ucon64.controller2 =
-  ucon64.tv_standard =
-  ucon64.battery =
-  ucon64.vram =
-  ucon64.mirror =
-  ucon64.use_dump_info =
-  ucon64.console =
-  ucon64.do_not_calc_crc =
   ucon64.crc_big_files =
-  ucon64.id = UCON64_UNKNOWN;
+  ucon64.do_not_calc_crc =
+  ucon64.id =
+  ucon64.interleaved =
+  ucon64.mirror =
+  ucon64.part_size =
+  ucon64.region =
+  ucon64.snes_header_base =
+  ucon64.snes_hirom =
+  ucon64.split =
+  ucon64.tv_standard =
+  ucon64.use_dump_info =
+  ucon64.vram = UCON64_UNKNOWN;
 
   ucon64.file_size =
   ucon64.crc32 =

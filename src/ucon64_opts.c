@@ -450,6 +450,13 @@ ucon64_switches (int c, const char *optarg)
       ucon64.id = 1;
       break;
 
+    case UCON64_REGION:
+      if (optarg[1] == 0 && toupper (optarg[0]) == 'X') // be insensitive to case
+        ucon64.region = 256;
+      else
+        ucon64.region = strtol (optarg, NULL, 10);
+      break;
+
     default:
       break;
     }

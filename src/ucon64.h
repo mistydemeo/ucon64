@@ -170,21 +170,22 @@ typedef struct
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
   // the following values are for SNES, NES and Genesis
-  int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
-  int snes_hirom;                               // SNES ROM is HiROM
-  int part_size;                                // SNES/Genesis split part size
-  int split;                                    // ROM is split
+  int battery;                                  // NES UNIF/iNES/Pasofami
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
+  const char *comment;                          // NES UNIF
   int controller;                               // NES UNIF & SNES NSRT
   int controller2;                              // SNES NSRT
-  int tv_standard;                              // NES UNIF/Genesis
-  int battery;                                  // NES UNIF/iNES/Pasofami
-  int vram;                                     // NES UNIF
-  int mirror;                                   // NES UNIF/iNES/Pasofami
-  const char *mapr;                             // NES UNIF board name or iNES mapper number
-  int use_dump_info;                            // NES UNIF
   const char *dump_info;                        // NES UNIF
-  const char *comment;                          // NES UNIF
+  const char *mapr;                             // NES UNIF board name or iNES mapper number
+  int mirror;                                   // NES UNIF/iNES/Pasofami
+  int part_size;                                // SNES/Genesis split part size
+  int region;                                   // Genesis (for -multi)
+  int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
+  int snes_hirom;                               // SNES ROM is HiROM
+  int split;                                    // ROM is split
+  int tv_standard;                              // NES UNIF
+  int use_dump_info;                            // NES UNIF
+  int vram;                                     // NES UNIF
 
 #ifdef  DISCMAGE
   dm_image_t *image;                            // info from libdiscmage
@@ -216,3 +217,4 @@ extern int ucon64_parport_needed;
 extern const struct option options[];
 
 #endif // #ifndef UCON64_H
+

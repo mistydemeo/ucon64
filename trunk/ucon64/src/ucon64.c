@@ -522,7 +522,20 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 #endif
 
       rominfo->current_crc32 = fileCRC32 (romfile, rominfo->buheader_len);
-      ucon64_dbsearch (rominfo);
+      
+      switch (ucon64.console)
+        {
+          case UCON64_SNES:
+          case UCON64_GENESIS:
+          case UCON64_GB:
+          case UCON64_GBA:
+          case UCON64_N64:
+            break;
+            
+          default:
+            ucon64_dbsearch (rominfo);
+            break;
+        }
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {

@@ -53,6 +53,7 @@ extern int snes_l (st_rominfo_t *rominfo);
 extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names);
 extern int snes_mgd (st_rominfo_t *rominfo);
 extern int snes_mgh (st_rominfo_t *rominfo);
+extern int snes_multi (int truncate_size, char *fname);
 extern int snes_n (st_rominfo_t *rominfo, const char *name);
 extern int snes_s (st_rominfo_t *rominfo);
 extern void snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header);

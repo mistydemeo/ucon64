@@ -44,7 +44,7 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         backup/fig.obj backup/gbx.obj backup/gd.obj backup/interceptor.obj \
         backup/lynxit.obj backup/mccl.obj backup/mcd.obj backup/md-pro.obj \
         backup/mgd.obj backup/msg.obj backup/pce-pro.obj backup/pl.obj \
-        backup/psxpblib.obj backup/smc.obj backup/smd.obj \
+        backup/psxpblib.obj backup/sflash.obj backup/smc.obj backup/smd.obj \
         backup/smsgg-pro.obj backup/ssc.obj backup/swc.obj backup/tototek.obj \
         backup/ufo.obj backup/yoko.obj backup/z64.obj
 !ifdef USE_ZLIB
@@ -205,6 +205,7 @@ backup/msg.obj: backup/msg.h backup/ffe.h $(UCON64_STD_H)
 backup/pce-pro.obj: backup/pce-pro.h backup/tototek.h $(UCON64_STD_H)
 backup/pl.obj: backup/pl.h $(UCON64_STD_H)
 backup/psxpblib.obj: backup/psxpblib.h $(UCON64_STD_H)
+backup/sflash.obj: backup/sflash.h backup/tototek.h $(UCON64_STD_H)
 backup/smc.obj: backup/smc.h backup/ffe.h $(UCON64_STD_H)
 backup/smd.obj: backup/smd.h backup/ffe.h $(UCON64_STD_H)
 backup/smsgg-pro.obj: backup/smsgg-pro.h backup/tototek.h $(UCON64_STD_H)

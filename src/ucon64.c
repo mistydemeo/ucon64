@@ -168,6 +168,7 @@ static const st_getopt2_t lf[] =
     swc_usage,
     gd_usage,
     fig_usage,
+    sflash_usage,
   //  mgd_usage,
 #endif
     lf,

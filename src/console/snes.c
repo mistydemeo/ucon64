@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <sys/stat.h>
 #include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/string.h"
@@ -297,6 +298,13 @@ const st_getopt2_t snes_usage[] =
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
       &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+    },
+    {
+      "multi", 1, 0, UCON64_MULTI,
+      "SIZE", "make multi-game file for use with Super Flash flash card,\n"
+      "truncated to SIZE Mbit; file with loader must be specified\n"
+      "first, then all the ROMs, multi-game file to create last",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
     },
     {
       "dmirr", 0, 0, UCON64_DMIRR,
@@ -3813,7 +3821,7 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 */
 {
   int score = 0, x, y;
-  
+
 //  dumper (stdout, (char *) rom_buffer + SNES_HEADER_START + header_offset,
 //           SNES_HEADER_LEN, SNES_HEADER_START + header_offset, DUMPER_HEX);
 
@@ -3949,6 +3957,206 @@ snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
 
   remove_temp_file ();
   free (buffer);
+  return 0;
+}
+
+
+static void
+write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo, int size)
+{
+  int n, uses_DSP;
+  unsigned char name[0x1c], flags1, flags2;
+  static int slot = 0;
+
+  uses_DSP = snes_header.rom_type == 3 || snes_header.rom_type == 5 ||
+             snes_header.rom_type == 0xf6;
+
+  fseek (destfile, 0x4000 + (file_no - 1) * 0x20, SEEK_SET);
+  fputc (0xff, destfile);                       // 0x0 = 0xff
+  memcpy (name, rominfo->name, 0x1c);
+  for (n = 0; n < 0x1c; n++)
+    {
+      if (!isprint ((int) name[n]))
+        name[n] = '.';
+      else
+        name[n] = toupper (name[n]);            // The Super Flash loader (SFBOTX2.GS)
+    }                                           //  only supports upper case characters
+  fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
+
+  if (snes_sramsize)
+    {
+      if (snes_sramsize == 2 * 1024)
+        flags2 = 0x00;
+      else if (snes_sramsize == 8 * 1024)
+        flags2 = 0x10;
+      else if (snes_sramsize == 32 * 1024)
+        flags2 = 0x20;
+      else // if (snes_sramsize == 128 * 1024)  // Default to 1024 kbit SRAM
+        flags2 = 0x30;
+    }
+  else
+    flags2 = 0x40;
+
+  if (snes_header_base == SNES_EROM)            // Enable Extended Map for >32 Mbit ROMs
+    flags2 |= 0x80;
+
+  flags1 = snes_hirom ? 0x10 : 0x00;
+
+  if (!snes_hirom && uses_DSP)                  // Set LoROM DSP flag if necessary
+    flags1 |= 0x01;
+
+  if (slot == 0)
+    flags1 |= 0x00;
+  else if (slot == 0x200000)
+    flags1 |= 0x40;
+  else if (slot == 0x400000)
+    flags1 |= 0x20;
+  else if (slot == 0x600000)
+    flags1 |= 0x60;
+
+  slot += (size + 16 * MBIT - 1) & ~(16 * MBIT - 1);
+
+  fputc (flags1, destfile);                     // 0x1d = mapping flags
+  fputc (flags2, destfile);                     // 0x1e = SRAM flags
+  fputc (size / 0x8000, destfile);              // 0x1f = ROM size (not used by loader)
+}
+
+
+int
+snes_multi (int truncate_size, char *fname)
+{
+#define BUFSIZE (32 * 1024)
+  int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
+      totalsize_disk = 0, totalsize_card = 0, org_do_not_calc_crc = ucon64.do_not_calc_crc;
+  struct stat fstate;
+  FILE *srcfile, *destfile;
+  char *destname;
+  unsigned char buffer[BUFSIZE];
+
+  if (truncate_size == 0)
+    {
+      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      return -1;
+    }
+
+  if (fname != NULL)
+    {
+      destname = fname;
+      n_files = ucon64.argc;
+    }
+  else
+    {
+      destname = ucon64.argv[ucon64.argc - 1];
+      n_files = ucon64.argc - 1;
+    }
+
+  ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
+  if ((destfile = fopen (destname, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
+      return -1;
+    }
+
+  printf ("Creating multi-game file for Super Flash: %s\n", destname);
+
+  file_no = 0;
+  for (n = 1; n < n_files; n++)
+    {
+      if (access (ucon64.argv[n], F_OK))
+        continue;                               // "file" does not exist (option)
+      stat (ucon64.argv[n], &fstate);
+      if (!S_ISREG (fstate.st_mode))
+        continue;
+      if (file_no == 5)                         // loader + 4 games
+        {
+          puts ("WARNING: A multi-game file can contain a maximum of 4 games. The other files\n"
+                "         are ignored.");
+          break;
+        }
+
+      ucon64.console = UCON64_UNKNOWN;
+      ucon64.rom = ucon64.argv[n];
+      ucon64.file_size = fsizeof (ucon64.rom);
+      // DON'T use fstate.st_size, because file could be compressed
+      ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
+                                       ucon64.buheader_len : 0;
+      ucon64.rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+                                       ucon64.interleaved : 0;
+      ucon64.do_not_calc_crc = 1;
+      if (snes_init (ucon64.rominfo) != 0)
+        printf ("WARNING: %s does not appear to be a SNES ROM\n", ucon64.rom);
+      else if (ucon64.rominfo->interleaved)
+        printf ("WARNING: %s appears to be interleaved\n", ucon64.rom);
+
+      if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+          continue;
+        }
+      if (ucon64.rominfo->buheader_len)
+        fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
+
+      if (file_no == 0)
+        {
+          printf ("Loader: %s\n", ucon64.rom);
+          if (ucon64.file_size - ucon64.rominfo->buheader_len != 32 * 1024)
+            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
+        }
+      else
+        {
+          printf ("ROM%d: %s\n", file_no, ucon64.rom);
+          write_game_table_entry (destfile, file_no, ucon64.rominfo, ucon64.file_size - ucon64.rominfo->buheader_len);
+          fseek (destfile, totalsize_disk, SEEK_SET); // restore file pointer
+        }
+
+      done = 0;
+      byteswritten = 0;                         // # of bytes written per file
+      while (!done)
+        {
+          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+          if (totalsize_disk + bytestowrite > truncate_size)
+            {
+              bytestowrite = truncate_size - totalsize_disk;
+              done = 1;
+              truncated = 1;
+              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
+                      truncate_size / MBIT, ucon64.rom, ucon64.file_size -
+                        ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
+            }
+          else if (totalsize_card + bytestowrite > 64 * MBIT)
+            {
+              bytestowrite = 64 * MBIT - totalsize_card;
+              done = 1;
+              truncated = 1;
+              printf ("Output file needs 64 Mbit on flash card, truncating %s, skipping %d bytes\n",
+                      ucon64.rom, ucon64.file_size -
+                        ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
+            }
+          totalsize_disk += bytestowrite;
+          if (file_no > 0)
+            totalsize_card += bytestowrite;
+          if (bytestowrite == 0)
+            done = 1;
+          fwrite (buffer, 1, bytestowrite, destfile);
+          byteswritten += bytestowrite;
+        }
+
+      file_no++;
+
+      // We don't need padding for Super Flash as sf_write_rom() will care
+      //  about alignment. Games have to be aligned to a 16 Mbit boundary.
+      totalsize_card = (totalsize_card + 16 * MBIT - 1) & ~(16 * MBIT - 1);
+      fclose (srcfile);
+      if (truncated)
+        break;
+    }
+  // fill the next game table entry
+  fseek (destfile, 0x4000 + (file_no - 1) * 0x20, SEEK_SET);
+  fputc (0, destfile);                          // indicate no next game
+  fclose (destfile);
+  ucon64.console = UCON64_SNES;
+  ucon64.do_not_calc_crc = org_do_not_calc_crc;
+
   return 0;
 }
 

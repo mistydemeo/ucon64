@@ -107,9 +107,9 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/fig.o backup/gbx.o backup/gd.o backup/interceptor.o \
         backup/lynxit.o backup/mccl.o backup/mcd.o backup/md-pro.o \
         backup/mgd.o backup/msg.o backup/pce-pro.o backup/pl.o \
-        backup/psxpblib.o backup/smc.o backup/smd.o backup/smsgg-pro.o \
-        backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o backup/yoko.o \
-        backup/z64.o
+        backup/psxpblib.o backup/sflash.o backup/smc.o backup/smd.o \
+        backup/smsgg-pro.o backup/ssc.o backup/swc.o backup/tototek.o \
+        backup/ufo.o backup/yoko.o backup/z64.o
 ifdef USE_ZLIB
 LDFLAGS+=-lz
 OBJECTS+=misc/archive.o misc/map.o misc/unzip.o
@@ -362,6 +362,7 @@ backup/msg.o: backup/msg.h backup/ffe.h $(UCON64_STD_H)
 backup/pce-pro.o: backup/pce-pro.h backup/tototek.h $(UCON64_STD_H)
 backup/pl.o: backup/pl.h $(UCON64_STD_H)
 backup/psxpblib.o: backup/psxpblib.h $(UCON64_STD_H)
+backup/sflash.o: backup/sflash.h backup/tototek.h $(UCON64_STD_H)
 backup/smc.o: backup/smc.h backup/ffe.h $(UCON64_STD_H)
 backup/smd.o: backup/smd.h backup/ffe.h $(UCON64_STD_H)
 backup/smsgg-pro.o: backup/smsgg-pro.h backup/tototek.h $(UCON64_STD_H)

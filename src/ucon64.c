@@ -403,31 +403,31 @@ main (int argc, char **argv)
 
       dm_version = get_symbol (libdm, "dm_version");
       
-#if 0
-      if (dm_version < LINUX_VERSION(0,0,1))
+      if ((uint32_t)dm_version < (uint32_t)LINUX_VERSION(0,0,2))
         {
           fprintf (stderr, "ERROR: Your libdiscmage is too old\n\n");
           ucon64.discmage_enabled = 0;
         }
-#endif
+      else
+        {
+          dm_usage = get_symbol (libdm, "dm_usage");
 
-      dm_usage = get_symbol (libdm, "dm_usage");
+          dm_open = get_symbol (libdm, "dm_open");
+          dm_close = get_symbol (libdm, "dm_close");
 
-      dm_open = get_symbol (libdm, "dm_open");
-      dm_close = get_symbol (libdm, "dm_close");
+          dm_rip = get_symbol (libdm, "dm_rip");
+          dm_cdirip = get_symbol (libdm, "dm_cdirip");
+          dm_nrgrip = get_symbol (libdm, "dm_nrgrip");
 
-      dm_rip = get_symbol (libdm, "dm_rip");
-      dm_cdirip = get_symbol (libdm, "dm_cdirip");
-      dm_nrgrip = get_symbol (libdm, "dm_nrgrip");
+          dm_disc_read = get_symbol (libdm, "dm_disc_read");
+          dm_disc_write = get_symbol (libdm, "dm_disc_write");
 
-      dm_disc_read = get_symbol (libdm, "dm_disc_read");
-      dm_disc_write = get_symbol (libdm, "dm_disc_write");
+          dm_mksheets = get_symbol (libdm, "dm_mksheets");
+          dm_mktoc = get_symbol (libdm, "dm_mktoc");
+          dm_mkcue = get_symbol (libdm, "dm_mkcue");
 
-      dm_mksheets = get_symbol (libdm, "dm_mksheets");
-      dm_mktoc = get_symbol (libdm, "dm_mktoc");
-      dm_mkcue = get_symbol (libdm, "dm_mkcue");
-
-      ucon64.discmage_enabled = 1;
+          ucon64.discmage_enabled = 1;
+        }
     }
   else
     ucon64.discmage_enabled = 0;

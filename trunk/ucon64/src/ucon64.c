@@ -50,6 +50,7 @@ write programs in C
 #include "vboy/vboy.h"
 #include "vectrex/vectrex.h"
 #include "wswan/wswan.h"
+#include "intelli/intelli.h"
 
 #include "backup/fig.h"
 #include "backup/swc.h"
@@ -138,7 +139,12 @@ int ucon64_main(int argc,char *argv[])
     "-ata",
     "-s16",
     "-ngp",
-    "-gba"
+    "-gba",
+    "-vec",
+    "-vboy",
+    "-swan",
+    "-coleco",
+    "-int"
   };
 #ifdef	__UNIX__
   uid_t uid;
@@ -488,12 +494,6 @@ if(argcmp(argc,argv,"-idppf"))
 }
 
 
-
-
-
-
-
-
 //find out which console type
 
 if(argcmp(argc,argv,"-ata"))console=ucon64_ATARI;
@@ -517,11 +517,11 @@ if(argcmp(argc,argv,"-dc"))console=ucon64_DC;
 if(argcmp(argc,argv,"-cdi"))console=ucon64_CDI;
 if(argcmp(argc,argv,"-cd32"))console=ucon64_CD32;
 if(argcmp(argc,argv,"-3do"))console=ucon64_REAL3DO;
-
-
-
-
-
+if(argcmp(argc,argv,"-coleco"))console=ucon64_COLECO;
+if(argcmp(argc,argv,"-vboy"))console=ucon64_VIRTUALBOY;
+if(argcmp(argc,argv,"-swan"))console=ucon64_WONDERSWAN;
+if(argcmp(argc,argv,"-vec"))console=ucon64_VECTREX;
+if(argcmp(argc,argv,"-int"))console=ucon64_INTELLI;
 
 if(argcmp(argc,argv,"-col"))console=ucon64_SNES;
 if(argcmp(argc,argv,"-ip"))console=ucon64_DC;
@@ -680,6 +680,21 @@ break;
 case ucon64_NEOGEOPOCKET:
 	neogeopocket_main(argc,argv);
 break;
+case ucon64_VECTREX:
+	vectrex_main(argc,argv);
+break;
+case ucon64_VIRTUALBOY:
+	virtualboy_main(argc,argv);
+break;
+case ucon64_WONDERSWAN:
+	wonderswan_main(argc,argv);
+break;
+case ucon64_COLECO:
+	coleco_main(argc,argv);
+break;
+case ucon64_INTELLI:
+	intelli_main(argc,argv);
+break;
 case ucon64_UNKNOWN:
 default:
 	filehexdump(ucon64_rom(),0,512);//show possible header or maybe the internal rom header
@@ -782,14 +797,13 @@ else if(argcmp(argc,argv,"-pce"))pcengine_usage(argc,argv);
 else if(argcmp(argc,argv,"-sms"))sms_usage(argc,argv);
 //else if(argcmp(argc,argv,"-c64"))commodore_usage(argc,argv);
 else if(argcmp(argc,argv,"-nes"))nes_usage(argc,argv);
-/*
 else if(argcmp(argc,argv,"-s16"))sys16_usage(argc,argv);
 else if(argcmp(argc,argv,"-ata"))atari_usage(argc,argv);
 else if(argcmp(argc,argv,"-coleco"))coleco_usage(argc,argv);
-else if(argcmp(argc,argv,"-vboy"))vboy_usage(argc,argv);
-else if(argcmp(argc,argv,"-swan"))wswan_usage(argc,argv);
+else if(argcmp(argc,argv,"-vboy"))virtualboy_usage(argc,argv);
+else if(argcmp(argc,argv,"-swan"))wonderswan_usage(argc,argv);
 else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
-*/
+else if(argcmp(argc,argv,"-int"))intelli_usage(argc,argv);
 else 
 {
 	gbadvance_usage(argc,argv);
@@ -809,11 +823,12 @@ else
 	sys16_usage(argc,argv);
 	atari_usage(argc,argv);
 	coleco_usage(argc,argv);
-	vboy_usage(argc,argv);
-	wswan_usage(argc,argv);
+	virtualboy_usage(argc,argv);
+	wonderswan_usage(argc,argv);
 	vectrex_usage(argc,argv);
+	intelli_usage(argc,argv);
 */
-printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
+printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 	"  -jag		force recognition; NEEDED\n"
 	"  -s16		force recognition; NEEDED\n"
 	"  -ata		force recognition; NEEDED\n"
@@ -821,6 +836,7 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 	"  -vboy		force recognition; NEEDED\n"
 	"  -swan		force recognition; NEEDED\n"
 	"  -vec		force recognition; NEEDED\n"
+	"  -int		force recognition; NEEDED\n"
 	"  -hd		force ROM has header (+512 Bytes)\n"
 	"  -nhd		force ROM has no header\n"
 	"  *		show info (default)\n\n"
@@ -831,6 +847,7 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 ,virtualboy_TITLE
 ,wonderswan_TITLE
 ,vectrex_TITLE
+,intelli_TITLE
 );
 }
 

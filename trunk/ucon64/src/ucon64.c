@@ -505,13 +505,14 @@ main (int argc, char **argv)
       return 0;
     }
 
+// parse the cmdline
   x = optind = 0;
+  memset (&arg, 0, sizeof (st_args_t) * ARG_MAX);
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
-    if (x < ARG_MAX - 1) 
+    if (x < ARG_MAX) 
       {
         arg[x].val = c;
         arg[x++].optarg = (optarg ? optarg : NULL);
-        memset (&arg[x], 0, sizeof (st_args_t)); // set next arg to NULL
       }
 
 #ifdef  DEBUG
@@ -649,8 +650,8 @@ ucon64_execute_options (void)
   ucon64.crc32 =
   ucon64.fcrc32 = 0;
 
-#if 0
   // switches
+#if 0
   optind = 0;
   while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {

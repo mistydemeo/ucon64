@@ -813,13 +813,12 @@ else
 	neogeo_usage(argc,argv);
 	genesis_usage(argc,argv);
 	gameboy_usage(argc,argv);
+	jaguar_usage(argc,argv);
 	lynx_usage(argc,argv);
 	pcengine_usage(argc,argv);
 	sms_usage(argc,argv);
 	nes_usage(argc,argv);
-
 /*
-	jaguar_usage(argc,argv);
 	sys16_usage(argc,argv);
 	atari_usage(argc,argv);
 	coleco_usage(argc,argv);
@@ -828,8 +827,7 @@ else
 	vectrex_usage(argc,argv);
 	intelli_usage(argc,argv);
 */
-printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
-	"  -jag		force recognition; NEEDED\n"
+printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 	"  -s16		force recognition; NEEDED\n"
 	"  -ata		force recognition; NEEDED\n"
 	"  -coleco	force recognition; NEEDED\n"
@@ -837,10 +835,7 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 	"  -swan		force recognition; NEEDED\n"
 	"  -vec		force recognition; NEEDED\n"
 	"  -int		force recognition; NEEDED\n"
-	"  -hd		force ROM has header (+512 Bytes)\n"
-	"  -nhd		force ROM has no header\n"
 	"  *		show info (default)\n\n"
-,jaguar_TITLE
 ,system16_TITLE
 ,atari_TITLE
 ,coleco_TITLE

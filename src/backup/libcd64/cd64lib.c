@@ -328,17 +328,24 @@ int cd64_bios_send(struct cd64_t *cd64, void *io_id, uint32_t addr,
 			send_bogus_csum = 1;
 		}
 	}
-	else if (cmd == GHEMOR_TRANSFER_PROGRAM) {
-		if (addr != 0xb4000000) {
-			cd64->notice_callback("Ignoring address %lxh != 0xb4000000 for Ghemor.",
-			                      (long unsigned int) addr);
-		}
-	}
+
 	if (!valid) {
 		cd64->notice_callback2("Invalid address %lxh for operation.",
 		                       (long unsigned int) addr);
 		return 0;
 	}
+
+	if (cd64->protocol == GHEMOR && addr != 0xb4000000 &&
+			(cmd == BIOS_TRANSFER_PI || cmd == BIOS_EXECUTE_PI)) {
+		/* They might try to send to Ghemor in BIOS mode, but
+		 * oh well.  Warn them if we know it's Ghemor. */
+		cd64->notice_callback("Ignoring address %lxh != 0xb4000000 for Ghemor.",
+		                      (long unsigned int) addr);
+	}
+	if (cmd == GHEMOR_TRANSFER_PROGRAM) {
+		cd64->notice_callback("Ghemor ignores this command currently...");
+	}
+
 
 	/* Try to get in sync with the CD64
 	 * We use a delay here to give the PPA a chance to power up. */

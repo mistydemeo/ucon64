@@ -477,7 +477,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   int result = 0;
   char *p = NULL;
   FILE *fh = NULL, *fh2 = NULL;
-
+  int m = 0, s = 0, f = 0;
 
   if (flags & DM_FIX || flags & DM_2048)
     fprintf (stderr, dm_msg[ALPHA]);
@@ -572,6 +572,11 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
           memset (&buf2, 0, sizeof (buf2));
           result = 0;
           result += fwrite (&sync_data, 1, 12, fh2);
+
+dm_lba_to_msf (150 + x, &m, &s, &f);
+fprintf (stderr, "%d: %d %d %d\n", track->sector_size, m, s, f);
+fflush (stderr);
+
           result += fwrite (&buf2, 1, 3, fh2); //TODO: MSF
           if (fputc (track->mode, fh2))
             result++;
@@ -811,7 +816,7 @@ dm_get_version (void)
 const char *
 dm_get_version_s (void)
 {
-  return "0.0.5";
+  return "0.0.5alpha";
 }
 
 

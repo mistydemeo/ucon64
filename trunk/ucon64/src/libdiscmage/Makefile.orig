@@ -234,7 +234,7 @@ ifndef DLOPEN
 #	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
 	[ -d $(DESTDIR)$(includedir) ] || \
 	    (mkdir -p $(DESTDIR)$(includedir); chmod 755 $(DESTDIR)$(includedir))
-	$(INSTALL_DATA) lib$(LIBNAME).h $(DESTDIR)$(includedir)/$(LIBNAME).h
+	$(INSTALL_DATA) lib$(LIBNAME).h $(DESTDIR)$(includedir)
 endif
 
 uninstall:

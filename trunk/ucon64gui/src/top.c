@@ -94,6 +94,8 @@ ucon64gui_top(void)
   h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br ();
 
+#ifdef DB
+
   h2g_("Database: ");
   
   h2g_input_submit ("Search", "-dbs", "(-dbs) search ROM database (all entries) by CRC32; $ROM=0xCRC32");
@@ -102,7 +104,11 @@ ucon64gui_top(void)
 
   h2g_input_submit ("View", "-dbv", "(-dbv) view ROM database (all entries)");
 
-  h2g_(" Padding: ");
+  h2g_ (" ");
+
+#endif // DB
+
+  h2g_("Padding: ");
 
 
   h2g_input_submit ("Pad ROM", "-pad", "(-pad) pad ROM to full Mb");

@@ -215,7 +215,9 @@ ucon64gui_output (char *output)
 void
 ucon64gui_root (void)
 {
-#include "xpm/trans.xpm"
+#ifdef BACKUP
+  #include "xpm/trans.xpm"
+#endif // BACKUP
 #include "xpm/icon.xpm"
 
   h2g_html (0, 0, 0);
@@ -237,12 +239,17 @@ ucon64gui_root (void)
                     "(-n64) Options for Nintendo 64");
 
   h2g_br ();
+
+
+#ifdef BACKUP
   h2g_img (trans_xpm, 0, 3, 0, NULL);
 //  h2g_hr ();
   h2g_ ("Backup unit specific options");
   h2g_br ();
   h2g_input_submit ("Super Wild Card", "ucon64gui_swc",
                     "Options for Super Wild Card");
+
+#endif // BACKUP
 
   ucon64gui_bottom ();
 

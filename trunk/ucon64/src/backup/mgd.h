@@ -65,6 +65,7 @@ game size       # of files      names           MUTLI-GD
                                 MD32XXXD.038    MD32XXXD
 
 PC Engine:
+
 game size       # of files      names           MUTLI-GD
 ================================================================
 1M              1               PC1XXX.040      PC1XXX
@@ -73,8 +74,9 @@ game size       # of files      names           MUTLI-GD
 8M              1               PC8XXX.058      PC8XXX
 
 
-Contrary to popular belief the Game Doctor *does* use a 512
-byte header like the SWC, but it also accepts headerless files.
+Contrary to popular belief the Game Doctor SF3/SF6/SF7 *does*
+use a 512 byte header like the SWC, but it also accepts
+headerless files.
 A header is necessary when things like SRAM size must be made
 known to the Game Doctor. The Game Doctor also uses specially
 designed filenames to distinguish between multi files.

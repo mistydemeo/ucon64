@@ -746,7 +746,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode)
   char buf[MAXBUFSIZE];
   st_rominfo_t rominfo;
 
-  ucon64.console = UCON64_UNKNOWN;
+//  ucon64.console = UCON64_UNKNOWN;
   ucon64.rom = filename;
   ucon64.type = (quickftell (ucon64.rom) <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
   ucon64_flush (&rominfo);

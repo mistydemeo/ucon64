@@ -342,13 +342,13 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-crc"))
     {
-      printf ("Checksum: %08lx\n\n", fileCRC32 (rom.rom, 0));
+      printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 0));
       return (0);
     }
 
   if (argcmp (argc, argv, "-crchd"))
     {
-      printf ("Checksum: %08lx\n\n", fileCRC32 (rom.rom, 512));
+      printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 512));
       return (0);
     }
 

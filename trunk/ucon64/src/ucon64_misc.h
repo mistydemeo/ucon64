@@ -1,3 +1,4 @@
+
 /*
 ucon64_misc.h - miscellaneous functions for uCON64
 
@@ -86,22 +87,22 @@ extern char *ucon64_temp_file;
   if move_name != NULL then filename will just be moved (renamed) and NOT
   duplicated (faster); move_name will contain the new name then
 */
-extern void ucon64_fbackup (char *move_name, const char *filename);
 extern void handle_existing_file (const char *dest, char *src);
-//#define ucon64_fbackup(a,b) (handle_existing_file(b,a))
+//extern void ucon64_fbackup (char *move_name, const char *filename);
+#define ucon64_fbackup(a,b) (handle_existing_file(b,a))
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
-extern int ucon64_fhexdump (const char *filename, long start, long len);
+extern int ucon64_fhexdump (const char *filename, int start, int len);
 
-extern unsigned long ucon64_filefile (const char *filename1, long start1, const char *filename2, long start2, int similar);
+extern unsigned int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);
 
 /*
   wrapper for misc.c/gauge()
 */
-extern int ucon64_gauge (time_t init_time, long pos, long size);
+extern int ucon64_gauge (time_t init_time, int pos, int size);
 
 extern int ucon64_pad (const char *filename, int start, int size); // pad a ROM to a certain size
-extern long ucon64_testpad (const char *filename, st_rominfo_t *rominfo); //test if a ROM is padded
+extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); //test if a ROM is padded
 
 extern int ucon64_testsplit (const char *filename);//test if a ROM is split
 
@@ -117,7 +118,7 @@ extern void ucon64_wrote (const char *filename);
 
   to delete the tempdir *dp must be closed with closedir2()
 */
-extern const char *ucon64_rom_in_archive (const char *archive);
+extern const char *ucon64_extract (const char *archive);
 
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);

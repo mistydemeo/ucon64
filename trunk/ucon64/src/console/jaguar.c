@@ -60,7 +60,7 @@ jaguar_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 #ifdef CONSOLE_PROBE
-  long x, value;
+  int x, value;
 #endif // CONSOLE_PROBE
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?

@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.12 2002-09-12 18:43:40 noisyb Exp $
+ * $Id: gg.c,v 1.13 2002-09-26 14:15:32 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -54,6 +54,7 @@
 #include "quick_io.h"
 #include "config.h"
 #include "ucon64.h"
+#include "ucon64_misc.h"
 
 #include "patch/gg.h"
 
@@ -1113,7 +1114,9 @@ gg_gg (st_rominfo_t *rominfo)
   buf[0] = q_fgetc (ucon64.rom, add + rominfo->buheader_len);
   mem_hexdump (buf, 1, add + rominfo->buheader_len);
 
-  q_fputc (q_fbackup(NULL, ucon64.rom), add + rominfo->buheader_len, (unsigned char) value, "r+b");
+  ucon64_fbackup (NULL, ucon64.rom);
+
+  q_fputc (ucon64.rom, add + rominfo->buheader_len, (unsigned char) value, "r+b");
 
   buf[0] = q_fgetc (ucon64.rom, add + rominfo->buheader_len);
   mem_hexdump (buf, 1, add + rominfo->buheader_len);

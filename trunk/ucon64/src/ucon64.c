@@ -293,10 +293,9 @@ const struct option long_options[] = {
 void
 ucon64_exit (void)
 {
-#if 0
-  if (ucon64.dp)
-    closedir2 (ucon64.dp);
-#endif
+//  if (ucon64.temp)
+//    closedir2 (ucon64.temp);
+
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -377,10 +376,8 @@ main (int argc, char **argv)
   if (optind < argc)
     ucon64.rom = argv[optind++];
 
-#if 0
-  ucon64.rom = ucon64_rom_in_archive (ucon64.dp, ucon64.rom, ucon64.rom_in_archive,
+  ucon64.rom = ucon64_rom_in_archive (ucon64.temp, ucon64.rom, ucon64.rom_in_archive,
                              ucon64.configfile);
-#endif
 
   if (optind < argc)
     ucon64.file = argv[optind++];

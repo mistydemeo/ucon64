@@ -124,10 +124,8 @@ extern void ucon64_wrote (const char *filename);
 
   to delete the tempdir *dp must be closed with closedir2()
 */
-#if 0
-extern char *ucon64_rom_in_archive (DIR2_t *dp, const char *archive, char *romname,
-                                    char *configfile);
-#endif
+extern const char *ucon64_rom_in_archive (DIR *temp, const char *archive, char *romname,
+                                    const char *configfile);
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);
 extern int ucon64_mktoc (st_rominfo_t *rominfo);

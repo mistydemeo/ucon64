@@ -404,10 +404,10 @@ gba_init (st_rominfo_t *rominfo)
   sprintf (buf, "Device type: %02x\n", gba_header.device_type);
   strcat (rominfo->misc, buf);
 
-  value = gba_header.start[0] << 24;
-  value += gba_header.start[1] << 16;
-  value += gba_header.start[2] << 8;
-  value += gba_header.start[3];
+  value = gba_header.start[0] << 24 |
+          gba_header.start[1] << 16 |
+          gba_header.start[2] << 8 |
+          gba_header.start[3];
   sprintf (buf, "Start address: %08x\n", value);
   strcat (rominfo->misc, buf);
 

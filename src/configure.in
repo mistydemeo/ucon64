@@ -11,7 +11,7 @@ AC_PROG_CC(gcc egcs cc)
 AC_PROG_GCC_TRADITIONAL
 
 
-AC_DEFINE(UCON64,1,[indicate it's uCON64 source code])
+AC_DEFINE(UCON64, 1, [indicate it's uCON64 source code])
 
 
 AC_MSG_CHECKING(whether debug output is enabled)
@@ -21,7 +21,7 @@ AC_ARG_ENABLE(debug,
               enable_debug=$enableval,
               enable_debug=no)
 if test $enable_debug = yes; then
-  AC_DEFINE(DEBUG,1,[enable debug output (default: no)])
+  AC_DEFINE(DEBUG, 1, [enable debug output (default: no)])
 fi
 AC_MSG_RESULT($enable_debug)
 
@@ -33,7 +33,7 @@ AC_ARG_ENABLE(parallel,
               enable_parallel=$enableval,
               enable_parallel=yes)
 if test $enable_parallel = yes; then
-  AC_DEFINE(PARALLEL,1,[enable support for parallel port backup units (default: yes)])
+  AC_DEFINE(PARALLEL, 1, [enable support for parallel port backup units (default: yes)])
 fi
 AC_MSG_RESULT($enable_parallel)
 
@@ -45,7 +45,7 @@ dnl                              [enable support for serial port backup units (d
 dnl               enable_serial=$enableval,
 dnl               enable_serial=yes)
 dnl if test $enable_serial = yes; then
-dnl   AC_DEFINE(SERIAL,1,[enable support for serial port backup units (default: yes)])
+dnl   AC_DEFINE(SERIAL, 1, [enable support for serial port backup units (default: yes)])
 dnl fi
 dnl AC_MSG_RESULT($enable_serial)
 
@@ -57,7 +57,10 @@ AC_ARG_ENABLE(ppdev,
               enable_ppdev=$enableval,
               enable_ppdev=no)
 if test $enable_ppdev = yes; then
-  AC_DEFINE(PPDEV,1,[use ppdev for parallel port I/O (default: no)])
+  AC_TRY_COMPILE([#include <linux/ppdev.h>], , enable_ppdev=yes, enable_ppdev=no)
+fi
+if test $enable_ppdev = yes; then
+  AC_DEFINE(PPDEV, 1, [use ppdev for parallel port I/O (default: no)])
 fi
 AC_MSG_RESULT($enable_ppdev)
 
@@ -69,7 +72,7 @@ AC_ARG_ENABLE(ansi_color,
               enable_ansi_color=$enableval,
               enable_ansi_color=yes)
 if test $enable_ansi_color = yes; then
-  AC_DEFINE(ANSI_COLOR,1,[enable usage of color (default: yes)])
+  AC_DEFINE(ANSI_COLOR, 1, [enable usage of color (default: yes)])
 fi
 AC_MSG_RESULT($enable_ansi_color)
 
@@ -81,7 +84,7 @@ AC_ARG_ENABLE(dload,
               enable_dload=$enableval,
               enable_dload=yes)
 if test $enable_dload = yes; then
-  AC_DEFINE(DLOPEN,1,[enable dynamic loading of add-on libraries (default: yes)])
+  AC_DEFINE(DLOPEN, 1, [enable dynamic loading of add-on libraries (default: yes)])
   DEFINE_DLOPEN_MAKE="DLOPEN=1"
 fi
 AC_MSG_RESULT($enable_dload)
@@ -95,7 +98,7 @@ AC_ARG_ENABLE(discmage,
               enable_discmage=$enableval,
               enable_discmage=yes)
 if test $enable_discmage = yes; then
-  AC_DEFINE(DISCMAGE,1,[enable libdiscmage (default: yes)])
+  AC_DEFINE(DISCMAGE, 1, [enable libdiscmage (default: yes)])
   DEFINE_DISCMAGE_MAKE="DISCMAGE=1"
 fi
 AC_MSG_RESULT($enable_discmage)
@@ -113,7 +116,7 @@ if test $with_zlib = yes; then
   AC_TRY_COMPILE([#include <zlib.h>], , with_zlib=yes, with_zlib=no)
 fi
 if test $with_zlib = yes; then
-  AC_DEFINE(HAVE_ZLIB_H,1,[build with gzip and zip support (default: yes)])
+  AC_DEFINE(HAVE_ZLIB_H, 1, [build with gzip and zip support (default: yes)])
   DEFINE_ZLIB_MAKE="ZLIB=1"
 fi
 AC_MSG_RESULT($with_zlib)
@@ -130,7 +133,7 @@ if test $with_libusb = yes; then
   AC_TRY_COMPILE([#include <usb.h>], , with_libusb=yes, with_libusb=no)
 fi
 if test $with_libusb = yes; then
-  AC_DEFINE(HAVE_USB_H,1,[build with (lib)usb support (default: no)])
+  AC_DEFINE(HAVE_USB_H, 1, [build with (lib)usb support (default: no)])
   DEFINE_USB_MAKE="USB=1"
 fi
 AC_MSG_RESULT($with_libusb)

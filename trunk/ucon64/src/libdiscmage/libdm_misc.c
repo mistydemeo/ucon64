@@ -51,11 +51,53 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define CD_FRAMES            75 /* frames per second */
 #endif
 
+#define MBIT (131072)
+#define TOMBIT(x) ((int)(x) / MBIT)
+#define TOMBIT_F(x) ((float)(x) / MBIT)
+
+
 const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
 const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
 const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
 
+#define ISODCL(from, to) (to - from + 1)
+typedef struct
+  {
+    char type[ISODCL (1, 1)];   /* 711 */
+    char id[ISODCL (2, 6)];
+    char version[ISODCL (7, 7)];        /* 711 */
+    char unused1[ISODCL (8, 8)];
+    char system_id[ISODCL (9, 40)];     /* achars */
+    char volume_id[ISODCL (41, 72)];    /* dchars */
+    char unused2[ISODCL (73, 80)];
+    char volume_space_size[ISODCL (81, 88)];    /* 733 */
+    char unused3[ISODCL (89, 120)];
+    char volume_set_size[ISODCL (121, 124)];    /* 723 */
+    char volume_sequence_number[ISODCL (125, 128)];     /* 723 */
+    char logical_block_size[ISODCL (129, 132)]; /* 723 */
+    char path_table_size[ISODCL (133, 140)];    /* 733 */
+    char type_l_path_table[ISODCL (141, 144)];  /* 731 */
+    char opt_type_l_path_table[ISODCL (145, 148)];      /* 731 */
+    char type_m_path_table[ISODCL (149, 152)];  /* 732 */
+    char opt_type_m_path_table[ISODCL (153, 156)];      /* 732 */
+    char root_directory_record[ISODCL (157, 190)];      /* 9.1 */
+    char volume_set_id[ISODCL (191, 318)];      /* dchars */
+    char publisher_id[ISODCL (319, 446)];       /* achars */
+    char preparer_id[ISODCL (447, 574)];        /* achars */
+    char application_id[ISODCL (575, 702)];     /* achars */
+    char copyright_file_id[ISODCL (703, 739)];  /* 7.5 dchars */
+    char abstract_file_id[ISODCL (740, 776)];   /* 7.5 dchars */
+    char bibliographic_file_id[ISODCL (777, 813)];      /* 7.5 dchars */
+    char creation_date[ISODCL (814, 830)];      /* 8.4.26.1 */
+    char modification_date[ISODCL (831, 847)];  /* 8.4.26.1 */
+    char expiration_date[ISODCL (848, 864)];    /* 8.4.26.1 */
+    char effective_date[ISODCL (865, 881)];     /* 8.4.26.1 */
+    char file_structure_version[ISODCL (882, 882)];     /* 711 */
+    char unused4[ISODCL (883, 883)];
+    char application_data[ISODCL (884, 1395)];
+    char unused5[ISODCL (1396, 2048)];
+  } st_iso_header_t;
 
 
 /*
@@ -130,27 +172,27 @@ Easy CD Creator image file (*.cif)|*.cif
 
 const st_track_probe_t track_probe[] = 
   {
-    {1, 0,  2048, 0,   DM_MODE1_2048}, // MODE2_FORM1
-    {1, 16, 2352, 288, DM_MODE1_2352},
-    {2, 8,  2336, 280, DM_MODE2_2336}, // MODE2_FORM_MIX
-    {2, 24, 2352, 280, DM_MODE2_2352},
+    {1, 0,  2048, 0,   DM_MODE1_2048, ".iso"}, // MODE2_FORM1
+    {1, 16, 2352, 288, DM_MODE1_2352, ".bin.tao.iso.img.bwi"},
+    {2, 8,  2336, 280, DM_MODE2_2336, ".mm2"}, // MODE2_FORM_MIX
+    {2, 24, 2352, 280, DM_MODE2_2352, ".bin.tao.iso.img.bwi"},
 #if 0
-    {2, 24, 2324, 4},   // MODE2/2328, MODE2_FORM2
-    {2, 0,  2340, 0},
-    {2, 0,  2368, 0},
-    {2, 0,  2448, 0},
-    {2, 0,  2646, 0},
-    {2, 0,  2647, 0},
-    {2, 0,  2336, 280},  // MODE2/2336, Macintosh
-    {2, 16, 2352, 280}, // MODE2/2352, Macintosh
-    {2, 0,  2056, 0},  // MODE2/2056, Macintosh
-    {0, 0,    NULL,         "MODE0"},
-    {0, 0,    NULL,         "MODE2_FORM2"},
+    {2, 24, 2324, 4, DM_UNKNOWN, NULL},   // MODE2/2328, MODE2_FORM2
+    {2, 0,  2340, 0, DM_UNKNOWN, NULL},
+    {2, 0,  2368, 0, DM_UNKNOWN, NULL},
+    {2, 0,  2448, 0, DM_UNKNOWN, NULL},
+    {2, 0,  2646, 0, DM_UNKNOWN, NULL},
+    {2, 0,  2647, 0, DM_UNKNOWN, NULL},
+    {2, 0,  2336, 280, DM_UNKNOWN, NULL},  // MODE2/2336, Macintosh
+    {2, 16, 2352, 280, DM_UNKNOWN, NULL}, // MODE2/2352, Macintosh
+    {2, 0,  2056, 0, DM_UNKNOWN, NULL},  // MODE2/2056, Macintosh
+    {0, 0,  0,    0, DM_UNKNOWN, NULL},
+    {0, 0,  0,    0, DM_UNKNOWN, NULL},
 #endif
-    {0, 0,  2352, 0, DM_AUDIO},
+    {0, 0,  2352, 0, DM_AUDIO, ".pcm.bin.img.bwi"},
     // TODO: remove this!
-    {0, 0, 1, 0, DM_AUDIO},
-    {0, 0, 0, 0, 0}
+//    {0, 0, 1, 0, DM_AUDIO, ".pcm.bin.img.bwi"},
+    {0, 0, 0, 0, 0, NULL}
   };
 
 
@@ -165,7 +207,7 @@ const char *dm_msg[] = {
 
 
 int
-dm_get_track_id (int mode, int sector_size)
+dm_get_track_mode_id (int mode, int sector_size)
 {
   int x = 0;
   
@@ -179,7 +221,7 @@ dm_get_track_id (int mode, int sector_size)
 
 
 void
-dm_get_track_by_id (int id, int8_t *mode, uint16_t *sector_size)
+dm_get_track_mode_by_id (int id, int8_t *mode, uint16_t *sector_size)
 {
   int x = 0;
   
@@ -319,16 +361,6 @@ dm_clean (dm_image_t *image)
 void (* dm_ext_gauge) (int, int);
 
 
-int
-dm_fseek (FILE *fp, int track, int how)
-{
- (void) fp;                                     // warning remover
- (void) track;                                  // warning remover
- (void) how;                                    // warning remover
- return 0;
-}
-
-
 uint32_t
 dm_get_version (void)
 {
@@ -418,17 +450,14 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 {
   dm_track_t *track = (dm_track_t * ) &image->track[track_num];
 #if     FILENAME_MAX > MAXBUFSIZE
-  char buf[FILENAME_MAX];
-  char buf2[FILENAME_MAX];
+  char buf[FILENAME_MAX], buf2[FILENAME_MAX];
 #else
-  char buf[MAXBUFSIZE];
-  char buf2[MAXBUFSIZE];
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
 #endif
   unsigned int x = 0;
-  int result = 0;
+  int result = 0, m = 0, s = 0, f = 0;
   char *p = NULL;
   FILE *fh = NULL, *fh2 = NULL;
-  int m = 0, s = 0, f = 0;
 
   if (flags & DM_FIX || flags & DM_2048)
     fprintf (stderr, dm_msg[ALPHA]);
@@ -514,10 +543,10 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
       else
         {
           const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff, 0};
+                                       (const char) 0xff, (const char) 0xff,
+                                       (const char) 0xff, (const char) 0xff,
+                                       (const char) 0xff, (const char) 0xff,
+                                       (const char) 0xff, (const char) 0xff, 0};
 //          uint32_t value_32 = 0;
 
           memset (&buf2, 0, sizeof (buf2));
@@ -738,3 +767,157 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
 }
 #endif
 
+
+void
+dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
+{
+#define COLS 80
+  int t = 0, s = 0, x = 0, min = 0, sec = 0, frames = 0;
+  char buf[MAXBUFSIZE];
+  st_iso_header_t iso_header;
+  uint32_t filesize = q_fsize (image->fname);
+  FILE *fh = NULL;
+
+#if 0
+  if (image->console_usage != NULL)
+    {
+      strcpy (buf, rominfo->console_usage[0].desc);
+      puts (to_func (buf, strlen (buf), toprint2));
+
+#if 0
+      if (image->console_usage[1].desc)
+        {
+          strcpy (buf, rominfo->console_usage[1].desc);
+          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
+        }
+#endif
+    }
+#endif
+
+  printf ("%d Bytes (%.4f Mb)\n\n",
+          filesize,
+          TOMBIT_F (filesize));
+
+  printf ("Type: %s\n", image->desc);
+
+  if (image->misc[0])
+    puts (image->misc);
+
+  printf ("Sessions: %d\n", image->sessions);
+  printf ("Tracks: %d\n", image->tracks);
+
+  if ((COLS / image->tracks) > 1 && image->sessions && image->tracks)
+    {
+      printf ("Layout: ");
+
+      for (s = t = 0; s < image->sessions; s++)
+        {
+#ifdef  ANSI_COLOR
+          if (ansi_color)
+            printf ("\x1b[0m[\x1b[30;41m%2d \x1b[0m", s + 1);
+//            printf ("\x1b[0m[\x1b[30;41m");
+          else
+#endif
+            printf ("[%2d ", s + 1);
+//            printf ("[");
+
+          for (x = 0; x < image->session[s]; x++, t++)
+#ifdef  ANSI_COLOR
+            if (ansi_color)
+              printf ("\x1b[0m[\x1b[30;42m%2d \x1b[0m]", t + 1);
+            else
+#endif
+              printf ("[%2d ]", t + 1);
+
+#ifdef  ANSI_COLOR
+          if (ansi_color)
+            printf ("\x1b[0m] ");
+          else
+#endif
+          printf ("] "); 
+        }
+
+      fputc ('\n', stdout);
+    }
+
+  for (t = 0; t < image->tracks; t++)
+    {
+      const dm_track_t *track = (const dm_track_t *) &image->track[t];
+
+      if (!track)
+        continue;
+
+      if (!track->mode && track->sector_size == 2352)
+        strcpy (buf, "AUDIO");
+      else
+        sprintf (buf, "MODE%d/%d", track->mode, track->sector_size);
+
+      printf ("Track: %d %s", t + 1, buf);
+
+      dm_lba_to_msf (track->track_len, &min, &sec, &frames);
+      printf ("\n  %d Sectors, %d:%02d.%02d MSF, %d Bytes (%.4f Mb)",
+        (int) track->total_len,
+        min, sec, frames,
+        (int) (track->total_len * track->sector_size),
+        TOMBIT_F (track->total_len * track->sector_size));
+
+      fputc ('\n', stdout);
+
+      if (verbose)
+        {
+          printf ("  Pregap/Pause: %d, Start Sector: %d, End Sector: %d, Postgap: %d\n",
+            track->pregap_len,
+            (int) (track->track_start / track->sector_size + track->pregap_len),
+            (int) ((track->track_start / track->sector_size + track->pregap_len) +
+            track->track_len - track->postgap_len - 1),
+            track->postgap_len);
+
+          dm_lba_to_msf (track->track_len, &min, &sec, &frames);
+          printf ("  Total Time: %d:%02d.%02d MSF, File Start Pos: %d, End Pos: %d\n",
+            min, sec, frames,
+            (int) track->track_start,
+            (int) track->track_end);
+        }
+
+      memset (&iso_header, 0, sizeof (st_iso_header_t));
+      if (track->iso_header_start != -1)
+        if ((fh = fopen (image->fname, "rb")))
+          if (fread (&iso_header, track->iso_header_start, sizeof (st_iso_header_t), fh))
+            {
+              if (verbose)
+                mem_hexdump (&iso_header, sizeof (st_iso_header_t), track->iso_header_start);
+
+              // name, maker, country and size
+              // some have a name with control chars in it -> replace control chars
+              strncpy2 (buf, NULL_TO_EMPTY (iso_header.volume_id),
+                sizeof (iso_header.volume_id));
+              to_func (buf, strlen (buf), toprint2);
+              if (*strtrim (buf))
+                printf ("  %s\n", buf);
+
+              strncpy2 (buf, NULL_TO_EMPTY (iso_header.publisher_id),
+                sizeof (iso_header.publisher_id));
+              to_func (buf, strlen (buf), toprint2);
+              if (*strtrim (buf))
+                printf ("  %s\n", buf);
+
+              strncpy2 (buf, NULL_TO_EMPTY (iso_header.preparer_id),
+                sizeof (iso_header.preparer_id));
+              to_func (buf, strlen (buf), toprint2);
+              if (*strtrim (buf))
+                printf ("  %s\n", buf);
+#if 0
+              strncpy2 (buf, NULL_TO_EMPTY (iso_header.logical_block_size),
+                sizeof (iso_header.logical_block_size));
+              to_func (buf, strlen (buf), toprint2);
+              if (*strtrim (buf))
+                printf ("  %s\n", buf);
+#endif
+              strncpy2 (buf, NULL_TO_EMPTY (iso_header.application_id),
+                sizeof (iso_header.application_id));
+              to_func (buf, strlen (buf), toprint2);
+              if (*strtrim (buf))
+                printf ("  %s\n", buf);
+            }
+    }
+}

@@ -8,6 +8,7 @@ dm_get_version_s
 dm_open
 dm_reopen
 dm_fdopen
+dm_nfo
 dm_read
 dm_write
 dm_set_gauge
@@ -16,7 +17,3 @@ dm_cue_write
 dm_toc_read
 dm_toc_write
 dm_rip
-dm_lba_to_msf
-dm_msf_to_lba
-dm_bcd_to_int
-dm_int_to_bcd

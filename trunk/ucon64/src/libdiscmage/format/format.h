@@ -1,5 +1,5 @@
 /*
-format.c - support of different image formats for libdiscmage
+format.h - support of different image formats for libdiscmage
 
 written by 2004 NoisyB (noisyb@gmx.net)
 
@@ -20,13 +20,5 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef FORMAT_H
 #define FORMAT_H
-/*
-  callibrate()        a brute force function that tries to find a iso header
-                      or anything else that could identify a file as an
-                      image (can be very slow)
-*/
-//extern int callibrate (const char *fname, int track_num);
-
 extern int dm_track_init (dm_track_t *track, FILE *fh);
-extern int dm_free (dm_image_t *image);
 #endif  // FORMAT_H

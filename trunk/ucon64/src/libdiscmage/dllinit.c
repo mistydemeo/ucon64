@@ -89,7 +89,7 @@ st_map_t *symbol;
 int
 dxe_init (void)
 {
-  symbol = map_create (20);
+  symbol = map_create (17);
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
   symbol = map_put (symbol, "dm_get_version", dm_get_version);
@@ -100,6 +100,7 @@ dxe_init (void)
   symbol = map_put (symbol, "dm_reopen", dm_reopen);
   symbol = map_put (symbol, "dm_fdopen", dm_fdopen);
   symbol = map_put (symbol, "dm_close", dm_close);
+  symbol = map_put (symbol, "dm_nfo", dm_nfo);
 
   symbol = map_put (symbol, "dm_read", dm_read);
   symbol = map_put (symbol, "dm_write", dm_write);
@@ -114,11 +115,6 @@ dxe_init (void)
   symbol = map_put (symbol, "dm_cue_write", dm_cue_write);
 
   symbol = map_put (symbol, "dm_rip", dm_rip);
-
-  symbol = map_put (symbol, "dm_lba_to_msf", dm_lba_to_msf);
-  symbol = map_put (symbol, "dm_msf_to_lba", dm_msf_to_lba);
-  symbol = map_put (symbol, "dm_bcd_to_int", dm_bcd_to_int);
-  symbol = map_put (symbol, "dm_int_to_bcd", dm_int_to_bcd);
 
   return 0;
 }

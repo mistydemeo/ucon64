@@ -42,6 +42,7 @@ static FILE *(*dm_fdopen_ptr) (dm_image_t *, int, const char *);
 static dm_image_t *(*dm_open_ptr) (const char *, uint32_t);
 static dm_image_t *(*dm_reopen_ptr) (const char *, uint32_t, dm_image_t *);
 static int (*dm_close_ptr) (dm_image_t *);
+static void (*dm_nfo_ptr) (const dm_image_t *, int, int);
 
 static int (*dm_disc_read_ptr) (const dm_image_t *);
 static int (*dm_disc_write_ptr) (const dm_image_t *);
@@ -57,11 +58,6 @@ static int (*dm_cue_write_ptr) (const dm_image_t *);
 
 static int (*dm_rip_ptr) (const dm_image_t *, int, uint32_t);
 
-static int (*dm_lba_to_msf_ptr) (int, int *, int *, int *);
-static int (*dm_msf_to_lba_ptr) (int, int, int, int);
-static int (*dm_bcd_to_int_ptr) (int);
-static int (*dm_int_to_bcd_ptr) (int);
-
 
 static void
 load_dxe (void)
@@ -76,6 +72,7 @@ load_dxe (void)
   dm_fdopen_ptr = get_symbol (libdm, "dm_fdopen");
   dm_reopen_ptr = get_symbol (libdm, "dm_reopen");
   dm_close_ptr = get_symbol (libdm, "dm_close");
+  dm_nfo_ptr = get_symbol (libdm, "dm_nfo");
 
   dm_disc_read_ptr = get_symbol (libdm, "dm_disc_read");
   dm_disc_write_ptr = get_symbol (libdm, "dm_disc_write");
@@ -90,11 +87,6 @@ load_dxe (void)
   dm_cue_write_ptr = get_symbol (libdm, "dm_cue_write");
 
   dm_rip_ptr = get_symbol (libdm, "dm_rip");
-
-  dm_lba_to_msf_ptr = get_symbol (libdm, "dm_lba_to_msf");
-  dm_msf_to_lba_ptr = get_symbol (libdm, "dm_msf_to_lba");
-  dm_bcd_to_int_ptr = get_symbol (libdm, "dm_bcd_to_int");
-  dm_int_to_bcd_ptr = get_symbol (libdm, "dm_int_to_bcd");
 }
 
 
@@ -123,7 +115,7 @@ void
 dm_set_gauge (void (*a) (int, int))
 {
   CHECK
-  return dm_set_gauge_ptr (a);
+  dm_set_gauge_ptr (a);
 }
 
 
@@ -156,6 +148,14 @@ dm_close (dm_image_t *a)
 {
   CHECK
   return dm_close_ptr (a);
+}
+
+
+void
+dm_nfo (const dm_image_t *a, int b, int c)
+{
+  CHECK
+  dm_nfo_ptr (a, b, c);
 }
 
 
@@ -228,36 +228,4 @@ dm_rip (const dm_image_t *a, int b, uint32_t c)
 {
   CHECK
   return dm_rip_ptr (a, b, c);
-}
-
-
-int
-dm_lba_to_msf (int lba, int *m, int *s, int *f)
-{
-  CHECK
-  return dm_lba_to_msf_ptr (lba, m, s, f);
-}
-
-
-int
-dm_msf_to_lba (int m, int s, int f, int force_positive)
-{
-  CHECK
-  return dm_msf_to_lba_ptr (m, s, f, force_positive);
-}
-
-
-int
-dm_bcd_to_int (int b)
-{
-  CHECK
-  return dm_bcd_to_int_ptr (b);
-}
-
-
-int
-dm_int_to_bcd (int i)
-{
-  CHECK
-  return dm_int_to_bcd_ptr (i);
 }

@@ -81,11 +81,10 @@ dm_cue_read (dm_image_t *image, const char *cue_cue)
   char sec;
   char fps;
   int already_set = 0;
-#endif  
-  int t = 0;
+#endif
+  int t = 0, x = 0;
   FILE *fh = NULL;
-  int x = 0;
-  
+
   if (!(fh = fopen (cue_cue, "rb")))
     return NULL; // cue_cue not found
 
@@ -100,7 +99,7 @@ dm_cue_read (dm_image_t *image, const char *cue_cue)
           for (x = 0; track_probe[x].sector_size; x++)
             if (strstr (buf, cue_desc[x].desc))
               {
-                dm_get_track_by_id (cue_desc[x].id, &track->mode, &track->sector_size);
+                dm_get_track_mode_by_id (cue_desc[x].id, &track->mode, &track->sector_size);
                 break;
               }       
 
@@ -138,10 +137,10 @@ dm_cue_read (dm_image_t *image, const char *cue_cue)
             }
         }
       else if (strncmp (&buf[4], "PREGAP ", 7) == 0)
-        {;                      /* ignore */
+        {
         }
       else if (strncmp (&buf[4], "FLAGS ", 6) == 0)
-        {;                      /* ignore */
+        {
         }
 #endif
         }
@@ -157,14 +156,14 @@ cue_init (dm_image_t *image)
   int t = 0;
   FILE *fh = NULL;
   char buf[FILENAME_MAX];
-  
+
   strcpy (buf, image->fname);
-      set_suffix (buf, ".CUE");
-      if (!dm_cue_read (image, buf)) // read cue cue into dm_image_t
-        {
-          if (!(fh = fopen (image->fname, "rb"))) // no cue; try the image itself 
-            return -1;
-        }
+  set_suffix (buf, ".CUE");
+  if (!dm_cue_read (image, buf)) // read cue cue into dm_image_t
+    {
+      if (!(fh = fopen (image->fname, "rb"))) // no cue; try the image itself
+        return -1;
+    }
 
 #if 1
   image->sessions =
@@ -175,7 +174,7 @@ cue_init (dm_image_t *image)
   for (t = 0; t < image->tracks; t++)
     {
       dm_track_t *track = (dm_track_t *) &image->track[t];
-      
+
       if (!dm_track_init (track, fh))
         {
           track->track_len =
@@ -188,7 +187,7 @@ cue_init (dm_image_t *image)
         }
     }
 
-  image->desc = "ISO/BIN track with external cue file";
+  image->desc = "ISO/BIN track";
 
   fclose (fh);
   return 0;
@@ -238,7 +237,8 @@ dm_cue_write (const dm_image_t *image)
           result = -1;
           continue;
         }
-      else result = 0;
+      else
+        result = 0;
 
       switch (track->mode)
         {

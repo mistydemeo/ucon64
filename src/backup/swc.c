@@ -118,7 +118,7 @@ receive_rom_info (unsigned char *buffer, int superdump)
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
       ffe_send_command (5, address, 0);
-      byte = ffe_send_command1 (0xa0a0);
+      buffer[n] = ffe_send_command1 (0xa0a0);
 
       address++;
     }

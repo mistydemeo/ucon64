@@ -25,6 +25,9 @@ const char *dex_usage[] =
   {
     "DexDrive",
     "InterAct http://www.dexdrive.de",
+#ifdef TODO
+#warning TODO  -xdex    send/receive SRAM to/from DexDrive
+#endif // TODO
 #if 0
     "TODO:  -xdex    send/receive SRAM to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
     "		receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n",

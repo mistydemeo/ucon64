@@ -703,7 +703,9 @@ int
 ucon64_trackmode_probe (const char *image)
 // tries to figure out the used track mode of the cd image
 {
-//TODO support image == "/dev/<cdrom>"
+#ifdef TODO
+#warning TODO support image == /dev/<cdrom>
+#endif
   int result = -1; 
 #if 0
   const char PVD_STRING[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x01" "CD001" "\x01" "\0";

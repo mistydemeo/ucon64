@@ -34,6 +34,9 @@ const char *fig_usage[] =
   {
     "Super Pro Fighter (Q)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG",
     "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw",
+#ifdef TODO
+#warning TODO --xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG
+#endif // TODO
 #if 0
     "TODO:  " OPTION_LONG_S "xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when " OPTION_LONG_S "rom does not exist\n",

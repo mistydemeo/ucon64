@@ -26,6 +26,9 @@ const char *mgd_usage[] =
     "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW",
     "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
     "?Makko Toys Co., Ltd.?",
+#ifdef TODO
+#warning TODO  --xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW
+#endif // TODO
 #if 0
     "TODO:  " OPTION_LONG_S "xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; " OPTION_LONG_S "file=PORT\n"
     "		receives automatically when " OPTION_LONG_S "rom does not exist\n",

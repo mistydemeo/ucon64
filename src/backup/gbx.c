@@ -660,7 +660,10 @@ wait_status (void)
 {
   unsigned temp;
   temp = read_byte ();          // read first status byte
-//      printf("temp=%x ",temp);        /* TODO: is 16meg status different? */
+//      printf("temp=%x ",temp);        
+#ifdef TODO
+#warning TODO is 16meg status different?
+#endif // TODO
 
   while ((temp & 0xfc) != 0x80)
     {

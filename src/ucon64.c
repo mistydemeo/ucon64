@@ -829,6 +829,10 @@ ucon64_usage (int argc, char *argv[])
 //    "                TRACK_MODE='MODE2_FORM_MIX' (2336 Bytes)\n"
     "                  " OPTION_LONG_S "file=TRACK_MODE is optional, uCON64 will always try to\n"
     "                  detect the correct TRACK_MODE from the CD_IMAGE itself\n"
+#ifdef TODO
+#warning TODO  --toc    convert CloneCD *.cue to cdrdao *.toc
+#warning TODO  --cue    convert cdrdao *.toc to *.cue
+#endif // TODO
 //    "TODO:  " OPTION_LONG_S "toc    convert CloneCD *.cue to cdrdao *.toc\n"
 //    "TODO:  " OPTION_LONG_S "cue    convert cdrdao *.toc to *.cue\n"
     "  " OPTION_LONG_S "iso         convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
@@ -850,7 +854,10 @@ ucon64_usage (int argc, char *argv[])
     "\n"
   );
 
-  optind = option_index = 0;//TODO is there a better way to "reset"?
+  optind = option_index = 0;
+#ifdef TODO
+#warning TODO is there a better way to reset?
+#endif // TODO
 
   single = 0;
 

@@ -107,26 +107,6 @@ const char *unknown_usage[] =
 };
 
 
-#if 0
-int
-read_raw_frame (int fd, int lba, unsigned char *buf)
-{
-  struct cdrom_msf *msf = (struct cdrom_msf *) buf;
-  int rc;
-
-//  msf = (struct cdrom_msf *) buf;
-  msf->cdmsf_min0 = (lba + CD_MSF_OFFSET) / CD_FRAMES / CD_SECS;
-  msf->cdmsf_sec0 = (lba + CD_MSF_OFFSET) / CD_FRAMES % CD_SECS;
-  msf->cdmsf_frame0 = (lba + CD_MSF_OFFSET) % CD_FRAMES;
-
-  if ((rc = ioctl (fd, CDROMREADMODE2, buf)) == -1)
-    fprintf (stderr, "ERROR: ioctl CDROMREADMODE2\n");
-
-  return rc;
-}
-#endif
-
-
 /*
   Return type is not const char *, because it may return move_name (indirectly
   via q_fbackup()), which is not a pointer to constant characters.
@@ -288,7 +268,7 @@ ucon64_pad (const char *filename, int start, int size)
 }
 
 
-#if 1
+#if 0
 long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
@@ -319,15 +299,26 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
   int buf_pos = pos % MAXBUFSIZE;
   int c = q_fgetc (filename, pos);
   unsigned char buf[MAXBUFSIZE];
+  FILE *fh = fopen (filename, "rb");
+  
+  if (!fh) return -1;
 
-  for (pos -= buf_pos; q_fread (buf, pos, buf_pos, filename) > 0 && pos > -1;
+  for (pos -= buf_pos; !fseek (fh, pos, SEEK_SET) && pos > -1;
         pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
     {
+      fread (buf, 1, buf_pos, fh);
+      
       for (; buf_pos > 0; buf_pos--)
         if (buf[buf_pos - 1] != c)
-          return rominfo->file_size - (pos + buf_pos) > 1 ?
-            rominfo->file_size - (pos + buf_pos) : 0;
+          {
+            fclose (fh);
+            
+            return rominfo->file_size - (pos + buf_pos) > 1 ?
+              rominfo->file_size - (pos + buf_pos) : 0;
+          }
     }
+
+  fclose (fh);
 
   return rominfo->file_size; // the whole file is "padded"
 }
@@ -1454,3 +1445,25 @@ msf2frame (struct cdrom_msf0 *msf)
           msf->second * CD_FRAMES + msf->frame);
 }
 #endif
+
+
+#if 0
+int
+read_raw_frame (int fd, int lba, unsigned char *buf)
+{
+  struct cdrom_msf *msf = (struct cdrom_msf *) buf;
+  int rc;
+
+//  msf = (struct cdrom_msf *) buf;
+  msf->cdmsf_min0 = (lba + CD_MSF_OFFSET) / CD_FRAMES / CD_SECS;
+  msf->cdmsf_sec0 = (lba + CD_MSF_OFFSET) / CD_FRAMES % CD_SECS;
+  msf->cdmsf_frame0 = (lba + CD_MSF_OFFSET) % CD_FRAMES;
+
+  if ((rc = ioctl (fd, CDROMREADMODE2, buf)) == -1)
+    fprintf (stderr, "ERROR: ioctl CDROMREADMODE2\n");
+
+  return rc;
+}
+#endif
+
+

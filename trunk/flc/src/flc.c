@@ -248,53 +248,57 @@ void
 flc_usage (int argc, char *argv[])
 {
   (void) argc;
+  st_usage_t flc_usage[] = {
+    {"c", 0, NULL, "also test every possible archive in DIRECTORY for errors\n"
+                   "return flags: N=not checked (default), P=passed, F=failed", NULL},
+    {"html", 0, NULL, "output as HTML document with links to the files", NULL},
+    {"bbs", 0, NULL, "output as BBS style filelisting (default)", NULL},
+    {"o", 1, "FILE", "write output into FILE", NULL},
+    {"t", 0, NULL, "sort by modification time", NULL},
+    {"X", 0, NULL, "sort alphabetical", NULL},
+    {"S", 0, NULL, "sort by byte size", NULL},
+    {"fr", 0, NULL, "sort reverse", NULL},
+    {"k", 0, NULL, "show sizes in kilobytes", NULL},
+    {"help", 0, NULL, "display this help and exit", NULL},
+    {"version", 0, NULL, "output version information and exit", NULL},
+    {NULL, 0, NULL, NULL, NULL}
+  };
 
   printf ("\n%s\n"
           "This may be freely redistributed under the terms of the GNU Public License\n\n"
-          "Usage: %s [OPTION]... [FILE]...\n\n"
-          "  " OPTION_S "c            also test every possible archive in DIRECTORY for errors\n"
-          "                  return flags: N=not checked (default), P=passed, F=failed\n"
-          "  " OPTION_LONG_S "html        output as HTML document with links to the files\n"
-          "  " OPTION_LONG_S "bbs         output as BBS style filelisting (default)\n"
-          "  " OPTION_LONG_S "o=FILE      write output into FILE\n"
-          "  " OPTION_S "t            sort by modification time\n"
-          "  " OPTION_S "X            sort alphabetical\n"
-          "  " OPTION_S "S            sort by byte size\n"
-          "  " OPTION_LONG_S "fr          sort reverse\n"
-          "  " OPTION_S "k            show sizes in kilobytes\n"
-          "  " OPTION_LONG_S "help        display this help and exit\n"
-          "  " OPTION_LONG_S "version     output version information and exit\n"
-          "\n"
-          "Amiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
-          "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
-          flc_title, argv[0]);
+          "Usage: %s [OPTION]... [FILE]...\n\n", flc_title, argv[0]);
+          
+  render_usage (flc_usage, 0);
+
+  printf ("\nAmiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
+          "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n");
 }
 
 
+// configfile handling
 int
 flc_configfile (void)
 {
+#if     FILENAME_MAX > MAXBUFSIZE
   char buf[FILENAME_MAX + 1];
-  FILE *fh;
-/*
-   configfile handling
-*/
+#else
+  char buf[MAXBUFSIZE + 1];
+#endif
+  char *dirname;
+  FILE *fh = NULL;
+
+  dirname = getenv2 ("HOME");
   sprintf (flc.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
-           "flc.cfg"
+    "flc.cfg"
 #else
-           /*
-              Use getchd() here too. If this code gets compiled under Windows the compiler has to be
-              Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
-              where long filenames are available and where files can have more than three characters
-              as "extension". Under Bash HOME will be set, but most Windows people will propably run
-              uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
-              (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
-            */
-           ".flcrc"
+    ".flcrc"
 #endif
-           , getenv2 ("HOME"));
-
+    , dirname);
+#ifdef  DJGPP
+  // this is DJGPP specific - not necessary, but prevents confusion
+  change_mem (flc.configfile, strlen (flc.configfile), "/", 1, 0, 0, "\\", 1, 0);
+#endif
 
   if (!access (flc.configfile, F_OK))
     {
@@ -313,49 +317,32 @@ flc_configfile (void)
     }
   else printf ("WARNING: %s not found: creating...", flc.configfile);
 
-
-  if (!(fh = fopen (flc.configfile, "wb")))
-    {
+  if (!(fh = fopen (flc.configfile, "w"))) // opening the file in text mode
+    {                                         //  avoids trouble under DOS
       printf ("FAILED\n\n");
       return -1;
     }
+ fclose (fh);                              // we'll use set_property() from now
 
-  fprintf (fh, "# flc config\n"
-         "#\n"
-         "version=%d\n"
-         "#\n"
-         "# LHA support\n"
-         "#\n"
-         "lha_test=lha t \"%%s\"\n"
-         "lha_extract=lha efi \"%%s\" " FLC_ID_NAMES "\n"
-         "#\n"
-         "# LZH support\n"
-         "#\n"
-         "lzh_test=lha t \"%%s\"\n"
-         "lzh_extract=lha efi \"%%s\" " FLC_ID_NAMES "\n"
-         "#\n"
-         "# ZIP support\n"
-         "#\n"
-         "zip_test=unzip -t \"%%s\"\n"
-         "zip_extract=unzip -xojC \"%%s\" " FLC_ID_NAMES "\n"
-         "#\n"
-         "# RAR support\n"
-         "#\n"
-         "rar_test=unrar t \"%%s\"\n"
-         "rar_extract=unrar x \"%%s\" " FLC_ID_NAMES "\n"
-         "#\n"
-         "# ACE support\n"
-         "#\n"
-         "ace_test=unace t \"%%s\"\n"
-         "ace_extract=unace e \"%%s\" " FLC_ID_NAMES "\n"
-         "#\n"
-         "# more?\n"
-         "#\n"
-         "# %%s will be replaced with the file/archive name\n"
-         "#\n",
-         FLC_CONFIG_VERSION);
+  sprintf (buf, "%d", FLC_CONFIG_VERSION);
+  set_property (flc.configfile, "version", buf, "flc config");
 
-  fclose (fh);
+  set_property (flc.configfile, "lha_test",    "lha t \"%s\"",                     "LHA support\n"
+                                                                  "%s will be replaced with the file/archive name");
+  set_property (flc.configfile, "lha_extract", "lha efi \"%s\" " FLC_ID_NAMES,     NULL);
+
+  set_property (flc.configfile, "lzh_test",    "lha t \"%s\"",                     "LZH support");
+  set_property (flc.configfile, "lzh_extract", "lha efi \"%s\" " FLC_ID_NAMES,     NULL);
+
+  set_property (flc.configfile, "zip_test",    "unzip -t \"%s\"",                  "ZIP support");
+  set_property (flc.configfile, "zip_extract", "unzip -xojC \"%s\" " FLC_ID_NAMES, NULL);
+
+  set_property (flc.configfile, "rar_test",    "rar_test=unrar t \"%s\"",          "RAR support");
+  set_property (flc.configfile, "rar_extract", "rar_extract=unrar x \"%s\" " FLC_ID_NAMES, NULL);
+
+  set_property (flc.configfile, "ace_test",    "unace t \"%s\"",                   "ACE support");
+  set_property (flc.configfile, "ace_extract", "unace e \"%s\" " FLC_ID_NAMES,     NULL);
+
   printf ("OK\n\n");
 
   return 0;

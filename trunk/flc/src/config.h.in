@@ -1,8 +1,5 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
-/* enable usage of color (default: yes) */
-#undef ANSI_COLOR
-
 /* enable debug output (default: no) */
 #undef DEBUG
 
@@ -59,3 +56,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* enable usage of color (default: yes) */
+#undef USE_ANSI_COLOR

@@ -243,70 +243,6 @@ snes_get_file_type (void)
 
 
 int
-snes_dint (st_rominfo_t *rominfo)
-{
-  st_unknown_header_t header;
-  FILE *srcfile, *destfile;
-  unsigned char *buffer;
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  int size = ucon64.file_size - rominfo->buheader_len, success = 1;
-
-  puts ("Converting to deinterleaved format...");
-  if (!(buffer = (unsigned char *) malloc (size)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
-      exit (1);
-    }
-  strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".TMP");
-  strcpy (src_name, ucon64.rom);
-  ucon64_file_handler (dest_name, src_name, 0);
-
-  if ((srcfile = fopen (src_name, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
-      return -1;
-    }
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
-
-  if (rominfo->buheader_len)
-    {
-      if (!fread (&header, SWC_HEADER_LEN, 1, srcfile))
-        success = 0;
-      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
-    }
-  if (!fread (buffer, size, 1, srcfile))
-    success = 0;
-  if (!success)
-    {
-      fprintf (stderr, "ERROR: Can't read from %s\n", ucon64.rom);
-      free (buffer);
-      fclose (srcfile);
-      fclose (destfile);
-      return -1;
-    }
-
-  snes_deinterleave (rominfo, &buffer, size);
-
-  if (rominfo->buheader_len)
-    fwrite (&header, 1, SWC_HEADER_LEN, destfile);
-  fwrite (buffer, size, 1, destfile);
-
-  free (buffer);
-  fclose (srcfile);
-  fclose (destfile);
-
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return 0;
-}
-
-
-int
 snes_col (const char *color)
 {
 /*
@@ -472,7 +408,8 @@ snes_ufos (void)
 
 
 static void
-write_deinterleaved_data (st_rominfo_t *rominfo, const char *dest_name, int size)
+write_deinterleaved_data (st_rominfo_t *rominfo, const char *src_name,
+                          const char *dest_name, int size)
 {
   unsigned char *buffer;
   if (!(buffer = (unsigned char *) malloc (size)))
@@ -480,10 +417,35 @@ write_deinterleaved_data (st_rominfo_t *rominfo, const char *dest_name, int size
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
     }
-  q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
+  q_fread (buffer, rominfo->buheader_len, size, src_name);
   snes_deinterleave (rominfo, &buffer, size);
   q_fwrite (buffer, SWC_HEADER_LEN, size, dest_name, "ab");
   free (buffer);
+}
+
+
+int
+snes_dint (st_rominfo_t *rominfo)
+{
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+
+  puts ("Converting to deinterleaved format...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".TMP");
+  ucon64_file_handler (dest_name, src_name, 0);
+
+  if (!rominfo->interleaved)
+    printf ("WARNING: Deinterleaving a ROM that was not detected as interleaved\n");
+  q_fcpy (src_name, 0, rominfo->buheader_len > (int) SWC_HEADER_LEN ?
+                         (int) SWC_HEADER_LEN : rominfo->buheader_len, dest_name, "wb");
+  write_deinterleaved_data (rominfo, src_name, dest_name,
+                            ucon64.file_size - rominfo->buheader_len);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return 0;
 }
 
 
@@ -516,14 +478,14 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
 
   set_nsrt_info (rominfo, (unsigned char *) &header);
 
+  strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ext);
-  strcpy (src_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
   if (rominfo->interleaved)
-    write_deinterleaved_data (rominfo, dest_name, size);
+    write_deinterleaved_data (rominfo, src_name, dest_name, size);
   else
     q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
@@ -618,14 +580,14 @@ snes_fig (st_rominfo_t *rominfo)
   snes_set_fig_header (rominfo, &header);
   set_nsrt_info (rominfo, (unsigned char *) &header);
 
+  strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".FIG");
-  strcpy (src_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
   if (rominfo->interleaved)
-    write_deinterleaved_data (rominfo, dest_name, size);
+    write_deinterleaved_data (rominfo, src_name, dest_name, size);
   else
     q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
@@ -688,17 +650,16 @@ snes_mgd (st_rominfo_t *rominfo)
 // What should we do with this function? snes_gd3() is probably sufficient
 //  (and tested on a real Game Doctor!).
 {
-  char mgh[32], dest_name[FILENAME_MAX], *fname;
-  int n, len;
+  char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *fname;
+  int n;
 
+  strcpy (src_name, ucon64.rom);
   fname = basename (ucon64.rom);
   sprintf (dest_name, "%s%d", is_func (fname, strlen (fname), isupper) ? "SF" : "sf",
     (ucon64.file_size - rominfo->buheader_len) / MBIT);
   strncat (dest_name, fname, 5);
   dest_name[8] = 0;
-
-  len = strlen (dest_name);
-  for (n = 0; n < len; n++)
+  for (n = 0; n < 8; n++)
     if (dest_name[n] == ' ')
       dest_name[n] = '_';
 
@@ -712,11 +673,12 @@ snes_mgd (st_rominfo_t *rominfo)
   memcpy (&mgh[16], dest_name, strlen (dest_name));
 
   set_suffix (dest_name, ".078");
-  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
   if (rominfo->interleaved)
-    write_deinterleaved_data (rominfo, dest_name, ucon64.file_size - rominfo->buheader_len);
+    write_deinterleaved_data (rominfo, src_name, dest_name,
+                              ucon64.file_size - rominfo->buheader_len);
   else
-    q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+    q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
 
   strcpy (dest_name, "MULTI-GD.MGH");
@@ -784,6 +746,7 @@ snes_gd3 (st_rominfo_t *rominfo)
   surplus4Mb = size % (4 * MBIT);
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
+  strcpy (src_name, ucon64.rom);
   p = basename (ucon64.rom);
   n = ((size + MBIT - 1) / MBIT);
   if (n == 20)
@@ -810,7 +773,6 @@ snes_gd3 (st_rominfo_t *rominfo)
   for (n = 3; n < 7; n++)                       // skip "sf" and first digit
     if (dest_name[n] == ' ')
       dest_name[n] = '_';
-  strcpy (src_name, ucon64.rom);
 
   if (snes_hirom)
     {
@@ -1011,7 +973,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
       q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
       if (rominfo->interleaved)
-        write_deinterleaved_data (rominfo, dest_name, size);
+        write_deinterleaved_data (rominfo, src_name, dest_name, size);
       else
         q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
@@ -1927,7 +1889,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   copier, but by incorrect ROM tools...
 */
 {
-  int interleaved = 0, check_map_type = 1, header_offset;
+  int interleaved = 0, check_map_type = 1;
   unsigned int crc = crc32 (0, rom_buffer, 512);
 
   /*
@@ -1986,8 +1948,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   else
     {
 #ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
-      header_offset = size / 2;
-      if (check_banktype (rom_buffer, header_offset) > banktype_score)
+      if (check_banktype (rom_buffer, size / 2) > banktype_score)
         {
           interleaved = 1;
           snes_hirom = 0;
@@ -2007,16 +1968,13 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
         Super Mario All-Stars & World (E) [!]
       */
       if (!interleaved && size == 24 * MBIT)
-        {
-          header_offset = 16 * MBIT;
-          if (check_banktype (rom_buffer, header_offset) > banktype_score)
-            {
-              interleaved = 1;
-              snes_hirom = 0;
-              snes_hirom_ok = 2;                // fix for snes_deinterleave()
-              check_map_type = 0;
-            }
-        }
+        if (check_banktype (rom_buffer, 16 * MBIT) > banktype_score)
+          {
+            interleaved = 1;
+            snes_hirom = 0;
+            snes_hirom_ok = 2;                  // fix for snes_deinterleave()
+            check_map_type = 0;
+          }
 #endif
     }
   if (check_map_type && !snes_hirom)
@@ -2370,7 +2328,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
     not a guarantee that rominfo->buheader_len already has the right value
     (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
   */
-  if (type != MGD && type != SMC)
+  if (type != MGD) // don't do "&& type != SMC" or we'll miss a lot of PD ROMs
     {
       y = ((header->size_high << 8) + header->size_low) * 8 * 1024;
       y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
@@ -2577,9 +2535,10 @@ snes_init (st_rominfo_t *rominfo)
 
   calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
 
-  // we want the CRC32 of the "raw" data
+  // we want the CRC32 of the "raw" data (too)
   if (calc_checksums)
     ucon64.fcrc32 = crc32 (0, rom_buffer, size);
+
   // bs_dump has to be set before calling snes_chksum(), but snes_check_bs()
   //  needs snes_header to be filled with the correct data
   if (rominfo->interleaved)
@@ -2625,7 +2584,15 @@ snes_init (st_rominfo_t *rominfo)
           unsigned short int *bs_date_ptr = (unsigned short int *)
             (rom_buffer + snes_header_base + SNES_HEADER_START + snes_hirom + 38);
           unsigned short int bs_date = *bs_date_ptr;
-          // we follow the "uCONSRT standard" for calculating the CRC32 of BS dumps
+          /*
+            We follow the "uCONSRT standard" for calculating the CRC32 of BS
+            dumps. At the time of this writing (20 June 2003) the uCONSRT
+            standard defines that the date of BS dumps has to be "skipped"
+            (overwritten with a constant number), because the date is variable.
+            When a BS dump is made the BSX fills in the date. Otherwise two
+            dumps of the same memory card would have a different CRC32.
+            Why 42? It's the answer to life, the universe and everything :-)
+          */
 #ifdef  WORDS_BIGENDIAN
           *bs_date_ptr = 0x4200;
 #else

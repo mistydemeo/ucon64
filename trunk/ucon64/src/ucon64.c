@@ -1085,7 +1085,6 @@ int ucon64_init(struct ucon64_ *rom)
   if( bytes <= MAXROMSIZE )
     rom->current_crc32=fileCRC32(rom->rom,0);
 
-
 if(rom->console != ucon64_UNKNOWN)
 {
   (rom->console == ucon64_GB &&
@@ -1098,6 +1097,12 @@ if(rom->console != ucon64_UNKNOWN)
    bytes <= MAXROMSIZE ) ? nintendo64_init(rom) :
   (rom->console == ucon64_SNES &&
    bytes <= MAXROMSIZE ) ? snes_init(rom) :
+/*
+    ROMs for the following consoles can be only detected by their CRC32
+
+  if( bytes <= MAXROMSIZE )
+    rom->current_crc32=fileCRC32(rom->rom,0);
+*/
   (rom->console == ucon64_SMS &&
    bytes <= MAXROMSIZE ) ? sms_init(rom) :
   (rom->console == ucon64_JAGUAR &&

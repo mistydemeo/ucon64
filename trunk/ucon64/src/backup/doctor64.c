@@ -136,6 +136,7 @@ return 1;
 int initCommunication(unsigned int port)
 {
 	int i;
+
 	for( i=0; i<SYNC_MAX_TRY; i++ ) 
 	{
 		if( syncHeader(port) == 0 ) break;

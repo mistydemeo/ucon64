@@ -61,7 +61,7 @@ const char *gameboy_usage[] =
     "                  " OPTION_LONG_S "rom=NES_ROM " OPTION_LONG_S "file=FC.GB (the emulator)\n"
     "                  m-kami@da2.so-net.ne.jp www.playoffline.com\n"
     "  " OPTION_LONG_S "chk         fix ROM checksum\n"
-#if 0 
+#if 0
     "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
     "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXX-XXX or " OPTION_LONG_S "rom=XXX-XXX-XXX\n"
     "  " OPTION_LONG_S "gg          apply GameGenie code (permanent);\n"
@@ -76,82 +76,6 @@ const char *gameboy_usage[] =
   };
 
 
-/*
-The MGD2 only accepts certain filenames, and these filenames
-must be specified in an index file, "MULTI-GD", otherwise the
-MGD2 will not recognize the file.  In the case of multiple games
-being stored in a single disk, simply enter its corresponding
-MULTI-GD index into the "MULTI-GD" file.
-
-Super Famiciom:
-
-game size       # of files      names           MULTI-GD
-================================================================
-4M              1               SF4XXX.048      SF4XXX
-4M              2               SF4XXXxA.078    SF4XXXxA
-                                SF4XXXxB.078    SF4XXXxB
-8M              1               SF8XXX.058      SF8XXX
-                2               SF8XXXxA.078    SF8XXXxA
-                                SF8XXXxB.078    SF8xxxxB
-16M             2               SF16XXXA.078    SF16XXXA
-                                SF16XXXB.078    SF16XXXB
-24M             3               SF24XXXA.078    SF24XXXA
-                                SF24XXXB.078    SF24XXXB
-                                SF24XXXC.078    SF24XXXC
-
-Mega Drive:
-
-game size       # of files      names           MUTLI-GD
-================================================================
-1M              1               MD1XXX.000      MD1XXX
-2M              1               MD2XXX.000      MD2XXX
-4M              1               MD4XXX.000      MD4XXX
-8M              1               MD8XXX.008      MD8XXX
-16M             2               MD16XXXA.018    MD16XXXA
-                                MD16XXXB.018    MD16XXXB
-24M             3               MD24XXXA.038    MD24XXXA
-                                MD24XXXB.038    MD24XXXB
-                                MD24XXXC.038    MD24XXXC
-32M             4               MD32XXXA.038    MD32XXXA
-                                MD32XXXB.038    MD32XXXB
-                                MD32XXXC.038    MD32XXXC
-                                MD32XXXD.038    MD32XXXD
-
-PC Engine:
-game size       # of files      names           MUTLI-GD
-================================================================
-1M              1               PC1XXX.040      PC1XXX
-2M              1               PC2XXX.040      PC2XXX
-4M              1               PC4XXX.048      PC4XXX
-8M              1               PC8XXX.058      PC8XXX
-
-
-The Game Doctor does not use a 512 byte header like the SWC,
-instead it uses specially designed filenames to distinguish
-between multi files. I'm not sure if it used the filename for
-information about the size of the image though.
-<p>
-Usually, the filename is in the format of: SFXXYYYZ.078
-<p>
-Where SF means Super Famicom, XX refers to the size of the
-image in Mbit. If the size is only one character (i.e. 2, 4 or
-8 Mbit) then no leading "0" is inserted.
-<p>
-YYY refers to a catalogue number in Hong Kong shops
-identifying the game title. (0 is Super Mario World, 1 is F-
-Zero, etc). I was told that the Game Doctor copier produces a
-random number when backing up games.
-<p>
-Z indicates a multi file. Like XX, if it isn't used it's
-ignored.
-<p>
-A would indicate the first file, B the second, etc. I am told
-078 is not needed, but is placed on the end of the filename by
-systems in Asia.
-<p>
-e.g. The first 16Mbit file of Donkey Kong Country (assuming it
-  is cat. no. 475) would look like:  SF16475A.078
-*/
 /*
 0148       ROM size:
            0 - 256kBit =  32kB =  2 banks
@@ -176,12 +100,12 @@ st_gameboy_header_t gameboy_header;
 
 typedef struct st_gameboy_chksum
 {
-  unsigned short calc;
-  unsigned char calccomp;
+  unsigned short value;
+  unsigned char complement;
 } st_gameboy_chksum_t;
 
-static st_gameboy_chksum_t gbcrc;
-static int gameboy_chksum (st_rominfo_t *rominfo);
+static st_gameboy_chksum_t checksum;
+static st_gameboy_chksum_t gameboy_chksum (st_rominfo_t *rominfo);
 static st_ines_header_t ines_header;
 static st_unknown_header_t unknown_header;
 
@@ -210,7 +134,7 @@ gameboy_n2gb (st_rominfo_t *rominfo)
 
   if (!strncmp (ines_header.signature, "NES", 3))
     {
-      fprintf (stderr, "ERROR: only NES ROMs with iNES header are supported\n");
+      fprintf (stderr, "ERROR: Only NES ROMs with iNES header are supported\n");
       return -1;
     }
 
@@ -221,7 +145,7 @@ gameboy_n2gb (st_rominfo_t *rominfo)
     {
       if (n == 0x14e || n == 0x14f)
         continue;
-      else 
+      else
         crc += buf[n];
     }
 
@@ -376,16 +300,15 @@ gameboy_chk (st_rominfo_t *rominfo)
   char buf[4];
 
   ucon64_fbackup (NULL, ucon64.rom);
-  gameboy_chksum (rominfo);
 
   q_fputc (ucon64.rom,
               GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
-              gbcrc.calccomp, "r+b");
+              checksum.complement, "r+b");
   q_fputc (ucon64.rom,
               GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4e,
-              (gbcrc.calc & 0xff00) >> 8, "r+b");
+              (rominfo->current_internal_crc & 0xff00) >> 8, "r+b");
   q_fputc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f,
-              (gbcrc.calc & 0xff), "r+b");
+              rominfo->current_internal_crc & 0xff, "r+b");
 
   q_fread (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, 3, ucon64.rom);
 
@@ -664,9 +587,9 @@ gameboy_init (st_rominfo_t *rominfo)
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;
       rominfo->internal_crc2_len = 1;
-      gameboy_chksum (rominfo);
+      checksum = gameboy_chksum (rominfo);
+      rominfo->current_internal_crc = checksum.value;
 
-      rominfo->current_internal_crc = gbcrc.calc;
       rominfo->internal_crc =
         (q_fgetc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4e) << 8) +
          q_fgetc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f);
@@ -679,54 +602,46 @@ gameboy_init (st_rominfo_t *rominfo)
       sprintf (rominfo->internal_crc2, buf,
 #ifdef  ANSI_COLOR
                ucon64.ansi_color ?
-                 ((gbcrc.calccomp == x) ?
+                 ((checksum.complement == x) ?
                    "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
                  :
-                 ((gbcrc.calccomp == x) ? "ok" : "bad"),
+                 ((checksum.complement == x) ? "ok" : "bad"),
 #else
-               (gbcrc.calccomp == x) ? "ok" : "bad",
+               (checksum.complement == x) ? "ok" : "bad",
 #endif
-               gbcrc.calccomp,
-               (gbcrc.calccomp == x) ? "=" : "!", x);
+               checksum.complement,
+               (checksum.complement == x) ? "=" : "!", x);
     }
   return result;
 }
 
 
-int
+st_gameboy_chksum_t
 gameboy_chksum (st_rominfo_t *rominfo)
 {
   FILE *fh;
-  unsigned short calc = 0;
-  unsigned char calccomp = 0;
+  st_gameboy_chksum_t sum = {0, 0};
   int ch, i = 0;
 
   if (!(fh = fopen (ucon64.rom, "rb")))
-    return -1;
+    {
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", ucon64.rom);
+      exit (1);
+    }
 
   fseek (fh, rominfo->buheader_len, SEEK_SET);
   while ((ch = fgetc (fh)) != EOF)
     {
-      if (i != 0x014D && i != 0x014E && i != 0x014F)
-        calc += ch;
-      if (i >= 0x0134 && i < 0x014D)
-        calccomp += ch;
+      if (i != 0x014d && i != 0x014e && i != 0x014f)
+        sum.value += ch;
+      if (i >= 0x0134 && i < 0x014d)
+        sum.complement += ch;
       i++;
     }
   fclose (fh);
 
-#if 0
-  cartcompchecksum = q_fgetc (ucon64.rom, rominfo->buheader_len + 0x014D);
-  cartchecksum = (q_fgetc (ucon64.rom, rominfo->buheader_len + 0x014E) << 8) +
-                 q_fgetc (ucon64.rom, rominfo->buheader_len + 0x014F);
-#endif
+  sum.complement = 0xe7 - sum.complement;
+  sum.value += sum.complement;
 
-  calccomp = 0xE7 - calccomp;
-  calc += calccomp;
-
-  gbcrc.calccomp = calccomp;
-  gbcrc.calc = calc;
-
-  return 0;
+  return sum;
 }
-

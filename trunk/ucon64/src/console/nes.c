@@ -964,7 +964,7 @@ nes_unif (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", dest_name);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
       return -1;
     }
 
@@ -984,7 +984,7 @@ nes_unif (st_rominfo_t *rominfo)
     {
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+          fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
           return -1;
         }
 
@@ -1358,7 +1358,7 @@ nes_ines (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", dest_name);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
       return -1;
     }
 
@@ -1370,7 +1370,7 @@ nes_ines (st_rominfo_t *rominfo)
     {
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+          fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
           return -1;
         }
 
@@ -1484,12 +1484,12 @@ nes_dint (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
       return -1;
     }
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", dest_name);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
       return -1;
     }
 
@@ -1775,7 +1775,7 @@ write_prm (st_ines_header_t *header, const char *fname)
   // don't write backups of parts, because one name is used
   if (q_fwrite (prm, 0, sizeof (prm), fname, "wb") == -1)
     {
-      fprintf (stderr, "ERROR: Could not write %s\n", fname);
+      fprintf (stderr, "ERROR: Can't write %s\n", fname);
       return -1;                                // try to continue
     }
   else
@@ -1801,7 +1801,7 @@ nes_s (st_rominfo_t *rominfo)
 
   if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", ucon64.rom);
       return -1;
     }
 
@@ -1842,7 +1842,7 @@ nes_s (st_rominfo_t *rominfo)
       setext (dest_name, ".700");
       // don't write backups of parts, because one name is used
       if (q_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
-        fprintf (stderr, "ERROR: Could not write %s\n", dest_name); // try to continue
+        fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
       else
         ucon64_wrote (dest_name);
     }
@@ -1852,7 +1852,7 @@ nes_s (st_rominfo_t *rominfo)
       setext (dest_name, ".PRG");
       // don't write backups of parts, because one name is used
       if (q_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
-        fprintf (stderr, "ERROR: Could not write %s\n", dest_name); // try to continue
+        fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
       else
         ucon64_wrote (dest_name);
     }
@@ -1864,7 +1864,7 @@ nes_s (st_rominfo_t *rominfo)
       setext (dest_name, ".CHR");
       // don't write backups of parts, because one name is used
       if (q_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
-        fprintf (stderr, "ERROR: Could not write %s\n", dest_name); // try to continue
+        fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
       else
         ucon64_wrote (dest_name);
     }
@@ -2392,7 +2392,7 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
 
   if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", ucon64.rom);
       return -1;
     }
 

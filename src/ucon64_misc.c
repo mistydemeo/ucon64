@@ -56,7 +56,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 /*
   uCON64 "workflow" objects
-  
+
   We want to do things compile-time. Using ucon64_wf is necessary for VC 6. GCC
   (3) accepts casts in struct initialisations.
 */
@@ -66,7 +66,7 @@ st_ucon64_obj_t ucon64_wf[] =
     {0, WF_DEFAULT},                            // WF_OBJ_ALL_DEFAULT
     {0, WF_DEFAULT | WF_NO_SPLIT},              // WF_OBJ_ALL_DEFAULT_NO_SPLIT
     {0, WF_STOP},                               // WF_OBJ_ALL_STOP
-    {0, WF_NO_ROM},                             // WF_OBJ_ALL_NO_ROM
+    {0, WF_STOP | WF_NO_ROM},                   // WF_OBJ_ALL_STOP_NO_ROM
     {0, WF_DEFAULT | WF_STOP | WF_NO_ROM},      // WF_OBJ_ALL_DEFAULT_STOP_NO_ROM
     {0, WF_INIT},                               // WF_OBJ_ALL_INIT
     {0, WF_INIT | WF_PROBE},                    // WF_OBJ_ALL_INIT_PROBE
@@ -108,7 +108,7 @@ st_ucon64_obj_t ucon64_wf[] =
     {UCON64_SNES, WF_NO_ROM},                   // WF_OBJ_SNES_NO_ROM
     {UCON64_SNES, 0},                           // WF_OBJ_SNES_NULL
     {UCON64_SWAN, WF_SWITCH},                   // WF_OBJ_SWAN_SWITCH
-    
+
     {UCON64_N64, WF_STOP | WF_NO_ROM},          // WF_OBJ_N64_STOP_NO_ROM
     {UCON64_N64, WF_DEFAULT | WF_STOP},         // WF_OBJ_N64_DEFAULT_STOP
     {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM}, // WF_OBJ_N64_DEFAULT_STOP_NO_ROM

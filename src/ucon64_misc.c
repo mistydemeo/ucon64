@@ -2374,7 +2374,8 @@ ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
             for (n = 0; n < n_patterns; n++)
               {
                 int x = 1 - patterns[n].search_size;
-                n_found += change_mem2 (buffer + overlap + x, bytesread + x,
+                n_found += change_mem2 (buffer + overlap + x,
+                                        bytesread + patterns[n].search_size - 1,
                                         patterns[n].search, patterns[n].search_size,
                                         patterns[n].wildcard, patterns[n].escape,
                                         patterns[n].replace, patterns[n].replace_size,

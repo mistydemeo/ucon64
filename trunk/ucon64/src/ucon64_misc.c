@@ -1458,7 +1458,6 @@ ucon64_configfile_create (void)
 
   for (x = 0; emulate[x].command; x++)
     for (y = 0; y < UCON64_MAX_ARGS /*options[y].name*/; y++)
-    {
       if (emulate[x].id == options[y].val)
         {
           char buf[MAXBUFSIZE];
@@ -1473,7 +1472,6 @@ ucon64_configfile_create (void)
 
           break;
         }
-    }
 
   return 0;
 }

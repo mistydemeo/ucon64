@@ -17,6 +17,9 @@ LDFLAGS=-s
 
 LIBNAME=discmage
 OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o
+ifndef  DJGPP
+OBJECTS+=misc.o
+endif
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the
@@ -25,7 +28,8 @@ OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-LIBS=-lcygwin -lkernel32
+GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/
+LIBS=-lcygwin -lkernel32 -lz -L$(GCCA_DIR) -lgcc
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
 
 ifdef DLOPEN

@@ -1,7 +1,7 @@
 /*
 dxedll_priv.h - DXE support (code/data private to DXE)
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -34,12 +34,30 @@ st_symbol_t import_export;
 #define fprintf import_export.fprintf
 #define sprintf import_export.sprintf
 #define fputs import_export.fputs
+
+#ifndef HAVE_ZLIB_H
 #define fopen import_export.fopen
 #define fclose import_export.fclose
 #define fseek import_export.fseek
-#define ftell import_export.ftell
 #define fread import_export.fread
+#define fgetc import_export.fgetc
+#define fgets import_export.fgets
+#define feof import_export.feof
 #define fwrite import_export.fwrite
+#define fputc import_export.fputc
+#else
+#define fopen2 import_export.fopen
+#define fclose2 import_export.fclose
+#define fseek2 import_export.fseek
+#define fread2 import_export.fread
+#define fgetc2 import_export.fgetc
+#define fgets2 import_export.fgets
+#define feof2 import_export.feof
+#define fwrite2 import_export.fwrite
+#define fputc2 import_export.fputc
+#endif
+
+#define ftell import_export.ftell
 #define fflush import_export.fflush
 
 #define free import_export.free
@@ -59,8 +77,10 @@ st_symbol_t import_export;
 // We have to do this, because there's also a struct stat
 // TODO?: do this for all #defines in this file.
 #define stat(FILE, STATBUF) import_export.stat(FILE, STATBUF)
-
 #define time import_export.time
+
+#define basename2 import_export.basename2
+#define setext import_export.setext
 
 #define __dj_stdin import_export.__dj_stdin
 #define __dj_stdout import_export.__dj_stdout

@@ -26,7 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "config.h"
 #include "libdiscmage_cfg.h"
-#ifdef  HAVE_INTTYPES_H
+#include "misc.h"                               // or let every source file include
+#ifdef  HAVE_INTTYPES_H                         //  misc.h (for DJGPP DXE & ZLIB)
 #include <inttypes.h>
 #elif   defined __CYGWIN__
 #include <sys/types.h>

@@ -68,6 +68,7 @@ typedef struct termios tty_t;
 
 #ifdef  DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
+//#include "dxedll_priv.h"
 #endif
 
 extern int errno;
@@ -84,10 +85,6 @@ static int misc_ansi_color = 0;
 
 #if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
 static void set_tty (tty_t *param);
-#endif
-
-#ifdef  __CYGWIN__
-static char *cygwin_fix (char *value);
 #endif
 
 void deinit_conio(void);
@@ -782,6 +779,9 @@ gauge (time_t init_time, int pos, int size)
   environment variable, the character isn't the right character for accessing
   the file system. We fix this.
   TODO: fix the same problem for other non-ASCII characters (> 127).
+  UPDATE: The problem seems to also occur when reading from files instead of
+          the environment. Cygwin probably uses a different character set than
+          Windows. This problem is present under cmd.exe *and* Bash.
 */
 char *
 cygwin_fix (char *value)
@@ -1241,6 +1241,7 @@ handle_registered_funcs (void)
 
 
 // map code should be included unconditionally (needed by gz/zip & DLL (DXE) code)
+#define DXE                                     // signal that we include map.c from a DXE
 #include "map.c"
 
 #ifdef  HAVE_ZLIB_H

@@ -58,7 +58,8 @@ DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
 #elif   defined DJGPP
 #include "dxedll_pub.h"                         // for st_symbol_t
 #include "dxedll_priv.h"                        // must be included after headers
-#include "map.h"                                //  of external libraries!
+                                                //  of external libraries!
+#include "map.h"
 
 #define DXE                                     // signal that we include map.c from a DXE
 #include "map.c"
@@ -77,12 +78,12 @@ dxe_init (void)
   symbol = map_create (10);                     // Read comment in map.h!
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
-  symbol = map_put (symbol, "dm_init", dm_init);
+  symbol = map_put (symbol, "dm_open", dm_open);
   symbol = map_put (symbol, "dm_close", dm_close);
 
-  symbol = map_put (symbol, "dm_bin2iso", dm_bin2iso);
+  symbol = map_put (symbol, "dm_rip", dm_bin2iso);
   symbol = map_put (symbol, "dm_cdirip", dm_cdirip);
-  symbol = map_put (symbol, "dm_cdi2nero", dm_cdi2nero);
+  symbol = map_put (symbol, "dm_nrgrip", dm_cdi2nero);
 
   symbol = map_put (symbol, "dm_disc_read", dm_disc_read);
   symbol = map_put (symbol, "dm_disc_write", dm_disc_write);

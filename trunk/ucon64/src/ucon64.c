@@ -372,6 +372,9 @@ main (int argc, char **argv)
 
 #ifdef  DLOPEN
   strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.discmage_path, cygwin_fix (ucon64.discmage_path));
+#endif
   if (strlen (ucon64.discmage_path) >= 3)
     {
       strcpy (buf, ucon64.discmage_path);
@@ -460,11 +463,22 @@ main (int argc, char **argv)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
 
   strcpy (ucon64.cache_path, get_property (ucon64.configfile, "cache_path", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.cache_path, cygwin_fix (ucon64.cache_path));
+#endif
   if (strlen (ucon64.cache_path) >= 3)
     {
       strcpy (buf, ucon64.cache_path);
       realpath2 (buf, ucon64.cache_path);
     }
+#ifdef  HAVE_ZLIB_H
+  if (!access (ucon64.cache_path, F_OK))
+    ucon64.cache_enabled = 1;
+  else
+    ucon64.cache_enabled = 0;
+#else
+    ucon64.cache_enabled = 0;
+#endif
 
   // if the config file doesn't contain a parport line use "0" to force probing
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
@@ -481,7 +495,9 @@ main (int argc, char **argv)
   ucon64.argc = argc;
   ucon64.argv = argv;
 
+#ifdef HAVE_ZLIB_H
   ucon64_index_cache (); // update cache index file (eventually)
+#endif
 
   ucon64_flush (&rom);
 

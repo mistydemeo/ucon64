@@ -17,6 +17,9 @@ LDFLAGS=-s
 
 LIBNAME=discmage
 OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o
+ifndef  DJGPP
+OBJECTS+=misc.o
+endif
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the

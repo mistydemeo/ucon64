@@ -1283,7 +1283,7 @@ ucon64_configfile (void)
 #endif
       );
 
-      set_property (ucon64.cache_path, "cache_path",
+      set_property (ucon64.configfile, "cache_path",
 #if     defined __MSDOS__
         ""
 #elif   defined __CYGWIN__

@@ -40,7 +40,7 @@ write programs in C
 #include <sys/stat.h>
 
 #include "include.h"
-#include "defines.h"
+#include "ucon64.h"
 
 #define ucon64_UNKNOWN		-1
 #define ucon64_GB		1
@@ -64,9 +64,10 @@ write programs in C
 #define ucon64_NEOGEOPOCKET	19
 #define ucon64_KNOWN		9999
 
-#define ucon64_name() (getarg(argc,argv,ucon64_NAME))
-#define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
-#define ucon64_file() (getarg(argc,argv,ucon64_FILE))
+
+#define ucon64_VERSION "1.9.5"
+#define ucon64_TITLE "uCON64 1.9.5 GNU/Linux 1999/2000/2001 by NoisyB (noisyb@gmx.net)"
+
 
 int ucon64_backup(char *name);
 
@@ -75,13 +76,10 @@ char *ucon64_argv[128];
 
 //#include "stolen/nes/fam2fds.h"
 //#include "stolen/nes/fdslist.h"
-#include "stolen/n64aps.h"
-#include "stolen/n64caps.h"
-#include "stolen/cips.h"
-#include "stolen/ips.h"
-#include "stolen/applyppf.h"
-#include "stolen/makeppf.h"
-#include "stolen/cdinfo.h"
+#include "aps.h"
+#include "ips.h"
+#include "ppf.h"
+//#include "cdinfo.h"
 //#include "stolen/psx/xadump.h"
 //#include "stolen/psx/xa2wav.h"
 
@@ -89,23 +87,21 @@ char *ucon64_argv[128];
 //#include "unzip.h"
 //#include "gamecodes.h"
 //#include "transfer/transfer.h"
-#include "snes.h"
-#include "gb.h"
-#include "jaguar.h"
-#include "psx.h"
-#include "n64.h"
-#include "lynx.h"
-#include "sms.h"
-#include "nes.h"
-#include "genesis.h"
-#include "pce.h"
+#include "snes/snes.h"
+#include "gb/gb.h"
+#include "jaguar/jaguar.h"
+#include "n64/n64.h"
+#include "lynx/lynx.h"
+#include "sms/sms.h"
+#include "nes/nes.h"
+#include "genesis/genesis.h"
+#include "pce/pce.h"
 #include "bsl.h"
 #include "xps.h"
-#include "neogeo.h"
-#include "sys16.h"
-#include "atari.h"
-#include "dc.h"
-#include "ngp.h"
+#include "neogeo/neogeo.h"
+#include "sys16/sys16.h"
+#include "atari/atari.h"
+#include "ngp/ngp.h"
 
 int main(int argc,char *argv[])
 {
@@ -134,7 +130,7 @@ if(argcmp(argc,argv,"-db")||argcmp(argc,argv,"-dbv"))
 	atari_main(argc,argv);
 //	commodore_main(argc,argv);
 //	gameboy_main(argc,argv);
-//	segamegadrive_main(argc,argv);
+//	genesis_main(argc,argv);
 	jaguar_main(argc,argv);
 	lynx_main(argc,argv);
 //	nintendo64_main(argc,argv);
@@ -201,6 +197,7 @@ if(argcmp(argc,argv,"-find"))
 	return(0);
 }
 
+/*
 if(argcmp(argc,argv,"-cdrom"))
 {
 //	cdromnfo(ucon64_rom(),ucon64_rom());
@@ -208,9 +205,10 @@ if(argcmp(argc,argv,"-cdrom"))
 	ucon64_argv[1]=ucon64_rom();
 	ucon64_argc=2;
 
-	cdinfo_main(ucon64_argc,ucon64_argv);
+//	cdinfo_main(ucon64_argc,ucon64_argv);
 	return(0);
 }
+*/
 
 if(argcmp(argc,argv,"-swap"))
 {
@@ -433,7 +431,7 @@ if(console==ucon64_UNKNOWN)
 //the same but automatic
 
 	if(supernintendo_probe(argc,argv)!=-1)console=ucon64_SNES;
-	else if(segamegadrive_probe(argc,argv)!=-1)console=ucon64_GENESIS;
+	else if(genesis_probe(argc,argv)!=-1)console=ucon64_GENESIS;
 	else if(nintendo64_probe(argc,argv)!=-1)console=ucon64_N64;
 	else if(nes_probe(argc,argv)!=-1)console=ucon64_NES;
 	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
@@ -455,7 +453,7 @@ case ucon64_GB:
 	gameboy_main(argc,argv);
 break;
 case ucon64_GENESIS:
-	segamegadrive_main(argc,argv);
+	genesis_main(argc,argv);
 break;
 case ucon64_SMS:
 	sms_main(argc,argv);
@@ -478,12 +476,16 @@ break;
 case ucon64_PCE:
 	pcengine_main(argc,argv);
 break;
+/*
 case ucon64_PSX:
 	playstation_main(argc,argv);
 break;
+*/
+/*
 case ucon64_DC:
 	dreamcast_main(argc,argv);
 break;
+*/
 case ucon64_SYSTEM16:
 	system16_main(argc,argv);
 break;

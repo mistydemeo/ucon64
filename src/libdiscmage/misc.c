@@ -298,6 +298,10 @@ mkfile (char *str, const unsigned char replacement)
       case '.':
       case '-':
       case ' ':
+      case '(':
+      case ')':
+      case '[':
+      case ']':
         break;
 
       default:
@@ -357,6 +361,22 @@ strlwr (char *str)
     *p = tolower (*p);
 
   return str;
+}
+
+
+const char *
+strcasestr2 (const char *str, const char *search)
+{
+  const char *p = str;
+  int len = strlen (search);
+  
+  if (!len) return str;
+  
+  for (; *p; p++)
+    if (!strnicmp (p, search, len))
+      return p;
+  
+  return NULL;
 }
 
 

@@ -25,9 +25,11 @@
 #ifdef  __MSDOS__
 #define _PSXPB_DJGPP_
 #elif   defined __unix__
-#define _PSXPB_LINUX_
+#define _PSXPB_UNIX_
 #elif   defined __BEOS__
 #define _PSXPB_BEOS_
+#elif   defined _WIN32
+#define _PSXPB_WIN32_
 #endif
 
 
@@ -41,7 +43,7 @@
 #include <pc.h>
 #endif
 
-#if     defined _PSXPB_LINUX_ || defined _PSXPB_BEOS_
+#if     defined _PSXPB_UNIX_ || defined _PSXPB_BEOS_ || defined _PSXPB_WIN32_
 #include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>

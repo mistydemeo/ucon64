@@ -2646,11 +2646,13 @@ gbx_init (unsigned int parport, const char *filename)
   port_a = parport + 2;
   port_b = parport + 3;
   port_c = parport + 4;
+#if 0 // we want to support non-standard parallel port addresses
   if (port_8 != 0x3bc && port_8 != 0x378 && port_8 != 0x278)
     {
       printf ("PORT must be 0x3bc, 0x378 or 0x278\n");
       exit (1);
     }
+#endif
   printf ("Using I/O port 0x%x\n", port_8);
 
   if (check_port () != 0)

@@ -310,7 +310,7 @@ psx_obtain_io_permission (int base)
     }
   // return 1 if successful, otherwise, 0
 #if 0                                           // uCON64 already enabled access to I/O ports
-#ifdef  _PSX_LINUX_
+#ifdef  _PSXPB_UNIX_
   if (ioperm (base, 3, 1))
     {
       return 0;

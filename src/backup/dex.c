@@ -83,8 +83,8 @@ write_frame (int frame, char *data)
 
 
 /*
-  It will save you some work if you don't fully integrate the code above with uCON64's code,
-  because it is a project separate from the uCON64 project.
+  It will save you some work if you don't fully integrate the code above with
+  uCON64's code, because it is a project separate from the uCON64 project.
 */
 int dex_argc;
 char *dex_argv[128];

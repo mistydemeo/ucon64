@@ -454,7 +454,7 @@ void BackupROM (FILE *fp, int SizekW)
          fputc(valw >> 8, fp);
          }
       bytesread += 256 << 1;                    // 256 words
-      if ((bytesread & 0x7fff)==0)              // call parport_gauge() after receiving 32kB
+      if ((bytesread & 0xffff) == 0)            // call parport_gauge() after receiving 64kB
          parport_gauge (starttime, bytesread, size);
       }
    }
@@ -770,7 +770,7 @@ void ProgramNonIntIntelFlash (FILE *fp)
             j = GetFileByte (fp);
          }
       addr += 16;
-      if ((addr & 0x7fff)==0)                   // call parport_gauge() after sending 64kB
+      if ((addr & 0x3fff) == 0)                 // call parport_gauge() after sending 32kB
          parport_gauge (starttime, addr << 1, FileSize);
       l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
       }
@@ -852,7 +852,7 @@ void ProgramInterleaveIntelFlash (FILE *fp)
             j = GetFileByte (fp);
          }
       addr += 32;
-      if ((addr & 0x7fff)==0)                   // call parport_gauge() after sending 64kB
+      if ((addr & 0x3fff) == 0)                 // call parport_gauge() after sending 32kB
          parport_gauge (starttime, addr << 1, FileSize);
       l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
       l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
@@ -915,7 +915,7 @@ void ProgramSharpFlash (FILE *fp)
       addr += 1;
 
       j = GetFileByte (fp);
-      if ((addr & 0x7fff)==0)                   // call parport_gauge() after sending 64kB
+      if ((addr & 0x3fff) == 0)                 // call parport_gauge() after sending 32kB
          parport_gauge (starttime, addr << 1, FileSize);
       }
 

@@ -239,12 +239,18 @@ get_next_file (char *fname)
 static st_ucon64_dat_t *
 get_dat_header (char *fname, st_ucon64_dat_t *dat)
 {
+  char buf[50 * 80];                            // should be enough
+
   // Hell yes! I (NoisyB) use get_property() here...
-  get_property (fname, "author", dat->author, "Unknown");
-  get_property (fname, "version", dat->version, "?");
-  get_property (fname, "refname", dat->refname, "");
-  get_property (fname, "comment", dat->refname, "");
-  get_property (fname, "date", dat->date, "?");
+  strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author));
+  dat->author[sizeof (dat->author) - 1] = 0;
+  strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version));
+  dat->version[sizeof (dat->version) - 1] = 0;
+  strncpy (dat->refname, get_property (fname, "refname", buf, ""), sizeof (dat->refname));
+  dat->refname[sizeof (dat->refname) - 1] = 0;
+  strcpy (dat->comment, get_property (fname, "comment", buf, ""));
+  strncpy (dat->date, get_property (fname, "date", buf, "?"), sizeof (dat->date));
+  dat->date[sizeof (dat->date) - 1] = 0;
 
   return dat;
 }

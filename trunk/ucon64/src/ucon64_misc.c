@@ -42,7 +42,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  PARALLEL
 #if     defined __linux__ && defined __GLIBC__
-#include <sys/io.h>                             // ioperm() (glibc)
+#ifdef  HAVE_SYS_IO_H                           // necessary for some Linux/PPC configs
+#include <sys/io.h>                             // ioperm() (glibc), in{b, w}(), out{b, w}()
+#else
+#error No sys/io.h; configure with --disable-parallel
+#endif
 #elif   defined __BEOS__ || defined __FreeBSD__
 #include <fcntl.h>
 #elif   defined AMIGA
@@ -1440,6 +1444,8 @@ inportb (unsigned short port)
   return input_byte (port);
 #elif   defined __i386__
   return i386_input_byte (port);
+#elif   defined HAVE_SYS_IO_H
+  return inb (port);
 #endif
 }
 
@@ -1482,6 +1488,8 @@ inportw (unsigned short port)
   return input_word (port);
 #elif   defined __i386__
   return i386_input_word (port);
+#elif   defined HAVE_SYS_IO_H
+  return inw (port);
 #endif
 }
 
@@ -1523,6 +1531,8 @@ outportb (unsigned short port, unsigned char byte)
   output_byte (port, byte);
 #elif   defined __i386__
   i386_output_byte (port, byte);
+#elif   defined HAVE_SYS_IO_H
+  outb (byte, port);
 #endif
 }
 
@@ -1564,6 +1574,8 @@ outportw (unsigned short port, unsigned short word)
   output_word (port, word);
 #elif   defined __i386__
   i386_output_word (port, word);
+#elif   defined HAVE_SYS_IO_H
+  outw (word, port);
 #endif
 }
 
@@ -1678,8 +1690,9 @@ ucon64_parport_init (int port)
     }
 #endif
 
-#ifdef  __linux__
+#if     defined __linux__ && !defined __powerpc__
   /*
+    TODO: find out requirements for Linux/PPC
     Some code needs us to switch to the real uid and gid. However, other code
     needs access to I/O ports other than the standard printer port registers.
     We just do an iopl(3) and all code should be happy. Using iopl(3) enables
@@ -1697,7 +1710,7 @@ ucon64_parport_init (int port)
                        "       (This program needs root privileges for the requested action)\n");
       exit (1);                                 // Don't return, if iopl() fails port access
     }                                           //  causes core dump
-#endif // __linux__
+#endif // __linux__ && !__powerpc__
 
 #if     defined __i386__ || defined _WIN32
 

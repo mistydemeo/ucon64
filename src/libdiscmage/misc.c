@@ -704,7 +704,7 @@ mkdir2 (const char *name)
 
 char *
 basename2 (const char *path)
-// basename() clone (differs from Linux' basename())
+// basename() clone (differs from Linux's basename())
 {
   char *p1;
 #if     defined DJGPP || defined __CYGWIN__
@@ -716,7 +716,7 @@ basename2 (const char *path)
 
 #if     defined DJGPP || defined __CYGWIN__
   // Yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
-  // __CYGWIN__ has no basename()
+  // Cygwin has no basename()
   p1 = strrchr (path, '/');
   p2 = strrchr (path, '\\');
   if (p2 > p1)                                  // use the last separator in path
@@ -733,7 +733,7 @@ basename2 (const char *path)
 
 char *
 dirname2 (const char *path)
-// dirname() clone (differs from Linux' dirname())
+// dirname() clone (differs from Linux's dirname())
 {
   char *p1, *dir;
 #if     defined DJGPP || defined __CYGWIN__
@@ -750,7 +750,7 @@ dirname2 (const char *path)
   strcpy (dir, path);
 #if     defined DJGPP || defined __CYGWIN__
   // Yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
-  // __CYGWIN__ has no dirname()
+  // Cygwin has no dirname()
   p1 = strrchr (dir, '/');
   p2 = strrchr (dir, '\\');
   if (p2 > p1)                                  // use the last separator in path
@@ -767,14 +767,15 @@ dirname2 (const char *path)
   p1 = strrchr (dir, FILE_SEPARATOR);
 #endif
 
-  while (p1 > dir &&                            // find first of last separators
-         ((*(p1 - 1) == '/' && (*p1 == '/'      //  (we have to strip trailing ones)
+  while (p1 > dir &&                            // find first of last separators (we have to strip trailing ones)
 #if     defined DJGPP || defined __CYGWIN__
-                                           || *p1 == '\\'))
+         ((*(p1 - 1) == '/' && (*p1 == '/' || *p1 == '\\'))
           ||
-          (*(p1 - 1) == '\\' && (*p1 == '\\' || *p1 == '/'
+          (*(p1 - 1) == '\\' && (*p1 == '\\' || *p1 == '/'))))
+#else
+         (*(p1 - 1) == FILE_SEPARATOR && *p1 == FILE_SEPARATOR))
 #endif
-         ))))
+         
     p1--;
 
   if (p1 == dir)
@@ -1744,15 +1745,15 @@ set_tty (tty_t *param)
 #endif
 
 
-void
-init_conio (void)
-{
 #ifndef __MSDOS__
 /*
   This code compiles with DJGPP, but is not neccesary. Our kbhit() conflicts
   with DJGPP's one, so it won't be used for that function. Perhaps it works
   for making getchar() behave like getch(), but that's a bit pointless.
 */
+void
+init_conio (void)
+{
   if (!isatty (STDIN_FILENO))
     {
       stdin_tty = 0;
@@ -1779,21 +1780,19 @@ init_conio (void)
   newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
 
   set_tty (&newtty);
-#endif
 }
 
 
 void
 deinit_conio (void)
 {
-#ifndef __MSDOS__
   if (oldtty_set)
     {
       tcsetattr (STDIN_FILENO, TCSAFLUSH, &oldtty);
       oldtty_set = 0;
     }
-#endif
 }
+#endif // #ifndef __MSDOS__
 
 
 #if     defined __CYGWIN__ && !defined USE_POLL

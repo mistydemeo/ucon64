@@ -1165,6 +1165,91 @@ ucon64_testpad (const char *filename)
 
 
 #ifdef  PARALLEL
+
+#ifdef  __i386__                                // GCC && x86
+inline static unsigned char
+#ifdef  __CYGWIN__
+__stdcall
+#endif
+i386_input_byte (unsigned short port)
+{
+  unsigned char byte;
+  __asm__ __volatile__
+  ("inb %1, %0"
+    : "=a" (byte)
+    : "d" (port)
+  );
+  return byte;
+}
+
+
+inline static unsigned short
+i386_input_word (unsigned short port)
+{
+  unsigned short word;
+  __asm__ __volatile__
+  ("inw %1, %0"
+    : "=a" (word)
+    : "d" (port)
+  );
+  return word;
+}
+
+
+inline static void
+#ifdef  __CYGWIN__
+__stdcall
+#endif
+i386_output_byte (unsigned short port, unsigned char byte)
+{
+  __asm__ __volatile__
+  ("outb %1, %0"
+    :
+    : "d" (port), "a" (byte)
+  );
+}
+
+
+inline static void
+i386_output_word (unsigned short port, unsigned short word)
+{
+  __asm__ __volatile__
+  ("outw %1, %0"
+    :
+    : "d" (port), "a" (word)
+  );
+}
+#endif // __i386__
+
+
+#if     defined _WIN32
+#include <conio.h>
+#include "dlopen.h"
+
+// The following four functions are needed because inp{w} and outp{w} seem to be macros
+// __stdcall is used, because the functions in inpout32.dll also use that attribute
+unsigned char __stdcall inp_func (unsigned short port) { return (unsigned char) inp (port); }
+unsigned short inpw_func (unsigned short port) { return inpw (port); }
+void __stdcall outp_func (unsigned short port, unsigned char byte) { outp (port, byte); }
+void outpw_func (unsigned short port, unsigned short word) { outpw (port, word); }
+
+void *inpout32;
+unsigned char (__stdcall *input_byte) (unsigned short) = inp_func;
+unsigned short (*input_word) (unsigned short) = inpw_func;
+void (__stdcall *output_byte) (unsigned short, unsigned char) = outp_func;
+void (*output_word) (unsigned short, unsigned short) = outpw_func;
+
+#elif   defined __CYGWIN__
+#include "dlopen.h"
+
+void *inpout32;
+unsigned char (__stdcall *input_byte) (unsigned short) = i386_input_byte;
+unsigned short (*input_word) (unsigned short) = i386_input_word;
+void (__stdcall *output_byte) (unsigned short, unsigned char) = i386_output_byte;
+void (*output_word) (unsigned short, unsigned short) = i386_output_word;
+#endif
+
+
 #if     defined __BEOS__ || defined AMIGA
 void
 close_io_port (void)
@@ -1174,7 +1259,6 @@ close_io_port (void)
 #endif
 
 
-#ifndef _WIN32
 unsigned char
 inportb (unsigned short port)
 {
@@ -1185,16 +1269,10 @@ inportb (unsigned short port)
   ioctl (ucon64_io_fd, 'r', &temp, 0);
 
   return temp.data8;
+#elif   defined _WIN32 || defined __CYGWIN__
+  return input_byte (port);
 #elif   defined __i386__
-  unsigned char byte;
-
-  __asm__ __volatile__
-  ("inb %1, %0"
-    : "=a" (byte)
-    : "d" (port)
-  );
-
-  return byte;
+  return i386_input_byte (port);
 #endif
 }
 
@@ -1209,16 +1287,10 @@ inportw (unsigned short port)
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
 
   return temp.data16;
+#elif   defined _WIN32 || defined __CYGWIN__
+  return input_word (port);
 #elif   defined __i386__
-  unsigned short word;
-
-  __asm__ __volatile__
-  ("inw %1, %0"
-    : "=a" (word)
-    : "d" (port)
-  );
-
-  return word;
+  return i386_input_word (port);
 #endif
 }
 
@@ -1232,12 +1304,10 @@ outportb (unsigned short port, unsigned char byte)
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
+#elif   defined _WIN32 || defined __CYGWIN__
+  output_byte (port, byte);
 #elif   defined __i386__
-  __asm__ __volatile__
-  ("outb %1, %0"
-    :
-    : "d" (port), "a" (byte)
-  );
+  i386_output_byte (port, byte);
 #endif
 }
 
@@ -1251,15 +1321,12 @@ outportw (unsigned short port, unsigned short word)
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
+#elif   defined _WIN32 || defined __CYGWIN__
+  output_word (port, word);
 #elif   defined __i386__
-  __asm__ __volatile__
-  ("outw %1, %0"
-    :
-    : "d" (port), "a" (word)
-  );
+  i386_output_word (port, word);
 #endif
 }
-#endif // ifndef _WIN32
 
 
 #define DETECT_MAX_CNT 1000
@@ -1350,6 +1417,30 @@ ucon64_parport_init (unsigned int port)
     }
 #endif
 #if     defined __i386__ || defined _WIN32      // 0x3bc, 0x378, 0x278
+
+#if     defined _WIN32 || defined __CYGWIN__
+  /*
+    We support the device driver inpout32.dll, because using that file is way
+    easier than using UserPort or GiveIO. inpout32.dll is also more reliable
+    and seems to enable access to all I/O ports (at least it's *very* easy to
+    crash Windows XP ;-) The only downside is that it's almost two times slower
+    than UserPort...
+  */
+  char fname[FILENAME_MAX];
+  sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
+#ifdef  __CYGWIN__
+  change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
+#endif
+  if (access (fname, F_OK) == 0)
+    {
+      printf ("Using %s!\n", fname);
+      inpout32 = open_module (fname);
+      // note that inport_word and output_word keep their default value...
+      input_byte = get_symbol (inpout32, "Inp32");
+      output_byte = get_symbol (inpout32, "Out32");
+    }
+#endif // _WIN32 || __CYGWIN__
+
   if (!port)                                    // no port specified or forced?
     {
       unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
@@ -1387,7 +1478,7 @@ ucon64_parport_init (unsigned int port)
 #endif // __linux__ || __FreeBSD__
 
   outportb ((unsigned short) (port + PARPORT_CONTROL), 
-            inportb ((unsigned short) (port + PARPORT_CONTROL)) & 0x0f);
+            (unsigned char) (inportb ((unsigned short) (port + PARPORT_CONTROL)) & 0x0f));
   // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
 #ifdef  __linux__

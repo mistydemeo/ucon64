@@ -37,9 +37,6 @@ const char *neogeo_usage[] =
     "Neo Geo/Neo Geo CD(Z)/MVS",
     "1990/1994 SNK http://www.neogeo.co.jp",
     "  " OPTION_LONG_S "ng          force recognition"
-#ifndef HAVE_ZLIB_H
-    "; NEEDED"
-#endif
     "\n"
 #if 0
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
@@ -58,7 +55,6 @@ const char *neogeo_usage[] =
 //    "                  " OPTION_LONG_S "rom=DIRECTORY\n"
 //    "INFO: actually this option does the same as Goodxxxx, Romcenter, etc.\n"
 //    "      Therefore you must have the DAT files for Arcade installed\n"
-    "                  for more options check the support for DISC-based consoles\n"
     ,
     NULL
   };

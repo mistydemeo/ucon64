@@ -1,3 +1,4 @@
+
 /*
 uCON64 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
@@ -1161,7 +1162,7 @@ ucon64_usage (int argc, char *argv[])
       "All DISC-based consoles (using libdiscmage)\n");
   if (ucon64.discmage_enabled)
     printf (
-      "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
+      "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for IMAGE; " OPTION_LONG_S "rom=IMAGE\n"
 //      "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
       "TODO: " OPTION_LONG_S "cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
       "TODO: " OPTION_LONG_S "nrgrip=Nrip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"

@@ -40,9 +40,6 @@ const char *sms_usage[] =
     "Sega Master System(II/III)/GameGear (Handheld)",
     "1986/19XX SEGA http://www.sega.com",
     "  " OPTION_LONG_S "sms         force recognition"
-#ifndef HAVE_ZLIB_H
-    "; NEEDED"
-#endif
     "\n"
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"

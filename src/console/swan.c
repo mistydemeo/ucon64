@@ -38,9 +38,6 @@ const char *swan_usage[] =
     "WonderSwan/WonderSwan Color/SwanCrystal",
     "19XX/19XX/2002 Bandai",
     "  " OPTION_LONG_S "swan        force recognition"
-#ifndef HAVE_ZLIB_H
-    "; NEEDED"
-#endif
     "\n"
     "  " OPTION_LONG_S "chk         fix ROM checksum\n"
     ,

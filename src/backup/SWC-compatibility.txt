@@ -1,9 +1,9 @@
 A Super Wild Card compatibility list
-Version: 1.20
+Version: 1.21
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 19 May 2003
+Date: 24 June 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
-Software: uCON64 1.9.8beta8
+Software: uCON64 1.9.8beta9
 
 
 Legend:
@@ -40,7 +40,7 @@ byte before sending the game. This causes that some games don't have code 3,
 because uCON64 already makes the required modification. For example, if Addams
 Family Values is loaded from diskette the emulation mode select byte should
 have the value 0x2c instead of the value 0x0c (before the file is split).
-For games marked with an asterisk uCON64 1.9.8beta8 is required.
+For games marked with an asterisk uCON64 1.9.8beta9 is required.
 
 
 Code    Game
@@ -290,6 +290,7 @@ Code    Game
 9 -     Star Ocean (J)
 9 -     Starwing (V1.0) (E)
 9 -     Starwing (V1.1) (E)
+9 -     Street Fighter Alpha 2 (E) [!]
 9 -     Street Fighter Alpha 2 (E) [b1]
 9 -     Street Fighter Alpha 2 (U)
 0 -     Street Fighter II Champ. Edition (Hack)
@@ -306,6 +307,7 @@ Code    Game
 0 -     Super Adventure Island II (U)
 0 -     Super Adventure Island (U)
 0 -     Super Aleste (E)
+0 -     Super Aleste (J)
 0 -     Super Aleste (J) [t1]
 0 -     Super Battletank (V1.0) (U)
 0 -     Super Bomberman 2 (E)
@@ -360,10 +362,12 @@ Code    Game
 0 -     Terranigma (E)
 0 -     Terranigma (S)
 0 -     Test Drive 2 (U)(20429)
+1* -    Tetris Attack (E)
+1 + 2*- Tetris Attack (U)
 0 -     Theme Park (E)
 0 -     Thoroughbred Breeder 3 (J)
 0 -     Tiny Toons Adventures - Buster Busts Loose! (E)
-2 + 8 + 9 - Tokimeki Memorial (V1.1) (J) <= the game halts after a while
+2+8+9 - Tokimeki Memorial (V1.1) (J) <= the game halts after a while
 0 -     Tom & Jerry (U)
 0 -     Top Racer (J)
 0 -     Treasure Hunter G (J)

@@ -1930,35 +1930,39 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     This has been verified on a real SNES for the games with crc 0x29226b62 and
     0x4ef3d27b. The games with crc 0xbd7bc39f don't seem to run on a copier.
 
-    0x9b161d4d: Pop 'N Twinbee Sample (J)
-    0xbd8f1b20: Rise of the Robots (Beta)
-    0x05926d17: Shaq Fu (J)(NG-Dump Known)
-    0x3e2e5619: Super Adventure Island II (Beta)
-    0x023e1298: Super Air Driver (E) [b]
     0x89d09a77: Infernal's Evil Demo! (PD)
     0xd3095af3: Legend - SNDS Info, Incredible Hulk Walkthru (PD)
-    0x0f802e41: Mortal Kombat 3 Final (Anthrox Beta Hack)
+    0x9b161d4d: Pop 'N Twinbee Sample (J)
     0x6910700a: Rock Fall (PD)
     0x447df9d5: SM Choukyousi Hitomi (PD)
-    0x422c95c4: Time Slip (Beta)
+    0x02f401df: SM Choukyousi Hitomi Vol 2 (PD)
     0xf423997a: World of Manga 2 (PD)
-    These games/dumps have a HiROM map type byte while they are LoROM games
+    These games/dumps have a HiROM map type byte while they are LoROM
+
+    0x0f802e41: Mortal Kombat 3 Final (Anthrox Beta Hack)
+    0xbd8f1b20: Rise of the Robots (Beta)
+    0x05926d17: Shaq Fu (E)/(J)(NG-Dump Known)
+    0x3e2e5619: Super Adventure Island II (Beta)
+    0x023e1298: Super Air Driver (E) [b]
+    These are also not special cases (not: HiROM map type byte + LoROM game).
+    GoodSNES - 0.999.5 for RC 2.5.dat simply contains bugs.
 
     0xf3aa1eca: Power Piggs of the Dark Age (Pre-Release) {[h1]}
     0xaad23842/0x5ee74558: Super Wild Card DX DOS ROM V1.122/interleaved
-    0x7a44bd18: Total Football (E)(NG-Dump Known)
+    0x422c95c4: Time Slip (Beta)
     0xf0bf8d7c/0x92180571: Utyu no Kishi Tekkaman Blade (Beta) {[h1]}/interleaved
     0x8e1933d0: Wesley Orangee Hotel (PD)
-    0xe2b95725/0x9ca5ed58: Zool (Sample Cart)
-    These games have garbage in their header
+    0xe2b95725/0x9ca5ed58: Zool (Sample Cart)/interleaved
+    These games/dumps have garbage in their header
+
+    0x7a44bd18: Total Football (E)(NG-Dump Known)
+    Garbage in header, but not a special case
   */
   if (crc == 0xfa83b519 || crc == 0x9b161d4d || crc == 0xf3aa1eca ||
-      crc == 0xbd8f1b20 || crc == 0x05926d17 || crc == 0x3e2e5619 ||
-      crc == 0x023e1298 || crc == 0xaad23842 || crc == 0x7a44bd18 ||
-      crc == 0x89d09a77 || crc == 0xd3095af3 || crc == 0x0f802e41 ||
+      crc == 0xaad23842 || crc == 0x89d09a77 || crc == 0xd3095af3 ||
       crc == 0x6910700a || crc == 0x447df9d5 || crc == 0x422c95c4 ||
       crc == 0xf0bf8d7c || crc == 0x8e1933d0 || crc == 0xf423997a ||
-      crc == 0xe2b95725)
+      crc == 0xe2b95725 || crc == 0x02f401df)
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x65485afb || crc == 0x9b4638d0 || crc == 0x7039388a ||
            crc == 0xdbc88ebf || crc == 0x5ee74558 || crc == 0x92180571 ||
@@ -2362,7 +2366,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
         rominfo->buheader_len = SWC_HEADER_LEN;
       else
         {
-          int surplus = ucon64.file_size % 32768;
+          int surplus = ucon64.file_size > 32768 ? ucon64.file_size % 32768 : 0;
           if (surplus == 0)
             // most likely we guessed the copier type wrong
             {
@@ -2371,6 +2375,8 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
             }
           else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < MAXBUFSIZE)
             rominfo->buheader_len = surplus;
+          else if (type == SWC || type == GD3)  // special case for Infinity Demo (PD)...
+            rominfo->buheader_len = SWC_HEADER_LEN;
         }
     }
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn switch was specified

@@ -1071,6 +1071,10 @@ ucon64_rom_handling (void)
   if (ucon64.crc32 != 0 && ucon64.dat_enabled)
     {
       ucon64.dat = ucon64_dat_search (ucon64.crc32, NULL);
+      if (ucon64.dat)
+        if ((int) ucon64.dat->fsize != ucon64.file_size - // file size must match
+                                       (ucon64.rominfo ? ucon64.rominfo->buheader_len : 0))
+          ucon64.dat = NULL;
 
       if (ucon64.dat)
         switch (ucon64.console)

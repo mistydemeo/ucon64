@@ -171,7 +171,8 @@ const st_getopt2_t lf[] = {
 #ifdef  USE_PARALLEL
   smd_usage,
   mdpro_usage,
-//  mgd_usage, 
+  mcd_usage,
+//  mgd_usage,
 #endif
   lf,
   gameboy_usage,

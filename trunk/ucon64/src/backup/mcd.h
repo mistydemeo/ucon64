@@ -1,8 +1,7 @@
 /*
-f2a.h - Flash 2 Advance support for uCON64
+mcd.h - Mike Pavone's Genesis/Sega CD transfer cable support for uCON64
 
-written by 2003 Ulrich Hecht (uli@emulinks.de)
-           2004 NoisyB (noisyb@gmx.net)
+written by 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -19,17 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef F2A_H
-#define F2A_H
-extern const st_getopt2_t f2a_usage[];
+#ifndef MCD_H
+#define MCD_H
+extern const st_getopt2_t mcd_usage[];
 
-#define F2A_HEADER_START 0
-#define F2A_HEADER_LEN 0
-
-#if     defined USE_PARALLEL || defined USE_USB
-extern int f2a_read_rom (const char *filename, int size);
-extern int f2a_write_rom (const char *filename, int size);
-extern int f2a_read_sram (const char *filename, int bank);
-extern int f2a_write_sram (const char *filename, int bank);
+#ifdef USE_PARALLEL
+extern int mcd_read_rom (const char *filename, unsigned int parport);
 #endif // USE_PARALLEL
-#endif
+
+#endif // MCD_H

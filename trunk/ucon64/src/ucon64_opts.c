@@ -300,6 +300,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGGB:
     case UCON64_XLIT:
     case UCON64_XMCCL:
+    case UCON64_XMCD:
     case UCON64_XMD:
     case UCON64_XMDS:
     case UCON64_XMDB:
@@ -1876,6 +1877,13 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XMCD:
+      if (!access (ucon64.rom, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
+      mcd_read_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XMD:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump flash card
         md_read_rom (ucon64.rom, ucon64.parport, 64 * MBIT); // reads 32 Mbit if Sharp card
@@ -2048,37 +2056,37 @@ ucon64_options (int c, const char *optarg)
 #if     defined USE_PARALLEL || defined USE_USB
     case UCON64_XF2A:
       if (access (ucon64.rom, F_OK) != 0)
-        f2a_read_rom (ucon64.rom, ucon64.parport, 32);
+        f2a_read_rom (ucon64.rom, 32);
       else
-        f2a_write_rom (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+        f2a_write_rom (ucon64.rom, UCON64_UNKNOWN);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XF2AMULTI:
-      f2a_write_rom (NULL, ucon64.parport, strtol (optarg, NULL, 10) * MBIT);
+      f2a_write_rom (NULL, strtol (optarg, NULL, 10) * MBIT);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XF2AC:
       if (!access (ucon64.rom, F_OK) && ucon64.backup)
         printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
-      f2a_read_rom (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      f2a_read_rom (ucon64.rom, strtol (optarg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
     case UCON64_XF2AS:
       if (access (ucon64.rom, F_OK) != 0)
-        f2a_read_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+        f2a_read_sram (ucon64.rom, UCON64_UNKNOWN);
       else
-        f2a_write_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+        f2a_write_sram (ucon64.rom, UCON64_UNKNOWN);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XF2AB:
       if (access (ucon64.rom, F_OK) != 0)
-        f2a_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+        f2a_read_sram (ucon64.rom, strtol (optarg, NULL, 10));
       else
-        f2a_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+        f2a_write_sram (ucon64.rom, strtol (optarg, NULL, 10));
       fputc ('\n', stdout);
       break;
 #endif // USE_PARALLEL || USE_USB

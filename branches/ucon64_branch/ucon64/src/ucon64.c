@@ -585,7 +585,6 @@ main (int argc, char **argv)
   // load libnetgui
   ucon64.netgui_enabled = ucon64_load_netgui ();
 #endif
-#endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
   if (argc < 2)

@@ -215,8 +215,8 @@ ucon64_switches (int c, const char *optarg)
 
 #ifdef  GUI
       printf (NETGUI_STATUS_MSG
-              "netgui enabled:                  %s\n"
-              "netgui version:                  %s\n",
+              "netgui enabled:                    %s\n"
+              "netgui version:                    %s\n",
               ptr2,
               ucon64.netgui_enabled ? "yes" : "no",
               buf2);

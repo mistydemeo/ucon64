@@ -86,12 +86,13 @@ if(!strdcmp(query,"-ns"))
 /*
   options
 */
+
   sprintf(buf,"xterm -e \"ucon64 %s %s %s\" &", query
   , (ucon64gui.rom != NULL) ? ucon64gui.rom : ""
   , (ucon64gui.file != NULL) ? ucon64gui.file : ""
   );
 
-  system (buf);
+//  system (buf);
 
 /*
   if (!(fh = popen (buf, "r")))

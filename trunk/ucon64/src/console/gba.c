@@ -319,8 +319,8 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
 {
   FILE *srcfile, *destfile;
   int bytesread, n = 0;
-  char buffer[32 * 1024], backup_name[FILENAME_MAX], replace[2],
-       wait_time = atoi (value);
+  char buffer[32 * 1024], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       replace[2], wait_time = atoi (value);
 
   if (wait_time % 4 != 0 || wait_time > 28 || wait_time < 0)
     {
@@ -330,17 +330,17 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
 
   puts ("Applying crash patch...");
 
-  strcpy (backup_name, ucon64.rom);
-  set_suffix (backup_name, ".BAK");
-  rename (ucon64.rom, backup_name);
-  if ((srcfile = fopen (backup_name, "rb")) == NULL)
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], backup_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
       return -1;
     }
-  if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
   if (rominfo->buheader_len)        // copy header (if present)
@@ -365,7 +365,8 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
   fclose (destfile);
 
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
-  printf (ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 

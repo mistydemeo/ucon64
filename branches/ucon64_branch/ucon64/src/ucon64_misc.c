@@ -396,9 +396,6 @@ const st_usage_t ucon64_options_usage[] = {
   {"findr", "STR", "like " OPTION_LONG_S "find but looks also for shifted/relative similarities"},
   {"c", "FILE", "compare FILE with ROM for differences"},
   {"cs" ,"FILE", "compare FILE with ROM for similarities"},
-#ifdef  GUI
-  {"js", "DEVICE", "test Joystick/Gamepad on DEVICE (default: /dev/input/js0)"},
-#endif
   {"help", NULL, "display this help and exit"},
   {"version", NULL, "output version information and exit"},
   {"q", NULL, "be quiet (don't show ROM info)"},

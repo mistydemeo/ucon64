@@ -69,7 +69,7 @@ extern const st_track_probe_t track_probe[];
                         or anything else that could identify a file as an
                         image (can be very slow)
 */
-extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
+extern int dm_track_init (dm_track_t *track, FILE *fh);
 extern int dm_free (dm_image_t *image);
 //extern void writewavheader (FILE * fdest, int track_length);
 extern const char *dm_get_track_desc (int mode, int sector_size, int cue);

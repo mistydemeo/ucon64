@@ -621,7 +621,10 @@ main (int argc, char **argv)
 #ifdef  GUI
       if (!stricmp (ucon64.argv[0], "ucon64gui") ||
           !stricmp (ucon64.argv[0], "gucon64"))
-        libng_gui (NULL);
+        {
+          libng_gui (NULL);
+          exit (0);
+        }
       else
         {
 #endif

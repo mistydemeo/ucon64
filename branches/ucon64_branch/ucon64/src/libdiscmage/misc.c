@@ -1774,7 +1774,7 @@ gauge (time_t init_time, int pos, int size)
   int curr, bps, left, p, percentage;
   char progress[MAXBUFSIZE];
 
-  if (pos > size)
+  if (pos > size || pos + size == 0)
     return -1;
 
   if ((curr = time (0) - init_time) == 0)

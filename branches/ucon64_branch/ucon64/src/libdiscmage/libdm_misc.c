@@ -353,7 +353,7 @@ callibrate (const char *s, int len, FILE *fh)
 }
 
 
-const dm_track_t *
+int
 dm_track_init (dm_track_t *track, FILE *fh)
 {
   int pos = 0; 
@@ -375,7 +375,7 @@ dm_track_init (dm_track_t *track, FILE *fh)
   for (x = 0; x < 64; x++)
     {
       if (fread (&value_s, 1, 16, fh) != 16)
-        return NULL;
+        return -1;
       fseek (fh, -16, SEEK_CUR);
       if (!memcmp (sync_data, value_s, 12))
         break;
@@ -425,7 +425,7 @@ dm_track_init (dm_track_t *track, FILE *fh)
   if (!identified)
     {
       fprintf (stderr, "ERROR: could not find iso header of current track\n");
-      return NULL;
+      return -1;
     }
 
   track->sector_size = track_probe[x].sector_size;
@@ -435,7 +435,7 @@ dm_track_init (dm_track_t *track, FILE *fh)
   track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
   track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
 
-  return track;
+  return 0;
 }
 
 
@@ -446,17 +446,18 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   typedef struct
     {
       int type;
-      int (* func) (dm_image_t *);
+      int (* init_func) (dm_image_t *);
+      int (* track_init_func) (dm_track_t *, FILE *);
     } st_probe_t;
 
   static st_probe_t probe[] =
     {
-      {DM_CDI, cdi_init},
-      {DM_NRG, nrg_init},
-//      {DM_CCD, ccd_init},
-      {DM_SHEET, sheet_init},
-      {DM_OTHER, other_init},
-      {0, NULL}
+      {DM_CDI, cdi_init, cdi_track_init},
+      {DM_NRG, nrg_init, nrg_track_init},
+//      {DM_CCD, ccd_init, ccd_track_init},
+      {DM_SHEET, sheet_init, dm_track_init},
+      {DM_OTHER, other_init, dm_track_init},
+      {0, NULL, NULL}
     };
   int x = 0, identified = 0;
   int t = 0;
@@ -483,13 +484,13 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
     return NULL;
 
   for (x = 0; probe[x].type; x++)
-    if (probe[x].func)
+    if (probe[x].init_func)
       {
         dm_clean (image);
         image->flags = flags;
         strcpy (image->fname, fname);
 
-        if (!probe[x].func (image))
+        if (!probe[x].init_func (image))
           {
             identified = 1;
             break;

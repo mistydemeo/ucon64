@@ -52,7 +52,11 @@ mgd_interleave (unsigned char **buffer, int size)
   int n;
   unsigned char *src = *buffer;
 
-  *buffer = (unsigned char *) malloc (size);
+  if (!(*buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
+      exit (1);
+    }
   for (n = 0; n < size / 2; n++)
     {
       (*buffer)[n] = src[n * 2 + 1];
@@ -68,7 +72,11 @@ mgd_deinterleave (unsigned char **buffer, int size)
   int n = 0, offset;
   unsigned char *src = *buffer;
 
-  *buffer = (unsigned char *) malloc (size);
+  if (!(*buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
+      exit (1);
+    }
   for (offset = 0; offset < size / 2; offset++)
     {
       (*buffer)[n++] = src[size / 2 + offset];
@@ -79,34 +87,53 @@ mgd_deinterleave (unsigned char **buffer, int size)
 
 
 int
-q_fread_mgd (void *buffer, size_t fpos, size_t len, const char *filename)
+fread_mgd (void *buffer, size_t size, size_t number, FILE *fh)
 /*
-  This function is used to handle an MGD file as if it wasn't interleaved,
-  without the overhead of reading the entire file into memory. This is
-  important for genesis_init(). When the file turns out to be a Genesis dump in
-  MGD format it is much more efficient for compressed files to read the entire
-  file into memory and then deinterleave it (as load_rom() does).
+  This function is used to handle a Genesis MGD file as if it wasn't
+  interleaved, without the overhead of reading the entire file into memory.
+  This is important for genesis_init(). When the file turns out to be a Genesis
+  dump in MGD format it is much more efficient for compressed files to read the
+  entire file into memory and then deinterleave it (as load_rom() does).
   In order to speed this function up a bit ucon64.file_size is used. That means
   it can't be used for an arbitrary file.
 */
 {
-  int bpos = 0, n, block_size, fpos_odd = fpos & 1, // flag if starting fpos is odd
-      size = ucon64.file_size /* q_fsize (filename) */;
-  FILE *fh;
+  int n = 0, bpos = 0, fpos, fpos_org, block_size, bytesread = 0,
+      len = number * size, fsize = ucon64.file_size /* q_fsize (filename) */;
   unsigned char tmp1[MAXBUFSIZE], tmp2[MAXBUFSIZE];
 
-  if ((fh = fopen (filename, "rb")) == NULL)
-    return -1;
-  while (len > 0)
+  fpos = fpos_org = ftell (fh);
+  if (fpos >= fsize)
+    return 0;
+
+  if (len == 0)
+    return 0;
+  else if (len == 1)
+    {
+      if (fpos_org & 1)
+        {
+          fseek (fh, fpos / 2, SEEK_SET);
+          *((unsigned char *) buffer) = fgetc (fh);
+        }
+      else
+        {
+          fseek (fh, fpos / 2 + fsize / 2, SEEK_SET);
+          *((unsigned char *) buffer) = fgetc (fh);
+        }
+      fseek (fh, fpos_org + 1, SEEK_SET);
+      return 1;
+    }
+
+  while (len > 0 && !feof (fh))
     {
       block_size = len > MAXBUFSIZE ? MAXBUFSIZE : len;
 
       fseek (fh, fpos / 2, SEEK_SET);
-      fread (tmp1, 1, block_size / 2, fh);      // read odd bytes
-      fseek (fh, (fpos + 1) / 2 + size / 2, SEEK_SET);
-      fread (tmp2, 1, block_size / 2, fh);      // read even bytes
+      bytesread += fread (tmp1, 1, block_size / 2, fh); // read odd bytes
+      fseek (fh, (fpos + 1) / 2 + fsize / 2, SEEK_SET);
+      bytesread += fread (tmp2, 1, block_size / 2, fh); // read even bytes
 
-      if (fpos_odd)
+      if (fpos_org & 1)
         for (n = 0; n < block_size / 2; n++)
           {
             ((unsigned char *) buffer)[bpos + n * 2] = tmp1[n];
@@ -122,9 +149,24 @@ q_fread_mgd (void *buffer, size_t fpos, size_t len, const char *filename)
       bpos += block_size;
       len -= block_size;
     }
+  fseek (fh, fpos_org + bytesread, SEEK_SET);
+  return bytesread / size;
+}
+
+
+int
+q_fread_mgd (void *buffer, size_t start, size_t len, const char *filename)
+{
+  int result;
+  FILE *fh;
+
+  if ((fh = fopen (filename, "rb")) == NULL)
+    return -1;
+  fseek (fh, start, SEEK_SET);
+  result = (int) fread_mgd (buffer, 1, len, fh);
   fclose (fh);
 
-  return 0;
+  return result;
 }
 
 

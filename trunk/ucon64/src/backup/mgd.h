@@ -110,7 +110,9 @@ is cat. no. 475) would look like: SF16475A.078
 // the following three functions are used by non-transfer code in genesis.c
 extern void mgd_interleave (unsigned char **buffer, int size);
 extern void mgd_deinterleave (unsigned char **buffer, int size);
-extern int q_fread_mgd (void *buffer, size_t start, size_t len, const char *filename);
+extern int fread_mgd (void *buffer, size_t size, size_t number, FILE *fh);
+extern int q_fread_mgd (void *buffer, size_t start, size_t len,
+                        const char *filename);
 
 #define MGD_HEADER_START 0
 #define MGD_HEADER_LEN 512

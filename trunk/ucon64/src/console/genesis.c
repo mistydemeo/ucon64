@@ -45,8 +45,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GENESIS_NAME_LEN 48
 
 static int genesis_chksum (unsigned char *rom_buffer);
-static unsigned char *load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer);
-static int save_smd (const char *name, unsigned char *buffer, st_smd_header_t *header, long size);
+static unsigned char *load_rom (st_rominfo_t *rominfo, const char *name,
+                                unsigned char *rom_buffer);
+static int save_smd (const char *name, unsigned char *buffer,
+                     st_smd_header_t *header, long size);
 static int save_bin (const char *name, unsigned char *buffer, long size);
 static int save_mgd (const char *name, unsigned char **buffer, long size);
 
@@ -88,9 +90,10 @@ const st_usage_t genesis_usage[] =
     {"multi", "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
                       "truncated to SIZE Mbit; file with loader must be specified\n"
                       "first, then all the ROMs, multi-game file to create last"},
+    {"pal", NULL, "specify console to use multi-game file on is a\n"
+                  "European Mega Drive (PAL); use in combination with -multi"},
     {NULL, NULL, NULL}
   };
-
 
 const st_usage_t bin_usage[] =
   {
@@ -99,15 +102,21 @@ const st_usage_t bin_usage[] =
     {NULL, NULL, NULL}
   };
 
-
 typedef struct st_genesis_header
 {
   char pad[256];
 } st_genesis_header_t;
 
-st_genesis_header_t genesis_header;
-enum { SMD, BIN, MGD } type;
-static int genesis_rom_size;
+static st_genesis_header_t genesis_header;
+static genesis_file_t type;
+static int genesis_rom_size, genesis_has_sram, genesis_tv_standard;
+
+
+genesis_file_t
+genesis_get_file_type (void)
+{
+  return type;
+}
 
 
 int
@@ -438,7 +447,7 @@ genesis_s (st_rominfo_t *rominfo)
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
-  else // type == MGD
+  else // type == MGD_GEN
     {
       p = basename (ucon64.rom);
       if ((p[0] == 'M' || p[0] == 'm') && (p[1] == 'D' || p[1] == 'd'))
@@ -503,19 +512,22 @@ genesis_j (st_rominfo_t *rominfo)
           (*(strrchr (src_name, '.') + 1))++;
           block_size = q_fsize (src_name) - rominfo->buheader_len;
         }
-                                                // fix header
-      buf[0] = total_size / 16384;              // # 16K blocks
-      buf[1] = 3;                               // ID 0
-      buf[2] = 0;                               // last file -> clear bit 6
-      q_fwrite (buf, 0, 3, dest_name, "r+b");
-      buf[0] = 0xaa;                            // ID 1
-      buf[1] = 0xbb;                            // ID 2
-      buf[2] = 6;                               // type Genesis
-      q_fwrite (buf, 8, 3, dest_name, "r+b");
+
+      if (rominfo->buheader_len)
+        {                                       // fix header
+          buf[0] = total_size / 16384;          // # 16K blocks
+          buf[1] = 3;                           // ID 0
+          buf[2] = 0;                           // last file -> clear bit 6
+          q_fwrite (buf, 0, 3, dest_name, "r+b");
+          buf[0] = 0xaa;                        // ID 1
+          buf[1] = 0xbb;                        // ID 2
+          buf[2] = 6;                           // type Genesis
+          q_fwrite (buf, 8, 3, dest_name, "r+b");
+        }
 
       printf (ucon64_msg[WROTE], dest_name);
     }
-  else // type == MGD
+  else // type == MGD_GEN
     {
       /*
         file1 file2 file3 file4
@@ -582,7 +594,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       q_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
       save_smd (buf, rom_buffer, &smd_header, genesis_rom_size);
     }
-  else if (type == MGD)
+  else if (type == MGD_GEN)
     save_mgd (buf, &rom_buffer, genesis_rom_size);
   else
     save_bin (buf, rom_buffer, genesis_rom_size);
@@ -637,7 +649,7 @@ genesis_chk (st_rominfo_t *rominfo)
       q_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
       save_smd (dest_name, rom_buffer, &smd_header, genesis_rom_size);
     }
-  else if (type == MGD)
+  else if (type == MGD_GEN)
     save_mgd (dest_name, &rom_buffer, genesis_rom_size);
   else
     save_bin (dest_name, rom_buffer, genesis_rom_size);
@@ -790,20 +802,16 @@ genesis_f (st_rominfo_t *rominfo)
       return -1;
     }
 
-  switch (OFFSET (genesis_header, 240))
-    {
-    /*
-      In the Philipines the television standard is NTSC, but do games made
-      for the Philipines exist?
-      Yes, we only check the first country code. Just like with SNES we don't
-      guarantee anything for files that needn't be fixed/cracked/patched.
-    */
-    case 'J':                                   // Japan
-    case 'U':                                   // U.S.A.
-      return genesis_fix_ntsc_protection (rominfo);
-    default:
-      return genesis_fix_pal_protection (rominfo);
-    }
+  /*
+    In the Philipines the television standard is NTSC, but do games made
+    for the Philipines exist?
+    Just like with SNES we don't guarantee anything for files that needn't be
+    fixed/cracked/patched.
+  */
+  if (genesis_tv_standard == 0)               // NTSC (Japan or U.S.A.)
+    return genesis_fix_ntsc_protection (rominfo);
+  else
+    return genesis_fix_pal_protection (rominfo);
 }
 
 
@@ -831,7 +839,7 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 
       if (type == SMD)
         smd_deinterleave (rom_buffer, bytesread);
-      else // type == MGD
+      else // type == MGD_GEN
         mgd_deinterleave (&rom_buffer, bytesread);
     }
 
@@ -865,6 +873,58 @@ int
 save_bin (const char *name, unsigned char *buffer, long size)
 {
   return q_fwrite (buffer, 0, size, name, "wb");
+}
+
+
+static void
+write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
+                        int totalsize)
+{
+//  static int sram_page = 0, file_no_sram = 0;
+  int m;
+  unsigned char flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
+
+  fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
+  if (rominfo->name[0] == 0)
+    rominfo->name[0] = 'D';                     // if table[0] == 0 => no next game
+  for (m = 0; m < 0x1d; m++)
+    if (!isprint (rominfo->name[m]))
+      rominfo->name[m] = '.';
+  fwrite (rominfo->name, 1, 0x1d, destfile);    // 0x0 - 0x1c = name
+  fputc (0, destfile);                          // 0x1d = 0
+  fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
+
+  if (genesis_has_sram)
+    {
+#if 0 // TODO: ask Leo how to use S1 & S0
+      flags = sram_page++;
+      if (sram_page == 3)
+        file_no_sram = file_no;
+      else if (sram_page > 3)
+        {
+          printf ("WARNING: This ROM will share SRAM with ROM %d\n", file_no_sram);
+          sram_page = 3;
+        }
+#endif
+      if ((ucon64.file_size - rominfo->buheader_len) > 16 * MBIT)
+        flags |= 0x80;                          // set F (>16 Mb & SRAM)
+    }
+  else
+    flags |= 4;                                 // set T (no SRAM)
+
+  if (genesis_tv_standard == 1)
+    flags |= 0x10;                              // set P(AL)
+
+  if (ucon64.tv_standard == 1)
+    flags |= 0x20;                              // set E(uro)
+
+  if (genesis_tv_standard == 0 && ucon64.tv_standard == 1)
+    {
+      flags |= 8;                               // set V (Euro console & NTSC game)
+      flags &= ~0x30;                           // clear E(uro) & P(AL)
+    }
+
+  fputc (flags, destfile);                          // 0x1f = flags
 }
 
 
@@ -925,7 +985,7 @@ genesis_multi (int truncate_size, char *fname)
         printf ("WARNING: %s does not appear to be a Genesis ROM\n", ucon64.rom);
       /*
         NOTE: This is NOT the place to mess with ucon64.console. When this
-              function was entered ucon64.console must have been UCON64_GEN. We
+              function is entered ucon64.console must have been UCON64_GEN. We
               modify ucon64.console temporarily only to be able to help detect
               problems with incorrect files.
       */
@@ -947,25 +1007,23 @@ genesis_multi (int truncate_size, char *fname)
       else
         {
           printf ("ROM%d: %s\n", file_no, ucon64.rom);
-
-          // fill the next game table entry
-          fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
-          if (ucon64.rominfo->name[0] == 0)
-            ucon64.rominfo->name[0] = 'A';                  // if table[0] == 0 => no next game
-          fwrite (ucon64.rominfo->name, 1, 0x1d, destfile); // 0x0 - 0x1c = name
-          fputc (0, destfile);                              // 0x1d = 0
-          fputc (totalsize / (2 * MBIT), destfile);         // 0x1e = bank code
-          fputc (0x08, destfile);                           // 0x1f = (SRAM/region?) flag
+          write_game_table_entry (destfile, file_no, ucon64.rominfo, totalsize);
+          fseek (destfile, totalsize, SEEK_SET); // restore file pointer
         }
 
-      fseek (destfile, totalsize, SEEK_SET);    // restore file pointer
       done = 0;
       byteswritten = 0;                         // # of bytes written per file
       while (!done)
         {
-          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
-          if (ucon64.rominfo->interleaved)
-            smd_deinterleave (buffer, BUFSIZE); // yes, bytestowrite might not be n*16kB
+          if (ucon64.rominfo->interleaved == 2)
+            bytestowrite = fread_mgd (buffer, 1, BUFSIZE, srcfile);
+          else
+            {
+              bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+              if (ucon64.rominfo->interleaved)
+                smd_deinterleave (buffer, BUFSIZE);
+                // yes, BUFSIZE. bytestowrite might not be n * 16 kB
+            }
           if (totalsize + bytestowrite > truncate_size)
             {
               bytestowrite = truncate_size - totalsize;
@@ -1110,7 +1168,7 @@ genesis_init (st_rominfo_t *rominfo)
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, "", NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
@@ -1176,7 +1234,7 @@ genesis_init (st_rominfo_t *rominfo)
   else if (rominfo->interleaved == 1)
     type = SMD;
   else if (rominfo->interleaved == 2)
-    type = MGD;
+    type = MGD_GEN;
 
   if (type == SMD)
     {
@@ -1189,10 +1247,10 @@ genesis_init (st_rominfo_t *rominfo)
       smd_deinterleave (buf, 16384);            // buf will contain the deinterleaved data
       memcpy (&genesis_header, buf + GENESIS_HEADER_START, GENESIS_HEADER_LEN);
     }
-  else if (type == MGD)
+  else if (type == MGD_GEN)
     {
       // We use rominfo->buheader_len to make it user controllable. Normally it
-      //  should be 0 for MGD.
+      //  should be 0 for MGD_GEN.
       genesis_rom_size = ucon64.file_size - rominfo->buheader_len;
       q_fread_mgd (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
         GENESIS_HEADER_LEN, ucon64.rom);
@@ -1244,16 +1302,24 @@ genesis_init (st_rominfo_t *rominfo)
       maker;
     }
 
+  genesis_tv_standard = 1;              // default to PAL; NTSC has higher precedence
   country[0] = 0;
   // ROM country
   for (x = 0; x < 5; x++)
     {
-      if (x > 0 && (int) OFFSET (genesis_header, 240 + x) == 0)
+      int country_code = OFFSET (genesis_header, 240 + x);
+
+      if ((x > 0 && country_code == 0) || country_code == ' ')
         continue;
-      strcat (country, NULL_TO_UNKNOWN_S (genesis_country[MIN ((int)
-        OFFSET (genesis_header, 240 + x), GENESIS_COUNTRY_MAX - 1)]));
-      strcat (country, " ");
+      if (country_code == 'J' || country_code == 'U') // Japan or U.S.A.
+        genesis_tv_standard = 0;
+      strcat (country, NULL_TO_UNKNOWN_S
+               (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
+      strcat (country, ", ");
     }
+  x = strlen (country);
+  if (x >= 2 && country[x - 2] == ',' && country[x - 1] == ' ')
+    country[x - 2] = 0;
   rominfo->country = country;
 
   // misc stuff
@@ -1300,11 +1366,17 @@ genesis_init (st_rominfo_t *rominfo)
     }
 #endif
 
-  sprintf ((char *) buf, "I/O device(s): %s %s %s %s\n",
-           NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)]),
-           NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 145), GENESIS_IO_MAX - 1)]),
-           NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 146), GENESIS_IO_MAX - 1)]),
-           NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 147), GENESIS_IO_MAX - 1)]));
+  sprintf ((char *) buf, "I/O device(s): %s",
+    NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)]));
+  for (x = 0; x < 3; x++)
+    {
+      const char *io_device = genesis_io[MIN (OFFSET (genesis_header, 145 + x), GENESIS_IO_MAX - 1)];
+      if (!io_device)
+        continue;
+      strcat ((char *) buf, ", ");
+      strcat ((char *) buf, io_device);
+    }
+  strcat ((char *) buf, "\n");
   strcat (rominfo->misc, (const char *) buf);
 
   sprintf ((char *) buf, "Product code: %-11.11s\n", &OFFSET (genesis_header, 128));
@@ -1319,8 +1391,9 @@ genesis_init (st_rominfo_t *rominfo)
   sprintf ((char *) buf, "Memo: %-40.40s\n", &OFFSET (genesis_header, 200));
   strcat (rominfo->misc, (const char *) buf);
 
-  sprintf ((char *) buf, "Backup RAM: %s\n", (OFFSET (genesis_header, 176) == 'R' &&
-                                              OFFSET (genesis_header, 177) == 'A') ? "Yes" : "No");
+  genesis_has_sram = OFFSET (genesis_header, 176) == 'R' &&
+                     OFFSET (genesis_header, 177) == 'A';
+  sprintf ((char *) buf, "Backup RAM: %s\n", genesis_has_sram ? "Yes" : "No");
   strcat (rominfo->misc, (const char *) buf);
 
   sprintf ((char *) buf, "Version: 1.%c%c", OFFSET (genesis_header, 140), OFFSET (genesis_header, 141));
@@ -1345,7 +1418,7 @@ genesis_init (st_rominfo_t *rominfo)
   rominfo->console_usage = genesis_usage;
   if (type == SMD)
     rominfo->copier_usage = smd_usage;
-  else if (type == MGD)
+  else if (type == MGD_GEN)
     rominfo->copier_usage = mgd_usage;
   else // type == BIN
     rominfo->copier_usage = bin_usage;

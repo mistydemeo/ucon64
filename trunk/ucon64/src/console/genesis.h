@@ -21,6 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GENESIS_H
 #define GENESIS_H
+
+typedef enum { SMD, BIN, MGD_GEN } genesis_file_t;
+
+extern const st_usage_t genesis_usage[];
+
+extern genesis_file_t genesis_get_file_type (void);
 extern int genesis_1991 (st_rominfo_t *rominfo);
 extern int genesis_chk (st_rominfo_t *rominfo);
 extern int genesis_j (st_rominfo_t *rominfo);
@@ -34,6 +40,4 @@ extern int genesis_mgd (st_rominfo_t *rominfo);
 extern int genesis_multi (int truncate_size, char *fname);
 extern int genesis_init (st_rominfo_t *rominfo);
 extern int genesis_f (st_rominfo_t *rominfo);
-
-extern const st_usage_t genesis_usage[];
 #endif // GENESIS_H

@@ -53,14 +53,14 @@ clean:
 	del backup\*.obj
 	del $(TARGET)
 	cd libdiscmage
-	$(MAKE) -f Makefile.vc6 clean
+	$(MAKE) /nologo -f Makefile.vc6 clean
 	cd ..
 
 
 distclean: clean
 	del config.h
 	cd libdiscmage
-	$(MAKE) -f Makefile.vc6 distclean
+	$(MAKE) /nologo -f Makefile.vc6 distclean
 	cd ..
 
 
@@ -71,7 +71,7 @@ distclean: clean
 !ifdef DISCMAGE
 libdiscmage/$(FULLLIBNAME_DM):
 	cd libdiscmage
-	$(MAKE) -f Makefile.vc6
+	$(MAKE) /nologo -f Makefile.vc6
 	cd ..
 !endif
 
@@ -82,13 +82,13 @@ $(TARGET): $(OBJECTS)
 
 install:
 #	cd libdiscmage
-#	$(MAKE) -f Makefile.vc6 install
+#	$(MAKE) /nologo -f Makefile.vc6 install
 #	cd ..
 
 
 uninstall:
 #	cd libdiscmage
-#	$(MAKE) -f Makefile.vc6 uninstall
+#	$(MAKE) /nologo -f Makefile.vc6 uninstall
 #	cd ..
 
 
@@ -129,18 +129,18 @@ ucon64_opts.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
 ucon64_misc.obj: dlopen.h $(UCON64_STD_H)
 ucon64_dat.obj: ucon64_dat.h $(UCON64_STD_H)
 ucon64_dm.obj: ucon64_dm.h dlopen.h $(UCON64_STD_H)
-console/gb.obj: console/gb.h $(UCON64_STD_H)
+console/gb.obj: console/gb.h backup/mgd.h $(UCON64_STD_H)
 console/gba.obj: console/gba.h $(UCON64_STD_H)
-console/genesis.obj: console/genesis.h $(UCON64_STD_H)
+console/genesis.obj: console/genesis.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
 console/jaguar.obj: console/jaguar.h $(UCON64_STD_H)
 console/lynx.obj: console/lynx.h $(UCON64_STD_H)
 console/n64.obj: console/n64.h $(UCON64_STD_H)
 console/neogeo.obj: console/neogeo.h $(UCON64_STD_H)
 console/nes.obj: console/nes.h $(UCON64_STD_H)
 console/ngp.obj: console/ngp.h $(UCON64_STD_H)
-console/pce.obj: console/pce.h $(UCON64_STD_H)
-console/sms.obj: console/sms.h $(UCON64_STD_H)
-console/snes.obj: console/snes.h $(UCON64_STD_H)
+console/pce.obj: console/pce.h backup/mgd.h $(UCON64_STD_H)
+console/sms.obj: console/sms.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
+console/snes.obj: console/snes.h backup/mgd.h $(UCON64_STD_H)
 console/swan.obj: console/swan.h $(UCON64_STD_H)
 console/dc.obj: console/dc.h $(UCON64_STD_H)
 console/psx.obj: console/psx.h $(UCON64_STD_H)

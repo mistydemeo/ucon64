@@ -234,6 +234,7 @@ char *fix_character_set (char *value);
   get_suffix() get suffix of filename
   set_suffix() set/replace suffix of filename with suffix
               suffix means in this case the suffix INCLUDING the dot '.'
+  set_suffix_i() like set_suffix(), but doesn't change the case
 
   basename2() DJGPP basename() clone
   dirname2()  DJGPP dirname() clone
@@ -268,6 +269,7 @@ extern char *strcasestr2 (const char *str, const char *search);
 extern char *strtrim (char *str);
 extern const char *get_suffix (const char *filename);
 extern char *set_suffix (char *filename, const char *suffix);
+extern char *set_suffix_i (char *filename, const char *suffix);
 //#ifndef HAVE_BASENAME
 extern char *basename2 (const char *path);
 //  the following define will override a possible XPG basename() which mods. the src

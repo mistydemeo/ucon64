@@ -1,5 +1,5 @@
 /*
-ucon64_dat.h - support for DAT files as known from Romcenter, Goodxxxx, etc.
+ucon64_dat.h - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
 written by 1999 - 2003 NoisyB (noisyb@gmx.net)
 

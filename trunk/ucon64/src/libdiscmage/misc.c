@@ -596,8 +596,26 @@ set_suffix (char *filename, const char *suffix)
       *p2 = 0;
 
   strcpy (suffix2, suffix);
-  p = basename (filename);
   strcat (filename, is_func (p, strlen (p), isupper) ? strupr (suffix2) : strlwr (suffix2));
+
+  return filename;
+}
+
+
+char *
+set_suffix_i (char *filename, const char *suffix)
+{
+  char *p, *p2 = NULL;
+
+  p = basename (filename);
+  if (!p)
+    p = filename;
+
+  if ((p2 = strrchr (p, '.')))
+    if (strcmp (p2 ,p) != 0)                    // some files start with '.'
+      *p2 = 0;
+
+  strcat (filename, suffix);
 
   return filename;
 }
@@ -1017,7 +1035,7 @@ realpath (const char *path, char *full_path)
 
   if (GetFullPathName (path, FILENAME_MAX, full_path, &p) == 0)
     return NULL;
-  
+
   c = toupper (full_path[0]);
   n = strlen (full_path) - 1;
   // Remove trailing separator if full_path is not the root dir of a drive,

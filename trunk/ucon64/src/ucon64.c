@@ -119,91 +119,25 @@ ucon64_flush(argc,argv,&rom);
     return 0;
   }
 
-/*
+strcpy(rom.rom,getarg(argc,argv,ucon64_ROM));
+if (!strlen(rom.rom)) getcwd(rom.rom,sizeof(rom.rom));
+
+strcpy(rom.file,getarg(argc,argv,ucon64_FILE));
+
+
+
+
+
+
 if(argcmp(argc, argv, "-sh"))
 {
 //TODO shell modus
-	printf(
-"                                                            ___\n"
-"   .,,,,     .---._ Oo  .::::. ::  :: .::::: :::   :::    __\\__\\\n"
-"   ( oo)__   ( oo) /..\\ ::  `' ::  :: ::     :::   :::    \\ / Oo\\o  (\\(\\\n"
-"  /\\_  \\__) /\\_  \\/\\_,/ `::::. :::::: ::::.  ::'   ::'    _\\\\`--_/ o/oO \\\n"
-"  \\__)_/   _\\__)_/_/    ..  :: ::  :: ::     ::....::.... \\_ \\  \\  \\.--'/\n"
-"  /_/_/    \\ /_/_//     `::::' ::  :: `::::: `:::::`:::::: /_/__/   / \\ \\___\n"
-"_(__)_)_,   (__)_/  .::::.                             ;::  |_|_    \\_/_/\\_/\\\n"
-" o    o      (__)) ,:' `:::::::::::::::::::::::::::::::::' (__)_)   (_(_)\n"
-"\n"
-"\nShell modus active. Enter q to exit\n\n"
-"BEFORE:           %s -help\n"
-"NOW: (enter just) help\n\n"
-,ucon64_name());
-
-	for(;;)
-	{
-
-	}
-	return(0);
+//  for(;;)
+  {
+    printf("ucon64>");
+  }
+  return(0);
 }
-*/
-
-
-
-/*TODO
-if (!strlen(rom.rom))
-{
-  ucon64_usage(argc,argv);
-  return 0;
-}
-*/
-
-
-
-#ifdef BACKUP
-if (strlen( rom.file ))
-{
-  strcpy(buf, rom.file);
-  sscanf(buf, "%x", &ucon64_parport);
-}
-
-if (!(ucon64_parport = parport_probe(ucon64_parport)))
-  ;
-/*
-  printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
-else
-  printf("0x%x\n\n",ucon64_parport);
-*/
-
-#ifdef __UNIX__
-/*
-  Some code needs us to switch to the real uid and gid. However, other code needs access to
-  I/O ports other than the standard printer port registers. We just do an iopl(3) and all
-  code should be happy. Using iopl(3) enables users to run all code without being root (of
-  course with the uCON64 executable setuid root). Anyone a better idea?
-*/
-#ifdef __linux__
-if (iopl(3) == -1)
-{
-  fprintf(stderr, "Could not set the I/O privilege level to 3\n"
-                  "(This program needs root privileges)\n");
-  exit(1);
-}
-#endif
-
-uid = getuid();
-if (setuid(uid) == -1)
-{
-  fprintf(stderr, "Could not set uid\n");
-  exit(1);
-}
-gid = getgid();                                 // This shouldn't be necessary if `make install'
-if (setgid(gid) == -1)                          //  was used, but just in case (root did `chmod +s')
-{
-  fprintf(stderr, "Could not set gid\n");
-  exit(1);
-}
-#endif
-
-#endif
 
 if (argcmp(argc, argv, "-crc"))
 {
@@ -235,9 +169,6 @@ if(argcmp(argc,argv,"-hex"))
 	filehexdump(rom.rom,0,quickftell(rom.rom));
 	return(0);
 }
-
-
-
 
 if(argcmp(argc,argv,"-c"))
 {
@@ -297,15 +228,11 @@ if(argcmp(argc,argv,"-ispad"))
 	return(0);
 }
 
-
-
 if(argcmp(argc,argv,"-strip"))
 {
 	truncate(rom.rom,quickftell(rom.rom)-atol(rom.file));
 	return(0);
 }
-
-
 
 if(argcmp(argc,argv,"-stp"))
 {
@@ -373,14 +300,6 @@ if(argcmp(argc,argv,"-ppf"))
 if(argcmp(argc,argv,"-mki"))
 {
 	cips(rom.rom,rom.file);
-/*
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]=rom.file;
-	ucon64_argv[2]=rom.rom;
-	ucon64_argc=3;
-
-	return(cips_main(ucon64_argc,ucon64_argv));
-*/
 	return(0);
 }
 
@@ -447,12 +366,13 @@ if(argcmp(argc,argv,"-idppf"))
 	return(0);
 }
 
-
-
-if (argcmp(argc, argv, "-ls") || argcmp(argc, argv, "-lsv"))
+if (argcmp(argc, argv, "-ls") ||
+    argcmp(argc, argv, "-lsv") ||
+    argcmp(argc,argv,  "-rrom") ||
+    argcmp(argc,argv,  "-rr83")
+)
 {
   char current_dir[FILENAME_MAX];
-
   if (access(rom.rom, R_OK) == -1 || (dp = opendir(rom.rom)) == NULL)
     return -1;
 
@@ -484,42 +404,68 @@ if (argcmp(argc, argv, "-ls") || argcmp(argc, argv, "-lsv"))
   return 0;
 }
 
-/*TODO
-if(argcmp(argc,argv,"-rrom"))
+
+
+
+
+#ifdef BACKUP
+if (strlen( rom.file ))
 {
-if(access( rom.rom ,R_OK)==-1 ||
-(dp=opendir( rom.rom ))==NULL)return(-1);
-
-chdir( rom.rom );
-
-while((ep=readdir(dp))!=0)
-{
-	if(!stat(ep->d_name,&puffer))
-	{
-		if(S_ISREG(puffer.st_mode)==1)
-		{
-			sprintf(buf,"%s %s",argv[0],ep->d_name);
-			system(buf);
-		}
-	}
-}
-(void)closedir(dp);
-
-	return(0);
+  strcpy(buf, rom.file);
+  sscanf(buf, "%x", &ucon64_parport);
 }
 
+if (!(ucon64_parport = parport_probe(ucon64_parport)))
+  ;
+/*
+  printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
+else
+  printf("0x%x\n\n",ucon64_parport);
 */
 
-strcpy(buf,rom.rom);
-if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(rom.rom)%65500)==0)
-	rom.console=ucon64_NES;
+#ifdef __UNIX__
+/*
+  Some code needs us to switch to the real uid and gid. However, other code needs access to
+  I/O ports other than the standard printer port registers. We just do an iopl(3) and all
+  code should be happy. Using iopl(3) enables users to run all code without being root (of
+  course with the uCON64 executable setuid root). Anyone a better idea?
+*/
+#ifdef __linux__
+if (iopl(3) == -1)
+{
+  fprintf(stderr, "Could not set the I/O privilege level to 3\n"
+                  "(This program needs root privileges)\n");
+  exit(1);
+}
+#endif
+
+uid = getuid();
+if (setuid(uid) == -1)
+{
+  fprintf(stderr, "Could not set uid\n");
+  exit(1);
+}
+gid = getgid();                                 // This shouldn't be necessary if `make install'
+if (setgid(gid) == -1)                          //  was used, but just in case (root did `chmod +s')
+{
+  fprintf(stderr, "Could not set gid\n");
+  exit(1);
+}
+#endif
+
+#endif
+
+
 
 if(!access(rom.rom,F_OK))
 {
 	ucon64_init(&rom);
-if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
+	if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
 }
 
+strcpy(buf,rom.rom);
+if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(rom.rom)%65500)==0)
+	rom.console=ucon64_NES;
 if(argcmp(argc,argv,"-ata"))rom.console=ucon64_ATARI;
 if(argcmp(argc,argv,"-s16"))rom.console=ucon64_SYSTEM16;
 if(argcmp(argc,argv,"-n64"))rom.console=ucon64_N64;
@@ -590,7 +536,7 @@ if(argcmp(argc,argv,"-dbs"))
 
 	sscanf(rom.rom, "%lx", &rom.current_crc32);
 
-	ucon64_dbsearch(	&rom	);
+	ucon64_dbsearch(&rom);
 	
 	ucon64_nfo(&rom);
 
@@ -607,15 +553,9 @@ if(argcmp(argc,argv,"-dbv"))
 	return(0);
 }
 
-
-
-
-
-//here could be global overrides
-
-
-//options which depend on a special console system
-
+/*
+    options which depend on a special console system
+*/
 switch(rom.console)
 {
 
@@ -649,13 +589,11 @@ break;
 case ucon64_PCE:
 	pcengine_main(&rom);
 break;
-/*
+/*  ucon64 is cartridge only
 case ucon64_PSX:
 case ucon64_PSX2:
 	playstation_main(&rom);
 break;
-*/
-/*
 case ucon64_DC:
 	dreamcast_main(&rom);
 break;
@@ -693,16 +631,15 @@ default:
 	{
 		filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header
 		printf(
-"\n"
-"ERROR: unknown ROM: %s (not found in internal DB)\n"
+"\nERROR: unknown ROM: %s (not found in internal DB)\n"
 "TIP:   if this is a ROM you can force recognition with the -<CONSOLE> option\n"
 "       if you compiled from the sources you can add it to ucon64_db.c and\n"
-"       recompile\n",rom.rom);
-	}
-	else ucon64_usage(argc,argv);
+"       recompile\n"
+,rom.rom);
+}
+else ucon64_usage(argc,argv);
 break;
 }
-
 
 if (argcmp(argc, argv, "-e"))
 {
@@ -778,10 +715,11 @@ if (argcmp(argc, argv, "-e"))
   return 0;
 }
 
-
-
 return(0);
 }
+
+
+
 
 /*
 	flush the ucon64 struct with default values

@@ -403,6 +403,14 @@ genesis_s (st_rominfo_t *rominfo)
   nparts = size / PARTSIZE;
   surplus = size % PARTSIZE;
 
+  if (size <= PARTSIZE)
+    {
+      printf (
+        "NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",
+        PARTSIZE / MBIT);
+      return -1;
+    }
+
   if (type == BIN)
     {
       strcpy (buf, areupper (basename (ucon64.rom)) ? "MD" : "md");

@@ -5,6 +5,7 @@ written by 2001        Jeff Frohwein
            2001        NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
 
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -51,10 +52,7 @@ const char *fal_usage[] =
     "                  receives automatically when SRAM does not exist\n"
     "  " OPTION_LONG_S "xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK\n"
     "                  BANK can be 1, 2, 3 or 4;  " OPTION_LONG_S "file=PORT\n"
-    "                  receives automatically when SRAM does not exist\n"
-    "                  You only need to specify PORT if uCON64 doesn't detect the\n"
-    "                  (right) parallel port. If that is the case give a hardware\n"
-    "                  address: ucon64 " OPTION_LONG_S "xfal \"rom.gba\" 0x378\n",
+    "                  receives automatically when SRAM does not exist\n",
 #endif // PARALLEL
     NULL
 };

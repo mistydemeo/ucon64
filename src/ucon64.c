@@ -91,7 +91,6 @@ write programs in C
 #include "backup/gbx.h"
 #include "backup/cd64.h"
 #include "backup/dex.h"
-#include "backup/smc.h"
 #include "backup/fpl.h"
 #include "backup/mgd.h"
 #include "backup/gd.h"
@@ -849,7 +848,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
   printf ("%s\n\n", ucon64.rom);
 
-  if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SMC_HEADER_LEN)
+  if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SWC_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
@@ -1174,7 +1173,6 @@ ucon64_usage (int argc, char *argv[])
         UCON64_USAGE (swc_usage);
         UCON64_USAGE (gd_usage);
 //        UCON64_USAGE (fig_usage);
-//        UCON64_USAGE (smc_usage);
 //        UCON64_USAGE (mgd_usage);
 #endif // PARALLEL
         single = 1;
@@ -1313,7 +1311,6 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (swc_usage);
       UCON64_USAGE (gd_usage);
 //      UCON64_USAGE (fig_usage);
-//      UCON64_USAGE (smc_usage);
 //      UCON64_USAGE (mgd_usage);
 #endif // PARALLEL
       printf ("\n");
@@ -1374,9 +1371,18 @@ ucon64_usage (int argc, char *argv[])
 #endif // SAMPLE
   }
 
+// TODO: change DB-specific "HAVE_ZLIB_H"'s to "DB"
   printf (
      "Database: %d known ROMs\n"
      "\n"
+#ifdef  PARALLEL
+     "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
+     "      parallel port. If that is the case give a hardware address. For example:\n"
+     "        ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
+     "      In order to connect a copier to a PC's parallel port you need a standard\n"
+     "      bidirectional parallel cable\n"
+     "\n"
+#endif
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
 #ifdef  __MSDOS__
      "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"

@@ -32,27 +32,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "swc.h"
+#include "../console/snes.h"
 
 
 const char *swc_usage[] =
   {
-    "Super Wild Card 1.6XC/Super Wild Card 2.8CC/Super Wild Card DX(2)/SWC",
+    "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.8CC)/SWC DX(2)",
     "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw",
 #ifdef PARALLEL
     "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n"
     "                  Press q to abort; ^C will cause invalid state of backup unit\n"
-    "  " OPTION_LONG_S "xswc2       same as " OPTION_LONG_S "xswc, but enables Real Time Save mode\n"
+    "  " OPTION_LONG_S "xswc2       same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)\n"
     "  " OPTION_LONG_S "xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
     "                  " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when SRAM does not exist\n"
-    "                  Press q to abort; ^C will cause invalid state of backup unit\n"
-    "                  You only need to specify PORT if uCON64 doesn't detect the\n"
-    "                  (right) parallel port. If that is the case give a hardware\n"
-    "                  address: ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
-    "                  In order to connect the Super Wild Card to a PC's parallel\n"
-    "                  port you need a standard bidirectional parallel cable like\n"
-    "                  for the most backup units\n",
+    "                  Press q to abort; ^C will cause invalid state of backup unit\n",
 #else
     "",
 #endif // PARALLEL
@@ -71,6 +66,7 @@ static int check1 (unsigned char *info_block, int index);
 static int check2 (unsigned char *info_block, int index, unsigned char value);
 static int check3 (unsigned char *info_block, int index1, int index2, int size);
 static unsigned char get_emu_mode_select (unsigned char byte, int size);
+static void handle_fig_header (unsigned char *header);
 
 static int hirom;                               // `hirom' was `special'
 
@@ -259,6 +255,36 @@ get_emu_mode_select (unsigned char byte, int size)
 
 
 void
+handle_fig_header (unsigned char *header)
+{
+  if ((header[4] == 0x77 && header[5] == 0x83) ||
+      (header[4] == 0xf7 && header[5] == 0x83) ||
+      (header[4] == 0x47 && header[5] == 0x83) ||
+      (header[4] == 0x11 && header[5] == 0x02))
+    header[2] = 0x0c;                           // 0 kB
+  else if (header[4] == 0xfd && header[5] == 0x82)
+    header[2] = 0x08;                           // 2 kB
+  else if ((header[4] == 0xdd && header[5] == 0x82) ||
+           (header[4] == 0x00 && header[5] == 0x80))
+    /*
+      8 kB *or* 2 kB (shortcoming of FIG header format). We give the emu mode
+      select byte a value as if the game uses 8 kB. At least this makes games
+      that use 8 kB work.
+      Users should not complain if the game doesn't work because of a SRAM
+      protection, because they should have converted the ROM to SWC format in
+      the first place.
+    */
+    header[2] = 0x04;
+  else if ((header[4] == 0xdd && header[5] == 0x02) ||
+           (header[4] == 0x00 && header[5] == 0x00))
+    header[2] = 0;                              // 32 kB
+
+  if (header[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
+    header[2] |= 0x30;                          // set bit 5&4 (SRAM & DRAM mem map mode 21)
+}
+
+
+void
 swc_unlock (unsigned int parport)
 /*
   "Unlock" the SWC. However, just starting to send, then stopping with ^C,
@@ -395,9 +421,9 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   ffe_send_block (0x400, buffer, SWC_HEADER_LEN); // send header
   bytessend = SWC_HEADER_LEN;
 
+  if (snes_get_copier_type () == FIG)
+    handle_fig_header (buffer);
   emu_mode_select = buffer[2];                  // this byte is needed later
-  if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
-    emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
 #if 1
   /*
     0x0c == no SRAM & LoROM; we use the header, so that the user can override this

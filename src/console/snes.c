@@ -32,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "snes.h"
-#include "backup/smc.h"
 #include "backup/mgd.h"
 #include "backup/gd.h"
 #include "backup/swc.h"
@@ -49,6 +48,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
 static int snes_convert_sramfile (const void *header);
+static int snes_fix_pal_protection (st_rominfo_t *rominfo);
+static int snes_fix_ntsc_protection (st_rominfo_t *rominfo);
 static int get_internal_sums (st_rominfo_t *rominfo);
 //static int snes_special_bs (void);
 static int snes_bs_name(void);
@@ -175,7 +176,7 @@ static int snes_split, force_interleaved, bs_dump, rom_is_top,  // flag for inte
   called from snes_dint().
 */
 
-enum { SWC, GD3, FIG, MGD, SMC } type;
+snes_copier_t type;
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -221,6 +222,20 @@ static unsigned char gd3_lorom_32mb_map[GD3_HEADER_MAPSIZE] = {
 
 
 int
+snes_get_snes_hirom (void)
+{
+  return snes_hirom;
+}
+
+
+snes_copier_t
+snes_get_copier_type (void)
+{
+  return type;
+}
+
+
+int
 snes_dint (st_rominfo_t *rominfo)
 {
   st_unknown_header_t header;
@@ -252,7 +267,7 @@ snes_dint (st_rominfo_t *rominfo)
 
   if (rominfo->buheader_len)
     {
-      if (!fread (&header, SMC_HEADER_LEN, 1, srcfile))
+      if (!fread (&header, SWC_HEADER_LEN, 1, srcfile))
         success = 0;
       fseek (srcfile, rominfo->buheader_len, SEEK_SET);
     }
@@ -271,7 +286,7 @@ snes_dint (st_rominfo_t *rominfo)
   snes_deinterleave (rominfo, buffer, size);
 
   if (rominfo->buheader_len)
-    fwrite (&header, 1, SMC_HEADER_LEN, destfile);
+    fwrite (&header, 1, SWC_HEADER_LEN, destfile);
   fwrite (buffer, size, 1, destfile);
 
   free (buffer);
@@ -389,11 +404,11 @@ snes_convert_sramfile (const void *header)
       return -1;
     }
 
-  fwrite (header, 1, SMC_HEADER_LEN, destfile); // write header
-  byteswritten = SMC_HEADER_LEN;
+  fwrite (header, 1, SWC_HEADER_LEN, destfile); // write header
+  byteswritten = SWC_HEADER_LEN;
 
   blocksize = fread (buf, 1, 32 * 1024, srcfile); // read 32 kB at max
-  while (byteswritten < 32 * 1024 + SMC_HEADER_LEN)
+  while (byteswritten < 32 * 1024 + SWC_HEADER_LEN)
     {                                           // pad sram to 32.5 kB by
       fwrite (buf, 1, blocksize, destfile);     //  repeating the SRAM data
       byteswritten += blocksize;
@@ -436,9 +451,9 @@ snes_figs (st_rominfo_t *rominfo)
 int
 snes_ufos (st_rominfo_t *rominfo)
 {
-  unsigned char header[SMC_HEADER_LEN];
+  unsigned char header[SWC_HEADER_LEN];
 
-  memset (&header, 0, SMC_HEADER_LEN);
+  memset (&header, 0, SWC_HEADER_LEN);
   memcpy (&header[8], "SUPERUFO", 8);
 
   return snes_convert_sramfile (&header);
@@ -563,7 +578,7 @@ reset_header (void *header)
       set_nsrt_checksum (header);
     }
   else
-    memset (header, 0, SMC_HEADER_LEN);
+    memset (header, 0, SWC_HEADER_LEN);
 }
 
 
@@ -992,14 +1007,14 @@ snes_gd3 (st_rominfo_t *rominfo)
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
       ucon64_fbackup (NULL, dest_name);
-      q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
-      q_fwrite (dstbuf, SMC_HEADER_LEN, newsize, dest_name, "ab");
+      q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
+      q_fwrite (dstbuf, SWC_HEADER_LEN, newsize, dest_name, "ab");
       fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
       free (srcbuf);
       free (dstbuf);
 
-      rominfo->buheader_len = SMC_HEADER_LEN;
+      rominfo->buheader_len = SWC_HEADER_LEN;
       rominfo->interleaved = 1;
     }
   else
@@ -1039,22 +1054,15 @@ snes_gd3 (st_rominfo_t *rominfo)
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
       ucon64_fbackup (NULL, dest_name);
-      q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
+      q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
       fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
-      rominfo->buheader_len = SMC_HEADER_LEN;
+      rominfo->buheader_len = SWC_HEADER_LEN;
       rominfo->interleaved = 1;
     }
 
   return 0;
-}
-
-
-int
-snes_get_snes_hirom(void)
-{
-  return snes_hirom;
 }
 
 
@@ -1213,7 +1221,7 @@ snes_s (st_rominfo_t *rominfo)
       strcpy (dest_name, ucon64.rom);
       setext (dest_name, ".1");
 
-      q_fread (header, 0, SMC_HEADER_LEN, ucon64.rom);
+      q_fread (header, 0, SWC_HEADER_LEN, ucon64.rom);
       header[0] = part_size / 8192;
       header[1] = part_size / 8192 >> 8;
       // if header[2], bit 6 == 0 -> SWC/FIG knows this is the last file of the ROM
@@ -1224,7 +1232,7 @@ snes_s (st_rominfo_t *rominfo)
             header[2] &= ~0x40;                 // last file -> clear bit 6
 
           // don't write backups of parts, because one name is used
-          q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
+          q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
@@ -1238,7 +1246,7 @@ snes_s (st_rominfo_t *rominfo)
           header[2] &= ~0x40;                   // last file -> clear bit 6
 
           // don't write backups of parts, because one name is used
-          q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
+          q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
@@ -1294,6 +1302,7 @@ int
 snes_k (st_rominfo_t *rominfo)
 {
 /*
+See the document "src/backup/SWC-compatibility.txt".
 Don't touch this code if you don't know what you're doing!
 
 Some SNES games check to see how much SRAM is connected to the SNES as a form
@@ -1428,9 +1437,9 @@ Same here.
     }
   if (rominfo->buheader_len)                    // copy header (if present)
     {
-      fread (header, 1, SMC_HEADER_LEN, srcfile);
+      fread (header, 1, SWC_HEADER_LEN, srcfile);
       fseek (srcfile, rominfo->buheader_len, SEEK_SET);
-      fwrite (header, 1, SMC_HEADER_LEN, destfile);
+      fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
@@ -1516,42 +1525,28 @@ Same here.
 
 
 int
-snes_f (st_rominfo_t *rominfo)
+snes_fix_pal_protection (st_rominfo_t *rominfo)
 {
 /*
+This function searches for PAL protection codes. If it finds one it will
+fix the code so that the game will run on an NTSC SNES.
 Don't touch this code if you don't know what you're doing!
 
 Search for                            Replace with
-3f 21 29/89 10 f0                     3f 21 29/89 10 80
-ad 3f 21 29 10 d0                     ad 3f 21 29 10 ea ea
-ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live-a-Live (ea ea)
-3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80
+ad 3f 21 89 10 d0                     ad 3f 21 89 10 80                - Terranigma
 ad 3f 21 29 10 00 d0                  ad 3f 21 29 10 00 80
 ad 3f 21 89 10 00 d0                  a9 10 00 89 10 00 d0             - Eric Cantona Football ?
-   3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX ea ea       - Robotrek
-3f 21 29/89 10 c9 10 f0               3f 21 29/89 10 c9 10 80
-ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 80/(ea ea) <= original uCON used 80
-ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
-ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
 ad 3f 21 29 10 cf bd ff 00 f0         ad 3f 21 29 10 cf bd ff 00 80    - Tiny Toons - Wild and Wacky Sports ?
-   3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80    - Gokujyou Parodius/Tokimeki Memorial
-ad 3f 21 8d XX YY 29 10 8d            ad 3f 21 8d XX YY 29 00 8d       - Dragon Ball Z - Super Butoden 2 ?
-3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80             - Kirby's Dream Course U (29)
-af 3f 21 00 29 10 d0                  af 3f 21 00 29 10 80/(ea ea)     - Kirby No Kira Kizzu (ea ea)
-af 3f 21 00 89 10 d0                  af 3f 21 00 89 10 ea ea          - Final Fight Guy
+af 3f 21 00 29 10 d0                  af 3f 21 00 29 10 80
 af 3f 21 00 29 10 00 d0               af 3f 21 00 29 10 00 ea ea
-af 3f 21 00 29/89 10 00 f0            af 3f 21 00 29/89 10 00 80
-af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3/Secret of Mana E
-af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
-af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
-af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
-a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E/U
+af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Secret of Mana E
+a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
   int bytesread;
 
-  puts ("Attempting NTSC/PAL fix...");
+  puts ("Attempting to fix PAL protection code...");
 
   strcpy (src_name, ucon64.rom);
   handle_existing_file (ucon64.rom, src_name);
@@ -1567,9 +1562,86 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
     }
   if (rominfo->buheader_len)                    // copy header (if present)
     {
-      fread (header, 1, SMC_HEADER_LEN, srcfile);
+      fread (header, 1, SWC_HEADER_LEN, srcfile);
       fseek (srcfile, rominfo->buheader_len, SEEK_SET);
-      fwrite (header, 1, SMC_HEADER_LEN, destfile);
+      fwrite (header, 1, SWC_HEADER_LEN, destfile);
+    }
+
+  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
+    {
+      change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, buffer, bytesread, -6);
+      change_string ("\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xf0\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1);
+
+      fwrite (buffer, 1, bytesread, destfile);
+    }
+  fclose (srcfile);
+  fclose (destfile);
+
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  remove_temp_file ();
+
+  return 0;
+}
+
+
+int
+snes_fix_ntsc_protection (st_rominfo_t *rominfo)
+{
+/*
+This function searches for NTSC protection codes. If it finds one it will
+fix the code so that the game will run on a PAL SNES.
+Don't touch this code if you don't know what you're doing!
+
+Search for                            Replace with
+3f 21 29/89 10 f0                     3f 21 29/89 10 80
+ad 3f 21 29 10 d0                     ad 3f 21 29 10 ea ea
+ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live-a-Live (ea ea)
+3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80
+   3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX ea ea       - Robotrek
+3f 21 29/89 10 c9 10 f0               3f 21 29/89 10 c9 10 80
+ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 80/(ea ea) <= original uCON used 80
+ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
+ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
+   3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80    - Gokujyou Parodius/Tokimeki Memorial
+ad 3f 21 8d XX YY 29 10 8d            ad 3f 21 8d XX YY 29 00 8d       - Dragon Ball Z - Super Butoden 2 ?
+3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80             - Kirby's Dream Course U (29)
+af 3f 21 00 29/89 10 d0               af 3f 21 00 89 10 ea ea          - Kirby No Kira Kizzu/Final Fight Guy
+af 3f 21 00 29/89 10 00 f0            af 3f 21 00 29/89 10 00 80
+af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3
+af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
+af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
+af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
+a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
+*/
+  char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
+  FILE *srcfile, *destfile;
+  int bytesread;
+
+  puts ("Attempting to fix NTSC protection code...");
+
+  strcpy (src_name, ucon64.rom);
+  handle_existing_file (ucon64.rom, src_name);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ucon64.rom);
+      return -1;
+    }
+  if (rominfo->buheader_len)                    // copy header (if present)
+    {
+      fread (header, 1, SWC_HEADER_LEN, srcfile);
+      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
+      fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
@@ -1585,35 +1657,25 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
       change_string ("\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-      change_string ("\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, buffer, bytesread, -6);
       change_string ("\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xf0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xd0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x10\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\x3f\x21\x29\x10\xcf\x01\x01\x80\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x8d\x01\x01\x29\x10\x8d", 9, '\x01', '\x02', "\x00", 1, buffer, bytesread, -1);
       change_string ("\x3f\x21\x00\x02\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-
-      if (snes_sramsize == 2 * 1024)            // actually Kirby No Kira Kizzu
-        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      else
-        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-
-      change_string ("\xaf\x3f\x21\x00\x89\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x02\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0,
+                     "\x29\x89", 2);
       change_string ("\xaf\x3f\x21\x00\x02\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
       change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, buffer, bytesread, -4);
       change_string ("\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, buffer, bytesread, -7);
-      change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00!\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1,
-                     "\xf0\xd0", 2);
+      change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xd0\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -1624,6 +1686,23 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   remove_temp_file ();
 
   return 0;
+}
+
+
+int
+snes_f (st_rominfo_t *rominfo)
+{
+// See the document "src/backup/NTSC-PAL notes.txt".
+  switch (snes_header.country)
+    {
+      // In the Philipines the television standard is NTSC, but do games made
+      //  for the Philipines exist?
+      case 0:                                   // Japan
+      case 1:                                   // U.S.A.
+        return snes_fix_ntsc_protection (rominfo);
+      default:
+        return snes_fix_pal_protection (rominfo);
+    }
 }
 
 
@@ -1666,9 +1745,9 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
     }
   if (rominfo->buheader_len)                    // copy header (if present)
     {
-      fread (header, 1, SMC_HEADER_LEN, srcfile);
+      fread (header, 1, SWC_HEADER_LEN, srcfile);
       fseek (srcfile, rominfo->buheader_len, SEEK_SET);
-      fwrite (header, 1, SMC_HEADER_LEN, destfile);
+      fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
@@ -1913,13 +1992,18 @@ snes_buheader_info (st_rominfo_t *rominfo)
   unsigned char header[512];
   int x, y;
 
-  if (rominfo->buheader_len == 0)
+  if (rominfo->buheader_len == 0) // type == MGD
     {
       printf ("This ROM has no backup unit header\n");
       return -1;
     }
   else
-    printf ("Backup unit header info\n\n");
+    printf ("Backup unit header info (%s)\n\n",
+      type == SWC ? "SWC" :
+      type == FIG ? "FIG" :
+      type == GD3 ? "GD3" :
+      "unknown header type, but interpreted as SWC");
+
   q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
   mem_hexdump (header, 48, 0);                  // show only the part that is
   puts ("");                                    //  interpreted by copier
@@ -2139,7 +2223,7 @@ snes_init (st_rominfo_t *rominfo)
   rom_is_top = 0;                               // init these vars here, for -lsv
   snes_hirom_changed = 0;                       // idem
   snes_sramsize = 0;                            // idem
-  type = SMC;                                   // idem, SMC is almost the same as "unknown"
+  type = SMC;                                   // idem, SMC indicates unknown copier type
 
   q_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
   if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 5)
@@ -2176,7 +2260,7 @@ snes_init (st_rominfo_t *rominfo)
   if ((x = get_internal_sums (rominfo)) != 0xffff)
     {
       snes_hirom = 0;
-      rominfo->buheader_len = SMC_HEADER_LEN;
+      rominfo->buheader_len = SWC_HEADER_LEN;
       if ((x = get_internal_sums (rominfo)) != 0xffff)
         {
           snes_hirom = SNES_HIROM;
@@ -2184,7 +2268,7 @@ snes_init (st_rominfo_t *rominfo)
           if ((x = get_internal_sums (rominfo)) != 0xffff)
             {
               snes_hirom = SNES_HIROM;
-              rominfo->buheader_len = SMC_HEADER_LEN;
+              rominfo->buheader_len = SWC_HEADER_LEN;
               x = get_internal_sums (rominfo);
             }
         }
@@ -2215,8 +2299,6 @@ snes_init (st_rominfo_t *rominfo)
     type = FIG;
   else if (rominfo->buheader_len == 0 && x == 0xffff)
     type = MGD;
-  else if (rominfo->buheader_len != 0 && x == 0xffff)
-    type = SMC;
 
   /*
     x can be better trusted than type == FIG, but x being 0xffff is definitely
@@ -2226,9 +2308,9 @@ snes_init (st_rominfo_t *rominfo)
   if (type != MGD && type != SMC)
     {
       y = ((header.size_high << 8) + header.size_low) * 8 * 1024;
-      y += SMC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
+      y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
       if (y == rominfo->file_size)              //  hdr[0] low byte of # 8 kB blocks in ROM
-        rominfo->buheader_len = SMC_HEADER_LEN;
+        rominfo->buheader_len = SWC_HEADER_LEN;
       else
         {
           int surplus = rominfo->file_size % MBIT;
@@ -2238,7 +2320,7 @@ snes_init (st_rominfo_t *rominfo)
               rominfo->buheader_len = 0;
               type = MGD;
             }
-          else if ((surplus % SMC_HEADER_LEN) == 0 && surplus < MAXBUFSIZE)
+          else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < MAXBUFSIZE)
             rominfo->buheader_len = surplus;
         }
     }
@@ -2336,17 +2418,16 @@ snes_init (st_rominfo_t *rominfo)
     {
       switch (type)
         {
-        case SWC:
-          rominfo->copier_usage = swc_usage;
-          break;
         case GD3:
           rominfo->copier_usage = gd_usage;
           break;
         case FIG:
           rominfo->copier_usage = fig_usage;
           break;
+        // just assume it's in SWC format... (there are _many_ ROMs on the
+        //  internet with incorrect headers)
         default:
-          rominfo->copier_usage = !snes_hirom ? smc_usage : fig_usage;
+          rominfo->copier_usage = swc_usage;
         }
     }
 

@@ -41,10 +41,7 @@ const char *gbx_usage[] =
     "                  receives automatically when SRAM does not exist\n"
     "  " OPTION_LONG_S "xgbxb=BANK  send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
     "                  BANK can be a number from 0 to 15; " OPTION_LONG_S "file=PORT\n"
-    "                  receives automatically when ROM does not exist\n"
-    "                  You only need to specify PORT if uCON64 doesn't detect the\n"
-    "                  (right) parallel port. If that is the case give a hardware\n"
-    "                  address: ucon64 " OPTION_LONG_S "xgbx \"rom.gb\" 0x378\n",
+    "                  receives automatically when ROM does not exist\n",
 #endif // PARALLEL
     NULL
   };

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GBX_H
 #define GBX_H
-#define gbx_TITLE "GameBoy Xchanger"
+#define gbx_TITLE "GameBoy Xchanger/GBDoctor\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
 #define gbx_HEADER_START 0
 #define gbx_HEADER_LEN 0
 

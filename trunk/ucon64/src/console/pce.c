@@ -680,12 +680,13 @@ random number when backing up games.
     }
 
   p = basename (ucon64.rom);
-  strcpy (buf, is_func (p, strlen (p), isupper) ? "PC" : "pc");
-  strcat (buf, p);
+  if ((p[0] == 'P' || p[0] == 'p') && (p[1] == 'C' || p[1] == 'c'))
+    strcpy (buf, p);
+  else
+    sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "PC" : "pc", p);
   if ((p = strrchr (buf, '.')))
     *p = 0;
-  strcat (buf, "________");
-  buf[7] = '_';
+  strcat (buf, "______");
   buf[8] = 0;
   sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
 

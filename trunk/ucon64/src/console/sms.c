@@ -119,11 +119,13 @@ NOTE: Can anyone explain to me (dbjh) what the relationship is between the
 
   strcpy (src_name, ucon64.rom);
   p = basename (ucon64.rom);
-  sprintf (dest_name, "%s%s", is_func (dest_name, strlen (p), isupper) ? "GG" : "gg", p);
+  if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'G' || p[1] == 'g'))
+    strcpy (dest_name, p);
+  else
+    sprintf (dest_name, "%s%s", is_func (p, strlen (p), isupper) ? "GG" : "gg", p);
   if ((p = strrchr (dest_name, '.')))
     *p = 0;
-  strcat (dest_name, "_____");
-  dest_name[7] = '_';
+  strcat (dest_name, "______");
   dest_name[8] = 0;
   sprintf (suffix, ".%03u", size / MBIT);
   set_suffix (dest_name, suffix);

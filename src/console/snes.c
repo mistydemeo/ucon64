@@ -2308,8 +2308,8 @@ snes_init (st_rominfo_t *rominfo)
     "South Korea"},
     *snes_romtype[3] = {
     "ROM",                                      // NOT ROM only, ROM + other chip is possible
-    "ROM and RAM",
-    "ROM and Save RAM"};
+    "ROM + RAM",
+    "ROM + Save RAM"};
 
   rom_is_top = 0;                               // init these vars here, for -lsv
   snes_hirom_changed = 0;                       // idem
@@ -2593,13 +2593,21 @@ snes_init (st_rominfo_t *rominfo)
             str = "Game Boy data";
           else if (snes_header.rom_type == 0xf3)
             str = "C4";
-          else if (snes_header.rom_type == 0xf5 || snes_header.rom_type == 0xf9)
-            str = "SPC7110";
+          else if (snes_header.rom_type == 0xf5)
+            {
+              if (snes_header.map_type == 0x30)
+                str = "Seta RISC";
+              else
+                str = "SPC7110";
+            }
           else if (snes_header.rom_type == 0xf6)
-            str = "Seta's DSP";
+            str = "Seta DSP";
+          else if (snes_header.rom_type == 0xf9)
+            str = "SPC7110 + RTC";
           else
             str = "Unknown";
-          sprintf (buf, " and %s", str);
+
+          sprintf (buf, " + %s", str);
           strcat (rominfo->misc, buf);
         }
       strcat (rominfo->misc, "\n");

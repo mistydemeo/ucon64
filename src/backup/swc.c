@@ -276,7 +276,7 @@ handle_fig_header (unsigned char *header)
   else if ((header[4] == 0xdd && header[5] == 0x82) ||
            (header[4] == 0x00 && header[5] == 0x80))
     /*
-      8 kB *or* 2 kB (shortcomming of FIG header format). We give the emu mode
+      8 kB *or* 2 kB (shortcoming of FIG header format). We give the emu mode
       select byte a value as if the game uses 8 kB. At least this makes games
       that use 8 kB work.
       Users should not complain if the game doesn't work because of a SRAM

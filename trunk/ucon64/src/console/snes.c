@@ -592,7 +592,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   q_fread (&header, 0, rominfo->buheader_len > (int) SWC_HEADER_LEN ?
-                         SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
+                         (int) SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   size = ucon64.file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
@@ -656,7 +656,7 @@ snes_fig (st_rominfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   q_fread (&header, 0, rominfo->buheader_len > (int) FIG_HEADER_LEN ?
-                         FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
+                         (int) FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   size = ucon64.file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
@@ -1090,11 +1090,11 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   surplus = size % (8 * MBIT);
 
   if (sf_romname)
-    strcpy (dest_name, basename (ucon64.rom));
+    strcpy (dest_name, basename (filename));
   else
     {
       strcpy (dest_name, "SF");
-      strcat (dest_name, basename (ucon64.rom));
+      strcat (dest_name, basename (filename));
     }
   strupr (dest_name);
   if ((p = strrchr (dest_name, '.')))
@@ -3028,9 +3028,10 @@ score_hirom (unsigned char *rom_buffer, int rom_size)
     score += 2;
   if (!(rom_buffer[0xff00 + 0xfd] & 0x80))
     score -= 4;
-#if 0
-  // this seems to work by accident for Snes9x (letting rom_size (CalculatedSize)
-  // be 0 for first call)
+#if 1
+  // This seems to work by accident for Snes9x (letting rom_size (CalculatedSize)
+  // be 0 for first call). We do it too as warning remover.
+  rom_size = 0;
   if (rom_size > 1024 * 1024 * 3)
     score += 4;
 #endif
@@ -3060,7 +3061,7 @@ score_lorom (unsigned char *rom_buffer, int rom_size)
   if ((rom_buffer[0x7f00 + 0xd5] & 0xf) < 4)
     score += 2;
 #if 1
-  // this also seems strange, ROMs are always less than 16 MB
+  // This also seems strange, ROMs are always less than 16 MB.
   if (rom_size <= 1024 * 1024 * 16)
     score += 2;
 #endif

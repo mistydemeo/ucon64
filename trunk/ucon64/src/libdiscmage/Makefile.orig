@@ -10,7 +10,7 @@ INSTALL = install -c
 LIBTOOL = libtool
 
 CC=gcc
-CFLAGS=-I. -I.. -Wall -O3 -DDLL -DHAVE_CONFIG_H
+CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H -I.. -DDLL
 # The order of . and .. is important if header files are specified between
 # angle brackets
 ifdef DLOPEN

@@ -27,6 +27,6 @@ extern int sms_gge (st_rominfo_t *rominfo);
 extern int sms_init (st_rominfo_t *rominfo);
 extern int sms_mgd (st_rominfo_t *rominfo);
 extern int sms_smd (st_rominfo_t *rominfo);
-extern int sms_smds (st_rominfo_t *rominfo);
+extern int sms_smds (void);
 extern const st_usage_t sms_usage[];
 #endif // SMS_H

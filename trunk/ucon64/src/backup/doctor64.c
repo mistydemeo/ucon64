@@ -266,7 +266,7 @@ sendUploadHeader (unsigned int baseport, char name[], int len)
 
 
 int
-sendDownloadHeader (unsigned int baseport, char name[], int *len)
+sendDownloadHeader (unsigned int baseport, int *len)
 {
   char mname[12];
   static char protocolId[] = "GD6W";
@@ -306,8 +306,7 @@ doctor64_read (const char *filename, unsigned int parport)
 
   inittime = time (0);
 
-  strcpy (buf, filename);
-  if (sendDownloadHeader (parport, buf, &size) != 0)
+  if (sendDownloadHeader (parport, &size) != 0)
     return -1;
   if (!(fh = fopen (filename, "wb")))
     return -1;
@@ -337,7 +336,7 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
   FILE *fh;
   unsigned int size, inittime, pos, bytessend = 0;
 
-  size = q_fsize (filename) - start;
+  size = len - start;
   if (initCommunication (parport) == -1)
     return -1;
   inittime = time (0);

@@ -244,6 +244,7 @@ int
 n64_f (st_rominfo_t *rominfo)
 {
   // TODO: PAL/NTSC fix
+  if (rominfo->interleaved) return -1; else return -2; // warning remover
   return 0;
 }
 

@@ -98,7 +98,7 @@ static st_unknown_header_t unknown_header;
 
 
 int
-gameboy_n2gb (st_rominfo_t *rominfo, const char *emu_rom)
+gameboy_n2gb (const char *emu_rom)
 {
 #define EMULATOR_LEN 0x10000
   int n = 0, crc = 0;
@@ -486,7 +486,7 @@ gameboy_init (st_rominfo_t *rominfo)
   else
     {
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-        ucon64.buheader_len : SSC_HEADER_LEN;
+        ucon64.buheader_len : (int) SSC_HEADER_LEN;
 
       q_fread (&gameboy_header, GAMEBOY_HEADER_START +
         rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);

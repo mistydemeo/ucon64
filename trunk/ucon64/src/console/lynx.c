@@ -274,7 +274,7 @@ lynx_init (st_rominfo_t *rominfo)
   if (!strncmp (lnx_header.magic, "LYNX", 4))
     {
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-        ucon64.buheader_len : LNX_HEADER_LEN;
+        ucon64.buheader_len : (int) LNX_HEADER_LEN;
 
       if (UCON64_ISSET (ucon64.buheader_len) && !ucon64.buheader_len)
         return ucon64.console == UCON64_LYNX ? 0 : result;

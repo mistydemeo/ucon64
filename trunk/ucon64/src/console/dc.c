@@ -221,7 +221,7 @@ update_crc (char *ip)
 
 
 int
-dc_mkip (st_rominfo_t *rominfo, const char *ip_file) // make ip
+dc_mkip (const char *ip_file) // make ip
 {
 /* in
 Hardware ID   : SEGA SEGAKATANA

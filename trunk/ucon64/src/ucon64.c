@@ -489,7 +489,7 @@ main (int argc, char **argv)
 
   // $HOME/.ucon64/ ?
   strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
-#if     defined __CYGWIN__
+#ifdef  __CYGWIN__
   strcpy (ucon64.configdir, fix_character_set (ucon64.configdir));
 #endif
   strcpy (buf, ucon64.configdir);
@@ -498,7 +498,7 @@ main (int argc, char **argv)
   // DAT file handling
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "datdir", buf, ""));
-#if     defined __CYGWIN__
+#ifdef  __CYGWIN__
   strcpy (ucon64.datdir, fix_character_set (ucon64.datdir));
 #endif
   strcpy (buf, ucon64.datdir);
@@ -1558,7 +1558,7 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n",
-     ucon64_dat_total_entries (UCON64_UNKNOWN),
+     ucon64_dat_total_entries (),
      ucon64.datdir,
      name_exe, name_exe);
 }

@@ -150,7 +150,7 @@ ucon64_switches (int c, const char *optarg)
               ucon64.discmage_enabled ? "yes" : "no",
               ucon64.configdir,
               ucon64.datdir,
-              ucon64_dat_total_entries (UCON64_UNKNOWN),
+              ucon64_dat_total_entries (),
               ucon64.dat_enabled ? "yes" : "no"
       );
       exit (0);
@@ -1085,7 +1085,7 @@ ucon64_options (int c, const char *optarg)
           snes_dint (ucon64.rominfo);
           break;
         case UCON64_NES:
-          nes_dint (ucon64.rominfo);
+          nes_dint ();
           break;
         default:
           puts ("Converting to deinterleaved format...");
@@ -1114,7 +1114,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_FDS:
-      nes_fds (ucon64.rominfo);
+      nes_fds ();
       break;
 
     case UCON64_FDSL:
@@ -1164,7 +1164,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_INES:
-      nes_ines (ucon64.rominfo);
+      nes_ines ();
       break;
 
     case UCON64_INESHD:
@@ -1183,7 +1183,7 @@ ucon64_options (int c, const char *optarg)
           genesis_j (ucon64.rominfo);
           break;
         case UCON64_NES:
-          nes_j (ucon64.rominfo, NULL);
+          nes_j (NULL);
           break;
         case UCON64_SNES:
           snes_j (ucon64.rominfo);
@@ -1225,7 +1225,7 @@ ucon64_options (int c, const char *optarg)
           genesis_mgd (ucon64.rominfo);
           break;
         case UCON64_NG:
-          neogeo_mgd (ucon64.rominfo);
+          neogeo_mgd ();
           break;
         case UCON64_SNES:
           snes_mgd (ucon64.rominfo);
@@ -1261,7 +1261,7 @@ ucon64_options (int c, const char *optarg)
           n64_n (ucon64.rominfo, optarg);
           break;
         case UCON64_NES:
-          nes_n (ucon64.rominfo, optarg);
+          nes_n (optarg);
           break;
         case UCON64_SNES:
           snes_n (ucon64.rominfo, optarg);
@@ -1280,7 +1280,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_N2GB:
-      gameboy_n2gb (ucon64.rominfo, optarg);
+      gameboy_n2gb (optarg);
       break;
 
     case UCON64_NROT:
@@ -1288,7 +1288,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_PASOFAMI:
-      nes_pasofami (ucon64.rominfo);
+      nes_pasofami ();
       break;
 
     case UCON64_POKE:
@@ -1331,10 +1331,10 @@ ucon64_options (int c, const char *optarg)
           genesis_s (ucon64.rominfo);
           break;
         case UCON64_NG:
-          neogeo_s (ucon64.rominfo);
+          neogeo_s ();
           break;
         case UCON64_NES:
-          nes_s (ucon64.rominfo);
+          nes_s ();
           break;
         case UCON64_SNES:
           snes_s (ucon64.rominfo);
@@ -1364,7 +1364,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_SMDS:
-      genesis_smds (ucon64.rominfo);
+      genesis_smds ();
       break;
 
     case UCON64_SMG:
@@ -1388,7 +1388,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_UNIF:
-      nes_unif (ucon64.rominfo);
+      nes_unif ();
       break;
 
     case UCON64_USMS:
@@ -1422,8 +1422,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XDJR:
       if (!access (ucon64.rom, F_OK))
         {
-          if (doctor64jr_write (ucon64.rom, ucon64.rominfo->buheader_len,
-                                ucon64.file_size, ucon64.parport) != 0)
+          if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
@@ -1435,11 +1434,9 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_XGD3:
-#if 0 // dumping is not yet supported
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        gd_read_rom (ucon64.rom, ucon64.parport);
+        gd_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
       else
-#endif
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,

@@ -569,14 +569,14 @@ ucon64_dat_view (int console, int verbose)
     }
 
   printf ("DAT files: %d; entries: %d; total entries: %d\n",
-    n_datfiles, n_entries_sum, ucon64_dat_total_entries (UCON64_UNKNOWN));
+    n_datfiles, n_entries_sum, ucon64_dat_total_entries ());
 
   return 0;
 }
 
 
 unsigned int
-ucon64_dat_total_entries (int console)
+ucon64_dat_total_entries (void)
 {
   uint32_t entries = 0;
   int fsize;

@@ -194,6 +194,7 @@ const struct option options[] = {
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
     {"mkcue", 0, 0, UCON64_MKCUE},
+    {"mkdat", 1, 0, UCON64_MKDAT},
     {"mki", 1, 0, UCON64_MKI},
     {"mkppf", 1, 0, UCON64_MKPPF},
     {"mksheet", 0, 0, UCON64_MKSHEET},
@@ -1101,7 +1102,7 @@ ucon64_probe (st_rominfo_t * rominfo)
               }
           }
     }
-  
+
   return NULL;
 }
 
@@ -1129,7 +1130,7 @@ ucon64_nfo (void)
       {
         libdm_nfo (ucon64.image);
         printf ("\n");
-        
+
         return 0; // no crc calc. for disc images and therefore no dat entry either
       }
 #endif

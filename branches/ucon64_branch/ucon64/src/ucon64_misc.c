@@ -541,6 +541,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MGD, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
 //  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      WF_STOP},
+  {UCON64_MKDAT, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
   {UCON64_MKI, UCON64_UNKNOWN, ips_usage,      WF_STOP},
   {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,    WF_STOP},
   {UCON64_N, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
@@ -1106,6 +1107,45 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #if 1
 int
 ucon64_testpad (const char *filename)
+/*
+  Test if EOF is padded (repeated byte values)
+  This (new) version is not efficient for uncompressed files, but *much* more
+  efficient for compressed files. For example (a bad case), on a Celeron 850
+  just viewing info about a zipped dump of Mario Party (U) takes more than 3
+  minutes when the old version of ucon64_testpad() is used. A gzipped dump
+  can take more than 6 minutes. With this version it takes about 9 seconds for
+  the zipped dump and 12 seconds for the gzipped dump.
+*/
+{
+  int c = 0, blocksize, i, n = 0;
+  unsigned char buffer[MAXBUFSIZE];
+  FILE *file = fopen (filename, "rb");
+
+  if (!file)
+    return -1;
+
+  while ((blocksize = fread (buffer, 1, MAXBUFSIZE, file)))
+    {
+      if (buffer[blocksize - 1] != c)
+        {
+          c = buffer[blocksize - 1];
+          n = 0;
+        }
+      for (i = blocksize - 1; i >= 0; i--)
+        {
+          if (buffer[i] != c)
+            break;
+          else
+            n++;
+        }
+    }
+
+  fclose (file);
+  return n;
+}
+#else
+int
+ucon64_testpad (const char *filename)
 // test if EOF is padded (repeating bytes)
 {
   int pos = ucon64.file_size - 1, buf_pos = pos % MAXBUFSIZE,
@@ -1133,29 +1173,7 @@ ucon64_testpad (const char *filename)
 
   fclose (fh);
 
-  return ucon64.file_size;                    // the whole file is "padded"
-}
-#else
-int
-ucon64_testpad (const char *filename)
-// test if EOF is padded (repeating bytes)
-{
-  int size = ucon64.file_size, pos = ucon64.file_size - 2,
-      c = q_fgetc (filename, ucon64.file_size - 1);
-  unsigned char *buf;
-
-  if (!(buf = (unsigned char *) malloc ((size + 2) * sizeof (unsigned char))))
-    return -1;
-
-  q_fread (buf, 0, size, filename);
-
-  while (c == buf[pos])
-    pos--;
-
-  free (buf);
-
-  size -= (pos + 1);
-  return size > 1 ? size : 0;
+  return ucon64.file_size;                      // the whole file is "padded"
 }
 #endif
 

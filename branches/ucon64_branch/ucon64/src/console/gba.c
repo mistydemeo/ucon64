@@ -509,7 +509,7 @@ gba_multi (int truncate_size, char *fname)
       n_files = ucon64.argc - 1;
     }
 
-  ucon64_file_handler (destname, NULL, 0);
+  ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (destname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);

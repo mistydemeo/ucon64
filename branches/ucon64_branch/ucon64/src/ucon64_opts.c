@@ -767,7 +767,7 @@ ucon64_options (int c, const char *optarg)
         break; // empty search string
 
       while ((value = q_fncmp (ucon64.rom, value, ucon64.file_size, optarg,
-                              strlen (optarg), '?')) != -1)
+                               strlen (optarg), '?')) != -1)
         {
           ucon64_fhexdump (ucon64.rom, value, strlen (optarg) + 16);
           printf ("\n");                        // + 16 gives a bit of context
@@ -1124,6 +1124,10 @@ ucon64_options (int c, const char *optarg)
         }
       else
         printf (ucon64_msg[DAT_NOT_ENABLED]);
+      break;
+
+    case UCON64_MKDAT:
+      ucon64_create_dat (optarg, ucon64.rom, ucon64.rominfo);
       break;
 
     case UCON64_MULTI:

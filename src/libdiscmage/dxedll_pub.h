@@ -68,7 +68,9 @@ typedef struct st_symbol
   int (*fputs) (const char *, FILE *);
   FILE *(*fopen) (const char *, const char *);
   FILE *(*fdopen) (int, const char *);
+  FILE *(*popen) (const char *, const char *);
   int (*fclose) (FILE *);
+  int (*pclose) (FILE *);
   int (*fseek) (FILE *, long, int);
   long (*ftell) (FILE *);
   void (*rewind) (FILE *);
@@ -91,11 +93,13 @@ typedef struct st_symbol
   char *(*getenv) (const char *);
   void (*srand) (unsigned);
   int (*rand) (void);
+  int (*atoi) (const char *);
 
   void *(*memcpy) (void *, const void *, size_t);
   void *(*memset) (void *, int, size_t);
   int (*strcmp) (const char *, const char *);
   char *(*strcpy) (char *, const char *);
+  char *(*strncpy) (char *, const char *, size_t);
   char *(*strcat) (char *, const char *);
   char *(*strncat) (char *, const char *, size_t);
   int (*strcasecmp) (const char *, const char *);
@@ -106,6 +110,8 @@ typedef struct st_symbol
   size_t (*strspn) (const char *, const char *);
   size_t (*strcspn) (const char *, const char *);
   size_t (*strlen) (const char *);
+  char *(*strstr) (const char *, const char *);
+  char *(*strdup) (const char *);
 
   int (*tolower) (int);
   int (*toupper) (int);

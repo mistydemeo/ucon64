@@ -52,6 +52,20 @@ fclose (FILE *file)
 }
 
 
+FILE *
+popen (const char *command, const char *mode)
+{
+  return import_export.popen (command, mode);
+}
+
+
+int
+pclose (FILE *stream)
+{
+  return import_export.pclose (stream);
+}
+
+
 int
 fseek (FILE *file, long offset, int mode)
 {

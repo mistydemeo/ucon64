@@ -199,7 +199,7 @@ extern int kbhit (void);                        // may only be used after init_c
 #include <conio.h>                              // kbhit() & getch()
 #endif
 
-#if     defined __CYGWIN__
+#ifdef  __CYGWIN__
 char *fix_character_set (char *value);
 #endif
 
@@ -211,8 +211,8 @@ char *fix_character_set (char *value);
   tofname()   replaces chars that can not be used for filenames
   toprint2()  replaces chars that should not be used for stdout
 
-  is_func()   use all is*() functions on an array of unsigned char
-  to_func()   use all to*() functions on an array of unsigned char
+  is_func()   use all is*() functions on an array of char
+  to_func()   use all to*() functions on an array of char
 
   strtrim()   trim isspace()'s from start and end of string
 
@@ -223,7 +223,7 @@ char *fix_character_set (char *value);
   basename()  GNU basename() clone
   realpath2() realpath() clone
   mkdir2()    mkdir() wrapper who automatically cares for rights, etc.
-  truncate2() don't use truncate() to enlarge files, because the result is 
+  truncate2() don't use truncate() to enlarge files, because the result is
               undefined (by POSIX) use truncate2() instead which does both
   strargv()   wapper for argz_* to convert a cmdline into an argv[]
               like array
@@ -232,8 +232,8 @@ extern int isfname (int c);
 extern int isprint2 (int c);
 extern int tofname (int c);
 extern int toprint2 (int c);
-extern int is_func (unsigned char *s, int size, int (*func) (int));
-extern char *to_func (unsigned char *s, int size, int (*func) (int));
+extern int is_func (char *s, int size, int (*func) (int));
+extern char *to_func (char *s, int size, int (*func) (int));
 #define strupr(s) (to_func(s, strlen(s), toupper))
 #define strlwr(s) (to_func(s, strlen(s), tolower))
 //#ifndef HAVE_STRCASESTR
@@ -390,7 +390,7 @@ extern int q_fncmp (const char *filename, int start, int len,
                     const char *search, int searchlen, int wildcard);
 extern int q_fcpy (const char *src, int start, int len, const char *dest, const char *mode);
 extern int q_fswap (const char *filename, int start, int len);
-extern unsigned int q_fcrc32 (const char *filename, int start);
+extern int q_fcrc32 (const char *filename, int start);
 #if 1
 #define BAK_DUPE 0
 #define BAK_MOVE 1

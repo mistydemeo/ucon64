@@ -62,7 +62,7 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
 ifdef ZLIB
 LDFLAGS+=-lz
-OBJECTS+=unzip.o miscz.o
+OBJECTS+=unzip.o map.o miscz.o
 endif
 
 
@@ -182,7 +182,8 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 getopt.o: getopt.h
 unzip.o: unzip.h
 misc.o: misc.h miscz.h config.h
-miscz.o: map.c map.h miscz.h config.h
+map.o: map.h
+miscz.o: miscz.h map.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
 ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \

@@ -29,6 +29,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "ucon64.h"
+#include "misc.h"                               // kbhit(), getch()
+#include "ucon64.h"
+#include "ucon64_misc.h"
+#include "z64.h"
 
 
 const st_usage_t z64_usage[] =
@@ -38,12 +42,4 @@ const st_usage_t z64_usage[] =
   };
 
 #ifdef PARALLEL
-
-#include "misc.h"                               // kbhit(), getch()
-#include "ucon64.h"
-#include "ucon64_misc.h"
-#include "z64.h"
-
-
-
 #endif // PARALLEL

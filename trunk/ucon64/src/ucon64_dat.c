@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define MAX_FIELDS_IN_DAT 32
 #define DAT_FIELD_SEPARATOR (0xac)
-#define DAT_FIELD_SEPARATOR_S ("\xac")
+#define DAT_FIELD_SEPARATOR_S ((const char *) "\xac")
 
 typedef struct
 {
@@ -150,14 +150,15 @@ fclose_fdat (void)
 static int
 custom_stristr (const void *a, const void *b)
 {
-  return !stristr (a, b);
+  return !stristr ((const char *) a, (const char *) b);
 }
 
 
 static int
 custom_strnicmp (const void *a, const void *b)
 {
-  return strnicmp (a, b, MIN (strlen (a), strlen (b)));
+  return strnicmp ((const char *) a, (const char *) b,
+                   MIN (strlen ((const char *) a), strlen ((const char *) b)));
 }
 
 
@@ -165,7 +166,7 @@ custom_strnicmp (const void *a, const void *b)
 static int
 custom_stricmp (const void *a, const void *b)
 {
-  return stricmp (a, b);
+  return stricmp ((const char *) a, (const char *) b);
 }
 #endif
 
@@ -370,8 +371,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     "(Unk) Unknown Country",
     NULL
   };
-  unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE],
-                *p = NULL;
+  char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE], *p = NULL;
   uint32_t pos = 0;
 
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
@@ -448,9 +448,8 @@ uint32_t
 line_to_crc (const char *dat_entry)
 // get crc32 of current line
 {
-  unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL };
+  char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE];
   uint32_t pos = 0, crc32 = 0;
-  char buf[MAXBUFSIZE];
 
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return 0;
@@ -502,7 +501,8 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
 int
 ucon64_dat_view (int console, int verbose)
 {
-  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname, *p;
+  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname;
+  unsigned char *p;
   static st_ucon64_dat_t dat;
   int n, fsize, n_entries, n_entries_sum = 0, n_datfiles = 0;
   st_idx_entry_t *idx_entry;
@@ -655,8 +655,8 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 
       // search index for crc
       key.crc32 = crc32;
-      idx_entry = bsearch (&key, p, fsize / sizeof (st_idx_entry_t),
-                           sizeof (st_idx_entry_t), idx_compare);
+      idx_entry = (st_idx_entry_t *) bsearch (&key, p, fsize / sizeof (st_idx_entry_t),
+                                              sizeof (st_idx_entry_t), idx_compare);
       if (idx_entry)                            // crc32 found
         {
           if (!datinfo)

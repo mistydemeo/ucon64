@@ -94,6 +94,9 @@ typedef struct
 } st_rominfo_t;
 
 
+typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
+
+
 /*
   this struct holds workflow relevant information
 */
@@ -127,7 +130,7 @@ typedef struct
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 
   unsigned int parport;                         // parallel port address
-  enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode; // parallel port mode: ECP, EPP, SPP
+  parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
   
 #ifdef  ANSI_COLOR
   int ansi_color;

@@ -1484,9 +1484,7 @@ ucon64_usage (int argc, char *argv[])
 #else
 #if     defined __MSDOS__
     "discmage.dxe";
-#elif   defined __CYGWIN__
-    "discmage.dll";
-#elif   defined _WIN32
+#elif   defined __CYGWIN__ || defined _WIN32
     "discmage.dll";
 #elif   defined __unix__ || defined __BEOS__
     "libdiscmage.so";

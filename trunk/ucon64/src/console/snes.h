@@ -49,8 +49,7 @@ extern int snes_swc (st_rominfo_t *rominfo);
 extern int snes_swcs (void);
 extern int snes_ufos (void);
 extern int snes_buheader_info (st_rominfo_t *rominfo);
-extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo,
-                               char **names);
+extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names);
 extern int snes_get_snes_hirom (void);
 extern snes_file_t snes_get_file_type (void);
 #endif /* SNES_H */

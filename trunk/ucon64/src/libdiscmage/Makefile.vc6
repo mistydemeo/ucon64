@@ -13,7 +13,7 @@ LIBNAME=discmage
 OBJECTS=libdm_misc.obj cdi.obj nero.obj sheets.obj dllinit.obj misc.obj
 !ifdef ZLIB
 LIBS=zlib.lib
-OBJECTS=$(OBJECTS) unzip.obj miscz.obj
+OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
 !else
 LIBS=
 !endif

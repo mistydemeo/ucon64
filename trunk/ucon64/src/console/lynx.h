@@ -22,12 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define LYNX_H
 typedef struct st_lnx_header
 {
-  unsigned char magic[4];
-  unsigned short page_size_bank0;
-  unsigned short page_size_bank1;
-  unsigned short version;
-  unsigned char cartname[32];
-  unsigned char manufname[16];
+  char magic[4];
+  short int page_size_bank0;
+  short int page_size_bank1;
+  short int version;
+  char cartname[32];
+  char manufname[16];
   unsigned char rotation;
   unsigned char spare[5];
 } st_lnx_header_t;

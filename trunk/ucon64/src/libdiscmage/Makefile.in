@@ -22,9 +22,12 @@ LIBNAME=discmage
 OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
 ifdef ZLIB
 LIBS=-lz
-OBJECTS+=unzip.o miscz.o
+OBJECTS+=unzip.o map.o miscz.o
 else
 LIBS=
+ifdef DJGPP                             # DJGPP code in dllinit needs map code
+OBJECTS+=map.o
+endif
 endif
 
 

@@ -167,16 +167,8 @@ void l40226c (void);
 
 #include "cartlib.c"
 
-int debug, verbose;
-int DataSize16;
-int Device;
-int EPPMode;
-int RepairHeader;
-int VisolyTurbo;
-int WaitDelay;
-int FileHeader[0xc0];
-int HeaderBad;
-int Complement = 0;
+static int debug, verbose, DataSize16, Device, EPPMode, RepairHeader,
+           VisolyTurbo, WaitDelay, FileHeader[0xc0], HeaderBad, Complement = 0;
 
 const u8 GoodHeader[] = {
   46, 0, 0, 234, 36, 255, 174, 81, 105, 154, 162, 33, 61, 132, 130, 10,

@@ -983,7 +983,7 @@ ucon64_fhexdump (const char *filename, int start, int len)
 #define FILEFILE_LARGE_BUF
 // When verifying if the code produces the same output when FILEFILE_LARGE_BUF
 //  is defined as when it's not, be sure to use the same buffer size
-unsigned int
+int
 ucon64_filefile (const char *filename1, int start1, const char *filename2,
                  int start2, int similar)
 {

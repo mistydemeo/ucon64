@@ -88,8 +88,8 @@ remove_destfile (void)
 int
 ips_apply (const char *mod, const char *ipsname)
 {
-  unsigned char byte, byte2, byte3, magic[6];
-  char modname[FILENAME_MAX];
+  unsigned char byte, byte2, byte3;
+  char modname[FILENAME_MAX], magic[6];
   unsigned int offset, length, i;
 
   strcpy (modname, mod);
@@ -352,7 +352,8 @@ int
 ips_create (const char *orgname, const char *modname)
 {
   int i, orgfilesize, modfilesize;
-  unsigned char ipsname[FILENAME_MAX], byte, byte2, buf[BUFSIZE];
+  char ipsname[FILENAME_MAX];
+  unsigned char byte, byte2, buf[BUFSIZE];
 
   if ((orgfile = fopen (orgname, "rb")) == NULL)
     {

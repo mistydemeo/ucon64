@@ -29,22 +29,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "ucon64.h"
-
-
-const st_usage_t ssc_usage[] =
-  { 
-    {NULL, NULL, "Super Smart Card/SSC"},
-    {NULL, NULL, NULL}
-  };
-
-
-#ifdef PARALLEL
-
 #include "misc.h"                               // kbhit(), getch()
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ssc.h"
 
 
+const st_usage_t ssc_usage[] =
+  {
+    {NULL, NULL, "Super Smart Card/SSC"},
+    {NULL, NULL, NULL}
+  };
 
+#ifdef PARALLEL
 #endif // PARALLEL

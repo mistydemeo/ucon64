@@ -65,6 +65,8 @@ Data Read Procedure:
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "mccl.h"
+
 
 const st_usage_t mccl_usage[] = {
   {NULL, NULL, "Mad Catz Camera Link (Game Boy Camera)"},

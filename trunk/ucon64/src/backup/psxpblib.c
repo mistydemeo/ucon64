@@ -79,6 +79,7 @@ psx_clk (int base, int conport, int on)
     }
 }
 
+
 /*
  *
  * sets att for conport connected to parallel port base
@@ -131,6 +132,7 @@ psx_att (int base, int conport, int on)
     }
 }
 
+
 /*
  *
  * sets command for conport connected to parallel port base
@@ -171,6 +173,7 @@ psx_cmd (int base, int conport, int on)
     }
 }
 
+
 /*
  *
  * tests data for conport connected to parallel port base, returns 1 if high
@@ -202,6 +205,7 @@ psx_dat (int base, int conport)
         }
     }
 }
+
 
 /*
  *
@@ -246,6 +250,7 @@ psx_ack (int base, int conport)
     }
 }
 
+
 /*
  *
  * wait for delay * (psx_outportb() execution time) 
@@ -262,10 +267,11 @@ psx_delay (int base, int delay)
     }
 }
 
+
 /*
  *
  * send byte as a command to conport connected to parallel port base
- * assumes clock high and the attention for conport 
+ * assumes clock high and the attention for conport
  *
  */
 unsigned char
@@ -293,6 +299,7 @@ psx_sendbyte (int base, int conport, int delay, unsigned char byte, int wait)
   return data;
 }
 
+
 int
 psx_obtain_io_permission (int base)
 {
@@ -313,6 +320,7 @@ psx_obtain_io_permission (int base)
   already = 1;
   return 1;
 }
+
 
 /*
  *
@@ -338,6 +346,7 @@ psx_sendinit (int base, int conport, int delay)
   psx_delay (base, delay);
 }
 
+
 /*
  *
  * use after psx_sendbyte()
@@ -354,7 +363,8 @@ psx_sendclose (int base, int conport, int delay)
   psx_delay (base, delay);
 }
 
-/* 
+
+/*
  *
  * send string as a series of commands to conport connected to parallel port base
  *
@@ -379,6 +389,7 @@ psx_sendstring (int base, int conport, int delay, int string[])
 
   psx_sendclose (base, conport, delay);
 }
+
 
 /*
  *
@@ -417,6 +428,7 @@ psx_controller_detect (int base, int conport, int tap, int delay)
 
   return type;
 }
+
 
 /*
  *
@@ -472,6 +484,7 @@ psx_controller_read (int base, int conport, int tap, int delay)
   return &psx_con_buf;
 }
 
+
 /*
  *
  * sends force feedback/shock init command sequence to conport:tap on port base
@@ -481,12 +494,12 @@ psx_controller_read (int base, int conport, int tap, int delay)
 void
 psx_controller_vinit (int base, int conport, int tap, int delay)
 {
-  int i;
-  int vibrate_init_string[3][11] = {
-    {tap, 0x43, 0x00, 0x01, 0x00, 0x01, -1},
-    {tap, 0x4d, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0x01, -1},
-    {tap, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, -1},
-  };
+  int i, vibrate_init_string[3][11] =
+    {
+      {tap, 0x43, 0x00, 0x01, 0x00, 0x01, -1},
+      {tap, 0x4d, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0x01, -1},
+      {tap, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, -1},
+    };
 
   for (i = 0; i < 3; i++)
     {
@@ -496,6 +509,7 @@ psx_controller_vinit (int base, int conport, int tap, int delay)
       psx_sendstring (base, conport, delay, vibrate_init_string[i]);
     }
 }
+
 
 /*
  *
@@ -516,28 +530,23 @@ psx_controller_vshock (int base, int conport, int tap, int delay, int shock,
   psx_sendstring (base, conport, delay, dualshock_string);
 }
 
+
 /*
  *
  * Reads a single frame (128 bytes) from Memory Card on conport base:tap
  *
  */
-char *
+unsigned char *
 psx_memcard_read_frame (int base, int conport, int tap, int delay, int frame)
 {
-  int i, xor;
+  int i, xor_val;
   static unsigned char data[128], c_data;
-
-  unsigned char cmd_rstring_hdr[4] =
-    { (0x80 + (unsigned char) tap), 0x52, 0x00, 0x00 };
-  unsigned char chk_rstring_hdr[2] = { 0x5a, 0x5d };
-
-  unsigned char cmd_rstring_adr[2] = { (frame >> 8) & 0xff, frame & 0xff };
-
-  unsigned char chk_rstring_ack[1] = { 0x5c };
-
-  unsigned char chk_rstring_sfl[1] = { 0x5d };
-
-  unsigned char chk_rstring_efl[1] = { 0x47 };
+  unsigned char cmd_rstring_hdr[4] = { (0x80 + (unsigned char) tap), 0x52, 0x00, 0x00 },
+                chk_rstring_hdr[2] = { 0x5a, 0x5d },
+                cmd_rstring_adr[2] = { (frame >> 8) & 0xff, frame & 0xff },
+                chk_rstring_ack[1] = { 0x5c },
+                chk_rstring_sfl[1] = { 0x5d },
+                chk_rstring_efl[1] = { 0x47 };
 
   psx_sendinit (base, conport, delay);
 
@@ -620,15 +629,15 @@ psx_memcard_read_frame (int base, int conport, int tap, int delay, int frame)
   psx_delay (base, delay);
 
   /* test xor */
-  xor = 0;
+  xor_val = 0;
 
-  xor ^= cmd_rstring_adr[0];
-  xor ^= cmd_rstring_adr[1];
+  xor_val ^= cmd_rstring_adr[0];
+  xor_val ^= cmd_rstring_adr[1];
 
   for (i = 0; i < 128; i++)
-    xor ^= data[i];
+    xor_val ^= data[i];
 
-  if (xor != c_data)
+  if (xor_val != c_data)
     {
       psx_sendclose (base, conport, delay);
       return NULL;
@@ -649,6 +658,7 @@ psx_memcard_read_frame (int base, int conport, int tap, int delay, int frame)
   return data;
 }
 
+
 /*
  *
  * Writes a single frame (128 bytes) to Memory Card on conport base:tap
@@ -656,20 +666,15 @@ psx_memcard_read_frame (int base, int conport, int tap, int delay, int frame)
  */
 int
 psx_memcard_write_frame (int base, int conport, int tap, int delay, int frame,
-                         char *data_f)
+                         unsigned char *data_f)
 {
-  int i, xor;
-  unsigned char c_data;
-
-  unsigned char cmd_wstring_hdr[4] =
-    { (0x80 + (unsigned char) tap), 0x57, 0x00, 0x00 };
-  unsigned char chk_wstring_hdr[2] = { 0x5a, 0x5d };
-
-  unsigned char cmd_wstring_adr[2] = { (frame >> 8) & 0xff, frame & 0xff };
-
-  unsigned char chk_wstring_emk[2] = { 0x5c, 0x5d };
-
-  unsigned char chk_wstring_efl[1] = { 0x47 };
+  int i, xor_val;
+  unsigned char c_data,
+                cmd_wstring_hdr[4] = { (0x80 + (unsigned char) tap), 0x57, 0x00, 0x00 },
+                chk_wstring_hdr[2] = { 0x5a, 0x5d },
+                cmd_wstring_adr[2] = { (frame >> 8) & 0xff, frame & 0xff },
+                chk_wstring_emk[2] = { 0x5c, 0x5d },
+                chk_wstring_efl[1] = { 0x47 };
 
   psx_sendinit (base, conport, delay);
 
@@ -704,16 +709,16 @@ psx_memcard_write_frame (int base, int conport, int tap, int delay, int frame,
     }
 
   /* calculate xor */
-  xor = 0;
+  xor_val = 0;
 
-  xor ^= cmd_wstring_adr[0];
-  xor ^= cmd_wstring_adr[1];
+  xor_val ^= cmd_wstring_adr[0];
+  xor_val ^= cmd_wstring_adr[1];
 
   for (i = 0; i < 128; i++)
-    xor ^= data_f[i];
+    xor_val ^= data_f[i];
 
   /* send xor */
-  psx_sendbyte (base, conport, delay, (unsigned char) xor, 0);
+  psx_sendbyte (base, conport, delay, (unsigned char) xor_val, 0);
   psx_delay (base, delay);
 
   /* receive end mark */
@@ -739,15 +744,16 @@ psx_memcard_write_frame (int base, int conport, int tap, int delay, int frame,
 
   psx_sendclose (base, conport, delay);
 
-  return (int) ((unsigned char) xor);
+  return (int) ((unsigned char) xor_val);
 }
+
 
 /*
  *
  * Reads a single block (64 frames) from Memory Card on conport base:tap
  *
  */
-char *
+unsigned char *
 psx_memcard_read_block (int base, int conport, int tap, int delay, int block)
 {
   int i, j;
@@ -772,6 +778,7 @@ psx_memcard_read_block (int base, int conport, int tap, int delay, int block)
   return data_b;
 }
 
+
 /*
  *
  * Writes a single block (64 frames) to Memory Card on conport base:tap
@@ -779,17 +786,17 @@ psx_memcard_read_block (int base, int conport, int tap, int delay, int block)
  */
 int
 psx_memcard_write_block (int base, int conport, int tap, int delay, int block,
-                         char *data_b)
+                         unsigned char *data_b)
 {
-  int i, xor;
+  int i, xor_val;
 
   for (i = 0; i < 64; i++)
     {
-      xor =
+      xor_val =
         psx_memcard_write_frame (base, conport, tap, delay, (block * 64) + i,
                                  &(data_b[128 * i]));
 
-      if (xor == -1)
+      if (xor_val == -1)
         {
           return -1;
         }
@@ -797,6 +804,7 @@ psx_memcard_write_block (int base, int conport, int tap, int delay, int block,
 
   return 1;
 }
+
 
 /*
  *
@@ -806,7 +814,7 @@ psx_memcard_write_block (int base, int conport, int tap, int delay, int block,
 PSX_MCB_INFO_DIR *
 psx_mcb_read_dir (int base, int conport, int tap, int delay, int block)
 {
-  int i, xor;
+  int i, xor_val;
   unsigned char *data_f;
   static PSX_MCB_INFO_DIR mcb_info_dir;
 
@@ -851,12 +859,12 @@ psx_mcb_read_dir (int base, int conport, int tap, int delay, int block)
       return &mcb_info_dir;
     }
 
-  xor = 0;
+  xor_val = 0;
 
   for (i = 0; i < 127; i++)
-    xor ^= data_f[i];
+    xor_val ^= data_f[i];
 
-  if (xor != data_f[127])
+  if (xor_val != data_f[127])
     {
       mcb_info_dir.read = 0;
       return &mcb_info_dir;
@@ -894,6 +902,7 @@ psx_mcb_read_dir (int base, int conport, int tap, int delay, int block)
 
   return &mcb_info_dir;
 }
+
 
 /*
  *
@@ -1003,6 +1012,7 @@ psx_mcb_read_dat (int base, int conport, int tap, int delay, int block)
   return &mcb_info_dat;
 }
 
+
 /*
  *
  * Merges the info associated with block from the directory and it's data
@@ -1050,6 +1060,7 @@ psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
 
   return mcb_info;
 }
+
 
 /*
  *

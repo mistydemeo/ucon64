@@ -28,6 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "quick_io.h"
+#include "dex.h"
+
 
 const st_usage_t dex_usage[] =
   {
@@ -49,15 +51,15 @@ static int print_data = 0x378;
 #define TAP 1
 #define DELAY 4
 
-static char *
-read_block (int block_num, char *data)
+static unsigned char *
+read_block (int block_num, unsigned char *data)
 {
   data = psx_memcard_read_block (print_data, CONPORT, TAP, DELAY, block_num);
   return data;
 }
 
 static int
-write_block (int block_num, char *data)
+write_block (int block_num, unsigned char *data)
 {
   return psx_memcard_write_block (print_data, CONPORT, TAP, DELAY, block_num,
                                   data);
@@ -92,8 +94,7 @@ char *dex_argv[128];
 int
 dex_read_block (const char *filename, int block_num, unsigned int parport)
 {
-  char *result = NULL;
-  char data[BLOCK_SIZE];
+  unsigned char *result = NULL, data[BLOCK_SIZE];
   print_data = parport;
 
   result = read_block (block_num, data);
@@ -108,7 +109,7 @@ int
 dex_write_block (const char *filename, int block_num, unsigned int parport)
 {
   int result;
-  char data[BLOCK_SIZE];
+  unsigned char data[BLOCK_SIZE];
   print_data = parport;
 
   q_fread (data, 0, BLOCK_SIZE, filename);

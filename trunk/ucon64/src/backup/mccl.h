@@ -17,11 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef GBCAMERA_H
-#define GBCAMERA_H
+#ifndef MCCL_H
+#define MCCL_H
 extern const st_usage_t mccl_usage[];
 
 #ifdef PARALLEL
 extern int mccl_read (const char *filename, unsigned int parport);
 #endif // PARALLEL
-#endif // GBCAMERA_H
+#endif // MCCL_H

@@ -299,7 +299,7 @@ doctor64_read (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
-  unsigned int size, inittime, bytesreceived = 0;
+  int size, inittime, bytesreceived = 0;
 
   if (initCommunication (parport) == -1)
     return -1;

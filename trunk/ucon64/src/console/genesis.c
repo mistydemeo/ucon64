@@ -131,7 +131,8 @@ int
 genesis_smd (st_rominfo_t *rominfo)
 {
   st_smd_header_t header;
-  unsigned char dest_name[FILENAME_MAX], *rom_buffer = NULL;
+  char dest_name[FILENAME_MAX];
+  unsigned char *rom_buffer = NULL;
 
   if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
     return -1;
@@ -158,7 +159,8 @@ genesis_smd (st_rominfo_t *rominfo)
 int
 genesis_smds (st_rominfo_t *rominfo)
 {
-  char dest_name[FILENAME_MAX], buf[32768];
+  char dest_name[FILENAME_MAX];
+  unsigned char buf[32768];
   st_smd_header_t header;
 
   memset (&header, 0, SMD_HEADER_LEN);
@@ -184,9 +186,9 @@ int
 genesis_mgd (st_rominfo_t *rominfo)
 {
 #define CC (const char)
-  unsigned char dest_name[FILENAME_MAX], *rom_buffer = NULL, buf[FILENAME_MAX],
-                mgh[512], *p = NULL;
   int x, y;
+  unsigned char *rom_buffer = NULL;
+  char dest_name[FILENAME_MAX], buf[FILENAME_MAX], mgh[512], *p = NULL;
   const char mghcharset[1024] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -346,7 +348,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   mgh[5] = 0xf0;
   mgh[31] = 0xff;
 
-  strcpy (buf, &OFFSET (genesis_header, 32));   // name
+  strcpy (buf, (const char *) &OFFSET (genesis_header, 32)); // name
   for (x = 0; x < 15; x++)
     {
       for (y = 0; y < 4; y++)
@@ -525,7 +527,8 @@ genesis_j (st_rominfo_t *rominfo)
 static int
 genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
 {
-  char *rom_buffer = NULL, buf[FILENAME_MAX];
+  unsigned char *rom_buffer = NULL;
+  char buf[FILENAME_MAX];
 
   if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
     return -1;
@@ -895,7 +898,7 @@ genesis_init (st_rominfo_t *rominfo)
   if (maker[3] == 'T' && maker[4] == '-')
     {
       memcpy (buf, &maker[5], 3);
-      sscanf (buf, "%03d", &value);
+      sscanf ((char *) buf, "%03d", &value);
       rominfo->maker = NULL_TO_UNKNOWN_S (genesis_maker[value & 0xff]);
     }
   else
@@ -927,8 +930,8 @@ genesis_init (st_rominfo_t *rominfo)
   // misc stuff
   memcpy (buf2, &OFFSET (genesis_header, 80), 48);
   buf2[48] = 0;
-  sprintf (buf, "Overseas game name: %s\n", buf2);
-  strcat (rominfo->misc, buf);
+  sprintf ((char *) buf, "Overseas game name: %s\n", buf2);
+  strcat (rominfo->misc, (const char *) buf);
 
 #if 0
   if (OFFSET (genesis_header, 166) == 255 &&
@@ -936,63 +939,63 @@ genesis_init (st_rominfo_t *rominfo)
     strcpy(buf, "Internal Size: ? Mb\n");
   else
 #endif
-  sprintf (buf, "Internal size: %.4f Mb\n", (float)
+  sprintf ((char *) buf, "Internal size: %.4f Mb\n", (float)
            (OFFSET (genesis_header, 165) + 1) / 2);
-  strcat (rominfo->misc, buf);
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "Start: %02x%02x%02x%02x\n",
+  sprintf ((char *) buf, "Start: %02x%02x%02x%02x\n",
            OFFSET (genesis_header, 160),
            OFFSET (genesis_header, 161),
            OFFSET (genesis_header, 162),
            OFFSET (genesis_header, 163));
-  strcat (rominfo->misc, buf);
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "End: %02x%02x%02x%02x\n",
+  sprintf ((char *) buf, "End: %02x%02x%02x%02x\n",
            OFFSET (genesis_header, 164),
            OFFSET (genesis_header, 165),
            OFFSET (genesis_header, 166),
            OFFSET (genesis_header, 167));
-  strcat (rominfo->misc, buf);
+  strcat (rominfo->misc, (const char *) buf);
 
 #if 1
 // This code seems to give better results than the old code.
-  sprintf (buf, "ROM type: %s\n",
+  sprintf ((char *) buf, "ROM type: %s\n",
            (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Education");
-  strcat (rominfo->misc, buf);
+  strcat (rominfo->misc, (const char *) buf);
 #else
   if (OFFSET (genesis_header, 128) == 'G')
     {
-      sprintf (buf, "ROM type: %s\n",
+      sprintf ((char *) buf, "ROM type: %s\n",
                (OFFSET (genesis_header, 129) == 'M') ? "Game" : "Education");
-      strcat (rominfo->misc, buf);
+      strcat (rominfo->misc, (const char *) buf);
     }
 #endif
 
-  sprintf (buf, "I/O device(s): %s %s %s %s\n",
+  sprintf ((char *) buf, "I/O device(s): %s %s %s %s\n",
            NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)]),
            NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 145), GENESIS_IO_MAX - 1)]),
            NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 146), GENESIS_IO_MAX - 1)]),
            NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 147), GENESIS_IO_MAX - 1)]));
-  strcat (rominfo->misc, buf);
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "Product code: %-11.11s\n", &OFFSET (genesis_header, 128));
-  strcat (rominfo->misc, buf);
+  sprintf ((char *) buf, "Product code: %-11.11s\n", &OFFSET (genesis_header, 128));
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "Date: %-8.8s\n", &OFFSET (genesis_header, 24));
-  strcat (rominfo->misc, buf);
+  sprintf ((char *) buf, "Date: %-8.8s\n", &OFFSET (genesis_header, 24));
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "Modem data: %-20.20s\n", &OFFSET (genesis_header, 188));
-  strcat (rominfo->misc, buf);
+  sprintf ((char *) buf, "Modem data: %-20.20s\n", &OFFSET (genesis_header, 188));
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "Memo: %-40.40s\n", &OFFSET (genesis_header, 200));
-  strcat (rominfo->misc, buf);
+  sprintf ((char *) buf, "Memo: %-40.40s\n", &OFFSET (genesis_header, 200));
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "Backup RAM: %s\n", (OFFSET (genesis_header, 176) == 'R' &&
-                                     OFFSET (genesis_header, 177) == 'A') ? "Yes" : "No");
-  strcat (rominfo->misc, buf);
+  sprintf ((char *) buf, "Backup RAM: %s\n", (OFFSET (genesis_header, 176) == 'R' &&
+                                              OFFSET (genesis_header, 177) == 'A') ? "Yes" : "No");
+  strcat (rominfo->misc, (const char *) buf);
 
-  sprintf (buf, "Version: 1.%c%c", OFFSET (genesis_header, 140), OFFSET (genesis_header, 141));
-  strcat (rominfo->misc, buf);
+  sprintf ((char *) buf, "Version: 1.%c%c", OFFSET (genesis_header, 140), OFFSET (genesis_header, 141));
+  strcat (rominfo->misc, (const char *) buf);
 
   // internal ROM crc
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)

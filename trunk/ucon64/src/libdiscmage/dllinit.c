@@ -58,8 +58,7 @@ DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
 #elif   defined DJGPP
 #include "dxedll_pub.h"                         // for st_symbol_t
 #include "dxedll_priv.h"                        // must be included after headers
-                                                //  of external libraries!
-#include "map.h"
+#include "map.h"                                //  of external libraries!
 
 
 int dxe_init (void);

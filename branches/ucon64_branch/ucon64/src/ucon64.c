@@ -999,7 +999,10 @@ ucon64_rom_handling (void)
 
   // Does the option allow split ROMs?
   if (ucon64.flags & WF_NO_SPLIT)
-    // test for split files only if the console type knows about split files at all
+    /*
+      Test for split files only if the console type knows about split files at
+      all. However we only know the console type after probing.
+    */
     if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
         ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
       if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))

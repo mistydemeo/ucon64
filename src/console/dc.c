@@ -56,8 +56,8 @@ dc_init (st_rominfo_t *rominfo)
 
 //  printf ("%d\n", sizeof (dc_ip0000_header_t));
 
-  rominfo->console_usage = (const st_usage_t **)dc_usage;
-//  rominfo->copier_usage = (const st_usage_t **)cdrw_usage;
+  rominfo->console_usage = (const st_usage_t *)dc_usage;
+//  rominfo->copier_usage = (const st_usage_t *)cdrw_usage;
 
   return result;
 }

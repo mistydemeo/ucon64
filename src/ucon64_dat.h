@@ -44,8 +44,8 @@ typedef struct
   char comment[25 * 80];                // comment of dat file
   char refname[100];                    // ref name (could this be used to find out which console system?)
 
-  const st_usage_t **console_usage;                    // console system usage
-  const st_usage_t **copier_usage;                     // backup unit usage
+  const st_usage_t *console_usage;                    // console system usage
+  const st_usage_t *copier_usage;                     // backup unit usage
 } st_ucon64_dat_t;
 
 // search dat files for crc and return ucon64_dat_t

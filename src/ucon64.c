@@ -180,7 +180,6 @@ const struct option options[] = {
     {"int", 0, 0, UCON64_INT},
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
-    {"invert", 0, 0, UCON64_INVERT},
 //    {"ip", 0, 0, UCON64_IP},
 #ifdef  DISCMAGE
     {"isofix", 1, 0, UCON64_ISOFIX},
@@ -717,6 +716,23 @@ ucon64_process_rom (char *fname)
            unzip_current_file_nr++)
         {
           ucon64_fname_arch (fname);
+          /*
+            There seems to be no other way to detect directories in ZIP files
+            than by looking at the file name. Paths in ZIP files should contain
+            forward slashes. ucon64_fname_arch() calls basename2(), so
+            ucon64.fname_arch will be empty when uCON64 is compiled with a
+            compiler other than Visual C++ or MinGW. When uCON64 is compiled
+            with Visual C++ or MinGW, basename2() will not handle forward
+            slashes as file separator, so we have to check for an empty string
+            *or* a forward slash at the end of the string.
+          */
+#if     !defined _WIN32
+          if (strlen (ucon64.fname_arch) == 0)
+#else                                           // Visual C++ or MinGW
+          if (ucon64.fname_arch[strlen (ucon64.fname_arch) - 1] == '/')
+#endif
+            continue;
+
           ucon64.rom = fname;
 
           ucon64_execute_options();
@@ -1108,8 +1124,8 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_NGP, ngp_init, AUTO},
       {UCON64_SWAN, swan_init, AUTO},
       {UCON64_JAG, jaguar_init, AUTO},
+      {UCON64_PCE, pcengine_init, AUTO},
       {UCON64_NG, neogeo_init, 0},
-      {UCON64_PCE, pcengine_init, 0},
       {UCON64_SWAN, swan_init, 0},
       {UCON64_DC, dc_init, 0},
       {UCON64_PSX, psx_init, 0},

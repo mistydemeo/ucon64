@@ -483,7 +483,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (SNES, SMS, PC-Engine & Genesis) -mgd produces correct file names (by
   dbjh, thanks to acem77 for testing and feedback)<br>
 - updated (Genesis) -mgd automatically pads files to the right size (by dbjh)<br>
-- added (PC-Engine) -invert invert/swap bits of all bytes of a file. This
+- added (PC-Engine) -swap invert/swap bits of all bytes of a file. This
   effectively converts PC-Engine games between Japan and U.S.A. "mode" (by
   dbjh, thanks to acem77 for the information)<br>
 - added (SMS) backup unit header length detection (by dbjh, thanks to acem77
@@ -491,6 +491,13 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   surface: some CRC32 values are the result of including a backup unit header
   in the calculation. Someone with a complete GoodSMS collection should create
   a new DAT file<br>
+- updated (PC-Engine) auto-detection of bit-swapped files (by dbjh, thanks to
+  Cowering for the info)<br>
+- updated (PC-Engine) -mgd automatically bit-swaps the file if it detected as
+  being in Japan "mode" (by dbjh)<br>
+- updated (PC-Engine) -smg automatically bit-swaps the file if it detected as
+  being in U.S.A "mode" (by dbjh) I don't know if this correct. Please give
+  feedback<br>
 <br>
 <br>
 <br>

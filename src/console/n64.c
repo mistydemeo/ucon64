@@ -59,8 +59,9 @@ const st_usage_t n64_usage[] =
     {"nint", NULL, "force ROM is not in interleaved format (1234, Z64)"},
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"v64", NULL, "convert to Doctor V64 (and compatibles/interleaved)"},
-    {"z64", NULL, "convert to Z64 (Zip Drive/not interleaved)"},
+    {"z64", NULL, "convert to Mr. Backup Z64 (not interleaved)"},
     {"dint", NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)"},
+    {"swap", NULL, "same as " OPTION_LONG_S "dint"},
 #if 0
     {"f", NULL, "remove NTSC/PAL protection"},
 #endif

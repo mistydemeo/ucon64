@@ -73,9 +73,9 @@ neogeo_bios (const char *fname)
   strcpy (buf, fname);
   set_suffix (buf, ".NEW");
 
-  handle_existing_file (buf, NULL);
+  ucon64_file_handler (buf, NULL, 0);
   q_fcpy (fname, 0, MBIT, buf, "wb");
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
 
   q_fswap (buf, 0, MBIT);
 

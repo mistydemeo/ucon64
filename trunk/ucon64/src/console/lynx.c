@@ -77,10 +77,10 @@ lynx_lyx (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".LYX");
 
-  handle_existing_file (buf, NULL);
+  ucon64_file_handler (buf, NULL, 0);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf, "wb");
 
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -123,11 +123,11 @@ lynx_lnx (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".LNX");
 
-  handle_existing_file (buf, NULL);
+  ucon64_file_handler (buf, NULL, 0);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), buf, "wb");
   q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), buf, "ab");
 
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -147,10 +147,10 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
 
   header.rotation = rotation;                   // header.rotation is an 8-bit field
 
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
 
   return 0;
 }
@@ -193,10 +193,10 @@ lynx_n (st_rominfo_t *rominfo, const char *name)
   memset (header.cartname, 0, sizeof (header.cartname));
   strncpy (header.cartname, name, sizeof (header.cartname));
 
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -225,10 +225,10 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
     *bankvar = atol (value) * 4;
 #endif
 
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 

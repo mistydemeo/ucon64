@@ -788,13 +788,8 @@ static int ucon64_io_fd;
 #endif
 
 
-#if 1
 void
-handle_existing_file (const char *dest, char *src)
-#else
-void
-handle_existing_file (char *dest, char *src, int flags)
-#endif
+ucon64_file_handler (const char *dest, char *src, int flags)
 /*
   We have to handle the following cases (for example -swc and rom.swc exists):
   1) ucon64 -swc rom.swc
@@ -1424,7 +1419,7 @@ ucon64_gauge (time_t init_time, int pos, int size)
 
 
 int
-ucon64_dm_gauge (int pos, int size)
+ucon64_libdm_gauge (int pos, int size)
 {
   time_t init_time = 0;
   

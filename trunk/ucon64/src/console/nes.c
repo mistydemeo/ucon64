@@ -5782,8 +5782,7 @@ nes_unif (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".UNF");
   strcpy (src_name, ucon64.rom);
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, src_name);
+  ucon64_file_handler (dest_name, src_name, 0);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
@@ -5791,7 +5790,7 @@ nes_unif (st_rominfo_t *rominfo)
     }
 
   /*
-    remove possible temp file created by handle_existing_file ()
+    remove possible temp file created by ucon64_file_handler ()
     nes_ines_unif() and nes_unif_unif() might exit() so we use register_func()
   */
   register_func (remove_temp_file);
@@ -5834,7 +5833,7 @@ nes_unif (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -6177,8 +6176,7 @@ nes_ines (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".NES");
   strcpy (src_name, ucon64.rom);
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, src_name);
+  ucon64_file_handler (dest_name, src_name, 0);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
@@ -6221,7 +6219,7 @@ nes_ines (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -6259,10 +6257,10 @@ nes_ffe (st_rominfo_t *rominfo)
   header.id1 = 0xaa;
   header.id2 = 0xbb;
 #endif
-  handle_existing_file (buf, NULL);
+  ucon64_file_handler (buf, NULL, 0);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, rominfo->buheader_len, size, buf, "ab");
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -6281,10 +6279,9 @@ nes_ineshd (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".HDR");
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, NULL);
+  ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -6306,8 +6303,7 @@ nes_dint (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".NES");
   strcpy (src_name, ucon64.rom);
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, src_name);
+  ucon64_file_handler (dest_name, src_name, 0);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
@@ -6332,7 +6328,7 @@ nes_dint (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -6422,10 +6418,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".NES");
   if (write_file)
-    {
-      ucon64_output_fname (dest_name, 0);
-      handle_existing_file (dest_name, NULL);
-    }
+    ucon64_file_handler (dest_name, NULL, 0);
 
   // build iNES header
   memset (&ines_header, 0, INES_HEADER_LEN);
@@ -6535,7 +6528,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
     {
       q_fwrite (&ines_header, 0, INES_HEADER_LEN, dest_name, "wb");
       q_fwrite (buffer, INES_HEADER_LEN, size, dest_name, "ab");
-      fprintf (stdout, ucon64_msg[WROTE], dest_name);
+      printf (ucon64_msg[WROTE], dest_name);
       free (buffer);
     }
   else
@@ -6608,7 +6601,7 @@ write_prm (st_ines_header_t *header, const char *fname)
       return -1;                                // try to continue
     }
   else
-    fprintf (stdout, ucon64_msg[WROTE], fname);
+    printf (ucon64_msg[WROTE], fname);
 
   return 0;
 }
@@ -6664,7 +6657,7 @@ nes_s (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".PRM");
-  ucon64_output_fname (dest_name, 0);
+  ucon64_file_handler (dest_name, NULL, 0);
   write_prm (&ines_header, dest_name);
 
   if (ines_header.ctrl1 & INES_TRAINER)
@@ -6674,7 +6667,7 @@ nes_s (st_rominfo_t *rominfo)
       if (q_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
-        fprintf (stdout, ucon64_msg[WROTE], dest_name);
+        printf (ucon64_msg[WROTE], dest_name);
     }
 
   if (prg_size > 0)
@@ -6684,7 +6677,7 @@ nes_s (st_rominfo_t *rominfo)
       if (q_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
-        fprintf (stdout, ucon64_msg[WROTE], dest_name);
+        printf (ucon64_msg[WROTE], dest_name);
     }
   else
     printf ("WARNING: No PRG data in %s\n", ucon64.rom);
@@ -6696,7 +6689,7 @@ nes_s (st_rominfo_t *rominfo)
       if (q_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
-        fprintf (stdout, ucon64_msg[WROTE], dest_name);
+        printf (ucon64_msg[WROTE], dest_name);
     }
 
   free (trainer_data);
@@ -7395,8 +7388,7 @@ nes_fds (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".FDS");
   strcpy (src_name, ucon64.rom);
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, src_name);
+  ucon64_file_handler (dest_name, src_name, 0);
 
   for (n = 0; n < 4; n++)
     {
@@ -7425,7 +7417,7 @@ nes_fds (st_rominfo_t *rominfo)
 
   free (buffer);
   remove_temp_file ();
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }

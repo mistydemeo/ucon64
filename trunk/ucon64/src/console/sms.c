@@ -128,11 +128,11 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
            (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) /
                             MBIT));
 
-  handle_existing_file (buf2, NULL);
+  ucon64_file_handler (buf2, NULL, 0);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom),
             buf2, "wb");
 
-  fprintf (stdout, ucon64_msg[WROTE], buf2);
+  printf (ucon64_msg[WROTE], buf2);
   return 0;
 }
 
@@ -160,12 +160,12 @@ sms_smd (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".SMD");
 
-  handle_existing_file (buf, NULL);
+  ucon64_file_handler (buf, NULL, 0);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
 
   q_fcpy (ucon64.rom, 0, size, buf, "ab");
 
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -187,12 +187,12 @@ sms_smds (st_rominfo_t *rominfo)
 
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".TMP");
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
   rename (ucon64.rom, buf);
 
   q_fwrite (&header, 0, SMD_HEADER_LEN, ucon64.rom, "wb");
   q_fcpy (buf, 0, q_fsize (ucon64.rom), ucon64.rom, "ab");
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
 
   remove (buf);
   return 0;

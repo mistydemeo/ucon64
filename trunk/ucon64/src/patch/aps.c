@@ -260,7 +260,7 @@ readpatch (void)
 int
 aps_apply (const char *modname, const char *apsname)
 {
-  handle_existing_file (modname, NULL);
+  ucon64_file_handler (modname, NULL, 0);
 
   if ((n64aps_modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -476,7 +476,7 @@ aps_create (const char *orgname, const char *modname)
     }
   strcpy (apsname, orgname);
   set_suffix (apsname, ".APS");
-  handle_existing_file (apsname, NULL);
+  ucon64_file_handler (apsname, NULL, 0);
   if ((n64aps_apsfile = fopen (apsname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], apsname);
@@ -527,7 +527,7 @@ aps_set_desc (const char *apsname, const char *description)
 
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  handle_existing_file (apsname, NULL);
+  ucon64_file_handler (apsname, NULL, 0);
   q_fwrite (desc, 7, 50, apsname, "r+b");
   printf (ucon64_msg[WROTE], apsname);
 

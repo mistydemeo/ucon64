@@ -146,11 +146,10 @@ genesis_smd (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMD");
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, NULL);
+  ucon64_file_handler (dest_name, NULL, 0);
 
   save_smd (dest_name, rom_buffer, &header, genesis_rom_size);
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
   return 0;
@@ -178,7 +177,7 @@ genesis_smds (st_rominfo_t *rominfo)
   q_fwrite (&header, 0, SMD_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, 0, ucon64.file_size, buf, "ab");
 
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -333,11 +332,10 @@ genesis_mgd (st_rominfo_t *rominfo)
   buf[7] = '_';
   buf[8] = 0;
   sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
-  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
-  handle_existing_file (dest_name, NULL);
+  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
 
   save_bin (dest_name, rom_buffer, genesis_rom_size);
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
   // automatically create MGH name file
@@ -365,7 +363,7 @@ genesis_mgd (st_rominfo_t *rominfo)
     ROM backup is more important, so we don't write a backup of the MGH file.
   */
   q_fwrite (mgh, 0, sizeof (mgh), dest_name, "wb");
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -404,7 +402,7 @@ genesis_s (st_rominfo_t *rominfo)
 
       sprintf (dest_name, "%s.%03lu", buf,
                (unsigned long) (ucon64.file_size - rominfo->buheader_len) / MBIT);
-      ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
+      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
 
       if (surplus)
         nparts++;
@@ -416,7 +414,7 @@ genesis_s (st_rominfo_t *rominfo)
           // write second half of file; don't do: "(nparts / 2) * PARTSIZE"!
           q_fcpy (ucon64.rom, nparts * (PARTSIZE / 2) + x * (PARTSIZE / 2),
             PARTSIZE / 2, dest_name, "ab");
-          fprintf (stdout, ucon64_msg[WROTE], dest_name);
+          printf (ucon64_msg[WROTE], dest_name);
           (*(strrchr (dest_name, '.') - 1))++;
         }
     }
@@ -426,7 +424,7 @@ genesis_s (st_rominfo_t *rominfo)
 
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".1");
-      ucon64_output_fname (dest_name, 0);
+      ucon64_file_handler (dest_name, NULL, 0);
 
       smd_header.size = PARTSIZE / 16384;
       smd_header.id0 = 3;
@@ -440,7 +438,7 @@ genesis_s (st_rominfo_t *rominfo)
           // don't write backups of parts, because one name is used
           q_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, PARTSIZE, dest_name, "ab");
-          fprintf (stdout, ucon64_msg[WROTE], dest_name);
+          printf (ucon64_msg[WROTE], dest_name);
 
           (*(strrchr (dest_name, '.') + 1))++;
         }
@@ -453,7 +451,7 @@ genesis_s (st_rominfo_t *rominfo)
           // don't write backups of parts, because one name is used
           q_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, surplus, dest_name, "ab");
-          fprintf (stdout, ucon64_msg[WROTE], dest_name);
+          printf (ucon64_msg[WROTE], dest_name);
         }
     }
   return 0;
@@ -476,8 +474,7 @@ genesis_j (st_rominfo_t *rominfo)
 */
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".078");
-      ucon64_output_fname (dest_name, 0);
-      handle_existing_file (dest_name, NULL);
+      ucon64_file_handler (dest_name, NULL, 0);
       remove (dest_name);
 
       strcpy (src_name, ucon64.rom);
@@ -493,15 +490,14 @@ genesis_j (st_rominfo_t *rominfo)
           (*(strrchr (src_name, '.') - 1))++;   //  previous loop
         }
 
-      fprintf (stdout, ucon64_msg[WROTE], dest_name);
+      printf (ucon64_msg[WROTE], dest_name);
     }
   else
     {
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".SMD");
       strcpy (src_name, ucon64.rom);
-      ucon64_output_fname (dest_name, 0);
-      handle_existing_file (dest_name, NULL);
+      ucon64_file_handler (dest_name, NULL, 0);
 
       q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
       block_size = q_fsize (src_name) - rominfo->buheader_len;
@@ -520,7 +516,7 @@ genesis_j (st_rominfo_t *rominfo)
       q_fputc (dest_name, 9, 0xbb, "r+b");      // ID 2
       q_fputc (dest_name, 10, 6, "r+b");        // type Genesis
 
-      fprintf (stdout, ucon64_msg[WROTE], dest_name);
+      printf (ucon64_msg[WROTE], dest_name);
     }
 
   return 0;
@@ -548,7 +544,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + 48], buf, 48);
     }
 
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
   if (type == SMD)
     {
       st_smd_header_t smd_header;
@@ -559,7 +555,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
   else
     save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
   free (rom_buffer);
 
   return 0;
@@ -600,7 +596,7 @@ genesis_chk (st_rominfo_t *rominfo)
 
   mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
 
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
   if (type == SMD)
     {
       st_smd_header_t smd_header;
@@ -611,7 +607,7 @@ genesis_chk (st_rominfo_t *rominfo)
   else
     save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
   free (rom_buffer);
 
   return 0;

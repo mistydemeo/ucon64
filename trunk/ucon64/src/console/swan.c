@@ -57,7 +57,7 @@ int
 swan_chk (st_rominfo_t *rominfo)
 {
   char buf[3];
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
 
   q_fputc (ucon64.rom, SWAN_HEADER_START + 8,
     rominfo->current_internal_crc, "r+b");      // low byte

@@ -162,6 +162,7 @@ const struct option options[] = {
     {"ggd", 1, 0, UCON64_GGD},
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
+    {"good", 0, 0, UCON64_GOOD},
     {"h", 0, 0, UCON64_HELP},
     {"help", 0, 0, UCON64_HELP},
     {"hex", 0, 0, UCON64_HEX},
@@ -223,6 +224,7 @@ const struct option options[] = {
     {"psx", 0, 0, UCON64_PSX},
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
+    {"rdat", 0, 0, UCON64_RDAT},
     {"rrom", 0, 0, UCON64_RROM},
     {"rr83", 0, 0, UCON64_RR83},
     {"rl", 0, 0, UCON64_RL},
@@ -1089,6 +1091,8 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
+    "  " OPTION_LONG_S "rdat        like " OPTION_LONG_S "rrom but uses only DAT info; " OPTION_LONG_S "rom=DIRECTORY\n"
+    "  " OPTION_LONG_S "good        same as " OPTION_LONG_S "rdat\n"
 #if 0
     "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"

@@ -521,26 +521,26 @@ rom.console = (argcmp(argc,argv,"-ng") ||
                argcmp(argc,argv,"-sam")) ? ucon64_NEOGEO : rom.console;
 
 rom.console = (argcmp(argc,argv,"-n64") ||
-               argcmp(argc,argv,"-xdjr") ||
-               argcmp(argc,argv,"-bot") ||
-               argcmp(argc,argv,"-xv64")) ? ucon64_N64 : rom.console;
+               (argcmp(argc,argv,"-xdjr") && access(rom.rom,F_OK)!=0 ) ||
+               (argcmp(argc,argv,"-xv64") && access(rom.rom,F_OK)!=0 ) ||
+               argcmp(argc,argv,"-bot")) ? ucon64_N64 : rom.console;
 
 rom.console = (argcmp(argc,argv,"-snes") ||
                argcmp(argc,argv,"-col") ||
-               argcmp(argc,argv,"-xswc") ||
+               (argcmp(argc,argv,"-xswc") && access(rom.rom,F_OK)!=0 ) ||
                argcmp(argc,argv,"-xswcs") ||
                argcmp(argc,argv,"-swcs") ||
                argcmp(argc,argv,"-figs") ||
                argcmp(argc,argv,"-ufos")) ? ucon64_SNES : rom.console;
 
 rom.console = (argcmp(argc,argv,"-gba") ||
+               (argcmp(argc,argv,"-xfal") && access(rom.rom,F_OK)!=0 ) ||
                argcmp(argc,argv,"-xfalm") ||
-               argncmp(argc,argv,"-xfalc",6) ||
-               argcmp(argc,argv,"-xfal")) ? ucon64_GBA : rom.console;
+               argncmp(argc,argv,"-xfalc",6)) ? ucon64_GBA : rom.console;
 
 rom.console = (argcmp(argc,argv,"-gb") ||
                argcmp(argc,argv,"-n2gb") ||
-               argcmp(argc,argv,"-xgbx") ||
+               (argcmp(argc,argv,"-xgbx") && access(rom.rom,F_OK)!=0 ) ||
                argcmp(argc,argv,"-xgbxs") ||
                argncmp(argc,argv,"-xgbxb",6)) ? ucon64_GB : rom.console;
 

@@ -1931,7 +1931,7 @@ ucon64_rename (int mode)
                       stricmp (p, ".sg") &&     // Sega Master System
                       stricmp (p, ".sms") &&    // Sega Master System
                       stricmp (p, ".gg") &&     // Game Gear
-//                    stricmp (p, ".smd") &&    // Genesis
+                      stricmp (p, ".smd") &&    // Genesis
                       stricmp (p, ".v64")))     // Nintendo 64
                   buf[strlen (buf) - strlen (p)] = 0;
           }

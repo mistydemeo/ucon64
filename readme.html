@@ -107,8 +107,8 @@ DATabase (support for DAT files)
   --force63     force to rename all filenames into Joliet CD format
                   like: GoodXXXX rename inplace force63 ...
                   TIP: using --nes would process only NES ROMs
-  --rl          rename all ROMs to lowercase
-  --ru          rename all ROMs to uppercase
+  --rl          rename ROMs to lowercase
+  --ru          rename ROMs to uppercase
 
 Patching
   --poke=OFF:V  change byte at file offset OFF to value V (both in hexadecimal)
@@ -149,6 +149,7 @@ Patching
                   supported are:
                   Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance),
                   Sega Master System(II/III)/Game Gear (Handheld),
+                  Genesis/Sega Mega Drive/Sega CD/32X/Nomad,
                   Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),
                   Super Nintendo Entertainment System/SNES/Super Famicom
 
@@ -232,7 +233,7 @@ Nintendo 64
   --dint        convert ROM to (non-)interleaved format (1234 &#60;-&#62; 2143)
   --swap        same as --dint, byte-swap ROM
   --swap2       word-swap ROM (1234 &#60;-&#62; 3412)
-  --bot=BOOTCODE add/extract BOOTCODE (4032 Bytes) to/from ROM;
+  --bot=BOOTCODE replace/extract BOOTCODE (4032 Bytes) in/from ROM;
                   extracts automatically if BOOTCODE does not exist
   --lsram=SRAM  LaC's SRAM upload tool; ROM should be LaC's ROM image
                   the SRAM must have a size of 512 Bytes
@@ -242,7 +243,7 @@ Nintendo 64
                   ROM should be Jos Kwanten's UltraSMS ROM image
                   works only for SMS ROMs which are &#60;= 4 Mb in size
   --chk         fix ROM checksum
-                  supports only 6101 and 6102 boot codes
+                  supports only 6102 and 6105 boot codes
 Doctor V64
   --xv64        send/receive ROM to/from Doctor V64; --port=PORT
                   receives automatically when ROM does not exist
@@ -386,12 +387,12 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --n2=NEW_NAME change Japanese ROM name to NEW_NAME
   --smd         convert to Super Magic Drive/SMD
   --smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD
-  --bin         convert to binary format/BIN/RAW
+  --bin         convert to Magicom/BIN/RAW
   --mgd         convert to Multi Game*/MGD2/MGH
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
    -j           join split ROM
-   -s           split ROM; default part size is 4 Mb
+   -s           split ROM; default part size is 8 Mb (4 Mb for SMD)
   --ssize=SIZE  specify split part size in Mbit
    -f           remove NTSC/PAL protection
   --chk         fix ROM checksum
@@ -455,8 +456,7 @@ Game Boy Xchanger/GBDoctor
                   receives automatically when ROM does not exist
   --xgbxm       try to enable EPP mode, default is SPP mode
 Mad Catz Camera Link (Game Boy Camera)
-  --xmccl       send/receive BYTES to/from Mad Catz Camera Link; --port=PORT
-                  currently only receiving is supported
+  --xmccl       receives from Mad Catz Camera Link; --port=PORT
 
 Handy (prototype)/Lynx/Lynx II
   --lynx        force recognition
@@ -505,7 +505,7 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
   --mapr=MAPR   specify board name or mapper number for conversion options
                   MAPR must be a board name for UNIF or a number for Pasofami
                   and iNES
-  --dint        convert to non-interleaved format
+  --dint        deinterleave ROM (regardless whether the ROM is interleaved)
   --ctrl=TYPE   specify controller type (UNIF only)
                   TYPE=0 regular joypad
                   TYPE=1 zapper

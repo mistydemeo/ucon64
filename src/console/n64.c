@@ -114,7 +114,7 @@ const st_getopt2_t n64_usage[] =
 #endif
     {
       "bot", 1, 0, UCON64_BOT,
-      "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
+      "BOOTCODE", "replace/extract BOOTCODE (4032 Bytes) in/from ROM;\n"
       "extracts automatically if BOOTCODE does not exist",
       &ucon64_wf[WF_OBJ_N64_DEFAULT]
     },
@@ -136,7 +136,7 @@ const st_getopt2_t n64_usage[] =
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum\n"
-      "supports only 6101 and 6102 boot codes",
+      "supports only 6102 and 6105 boot codes",
       &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
 #if 0
@@ -176,8 +176,8 @@ st_n64_header_t n64_header;
 
 typedef struct st_n64_chksum
 {
-  unsigned long crc1;
-  unsigned long crc2;
+  unsigned int crc1;
+  unsigned int crc2;
 } st_n64_chksum_t;
 
 static st_n64_chksum_t n64crc;
@@ -418,43 +418,47 @@ n64_init (st_rominfo_t *rominfo)
   int result = -1, x;
   unsigned int value = 0;
 #define N64_MAKER_MAX 0x50
-  const char *n64_maker[N64_MAKER_MAX] = {
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, "Nintendo", NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, "Nintendo", NULL},
+  const char *n64_maker[N64_MAKER_MAX] =
+    {
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, "Nintendo", NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, "Nintendo", NULL
+    },
 #define N64_COUNTRY_MAX 0x5a
-  *n64_country[N64_COUNTRY_MAX] = {
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, "Germany", "U.S.A.",
-    "France", NULL, NULL, "Italy", "Japan",
-    NULL, NULL, NULL, NULL, NULL,
-    "Europe", NULL, NULL, "Spain", NULL,
-    "Australia", NULL, NULL, "France, Germany, Holland", NULL};
+    *n64_country[N64_COUNTRY_MAX] =
+    {
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, "Germany", "U.S.A.",
+      "France", NULL, NULL, "Italy", "Japan",
+      NULL, NULL, NULL, NULL, NULL,
+      "Europe", NULL, NULL, "Spain", NULL,
+      "Australia", NULL, NULL, "France, Germany, The Netherlands", NULL // Holland is an incorrect name for The Netherlands
+    };
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
@@ -516,20 +520,17 @@ n64_init (st_rominfo_t *rominfo)
       n64_chksum (rominfo, ucon64.rom);
       rominfo->current_internal_crc = n64crc.crc1;
 
+      value = 0;
       for (x = 0; x < 4; x++)
         {
           rominfo->internal_crc <<= 8;
           rominfo->internal_crc += OFFSET (n64_header, 16 + (x ^ rominfo->interleaved));
-        }
-      value = 0;
-      for (x = 0; x < 4; x++)
-        {
           value <<= 8;
           value += OFFSET (n64_header, 20 + (x ^ rominfo->interleaved));
         }
 
       sprintf (rominfo->internal_crc2,
-               "2nd Checksum: %s, 0x%08lx (calculated) %c= 0x%08x (internal)%s",
+               "2nd Checksum: %s, 0x%08x (calculated) %c= 0x%08x (internal)%s",
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((n64crc.crc2 == value) ?
@@ -557,7 +558,7 @@ n64_init (st_rominfo_t *rominfo)
 /*
   ROM check sum routine is based on chksum64 V1.2 by Andreas Sterbenz
   <stan@sbox.tu-graz.ac.at>, a program to calculate the ROM checksum of
-  Nintendo64 ROMs.
+  Nintendo 64 ROMs.
 */
 #define ROL(i, b) (((i) << (b)) | ((i) >> (32 - (b))))
 #define BYTES2LONG(b, s) ( (b)[0^(s)] << 24 | \
@@ -575,10 +576,9 @@ int
 n64_chksum (st_rominfo_t *rominfo, const char *filename)
 {
   unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
-  unsigned long i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
-                rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START;
-                // using ucon64.file_size is ok for n64_init() & n64_sram()
-  unsigned int n = 0, bootcode;
+  unsigned int i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
+               rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START,
+               n = 0, bootcode; // using ucon64.file_size is ok for n64_init() & n64_sram()
   FILE *file;
 #ifdef  CALC_CRC32
   unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32
@@ -657,7 +657,7 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   t5 = i;
   t6 = i;
 
-  for (;;)
+  while (1)
     {
       if (rlen > 0)
         {
@@ -699,7 +699,9 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
           if (bootcode == 6105)
             {
               k1 = 0x710 + (i & 0xff);
-              t1 += BYTES2LONG (&bootcode_buf[k1], 0) ^ c1;
+              //t1 += BYTES2LONG (&bootcode_buf[k1], 0) ^ c1;
+              t1 += ((bootcode_buf[k1] << 24) | (bootcode_buf[k1 + 1] << 16) |
+                     (bootcode_buf[k1 + 2] <<  8) | (bootcode_buf[k1 + 3])) ^ c1;
             }
           else
             t1 += c1 ^ t5;

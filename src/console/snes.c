@@ -1242,6 +1242,23 @@ Kong Country (U|E)) it should do the opposite, i.e., writing EA EA (nop nop).
 => 8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx 80   bra
 
 (uCON64)
+- Mega Man X
+   8f/9f xx xx 70 cf/df xx xx 70 f0
+=> 8f/9f xx xx 70 cf/df xx xx 70 ea ea
+The code above could be combined with the first original uCON code. However, we
+don't want to copy (or remove) the SRAM size determined behaviour, without
+knowing when that is necessary.
+
+- Mega Man X
+   af/bf xx 80 00 cf/df xx 80 40 f0
+=> af/bf xx 80 00 cf/df xx 80 40 80
+
+   lda $0080xx/lda $0080xx,x; cmp $408000/cmp $408000,x; beq ...
+
+- Mega Man X
+   af xx xx 84 cf xx xx 84 f0
+=> af xx xx 84 cf xx xx 84 ea ea
+
 - Super Metroid
    a9 00 00 a2 fe 1f df 00 00 70 d0     lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
 => a9 00 00 a2 fe 1f df 00 00 70 ea ea  lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
@@ -1303,9 +1320,14 @@ Note that this code must be searched for before the less specific uCON code.
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\x30\x31\x32\x33", 4);
 
       // uCON64
+      change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
+                     "\x8f\x9f", 2, "\xcf\xdf", 2);
       change_string ("\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\x5c\x7f\xd0\x83\x18\xfb\x78\xc2\x30", 9, '*', '!',
                      "\xea\xea\xea\xea\xea\xea\xea\xea\xea", 9, buffer, bytesread, -8);
+      change_string ("!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
+                     "\xaf\xbf", 2, "\xcf\xdf", 2);
+      change_string ("\xaf**\x84\xcf**\x84\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
 
       fwrite (buffer, 1, bytesread, destfile);
     }

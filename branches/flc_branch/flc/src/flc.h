@@ -26,7 +26,7 @@
 
 //extern void flc_usage (int argc, char *argv[]);
 
-#define FLC_VERSION_S "1.0.4"
+#define FLC_VERSION_S "1.1.0 (devel)"
 //#define FLC_VERSION 104
 #define FLC_CONFIG_VERSION 105
 

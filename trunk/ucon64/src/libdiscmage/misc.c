@@ -769,13 +769,14 @@ static char *
 realpath (const char *path, char *full_path)
 {
 #define MAX_READLINKS 32
-  char copy_path[FILENAME_MAX];
-  char link_path[FILENAME_MAX];
-  char got_path[FILENAME_MAX];
-  char *new_path = got_path;
-  char *max_path;
-  int readlinks = 0;
-  int n;
+  char copy_path[FILENAME_MAX], got_path[FILENAME_MAX],
+#ifdef  S_IFLNK
+       link_path[FILENAME_MAX], 
+#endif
+       *new_path = got_path, *max_path;
+#ifdef  S_IFLNK
+  int readlinks = 0, n;
+#endif
 
   // Make a copy of the source path since we may need to modify it.
   if (strlen (path) >= FILENAME_MAX - 2)
@@ -784,23 +785,23 @@ realpath (const char *path, char *full_path)
   strcpy (copy_path, path);
   path = copy_path;
   max_path = copy_path + FILENAME_MAX - 2;
-  if (*path != '/')
+  if (*path != FILE_SEPARATOR)
     {
       getcwd (new_path, FILENAME_MAX - 1);
       new_path += strlen (new_path);
-      if (new_path[-1] != '/')
-        *new_path++ = '/';
+      if (new_path[-1] != FILE_SEPARATOR)
+        *new_path++ = FILE_SEPARATOR;
     }
   else
     {
-      *new_path++ = '/';
+      *new_path++ = FILE_SEPARATOR;
       path++;
     }
   // Expand each slash-separated pathname component.
   while (*path != '\0')
     {
       // Ignore stray "/".
-      if (*path == '/')
+      if (*path == FILE_SEPARATOR)
         {
           path++;
           continue;
@@ -808,34 +809,34 @@ realpath (const char *path, char *full_path)
       if (*path == '.')
         {
           // Ignore ".".
-          if (path[1] == '\0' || path[1] == '/')
+          if (path[1] == '\0' || path[1] == FILE_SEPARATOR)
             {
               path++;
               continue;
             }
           if (path[1] == '.')
             {
-              if (path[2] == '\0' || path[2] == '/')
+              if (path[2] == '\0' || path[2] == FILE_SEPARATOR)
                 {
                   path += 2;
                   // Ignore ".." at root.
                   if (new_path == got_path + 1)
                     continue;
                   // Handle ".." by backing up.
-                  while ((--new_path)[-1] != '/');
+                  while ((--new_path)[-1] != FILE_SEPARATOR);
                   continue;
                 }
             }
         }
       // Safely copy the next pathname component.
-      while (*path != '\0' && *path != '/')
+      while (*path != '\0' && *path != FILE_SEPARATOR)
         {
           if (path > max_path)
             return NULL;
 
           *new_path++ = *path++;
         }
-#ifdef S_IFLNK
+#ifdef  S_IFLNK
       // Protect against infinite loops.
       if (readlinks++ > MAX_READLINKS)
         return NULL;
@@ -858,12 +859,13 @@ realpath (const char *path, char *full_path)
         {
           // Note: readlink doesn't add the null byte.
           link_path[n] = '\0';
-          if (*link_path == '/')
+          if (*link_path == FILE_SEPARATOR)
             // Start over for an absolute symlink.
             new_path = got_path;
           else
             // Otherwise back up over this component.
-            while (*(--new_path) != '/');
+            while (*(--new_path) != FILE_SEPARATOR)
+              ;
           // Safe sex check.
           if (strlen (path) + n >= FILENAME_MAX - 2)
             return NULL;
@@ -873,10 +875,10 @@ realpath (const char *path, char *full_path)
           path = copy_path;
         }
 #endif // S_IFLNK
-      *new_path++ = '/';
+      *new_path++ = FILE_SEPARATOR;
     }
   // Delete trailing slash but don't whomp a lone slash.
-  if (new_path != got_path + 1 && new_path[-1] == '/')
+  if (new_path != got_path + 1 && new_path[-1] == FILE_SEPARATOR)
     new_path--;
   // Make sure it's null terminated.
   *new_path = '\0';
@@ -912,7 +914,8 @@ realpath2 (const char *path, char *full_path)
 #if 1
       realpath (path, full_path);
 #else
-      for (x = 0; path[x] == '.'; x++);
+      for (x = 0; path[x] == '.'; x++)
+        ;
 
       if (path[x] == FILE_SEPARATOR)
         {
@@ -922,8 +925,8 @@ realpath2 (const char *path, char *full_path)
         }
       else if (path[x] == 0)
         getcwd (full_path, FILENAME_MAX);       // callers should always pass
-#endif
-    }                                           //  arrays that are large enough
+#endif                                          //  arrays that are large enough
+    }
   else
     strcpy (full_path, path);
 
@@ -936,7 +939,7 @@ realpath2 (const char *path, char *full_path)
       while (*p == FILE_SEPARATOR &&
         (*(p + 1) == FILE_SEPARATOR || *(p + 1) == 0))
           p++;
-      
+
       *p2 = *p;
     }
   *p2 = 0;
@@ -944,7 +947,8 @@ realpath2 (const char *path, char *full_path)
   if (!access (full_path, F_OK))
     return full_path;
 
-  if ((p = strrchr (full_path, FILE_SEPARATOR))) *p = 0;
+  if ((p = strrchr (full_path, FILE_SEPARATOR)))
+    *p = 0;
 
   return NULL;
 #endif
@@ -960,16 +964,16 @@ truncate2 (const char *filename, int new_size)
   stat (filename, &fstate);
   if (chmod (filename, fstate.st_mode | S_IWUSR))
     return -1;
-        
+
   if (size < new_size)
     {
       FILE *file;
       unsigned char padbuffer[MAXBUFSIZE];
       int n_bytes;
-      
+
       if ((file = fopen (filename, "ab")) == NULL)
         return -1;
-        
+
       memset (padbuffer, 0, MAXBUFSIZE);
 
       while (size < new_size)

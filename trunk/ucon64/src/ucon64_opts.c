@@ -48,7 +48,7 @@ int ucon64_parport_needed = 0;
 int
 ucon64_switches (int c, const char *optarg)
 {
-  char *ptr = NULL;
+  char *ptr = NULL, buf[MAXBUFSIZE];
   int x = 0;
 
   /*
@@ -74,11 +74,6 @@ ucon64_switches (int c, const char *optarg)
       so we can't use preprocessor directives in the argument list.
     */
     case UCON64_VER:
-      if (ucon64.discmage_enabled)
-        x = libdm_get_version();
-      else
-        x = 0;
-
 #ifdef  DLOPEN
 #define DISCMAGE_STATUS_MSG "discmage DLL:                      %s\n"
 #else
@@ -129,6 +124,14 @@ ucon64_switches (int c, const char *optarg)
         "unknown";
 #endif
 #endif // DLOPEN
+      if (ucon64.discmage_enabled)
+        {
+          x = libdm_get_version();
+          sprintf (buf, "%d.%d.%d", x >> 16, x >> 8, x);
+        }
+      else
+        strcpy (buf, "not available");
+
       printf ("version:                           %s (%s)\n"
               "platform:                          %s\n"
               "endianess:                         %s\n"
@@ -139,7 +142,7 @@ ucon64_switches (int c, const char *optarg)
               "configuration file %s  %s\n"
               DISCMAGE_STATUS_MSG
               "discmage enabled:                  %s\n"
-              "discmage version:                  %d.%d.%d\n"
+              "discmage version:                  %s\n"
               "configuration directory:           %s\n"
               "DAT file directory:                %s\n"
               "entries in DATabase:               %d\n"
@@ -155,7 +158,7 @@ ucon64_switches (int c, const char *optarg)
               access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ", ucon64.configfile,
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
-              x >> 16, x >> 8, x,
+              buf,
               ucon64.configdir,
               ucon64.datdir,
               ucon64_dat_total_entries (),

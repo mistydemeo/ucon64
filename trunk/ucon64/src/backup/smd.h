@@ -20,7 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "../ucon64.h"
 
-#define smd_TITLE "Super Magicom Drive/SMD"
+#define smd_TITLE "Super Com Pro (HK)/Super Magic Drive/SMD\n"
+                   "19XX Front Far East/FFE http://www.front.com.tw"
 
 int smd_usage(int argc,char *argv[]);
 #define smd_HEADER_START 0

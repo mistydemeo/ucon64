@@ -428,7 +428,7 @@ return(ucon64_exit(-1,&rom));
   closedir(dp);
   chdir(current_dir);
 
-  return 0;
+return(ucon64_exit(0,&rom));
 }
 
 

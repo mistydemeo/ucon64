@@ -273,13 +273,13 @@ Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
 <br>
 <p>
 <a name="20"><b>Q20</b>: What's the difference between the Flash Advance Linker options -xfals and -xfalb &#60;n&#62;?</a><br>
-<b>A</b>: When saving -xfals saves all 256kB while -xfalb &#60;n&#62; saves only the 64kB of bank n.
+<b>A</b>: When saving -xfals saves all 256 kB while -xfalb &#60;n&#62; saves only the 64 kB of bank n.
    When restoring -xfals starts restoring the SRAM in bank 1 while -xfalb &#60;n&#62; starts in bank n.
    For example, if you have Super Mario Advance 2 (J) in your Flash Card in "ROM bank" 4
    (GBA Pack) and would like to save/restore SRAM bank 4 you should do something like:<br>
    &nbsp;&nbsp; ucon64 -xfalb 4 "Super Mario Advance 2 (J).sav"<br>
    Note that the file size determines how many bytes are restored, even when you use -xfalb &#60;n&#62;.
-   So, if the file is greater than 64kB more than one bank will be written to.<br>
+   So, if the file is greater than 64 kB more than one bank will be written to.<br>
 <br>
 <p>
 <a name="21"><b>Q21</b>: uCON64 exits with the message "Flash cart erase failed!" when I try

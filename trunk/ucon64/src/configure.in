@@ -99,6 +99,22 @@ AC_MSG_RESULT($enable_discmage)
 AC_SUBST(DEFINE_DISCMAGE_MAKE)
 
 
+dnl This belongs here, not at the checks for libraries. We don't have to check
+dnl  if libcd64 is present as it is part of our source tree.
+AC_MSG_CHECKING(whether libcd64 is enabled)
+AC_ARG_ENABLE(libcd64,
+              AC_HELP_STRING([--enable-libcd64],
+                             [enable libcd64 (default: no)]),
+              enable_libcd64=$enableval,
+              enable_libcd64=no)
+if test $enable_libcd64 = yes; then
+  AC_DEFINE(USE_LIBCD64, 1, [enable libcd64 (default: no)])
+  DEFINE_LIBCD64_MAKE="USE_LIBCD64=1"
+fi
+AC_MSG_RESULT($enable_libcd64)
+AC_SUBST(DEFINE_LIBCD64_MAKE)
+
+
 dnl Checks for libraries.
 AC_MSG_CHECKING(for zlib)
 AC_ARG_WITH(zlib,

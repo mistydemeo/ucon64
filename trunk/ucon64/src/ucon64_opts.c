@@ -264,7 +264,13 @@ ucon64_switches (int c, const char *optarg)
       break;
 
 #ifdef  USE_PARALLEL
-    // We detect the presence of these options here so that we can drop privileges ASAP
+    /*
+      We detect the presence of these options here so that we can drop
+      privileges ASAP.
+      Note that the libcd64 options are not listed here. We cannot drop
+      privileges before libcd64 is initialised (after cd64_t.devopen() has been
+      called).
+    */
     case UCON64_XDEX:
     case UCON64_XDJR:
     case UCON64_XF2A:                           // could be for USB version
@@ -340,51 +346,68 @@ ucon64_switches (int c, const char *optarg)
 #endif
       break;
 
+    case UCON64_XCD64:
+    case UCON64_XCD64B:
+    case UCON64_XCD64C:
+    case UCON64_XCD64E:
+    case UCON64_XCD64F:
+    case UCON64_XCD64M:
+    case UCON64_XCD64S:
+      // We don't really need the parallel port. We just have to make sure that
+      //  privileges aren't dropped.
+      ucon64_parport_needed = 2;
+      break;
+
+
+    case UCON64_XCD64P:
+      ucon64.io_mode = strtol (optarg, NULL, 10);
+      break;
+
     case UCON64_XFALM:
     case UCON64_XGBXM:
       ucon64.parport_mode = UCON64_EPP;
       break;
 
     case UCON64_XSWC_IO:
-      ucon64.swc_io_mode = strtol (optarg, NULL, 16);
+      ucon64.io_mode = strtol (optarg, NULL, 16);
 
-      if (ucon64.swc_io_mode & SWC_IO_ALT_ROM_SIZE)
+      if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
         puts ("WARNING: I/O mode not yet implemented");
 #if 0 // all these constants are defined by default
-      if (ucon64.swc_io_mode & (SWC_IO_SPC7110 | SWC_IO_SDD1 | SWC_IO_SA1 | SWC_IO_MMX2))
+      if (ucon64.io_mode & (SWC_IO_SPC7110 | SWC_IO_SDD1 | SWC_IO_SA1 | SWC_IO_MMX2))
         puts ("WARNING: Be sure to compile swc.c with the appropriate constants defined");
 #endif
 
-      if (ucon64.swc_io_mode > SWC_IO_MAX)
+      if (ucon64.io_mode > SWC_IO_MAX)
         {
-          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.swc_io_mode);
-          ucon64.swc_io_mode = 0;
+          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.io_mode);
+          ucon64.io_mode = 0;
         }
       else
         {
-          printf ("I/O mode: 0x%03x", ucon64.swc_io_mode);
-          if (ucon64.swc_io_mode)
+          printf ("I/O mode: 0x%03x", ucon64.io_mode);
+          if (ucon64.io_mode)
             {
               char flagstr[100];
 
               flagstr[0] = 0;
-              if (ucon64.swc_io_mode & SWC_IO_FORCE_32MBIT)
+              if (ucon64.io_mode & SWC_IO_FORCE_32MBIT)
                 strcat (flagstr, "force 32 Mbit dump, ");
-              if (ucon64.swc_io_mode & SWC_IO_ALT_ROM_SIZE)
+              if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
                 strcat (flagstr, "alternative ROM size method, ");
-              if (ucon64.swc_io_mode & SWC_IO_SUPER_FX)
+              if (ucon64.io_mode & SWC_IO_SUPER_FX)
                 strcat (flagstr, "Super FX, ");
-              if (ucon64.swc_io_mode & SWC_IO_SDD1)
+              if (ucon64.io_mode & SWC_IO_SDD1)
                 strcat (flagstr, "S-DD1, ");
-              if (ucon64.swc_io_mode & SWC_IO_SA1)
+              if (ucon64.io_mode & SWC_IO_SA1)
                 strcat (flagstr, "SA-1, ");
-              if (ucon64.swc_io_mode & SWC_IO_SPC7110)
+              if (ucon64.io_mode & SWC_IO_SPC7110)
                 strcat (flagstr, "SPC7110, ");
-              if (ucon64.swc_io_mode & SWC_IO_DX2_TRICK)
+              if (ucon64.io_mode & SWC_IO_DX2_TRICK)
                 strcat (flagstr, "DX2 trick, ");
-              if (ucon64.swc_io_mode & SWC_IO_MMX2)
+              if (ucon64.io_mode & SWC_IO_MMX2)
                 strcat (flagstr, "Mega Man X 2, ");
-              if (ucon64.swc_io_mode & SWC_IO_DUMP_BIOS)
+              if (ucon64.io_mode & SWC_IO_DUMP_BIOS)
                 strcat (flagstr, "dump BIOS, ");
 
               if (flagstr[0])
@@ -1552,6 +1575,60 @@ ucon64_options (int c, const char *optarg)
       ("multizip"). Don't return, but use break instead. ucon64_execute_options()
       checks if an option was used that should stop uCON64.
     */
+#ifdef  USE_LIBCD64
+    case UCON64_XCD64:
+      if (access (ucon64.rom, F_OK) != 0)
+        cd64_read_rom (ucon64.rom, 8);
+      else
+        cd64_write_rom (ucon64.rom);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64C:
+      if (!access (ucon64.rom, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
+      cd64_read_rom (ucon64.rom, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64B:
+      cd64_write_bootemu (ucon64.rom);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64S:
+      if (access (ucon64.rom, F_OK) != 0)
+        cd64_read_sram (ucon64.rom);
+      else
+        cd64_write_sram (ucon64.rom);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64F:
+      if (access (ucon64.rom, F_OK) != 0)
+        cd64_read_flashram (ucon64.rom);
+      else
+        cd64_write_flashram (ucon64.rom);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64E:
+      if (access (ucon64.rom, F_OK) != 0)
+        cd64_read_eeprom (ucon64.rom);
+      else
+        cd64_write_eeprom (ucon64.rom);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64M:
+      if (access (ucon64.rom, F_OK) != 0)
+        cd64_read_mempack (ucon64.rom, strtol (optarg, NULL, 10));
+      else
+        cd64_write_mempack (ucon64.rom, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+#endif
+
     case UCON64_XDEX:
       if (access (ucon64.rom, F_OK) != 0)
         dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport);
@@ -1905,7 +1982,7 @@ ucon64_options (int c, const char *optarg)
       enableRTS = 0;                            // falling through
     case UCON64_XSWC2:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        swc_read_rom (ucon64.rom, ucon64.parport, ucon64.swc_io_mode);
+        swc_read_rom (ucon64.rom, ucon64.parport, ucon64.io_mode);
       else
         {
           if (!ucon64.rominfo->buheader_len)
@@ -1936,9 +2013,9 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XSWCC:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
-        swc_read_cart_sram (ucon64.rom, ucon64.parport, ucon64.swc_io_mode);
+        swc_read_cart_sram (ucon64.rom, ucon64.parport, ucon64.io_mode);
       else                                      // file exists -> restore SRAM
-        swc_write_cart_sram (ucon64.rom, ucon64.parport, ucon64.swc_io_mode);
+        swc_write_cart_sram (ucon64.rom, ucon64.parport, ucon64.io_mode);
       fputc ('\n', stdout);
       break;
 

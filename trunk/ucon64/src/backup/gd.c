@@ -100,7 +100,7 @@ const st_getopt2_t gd_usage[] =
 #define GD6_SYNC_RETRIES 16
 
 #if     defined _WIN32 && !defined __MINGW32__
-// somebody please explain why this isn't proof that VC++ 6 is broken
+// Visual C++ doesn't allow inline in C source code
 #define inline __inline
 #endif
 
@@ -161,7 +161,7 @@ init_io (unsigned int port)
 #if 0 // we want to support non-standard parallel port addresses
   if (gd_port != 0x3bc && gd_port != 0x378 && gd_port != 0x278)
     {
-      fprintf (stderr, "ERROR: PORT must be 0x3bc, 0x378 or 0x278\n");
+      fputs ("ERROR: PORT must be 0x3bc, 0x378 or 0x278\n", stderr);
       exit (1);
     }
 #endif
@@ -190,7 +190,7 @@ io_error (void)
 //  error. Or take an integer code that we can interpret here.
 {
   fflush (stdout);
-  fprintf (stderr, "ERROR: Communication with Game Doctor failed\n");
+  fputs ("ERROR: Communication with Game Doctor failed\n", stderr);
   fflush (stderr);
   // calling fflush() seems to be necessary under Msys in order to make the
   //  error message be displayed before the "Removing: <filename>" message
@@ -511,7 +511,7 @@ gd3_read_rom (const char *filename, unsigned int parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented for the SF3\n");
+  return fputs ("ERROR: The function for dumping a cartridge is not yet implemented for the SF3\n", stderr);
 }
 
 
@@ -542,7 +542,7 @@ gd6_read_rom (const char *filename, unsigned int parport)
 #else
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented for the SF6\n");
+  return fputs ("ERROR: The function for dumping a cartridge is not yet implemented for the SF6\n", stderr);
 #endif
 }
 
@@ -669,7 +669,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
   if (gd_send_prolog_bytes (buffer, 5) == GD_ERROR)
     io_error ();
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
   for (i = 0; i < num_units; i++)
     {
 #ifdef  DEBUG
@@ -738,7 +738,7 @@ gd3_read_sram (const char *filename, unsigned int parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented for the SF3\n");
+  return fputs ("ERROR: The function for dumping SRAM is not yet implemented for the SF3\n", stderr);
 }
 
 
@@ -796,7 +796,7 @@ gd6_read_sram (const char *filename, unsigned int parport)
     }
 
   printf ("Receive: %d Bytes\n", transfer_size);
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   starttime = time (NULL);
   while (bytesreceived < transfer_size)
@@ -876,7 +876,7 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
     }
   else
     {
-      fprintf (stderr, "ERROR: GD SRAM file size must be 32768 or 33280 bytes\n");
+      fputs ("ERROR: GD SRAM file size must be 32768 or 33280 bytes\n", stderr);
       exit (1);
     }
 
@@ -907,7 +907,7 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
   if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first GD I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first GD I/O,
                                                 //  because if we get here q works ;-)
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
@@ -933,7 +933,7 @@ gd3_read_saver (const char *filename, unsigned int parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping saver data is not yet implemented for the SF3\n");
+  return fputs ("ERROR: The function for dumping saver data is not yet implemented for the SF3\n", stderr);
 }
 
 
@@ -989,12 +989,12 @@ gd6_read_saver (const char *filename, unsigned int parport)
   transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
   if (transfer_size != 0x38000)
     {
-      fprintf (stderr, "ERROR: Saver transfer size from Game Doctor != 0x38000 bytes\n");
+      fputs ("ERROR: Saver transfer size from Game Doctor != 0x38000 bytes\n", stderr);
       exit (1);
     }
 
   printf ("Receive: %d Bytes\n", transfer_size);
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   starttime = time (NULL);
   while (bytesreceived < transfer_size)
@@ -1088,7 +1088,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   size = q_fsize (filename);
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
-      fprintf (stderr, "ERROR: GD saver file size must be 0x38000 bytes\n");
+      fputs ("ERROR: GD saver file size must be 0x38000 bytes\n", stderr);
       exit (1);
     }
 
@@ -1121,7 +1121,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first GD I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first GD I/O,
                                                 //  because if we get here q works ;-)
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))

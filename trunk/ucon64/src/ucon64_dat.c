@@ -546,8 +546,8 @@ line_to_crc (const char *dat_entry)
 // get crc32 of current line
 {
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE];
-  uint32_t crc32 = 0;
-
+  unsigned int crc32 = 0;                       // has to be unsigned int to
+                                                //  avoid a stupid gcc warning
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return 0;
 
@@ -556,9 +556,9 @@ line_to_crc (const char *dat_entry)
   strarg (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
 
   if (dat_field[5])
-    sscanf (dat_field[5], "%x", (unsigned int *) &crc32);
+    sscanf (dat_field[5], "%x", &crc32);
 
-  return crc32;
+  return (uint32_t) crc32;
 }
 
 

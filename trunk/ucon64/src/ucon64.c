@@ -151,7 +151,9 @@ const st_getopt2_t lf[] = {
 #ifdef  USE_PARALLEL
   doctor64_usage,
   doctor64jr_usage,
-//  cd64_usage,
+#ifdef  USE_LIBCD64
+  cd64_usage,
+#endif
   dex_usage,
 #endif
   lf,
@@ -739,7 +741,7 @@ ucon64_execute_options (void)
   ucon64.file_size =
   ucon64.crc32 =
   ucon64.fcrc32 =
-  ucon64.swc_io_mode = 0;
+  ucon64.io_mode = 0;
 
   // switches
   for (x = 0; arg[x].val; x++)
@@ -764,7 +766,7 @@ ucon64_execute_options (void)
     copier option has been specified, because another switch might've been
     specified after -port.
   */
-  if (ucon64_parport_needed)
+  if (ucon64_parport_needed == 1)
     ucon64.parport = misc_parport_open (ucon64.parport);
 #endif // USE_PARALLEL
 #if     defined __unix__ && !defined __MSDOS__
@@ -777,7 +779,7 @@ ucon64_execute_options (void)
     root (not setuid root), but we want to be user friendly. Besides, doing
     things as root is bad anyway (from a security viewpoint).
   */
-  if (first_call
+  if (first_call && ucon64_parport_needed != 2
 #ifdef  USE_USB
       && !ucon64.usbport
 #endif
@@ -1351,23 +1353,19 @@ ucon64_usage (int argc, char *argv[])
   // single usage
   for (x = 0; arg[x].val; x++)
     if (arg[x].console) // IS console
-      {
-        for (y = 0; option[y]; y++)
-          for (c = 0; option[y][c].name || option[y][c].help; c++)
-            if (option[y][c].object)
-              if ((((int)
+      for (y = 0; option[y]; y++)
+        for (c = 0; option[y][c].name || option[y][c].help; c++)
+          if (option[y][c].object)
+            if ((((int)
 #ifdef  __LP64__
-                    (uint64_t)
+                  (uint64_t)
 #endif
-                    option[y][c].object) & 0xffff) == arg[x].console)
-                {
-                  getopt2_usage (option[y]);
-                  single = 1;
-                  break;
-                }
-        if (single)
-          fputc ('\n', stdout);
-      }
+                  option[y][c].object) & 0xffff) == arg[x].console)
+              {
+                getopt2_usage (option[y]);
+                single = 1;
+                break;
+              }
 
   if (!single)
     getopt2_usage (options);

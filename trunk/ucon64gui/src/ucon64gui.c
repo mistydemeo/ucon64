@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "ucon64gui.h"
-
+#include "html2gui/src/html2gui.h"
 #include "snes/snes.h"
 
 #include "backup/swc.h"
@@ -46,14 +46,17 @@ ucon64gui_bottom (void)
              "(GTK) "
 #endif
              "0.1.0 2002 by NoisyB ");
-  html2gui_a ("http://ucon64.sf.net", "_blank");
+//  html2gui_a ("http://ucon64.sf.net", "_blank",NULL,NULL,"http://ucon64.sf.net");
 
 }
 
-
-void
-ucon64gui_system (void)
+void html2gui_system(char *shit)
 {
+printf(shit);
+fflush(stdout);
+return;
+
+/*
 //  FILE *fh;
   char buf[MAXBUFSIZE];
 
@@ -72,7 +75,7 @@ ucon64gui_system (void)
   html2gui_html_end();
   system (buf);
   html2gui_html(640,400,0);
-
+*/
 
 /*
   if (!(fh = popen (buf, "r")))
@@ -92,7 +95,7 @@ ucon64gui_system (void)
 void
 ucon64gui_rom (void)
 {
-  html2gui_input_file ("Select ROM", ucon64gui.rom);
+  html2gui_input_file ("Select ROM", "ROM=", ucon64gui.rom);
 
 }
 
@@ -100,33 +103,8 @@ void
 ucon64gui_file (void)
 {
 //_text nutzen?
-  html2gui_input_file ("Select ROM", ucon64gui.file);
+  html2gui_input_file ("Select ROM", "FILE=", ucon64gui.file);
 }
-
-void
-ucon64gui_info (void)
-{
-  strcpy (ucon64gui.rom, html2gui_filename);
-  sprintf (ucon64gui.cmd, "ucon64 \"%s\"", ucon64gui.rom);
-  ucon64gui_system ();
-}
-
-void
-ucon64gui_ls (void)
-{
-  strcpy (ucon64gui.cmd, "ucon64 -ls .");
-  ucon64gui_system ();
-}
-
-void
-ucon64gui_e (void)
-{
-  strcpy (ucon64gui.rom, html2gui_filename);
-  sprintf (ucon64gui.cmd, "ucon64 -e \"%s\"", ucon64gui.rom);
-  ucon64gui_system ();
-}
-
-
 
 void
 ucon64gui_top(void)
@@ -137,9 +115,8 @@ ucon64gui_top(void)
 
 //<html>
 
-  html2gui_input_submit (ucon64gui_info, "Config",
-                         buf, 0, 0,
-                         NULL);
+  html2gui_input_submit ("Config", "",
+                         buf, 0, 0);
   html2gui_br();
   html2gui_img(trans_1x3_xpm, 0, 0, 0);
 
@@ -148,89 +125,86 @@ ucon64gui_top(void)
   html2gui_("$ROM: ");
   strcpy (ucon64gui.rom, html2gui_filename);
   
-  html2gui_input_text (ucon64gui_ls,ucon64gui.rom,"test",20,1,0);
-  html2gui_input_submit (ucon64gui_rom, "Open", "Open", 0, 0,
-                         open_xpm);
+//  html2gui_input_text (i_ls,ucon64gui.rom,"test",20,1,0);
+  html2gui_a (ucon64gui_rom, "Open", "_blank", open_xpm, "Open");
 
   html2gui_br();
   html2gui_("$FILE:  ");
   strcpy (ucon64gui.rom, html2gui_filename);
   
-  html2gui_input_text (ucon64gui_ls,ucon64gui.file,"test",20,1,0);
+//  html2gui_input_text (ucon64gui_ls,ucon64gui.file,"test",20,1,0);
 
-  html2gui_input_submit (ucon64gui_file, "Open", "Open", 0, 0,
-                         open_xpm);
+  html2gui_a (ucon64gui_file, "Open", "_blank", open_xpm, "Open");
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
 
   html2gui_ ("Miscellaneous options");
   html2gui_br ();
-  html2gui_input_submit (ucon64gui_info, "Show info",
-                         "Click here to see information about ROM", 0, 0,
-                         NULL);
+  html2gui_input_submit ("Show info", "*",
+                         "Click here to see information about ROM", 0, 0);
 
   html2gui_(" ");
 
 
   sprintf(buf,"(-e) emulate/run ROM (see %s for more)",ucon64gui.configfile);
-  html2gui_input_submit (ucon64gui_e, "Emulate", buf, 0,
-                         0, NULL);
+  html2gui_input_submit ("Emulate", "-e", buf, 0,
+                         0);
 
   html2gui_ (" ");
 
-  html2gui_input_submit (ucon64gui_e, "CRC32", "(-crc) show CRC32 value of ROM", 0,
-                         0, NULL);
+  html2gui_input_submit ("CRC32", "-crc", "(-crc) show CRC32 value of ROM", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_e, "CRC32 (w/ hd)", "(-crchd) show CRC32 value of ROM (regarding to +512 Bytes header)", 0,
-                         0, NULL);
+  html2gui_input_submit ("CRC32 (w/ hd)", "-crchd", "(-crchd) show CRC32 value of ROM (regarding to +512 Bytes header)", 0,
+                         0);
 
   html2gui_ (" ");
 
-  html2gui_input_submit (ucon64gui_ls, "Strip", "(-stp) strip first 512 Bytes (possible header) from ROM", 0,
-                         0, NULL);
+  html2gui_input_submit ("Strip", "-stp", "(-stp) strip first 512 Bytes (possible header) from ROM", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "Insert", "(-ins) insert 512 Bytes (0x00) before ROM", 0,
-                         0, NULL);
+  html2gui_input_submit ("Insert", "-ins", "(-ins) insert 512 Bytes (0x00) before ROM", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "Truncate", "(-strip) strip Bytes from end of ROM; $FILE=VALUE", 0,
-                         0, NULL);
+  html2gui_input_submit ("Truncate", "-strip", "(-strip) strip Bytes from end of ROM; $FILE=VALUE", 0,
+                         0);
 
   html2gui_br();
   html2gui_img(trans_1x3_xpm, 0, 0, 0);
 
   html2gui_br();
 
-  html2gui_input_submit (ucon64gui_ls, "Hexdump", "(-hex) show ROM as hexdump", 0,
-                         0, NULL);
+  html2gui_input_submit ("Hexdump", "-hex", "(-hex) show ROM as hexdump", 0,
+                         0);
 
   html2gui_ (" ");
-  html2gui_input_submit (ucon64gui_ls, "Find String", "(-find) find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)", 0,
-                         0, NULL);
+  html2gui_input_submit ("Find String", "-find", "(-find) find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)", 0,
+                         0);
 
   html2gui_ (" ");
 
-  html2gui_input_submit (ucon64gui_ls, "Swap/(De)Interleave ROM", "(-swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)", 0,
-                         0, NULL);
+  html2gui_input_submit ("Swap/(De)Interleave ROM", "-swap", "(-swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)", 0,
+                         0);
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
 
   html2gui_("List ROMs: ");
 
-  html2gui_input_submit (ucon64gui_ls, "verbose", "(-ls) generate ROM list for all ROMs; $ROM=DIRECTORY", 0,
-                         0, NULL);
+  html2gui_input_submit ("verbose", "-ls", "(-ls) generate ROM list for all ROMs; $ROM=DIRECTORY", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "more verbose", "(-lsv) like [ROM list] but more verbose; $ROM=DIRECTORY", 0,
-                         0, NULL);
+  html2gui_input_submit ("more verbose", "-lsv", "(-lsv) like [ROM list] but more verbose; $ROM=DIRECTORY", 0,
+                         0);
 
   html2gui_(" Compare ROMs: ");
 
-  html2gui_input_submit (ucon64gui_ls, "differencies", "(-c) compare ROMs for differencies; $FILE=OTHER_ROM", 0,
-                         0, NULL);
+  html2gui_input_submit ("differencies", "-c", "(-c) compare ROMs for differencies; $FILE=OTHER_ROM", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "similarities", "(-cs) compare ROMs for similarities; $FILE=OTHER_ROM", 0,
-                         0, NULL);
+  html2gui_input_submit ("similarities", "-cs", "(-cs) compare ROMs for similarities; $FILE=OTHER_ROM", 0,
+                         0);
 
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
@@ -238,26 +212,26 @@ ucon64gui_top(void)
 
   html2gui_("Database: ");
   
-  html2gui_input_submit (ucon64gui_ls, "Search", "(-dbs) search ROM database (all entries) by CRC32; $ROM=0xCRC32", 0,
-                         0, NULL);
+  html2gui_input_submit ("Search", "-dbs", "(-dbs) search ROM database (all entries) by CRC32; $ROM=0xCRC32", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "Stats", "(-db) ROM database statistics (# of entries)", 0,
-                         0, NULL);
+  html2gui_input_submit ("Stats", "-db", "(-db) ROM database statistics (# of entries)", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "View", "view ROM database (all entries)", 0,
-                         0, NULL);
+  html2gui_input_submit ("View", "-dbv", "(-dbv) view ROM database (all entries)", 0,
+                         0);
 
   html2gui_(" Padding: ");
 
 
-  html2gui_input_submit (ucon64gui_ls, "Pad ROM", "(-pad) pad ROM to full Mb", 0,
-                         0, NULL);
+  html2gui_input_submit ("Pad ROM", "-pad", "(-pad) pad ROM to full Mb", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "Pad ROM (w/ hd)", "(-padhd) pad ROM to full Mb (regarding to +512 Bytes header)", 0,
-                         0, NULL);
+  html2gui_input_submit ("Pad ROM (w/ hd)", "-padhd", "(-padhd) pad ROM to full Mb (regarding to +512 Bytes header)", 0,
+                         0);
 
-  html2gui_input_submit (ucon64gui_ls, "Check", "(-ispad) check if ROM is padded", 0,
-                         0, NULL);
+  html2gui_input_submit ("Check", "-ispad", "(-ispad) check if ROM is padded", 0,
+                         0);
 
   html2gui_br();
   html2gui_img(trans_1x3_xpm, 0, 0, 0);
@@ -275,31 +249,31 @@ ucon64gui_top(void)
   html2gui_("Baseline/BSL: ");
 
 
-  html2gui_input_submit (ucon64gui_ls, "Apply", "(-b) apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE", 0,
-                         0, NULL);
+  html2gui_input_submit ("Apply", "-b", "(-b) apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE", 0,
+                         0);
                          
 //  html2gui_br();
   
   html2gui_(" IPS: ");
 
-  html2gui_input_submit (ucon64gui_ls, "Apply", "(-i) apply IPS patch (<=1.2); $FILE=PATCHFILE", 0,
-                         0, NULL);
+  html2gui_input_submit ("Apply", "-i", "(-i) apply IPS patch (<=1.2); $FILE=PATCHFILE", 0,
+                         0);
   
-  html2gui_input_submit (ucon64gui_ls, "Create", "(-mki) create IPS patch; $FILE=CHANGED_ROM", 0,
-                         0, NULL);
+  html2gui_input_submit ("Create", "-mki", "(-mki) create IPS patch; $FILE=CHANGED_ROM", 0,
+                         0);
   
 //  html2gui_br();
 
   html2gui_(" APS: ");
 
-  html2gui_input_submit (ucon64gui_ls, "Apply", "(-a) apply APS patch (<=1.2); $FILE=PATCHFILE", 0,
-                         0, NULL);
+  html2gui_input_submit ("Apply", "-a", "(-a) apply APS patch (<=1.2); $FILE=PATCHFILE", 0,
+                         0);
   
-  html2gui_input_submit (ucon64gui_ls, "Create", "(-mka) create APS patch; $FILE=CHANGED_ROM", 0,
-                         0, NULL);
+  html2gui_input_submit ("Create", "-mka", "(-mka) create APS patch; $FILE=CHANGED_ROM", 0,
+                         0);
   
-  html2gui_input_submit (ucon64gui_ls, "Rename", "(-na) change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION", 0,
-                         0, NULL);
+  html2gui_input_submit ("Rename", "-na", "(-na) change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION", 0,
+                         0);
   
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
@@ -307,17 +281,17 @@ ucon64gui_top(void)
   
   html2gui_("PPF: ");
 
-  html2gui_input_submit (ucon64gui_ls, "Apply", "(-ppf) apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE", 0,
-                         0, NULL);
+  html2gui_input_submit ("Apply", "-ppf", "(-ppf) apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE", 0,
+                         0);
   
-  html2gui_input_submit (ucon64gui_ls, "Create", "(-mkppf) create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE", 0,
-                         0, NULL);
+  html2gui_input_submit ("Create", "-mkppf", "(-mkppf) create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE", 0,
+                         0);
   
-  html2gui_input_submit (ucon64gui_ls, "Rename", "(-nppf) change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION", 0,
-                         0, NULL);
+  html2gui_input_submit ("Rename", "-nppf", "(-nppf) change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION", 0,
+                         0);
   
-  html2gui_input_submit (ucon64gui_ls, "FILE_ID.DIZ", "(-idppf) change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ", 0,
-                         0, NULL);
+  html2gui_input_submit ("FILE_ID.DIZ", "-idppf", "(-idppf) change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ", 0,
+                         0);
   
   
   html2gui_br ();
@@ -344,16 +318,16 @@ ucon64gui_root (void)
 
   html2gui_ ("Console specific options");
   html2gui_br ();
-  html2gui_input_submit (ucon64gui_snes, "Super Nintendo",
-                         "(-snes) Options for Super Nintendo", 0, 0, NULL);
+//  html2gui_input_a (ucon64gui_snes, "Super Nintendo",
+//                         "(-snes) Options for Super Nintendo", 0, 0, NULL);
 
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
 //  html2gui_hr ();
   html2gui_ ("Backup unit specific options");
   html2gui_br ();
-  html2gui_input_submit (ucon64gui_swc, "Super Wild Card",
-                         "Options for Super Wild Card", 0, 0, NULL);
+//  html2gui_input_submit (ucon64gui_swc, "Super Wild Card",
+//                         "Options for Super Wild Card", 0, 0);
 
   ucon64gui_bottom ();
 

@@ -2,7 +2,7 @@
 misc.c - miscellaneous functions
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -20,21 +20,26 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "misc.h"
-#include <stdarg.h>		// va_arg()
-#include <string.h>		// strncpy()
+#include <stdarg.h>                             // va_arg()
+#include <string.h>                             // strncpy(), strstr()
 
 #define MAXBUFSIZE 32768
 
-#if     (__UNIX__ || __BEOS__)
-#include <stdlib.h>		// atexit()
-#include <unistd.h>		// tcsetattr()
+#if     defined __UNIX__ || defined __BEOS__
+#include <stdlib.h>                             // atexit()
+#include <unistd.h>                             // tcsetattr()
 #include <termios.h>
 
 typedef struct termios tty_t;
 #endif
 
+#ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
+#define USE_POLL                                //  need poll() for kbhit(). poll()
+#include <sys/poll.h>                           //  is available under Linux, but not
+#endif                                          //  under BeOS. DOS already has kbhit()
 
-#if     (__UNIX__ || __BEOS__)
+
+#if     defined __UNIX__ || defined __BEOS__
 static void deinit_conio (void);
 static void set_tty (tty_t param);
 #endif
@@ -45,18 +50,129 @@ allascii (char *b, int size)
   int i;
 
   for (i = 0; i < size; i++)
-    if (b[i] < 32)		// " || b[i] > 127" is unnecessary, b is signed
-      return 0;			//  (unsigned char) b[i] > 127 == b[i] < 0 == b[i] < 32
+    if (b[i] < 32)                              // " || b[i] > 127" is unnecessary, b is signed
+      return 0;                                 //  (unsigned char) b[i] > 127 == b[i] < 0 == b[i] < 32
 
   return 1;
 }
 
 int
 strdcmp (char *str, char *str1)
+// compares length and case
 {
-//compares length and case
   return (((strlen (str) == strlen (str1)) &&
-	   (!strncmp (str, str1, strlen (str)))) ? 0 : (-1));
+           (!strncmp (str, str1, strlen (str)))) ? 0 : (-1));
+}
+
+/*
+Description
+
+stricmp() and strnicmp() functions lexicographically compare the nullterminated strings s1 and s2 
+case independent
+
+Return Values
+
+The strimp() and strnicmp() return an integer greater than, equal to, or less than 0, according as the string s1 is greater than, equal to, or less than the string s2. The comparison is done using
+unsigned characters, so that '\\200' is greater than '\\0'. 
+
+The strnicmp() compares not more than n characters. 
+*/
+int
+strnicmp(const char *s1, const char *s2, size_t n) 
+{
+  int result=0;
+  char *sb1,*sb2;
+
+  if (!strcmp (s1, s2)) return 0;
+
+  if (!(sb1 = (char *) malloc (strlen(s1) * sizeof (char))))
+    {
+      return (-1);
+    }
+  
+  if (!(sb2 = (char *) malloc (strlen(s2) * sizeof (char))))
+    {
+      free (sb1);
+      return (-1);
+    }
+
+  strcpy(sb1, s1);
+  strcpy(sb2, s2);
+  
+  result = strncmp (strlwr(sb1), strlwr(sb2), n);
+
+  free (sb1);
+  free (sb2);
+  
+  return (result);
+}
+
+int
+stricmp(const char *s1, const char *s2) 
+{
+  size_t l1,l2;
+
+  l1 = strlen (s1);
+  l2 = strlen (s2);
+
+  return (strnicmp (s1, s2, (l1 > l2) ? l1 : l2));
+}
+
+/*
+  Full path is: //0/home/fred/h/stdio.h
+
+  Components after _splitpath or before _makepath
+  node:  //0
+  dir:   /home/fred/h/
+  fname: stdio
+  ext:   .h
+*/
+void _makepath( char *path,
+        const char *node,
+        const char *dir,
+        const char *fname,
+        const char *ext )
+{
+  sprintf (path,"%s%s%s.%s", node, dir, fname, ext);
+}
+
+void _splitpath( const char *path,
+                 char *node,
+                 char *dir,
+                 char *fname,
+                 char *ext )
+{
+  int pos=0;
+  char path_[NAME_MAX];
+
+  sscanf (path,
+#ifdef __DOS__
+                "%s:"
+#endif               
+                FILE_SEPARATOR_S
+#ifndef __DOS__
+                FILE_SEPARATOR_S
+                "%s"
+                FILE_SEPARATOR_S
+#endif
+                "%s"
+                FILE_SEPARATOR_S
+                "%s.%s", node, dir, fname, ext);
+
+
+//TODO i hate this functions.. they suck.. they suck... and people who use them suck too
+
+  
+  pos = ((strchr(&path[1],FILE_SEPARATOR) == NULL) ||
+          (findlast (path, ".") > (findlast (path, FILE_SEPARATOR_S) + 1 ))) ?
+    findlast (path, ".") : strlen(path);
+
+  strncpy(path_, path, pos);
+  path_[pos]=0;
+
+  strcpy(fname, filenameonly(path_));
+
+  strcpy(ext, &path[pos+1]);
 }
 
 int
@@ -64,14 +180,14 @@ argcmp (int argc, char *argv[], char *str)
 {
   register int x = 0;
 
-  for (x = 1; x < argc; x++)	//leave out first arg
+  for (x = 1; x < argc; x++)                    // leave out first arg
     {
-      if (argv[x][0] == '-' && (!strdcmp (argv[x], str) || !strdcmp (&argv[x][1], str)	//'--' also!
-	  ))
-	return (x);
+      if (argv[x][0] == '-' && (!strdcmp (argv[x], str) || !strdcmp (&argv[x][1], str)  //'--' also!
+          ))
+        return (x);
     }
 
-  return (0);			//not found
+  return (0);                                   // not found
 }
 
 int
@@ -79,34 +195,34 @@ argncmp (int argc, char *argv[], char *str, size_t len)
 {
   register int x = 0;
 
-  for (x = 1; x < argc; x++)	//leave out first arg
+  for (x = 1; x < argc; x++)                    // leave out first arg
     {
       if (argv[x][0] == '-' &&
-	  (!strncmp (argv[x], str, len) || !strncmp (&argv[x][1], str, len)))
-	return (x);
+          (!strncmp (argv[x], str, len) || !strncmp (&argv[x][1], str, len)))
+        return (x);
     }
 
-  return (0);			//not found
+  return (0);                                   // not found
 }
 
 char *
 getarg (int argc, char *argv[], int pos)
+// return a filename
 {
-//return a filename
   register int x = 0, y = 0;
 
   for (x = 0; x < argc; x++)
     {
       if (argv[x][0] != '-')
-	{
-	  if (y != pos)
-	    y++;
-	  else
-	    return (argv[x]);
-	}
+        {
+          if (y != pos)
+            y++;
+          else
+            return (argv[x]);
+        }
     }
 
-  return ("");			//not found
+  return ("");                                  // not found
 }
 
 long
@@ -123,32 +239,33 @@ getarg_intval (int argc, char **argv, char *argname)
 
 int
 findlwr (char *str)
-//searches the string for ANY lowercase char
+// searches the string for ANY lowercase char
 {
   char *str2;
+//TODO filenames which consist only of numbers
 
   if (!(str2 = strrchr (str, FILE_SEPARATOR)))
-    str2 = str;			//strip path if it is a filename
+    str2 = str;                                 // strip path if it is a filename
   else
     str2++;
 
   while (*str2)
     {
-      if (isalpha ((int) *str2) && islower ((int) *str2))
-	return TRUE;
+      if (islower ((int) *str2))
+      return TRUE;
       str2++;
     }
+
   return FALSE;
 }
 
 int
 findlast (const char *str, const char *str2)
-{
-/* 
-	same as strcspn() but looks for the last appearance of str2
-
-	findlast(".1234.6789",".") == 5
+/*
+  same as strcspn() but looks for the last appearance of str2
+  findlast(".1234.6789",".") == 5
 */
+{
   register int x = 0;
   int pos = 0;
 
@@ -194,13 +311,16 @@ newext (char *filename, char *ext)
   int pos = 0;
   char ext2[4096];
 
-  pos = findlast (filename, ".");
-  if (filename[pos - 1] != FILE_SEPARATOR)
-    filename[pos] = 0;		//some files might start with a dot (.)
+  pos = ((strchr(&filename[1],FILE_SEPARATOR) == NULL) ||
+          (findlast (filename, ".") > (findlast (filename, FILE_SEPARATOR_S) + 1 ))) ?
+    findlast (filename, ".") : strlen(filename);
+
+//  if (filename[pos - 1] != FILE_SEPARATOR) // some files might start with a dot (.)
+      filename[pos] = 0;
 
   strcpy (ext2, ext);
   strcat (filename, (findlwr (filename) == TRUE) ?
-	  strlwr (ext2) : strupr (ext2));
+          strlwr (ext2) : strupr (ext2));
 
   return (filename);
 }
@@ -214,31 +334,6 @@ extcmp (char *filename, char *ext)
   strcpy (ext3, &filename[findlast (filename, ".") + 1]);
   return (strcmp (strupr (ext2), strupr (ext3)));
 }
-
-char *
-cmd2url (char *cmd, char *url)
-{
-  return (url);
-}
-
-char *
-url2cmd (char *url, char *cmd)
-{
-  return (cmd);
-}
-
-char *
-ip2domain (char *ip, char *domain)
-{
-  return (domain);
-}
-
-char *
-domain2ip (char *domain, char *ip)
-{
-  return (ip);
-}
-
 
 char *
 stpblk (char *str)
@@ -298,9 +393,9 @@ strhexdump (char *str, long start, long virtual_start, long len)
   for (x = 0; x < len; x++)
     {
       if (x != 0 && !(x % 16))
-	printf ("%s\n", buf);
+        printf ("%s\n", buf);
       if (!x || !(x % 16))
-	printf ("%08lx  ", x + virtual_start);
+        printf ("%08lx  ", x + virtual_start);
 
       dump = str[x + start];
 
@@ -321,7 +416,7 @@ rencase (char *dir, char *mode)
   DIR *dp;
   char buf[MAXBUFSIZE];
 
-  if (access (dir, R_OK) == -1 || (dp = opendir (dir)) == NULL)
+  if (access (dir, R_OK) != 0 || (dp = opendir (dir)) == NULL)
     return (-1);
 
   chdir (dir);
@@ -329,19 +424,18 @@ rencase (char *dir, char *mode)
   while ((ep = readdir (dp)) != 0)
     {
       if (!stat (ep->d_name, &puffer))
-	{
+        {
 //              if(S_ISREG(puffer.st_mode)==1)
-	  {
-	    strcpy (buf, ep->d_name);
-	    rename (ep->d_name,
-		    (mode[0] == 'l') ? strlwr (buf) : strupr (buf));
-	  }
-	}
+          {
+            strcpy (buf, ep->d_name);
+            rename (ep->d_name,
+                    (mode[0] == 'l') ? strlwr (buf) : strupr (buf));
+          }
+        }
     }
   (void) closedir (dp);
   return (0);
 }
-
 
 int
 renlwr (char *dir)
@@ -355,7 +449,6 @@ renupr (char *dir)
   return (rencase (dir, "upr"));
 }
 
-
 long
 quickftell (char *filename)
 {
@@ -364,16 +457,15 @@ quickftell (char *filename)
   return ((!stat (filename, &puffer)) ? ((long) puffer.st_size) : (-1L));
 }
 
-
 long
-filencmp (char *filename, long start, long len, char *search, long searchlen	//length of *search in Bytes
-  )
+filencmp (char *filename, long start, long len, char *search, long searchlen)
+// searchlen is length of *search in Bytes
 {
   register long x, y;
   size_t size;
   char *buf;
 
-  if (access (filename, R_OK) == -1)
+  if (access (filename, R_OK) != 0)
     return (-1);
 
   x = 0;
@@ -393,31 +485,30 @@ filencmp (char *filename, long start, long len, char *search, long searchlen	//l
   while ((x + searchlen + start) < size)
     {
       for (y = 0; y < searchlen; y++)
-	{
-	  if (buf[x + y] != search[y])
-	    break;
-	  if (y == searchlen - 1)
-	    {
-	      free (buf);
-	      return (x + start);
-	    }
-	}
+        {
+          if (buf[x + y] != search[y])
+            break;
+          if (y == searchlen - 1)
+            {
+              free (buf);
+              return (x + start);
+            }
+        }
       x++;
     }
   free (buf);
   return (-1);
 }
 
-
 long
-filencmp2 (char *filename, long start, long len, char *search, long searchlen	//length of *search in Bytes
-	   , char wildcard)
+filencmp2 (char *filename, long start, long len, char *search, long searchlen, char wildcard)
+// searchlen is length of *search in Bytes
 {
   register long x, y;
   size_t size;
   char *buf;
 
-  if (access (filename, R_OK) == -1)
+  if (access (filename, R_OK) != 0)
     return (-1);
 
   x = 0;
@@ -437,24 +528,21 @@ filencmp2 (char *filename, long start, long len, char *search, long searchlen	//
   while ((x + searchlen + start) < size)
     {
       for (y = 0; y < searchlen; y++)
-	if (search[y] != wildcard)
-	  {
-	    if (buf[x + y] != search[y])
-	      break;
-	    if (y == searchlen - 1)
-	      {
-		free (buf);
-		return (x + start);
-	      }
-	  }
+        if (search[y] != wildcard)
+          {
+            if (buf[x + y] != search[y])
+              break;
+            if (y == searchlen - 1)
+              {
+                free (buf);
+                return (x + start);
+              }
+          }
       x++;
     }
   free (buf);
   return (-1);
 }
-
-
-
 
 size_t
 quickfread (void *dest, size_t start, size_t len, char *src)
@@ -474,16 +562,12 @@ quickfread (void *dest, size_t start, size_t len, char *src)
   return (result);
 }
 
-
-
 size_t
-quickfwrite (const void *src, size_t start, size_t len, char *dest,
-	     char *mode)
+quickfwrite (const void *src, size_t start, size_t len, char *dest, char *mode)
 {
   size_t result;
   FILE *fh;
 
-//      if( !( fh=fopen(dest ,( access(dest,F_OK)!=0 ) ? "wb" : "r+b" ) ) )return(-1);
   if (!(fh = fopen (dest, mode)))
     return (-1);
   fseek (fh, start, SEEK_SET);
@@ -491,7 +575,6 @@ quickfwrite (const void *src, size_t start, size_t len, char *dest,
   fclose (fh);
   return (result);
 }
-
 
 int
 quickfgetc (char *filename, long pos)
@@ -529,7 +612,7 @@ filehexdump (char *filename, long start, long len)
   int dump;
   FILE *fh;
 
-  if (access (filename, R_OK) == -1)
+  if (access (filename, R_OK) != 0)
     return (-1);
 
   size = quickftell (filename);
@@ -545,9 +628,9 @@ filehexdump (char *filename, long start, long len)
   for (x = 0; x < len; x++)
     {
       if (x != 0 && !(x % 16))
-	printf ("%s\n", buf);
+        printf ("%s\n", buf);
       if (!x || !(x % 16))
-	printf ("%08lx  ", x + start);
+        printf ("%08lx  ", x + start);
 
       dump = fgetc (fh);
 
@@ -559,21 +642,6 @@ filehexdump (char *filename, long start, long len)
   printf ("%s\n", buf);
   fclose (fh);
 
-/* TODO range (also for strhexdump?!)
-	buf[0]=0;
-	strncat(buf,"-------------------------------------------------------------------------------"
-			,(size_t)((long)69*start/size)
-	);
-	strncat(buf,"==============================================================================="
-			,(!((size_t)((long)69*len/size))) ?
-			(1) :
-			((size_t)((long)69*len/size))
-	);
-	strcat(buf,"-------------------------------------------------------------------------------");
-	buf[69]=0;
-
-	printf("Range: [%s]\n",buf);
-*/
   return (0);
 }
 
@@ -584,11 +652,10 @@ filecopy (char *src, long start, long len, char *dest, char *mode)
   char buf[MAXBUFSIZE];
   FILE *fh, *fh2;
 
-  if (access (src, R_OK) == -1)
+  if (access (src, R_OK) != 0)
     return (-1);
 
-  len =
-    (((quickftell (src) - start) < len) ? (quickftell (src) - start) : len);
+  len = (((quickftell (src) - start) < len) ? (quickftell (src) - start) : len);
 
   if (!strdcmp (dest, src))
     return -1;
@@ -608,10 +675,10 @@ filecopy (char *src, long start, long len, char *dest, char *mode)
   if (len >= MAXBUFSIZE)
     {
       for (x = 0; x < len / MAXBUFSIZE; x++)
-	{
-	  fread (buf, MAXBUFSIZE, 1, fh);
-	  fwrite (buf, MAXBUFSIZE, 1, fh2);
-	}
+        {
+          fread (buf, MAXBUFSIZE, 1, fh);
+          fwrite (buf, MAXBUFSIZE, 1, fh2);
+        }
     }
 
   fread (buf, len % MAXBUFSIZE, 1, fh);
@@ -624,13 +691,12 @@ filecopy (char *src, long start, long len, char *dest, char *mode)
   return 0;
 }
 
-
 char *
 filebackup (char *filename)
 {
   char buf[MAXBUFSIZE];
 
-  if (access (filename, R_OK) == -1)
+  if (access (filename, R_OK) != 0)
     return (filename);
 
   strcpy (buf, filename);
@@ -639,7 +705,7 @@ filebackup (char *filename)
 #else
   strcat (buf, (findlwr (buf) ? ".bak" : ".BAK"));
 #endif
-  rename (filename, buf);	//keep file attributes like date
+  rename (filename, buf);                       // keep file attributes like date
   filecopy (buf, 0, quickftell (buf), filename, "wb");
 
   sync ();
@@ -652,7 +718,7 @@ filenameonly (char *str)
   char *str2;
 
   if (!(str2 = strrchr (str, FILE_SEPARATOR)))
-    str2 = str;			//strip path if it is a filename
+    str2 = str;                                 // strip path if it is a filename
   else
     str2++;
 
@@ -660,8 +726,7 @@ filenameonly (char *str)
 }
 
 unsigned long
-filefile (char *filename, long start, char *filename2, long start2,
-	  int similar)
+filefile (char *filename, long start, char *filename2, long start2, int similar)
 {
   unsigned long x;
   long size, size2, minsize, len;
@@ -673,7 +738,7 @@ filefile (char *filename, long start, char *filename2, long start2,
   if (access (filename, R_OK) != 0 || access (filename2, R_OK) != 0)
     return -1;
 
-  size = quickftell (filename);	// quickftell() returns size in bytes
+  size = quickftell (filename);                 // quickftell() returns size in bytes
   size2 = quickftell (filename2);
 
   if (size < start || size2 < start2)
@@ -701,25 +766,25 @@ filefile (char *filename, long start, char *filename2, long start2,
   for (x = 0; x <= minsize; x++)
     {
       if ((similar == FALSE && buf[x + start] != buf2[x + start2]) ||
-	  (similar == TRUE && buf[x + start] == buf2[x + start2]))
-	{
-	  len = 0;
-	  while ((similar == TRUE) ?
-		 (buf[x + start + len] == buf2[x + start2 + len]) :
-		 (buf[x + start + len] != buf2[x + start2 + len]))
-	    {
-	      len++;
-	      if (x + start + len >= size || x + start2 + len >= size2)
-		break;
-	    }
+          (similar == TRUE && buf[x + start] == buf2[x + start2]))
+        {
+          len = 0;
+          while ((similar == TRUE) ?
+                 (buf[x + start + len] == buf2[x + start2 + len]) :
+                 (buf[x + start + len] != buf2[x + start2 + len]))
+            {
+              len++;
+              if (x + start + len >= size || x + start2 + len >= size2)
+                break;
+            }
 
-	  printf ("%s:\n", filename);
-	  strhexdump (buf, x + start, x + start, len);
-	  printf ("%s:\n", filename2);
-	  strhexdump (buf2, x + start, x + start, len);
-	  printf ("\n");
-	  x += len;
-	}
+          printf ("%s:\n", filename);
+          strhexdump (buf, x + start, x + start, len);
+          printf ("%s:\n", filename2);
+          strhexdump (buf2, x + start, x + start, len);
+          printf ("\n");
+          x += len;
+        }
     }
 
   free (buf);
@@ -727,14 +792,13 @@ filefile (char *filename, long start, char *filename2, long start2,
   return x;
 }
 
-
 int
 filereplace (char *filename, long start, char *search, long slen,
-	     char *replace, long rlen)
+             char *replace, long rlen)
 {
   unsigned long pos, size;
 
-  if (access (filename, R_OK) == -1)
+  if (access (filename, R_OK) != 0)
     return (-1);
 
   pos = start;
@@ -743,7 +807,7 @@ filereplace (char *filename, long start, char *search, long slen,
   for (;;)
     {
       if ((pos = filencmp (filename, pos, size, search, slen)) == -1)
-	return (0);
+        return (0);
       filehexdump (filename, pos, slen);
       quickfwrite (replace, pos, rlen, filename, "r+b");
       filehexdump (filename, pos, rlen);
@@ -752,15 +816,10 @@ filereplace (char *filename, long start, char *search, long slen,
     }
 }
 
-
-
-
-
-
 void
 change_string (char *searchstr, int strsize, char wc, char esc,
-	       char *end, int endsize, char *buf, int bufsize, int offset,
-	       ...)
+               char *end, int endsize, char *buf, int bufsize, int offset,
+               ...)
 /*
   Search for all occurrences of string searchstr in buf and replace endsize bytes in buf
   by copying string end to the end of the found searchstring in buf plus offset.
@@ -803,85 +862,85 @@ change_string (char *searchstr, int strsize, char wc, char esc,
   for (bufpos = 0; bufpos < bufsize; bufpos++)
     {
       if (strpos == 0 && searchstr[0] != esc && searchstr[0] != wc)
-	while (bufpos < bufsize && searchstr[0] != buf[bufpos])
-	  bufpos++;
+        while (bufpos < bufsize && searchstr[0] != buf[bufpos])
+          bufpos++;
 
       // handle escape character in searchstr
       while (searchstr[strpos] == esc && bufpos < bufsize)
-	{
-	  if (strpos == pos_1st_esc)
-	    va_start (argptr, offset);	// reset argument pointer
-	  if (pos_1st_esc == -1)
-	    pos_1st_esc = strpos;
+        {
+          if (strpos == pos_1st_esc)
+            va_start (argptr, offset);          // reset argument pointer
+          if (pos_1st_esc == -1)
+            pos_1st_esc = strpos;
 
-	  set = va_arg (argptr, char *);	// get next set of characters
-	  setsize = va_arg (argptr, int);	// get set size
-	  i = 0;
-	  // see if buf[bufpos] matches with any character in current set
-	  while (i < setsize && buf[bufpos] != set[i])
-	    i++;
-	  if (i == setsize)
-	    break;		// buf[bufpos] didn't match with any char
+          set = va_arg (argptr, char *);        // get next set of characters
+          setsize = va_arg (argptr, int);       // get set size
+          i = 0;
+          // see if buf[bufpos] matches with any character in current set
+          while (i < setsize && buf[bufpos] != set[i])
+            i++;
+          if (i == setsize)
+            break;                              // buf[bufpos] didn't match with any char
 
-	  if (strpos == strsize - 1)	// check if we are at the end of searchstr
-	    {
-	      memcpy (buf + bufpos + offset, end, endsize);
-	      break;
-	    }
+          if (strpos == strsize - 1)            // check if we are at the end of searchstr
+            {
+              memcpy (buf + bufpos + offset, end, endsize);
+              break;
+            }
 
-	  strpos++;
-	  bufpos++;
-	}
+          strpos++;
+          bufpos++;
+        }
       if (searchstr[strpos] == esc)
-	{
-	  strpos = 0;
-	  continue;
-	}
+        {
+          strpos = 0;
+          continue;
+        }
 
       // skip wildcards in searchstr
       nwc = 0;
       while (searchstr[strpos] == wc && bufpos < bufsize)
-	{
-	  if (strpos == strsize - 1)	// check if at end of searchstr
-	    {
-	      memcpy (buf + bufpos + offset, end, endsize);
-	      break;
-	    }
+        {
+          if (strpos == strsize - 1)            // check if at end of searchstr
+            {
+              memcpy (buf + bufpos + offset, end, endsize);
+              break;
+            }
 
-	  strpos++;
-	  bufpos++;
-	  nwc++;
-	}
+          strpos++;
+          bufpos++;
+          nwc++;
+        }
       if (bufpos == bufsize)
-	break;
+        break;
       if (searchstr[strpos] == wc)
-	{
-	  strpos = 0;
-	  continue;
-	}
+        {
+          strpos = 0;
+          continue;
+        }
 
       if (searchstr[strpos] == esc)
-	{
-	  bufpos--;		// current char has to be checked, but `for'
-	  continue;		//  increments bufpos
-	}
+        {
+          bufpos--;                             // current char has to be checked, but `for'
+          continue;                             //  increments bufpos
+        }
 
       // no escape char, no wildcard -> normal character
       if (searchstr[strpos] == buf[bufpos])
-	{
-	  if (strpos == strsize - 1)	// check if at end of searchstr
-	    {
-	      memcpy (buf + bufpos + offset, end, endsize);
-	      strpos = 0;
-	    }
-	  else
-	    strpos++;
-	}
+        {
+          if (strpos == strsize - 1)            // check if at end of searchstr
+            {
+              memcpy (buf + bufpos + offset, end, endsize);
+              strpos = 0;
+            }
+          else
+            strpos++;
+        }
       else
-	{
-	  strpos = 0;
-	  bufpos -= nwc;	// scan the most recent wildcards too if
-	}			//  the character didn't match
+        {
+          strpos = 0;
+          bufpos -= nwc;                        // scan the most recent wildcards too if
+        }                                       //  the character didn't match
     }
 
   va_end (argptr);
@@ -896,7 +955,7 @@ fileswap (char *filename, long start, long len)
   char buf[MAXBUFSIZE], buf2[3], buf3;
 
 
-  if (access (filename, R_OK) == -1)
+  if (access (filename, R_OK) != 0)
     return (-1);
 
   len =
@@ -919,7 +978,7 @@ fileswap (char *filename, long start, long len)
   for (x = 0; x < (len - start); x += 2)
     {
       if (!fread (buf2, 2, 1, in))
-	break;
+        break;
       buf3 = buf2[0];
       buf2[0] = buf2[1];
       buf2[1] = buf3;
@@ -938,6 +997,55 @@ fileswap (char *filename, long start, long len)
   return (0);
 }
 
+/*
+  getchd() GetCurrentHomeDir the usage is like getcwd()
+*/
+char *
+getchd (char *buffer, size_t buffer_size)
+/*
+  if buffer == NULL then the caller is responsible for freeing memory of string
+
+  if there is no home dir (by default there is no env var HOME under Windows 9x)
+  the current dir is returned
+*/
+{
+  char *tmp, *homedir;
+
+  homedir = (buffer == NULL) ? (char *) malloc (buffer_size) : buffer;
+
+  if ((tmp = getenv ("HOME")) != NULL)
+    strcpy (homedir, tmp);
+  else if ((tmp = getenv ("USERPROFILE")) != NULL)
+    strcpy (homedir, tmp);
+  else if ((tmp = getenv ("HOMEDRIVE")) != NULL)
+    {
+      strcpy (homedir, tmp);
+      strcat (homedir, getenv ("HOMEPATH"));
+    }
+  else
+    getcwd (homedir, buffer_size);
+
+#ifdef __CYGWIN__
+  /*
+    weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is ok):
+    When a string with "e (e with diaeresis, one character) is read from an
+    environment variable, the character isn't the right character for accessing
+    the file system. We fix this.
+    TODO: fix the same problem for other non-ASCII characters (> 127).
+  */
+  {
+    int l = strlen (homedir);
+    change_string ("\x89", 1, 0, 0, "\xeb", 1, homedir, l, 0); // e diaeresis
+    change_string ("\x84", 1, 0, 0, "\xe4", 1, homedir, l, 0); // a diaeresis
+    change_string ("\x8b", 1, 0, 0, "\xef", 1, homedir, l, 0); // i diaeresis
+    change_string ("\x94", 1, 0, 0, "\xf6", 1, homedir, l, 0); // o diaeresis
+    change_string ("\x81", 1, 0, 0, "\xfc", 1, homedir, l, 0); // u diaeresis
+  }
+#endif
+  
+  return homedir;
+}
+  
 char *
 getProperty (char *filename, char *propname, char *buffer, char *def)
 {
@@ -947,86 +1055,113 @@ getProperty (char *filename, char *propname, char *buffer, char *def)
   if ((fh = fopen (filename, "rb")) != 0)
     {
       while (fgets (buf, sizeof buf, fh) != NULL)
-	{
-	  stplcr (buf);
-	  if (stpblk (buf)[0] == '#')
-	    continue;
+        {
+          stplcr (buf);
+          if (stpblk (buf)[0] == '#')
+            continue;
 
-	  buf[strcspn (buf, "#")] = 0;	//comment at end of a line
+          buf[strcspn (buf, "#")] = 0;          // comment at end of a line
 
-	  if (!strncmp (buf, propname, strlen (propname)))
-	    {
-	      result = strchr (buf, '=');
-	      result++;
-	      strcpy (buffer, stpblk (result));
+          if (!strncmp (buf, propname, strlen (propname)))
+            {
+              result = strchr (buf, '=');
+              result++;
+              strcpy (buffer, stpblk (result));
 
-	      fclose (fh);
-	      return buffer;
-	    }
-	}
+              fclose (fh);
+              return buffer;
+            }
+        }
       fclose (fh);
     }
 
-  return getenv (propname) != NULL ? getenv (propname) : def;
+  return (getenv (propname) != NULL) ? getenv (propname) : def;
 }
 
-char **
-getTags (char *filename, char *tagname, char **buffer)
+int
+setProperty (char *filename, char *propname, char *value)
 {
-/*
-int c=0;
-String link=null;
+  int found=0;
+  char buf[MAXBUFSIZE], *buf2;
+  FILE *fh;
 
-StringBuffer buf=new StringBuffer();
-File dir=new File(name);
+  if (!(buf2 = (char *) malloc ((quickftell(filename)
+                                         + MAXBUFSIZE) * sizeof (char))))
+    {
+      return (-1);
+    }
 
-String files[]={name};
-if(dir.isDirectory())files=dir.list();
+  buf2[0]=0;
 
-for(int x=0;x<files.length;x++)
-{
+  if ((fh = fopen (filename, "rb")) != 0)
+    {
+      while (fgets (buf, sizeof buf, fh) != NULL)
+        {
+          if (!strncmp (buf, propname, strlen (propname)))
+            {
+              found = 1;
+              if (value == NULL)
+                continue;
+              sprintf (buf, "%s=%s\n", propname, value);
+            }
+          strcat (buf2, buf);
+        }
+      fclose (fh);
+    }
 
-	if(new File(files[x]).isDirectory())getLinks(files[x]);
+    if (!found && value != NULL)
+      {
+        sprintf (buf, "%s=%s\n", propname, value);
+        strcat (buf2, buf);
+      }
 
-	try
-	{
-		FileReader fh=new FileReader(files[x]);
+    quickfwrite (buf2, 0, strlen (buf2), filename, "wb");
 
-		while((c=fh.read())!=-1)
-		{
-			if(c=='<')
-			{
-				c=fh.read();
-				if(c=='A'||c=='a')
-				{
-					link="<A";
-					while((c=fh.read())!=-1)
-					{
-						if(c=='<')
-						{
-							if(link.charAt(link.length()-1)=='>')link=link+link.substring(9,link.length()-2);
-							System.out.print(link+"</a><br>"+"\n");
-							break;
-						}
-						else link=link+(char)c;
-					}
-				}
-			}
-		}
-		fh.close();	
-	} 
-	catch(IOException e) 
-	{
-	}
+    return 0;
 }
-return(0);
-*/
+
+char *
+getLinks (char *filename, char *buffer)
+{
+  char c[2];
+  FILE *fh;
+
+  buffer[0] = c[1] = 0;
+  if ((fh = fopen (filename, "rb")) != 0)
+    {
+      while ((c[0] = fgetc (fh)) != EOF)
+        {
+          if (c[0] == '<')
+            {
+              c[0] = fgetc (fh);
+              if (tolower (c[0]) == 'a')
+                {
+                  strcat (buffer, "<A");
+                  while ((c[0] = fgetc (fh)) != EOF)
+                    {
+                      if (c[0] == '<')
+                        {
+                          strcat (buffer, "</A><BR>");
+                          break;
+                        }
+                      strcat (buffer, c);
+                    }
+                }
+            }
+        }
+      fclose (fh);
+    }
   return (buffer);
 }
 
+char *
+url2cmd (char *cmd, char *url)
+{
+  return(cmd);
+}
 
-#if     (__UNIX__  || __BEOS__)
-static int stdin_tty = 1;	// 1 => stdin is a tty, 0 => it's not
+#if     defined __UNIX__ || defined __BEOS__
+static int stdin_tty = 1;                       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
 void
@@ -1045,7 +1180,7 @@ init_conio (void)
   if (!isatty (STDIN_FILENO))
     {
       stdin_tty = 0;
-      return;			// rest is nonsense if not a tty
+      return;                                   // rest is nonsense if not a tty
     }
 
   if (tcgetattr (STDIN_FILENO, &oldtty) == -1)
@@ -1063,8 +1198,8 @@ init_conio (void)
   newtty = oldtty;
   newtty.c_lflag &= ~(ICANON | ECHO);
   newtty.c_lflag |= ISIG;
-  newtty.c_cc[VMIN] = 1;	// if VMIN != 0, read calls
-  newtty.c_cc[VTIME] = 0;	//  block (wait for input)
+  newtty.c_cc[VMIN] = 1;                        // if VMIN != 0, read calls
+  newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
 
   set_tty (newtty);
 }
@@ -1075,14 +1210,26 @@ deinit_conio (void)
   tcsetattr (STDIN_FILENO, TCSAFLUSH, &oldtty);
 }
 
+#if defined __CYGWIN__ && !defined USE_POLL
+#warning kbhit() does not work properly under Cygwin if USE_POLL is not defined
+#endif
 int
 kbhit (void)
 {
+#ifdef  USE_POLL
+  struct pollfd fd;
+
+  fd.fd = STDIN_FILENO;
+  fd.events = POLLIN;
+  fd.revents = 0;
+
+  return poll (&fd, 1, 0) > 0;
+#else
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
-  tmptty.c_cc[VMIN] = 0;
-  set_tty (tmptty);
+  tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
+  set_tty(tmptty);                              //   Cygwin (define USE_POLL)
 
   if ((ch = fgetc (stdin)) != EOF)
     {
@@ -1095,5 +1242,6 @@ kbhit (void)
   set_tty (newtty);
 
   return key_pressed;
+#endif
 }
 #endif

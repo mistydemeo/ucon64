@@ -2,7 +2,7 @@
 misc.h - miscellaneous functions
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -22,21 +22,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MISC_H
 #define MISC_H
 
+#include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/ioctl.h>
 #include <sys/stat.h>
-//#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
 #ifdef __DOS__
-#include <conio.h>		// getch()
-#include <pc.h>			// kbhit()
+#include <conio.h>                              // getch()
+#include <pc.h>                                 // kbhit()
 #endif
 
 #ifndef FALSE
@@ -49,136 +48,141 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifndef __DOS__
 #define STDERR          stderr
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
 #else
-#define STDERR          stdout	// Stupid DOS has no error
-#endif //  stream (direct video writes)
-						//  this makes redir possible
-#if     (__UNIX__ || __BEOS__)
-#define getch           getchar	// getchar() acts like DOS getch() after init_conio()
+#define STDERR          stdout                  // Stupid DOS has no error
+#define FILE_SEPARATOR '\\'                     //  stream (direct video writes)
+#define FILE_SEPARATOR_S "\\"                   //  this makes redir possible
+#endif                                          
+
+#if     defined __UNIX__ || defined __BEOS__
+#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
 
 void init_conio (void);
-int kbhit (void);		// may only be used after init_conio()!
+int kbhit (void);                               // may only be used after init_conio()!
 #endif
 
-int allascii (char *b, int size);	// test if a string is completely ascii
+int allascii (char *b, int size);               // test if a string is completely ascii
 
+int strdcmp (char *str, char *str1);            //compares case AND length
 
-int strdcmp (char *str, char *str1);
+int stricmp(const char *s1, const char *s2);
 
-int argcmp (int argc		// check the cmdline options for str
-	    , char *argv[], char *str);
+int strnicmp(const char *s1, const char *s2, size_t n);
 
-int argncmp (int argc		//same as argcmp() but with length
-	     , char *argv[], char *str, size_t len);
+/*
+  that person who invented _makepath() and _splitpath() should suck dicks in hell
+*/
+void _makepath( char *path,	//do not use
+        const char *node,
+        const char *dir,
+        const char *fname,
+        const char *ext );
 
-char *getarg (int argc		//get arg pos from cmdline options
-	      , char *argv[], int pos);
+void _splitpath( const char *path,	//do not use
+                 char *node,
+                 char *dir,
+                 char *fname,
+                 char *ext );
+
+int argcmp (int argc, char *argv[], char *str); // check the cmdline options for str
+
+int argncmp (int argc, char *argv[], char *str, size_t len); // same as argcmp() but with length
+
+char *getarg (int argc, char *argv[], int pos); // get arg pos from cmdline options
 
 long getarg_intval (int argc, char **argv, char *argname);
 
-int findlwr (char *str);	//find any lower char in str
+int findlwr (char *str);                        // find any lower char in str
 
 char *strupr (char *str);
 
 char *strlwr (char *str);
 
-char *cmd2url (char *cmd, char *url);	//converts a commandline into an url(!)
+char *newext (char *filename, char *ext);       // replace extension of str with ext
 
-char *url2cmd (char *url, char *cmd);	//converts an url into a commandline(!)
+int extcmp (char *filename, char *ext);         // compares if filename has the ext extension and returnes -1 if false or 0 if true
 
-char *ip2domain (char *ip, char *domain);	//dns
+int findlast (const char *str, const char *str2); // find last appearance of str2 in str
 
-char *domain2ip (char *domain, char *ip);	//dns
+char *stpblk (char *str);                       // strip blanks from beginning of str
 
-char *newext (char *filename	//replace extension of str with ext
-	      , char *ext);
+char *strtrim (char *dest, char *str);          // trim blanks from start and end of str
 
-int extcmp (char *filename	//compares if filename has the ext extension and returnes -1 if false or 0 if true
-	    , char *ext);
+char *stplcr (char *str);                       // kill all returns at end of str
 
-int findlast (const char *str	//find last appearance of str2 in str
-	      , const char *str2);
+char *strswap (char *str, long start, long len);// swap bytes in str from start for len
 
-char *stpblk (char *str);	//strip blanks from beginning of str
+/*
+  hexdump str from start for len
+  if str is only a part of a bigger buffer you can write here the start number
+  of the counter which is displayed left
+*/
+int strhexdump (char *str, long start, long virtual_start, long len);
 
-char *strtrim (char *dest	//trim blanks from start and end of str
-	       , char *str);
+int renlwr (char *dir);                         // rename all files in dir to lower case
 
-char *stplcr (char *str);	//kill all returns at end of str
+int renupr (char *dir);                         // rename all files in dir to upper case
 
-char *strswap (char *str	//swap bytes in str from start for len
-	       , long start, long len);
+long quickftell (char *filename);               // return size of filename
 
-int strhexdump (char *str	//hexdump str from start for len
-		, long start, long virtual_start	//if str is only a part of a bigger buffer you can write here the start number of the counter which is displayed left
-		, long len);
+// search filename for search with searchlen from start for len
+// searchlen is length of *search in Bytes
+long filencmp (char *filename, long start, long len, char *search, long searchlen);
 
-int renlwr (char *dir);		//rename all files in dir to lower case
+// same as filencmp but with wildcard support
+// searchlen is length of *search in Bytes
+long filencmp2 (char *filename, long start, long len, char *search, long searchlen,
+                char wildcard);
 
-int renupr (char *dir);		//rename all files in dir to upper case
+// same as fread but takes start and src is a filename
+size_t quickfread (void *dest, size_t start, size_t len, char *src);
 
-long quickftell (char *filename);	//return size of filename
+// same as fwrite but takes start and dest is a filename
+// mode is the same as fopen() modes
+size_t quickfwrite (const void *src, size_t start, size_t len, char *dest, char *mode);
 
-long filencmp (char *filename	//search filename for search with searchlen from start for len
-	       , long start, long len, char *search, long searchlen	//length of *search in Bytes
-  );
-
-long filencmp2 (char *filename	//same as filencmp but with wildcard support
-		, long start, long len, char *search, long searchlen	//length of *search in Bytes
-		, char wildcard);
-
-size_t quickfread (void *dest	//same as fread but takes start and src is a filename
-		   , size_t start, size_t len, char *src);
-
-
-size_t quickfwrite (const void *src	//same as fwrite but takes start and dest is a filename
-		    , size_t start, size_t len, char *dest, char *mode	//same like fopen() modes
-  );
-
-
-int quickfgetc (char *filename	//same as fgetc but takes filename instead of FILE and a pos
-		, long pos);
+// same as fgetc but takes filename instead of FILE and a pos
+int quickfgetc (char *filename, long pos);
 
 int quickfputc (char *filename, long pos, int c, char *mode);
 
-int filehexdump (char *filename	//same as strhexdump
-		 , long start, long len);
+int filehexdump (char *filename, long start, long len); // same as strhexdump
 
-
-int filecopy (char *src		//copy src from start for len to dest
-	      , long start, long len, char *dest, char *mode	//same like fopen() modes
-  );
+// copy src from start for len to dest
+// mode is the same as fopen() modes
+int filecopy (char *src, long start, long len, char *dest, char *mode);
 
 char *filebackup (char *filename);
 
-char *filenameonly (char *str);	//extracts only the filename from a complete path
+char *filenameonly (char *str);                 // extracts only the filename from a complete path
 
-unsigned long filefile (char *filename	//compare filename from start with filename2 from start2
-			, long start, char *filename2, long start2, int similar	//TRUE==find similarities; FALSE==find differences
-  );
+// compare filename from start with filename2 from start2
+// similar must be TRUE or FALSE; TRUE==find similarities; FALSE==find differences
+unsigned long filefile (char *filename, long start, char *filename2, long start2, int similar);
 
-int filereplace (char *filename	//search filename from start for search which has slen and replace with replace which has rlen
-		 , long start, char *search, long slen, char *replace,
-		 long rlen);
+// search filename from start for search which has slen and replace with replace which has rlen
+int filereplace (char *filename, long start, char *search, long slen, char *replace,
+                 long rlen);
 
 // see header of implementation for usage
 void change_string (char *searchstr, int strsize, char wc, char esc,
-		    char *end, int endsize, char *buf, int bufsize,
-		    int offset, ...);
+                    char *end, int endsize, char *buf, int bufsize,
+                    int offset, ...);
 
-int fileswap (char *filename	//bytesswap filename from start for len
-	      , long start, long len);
+int fileswap (char *filename, long start, long len); // bytesswap filename from start for len
 
-char *getProperty (char *filename, char *propname, char *buffer, char *def);
+char *getchd (char *buffer, size_t buffer_size);// getenv("HOME") for stupid DOS
+                                                // acts like getcwd()
+  
+char *getProperty (char *filename, char *propname, char *value, char *def); //get value of propname from filename or return value of env with name like propname or return def
+int setProperty (char *filename, char *propname, char *value); //set propname with value in filename
+#define deleteProperty(a, b) (setProperty(a, b, NULL))//like setProperty but when value of propname is NULL the whole property will disappear from filename
 
-char **getTags (char *filename, char *tagname, char **buffer);
+// extract only the links from ugly HTML pages for wget -m --input-file=FILE
+char *getLinks (char *filename, char *buffer);
 
-#ifdef __DOS__
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
-#else
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
-#endif
+char *url2cmd (char *cmd, char *url);  //convert an url into a commandline
 
 #endif // #ifndef MISC_H

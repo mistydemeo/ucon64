@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "misc.h"
 #include "ucon64.h"
-#include "html2gui/src/html2gui.h"
+//#include "html2gui/src/html2gui.h"
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768

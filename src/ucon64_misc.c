@@ -704,7 +704,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
     "LSP (Light & Shadow Prod.)",
   "ITE Media",                                  // 6Z
   "Infogrames", "Interplay", "JVC (US)", "Parker Brothers", NULL,
-  "SCI(Sales Curve Interactive)/Storm", NULL, NULL, "THQ Software", "Accolade Inc.",
+  "SCI (Sales Curve Interactive)/Storm", NULL, NULL, "THQ Software", "Accolade Inc.",
   "Triffix Entertainment", NULL, "Microprose Software",
     "Universal Interactive/Sierra/Simon & Schuster", NULL,
   "Kemco", "Rage Software", "Encore", NULL, "Zoo",

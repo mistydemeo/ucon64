@@ -77,7 +77,7 @@ main (int argc, char *argv[])
   flc_configfile ();
 
   while ((c =
-          getopt_long_only (argc, argv, "", long_options,
+          getopt_long (argc, argv, "tXSkch", long_options,
                             &option_index)) != -1)
 
     {
@@ -247,14 +247,14 @@ flc_usage (int argc, char *argv[])
   printf ("\n%s\n"
           "This may be freely redistributed under the terms of the GNU Public License\n\n"
           "USAGE: %s [OPTION]... [FILE]...\n\n"
-          "  " OPTION_S "c            also test every possible archive in DIRECTORY for errors\n"
+          "  " OPTION_S "c           also test every possible archive in DIRECTORY for errors\n"
           "                return flags: N=not checked (default), P=passed, F=failed\n"
           "  " OPTION_LONG_S "html        output as HTML document with links to the files\n"
-          "  " OPTION_S "t            sort by modification time\n"
-          "  " OPTION_S "X            sort alphabetical\n"
-          "  " OPTION_S "S            sort by byte size\n"
+          "  " OPTION_S "t           sort by modification time\n"
+          "  " OPTION_S "X           sort alphabetical\n"
+          "  " OPTION_S "S           sort by byte size\n"
           "  " OPTION_LONG_S "fr          sort reverse\n"
-          "  " OPTION_S "k            show sizes in kilobytes\n"
+          "  " OPTION_S "k           show sizes in kilobytes\n"
           "\n"
           "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",

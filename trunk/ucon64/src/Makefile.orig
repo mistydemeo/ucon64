@@ -7,7 +7,7 @@ LDFLAGS=-s
 #LDFLAGS+=-lz
 
 LIB=libdiscmage/libdiscmage.o libdiscmage/cdi.o libdiscmage/nero.o \
-        libdiscmage/sheets.o
+    libdiscmage/sheets.o
 
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
@@ -124,7 +124,7 @@ quick_io.o: quick_io.h misc.h config.h
 ucon64.o: switches.c options.c $(UCON64_STD_H)
 ucon64_misc.o: libdiscmage/cdi.h libdiscmage/nero.h $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)
-libdiscmage/lib_misc.o: $(UCON64_STD_H)
+libdiscmage/libdiscmage.o: libdiscmage/libdiscmage_cfg.h $(UCON64_STD_H)
 libdiscmage/nero.o: libdiscmage/nero.h libdiscmage/cdi.h config.h
 libdiscmage/cdi.o: libdiscmage/cdi.h misc.h config.h
 console/gb.o: console/gb.h $(UCON64_STD_H)

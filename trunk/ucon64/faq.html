@@ -401,6 +401,8 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    internal environment for the uCON64 executable with HOME set to Cygwin's
    home directory if it has not already been set. You can override this value
    with the method mentioned earlier.<br>
+   You can check which configuration file uCON64 uses by specifying the option
+   -version on the command line.<br>
 <br>
 <p>
 <a name="25"><b>Q25</b>: When I try to create a multirom under Windows I get the message
@@ -437,7 +439,7 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    (NT/2000), but uCON64 crashed. What's wrong?</a><br>
 <b>A</b>: If the message looks like this (for the Win32 executable):<br>
 <br>
-   0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
+   &nbsp;&nbsp; 0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
    5570 [main] ucon64 356 open_stackdumpfile: Dumping stack trace to ucon64.exe.stackdump<br>
 <br>
    then you didn't install an I/O driver (correctly). See <a href="#3">question 3</a>.<br>

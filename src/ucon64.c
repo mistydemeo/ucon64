@@ -204,7 +204,12 @@ if(argcmp(argc,argv,"-n2gb"))console=ucon64_GB;
 if(argcmp(argc,argv,"-xfal"))console=ucon64_GBA;
 if(argcmp(argc,argv,"-xswc"))console=ucon64_SNES;
 if(argcmp(argc,argv,"-xswcs"))console=ucon64_SNES;
-if(argcmp(argc,argv,"-swcs"))console=ucon64_SNES;
+if(argcmp(argc,argv,"-xfalm"))console=ucon64_GBA;
+if(argncmp(argc,argv,"-xfalc",6))console=ucon64_GBA;
+if(argcmp(argc,argv,"-xgbx"))console=ucon64_GB;
+if(argcmp(argc,argv,"-xgbxs"))console=ucon64_GB;
+if(argncmp(argc,argv,"-xgbxb",6))console=ucon64_GB;
+
 
 
 if(argcmp(argc,argv,"-db"))

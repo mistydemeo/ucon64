@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef SWC_H
+#define SWC_H
 #include "../ucon64.h"
 
 #define swc_TITLE "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n" \
@@ -31,3 +33,4 @@ void swc_unlock(unsigned int parport);
 int swc_usage(int argc, char *argv[]);
 #define swc_HEADER_START 0
 #define swc_HEADER_LEN 512
+#endif /* SWC_H */

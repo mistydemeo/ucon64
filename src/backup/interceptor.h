@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef INTERCEPTOR_H
+#define INTERCEPTOR_H
 #include "../ucon64.h"
 
 #define interceptor_TITLE "Mega Disk/Super Disk (Interceptor)\n" \
@@ -25,3 +27,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define interceptor_HEADER_START 0
 #define interceptor_HEADER_LEN 512
+#endif /* INTERCEPTOR_H */

@@ -60,26 +60,34 @@ int ucon64_exit(int value,struct ucon64_ *rom)
 #include "wswan/wswan.h"
 #include "intelli/intelli.h"
 
-//#ifdef BACKUP
+#ifdef CD
+  #include "cd32/cd32.h"
+  #include "ps2/ps2.h"
+  #include "saturn/saturn.h"
+  #include "cdi/cdi.h"
+  #include "psx/psx.h"
+  #include "dc/dc.h"
+  #include "real3do/real3do.h"
+
+  #include "patch/ppf.h"
+  #include "patch/xps.h"
+  #include "patch/pal4u.h"
+#endif
+
+#ifdef BACKUP
 #include "backup/fig.h"
 #include "backup/swc.h"
 #include "backup/unknown_bu.h"
 #include "backup/unknown_bu512.h"
-//#ifdef BACKUP
   #ifdef CD
     #include "backup/cdrecord.h"
     #include "backup/cdrdao.h"
   #endif
-//#endif
+#endif
 
 #include "patch/aps.h"
 #include "patch/ips.h"
-#include "patch/ppf.h"
 #include "patch/bsl.h"
-#include "patch/xps.h"
-//#include "patch/pal4u.h"
-
-
 
 int main(int argc,char *argv[])
 {
@@ -102,7 +110,7 @@ char *forceargs[] =
   "-nes",
   "-pce",
   "-psx",
-  "-psx2",
+  "-ps2",
   "-snes",
   "-sat",
   "-dc",
@@ -120,9 +128,11 @@ char *forceargs[] =
   "-intelli"
   };
 
-#ifdef	__UNIX__
-  uid_t uid;
-  gid_t gid;
+#ifdef BACKUP
+  #ifdef	__UNIX__
+    uid_t uid;
+    gid_t gid;
+  #endif
 #endif
 
 struct ucon64_ rom;
@@ -308,16 +318,6 @@ if(argcmp(argc,argv,"-a"))
 	return(ucon64_exit(0,&rom));
 }
 
-if(argcmp(argc,argv,"-ppf"))
-{
-	ucon64_argv[0]="ucon64";
-	ucon64_argv[1]=rom.rom;
-	ucon64_argv[2]=rom.file;
-	ucon64_argc=3;
-
-	applyppf_main(ucon64_argc,ucon64_argv);
-	return(ucon64_exit(0,&rom));
-}
 
 if(argcmp(argc,argv,"-mki"))
 {
@@ -346,6 +346,19 @@ if (argcmp(argc, argv, "-na"))
   quickfwrite(buf2, 7, 50, filebackup(rom.rom), "r+b");
 
   return(ucon64_exit(0,&rom));
+}
+
+#ifdef CD
+
+if(argcmp(argc,argv,"-ppf"))
+{
+	ucon64_argv[0]="ucon64";
+	ucon64_argv[1]=rom.rom;
+	ucon64_argv[2]=rom.file;
+	ucon64_argc=3;
+
+	applyppf_main(ucon64_argc,ucon64_argv);
+	return(ucon64_exit(0,&rom));
 }
 
 if(argcmp(argc,argv,"-mkppf"))
@@ -389,6 +402,8 @@ if(argcmp(argc,argv,"-idppf"))
 	addppfid(argc,argv);
 	return(ucon64_exit(0,&rom));
 }
+
+#endif /* CD */
 
 if (argcmp(argc, argv, "-ls") ||
     argcmp(argc, argv, "-lsv") ||
@@ -443,7 +458,6 @@ return(ucon64_exit(0,&rom));
 
 
 
-
 #ifdef BACKUP
 if (strlen( rom.file ))
 {
@@ -491,11 +505,6 @@ if (setgid(gid) == -1)                          //  was used, but just in case (
 
 #endif
 
-if(!access(rom.rom,F_OK))
-{
-  ucon64_init(&rom);
-  if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
-}
 
 /*
   here comes the console and ROM *specific* stuff
@@ -545,17 +554,17 @@ rom.console = (argcmp(argc,argv,"-gb") ||
                argcmp(argc,argv,"-xgbxs") ||
                argncmp(argc,argv,"-xgbxb",6)) ? ucon64_GB : rom.console;
 
-//#ifdef CD
+#ifdef CD
 if(argcmp(argc,argv,"-sat"))rom.console=ucon64_SATURN;
 if(argcmp(argc,argv,"-psx"))rom.console=ucon64_PSX;
-if(argcmp(argc,argv,"-psx2"))rom.console=ucon64_PS2;
+if(argcmp(argc,argv,"-ps2"))rom.console=ucon64_PS2;
 if(argcmp(argc,argv,"-cdi"))rom.console=ucon64_CDI;
 if(argcmp(argc,argv,"-cd32"))rom.console=ucon64_CD32;
 if(argcmp(argc,argv,"-3do"))rom.console=ucon64_REAL3DO;
 
 rom.console = (argcmp(argc,argv,"-dc") ||
                argcmp(argc,argv,"-ip")) ? ucon64_DC : rom.console;
-//#endif
+#endif
 
 if(argcmp(argc,argv,"-db"))
 {
@@ -592,6 +601,12 @@ if(argcmp(argc,argv,"-dbv"))
 	return(ucon64_exit(0,&rom));
 }
 
+if(!access(rom.rom,F_OK))
+{
+  ucon64_init(&rom);
+  if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
+}
+
 switch(rom.console)
 {
 case ucon64_GB:
@@ -624,33 +639,29 @@ break;
 case ucon64_PCE:
   pcengine_main(&rom);
 break;
-
-//#ifdef BACKUP
-  #ifdef CD
-    case ucon64_PS2:
-//    ps2_main(&rom);
-    break;
-    case ucon64_PSX:
-//    psx_main(&rom);
-    break;
-    case ucon64_DC:
-//    dreamcast_main(&rom);
-    break;
-    case ucon64_SATURN:
-//    saturn_main(&rom);
-    break;
-    case ucon64_CDI:
-//    cdi_main(&rom);
-    break;
-    case ucon64_CD32:
-//    cd32_main(&rom);
-    break;
-    case ucon64_REAL3DO:
-//    real3do_main(&rom);
-    break;
-  #endif
-//#endif
-
+#ifdef CD
+  case ucon64_PS2:
+    ps2_main(&rom);
+  break;
+  case ucon64_PSX:
+    psx_main(&rom);
+  break;
+  case ucon64_DC:
+    dc_main(&rom);
+  break;
+  case ucon64_SATURN:
+    saturn_main(&rom);
+  break;
+  case ucon64_CDI:
+    cdi_main(&rom);
+  break;
+  case ucon64_CD32:
+    cd32_main(&rom);
+  break;
+  case ucon64_REAL3DO:
+    real3do_main(&rom);
+  break;
+#endif
 case ucon64_SYSTEM16:
   system16_main(&rom);
 break;
@@ -885,31 +896,29 @@ if(rom->console != ucon64_UNKNOWN)
   case ucon64_PCE:
     pcengine_init(rom);
   break;
-//#ifdef BACKUP
-//  #ifdef CD
+#ifdef CD
     case ucon64_PS2:
-//    ps2_init(rom);
+      ps2_init(rom);
     break;
     case ucon64_PSX:
-//    psx_init(rom);
+      psx_init(rom);
     break;
     case ucon64_DC:
-//    dreamcast_init(rom);
+      dc_init(rom);
     break;
     case ucon64_SATURN:
-//    saturn_init(rom);
+      saturn_init(rom);
     break;
     case ucon64_CDI:
-//    cdi_init(rom);
+      cdi_init(rom);
     break;
     case ucon64_CD32:
-//    cd32_init(rom);
+      cd32_init(rom);
     break;
     case ucon64_REAL3DO:
-//    real3do_init(rom);
+      real3do_init(rom);
     break;
-//  #endif
-//#endif
+#endif
   case ucon64_SYSTEM16:
     system16_init(rom);
   break;
@@ -1034,9 +1043,11 @@ int ucon64_usage(int argc,char *argv[])
 bsl_usage( argc, argv );
 ips_usage( argc, argv );
 aps_usage( argc, argv );
-//pal4u_usage( argc, argv );
-ppf_usage( argc, argv );
-xps_usage( argc, argv );
+#ifdef CD
+  pal4u_usage( argc, argv );
+  ppf_usage( argc, argv );
+  xps_usage( argc, argv );
+#endif
 
 printf("\n");
 
@@ -1051,7 +1062,6 @@ else if(argcmp(argc,argv,"-gb"))gameboy_usage(argc,argv);
 else if(argcmp(argc,argv,"-lynx"))lynx_usage(argc,argv);
 else if(argcmp(argc,argv,"-pce"))pcengine_usage(argc,argv);
 else if(argcmp(argc,argv,"-sms"))sms_usage(argc,argv);
-//else if(argcmp(argc,argv,"-c64"))commodore_usage(argc,argv);
 else if(argcmp(argc,argv,"-nes"))nes_usage(argc,argv);
 else if(argcmp(argc,argv,"-s16"))sys16_usage(argc,argv);
 else if(argcmp(argc,argv,"-ata"))atari_usage(argc,argv);
@@ -1060,39 +1070,47 @@ else if(argcmp(argc,argv,"-vboy"))virtualboy_usage(argc,argv);
 else if(argcmp(argc,argv,"-swan"))wonderswan_usage(argc,argv);
 else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
 else if(argcmp(argc,argv,"-intelli"))intelli_usage(argc,argv);
-//#ifdef BACKUP
 #ifdef CD
-else if(argcmp(argc,argv,"-dc"));
-else if(argcmp(argc,argv,"-psx"));
-else if(argcmp(argc,argv,"-psx2"));
+  else if(argcmp(argc,argv,"-dc"))dc_usage(argc,argv);
+  else if(argcmp(argc,argv,"-psx"))psx_usage(argc,argv);
+  else if(argcmp(argc,argv,"-ps2"))ps2_usage(argc,argv);
+  else if(argcmp(argc,argv,"-sat"))saturn_usage(argc,argv);
+  else if(argcmp(argc,argv,"-3do"))real3do_usage(argc,argv);
+  else if(argcmp(argc,argv,"-cd32"))cd32_usage(argc,argv);
+  else if(argcmp(argc,argv,"-cdi"))cdi_usage(argc,argv);
 #endif
-//#endif
 else
 {
-//#ifdef BACKUP
-
 #ifdef CD
-printf("%s\n%s\n%s\n"
-	"  -dc, -psx, -psx2\n"
+  dc_usage(argc,argv);
+  psx_usage(argc,argv);
+/*
+  ps2_usage(argc,argv);
+  sat_usage(argc,argv);
+  3do_usage(argc,argv);
+  cd32_usage(argc,argv);
+  cdi_usage(argc,argv);
+*/
+  printf("%s\n%s\n%s\n%s\n%s\n"
+	"  -ps2, -sat, -3do, -cd32, -cdi\n"
 	"		force recognition; NEEDED"
 	"\n  *		show info (default)\n"
-,system16_TITLE
-,atari_TITLE
-,coleco_TITLE
-);
+  ,ps2_TITLE
+  ,saturn_TITLE
+  ,real3do_TITLE
+  ,cd32_TITLE
+  ,cdi_TITLE
+  );
 
-pal4u_usage( argc, argv );
-ppf_usage( argc, argv );
-xps_usage( argc, argv );
+  ppf_usage( argc, argv );
+  xps_usage( argc, argv );
 
-cdrdao_usage(argc,argv);
-cdrecord_usage(argc,argv);
-
-printf("\n");
+  #ifdef BACKUP
+    cdrdao_usage(argc,argv);
+    cdrecord_usage(argc,argv);
+  #endif
+  printf("\n");
 #endif
-
-//#endif
-
 
 	gbadvance_usage(argc,argv);
 	nintendo64_usage(argc,argv);
@@ -1146,9 +1164,6 @@ printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 #endif
         "     give the force recognition option a try if something went wrong\n"
 	"\n"
-#ifndef CD
-	"All CD-based consoles are supported by uCONCD; go to http://ucon64.sf.net\n"
-#endif	
 	"Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
 	"\n"
 ,getarg(argc,argv,ucon64_NAME),getarg(argc,argv,ucon64_NAME)
@@ -1223,7 +1238,15 @@ if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join
 
 
 
-
+/*
+Vectrex (1982)
+Colecovision (1982)
+Interton VC4000 (~1980)
+Intellivision (1979)
+G7400+/Odyssey² (1978)
+Channel F (1976)
+Odyssey (Ralph Baer/USA/1972)
+*/
 
 
 

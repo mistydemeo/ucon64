@@ -18,9 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef YOKO_H
+#define YOKO_H
 #include "../ucon64.h"
 
 #define yoko_TITLE "YOKO backup unit"
 
 #define yoko_HEADER_START 0
 #define yoko_HEADER_LEN 0
+#endif /* YOKO_H */

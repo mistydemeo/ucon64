@@ -20,35 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
- smd - A Super Magic Drive utility
- Version 0.1b
- by Charles MacDonald
- WWW: http://cgfm2.emuviews.com
-
- What's New:
- [Version 0.1b]
- - Fixed 2MB game loading.
- [Version 0.1a]
- - Fixed loading routine to ignore bad SMD headers.
- - Added option to run inserted cartridge.
- - Updated documentation to reflect changes.
- [Version 0.1]
- - Added SMS loader program.
- - Updated documentation with incompatability issues.
- - Changed makefile to do optimization.
-
- Usage: smd.exe [-options] <file.ext> ...
- Type 'smd.exe -help' for a list of options.
-
- Options:
-  -bc <file.smd> Backup Mega Drive cartridge.
-  -lc <file.ext> Load a Mega Drive (SMD, BIN) or SMS cartridge.
-  -bs <file.smd> Backup SRAM to disk.
-  -ls <file.smd> Load SRAM file from disk.
-  -ci            Show loaded cartridge size and available SMD RAM.
-  -db <file.bin> Dump SMD BIOS to disk.
-  -rc            Run loaded cartridge.
-
  The environment created by the Genesis and SMD is not completely
  compatible with the SMS. Therefore, some SMS games will not work.
 
@@ -68,10 +39,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  the smd utility will dump the entire first four megabytes. This is useful
  for special carts which the SMD cannot identify.
 
- The default parallel port is LPT1 ($378). This cannot be changed.
-
  It's been reported that there are some difficulties when using 8MB
- and 24MB copiers. I am working on ways to support these devices properly.
+ and 24MB copiers.
 */
 
 #include "smd.h"

@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef DOCTOR64JR_H
+#define DOCTOR64JR_H
 #include "../ucon64.h"
 
 /*#include <dos.h>*/
@@ -84,3 +86,4 @@ int doctor64jr_write(	char *filename
 int doctor64jr_usage(int argc,char *argv[]);
 #define doctor64jr_HEADER_START 0
 #define doctor64jr_HEADER_LEN 0
+#endif /* DOCTOR64JR_H */

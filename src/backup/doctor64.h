@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef DOCTOR64_H
+#define DOCTOR64_H
 #include "../ucon64.h"
 
 int syncHeader(unsigned int baseport);
@@ -42,3 +44,5 @@ int doctor64_usage(int argc, char *argv[]);
 #define doctor64_TITLE "Doctor V64\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
 #define doctor64_HEADER_START 0
 #define doctor64_HEADER_LEN 0
+
+#endif /* DOCTOR64_H */

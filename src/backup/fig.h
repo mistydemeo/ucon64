@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef FIG_H
+#define FIG_H
 #include "../ucon64.h"
 
 #define fig_TITLE "Super Pro Fighter (Q)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG\n1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"
@@ -25,3 +27,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int fig_usage(int argc,char *argv[]);
 #define fig_HEADER_START 0
 #define fig_HEADER_LEN 512
+#endif /* FIG_H */

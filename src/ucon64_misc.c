@@ -273,8 +273,6 @@ void outportb(unsigned short port, unsigned char byte)
   temp.Port = port;
   temp.Data = byte;
   ioctl(ucon64_io_fd, DRV_WRITE_IO_8, &temp, 0);
-
-  return;
 #else
   __asm__ __volatile__
   ("outb %1, %0"
@@ -292,8 +290,6 @@ void outportw(unsigned short port, unsigned short word)
   temp.Port = port;
   temp.Data16 = word;
   ioctl(ucon64_io_fd, DRV_WRITE_IO_16, &temp, 0);
-
-  return;
 #else
   __asm__ __volatile__
   ("outw %1, %0"
@@ -349,12 +345,24 @@ unsigned int parport_probe(unsigned int port)
   int i;
 
 #ifdef __BEOS__
-  ucon64_io_fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+  ucon64_io_fd = open("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
   if (ucon64_io_fd == -1)
   {
-    fprintf(stderr, "Could not open /dev/misc/parnew\n");
-    exit(1);
+    ucon64_io_fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+    if (ucon64_io_fd == -1)
+    {
+      fprintf(stderr, "Could not open I/O port driver\n");
+      exit(1);
+    }
+    else
+    {                                           // print warning, but continue
+      fprintf(stderr,
+              "Support for the driver parnew is deprecated. Future versions of ucon64 might\n"
+              "not support this driver. You can donwload the latest ioport driver from\n"
+              "http://www.infernal.currantbun.com or http://ucon64.sourceforge.com.\n");
+    }
   }
+
   if (atexit(close_io_port) == -1)
   {
     close(ucon64_io_fd);
@@ -363,14 +371,11 @@ unsigned int parport_probe(unsigned int port)
   }
 #endif
 
-  if (port == 0)
-    port = 1;
   if (port <= 3)
   {
     for (i = 0; i < 3; i++)
     {
-      port -= detectParPort(parPortAddresses[i]);
-      if (port == 0)
+      if (detectParPort(parPortAddresses[i]) == 1)
       {
         port = parPortAddresses[i];
         break;
@@ -426,7 +431,7 @@ int parport_gauge(time_t init_time, long pos, long size)
   strcat(buf, "------------------------");
   buf[24] = 0;
 
-  printf("\r%10lu Bytes [%s] %lu%% ,CPS=%lu ,",
+  printf("\r%10lu Bytes [%s] %lu%%,CPS=%lu, ",
          pos, buf, (unsigned long) 100*pos/size, (unsigned long) cps);
 
   if (pos == size)                              // last printed CPS is average transfer speed

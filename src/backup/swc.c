@@ -43,8 +43,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static void init_io(unsigned int port);
 static void checkabort(int status);
-static void send_address(unsigned short address1, unsigned short address2);
 static void send_block(unsigned short address, unsigned char *buffer, int len);
+static void send_command0(unsigned short address, unsigned char byte);
 static void send_command(unsigned char command_code, unsigned short a, unsigned short l);
 static void sendb(unsigned char byte);
 static int receive_rom_info(unsigned char *buffer);
@@ -58,7 +58,7 @@ static unsigned char receiveb(void);
 static inline unsigned char wait_while_busy(void);
 static inline void wait_for_ready(void);
 
-static int swc_port, interleaved;               // the name `interleaved' is just a guess :)
+static int swc_port, special;
 
 void init_io(unsigned int port)
 /*
@@ -86,7 +86,7 @@ int swc_write_rom(char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0, size, emu_mode_select;
+  int bytesread, bytessend = 0, size, emu_mode_select, hdr_4th_byte, blocksdone = 0;
   unsigned short address;
   struct stat fstate;
   time_t starttime;
@@ -108,9 +108,12 @@ int swc_write_rom(char *filename, unsigned int parport)
   size = fstate.st_size - HEADERSIZE;           // size of ROM in bytes
   printf("Send (excl. header): %d Bytes (%.4f Mb)\n", size, (float) size/MBIT);
 
+  send_command0(0xc008, 0);
   fread(buffer, 1, HEADERSIZE, file);
-  emu_mode_select = buffer[2];                  // this byte is needed later
-  send_address(0xc008, 0);
+  emu_mode_select = buffer[2];                  // these bytes are needed later
+  hdr_4th_byte = buffer[3];
+
+  send_command(5, 0, 0);
   send_block(0x400, buffer, HEADERSIZE);        // send header
 
   printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
@@ -119,19 +122,34 @@ int swc_write_rom(char *filename, unsigned int parport)
   starttime = time(NULL);                       //  but then some ROMs don't work
   while ((bytesread = fread(buffer, 1, BUFFERSIZE, file)))
   {
-    send_address(0xc010, address);
+    send_command0(0xc010, blocksdone >> 9);     // only 2 ROM dumps exist where 2nd arg != 0
+    send_command(5, address, 0);
     send_block(0x8000, buffer, bytesread);
     address++;
+    blocksdone++;
 
     bytessend += bytesread;
     parport_gauge(starttime, bytessend, size);
     checkabort(2);
   }
 
+/*
+  vgs '00 has the following code here:
+  if (emu_mode_select & 0x40)
+    goto <line with first fread() in this function>
+
+  since emu_mode_select does not change within this loop (eternal loop) I consider that a bug
+*/
+  if (hdr_4th_byte & 0x80)
+    emu_mode_select = 0x30;
+  if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
+    send_command0(0xc010, 2);
+
   send_command(5, 0, 0);
   size = (size + BUFFERSIZE - 1) / BUFFERSIZE;  // size in 8KB blocks (rounded up)
   send_command(6, 5 | (size << 8), size >> 8);  // bytes: 6, 5, #8K L, #8K H, 0
   send_command(6, 1 | (emu_mode_select << 8), 0);
+  send_command(6, 0, 0);                        // "unlock" swc
 
   wait_for_ready();
   outportb(swc_port + PARPORT_DATA, 0);
@@ -167,14 +185,8 @@ int swc_write_sram(char *filename, unsigned int parport)
   fseek(file, HEADERSIZE, SEEK_SET);            // skip the header
 
   send_command(5, 0, 0);
-
-  send_command(0, 0xe00d, 1);                   // see note in send_address()
-  sendb(0);
-  sendb(0x81);
-
-  send_command(0, 0xc008, 1);                   // see note in send_address()
-  sendb(0);
-  sendb(0x81);
+  send_command0(0xe00d, 0);
+  send_command0(0xc008, 0);
 
   printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
                                                 //  because if we get here q works ;)
@@ -196,14 +208,6 @@ int swc_write_sram(char *filename, unsigned int parport)
   return 0;
 }
 
-void send_address(unsigned short address1, unsigned short address2)
-{
-  send_command(0, address1, 1);                 // these three statements could be
-  sendb(0);                                     //  replaced by one send_block() as vgs
-  sendb(0x81);                                  //  does, but this is a little bit faster
-  send_command(5, address2, 0);
-}
-
 void send_block(unsigned short address, unsigned char *buffer, int len)
 {
   int checksum = 0x81, n;
@@ -217,17 +221,25 @@ void send_block(unsigned short address, unsigned char *buffer, int len)
   sendb(checksum);
 }
 
+void send_command0(unsigned short address, unsigned char byte)
+// command 0 for 1 byte
+{
+  send_command(0, address, 1);
+  sendb(byte);
+  sendb(0x81^byte);
+}
+
 void send_command(unsigned char command_code, unsigned short a, unsigned short l)
 {
   sendb(0xd5);
   sendb(0xaa);
   sendb(0x96);
   sendb(command_code);
-  sendb(a & 0xff);
-  sendb(a >> 8);
-  sendb(l & 0xff);
-  sendb(l >> 8);
-  sendb(0x81^command_code^(a & 0xff)^(a >> 8)^(l & 0xff)^(l >> 8)); // checksum
+  sendb(a);                                     // low byte
+  sendb(a >> 8);                                // high byte
+  sendb(l);                                     // low byte
+  sendb(l >> 8);                                // high byte
+  sendb(0x81^command_code^a^(a >> 8)^l^(l >> 8)); // checksum
 }
 
 void sendb(unsigned char byte)
@@ -267,20 +279,15 @@ int swc_read_rom(char *filename, unsigned int parport)
     exit(1);
   }
   blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
+  if (special)
+    size >>= 1;
   printf("Receive: %d Bytes (%.4f Mb) %s\n",
-         size*MBIT, (float) size, interleaved ?  "INTERLEAVED" : "");
+         size*MBIT, (float) size, special ?  "SPECIAL" : "");
   size *= MBIT;                                 // size in bytes for parport_gauge() below
 
   send_command(5, 0, 0);
-
-  send_command(0, 0xe00c, 1);
-  sendb(0);
-  sendb(0x81);
-
-  send_command(0, 0xe003, 1);
-  sendb(0);
-  sendb(0x81);
-
+  send_command0(0xe00c, 0);
+  send_command0(0xe003, 0);
   send_command(1, 0xbfd8, 1);
   byte = receiveb();
   if ((0x81^byte) != receiveb())
@@ -289,23 +296,22 @@ int swc_read_rom(char *filename, unsigned int parport)
   buffer[2] = get_emu_mode_select(byte, blocksleft/16);
   fwrite(buffer, 1, HEADERSIZE, file);          // write header (other necessary fields are
                                                 //  filled in by receive_rom_info())
-  if (interleaved)
-    blocksleft >>= 1;
+  if (special)
+    blocksleft >>= 1;                           // this must come after get_emu_mode_select()!
 
   printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
                                                 //  because if we get here q works ;)
-  address1 = 0x300;
-  address2 = 0x200;
+  address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
+  address2 = 0x200;                             //  also work
   starttime = time(NULL);
   while (blocksleft > 0)
   {
-    if (interleaved)
+    if (special)
     {
       for (n = 0; n < 4; n++)
       {
         send_command(5, address1, 0);
         receive_block(0x2000, buffer, BUFFERSIZE);
-        blocksleft--;
         address1++;
         fwrite(buffer, 1, BUFFERSIZE, file);
 
@@ -341,28 +347,24 @@ int swc_read_rom(char *filename, unsigned int parport)
 #endif
 int receive_rom_info(unsigned char *buffer)
 /*
-  - returns size of ROM in Mb (128KB) units (if interleaved returned size ==
+  - returns size of ROM in Mb (128KB) units (if special returned size ==
     2 * real size)
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
     filled in)
-  - sets global `interleaved'
+  - sets global `special'
 */
 {
   int n, m, size;
   unsigned short address;
   unsigned char byte;
 
-  send_command(0, 0xe00c, 1);
-  sendb(0);
-  sendb(0x81);
-
+  send_command0(0xe00c, 0);
   send_command(5, 3, 0);
-
   send_command(1, 0xbfd5, 1);
   byte = receiveb();
   if ((0x81^byte) != receiveb())
     printf("received data is corrupt\n");
-  interleaved = byte & 1;
+  special = byte & 1;                           // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
 
   address = 0x200;
   for (n = 0; n < HEADERSIZE; n++)
@@ -379,7 +381,7 @@ int receive_rom_info(unsigned char *buffer)
   }
 
   size = get_rom_size(buffer);
-  if (interleaved)
+  if (special)
     size <<= 1;
 
   memset(buffer, 0, HEADERSIZE);
@@ -490,7 +492,7 @@ unsigned char get_emu_mode_select(unsigned char byte, int size)
   else
     x = 0;
 
-  if (interleaved)
+  if (special)
   {
     if (x == 0xc && size <= 0x1c)
       ems = 0x1c;
@@ -540,14 +542,8 @@ int swc_read_sram(char *filename, unsigned int parport)
   fwrite(buffer, 1, HEADERSIZE, file);
 
   send_command(5, 0, 0);
-
-  send_command(0, 0xe00d, 1);
-  sendb(0);
-  sendb(0x81);
-
-  send_command(0, 0xc008, 1);
-  sendb(0);
-  sendb(0x81);
+  send_command0(0xe00d, 0);
+  send_command0(0xc008, 0);
 
   printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
                                                 //  because if we get here q works ;)

@@ -218,23 +218,29 @@ sms_init (st_rominfo_t *rominfo)
   int result = -1;
   unsigned char magic[11], *buffer;
 
+  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
+    rominfo->buheader_len = ucon64.buheader_len;
+
   q_fread (&magic, 0, 11, ucon64.rom);
   // Note that the identification bytes are the same as for Genesis SMD files
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0
   if (magic[8] == 0xaa && magic[9] == 0xbb && magic[10] == 6)
     {
+      if (!UCON64_ISSET (ucon64.buheader_len))
+        rominfo->buheader_len = SMD_HEADER_LEN;
+
       if (!(UCON64_ISSET (ucon64.interleaved) && !ucon64.interleaved) &&
           !UCON64_ISSET (ucon64.do_not_calc_crc))
         {
-          int size = ucon64.file_size - SMD_HEADER_LEN;
+          int size = ucon64.file_size - rominfo->buheader_len;
 
           if (!(buffer = (unsigned char *) malloc (size)))
             {
               fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
               return -1;
             }
-          q_fread (buffer, SMD_HEADER_LEN, size, ucon64.rom);
+          q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
 
           ucon64.fcrc32 = crc32 (0, buffer, size);
           smd_deinterleave (buffer, size);
@@ -242,12 +248,8 @@ sms_init (st_rominfo_t *rominfo)
 
           free (buffer);
         }
-      rominfo->buheader_len = SMD_HEADER_LEN;
       result = 0;
     }
-  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
-    rominfo->buheader_len = ucon64.buheader_len;
-
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : (result == 0 ? 1 : 0);
 

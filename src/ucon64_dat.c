@@ -452,6 +452,8 @@ ucon64_dat_search (uint32_t crc32, ucon64_dat_t * dat)
   uint32_t fsize = 0;
   FILE *fh = NULL;
 
+  if (!crc32) return NULL;
+
   closedir_dptr ();
   while (get_next_file (buf) != NULL)
     {

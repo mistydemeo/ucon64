@@ -1397,7 +1397,7 @@ ucon64_usage (int argc, char *argv[])
 
 // TODO: change DB-specific "HAVE_ZLIB_H"'s to "DB"
   printf (
-     "Database: %d known ROMs\n"
+     "DATabase: %d known ROMs\n"
      "\n"
 #ifdef  PARALLEL
      "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"

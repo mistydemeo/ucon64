@@ -494,7 +494,13 @@ main (int argc, char **argv)
   ucon64.argc = argc;
   ucon64.argv = argv;
 
-  ucon64_index_cache (); // update cache index file (eventually)
+#ifdef  ANSI_COLOR
+  if (ucon64.ansi_color)
+    ucon64.ansi_color = ansi_init ();
+#endif
+
+  if (ucon64.dat_enabled)
+    ucon64_index_cache (); // update cache index file (eventually)
 
   ucon64_flush (&rom);
 
@@ -502,11 +508,6 @@ main (int argc, char **argv)
     {
 #include "switches.c"
     }
-
-#ifdef  ANSI_COLOR
-  if (ucon64.ansi_color)
-    ucon64.ansi_color = ansi_init ();
-#endif
 
   if (!strlen (ucon64.rom) && optind < argc)
     ucon64.rom = argv[optind];

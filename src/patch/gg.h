@@ -23,6 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const char *gg_usage[];
 
+extern int gg_gg (st_rominfo_t *rominfo);
 extern int gg_gge (void);
 extern int gg_ggd (void);
 #endif // GG_H

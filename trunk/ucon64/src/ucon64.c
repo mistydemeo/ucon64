@@ -1319,7 +1319,7 @@ ucon64_usage (int argc, char *argv[])
            "\n"
          */
 //         "TODO:  -sh      use uCON64 in shell modus\n"
-           "TODO:  -nbak    prevents backup files (*.bak)\n"
+           "  -nbak         prevents backup files (*.bak)\n"
 #ifdef	__DOS__
            "  -e            emulate/run ROM (see ucon64.cfg for more)\n"
 #else

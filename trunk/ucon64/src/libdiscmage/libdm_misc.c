@@ -40,10 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "misc.h"
 #include "libdiscmage.h"
 #include "libdm_misc.h"
-#include "cdi.h"
-#include "nero.h"
-#include "sheets.h"
-#include "other.h"
+#include "format/format.h"
 #ifdef  DJGPP                                   // DXE's are specific to DJGPP
 #include "dxedll_priv.h"
 #endif
@@ -54,9 +51,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define CD_FRAMES            75 /* frames per second */
 #endif
 
-static const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
-static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
-static const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
+const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
+const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
+const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
 
 
@@ -151,6 +148,8 @@ const st_track_probe_t track_probe[] =
     {0, 0,    NULL,         "MODE2_FORM2"},
 #endif
     {0, 0,  2352, 0, "AUDIO", "AUDIO"},
+    // TODO: remove this!
+    {0, 0,  1, 0, "AUDIO", "AUDIO"},
     {0, 0, 0, 0, NULL, NULL}
   };
 
@@ -305,136 +304,6 @@ dm_clean (dm_image_t *image)
 }
 
 
-int
-dm_free (dm_image_t *image)
-{
-#if 1
-  memset (image, 0, sizeof (dm_image_t));
-#else
-  free (image);
-#endif
-  image = NULL;
-  return 0;
-}
-
-
-FILE *
-callibrate (const char *s, int len, FILE *fh)
-// brute force callibration
-{
-  int32_t pos = ftell (fh);
-  char buf[MAXBUFSIZE];
-//   malloc ((len + 1) * sizeof (char));
-  int size = 0;
-  int tries = 0; //TODO: make this an arg
-
-  fseek (fh, 0, SEEK_END);
-  size = ftell (fh);
-  fseek (fh, pos, SEEK_SET);
-
-  for (; pos < size - len && tries < 32768; pos++, tries++)
-    {
-      fseek (fh, pos, SEEK_SET);
-      fread (&buf, len, 1, fh);
-#ifdef  DEBUG
-  mem_hexdump (buf, len, ftell (fh) - len);
-  mem_hexdump (s, len, ftell (fh) - len);
-#endif
-      if (!memcmp (s, buf, len))
-        {
-          fseek (fh, -len, SEEK_CUR);
-          return fh;
-        }
-    }
-  
-  return NULL;
-}
-
-
-const dm_track_t *
-dm_track_init (dm_track_t *track, FILE *fh)
-{
-  int pos = 0; 
-  int x = 0, identified = 0;
-  const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff, 0};
-  char value_s[32];
-  uint8_t value8 = 0;
-  
-  fseek (fh, track->track_start, SEEK_SET);
-#if 1
-  fread (value_s, 1, 16, fh);
-#else
-// callibrate
-  fseek (fh, -15, SEEK_CUR);
-  for (x = 0; x < 64; x++)
-    {
-      if (fread (&value_s, 1, 16, fh) != 16)
-        return NULL;
-      fseek (fh, -16, SEEK_CUR);
-      if (!memcmp (sync_data, value_s, 12))
-        break;
-      fseek (fh, 1, SEEK_CUR);
-    }
-#endif
-
-  if (!memcmp (sync_data, value_s, 12))
-    {
-      value8 = (uint8_t) value_s[15];
-    
-      for (x = 0; track_probe[x].sector_size; x++)
-        if (track_probe[x].mode == value8)
-          {
-            // search for valid PVD in sector 16 of source image
-            pos = (track_probe[x].sector_size * 16) +
-                  track_probe[x].seek_header + track->track_start;
-            fseek (fh, pos, SEEK_SET);
-            fread (value_s, 1, 16, fh);
-            if (!memcmp (pvd_magic, &value_s, 8) ||
-                !memcmp (svd_magic, &value_s, 8) ||
-                !memcmp (vdt_magic, &value_s, 8))
-              {
-                identified = 1;
-                break;
-              }
-          }
-    }
-    
-  // no sync_data found? probably MODE1/2048
-  if (!identified)
-    {
-      x = 0;
-      if (track_probe[x].sector_size != 2048)
-        fprintf (stderr, "ERROR: dm_track_init()\n");
-
-      fseek (fh, (track_probe[x].sector_size * 16) +
-             track_probe[x].seek_header + track->track_start, SEEK_SET);
-      fread (value_s, 1, 16, fh);
-
-      if (!memcmp (pvd_magic, &value_s, 8) ||
-          !memcmp (svd_magic, &value_s, 8) ||
-          !memcmp (vdt_magic, &value_s, 8))
-        identified = 1;
-    }
-
-  if (!identified)
-    {
-      fprintf (stderr, "ERROR: could not find iso header of current track\n");
-      return NULL;
-    }
-
-  track->sector_size = track_probe[x].sector_size;
-  track->mode = track_probe[x].mode;
-  track->seek_header = track_probe[x].seek_header;
-  track->seek_ecc = track_probe[x].seek_ecc;
-  track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
-  track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
-
-  return track;
-}
 
 
 dm_image_t *
@@ -444,17 +313,19 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   typedef struct
     {
       int type;
-      int (* func) (dm_image_t *);
+      int (* init_func) (dm_image_t *);
+      int (* track_init_func) (dm_track_t *, FILE *);
     } st_probe_t;
 
   static st_probe_t probe[] =
     {
-      {DM_CDI, cdi_init},
-      {DM_NRG, nrg_init},
-//      {DM_CCD, ccd_init},
-      {DM_SHEET, sheet_init},
-      {DM_OTHER, other_init},
-      {0, NULL}
+      {DM_CDI, cdi_init, cdi_track_init},
+      {DM_NRG, nrg_init, nrg_track_init},
+//      {DM_CCD, ccd_init, ccd_track_init},
+      {DM_TOC, toc_init, format_track_init},
+      {DM_CUE, cue_init, format_track_init},
+      {DM_OTHER, other_init, format_track_init},
+      {0, NULL, NULL}
     };
   int x = 0, identified = 0;
   int t = 0;
@@ -468,7 +339,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 #endif
 
   if (image)
-    dm_free (image);
+    format_free (image);
 
   if (access (fname, F_OK) != 0)
     return NULL;
@@ -476,17 +347,18 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   if (!image)
 //    image = (dm_image_t *) malloc (sizeof (dm_image_t));
     image = (dm_image_t *) &image2;
+  memset (image, 0, sizeof (dm_image_t));
   if (!image)
     return NULL;
 
   for (x = 0; probe[x].type; x++)
-    if (probe[x].func)
+    if (probe[x].init_func)
       {
         dm_clean (image);
         image->flags = flags;
         strcpy (image->fname, fname);
 
-        if (!probe[x].func (image))
+        if (!probe[x].init_func (image))
           {
             identified = 1;
             break;
@@ -508,9 +380,10 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 
       if (track->mode != 0) // AUDIO/2352 has no iso header
         track->iso_header_start = track->track_start + (track->sector_size * (16 + track->pregap_len)) + track->seek_header;
-#ifdef  DEBUG
+
       printf ("iso header offset: %d\n\n", track->iso_header_start);
-#endif
+      fflush (stdout);
+
       track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
     }
 
@@ -541,7 +414,7 @@ int
 dm_close (dm_image_t *image)
 {
 //  dm_clean (image);
-  dm_free (image);
+  format_free (image);
   return 0;
 }
 
@@ -687,7 +560,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 
       if (flags & DM_2048)
         result = fwrite (&buf[track->seek_header], 1, 2048, fh2);
-      else if (flags & DM_CDMAGE) // cdmage compat. flag
+      else
         {
           const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
@@ -706,8 +579,6 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
           result += fwrite (&buf, 1, track->sector_size, fh2);
           result += fwrite (&buf2, 1, track->seek_ecc, fh2); // padding
         }
-      else
-        result = fwrite (&buf, 1, track->sector_size, fh2);
 
       if (!result)
         {
@@ -930,7 +801,9 @@ dm_disc_write (const dm_image_t *image)
 uint32_t
 dm_get_version (void)
 {
-  static const uint32_t dm_version = LIB_VERSION (0, 0, 4);
+  static const uint32_t dm_version = LIB_VERSION (DM_VERSION_MAJOR,
+                                                  DM_VERSION_MINOR,
+                                                  DM_VERSION_STEP);
   return dm_version;
 }
 

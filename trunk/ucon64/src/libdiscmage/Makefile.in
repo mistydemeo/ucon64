@@ -3,11 +3,15 @@
 @DEFINE_DLOPEN_MAKE@
 @DEFINE_ZLIB_MAKE@
 
-libdir = @libdir@
-#INSTALL = @INSTALL@
-#LIBTOOL = @LIBTOOL@
-INSTALL = install -c
-LIBTOOL = libtool
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+includedir = @includedir@
+libdir =  @libdir@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+#RANLIB = @RANLIB@
 
 CC=@CC@
 CFLAGS0=@CFLAGS@ @DEFS@
@@ -16,36 +20,29 @@ ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 LDFLAGS=-s
-# On Mac OS X using -s gives the following warning:
-# /usr/bin/libtool: -static not specified, -s invalid
-
-# The test for Cygwin should be done before the test for DJGPP, because the
-# environment variable DJGPP can be set under Bash for people who have
-# installed both gcc (and friends) ports.
-
-GCC_WIN=0
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-GCC_WIN=1
-endif
-ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
-GCC_WIN=1
-endif
 
 LIBNAME=discmage
-OBJECTS=libdm_misc.o cdi.o nero.o sheets.o other.o dllinit.o misc.o
+OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o\
+	format/nero.o format/cue.o format/toc.o format/other.o
 ifdef ZLIB
 LIBS=-lz
 OBJECTS+=unzip.o map.o miscz.o
 else
 LIBS=
-ifeq ($(GCC_WIN),1)
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
-ifdef DJGPP                             # DJGPP code in dllinit needs map code
+ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
+else
+ifdef DJGPP                             # DJGPP code in dllinit needs map code                          
 OBJECTS+=map.o
 endif                                   # DJGPP
-endif                                   # GCC_WIN
+endif                                   # msys
+endif                                   # cygwin
 endif                                   # ZLIB
 
+# The test for Cygwin should be done before the test for DJGPP, because the
+# environment variable DJGPP can be set under Bash for people who have
+# installed both gcc (and friends) ports.
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
@@ -100,30 +97,20 @@ DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)
 # $(LDFLAGS) must come after $(OBJECTS)
 FULLLIBNAME=$(LIBNAME).dxe
 
-else                                    # Unix, BeOS or Mac OS X (Darwin)
+else                                    # Unix or BeOS
 
 CFLAGS+=-fPIC
-
-ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
-FULLLIBNAME=$(LIBNAME).dylib
-else
+ifdef DLOPEN
 FULLLIBNAME=$(LIBNAME).so
-endif
-
-ifndef DLOPEN                           # GNU specific: "simply expanded variable"
-FULLLIBNAME:=$(addprefix lib,$(FULLLIBNAME))
+else
+FULLLIBNAME=lib$(LIBNAME).so
 endif
 
 ifeq ($(OSTYPE),beos)
 LDFLAGS+=-nostart
 else
-ifeq ($(findstring darwin,$(OSTYPE)),darwin)
-LDFLAGS+=-dynamiclib
-else
 LDFLAGS+=-shared
-endif                                   # darwin
-endif                                   # beos
-
+endif
 DLLFLAGS+=$(LDFLAGS) $(OBJECTS) $(LIBS) -o $(FULLLIBNAME)
 
 endif                                   # DJGPP
@@ -135,24 +122,32 @@ all: $(FULLLIBNAME)
 
 
 clean:
-ifeq ($(GCC_WIN),1)
-	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+              tmp.def tmp.base tmp.exp
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
               tmp.def tmp.base tmp.exp
 else
 ifdef DJGPP
-	del $(FULLLIBNAME)
+	del $(LIBNAME).dxe
 ifndef DLOPEN
 	del $(LIBNAME).a
 endif
 	del *.o
-else                                    # Unix, BeOS or Mac OS X (Darwin)
-	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
+else                                    # Unix or BeOS
+	rm -f *.so $(OBJECTS) *.core *.stackdump *.o
 endif                                   # DJGPP
-endif                                   # GCC_WIN
+endif                                   # msys
+endif                                   # cygwin
 
 
 distclean: clean
-ifeq ($(GCC_WIN),1)
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f Makefile config.log config.status config.cache config.h
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
 else
 ifdef DJGPP
@@ -164,14 +159,35 @@ ifdef DJGPP
 else
 	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
-endif                                   # GCC_WIN
+endif                                   # msys
+endif                                   # cygwin
 
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-ifeq ($(GCC_WIN),1)
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
+ifndef DLOPEN
+$(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
+else
+$(LIBNAME).dll: $(OBJECTS)
+endif
+	echo EXPORTS > tmp.def
+#	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
+	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
+# We use nm instead of dlltool --output-def, so that we don't have to
+# specify explicitly (in the source code) which symbols should be exported
+
+	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
+	@echo "      symbols, read faq.html question 3"
+	ld --base-file tmp.base $(DLLFLAGS)
+	dlltool $(DLLTOOLFLAGS)
+	ld tmp.exp $(DLLFLAGS)
+
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 ifndef DLOPEN
 $(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
@@ -208,30 +224,49 @@ ifndef DLOPEN
 	ar rs $(LIBNAME).a djimport.o map.o dlopen.o
 endif
 
-else                                    # Unix, BeOS or Mac OS X (Darwin)
-# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH, Darwin
-# uses LD_LIBRARY_PATH, DYLD_LIBRARY_PATH and DYLD_FALLBACK_LIBRARY_PATH
+else                                    # Unix or BeOS
+# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH
 
 $(FULLLIBNAME): $(OBJECTS)
 	$(CC) $(DLLFLAGS)
 
 endif                                   # DJGPP
-endif                                   # GCC_WIN
+endif                                   # msys
+endif                                   # cygwin
 
 
-#ifndef DLOPEN
-#install:
+install:
+ifndef DLOPEN
+	[ -d $(DESTDIR)$(libdir) ] || \
+	    (mkdir -p $(DESTDIR)$(libdir); chmod 755 $(DESTDIR)$(libdir))
+	$(INSTALL_DATA) $(FULLLIBNAME) $(DESTDIR)$(libdir)/$(FULLLIBNAME)
+#	$(RANLIB) $(DESTDIR)$(libdir)/$(FULLLIBNAME)
 #	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
-#endif
+	[ -d $(DESTDIR)$(includedir) ] || \
+	    (mkdir -p $(DESTDIR)$(includedir); chmod 755 $(DESTDIR)$(includedir))
+	$(INSTALL_DATA) lib$(LIBNAME).h $(DESTDIR)$(includedir)/$(LIBNAME).h
+else
+endif
+
+
+uninstall:
+ifndef DLOPEN
+	rm -f $(DESTDIR)$(libdir)/$(FULLLIBNAME)
+	rm -f $(DESTDIR)$(includedir)/$(LIBNAME).h
+else
+endif
 
 # Dependencies
+LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h
 
-libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
-cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
-nero.o: libdiscmage.h misc.h nero.h dxedll_priv.h
-sheets.o: libdiscmage.h misc.h sheets.h dxedll_priv.h
-other.o: libdiscmage.h misc.h other.h dxedll_priv.h
-dllinit.o: libdiscmage.h misc.h dxedll_priv.h
+libdm_misc.o: $(LIBDM_STD_H)
+format/format.o: $(LIBDM_STD_H)
+format/cdi.o: format/cdi.h $(LIBDM_STD_H)
+format/nero.o: format/nero.h $(LIBDM_STD_H)
+format/cue.o: format/cue.h $(LIBDM_STD_H)
+format/toc.o: format/toc.h $(LIBDM_STD_H)
+format/other.o: format/other.h $(LIBDM_STD_H)
+dllinit.o: $(LIBDM_STD_H)
 misc.o: misc.h dxedll_priv.h
 miscz.o: miscz.h misc.h dxedll_priv.h
 dxe_misc.o: dxedll_pub.h

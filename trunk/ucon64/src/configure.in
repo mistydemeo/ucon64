@@ -140,6 +140,9 @@ AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd mkdir rmdir strcspn strtol strcasestr basename dirname realpath)
 
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+
 AC_OUTPUT(Makefile libdiscmage/Makefile)
 
 echo

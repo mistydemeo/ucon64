@@ -784,7 +784,7 @@ ucon64_options (int c, const char *optarg)
                 break;
 
               case UCON64_CDMAGE:
-                flags |= DM_CDMAGE;
+//                flags |= DM_CDMAGE;
                 break;
             }
 

@@ -38,8 +38,8 @@ extern "C" {
 #include <stdio.h>
 #include <dirent.h>
 #ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif                             // HAVE_ZLIB_H, ANSI_COLOR support
+#include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
+#endif
 
 #ifdef  HAVE_ZLIB_H
 #include <zlib.h>
@@ -264,7 +264,7 @@ extern void argz_extract2 (char *cmd, size_t argc, char ***argv);
   mem functions
 
   memwcmp()    memcmp with wildcard support
-  mem_swap()    swap n Bytes from add on
+  mem_swap()   swap n Bytes from add on
   mem_hexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
   mem_crc16()  calculate the crc16 of buffer for size bytes
   mem_crc32()  calculate the crc32 of buffer for size bytes

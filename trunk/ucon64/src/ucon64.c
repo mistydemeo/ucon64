@@ -188,11 +188,11 @@ const struct option options[] =   {
     {"ls", 0, 0, UCON64_LS},
     {"lsd", 0, 0, UCON64_LSD},
     {"lsram", 1, 0, UCON64_LSRAM},
-//    {"lsv", 0, 0, UCON64_LSV},
+    {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
     {"mapr", 1, 0, UCON64_MAPR},
-//    {"mgd", 0, 0, UCON64_MGD},
+    {"mgd", 0, 0, UCON64_MGD},
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
@@ -302,7 +302,7 @@ const struct option options[] =   {
     {"xswc2", 0, 0, UCON64_XSWC2},
     {"xswcs", 0, 0, UCON64_XSWCS},
     {"xv64", 0, 0, UCON64_XV64},
-//    {"z64", 0, 0, UCON64_Z64},
+    {"z64", 0, 0, UCON64_Z64},
 #endif // PARALLEL
     {0, 0, 0, 0}
   };

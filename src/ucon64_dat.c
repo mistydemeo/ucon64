@@ -95,14 +95,15 @@ fclose_fdat (void)
 static int
 custom_stristr (const void *a, const void *b)
 {
-  return (!stristr ((const char *)a, (const char *)b)) ? 1 : 0;
+  return (!stristr ((const char *) a, (const char *) b)) ? 1 : 0;
 }
 
 
 static int
 custom_strnicmp (const void *a, const void *b)
 {
-  return strnicmp ((const char *)a, (const char *)b, MIN (strlen((const char *)a), strlen ((const char *)b)));
+  return strnicmp ((const char *) a, (const char *) b,
+           MIN (strlen ((const char *) a), strlen ((const char *) b)));
 }
 
 
@@ -110,7 +111,7 @@ custom_strnicmp (const void *a, const void *b)
 static int
 custom_stricmp (const void *a, const void *b)
 {
-  return stricmp ((const char *)a, (const char *)b);
+  return stricmp ((const char *) a, (const char *) b);
 }
 #endif
 
@@ -650,7 +651,7 @@ ucon64_dat_indexer (void)
             Doing a linear search removes the need of using the slow qsort()
             function inside the loop. Doing a binary search doesn't improve the
             speed much, but is much more efficient of course. Using qsort()
-            inside the loop slows it down with a factor of more than 10.
+            inside the loop slows it down with a factor greater than 10.
           */
           idx_entry = NULL;
           for (n = 0; n < pos; n++)

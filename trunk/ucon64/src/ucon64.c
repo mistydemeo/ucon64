@@ -861,6 +861,7 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 ,vectrex_TITLE
 ,intelli_TITLE
 );
+
 }
 
 printf(

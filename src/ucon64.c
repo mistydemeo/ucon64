@@ -1568,47 +1568,6 @@ ucon64_usage (int argc, char *argv[])
 #endif
   printf (USAGE_S, name_exe);
 
-  ucon64_render_usage (ucon64_options_usage);
-
-  fputc ('\n', stdout);
-
-  ucon64_render_usage (ucon64_padding_usage);
-
-  fputc ('\n', stdout);
-
-//  if (ucon64.dat_enabled)
-  ucon64_render_usage (ucon64_dat_usage);
-
-  fputc ('\n', stdout);
-
-  ucon64_render_usage (ucon64_patching_usage);
-
-  ucon64_render_usage (bsl_usage);
-  ucon64_render_usage (ips_usage);
-  ucon64_render_usage (aps_usage);
-  ucon64_render_usage (pal4u_usage);
-  ucon64_render_usage (ppf_usage);
-  ucon64_render_usage (xps_usage);
-  ucon64_render_usage (gg_usage);
-
-  printf ("                  supported are:\n"
-    "                  %s,\n"
-    "                  %s,\n"
-//    "                  %s,\n"
-    "                  %s,\n"
-    "                  %s\n\n",
-    gameboy_usage[0].desc, sms_usage[0].desc,
-//    genesis_usage[0].desc,
-    nes_usage[0].desc, snes_usage[0].desc);
-
-#ifdef  DISCMAGE
-  if (ucon64.discmage_enabled)
-    {
-      ucon64_render_usage (libdm_usage);
-      fputc ('\n', stdout);
-    }
-#endif
-
   // getopt()?
   for (c = 0; arg[c].val; c++)
     for (x = 0; usage_array[x].console != 0; x++)
@@ -1624,15 +1583,56 @@ ucon64_usage (int argc, char *argv[])
 
   if (!single)
     {
-      for (x = 0; usage_array[x].console != 0; x++)
+      ucon64_render_usage (ucon64_options_usage);
+      fputc ('\n', stdout);
+    
+      ucon64_render_usage (ucon64_padding_usage);
+      fputc ('\n', stdout);
+    
+//      if (ucon64.dat_enabled)
+      ucon64_render_usage (ucon64_dat_usage);
+      fputc ('\n', stdout);
+    
+      ucon64_render_usage (ucon64_patching_usage);
+    
+      ucon64_render_usage (bsl_usage);
+      ucon64_render_usage (ips_usage);
+      ucon64_render_usage (aps_usage);
+      ucon64_render_usage (pal4u_usage);
+      ucon64_render_usage (ppf_usage);
+      ucon64_render_usage (xps_usage);
+      ucon64_render_usage (gg_usage);
+    
+      printf ("                  supported are:\n"
+        "                  %s,\n"
+        "                  %s,\n"
+//        "                  %s,\n"
+        "                  %s,\n"
+        "                  %s\n\n",
+        gameboy_usage[0].desc, sms_usage[0].desc,
+//        genesis_usage[0].desc,
+        nes_usage[0].desc, snes_usage[0].desc);
+    
+#ifdef  DISCMAGE
+      if (ucon64.discmage_enabled)
         {
-          int y = 0;
-          for (; usage_array[x].usage[y]; y++)
-            ucon64_render_usage (usage_array[x].usage[y]);
-
+          ucon64_render_usage (libdm_usage);
           fputc ('\n', stdout);
         }
-  }
+#endif
+    
+      if (!single)
+        {
+          for (x = 0; usage_array[x].console != 0; x++)
+            {
+              int y = 0;
+              for (; usage_array[x].usage[y]; y++)
+                ucon64_render_usage (usage_array[x].usage[y]);
+    
+              fputc ('\n', stdout);
+            }
+      }
+    }
 
   printf (
      "DATabase: %d known ROMs (DAT files: %s)\n\n",

@@ -644,6 +644,13 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   remove it (by dbjh)<br>
 - updated (SNES) fixed shameful bug that caused -chk and -n not to work
   correctly for interleaved ROM dumps (by dbjh)<br>
+- updated (SNES) added/updated code to dump special-chip cartridges. Now it's
+  possible to dump Super FX (2), S-DD1, SA-1 and SPC7110 cartridges, but see the
+  comment in swc.c! (by JohnDie)<br>
+- updated (SNES) made -xswc-dm active for -xswcc so that SRAM can be transferred
+  to and from Super FX 2 cartridges (by dbjh)<br>
+- updated (SNES) renamed -xswc-dm to -xswc-io, because it can also be used for
+  sending an SRAM file (by dbjh)<br>
 <br>
 <br>
 <br>

@@ -124,8 +124,7 @@ swan_init (st_rominfo_t *rominfo)
     "SQR", NULL, NULL, NULL, NULL,
     "NMC", NULL, NULL};
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-                            ucon64.buheader_len : 0;
+  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
   q_fread (&swan_header, SWAN_HEADER_START + rominfo->buheader_len,
            SWAN_HEADER_LEN, ucon64.rom);
@@ -152,10 +151,10 @@ swan_init (st_rominfo_t *rominfo)
 
   rominfo->has_internal_crc = 1;
   rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
-  rominfo->current_internal_crc = swan_chksum (rom_buffer);
 
   if (ucon64.file_size > 10)                    // header itself is already 10 bytes
     {
+      rominfo->current_internal_crc = swan_chksum (rom_buffer);
       rominfo->internal_crc = OFFSET (swan_header, 8);          // low byte of checksum
       rominfo->internal_crc += OFFSET (swan_header, 9) << 8;    // high byte of checksum
       if (rominfo->current_internal_crc == rominfo->internal_crc)

@@ -729,7 +729,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
 #ifdef  PARALLEL
   {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
-  {UCON64_XSWC_DM, UCON64_SNES, swc_usage,     WF_SWITCH},
+  {UCON64_XSWC_IO, UCON64_SNES, swc_usage,     WF_SWITCH},
 #endif
   {0, 0, NULL, 0}
 };

@@ -184,7 +184,7 @@ typedef struct
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int split;                                    // ROM is split
-  int swc_dumping_mode;                         // SNES SWC
+  int swc_io_mode;                              // SNES SWC
   int tv_standard;                              // NES UNIF
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF
@@ -219,5 +219,3 @@ extern int ucon64_parport_needed;
 extern const struct option options[];
 
 #endif // #ifndef UCON64_H
-
-

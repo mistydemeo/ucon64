@@ -73,7 +73,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_GUI:
       if (ucon64.netgui_enabled)
         if (optarg)
-          ucon64.netgui = libng_open (optarg, NG_RDWR);
+          ucon64.netgui = libng_open (optarg, NG_SERVER);
       exit (0);
 
     /*
@@ -227,6 +227,13 @@ ucon64_switches (int c, const char *optarg)
       break;
 #endif
 
+    case UCON64_RIP:
+    case UCON64_MKTOC:
+    case UCON64_MKCUE:
+    case UCON64_MKSHEET:
+    case UCON64_BIN2ISO:
+    case UCON64_ISOFIX:
+    case UCON64_XCDRW:
     case UCON64_DISC:
       ucon64.force_disc = 1;
       break;

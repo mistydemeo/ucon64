@@ -672,20 +672,20 @@ void
 mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 // hexdump something
 {
-  uint32_t pos;
-  char buf[MAXBUFSIZE];
+  uint32_t pos = 0;
+  char buf[32];
   const unsigned char *p = (const unsigned char *) mem;
 
   *buf = 0;
-  for (pos = 0; pos < n; pos++, p++)
+  while (pos < n)
     {
-      if (!(pos % 16))
-        printf ("%s%s%08x  ", pos ? buf : "",
-                               pos ? "\n" : "",
-                               (int) pos + virtual_start);
-      printf ("%02x %s", *p, !((pos + 1) % 4) ? " ": "");
-      *(buf + (pos % 16)) = isprint (*p) ? *p : '.';
-      *(buf + (pos % 16) + 1) = 0;
+      if (!(pos & 15))
+        printf ("%s\n%08x  ", buf, (uint32_t) pos + virtual_start);
+
+      *(buf + (pos & 15)) = isprint (*p) ? *p : '.';
+      *(buf + (pos & 15) + 1) = 0;
+
+      printf (++pos & 3 ? "%02x " : "%02x  ", *(p++));
     }
   printf ("%s\n", buf);
 }

@@ -41,7 +41,7 @@ const char *doctor64jr_usage[] =
     NULL
   };
 
-static unsigned long inittime = 0, size = 0, pos = 0;
+static unsigned long init_time = 0, size = 0, pos = 0;
 
 
 
@@ -791,7 +791,7 @@ int
 doctor64jr_read (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
-  inittime = time (0);
+  init_time = time (0);
 
   port[0] = parport;
   port[1] = 0;
@@ -812,7 +812,7 @@ int
 doctor64jr_write (const char *filename, long start, long len, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
-  inittime = time (0);
+  init_time = time (0);
   port[0] = parport;
   port[1] = 0;
   strcpy (buf, filename);

@@ -39,7 +39,7 @@ mgd_usage (void)
 #if 0
     printf (mgd_title "\n"
 
-    "TODO:  -xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; $FILE=PORT\n"
+    "TODO:  " OPTION_LONG_S "xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 #endif
 }

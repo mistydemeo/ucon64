@@ -1087,6 +1087,7 @@ genesis_multi (int truncate_size, char *fname)
           write_game_table_entry (destfile, file_no, ucon64.rominfo, totalsize);
           fseek (destfile, totalsize, SEEK_SET); // restore file pointer
         }
+      file_no++;
 
       done = 0;
       byteswritten = 0;                         // # of bytes written per file
@@ -1145,8 +1146,6 @@ genesis_multi (int truncate_size, char *fname)
         }
       if (truncated)
         break;
-
-      file_no++;
     }
   // fill the next game table entry
   fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);

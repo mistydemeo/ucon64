@@ -449,11 +449,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
   {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
   {UCON64_DNSRT, UCON64_SNES, snes_usage,      WF_DEFAULT},
-#if 1 // -f is now used for SNES, Genesis and PC-Engine
-  {UCON64_F, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
-#else
-  {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},
-#endif
   {UCON64_FDS, UCON64_NES, nes_usage,          WF_DEFAULT},
   {UCON64_FDSL, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_FFE, UCON64_NES, nes_usage,          WF_DEFAULT},
@@ -473,11 +468,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MGDGG, UCON64_SMS, sms_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_MKIP, UCON64_DC, dc_usage,           WF_NO_ROM},
   {UCON64_MSG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
-#if 1 // -multi is now used for GBA *and* Genesis
-  {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
-#else
-  {UCON64_MULTI, UCON64_GBA, gba_usage,        WF_STOP},
-#endif
 //  {UCON64_MVS, UCON64_NG, neogeo_usage,        WF_DEFAULT},
   {UCON64_N2, UCON64_GEN, genesis_usage,       WF_DEFAULT},
   {UCON64_N2GB, UCON64_GB, gameboy_usage,      WF_DEFAULT},
@@ -583,6 +573,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_DBV, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
   {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
+  // -f is used for SNES, Genesis and PC-Engine
+  {UCON64_F, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
   {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
   {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_INIT|WF_PROBE},
   {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE|WF_NO_ROM},
@@ -605,6 +597,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MKDAT, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
   {UCON64_MKI, UCON64_UNKNOWN, ips_usage,      WF_STOP},
   {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,    WF_STOP},
+  // -multi is used for GBA, Genesis, SMS/GG and PC-Engine
+  {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
   {UCON64_N, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
   {UCON64_NA, UCON64_UNKNOWN, aps_usage,       0},
   {UCON64_NPPF, UCON64_UNKNOWN, ppf_usage,     0},

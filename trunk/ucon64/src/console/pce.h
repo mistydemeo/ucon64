@@ -27,5 +27,5 @@ extern int pcengine_mgd (st_rominfo_t *rominfo);
 extern int pcengine_msg (st_rominfo_t *rominfo);
 extern int pcengine_swap (st_rominfo_t *rominfo);
 extern int pcengine_f (st_rominfo_t *rominfo);
-
+extern int pcengine_multi (int truncate_size, char *fname);
 #endif // PCE_H

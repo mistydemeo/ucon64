@@ -107,7 +107,7 @@ write_rom_by_byte (int *addr, unsigned char *buf)
     {
       if (md_id == 0xb0d0)
         ttt_write_byte_sharp (*addr, buf[*addr & 0x3fff]);
-      else if (md_id == 0x8917)
+      else if (md_id == 0x8916 || md_id == 0x8917)
         ttt_write_byte_intel (*addr, buf[*addr & 0x3fff]);
       (*addr)++;
     }
@@ -174,12 +174,12 @@ md_read_rom (const char *filename, unsigned int parport, int size)
 
   eep_reset ();
   id = ttt_get_id ();
-  if ((id == 0xb0d0) && (size > 32 * MBIT))     // Sharp 32 Mbit flash card
-    size = 32 * MBIT;
+  if ((id == 0xb0d0 || id == 0x8916) && size > 32 * MBIT)
+    size = 32 * MBIT;                           // Sharp or Intel 32 Mbit flash card
 #if 0
   // size is set to 64 * MBIT "by default" (in ucon64_opts.c)
-  else if ((id == 0x8917) && (size > 64 * MBIT)) // Intel 64 Mbit flash card
-    size = 64 * MBIT;
+  else if (id == 0x8917 && size > 64 * MBIT)
+    size = 64 * MBIT;                           // Intel 64 Mbit flash card
 #endif
 
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
@@ -234,7 +234,7 @@ md_write_rom (const char *filename, unsigned int parport)
 
   eep_reset ();
   md_id = ttt_get_id ();
-  if ((md_id != 0xb0d0) && (md_id != 0x8917))   // Sharp 32M, Intel 64J3
+  if ((md_id != 0xb0d0) && (md_id != 0x8916) && (md_id != 0x8917)) // Sharp 32M, Intel 64J3
     {
       fputs ("ERROR: MD-PRO flash card (programmer) not detected\n", stderr);
       fclose (file);
@@ -248,7 +248,7 @@ md_write_rom (const char *filename, unsigned int parport)
     {
       ucon64_bswap16_n (buffer, 0x4000);
       if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
-          (((address & 0x1ffff) == 0) && (md_id == 0x8917)))
+          (((address & 0x1ffff) == 0) && (md_id == 0x8916 || md_id == 0x8917)))
         ttt_erase_block (address);
       write_block (&address, buffer);
       bytessend += bytesread;

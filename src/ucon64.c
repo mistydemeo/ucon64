@@ -572,7 +572,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 #if 0
   if (rominfo->buheader_len)
     {
-      strhexdump (rominfo->buheader, 0, rominfo->buheader_start,
+      memhexdump (rominfo->buheader, 0, rominfo->buheader_start,
                   rominfo->buheader_len);
       printf ("\n");
     }
@@ -592,8 +592,8 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
   if (rominfo->header_len)
     {
-      strhexdump (rominfo->header, 0, rominfo->header_start + rominfo->buheader_len,
-                  rominfo->header_len);
+      memhexdump (rominfo->header, rominfo->header_len,
+        rominfo->header_start + rominfo->buheader_len);
       printf ("\n");
     }
 
@@ -611,8 +611,8 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
   strcpy (buf, rominfo->name);
   printf ("%s\n%s\n%s\n%ld Bytes (%.4f Mb)\n\n", mkprint (buf, '.'),  // some ROMs have a name with control chars in it -> replace control chars
-          NULLtoEmpty (rominfo->maker),
-          NULLtoEmpty (rominfo->country),
+          NULL_TO_EMPTY (rominfo->maker),
+          NULL_TO_EMPTY (rominfo->country),
           quickftell (ucon64.rom) - rominfo->buheader_len,
           TOMBIT_F (quickftell (ucon64.rom) - rominfo->buheader_len));
 
@@ -703,12 +703,10 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 void
 usage (const char **usage)
 {
-  if (usage[0] != NULL)
+  if (usage[0])
     printf ("%s\n" , usage[0]);
-  if (usage[1] != NULL)
-    printf ("  %s\n", usage[1]);
-  if (usage[2] != NULL)
-    printf ("%s", usage[2]);
+  if (usage[1])
+    printf ("  %s\n%s", usage[1], NULL_TO_EMPTY (usage[2]));
 }
 
 

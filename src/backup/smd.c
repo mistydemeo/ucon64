@@ -438,7 +438,7 @@ load_smd (const char *filename)
   fseek (fd, 0, SEEK_SET);
 
   /* Load SMD header */
-  if (extcmp (filename, ".smd") == 0)
+  if (EXTCMP (filename, ".smd") == 0)
     {
       is_smd = 1;
       fread (header, 0x200, 1, fd);
@@ -462,7 +462,7 @@ load_smd (const char *filename)
       header[0] = block_size;
 
       /* 68000 binary files need file data to be interleaved */
-      if (extcmp (filename, ".bin") == 0)
+      if (EXTCMP (filename, ".bin") == 0)
         {
           header[1] = 0x03;
           interleave_buffer (buf, block_size);

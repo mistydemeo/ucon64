@@ -186,5 +186,5 @@ swan_chksum (unsigned char *ptr)
   while (t-- > 0)
     csum += *ptr++;
 
-  return csum & 0xffff;;
+  return csum & 0xffff;
 }

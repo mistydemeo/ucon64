@@ -246,9 +246,6 @@ pcengine_init (st_rominfo_t *rominfo)
   q_fread (&pce_header, PCENGINE_HEADER_START +
       rominfo->buheader_len, PCENGINE_HEADER_LEN, ucon64.rom);
 
-//#ifdef CONSOLE_PROBE
-//#endif // CONSOLE_PROBE
-
   rominfo->header_start = PCENGINE_HEADER_START;
   rominfo->header_len = PCENGINE_HEADER_LEN;
   rominfo->header = &pce_header;

@@ -63,9 +63,6 @@ const char *snes_usage[] =
     "Super Nintendo Entertainment System/SNES/Super Famicom",
     "1990 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "snes        force recognition"
-#ifndef CONSOLE_PROBE
-    "; NEEDED"
-#endif
     "\n"
     "  " OPTION_LONG_S "hi          force ROM is HiROM\n"
     "  " OPTION_LONG_S "nhi         force ROM is not HiROM\n"
@@ -1767,7 +1764,6 @@ snes_init (st_rominfo_t *rominfo)
 
     step 1. & first part of step 2.
   */
-#ifdef CONSOLE_PROBE
   snes_hirom = 0;
   rominfo->buheader_len = 0;
   if ((x = get_internal_sums (rominfo)) != 0xffff)
@@ -1843,7 +1839,6 @@ snes_init (st_rominfo_t *rominfo)
             rominfo->buheader_len = surplus;
         }
     }
-#endif // CONSOLE_PROBE
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     rominfo->buheader_len = ucon64.buheader_len;
 

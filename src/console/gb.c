@@ -592,7 +592,6 @@ gameboy_init (st_rominfo_t *rominfo)
 
   q_fread (&gameboy_header, GAMEBOY_HEADER_START +
     rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);
-#ifdef CONSOLE_PROBE
   if (OFFSET (gameboy_header, 0) == 0x00 &&
       OFFSET (gameboy_header, 1) == 0xc3)
     result = 0;
@@ -609,7 +608,6 @@ gameboy_init (st_rominfo_t *rominfo)
       else
         result = -1;
     }
-#endif // CONSOLE_PROBE
   if (ucon64.console == UCON64_GB)
     result = 0;
 

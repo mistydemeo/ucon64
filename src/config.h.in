@@ -22,32 +22,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef CONFIG_H
 #define CONFIG_H
-#define DEBUG
 //#define TODO                                  // don't make this the default setting
 #define MAXBUFSIZE 32768
+@DEFINE_DEBUG@
+
 
 /*
-console/other.[ch] are for consoles which have no specific support, yet
+  console/other.[ch] are for consoles which have no specific support, yet
 
-it is also a good start to add support for a new console
+  it is also a good start to add support for a new console
 */
 //#define OTHER
-
-
-/*
-  enables/disables support for gzip & zip files
-
-  comment this to disable it even if the configure script found zlib
-*/
-@DEFINE_ZLIB_CONFIG@
-
-
-/*
-  enables/disables probing in <console>_init()
-
-  it's a good idea to leave this defined/enabled
-*/
-#define CONSOLE_PROBE
 
 
 /*
@@ -56,7 +41,7 @@ it is also a good start to add support for a new console
   comment this and uCON64 will be only ~160kB in size but won't recognize
   ROMs for NES and other systems where ROMs have no internal header
 */
-#define DB
+@DEFINE_DB@
 
 
 /*
@@ -64,25 +49,27 @@ it is also a good start to add support for a new console
 
   comment this if your hardware has no parallel port
 */
-#define BACKUP
+@DEFINE_BACKUP@
 
 
-#ifndef __MSDOS__                               // AFAIK there is no Cdrdao for MSDOS
+#ifndef __MSDOS__                               // AFAIK there is no cdrdao for MSDOS
 /*
   enables/disables support for cd backups
 
-  comment this if there is no Cdrdao (http://cdrdao.sourceforge.net)
+  comment this if there is no cdrdao (http://cdrdao.sourceforge.net)
   port available for your platform
 */
-#define BACKUP_CD
+@DEFINE_BACKUP_CD@
 
 #endif // __MSDOS__
 
 
-/*
-  enables/disables the use of colors in display output
-*/
-#define ANSI_COLOR
+/* enables/disables the use of color in the display output */
+@DEFINE_ANSI_COLOR@
+
+
+/* enables/disables support for gzip & zip files */
+@DEFINE_ZLIB_CONFIG@
 
 
 /* Define to empty if the keyword does not work.  */

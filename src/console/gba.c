@@ -329,7 +329,6 @@ gba_init (st_rominfo_t *rominfo)
 
   q_fread (&gba_header, GBA_HEADER_START +
     rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
-#ifdef CONSOLE_PROBE
   if (OFFSET (gba_header, 0xac) == 'A' && OFFSET (gba_header, 0xb3) == 0)
     result = 0;
   else
@@ -344,7 +343,6 @@ gba_init (st_rominfo_t *rominfo)
       else
         result = -1;
     }
-#endif // CONSOLE_PROBE
   if (ucon64.console == UCON64_GBA)
     result = 0;
 

@@ -58,17 +58,13 @@ st_jaguar_t jaguar_header;
 int
 jaguar_init (st_rominfo_t *rominfo)
 {
-  int result = -1;
-#ifdef CONSOLE_PROBE
-  int x, value;
-#endif // CONSOLE_PROBE
+  int result = -1, x, value;
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
   q_fread (&jaguar_header, JAGUAR_HEADER_START +
     rominfo->buheader_len, JAGUAR_HEADER_LEN, ucon64.rom);
-#ifdef CONSOLE_PROBE
   value = 0;
   for (x = 0; x < 12; x++)
     value += OFFSET (jaguar_header, x);
@@ -90,7 +86,6 @@ jaguar_init (st_rominfo_t *rominfo)
       else
         result = -1;
     }
-#endif // CONSOLE_PROBE
   if (ucon64.console == UCON64_JAG)
     result = 0;
 

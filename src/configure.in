@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(ucon64.c)
+AC_INIT(uCON64, 1.9.8beta5, noisyb@gmx.net)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -8,28 +8,89 @@ AC_PROG_INSTALL
 CFLAGS="-I. -Wall -O3"
 LDFLAGS=-s
 
+AC_MSG_CHECKING(whether debugging output is enabled)
+AC_ARG_ENABLE(debug,
+              AC_HELP_STRING([--enable-debug],
+                             [enable support for debugging output (default is NO)]),
+              enable_debug=$enableval,
+              enable_debug=no)
+if test x$enable_debug = xyes; then
+  DEFINE_DEBUG="#define DEBUG"
+else
+  DEFINE_DEBUG="//#define DEBUG"
+fi
+AC_MSG_RESULT($enable_debug)
+
+AC_MSG_CHECKING(whether the internal database is enabled)
+AC_ARG_ENABLE(db,
+              AC_HELP_STRING([--enable-db],
+                             [enable internal database (default is YES)]),
+              enable_db=$enableval,
+              enable_db=yes)
+if test x$enable_db = xyes; then
+  DEFINE_DB="#define DB"
+else
+  DEFINE_DB="//#define DB"
+fi
+AC_MSG_RESULT($enable_db)
+
+AC_MSG_CHECKING(whether support for parallel port backup units is enabled)
+AC_ARG_ENABLE(backup,
+              AC_HELP_STRING([--enable-backup],
+                             [enable support for parallel port backup units (default is YES)]),
+              enable_backup=$enableval,
+              enable_backup=yes)
+if test x$enable_backup = xyes; then
+  DEFINE_BACKUP="#define BACKUP"
+else
+  DEFINE_BACKUP="//#define BACKUP"
+fi
+AC_MSG_RESULT($enable_backup)
+
+AC_MSG_CHECKING(whether support for CD backups is enabled)
+AC_ARG_ENABLE(backup_cd,
+              AC_HELP_STRING([--enable-backup-cd],
+                             [enable support for CD backups (default is YES)]),
+              enable_backup_cd=$enableval,
+              enable_backup_cd=yes)
+if test x$enable_backup_cd = xyes; then
+  DEFINE_BACKUP_CD="#define BACKUP_CD"
+else
+  DEFINE_BACKUP_CD="//#define BACKUP_CD"
+fi
+AC_MSG_RESULT($enable_backup_cd)
+
+AC_MSG_CHECKING(whether the use of color is enabled)
+AC_ARG_ENABLE(ansi_color,
+              AC_HELP_STRING([--enable-ansi-color],
+                             [enable usage of color (default is YES)]),
+              enable_ansi_color=$enableval,
+              enable_ansi_color=yes)
+if test x$enable_ansi_color = xyes; then
+  DEFINE_ANSI_COLOR="#define ANSI_COLOR"
+else
+  DEFINE_ANSI_COLOR="//#define ANSI_COLOR"
+fi
+AC_MSG_RESULT($enable_ansi_color)
+
 dnl Checks for libraries.
-AC_ARG_WITH(zlib,[  --with-zlib             build with zlib support],with_zlib=$withval)
+AC_ARG_WITH(zlib,
+            AC_HELP_STRING([--with-zlib],
+                           [build with zlib support (default is YES)]),
+            with_zlib=$withval,
+            with_zlib=yes)
 AC_MSG_CHECKING(for zlib)
 if test x$with_zlib = xyes; then
-  with_zlib=no
-  AC_TRY_COMPILE([
-  #include <zlib.h>
-  ],[
-  ],[
-  with_zlib=yes
-  ])
-  AC_MSG_RESULT($with_zlib)
-  if test x$with_zlib = xyes; then
-    LDFLAGS="$LDFLAGS -lz"
-    DEFINE_ZLIB_CONFIG="#define ZLIB"
-    DEFINE_ZLIB_MAKE="ZLIB=1"
-  fi
-else
-  AC_MSG_RESULT(not enabled by user)
+  AC_TRY_COMPILE([#include <zlib.h>], , with_zlib=yes, with_zlib=no)
 fi
-
-#AC_ARG_ENABLE(debug,[  --enable-debug          enable support for debugging output], [with_debug=yes])
+if test x$with_zlib = xyes; then
+  LDFLAGS="$LDFLAGS -lz"
+  DEFINE_ZLIB_CONFIG="#define ZLIB"
+  DEFINE_ZLIB_MAKE="ZLIB=1"
+else
+  DEFINE_ZLIB_CONFIG="//#define ZLIB"
+fi
+AC_MSG_RESULT($with_zlib)
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -50,6 +111,11 @@ AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd mkdir putenv rmdir strcspn strerror strtol basename dirname)
 
+AC_SUBST(DEFINE_DEBUG)
+AC_SUBST(DEFINE_DB)
+AC_SUBST(DEFINE_BACKUP)
+AC_SUBST(DEFINE_BACKUP_CD)
+AC_SUBST(DEFINE_ANSI_COLOR)
 AC_SUBST(DEFINE_ZLIB_CONFIG)
 AC_SUBST(DEFINE_ZLIB_MAKE)
 AC_OUTPUT(Makefile config.h)

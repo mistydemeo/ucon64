@@ -1,3 +1,4 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 /*
 config.h - config file for uCON64
 
@@ -21,32 +22,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef CONFIG_H
 #define CONFIG_H
-#define DEBUG
 //#define TODO                                  // don't make this the default setting
 #define MAXBUFSIZE 32768
-
-/*
-sample/sample.[ch] are for consoles which have no specific support, yet
-
-it is a good start to add support for a new console
-*/
-//#define SAMPLE
+//#define DEBUG
 
 
 /*
-  enables/disables support for gzip & zip files
+  console/other.[ch] are for consoles which have no specific support, yet
 
-  comment this to disable it even if the configure script found zlib
+  it is also a good start to add support for a new console
 */
-//#define ZLIB
-
-
-/*
-  enables/disables probing in <console>_init()
-
-  it's a good idea to leave this defined/enabled
-*/
-#define CONSOLE_PROBE
+//#define OTHER
 
 
 /*
@@ -66,11 +52,11 @@ it is a good start to add support for a new console
 #define BACKUP
 
 
-#ifndef __MSDOS__                               // AFAIK there is no Cdrdao for MSDOS
+#ifndef __MSDOS__                               // AFAIK there is no cdrdao for MSDOS
 /*
   enables/disables support for cd backups
 
-  comment this if there is no Cdrdao (http://cdrdao.sourceforge.net)
+  comment this if there is no cdrdao (http://cdrdao.sourceforge.net)
   port available for your platform
 */
 #define BACKUP_CD
@@ -78,17 +64,19 @@ it is a good start to add support for a new console
 #endif // __MSDOS__
 
 
-/*
-  enables/disables the use of colors in display output
-*/
+/* enables/disables the use of color in the display output */
 #define ANSI_COLOR
 
 
-#endif // CONFIG_H
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* enables/disables support for gzip & zip files */
+//#define ZLIB
+
 
 /* Define to empty if the keyword does not work.  */
-#undef const
+//#undef const
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef gid_t
 
 /* Define if you don't have vprintf but do have _doprnt.  */
 #undef HAVE_DOPRNT
@@ -105,14 +93,22 @@ it is a good start to add support for a new console
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
-/* Define as the return type of signal handlers (int or void).  */
-#undef RETSIGTYPE
-
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
 
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef uid_t
+
+/* Define if you have the basename function.  */
+#ifndef HAVE_BASENAME
+#undef HAVE_BASENAME
+#endif
+
+/* Define if you have the dirname function.  */
+#undef HAVE_DIRNAME
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
@@ -120,20 +116,17 @@ it is a good start to add support for a new console
 /* Define if you have the mkdir function.  */
 #undef HAVE_MKDIR
 
+/* Define if you have the putenv function.  */
+#undef HAVE_PUTENV
+
 /* Define if you have the rmdir function.  */
 #undef HAVE_RMDIR
 
 /* Define if you have the strcspn function.  */
 #undef HAVE_STRCSPN
 
-/* Define if you have the strdup function.  */
-#undef HAVE_STRDUP
-
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
-
-/* Define if you have the strstr function.  */
-#undef HAVE_STRSTR
 
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
@@ -147,23 +140,16 @@ it is a good start to add support for a new console
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
 
-/* Define if you have the <malloc.h> header file.  */
-#undef HAVE_MALLOC_H
-
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
 
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
 
-/* Define if you have the <sys/ioctl.h> header file.  */
-#undef HAVE_SYS_IOCTL_H
-
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
 
-/* Define if you have the <sys/time.h> header file.  */
-#undef HAVE_SYS_TIME_H
-
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+#endif // CONFIG_H

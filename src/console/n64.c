@@ -413,7 +413,6 @@ n64_init (st_rominfo_t *rominfo)
   q_fread (&n64_header, N64_HEADER_START +
     rominfo->buheader_len, N64_HEADER_LEN, ucon64.rom);
 
-#ifdef CONSOLE_PROBE
   value = OFFSET (n64_header, 0) << 24;
   value += OFFSET (n64_header, 1) << 16;
   value += OFFSET (n64_header, 2) << 8;
@@ -430,7 +429,6 @@ n64_init (st_rominfo_t *rominfo)
     }
   else
     result = 0;
-#endif // CONSOLE_PROBE
   if (ucon64.console == UCON64_N64)
     result = 0;
 

@@ -199,18 +199,20 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    and pin 25 is ground.<br>
 <br>
 <p>
-<a name="8"><b>Q8</b>: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.
-   Who is right?</a><br>
+<a name="8"><b>Q8</b>: I have a SNES ROM of which GoodSNES says it's good, but
+   uCON64 says it's bad. Who is right?</a><br>
 <b>A</b>: GoodSNES.<br>
-   There may be several reasons why uCON64 reports that the checksum is bad. It could have
-   made a mistake while determining if the ROM is a HiROM or a LoROM dump. Try the options
-   -hi and -nhi and see if uCON64 reports the checksum differently. A bigger problem is that
-   the interleave detection code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs
-   are often detected as not being interleaved while they actually are. Try the options -int
-   and -int2 and see if you get better results. If the checksum is reported as good it is
-   very likely that the ROM is really good. Alternatively, you may want to convert the ROM
-   to a non-interleaved format with -dint and run uCON64 on the converted ROM. That gives
-   the best results. Luckily you won't find many interleaved ROM dumps that uCON64 can't
+   There may be several reasons why uCON64 reports that the checksum is bad.
+   It could have made a mistake while determining if the ROM is a HiROM or a
+   LoROM dump. Try the switches -hi and -nhi and see if uCON64 reports the
+   checksum differently. A bigger problem is that the interleave detection code
+   (stolen from Snes9x ;-) is not reliable. Especially BS ROMs are often
+   detected as not being interleaved while they actually are. Try the switches
+   -int and -int2 and see if you get better results. If the checksum is
+   reported as good it is very likely that the ROM is really good.
+   Alternatively, you may want to convert the ROM to a non-interleaved format
+   with -dint and run uCON64 on the converted ROM. That gives the best results.
+   Luckily you won't find many interleaved ROM dumps that uCON64 can't
    handle, probably because Snes9x and ZSNES often can't handle them either.<br>
 <br>
 <p>
@@ -221,41 +223,50 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    can be pretty sure the ROM is good if it's a BS ROM. See previous answer.<br>
 <br>
 <p>
-<a name="10"><b>Q10</b>: I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now
-   uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it's bad. How
-   can that be, I did fix the ROM, right?</a><br>
-<b>A</b>: No, you did not. When you use -chk uCON64 changes four bytes in the ROM dump, so that
-   they match with the calculated checksum. However, the ROM stays just as bad as it was.<br>
-   Use -chk with care. -chk might be useful if you want to store a ROM somewhere without
-   using a database with its checksum. You can then later check if the ROM is still the same
-   as it was when you stored it by using the checksum that is stored in the ROM.<br>
+<a name="10"><b>Q10</b>: I have a SNES ROM of which uCON64 said it was bad, so
+   I used the -chk option. Now uCON64, Snes9x and ZSNES all say the ROM is
+   good, but GoodSNES still says it's bad. How can that be, I did fix the ROM,
+   right?</a><br>
+<b>A</b>: No, you did not. When you use -chk uCON64 changes four bytes in the
+   ROM dump, so that they match with the calculated checksum. However, the ROM
+   stays just as bad as it was.<br>
+   Use -chk with care. -chk might be useful if you want to store a ROM
+   somewhere without using a database with its checksum. You can then later
+   check if the ROM is still the same as it was when you stored it by using the
+   checksum that is stored in the ROM.<br>
 <br>
 <p>
-<a name="11"><b>Q11</b>: Some SNES games don't work on my Super Wild Card. What can I do about that?</a><br>
-<b>A</b>: You can do several things. First make sure the original game cartridge doesn't contain
-   any special chips that your Super Wild Card doesn't support (look at the rom type
-   information). For example, if you are trying to upload a game like Super Mario Kart (which
-   uses a DSP chip) your Super Wild Card should have an extension with the correct DSP chip
-   (or have the right cartridge with that chip plugged in your SWC). Then, make sure you are
-   using a good dump (look at the checksum information). Also verify that the backup header is
-   correct. You can make uCON64 rewrite the header with -swc. uCON64 uses the information in the
-   ROM dump's header, so this is important! You can also try to rewrite the header in combination
-   with the option -hi or -nhi to force uCON64 to handle it as a HiROM or a LoROM dump. Additionally
-   you could use the option -hd, -nhd or -hdn to specify the backup unit header size. For example:<br>
-   &nbsp;&nbsp; ucon64 -swc -hi -hd "Chrono Trigger (U).swc"<br>
-   There are many (good) ROMs on the internet with incorrect headers, so this might well solve
-   the problem.<br>
-   Several games contain a copy protection that prevents them from running on a backup unit,
-   so this can also be a reason why the game doesn't work. You can try -k to remove that
-   protection. Several games also check if they are running on a PAL or an NTSC SNES. Use -f
-   to remove that form of copy protection. Some other games check the ROM speed. You can use -l
-   for those. Note that some games have more than one type of copy protection, so it might be
-   necessary to use uCON64 several times with a different option.<br>
+<a name="11"><b>Q11</b>: Some SNES games don't work on my Super Wild Card.
+   What can I do about that?</a><br>
+<b>A</b>: You can do several things. First make sure the original game
+   cartridge doesn't contain any special chips that your Super Wild Card
+   doesn't support (look at the rom type information). For example, if you are
+   trying to upload a game like Super Mario Kart (which uses a DSP chip) your
+   Super Wild Card should have an extension with the correct DSP chip (or have
+   the right cartridge with that chip plugged in your SWC). Then, make sure you
+   are using a good dump (look at the checksum information). Also verify that
+   the backup header is correct. You can make uCON64 rewrite the header with
+   -swc. uCON64 uses the information in the ROM dump's header, so this is
+   important! You can also try to rewrite the header in combination with the
+   switch -hi or -nhi to force uCON64 to handle it as a HiROM or a LoROM dump.
+   Additionally you could use the switch -hd, -nhd or -hdn to specify the
+   backup unit header size. For example:<br>
+   &nbsp;&nbsp; ucon64 -swc -nhi -hd "Batman Revenge of the Joker (U).swc"<br>
+   There are many (good) ROMs on the internet with incorrect headers, so this
+   might well solve the problem.<br>
+   Several games contain a copy protection that prevents them from running on
+   a backup unit, so this can also be a reason why the game doesn't work. You
+   can try -k to remove that protection. Several games also check if they are
+   running on a PAL or an NTSC SNES. Use -f to remove that form of copy
+   protection. Some other games check the ROM speed. You can use -l for those.
+   Note that some games have more than one type of copy protection, so it might
+   be necessary to use uCON64 several times with a different option.<br>
 <br>
-   Some games seem to work, but after a while it becomes clear that they don't run as was
-   intended. Two examples of such games are Demon's Crest and Mega Man X. For completeness
-   here follows an explanation on how to get them to work. All credits go to Gideon Zhi for
-   sharing this info on cherryroms. Start with ROM images in SWC format.<br>
+   Some games seem to work, but after a while it becomes clear that they don't
+   run as was intended. Two examples of such games are Demon's Crest and Mega
+   Man X. For completeness here follows an explanation on how to get them to
+   work. All credits go to Gideon Zhi for sharing this info on cherryroms.
+   Start with ROM images in SWC format.<br>
 <br>
    Demon's Crest:<br>
    &nbsp;&nbsp; ucon64 -stp "Demon's Crest.swc"<br>
@@ -268,7 +279,8 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    &nbsp;&nbsp; cat "Mega Man X.swc" "Mega Man X.swc" &#62; "Mega Man X (SWC-fix).swc"<br>
    &nbsp;&nbsp; ucon64 -swc "Mega Man X (SWC-fix).swc"<br>
 <br>
-   WinDOS users without the program cat should use the command copy. For example:<br>
+   WinDOS users without the program cat should use the command copy. For
+   example:<br>
    &nbsp;&nbsp; copy /b "Mega Man X.swc" + "Mega Man X.swc" "Mega Man X (SWC-fix).swc"<br>
 <br>
 <p>

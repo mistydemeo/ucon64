@@ -160,12 +160,10 @@ Byte6 - Additional capabilities(?)
 
   rominfo->internal_crc = OFFSET (swan_header, 8);              // low byte of checksum
   rominfo->internal_crc += OFFSET (swan_header, 9) << 8;        // high byte of checksum
-#ifdef CONSOLE_PROBE
   if (rominfo->current_internal_crc == rominfo->internal_crc)
     result = 0;
   else
     result = -1;
-#endif // CONSOLE_PROBE
   if (ucon64.console == UCON64_SWAN)
     result = 0;
 

@@ -259,12 +259,10 @@ lynx_init (st_rominfo_t *rominfo)
   rominfo->copier_usage = unknown_usage;
 
   q_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.rom);
-#ifdef CONSOLE_PROBE
   if (!strncmp (lnx_header.magic, "LYNX", 4))
     result = 0;
   else
     result = -1;
-#endif // CONSOLE_PROBE
   if (ucon64.console == UCON64_LYNX)
     result = 0;
 

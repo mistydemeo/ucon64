@@ -395,8 +395,10 @@ main (int argc, char **argv)
 #include "switches.c"
     }
 
+#ifdef  ANSI_COLOR
   if (ucon64.ansi_color)
     ucon64.ansi_color = ansi_init ();
+#endif
 
   if (optind < argc)
     ucon64.rom = argv[optind++];
@@ -533,7 +535,6 @@ ucon64_console_probe (st_rominfo_t *rominfo)
     case UCON64_UNKNOWN:
       if (UCON64_TYPE_ISROM (ucon64.type))
         ucon64.console =
-#ifdef CONSOLE_PROBE
           (!gba_init (ucon64_flush (rominfo))) ? UCON64_GBA :
           (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
           (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
@@ -544,7 +545,6 @@ ucon64_console_probe (st_rominfo_t *rominfo)
           (!ngp_init (ucon64_flush (rominfo))) ? UCON64_NEOGEOPOCKET :
           (!swan_init (ucon64_flush (rominfo))) ? UCON64_WONDERSWAN :
           (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
-#endif // CONSOLE_PROBE
           UCON64_UNKNOWN;
 
       return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;

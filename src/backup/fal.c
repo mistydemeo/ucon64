@@ -1594,8 +1594,8 @@ fal_main (int argc, char **argv)
 }
 
 /*
-  It will save you some work if you don't fully integrate the code above with uCON64's code,
-  because it is a project separate from the uCON64 project.
+  It will save you some work if you don't fully integrate the code above with
+  uCON64's code, because it is a project separate from the uCON64 project.
 */
 int fal_argc;
 char *fal_argv[128];
@@ -1621,9 +1621,6 @@ fal_args (unsigned int parport)
 int
 fal_read_rom (const char *filename, unsigned int parport, int size)
 {
-  char buf[MAXBUFSIZE];
-  strcpy (buf, filename);
-
   fal_args (parport);
 
   fal_argv[3] = "-c";
@@ -1652,8 +1649,8 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
     fal_argv[4] = "32";
 
   fal_argv[5] = "-s";
-  fal_argv[6] = buf;
-  fal_argc = 7;
+  fal_argv[6] = (char *) filename;              // this is safe (FAL code
+  fal_argc = 7;                                 //  doesn't modify argv)
 
 #if 0
   if (argcmp (argc, argv, "-xfalm"))
@@ -1672,13 +1669,10 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
 int
 fal_write_rom (const char *filename, unsigned int parport)
 {
-  char buf[MAXBUFSIZE];
-  strcpy (buf, filename);
-
   fal_args (parport);
 
   fal_argv[3] = "-p";
-  fal_argv[4] = buf;
+  fal_argv[4] = (char *) filename;
   fal_argc = 5;
 
 #if 0
@@ -1699,8 +1693,6 @@ int
 fal_read_sram (const char *filename, unsigned int parport, int bank)
 {
   char bank_str[2];
-  char buf[MAXBUFSIZE];
-  strcpy (buf, filename);
 
   fal_args (parport);
 
@@ -1722,7 +1714,7 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
       fal_argv[4] = bank_str;
       fal_argv[5] = "2";        // 64 kB
     }
-  fal_argv[6] = buf;
+  fal_argv[6] = (char *) filename;
   fal_argc = 7;
 
   if (!fal_main (fal_argc, fal_argv))
@@ -1735,8 +1727,6 @@ int
 fal_write_sram (const char *filename, unsigned int parport, int bank)
 {
   char bank_str[2];
-  char buf[MAXBUFSIZE];
-  strcpy (buf, filename);
 
   fal_args (parport);
 
@@ -1754,7 +1744,7 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
       bank_str[1] = 0;          // terminate string
       fal_argv[4] = bank_str;
     }
-  fal_argv[5] = buf;
+  fal_argv[5] = (char *) filename;
   fal_argc = 6;
 
   if (!fal_main (fal_argc, fal_argv))

@@ -67,8 +67,6 @@ dc_init (st_rominfo_t *rominfo)
 {
 //  dc_ip0000_header_t header;
   int result = -1;
-//#ifdef CONSOLE_PROBE
-//#endif // CONSOLE_PROBE
 
 //  printf ("%d\n", sizeof (dc_ip0000_header_t));
 

@@ -892,7 +892,11 @@ ucon64_rom_handling (void)
 
   // The next statement is important and should be executed as soon as
   //  possible (and sensible) in this function
-  ucon64.file_size = fsizeof (ucon64.rom);
+  if ((ucon64.file_size = fsizeof (ucon64.rom)) < 0)
+    {
+      fprintf (stderr, "ERROR: Could not determine size of %s\n", ucon64.rom);
+      return -1;
+    }
   // We have to do this here, because we don't know the file size until now
   if (ucon64.buheader_len > ucon64.file_size)
     {

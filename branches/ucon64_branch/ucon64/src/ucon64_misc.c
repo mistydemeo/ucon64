@@ -498,6 +498,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
   {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
 
+//#ifdef  GUI
+  {UCON64_GUI, UCON64_UNKNOWN, libng_usage,    WF_STOP},
+//#endif
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},

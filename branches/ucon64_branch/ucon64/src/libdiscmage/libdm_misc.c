@@ -156,20 +156,6 @@ const st_track_probe_t track_probe[] =
   };
 
 
-const char *
-dm_get_track_desc (int mode, int sector_size, int cue)
-// if cue == TRUE return track_probe[x].cue
-{
-  int x = 0;
-  for (x = 0; track_probe[x].sector_size; x++)
-    if (track_probe[x].mode == mode &&
-        track_probe[x].sector_size == sector_size)
-      return (cue ? track_probe[x].cue : track_probe[x].toc);
-
-  return NULL;
-}
-
-
 static void (* dm_ext_gauge) (int, int);
 
 
@@ -180,6 +166,20 @@ const char *dm_msg[] = {
   NULL
 };
 
+
+const char *
+dm_get_track_desc (int mode, int sector_size, int cue)
+// if cue == TRUE return track_desc[x].cue
+{
+  int x = 0;
+  
+  for (x = 0; track_probe[x].sector_size; x++)
+    if (track_probe[x].mode == mode &&
+        track_probe[x].sector_size == sector_size)
+      return (cue ? track_probe[x].cue : track_probe[x].toc);
+
+  return NULL;
+}
 
 
 
@@ -312,41 +312,37 @@ dm_free (dm_image_t *image)
 }
 
 
-#if 0
-int
-callibrate (const char *fname, int track_num)
-// brute force sync_data[] callibration for unknown images
+FILE *
+callibrate (const char *s, int len, FILE *fh)
+// brute force callibration
 {
-  FILE *fh;
-  int32_t pos = 0;
-  const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff, 0};
+  int32_t pos = ftell (fh);
   char buf[MAXBUFSIZE];
-  int size = q_fsize (fname);
-  if (!(fh = fopen (fname, "rb")))
-    return -1;
+//   malloc ((len + 1) * sizeof (char));
+  int size = 0;
+  int tries = 0; //TODO: make this an arg
 
-  (void) track_num;
-  
-  for (pos = 0; pos < size - 16; pos++)
+  fseek (fh, 0, SEEK_END);
+  size = ftell (fh);
+  fseek (fh, pos, SEEK_SET);
+
+  for (; pos < size - len && tries < 100000; pos++, tries++)
     {
       fseek (fh, pos, SEEK_SET);
-      fread (&buf, 16, 1, fh);
-      if (!memcmp (sync_data, buf, 12))
+      fread (&buf, len, 1, fh);
+#ifdef  DEBUG
+  mem_hexdump (buf, len, ftell (fh) - len);
+  mem_hexdump (s, len, ftell (fh) - len);
+#endif
+      if (!memcmp (s, buf, len))
         {
-          printf ("%x %d\n", pos, pos);
-          break;
+          fseek (fh, -len, SEEK_CUR);
+          return fh;
         }
     }
-
-  fclose (fh);
   
-  return 0;
+  return NULL;
 }
-#endif
 
 
 const dm_track_t *
@@ -360,15 +356,11 @@ dm_track_init (dm_track_t *track, FILE *fh)
                             (const char) 0xff, (const char) 0xff, 0};
   uint8_t value8 = 0;
   char value_s[0xff];
+  int pos = ftell (fh);
 
-  fseek (fh, track->track_start, SEEK_SET);
-  fread (value_s, 1, 16, fh);
-#ifdef  DEBUG
-  mem_hexdump (value_s, 16, ftell (fh));
-#endif
-
-  if (!memcmp (sync_data, value_s, 12))
+  if (callibrate (sync_data, 12, fh))
     {
+      fread (&value_s, 16, 1, fh);
       value8 = (uint8_t) value_s[15];
 
       for (x = 0; track_probe[x].sector_size; x++)
@@ -385,16 +377,13 @@ dm_track_init (dm_track_t *track, FILE *fh)
               continue;
 
             // search for valid PVD in sector 16 of source image
-            fseek (fh, (track_probe[x].sector_size * 16) +
-                   track_probe[x].seek_header +
-                   track->track_start,
-                   SEEK_SET);
-            fread (value_s, 1, 16, fh);
 
-//#ifdef  DEBUG          
-            mem_hexdump (value_s, 16, ftell (fh));
-//#endif          
-            if (!memcmp (pvd_magic, &value_s, 8))
+            fseek (fh, (track_probe[x].sector_size * 16) +
+                   track_probe[x].seek_header,
+                   SEEK_CUR);
+
+            fread (&value_s, 8, 1, fh);
+            if (!memcmp (pvd_magic, value_s, 8))
               {
                 printf ("%d %d\n\n", track_probe[x].mode, track_probe[x].sector_size);
                 identified = 1;
@@ -406,22 +395,9 @@ dm_track_init (dm_track_t *track, FILE *fh)
   // no sync_data found? probably MODE1/2048
   if (!identified)
     {
-      x = 0;
-      if (track_probe[x].sector_size != 2048)
-        fprintf (stderr, "ERROR: dm_track_init() sanity check failed\n");
-
       // search for valid PVD in sector 16 of source image
-      fseek (fh, (track_probe[x].sector_size * 16) +
-             track_probe[x].seek_header +
-             track->track_start,
-             SEEK_SET);
-      fread (value_s, 1, 16, fh);
-
-#ifdef  DEBUG          
-      mem_hexdump (value_s, 16, ftell (fh));
-#endif          
-
-      if (!memcmp (pvd_magic, &value_s, 8))
+      fseek (fh, pos, SEEK_SET);
+      if (callibrate (pvd_magic, 8, fh))
         identified = 1;
     }
 
@@ -463,15 +439,15 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       {0, NULL}
     };
   int x = 0, identified = 0;
+  int t = 0;
   static dm_image_t image2;
+  FILE *fh = NULL;
 
 #ifdef  DEBUG
   printf ("sizeof (dm_track_t) == %d\n", sizeof (dm_track_t));
   printf ("sizeof (dm_image_t) == %d\n", sizeof (dm_image_t));
   fflush (stdout);
 #endif
-
-//  dirty_hack (fname, 0);
 
   if (image)
     dm_free (image);
@@ -503,6 +479,33 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
     return NULL;
 
   image->type = probe[x].type;
+
+  if (!(fh = fopen (image->fname, "rb")))
+    return image;
+
+  // verify header or sheet informations
+  for (t = 0; t < image->tracks; t++)
+    {
+      dm_track_t track2;
+      dm_track_t *track = (dm_track_t *) &image->track[t];
+
+      fseek (fh, track->track_start +
+                 (track->sector_size * 16) +
+                 (track->sector_size * track->pregap_len) + 8 +
+                 track->seek_header, SEEK_SET);
+        
+#ifdef  DEBUG
+      printf ("track offset: %ld %lx\n\n", ftell (fh), ftell (fh));
+      fflush (stdout);
+#endif
+        
+      if (dm_track_init (&track2, fh) != NULL)
+        track->iso_header_start = (track2.sector_size * 16) + track2.seek_header;
+
+      track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
+    }
+
+  fclose (fh);
 
   return image;
 }

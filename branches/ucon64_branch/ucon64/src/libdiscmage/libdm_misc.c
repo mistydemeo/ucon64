@@ -151,6 +151,8 @@ const st_track_probe_t track_probe[] =
     {0, 0,    NULL,         "MODE2_FORM2"},
 #endif
     {0, 0,  2352, 0, "AUDIO", "AUDIO"},
+    // TODO: remove this!
+    {0, 0,  1, 0, "AUDIO", "AUDIO"},
     {0, 0, 0, 0, NULL, NULL}
   };
 

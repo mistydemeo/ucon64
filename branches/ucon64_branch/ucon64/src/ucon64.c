@@ -554,7 +554,7 @@ main (int argc, char **argv)
   // $HOME/.ucon64/ ?
   strcpy (ucon64.configdir, get_property (ucon64.configfile, "ucon64_configdir", buf, ""));
 #ifdef  __CYGWIN__
-  strcpy (ucon64.configdir, fix_character_set (ucon64.configdir));
+  fix_character_set (ucon64.configdir);
 #endif
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
@@ -562,7 +562,7 @@ main (int argc, char **argv)
 #ifdef  GUI
   strcpy (ucon64.skindir, get_property (ucon64.configfile, "ucon64_skindir", buf, ""));
 #ifdef  __CYGWIN__
-  strcpy (ucon64.skindir, fix_character_set (ucon64.skindir));
+  fix_character_set (ucon64.skindir);
 #endif
   strcpy (buf, ucon64.skindir);
   realpath2 (buf, ucon64.skindir);
@@ -572,7 +572,7 @@ main (int argc, char **argv)
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
 #ifdef  __CYGWIN__
-  strcpy (ucon64.datdir, fix_character_set (ucon64.datdir));
+  fix_character_set (ucon64.datdir);
 #endif
   strcpy (buf, ucon64.datdir);
   realpath2 (buf, ucon64.datdir);

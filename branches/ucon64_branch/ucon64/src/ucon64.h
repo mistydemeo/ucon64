@@ -143,6 +143,7 @@ typedef struct
 #endif
 #ifdef  GUI
   char netgui_path[FILENAME_MAX];               // path to the netgui DLL
+  char gui_path[FILENAME_MAX];                  // remember the current path and file for the GUI
 #endif
   unsigned int parport;                         // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP

@@ -682,7 +682,7 @@ ucon64_e (void)
       return -1;
     }
 
-  sprintf (buf, "%s \"%s\"", buf2, ucon64.rom);
+  sprintf (buf, "%s \"%s\" &", buf2, ucon64.rom);
 
   puts (buf);
   fflush (stdout);

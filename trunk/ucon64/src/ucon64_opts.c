@@ -36,7 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_lib.h"
 #include "ucon64_opts.h"
 #include "quick_io.h"
-#include "libdiscmage/libdiscmage.h"
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"

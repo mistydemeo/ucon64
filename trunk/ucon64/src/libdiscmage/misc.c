@@ -636,18 +636,73 @@ get_suffix (const char *filename)
 }
 
 
-char *
-strtrim (char *str)
+/*
+ Removes all trailing blanks from a string.
+ Blanks are defined with ISSPACE  (blank, tab, newline, return, formfeed,
+ vertical tab = 0x09 - 0x0D + 0x20)
+*/
+static int
+strtrimr (char *pszStr)
 {
-  int x = strlen (str);
+  int i, j;
 
-  while (x && isspace ((int) *(str + (--x))))
-    ;
+  j = i = strlen (pszStr) - 1;
 
-  *(str + (++x)) = 0;
+  while (isspace (pszStr[i]) && (i >= 0))
+    pszStr[i--] = 0;
 
-  return str + strspn (str, "\t ");
+  return j - i;
 }
+
+
+/*
+  Removes all leading blanks from a string.
+  Blanks are defined with ISSPACE  (blank, tab, newline, return, formfeed,
+  vertical tab = 0x09 - 0x0D + 0x20)
+*/
+static int
+strtriml (char *pszStr)
+{
+  int i = 0, j;
+
+  j = strlen (pszStr) - 1;
+
+  while (isspace (pszStr[i]) && (i <= j))
+    i++;
+
+  if (0 < i)
+    strcpy (pszStr, &pszStr[i]);
+
+  return i;
+}
+
+
+/*
+  Removes all leading and trailing blanks in a string.
+  Blanks are defined with ISSPACE  (blank, tab, newline, return, formfeed,
+  vertical tab = 0x09 - 0x0D + 0x20)
+*/
+char *
+strtrim (char *pszStr)
+#if 1
+{
+  int iBlank;
+
+  iBlank = strtrimr (pszStr);
+  iBlank += strtriml (pszStr);
+
+  return pszStr;
+}
+#else
+{
+  int x = strlen (str) - 1;
+
+  for (; x >= 0 && isspace ((int) *(str + x)); x--);
+  *(str + x + 1) = 0;
+
+  return (char *) (str + strspn (str, "\t "));
+}
+#endif
 
 
 int
@@ -690,20 +745,20 @@ void
 mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 // hexdump something
 {
-  uint32_t pos;
-  char buf[MAXBUFSIZE];
+  uint32_t pos = 0;
+  char buf[32];
   const unsigned char *p = (const unsigned char *) mem;
 
   *buf = 0;
-  for (pos = 0; pos < n; pos++, p++)
+  while (pos < n)
     {
-      if (!(pos % 16))
-        printf ("%s%s%08x  ", pos ? buf : "",
-                               pos ? "\n" : "",
-                               (int) pos + virtual_start);
-      printf ("%02x %s", *p, !((pos + 1) % 4) ? " ": "");
-      *(buf + (pos % 16)) = isprint (*p) ? *p : '.';
-      *(buf + (pos % 16) + 1) = 0;
+      if (!(pos & 15))
+        printf ("%s\n%08x  ", buf, (uint32_t) pos + virtual_start);
+
+      *(buf + (pos & 15)) = isprint (*p) ? *p : '.';
+      *(buf + (pos & 15) + 1) = 0;
+
+      printf (++pos & 3 ? "%02x " : "%02x  ", *(p++));
     }
   printf ("%s\n", buf);
 }

@@ -2,12 +2,15 @@
 
 @DEFINE_DLOPEN_MAKE@
 @DEFINE_ZLIB_MAKE@
+@DEFINE_DISCMAGE_MAKE@
 
 CC=@CC@
-CFLAGS=@CFLAGS@ @DEFS@
+CFLAGS=-I../src/ @CFLAGS@ @DEFS@
 LDFLAGS=@LDFLAGS@
 
-LIBNAME=discmage
+ifdef DISCMAGE
+LIBNAME_DM=discmage
+endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
@@ -15,31 +18,40 @@ LIBNAME=discmage
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-FULLLIBNAME=$(LIBNAME).dll
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dll
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a 
+endif
 endif
 
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
-FULLLIBNAME=$(LIBNAME).dll
+ifdef DISCMAGE
+FULLLIBNAME=$(LIBNAME_DM).dll
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
+endif
 endif
 
 else
 ifdef DJGPP
 
-FULLLIBNAME=$(LIBNAME).dxe
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dxe
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
+endif
 endif
 
 else                                    # Unix or BeOS
 
 ifdef DLOPEN
-FULLLIBNAME=$(LIBNAME).so
+
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).so
+endif
 
 ifneq ($(OSTYPE),beos)
 ifneq ($(OSTYPE),FreeBSD)
@@ -48,8 +60,11 @@ endif
 endif
 
 else
-FULLLIBNAME=lib$(LIBNAME).so
-LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
+ifdef DISCMAGE
+FULLLIBNAME_DM=lib$(LIBNAME_DM).so
+LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
+endif                                   # DISCMAGE
+
 endif
 
 endif                                   # DJGPP
@@ -58,7 +73,7 @@ endif                                   # cygwin
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-        ucon64_lib.o misc.o getopt.o quick_io.o \
+        misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -72,6 +87,9 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
 ifdef ZLIB
 OBJECTS+=unzip.o map.o miscz.o
+endif
+ifdef DISCMAGE
+OBJECTS+=ucon64_lib.o
 endif
 
 ifdef DLOPEN
@@ -111,7 +129,7 @@ endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
 
-all: libdiscmage/$(FULLLIBNAME) $(TARGET)
+all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
 
 
 clean:
@@ -171,7 +189,8 @@ endif                                   # cygwin
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-libdiscmage/$(FULLLIBNAME):
+ifdef DISCMAGE
+libdiscmage/$(FULLLIBNAME_DM):
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libdiscmage && $(MAKE)
 else
@@ -187,7 +206,7 @@ else
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
-
+endif                                   # DISCMAGE
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
@@ -266,6 +285,7 @@ ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
 ucon64_misc.o: dlopen.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
 ucon64_lib.o: ucon64_lib.h dlopen.h $(UCON64_STD_H)
+ucon64_libng.o: ucon64_lib.h dlopen.h $(UCON64_STD_H)
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h $(UCON64_STD_H)

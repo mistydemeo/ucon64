@@ -33,8 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
 #include "misc.h"
-#include "libdiscmage/libdiscmage.h"            // dm_image_t
-
 
 typedef struct
 {
@@ -46,6 +44,10 @@ typedef struct
                                                   // 0 = OK, 1 = TODO, 2 = TEST
 } st_usage_t;
 
+
+#ifdef  DISCMAGE
+#include "ucon64_lib.h"
+#endif
 
 /*
   This struct contains very specific informations only <console>_init() can
@@ -131,6 +133,7 @@ typedef struct
   char datdir[FILENAME_MAX];                    // directory for DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
+  char netgui_path[FILENAME_MAX];               // path to the netgui DLL
 
   unsigned int parport;                         // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
@@ -141,6 +144,7 @@ typedef struct
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
+  int netgui_enabled;                           // flag if netgui DLL is loaded
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
 
@@ -179,7 +183,9 @@ typedef struct
   const char *dump_info;                        // NES UNIF
   const char *comment;                          // NES UNIF
 
+#ifdef  DISCMAGE
   dm_image_t *image;                            // info from libdiscmage
+#endif
   st_ucon64_dat_t *dat;                         // info from DATabase
   st_rominfo_t *rominfo;                        // info from <console>_init()
 } st_ucon64_t;

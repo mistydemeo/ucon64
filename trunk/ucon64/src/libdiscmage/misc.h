@@ -295,7 +295,41 @@ extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
-extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_char);
+
+
+/*
+  URL's (use URL's as commandline options)
+
+  url_unescape_string() replace %xx escape sequences with the char
+  url_escape_string()   replace chars with %xx escape sequences
+  strurl()  parse an url [protocol://][username][:password]hostname[:port][/...]
+              into st_url_t
+
+  url_to_cmd() convert a url into something like a cmdline
+              with this you can turn an url into argc and argv
+              by doing this http request's could be handled with getopt()(!)
+
+TODO:  strargv() wapper for argz_* to convert a cmdline into an argv[] like array
+TODO:  cmd_to_argv() wapper for argz_* to convert a cmdline into an argv[] like array
+*/
+extern char *url_unescape_string (char *ostr, const char *str); 
+extern int url_escape_string (char *ostr, const char *str);
+typedef struct
+{
+  char *url;       // default: "http://localhost:80/"
+  char *protocol;    // default: "http"
+
+  char *user;        // default: NULL
+  char *pass;        // default: NULL
+
+  char *host;        // default: localhost
+  unsigned int port; // default: 80
+  char *file;        // default: "/"
+} st_url_t;
+extern st_url_t *strurl (st_url_t *url, const char *url_s);
+extern char *url_to_cmd (const char *url_s);
+extern int cmd_to_argv (const char *cmd, char ***argv_p, int max_args);
+//extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_char);
 
 
 /*

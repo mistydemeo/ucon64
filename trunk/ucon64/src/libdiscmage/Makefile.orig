@@ -10,7 +10,7 @@ INSTALL = install -c
 LIBTOOL = libtool
 
 CC=gcc
-CFLAGS0=-I. -Wall -W -O3 -DHAVE_CONFIG_H -I..
+CFLAGS0=-Wall -W -O3 -DHAVE_CONFIG_H
 CFLAGS=$(CFLAGS0) -DDLL
 # The order of . and .. is important if header files are specified between
 # angle brackets

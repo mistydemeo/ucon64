@@ -250,6 +250,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_83 (UCON64_OPTION + 166)
 #define UCON64_FORCE63 (UCON64_OPTION + 167)
+#define UCON64_GUI (UCON64_OPTION + 168)
 
 // Keep these (libdiscmage) options separate
 #define UCON64_DISC (UCON64_OPTION + 250)
@@ -260,5 +261,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_BIN2ISO (UCON64_OPTION + 255)
 #define UCON64_ISOFIX (UCON64_OPTION + 256)
 #define UCON64_XCDRW (UCON64_OPTION + 257)
-
+#define UCON64_CDMAGE (UCON64_OPTION + 258)
 #endif // UCON64_DEFINES_H

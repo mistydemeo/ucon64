@@ -66,8 +66,8 @@ write programs in C
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
-#include "ucon64_lib.h"
 #include "ucon64_opts.h"
+#include "ucon64_lib.h"
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -111,6 +111,7 @@ const struct option options[] = {
     {"bot", 1, 0, UCON64_BOT},
     {"bs", 0, 0, UCON64_BS},
     {"c", 1, 0, UCON64_C},
+    {"cdmage", 1, 0, UCON64_CDMAGE},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"chk", 0, 0, UCON64_CHK},
@@ -153,7 +154,7 @@ const struct option options[] = {
     {"ggd", 1, 0, UCON64_GGD},
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
-//    {"good", 0, 0, UCON64_GOOD},
+    {"gui", 1, 0, UCON64_GUI},
     {"h", 0, 0, UCON64_HELP},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -427,9 +428,12 @@ ucon64_runtime_debug (void)
 void
 ucon64_exit (void)
 {
+#ifdef  DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       libdm_close (ucon64.image);
+#endif
+
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -543,8 +547,10 @@ main (int argc, char **argv)
   if (ucon64.dat_enabled)
     ucon64_dat_indexer ();  // update cache (index) files if necessary
 
+#ifdef  DISCMAGE
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
+#endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
   if (argc < 2)
@@ -937,11 +943,13 @@ ucon64_rom_handling (void)
 //          ucon64.rominfo = (st_rominfo_t *) &rominfo;
         }
 
+#ifdef  DISCMAGE
       // check for disc image only if ucon64_probe() failed or --disc was used
       if (ucon64.discmage_enabled)
 //        if (!ucon64.rominfo || ucon64.force_disc)
         if (ucon64.force_disc)
           ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
+#endif
     }
   // end of WF_PROBE
 
@@ -1096,7 +1104,6 @@ ucon64_nfo (void)
   if (ucon64.fname_arch[0])
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
-
   if (ucon64.console == UCON64_UNKNOWN && !ucon64.image)
     {
       fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
@@ -1105,7 +1112,8 @@ ucon64_nfo (void)
 
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.rominfo);
-
+  
+#ifdef  DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       {
@@ -1114,9 +1122,10 @@ ucon64_nfo (void)
 
         return 0; // no crc calc. for disc images and therefore no dat entry either
       }
-
+#endif
   // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
-  printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);
+  if (ucon64.fcrc32 || ucon64.crc32)
+    printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);
 
   // The check for the size of the file is made, so that uCON64 won't display a
   //  (nonsense) DAT info line when dumping a ROM (file doesn't exist, so
@@ -1534,11 +1543,13 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0].desc,
     nes_usage[0].desc, snes_usage[0].desc);
 
+#ifdef  DISCMAGE
   if (ucon64.discmage_enabled)
     {
       ucon64_render_usage (libdm_usage);
       printf ("\n");
     }
+#endif
 
   // getopt()?
   for (c = 0; arg[c].val; c++)

@@ -135,12 +135,12 @@ BuildCRCTable ()
     {
       crc = i;
       for (j = 8; j > 0; j--)
-	{
-	  if (crc & 1)
-	    crc = (crc >> 1) ^ CRC32_POLYNOMIAL;
-	  else
-	    crc >>= 1;
-	}
+        {
+          if (crc & 1)
+            crc = (crc >> 1) ^ CRC32_POLYNOMIAL;
+          else
+            crc >>= 1;
+        }
       CRCTable[i] = crc;
     }
 }
@@ -174,8 +174,8 @@ CalculateFileCRC (FILE * file)
     {
       count = fread (buffer, 1, 512, file);
       if ((i++ % 32) == 0)
-	if (count == 0)
-	  break;
+        if (count == 0)
+          break;
       crc = CalculateBufferCRC (count, crc, buffer);
     }
   return crc ^= 0xFFFFFFFFL;
@@ -267,7 +267,7 @@ filetestpad (char *filename)
 }
 
 #ifdef  BACKUP
-#if     (__UNIX__ || __BEOS__)	// DJGPP (DOS) has outportX() & inportX()
+#if     (__UNIX__ || __BEOS__)  // DJGPP (DOS) has outportX() & inportX()
 unsigned char
 inportb (unsigned short port)
 {
@@ -353,8 +353,8 @@ detect_parport (unsigned int port)
     {
       outportb (port, 0x55);
       for (i = 0; i < DETECT_MAX_CNT; i++)
-	if (inportb (port) == 0x55)
-	  break;
+        if (inportb (port) == 0x55)
+          break;
     }
 
 #ifdef  __linux__
@@ -389,20 +389,20 @@ parport_probe (unsigned int port)
     {
       ucon64_io_fd = open ("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
       if (ucon64_io_fd == -1)
-	{
-	  fprintf (stderr,
-		   "Could not open I/O port device (no driver)\n"
-		   "You can download the latest ioport driver from\n"
-		   "http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n");
-	  exit (1);
-	}
+        {
+          fprintf (stderr,
+                   "Could not open I/O port device (no driver)\n"
+                   "You can download the latest ioport driver from\n"
+                   "http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n");
+          exit (1);
+        }
       else
-	{			// print warning, but continue
-	  fprintf (stderr,
-		   "Support for the driver parnew is deprecated. Future versions of uCON64 might\n"
-		   "not support this driver. You can download the latest ioport driver from\n"
-		   "http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n\n");
-	}
+        {                       // print warning, but continue
+          fprintf (stderr,
+                   "Support for the driver parnew is deprecated. Future versions of uCON64 might\n"
+                   "not support this driver. You can download the latest ioport driver from\n"
+                   "http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n\n");
+        }
     }
 
   if (atexit (close_io_port) == -1)
@@ -416,37 +416,37 @@ parport_probe (unsigned int port)
   if (port <= 3)
     {
       for (i = 0; i < 3; i++)
-	{
-	  if (detect_parport (parport_addresses[i]) == 1)
-	    {
-	      port = parport_addresses[i];
-	      break;
-	    }
-	}
+        {
+          if (detect_parport (parport_addresses[i]) == 1)
+            {
+              port = parport_addresses[i];
+              break;
+            }
+        }
       if (i >= 3)
-	return 0;
+        return 0;
     }
   else
     if ((port != parport_addresses[0]) &&
-	(port != parport_addresses[1]) && (port != parport_addresses[2]))
+        (port != parport_addresses[1]) && (port != parport_addresses[2]))
     return 0;
 
   if (port != 0)
     {
 #ifdef  __linux__
-      if (ioperm (port, 3, 1) == -1)	// data, status & control
-	{
-	  fprintf (stderr,
-		   "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
-		   "(This program needs root privileges)\n",
-		   port + PARPORT_DATA, port + PARPORT_STATUS,
-		   port + PARPORT_CONTROL);
-	  exit (1);		// Don't return, if ioperm() fails port access
-	}			//  causes core dump
+      if (ioperm (port, 3, 1) == -1)    // data, status & control
+        {
+          fprintf (stderr,
+                   "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
+                   "(This program needs root privileges)\n",
+                   port + PARPORT_DATA, port + PARPORT_STATUS,
+                   port + PARPORT_CONTROL);
+          exit (1);             // Don't return, if ioperm() fails port access
+        }                       //  causes core dump
 #endif
       outportb (port + PARPORT_CONTROL,
-		inportb (port + PARPORT_CONTROL) & 0x0f);
-    }				// bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
+                inportb (port + PARPORT_CONTROL) & 0x0f);
+    }                           // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
   return port;
 }
@@ -459,11 +459,11 @@ parport_gauge (time_t init_time, long pos, long size)
   char buf[2 * 24 + 1];
 
   if ((curr = time (0) - init_time) == 0)
-    curr = 1;			// `round up' to at least 1 sec (no division
-  if (pos > size)		//  by zero below)
+    curr = 1;                   // `round up' to at least 1 sec (no division
+  if (pos > size)               //  by zero below)
     return -1;
 
-  cps = pos / curr;		// # bytes/second (average transfer speed)
+  cps = pos / curr;             // # bytes/second (average transfer speed)
   left = (size - pos) / cps;
 
   buf[0] = 0;
@@ -472,10 +472,10 @@ parport_gauge (time_t init_time, long pos, long size)
   buf[24] = 0;
 
   printf ("\r%10lu Bytes [%s] %lu%%, CPS=%lu, ",
-	  pos, buf, (unsigned long) 100 * pos / size, (unsigned long) cps);
+          pos, buf, (unsigned long) 100 * pos / size, (unsigned long) cps);
 
   if (pos == size)
-    printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline -> gauge can be cleared
+    printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60);   // DON'T print a newline -> gauge can be cleared
   else
     printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
 
@@ -542,11 +542,11 @@ int
 trackmode (long imagesize)
 // tries to figure out the used track mode of the cd image
 {
-  return ((!(imagesize % 2048)) ? 2048 :	// MODE1, MODE2_FORM1
-	  (!(imagesize % 2324)) ? 2324 :	// MODE2_FORM2
-	  (!(imagesize % 2336)) ? 2336 :	// MODE2, MODE2_FORM_MIX
-	  (!(imagesize % 2352)) ? 2352 :	// AUDIO, MODE1_RAW, MODE2_RAW
-	  -1			// unknown
+  return ((!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1
+          (!(imagesize % 2324)) ? 2324 :        // MODE2_FORM2
+          (!(imagesize % 2336)) ? 2336 :        // MODE2, MODE2_FORM_MIX
+          (!(imagesize % 2352)) ? 2352 :        // AUDIO, MODE1_RAW, MODE2_RAW
+          -1                    // unknown
     );
 }
 

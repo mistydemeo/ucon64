@@ -48,11 +48,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <malloc.h>
 #include <string.h>
 #ifdef  __UNIX__
-#include <unistd.h>		// usleep(), microseconds
+#include <unistd.h>             // usleep(), microseconds
 #elif   __DOS__
-#include <dos.h>		// delay(), milliseconds
+#include <dos.h>                // delay(), milliseconds
 #elif   __BEOS__
-#include <OS.h>			// snooze(), microseconds
+#include <OS.h>                 // snooze(), microseconds
 #endif
 
 #ifndef __BEOS__
@@ -154,52 +154,52 @@ smd_main (int argc, char **argv)
   for (i = 0; opts[i] != NULL; i += 1)
     {
       if (strcmp (opts[i], argv[1]) == 0)
-	{
-	  switch (i)
-	    {
-	    case 0:		/* Backup cartridge */
-	      save_smd (argv[2]);
-	      break;
+        {
+          switch (i)
+            {
+            case 0:            /* Backup cartridge */
+              save_smd (argv[2]);
+              break;
 
-	    case 1:		/* Send cartridge */
-	      load_smd (argv[2]);
-	      break;
+            case 1:            /* Send cartridge */
+              load_smd (argv[2]);
+              break;
 
-	    case 2:		/* Backup SRAM */
-	      save_sram (argv[2]);
-	      break;
+            case 2:            /* Backup SRAM */
+              save_sram (argv[2]);
+              break;
 
-	    case 3:		/* Send SRAM */
-	      load_sram (argv[2]);
-	      break;
+            case 3:            /* Send SRAM */
+              load_sram (argv[2]);
+              break;
 
-	    case 4:		/* Show cartridge information */
-	      {
-		uint8 mem;
-		uint8 blocks;
-		mem = smd_peek (0xDFF0);
-		blocks = smd_peek (0xDFF1);
+            case 4:            /* Show cartridge information */
+              {
+                uint8 mem;
+                uint8 blocks;
+                mem = smd_peek (0xDFF0);
+                blocks = smd_peek (0xDFF1);
 
-		printf ("The SMD has %d bytes of RAM. (%dMB)\n", mem * 0x4000,
-			(mem * 0x4000) / 0x20000);
+                printf ("The SMD has %d bytes of RAM. (%dMB)\n", mem * 0x4000,
+                        (mem * 0x4000) / 0x20000);
 
-		if (!blocks)
-		  printf ("The SMD does not detect a cartridge.\n");
-		else
-		  printf ("The cartidge size is %d bytes. (%dMB)\n",
-			  blocks * 0x4000, (blocks * 0x4000) / 0x20000);
-	      }
-	      break;
+                if (!blocks)
+                  printf ("The SMD does not detect a cartridge.\n");
+                else
+                  printf ("The cartidge size is %d bytes. (%dMB)\n",
+                          blocks * 0x4000, (blocks * 0x4000) / 0x20000);
+              }
+              break;
 
-	    case 5:		/* Dump BIOS */
-	      dump_bios (argv[2]);
-	      break;
+            case 5:            /* Dump BIOS */
+              dump_bios (argv[2]);
+              break;
 
-	    case 6:		/* Run loaded cartridge */
-	      smd_poke (0x2001, 0x02);
-	      break;
-	    }
-	}
+            case 6:            /* Run loaded cartridge */
+              smd_poke (0x2001, 0x02);
+              break;
+            }
+        }
     }
 
   return (0);
@@ -308,7 +308,7 @@ smd_recieve_block (uint32 length, uint8 * buffer)
   uint32 count;
   uint8 temp, checksum = 0x81;
 
-#ifdef  __UNIX__		// wait 32 milliseconds
+#ifdef  __UNIX__                // wait 32 milliseconds
   usleep (32000);
 #elif   __DOS__
   delay (32);
@@ -382,12 +382,12 @@ interleave_buffer (uint8 * buffer, int size)
       memcpy (block, &buffer[count * 0x4000], 0x4000);
 
       for (offset = 0; offset < 0x2000; offset += 1)
-	{
-	  buffer[(count * 0x4000) + 0x0000 + offset] =
-	    block[(offset << 1) | (1)];
-	  buffer[(count * 0x4000) + 0x2000 + offset] =
-	    block[(offset << 1) | (0)];
-	}
+        {
+          buffer[(count * 0x4000) + 0x0000 + offset] =
+            block[(offset << 1) | (1)];
+          buffer[(count * 0x4000) + 0x2000 + offset] =
+            block[(offset << 1) | (0)];
+        }
     }
 }
 
@@ -439,15 +439,15 @@ load_smd (char *filename)
 
       /* 68000 binary files need file data to be interleaved */
       if (extcmp (filename, ".bin") == 0)
-	{
-	  header[1] = 0x03;
-	  interleave_buffer (buf, block_size);
-	}
+        {
+          header[1] = 0x03;
+          interleave_buffer (buf, block_size);
+        }
       else
-	{
-	  /* Assume all other extensions are Z80 programs */
-	  header[1] = 0x01;
-	}
+        {
+          /* Assume all other extensions are Z80 programs */
+          header[1] = 0x01;
+        }
     }
   else
     {
@@ -521,10 +521,10 @@ save_smd (char *filename)
   memset (header, 0, 0x200);
   header[0x00] = smd_peek (0xDFF1);
 
-  header[0x01] = 0x03;		/* File type: 68000 program */
-  header[0x08] = 0xAA;		/* Identifier #1 */
-  header[0x09] = 0xBB;		/* Identifier #2 */
-  header[0x0A] = 0x06;		/* File type: 68000 program */
+  header[0x01] = 0x03;          /* File type: 68000 program */
+  header[0x08] = 0xAA;          /* Identifier #1 */
+  header[0x09] = 0xBB;          /* Identifier #2 */
+  header[0x0A] = 0x06;          /* File type: 68000 program */
 
   /* Write header to disk */
   fwrite (header, 0x200, 1, fd);
@@ -539,10 +539,10 @@ save_smd (char *filename)
       smd_send_command (0x05, count, 0x00);
       smd_send_command (0x01, 0x4000, 0x4000);
       if (!smd_recieve_block (0x4000, block))
-	{
-	  printf ("Checksum mismatch - check connections and try again.\n");
-	  exit (1);
-	}
+        {
+          printf ("Checksum mismatch - check connections and try again.\n");
+          exit (1);
+        }
       fwrite (block, 0x4000, 1, fd);
     }
 
@@ -616,11 +616,11 @@ save_sram (char *filename)
   /* Set up header */
   memset (header, 0, 0x200);
   header[0x00] = 0x00;
-  header[0x01] = 0x00;		/* SRAM file */
+  header[0x01] = 0x00;          /* SRAM file */
   header[0x02] = 0x00;
   header[0x08] = 0xAA;
   header[0x09] = 0xBB;
-  header[0x0A] = 0x07;		/* SRAM file */
+  header[0x0A] = 0x07;          /* SRAM file */
   fwrite (header, 0x200, 1, fd);
 
   /* Map SRAM */

@@ -28,9 +28,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define fal_HEADER_LEN 0
 
 int fal_read_rom (char *filename, unsigned int parport, int argc,
-		  char *argv[]);
+                  char *argv[]);
 int fal_write_rom (char *filename, unsigned int parport, int argc,
-		   char *argv[]);
+                   char *argv[]);
 int fal_read_sram (char *filename, unsigned int parport, int bank);
 int fal_write_sram (char *filename, unsigned int parport, int bank);
 int fal_usage (int argc, char *argv[]);

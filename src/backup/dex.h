@@ -29,10 +29,10 @@ int dex_usage (int argc, char *argv[]);
 #define dex_HEADER_LEN 0
 
 
-char *read_block(int block_num, char *data);
-int write_block(int block_num, char *data);
-char *read_frame(int frame, char *data);
-int write_frame(int frame, char *data);
-int get_perm();
+char *read_block (int block_num, char *data);
+int write_block (int block_num, char *data);
+char *read_frame (int frame, char *data);
+int write_frame (int frame, char *data);
+int get_perm ();
 
 #endif /* DEX_H */

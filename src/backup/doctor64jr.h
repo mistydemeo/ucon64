@@ -33,10 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define ai 0x37b
 //#define data 0x37c
 #define trans_size 32768
-#define set_ai_write outportb(port_a,5);	// ninit=1, nwrite=0
-#define set_data_write outportb(port_a,1);	// ninit=0, nwrite=0
-#define set_data_read outportb(port_a,0);	// ninit=0, nwrite=1
-#define set_normal outportb(port_a,4);	// ninit=1, nwrite=1
+#define set_ai_write outportb(port_a,5);        // ninit=1, nwrite=0
+#define set_data_write outportb(port_a,1);      // ninit=0, nwrite=0
+#define set_data_read outportb(port_a,0);       // ninit=0, nwrite=1
+#define set_normal outportb(port_a,4);  // ninit=1, nwrite=1
 /*
 unsigned char inportb(arg1);
 unsigned char outportb(arg1,arg2);
@@ -73,7 +73,7 @@ int d64jr_main (int argc, char *argv[]);
 int doctor64jr_read (char *filename, unsigned int parport);
 
 int doctor64jr_write (char *filename, long start, long len,
-		      unsigned int parport);
+                      unsigned int parport);
 
 
 #define doctor64jr_TITLE "Doctor64 Jr\n19XX Bung Enterprises Ltd http://www.bung.com.hk"

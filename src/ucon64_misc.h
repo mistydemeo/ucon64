@@ -33,17 +33,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>		// ioperm() (libc5)
+#include <unistd.h>             // ioperm() (libc5)
 #include "misc.h"
 
 #ifdef  BACKUP
 #ifdef  __linux__
 #ifdef  __GLIBC__
-#include <sys/io.h>		// ioperm() (glibc)
+#include <sys/io.h>             // ioperm() (glibc)
 #endif
 
 #elif   __DOS__
-#include <pc.h>			// inportb(), inportw()
+#include <pc.h>                 // inportb(), inportw()
 
 #elif   __BEOS__
 #include <fcntl.h>
@@ -65,8 +65,8 @@ IO_Tuple;
 
 #define MBIT 131072
 
-#define PARPORT_DATA    0	// output
-#define PARPORT_STATUS  1	// input
+#define PARPORT_DATA    0       // output
+#define PARPORT_STATUS  1       // input
 #define PARPORT_CONTROL 2
 
 #define out1byte(p,x)   outportb(p,x)
@@ -82,9 +82,9 @@ int hexByteValue (char x, char y);
 // CRC32 routines
 void BuildCRCTable ();
 unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
-				  void *buffer);
+                                  void *buffer);
 unsigned long CalculateFileCRC (FILE * file);
-unsigned long fileCRC32 (char *filename, long start);	// calculate CRC32 of filename beginning from start
+unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 char *ucon64_fbackup (char *filename);
 

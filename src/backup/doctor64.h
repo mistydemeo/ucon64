@@ -32,7 +32,7 @@ int sendDownloadHeader (unsigned int baseport, char name[], long *len);
 int doctor64_read (char *filename, unsigned int parport);
 
 int doctor64_write (char *filename, long start, long len,
-		    unsigned int parport);
+                    unsigned int parport);
 
 int doctor64_usage (int argc, char *argv[]);
 

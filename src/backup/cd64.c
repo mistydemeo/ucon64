@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "cd64.h"
-#include "../misc.h"		// kbhit(), getch()
+#include "../misc.h"            // kbhit(), getch()
 /*
 
 
@@ -1196,7 +1196,7 @@ cd64_usage (int argc, char *argv[])
     printf ("%s\n", cd64_TITLE);
 
   printf ("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
-	  "		receives automatically when $ROM does not exist\n");
+          "		receives automatically when $ROM does not exist\n");
   //TODO more info like technical info about cabeling and stuff for the copier
 
   return 0;

@@ -1963,7 +1963,7 @@ save_track (FILE * fh, st_image_t * image, st_track_t * track, st_opts_t * opts,
 
   if (flags->do_cut != 0) printf ("[cut: %d] ", flags->do_cut);
 
-  track_length = track->length - flags->do_cut;       // para no modificar valor original
+  track_length = track->length - flags->do_cut;       // modificate original value?
 
   if (opts->pregap && track->mode == 0 && image->remaining_tracks > 1) // quick hack to save next track pregap (audio tracks only)
     track_length += track->pregap_length;       // if this isn't last track in current session
@@ -2211,7 +2211,7 @@ ucon64_cdirip (const char *imagename)
               return -1;
             }
 
-// Decidir si cortar
+// cut?
           if (!opts.fulldata && track.mode != 0
               && image.global_current_session == 1 && image.sessions > 1)
             flags.do_cut = 2;
@@ -2224,7 +2224,7 @@ ucon64_cdirip (const char *imagename)
           else
             flags.do_cut = 0;
 
-// Decidir si convertir
+// convert?
           if (track.mode != 0 && track.sector_size != 2048)
             switch (opts.convert)
               {
@@ -2249,7 +2249,7 @@ ucon64_cdirip (const char *imagename)
             (track.sector_size == 2048 ||
              (track.mode != 0 && flags.do_convert)) ? TRUE : FALSE;
 
-// Guardar la pista
+// keep padding?
           if (track.total_length < track.length + track.pregap_length)
             {
               fprintf (stderr, "SKIPPING: This track seems truncated\n");

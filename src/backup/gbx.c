@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"
-char *gbx_title = "GameBoy Xchanger/GBDoctor\n"
+const char *gbx_title = "GameBoy Xchanger/GBDoctor\n"
                   "  19XX Bung Enterprises Ltd http://www.bung.com.hk";
 
 #ifdef BACKUP
@@ -1651,7 +1651,7 @@ check_card (void)
     0xbb, 0xbb, 0x67, 0x63, 0x6e, 0x0e, 0xec, 0xcc,
     0xdd, 0xdc, 0x99, 0x9f, 0xbb, 0xb9, 0x33, 0x3e
   };
-/*	char *rombuf_size_define[] = {
+/*	char *rominfo_size_define[] = {
 		"256kBit = 32kB = 2 banks",
 		"512kBit = 64kB = 4 banks",
 		"1MBit = 128kB = 8 banks",

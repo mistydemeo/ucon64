@@ -42,8 +42,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif // BACKUP
 #include "ucon64.h"
 #include "misc.h"
-#include "bin2iso.h"
 #include "ucon64_misc.h"
+
+const char *track_modes[] = {
+  "MODE1/2048",
+  "MODE1/2352",
+  "MODE2/2336",
+  "MODE2/2352"
+};
 
 #define MAXBUFSIZE 32768
 #define DETECT_MAX_CNT 1000
@@ -63,7 +69,7 @@ static unsigned int parport_probe (unsigned int parport);
 static int detect_parport (unsigned int port);
 #endif
 
-char *unknown_title = "Unknown backup unit/emulator";
+const char *unknown_title = "Unknown backup unit/emulator";
 
 char
 hexDigit (int value)
@@ -254,7 +260,7 @@ ucon64_fbackup (char *filename)
 }
 
 size_t
-filepad (char *filename, long start, long unit)
+filepad (const char *filename, long start, long unit)
 /*
   pad file (if necessary) from start size_t size;
   ignore start bytes (if file has header or something)
@@ -275,7 +281,7 @@ filepad (char *filename, long start, long unit)
 }
 
 long
-filetestpad (char *filename)
+filetestpad (const char *filename)
 // test if EOF is padded (repeating bytes)
 {
   long size, x;
@@ -422,7 +428,7 @@ close_io_port (void)
 #endif
 
 unsigned int
-ucon64_parport_probe(unsigned int port)
+ucon64_parport_probe (unsigned int port)
 {
 #ifdef BACKUP
 #ifdef __unix__
@@ -575,7 +581,7 @@ ucon64_gauge (time_t init_time, long pos, long size)
 #endif // BACKUP
 
 int
-ucon64_testsplit (char *filename)
+ucon64_testsplit (const char *filename)
 // test if ROM is splitted into parts
 {
   long x = 0;
@@ -604,24 +610,127 @@ ucon64_testsplit (char *filename)
 }
 
 int
-ucon64_trackmode_probe (long imagesize)
-// tries to figure out the used track mode of the cd image
+ucon64_bin2iso (const char *image, int track_mode)
 {
-  return (!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1
-         (!(imagesize % 2324)) ? 2324 :        // MODE2_FORM2
-         (!(imagesize % 2336)) ? 2336 :        // MODE2, MODE2_FORM_MIX
-         (!(imagesize % 2352)) ? 2352 :        // AUDIO, MODE1_RAW, MODE2_RAW
-         -1                    // unknown
-    ;
+  int seek_header, seek_ecc, sector_size;
+  long i, size;
+  char buf[MAXBUFSIZE];
+  FILE *dest, *src;
+
+  switch (track_mode)
+    {
+      case MODE1_2048:
+        printf ("ERROR: the images track mode is already MODE1/2048\n");
+        return -1;
+
+      case MODE1_2352:
+        seek_header = 16;
+        seek_ecc = 288;
+        sector_size = 2352;
+        break;
+      
+      case MODE2_2336:
+#ifdef __MAC__ // macintosh
+        seek_header = 0;
+#else
+        seek_header = 8;
+#endif      
+        seek_ecc = 280;
+        sector_size = 2336;
+        break;        
+
+      case MODE2_2352:
+#ifdef __MAC__ // macintosh
+        seek_header = 16;
+#else
+        seek_header = 24;
+#endif      
+        seek_ecc = 280;
+        sector_size = 2352;
+        break;
+
+      default:
+        printf ("ERROR: unknown/unsupported track mode");
+        return -1;
+    }
+
+  strcpy (buf, image);
+  newext (buf, ".ISO");
+  size = quickftell (image) / sector_size;
+
+  if (!(src = fopen (image, "rb"))) return -1;
+  if (!(dest = fopen (buf, "wb")))
+    {
+      fclose (src);
+      return -1;
+    }
+
+  for (i = 0; i < size; i++)
+    {
+      fseek (src, seek_header, SEEK_CUR);
+#ifdef __MAC__
+      if (track_mode == MODE2_2336 || track_mode == MODE2_2352)
+        {
+          fread (buf, sizeof (char), 2056, src);
+          fwrite (buf, sizeof (char), 2056, dest);
+        }
+      else
+#endif
+        {
+          fread (buf, sizeof (char), 2048, src);
+          fwrite (buf, sizeof (char), 2048, dest);
+        }
+      fseek (src, seek_ecc, SEEK_CUR);
+    }
+
+  fclose (dest);
+  fclose (src);
+
+  return 0;
 }
 
-int bin2iso(char *image)
+
+int
+ucon64_trackmode_probe (const char *image)
+// tries to figure out the used track mode of the cd image
 {
-  int argc = 2;
-  char *argv[128];
+//TODO support image == "/dev/<cdrom>"
+  int result = -1;
+  const char SYNC_HEADER[12] =
+    { 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0 };
+  char buf[MAXBUFSIZE];
 
-  argv[0] = "bin2iso";
-  argv[1] = image;
+  quickfread (buf, 0, 16, image);
 
-  return bin2iso_main(argc, argv);
+          printf ("\n");
+          strhexdump (buf, 0, 0, 16);
+          printf ("\n");
+  if (memcmp (SYNC_HEADER, buf, 12))
+{printf("MODE2_2336");
+    result = MODE2_2336;
+ } else
+    switch (buf[15])
+      {
+        case 2:
+          result = MODE2_2352;
+printf("MODE2_2352");
+          break;
+
+        case 1:
+printf("MODE1_2352");
+          result = MODE1_2352;
+          break;
+
+        case 0://TODO test this... at least we know MODE1_2048 has no sync headers
+printf("MODE1_2048");
+          result = MODE1_2048;
+          break;
+          
+        default:
+          printf ("\n");
+          strhexdump (buf, 0, 0, 16);
+          printf ("\n");
+          break;
+        }
+  return result;
 }

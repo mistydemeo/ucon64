@@ -20,12 +20,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef FIG_H
 #define FIG_H
-extern char *fig_title;
+extern const char *fig_title;
 
 #ifdef BACKUP
 extern void fig_usage (void);
 #endif // BACKUP
 
-#define fig_HEADER_START 0
-#define fig_HEADER_LEN 512
+#define FIG_HEADER_START 0
+#define FIG_HEADER_LEN 512
 #endif /* FIG_H */

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
-char *cd64_title = "CD64\n"
+const char *cd64_title = "CD64\n"
                    "  19XX UFO http://www.cd64.com";
 
 
@@ -267,7 +267,7 @@ void test_key (void)
 {
         int temp;
 
-        if ((!rombuf->frontend) ? kbhit () : 0)
+        if ((!rominfo->frontend) ? kbhit () : 0)
         {
                 temp=getch ();
                 if (temp==27||temp==3)

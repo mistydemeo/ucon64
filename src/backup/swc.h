@@ -21,9 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SWC_H
 #define SWC_H
 
-extern char *swc_title;
-#define swc_HEADER_START 0
-#define swc_HEADER_LEN 512
+extern const char *swc_title;
+#define SWC_HEADER_START 0
+#define SWC_HEADER_LEN 512
 
 #ifdef BACKUP
 extern int swc_read_rom (char *filename, unsigned int parport);

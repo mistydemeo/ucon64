@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SMD_H
 #define SMD_H
-extern char *smd_title;
+extern const char *smd_title;
 
 #ifdef BACKUP
 extern void smd_usage (void);
@@ -30,7 +30,7 @@ extern int smd_read_sram (char *filename, unsigned int parport);
 extern int smd_write_sram (char *filename, unsigned int parport);
 #endif // BACKUP
 
-#define smd_HEADER_START 0
-#define smd_HEADER_LEN 512
+#define SMD_HEADER_START 0
+#define SMD_HEADER_LEN 512
 
 #endif // #ifndef SMD_H

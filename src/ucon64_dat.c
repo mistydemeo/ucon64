@@ -578,8 +578,8 @@ ucon64_dat_indexer (void)
   int update = 0;
 #ifdef  NEW_CODE
 #define MAX_GAMES_FOR_CONSOLE 50000
-  st_idx_entry_t *idx_entries, *idx_entry, key;
-  int duplicates;
+  st_idx_entry_t *idx_entries, *idx_entry;
+  int duplicates, n;
   FILE *errorfile;
   char errorfname[FILENAME_MAX];
 
@@ -627,9 +627,16 @@ ucon64_dat_indexer (void)
       while (get_dat_entry (buf, &dat, 0, -1))
         {
 #ifdef  NEW_CODE
-          key.crc32 = dat.current_crc32;
-          idx_entry = bsearch (&key, idx_entries, pos,
-                               sizeof (st_idx_entry_t), idx_compare);
+          /*
+            Doing a linear search removes the need of using the slow qsort()
+            function inside the loop. Doing a binary search doesn't improve the
+            speed much, but is much more efficient of course. Using qsort()
+            inside the loop slows it down with a factor of more than 10.
+          */
+          idx_entry = NULL;
+          for (n = 0; n < pos; n++)
+            if (idx_entries[n].crc32 == dat.current_crc32)
+              idx_entry = &idx_entries[n];
           if (idx_entry)
             {
               // This really makes one loose trust in the DAT files...
@@ -640,7 +647,7 @@ ucon64_dat_indexer (void)
                 {
                   strcpy (errorfname, buf2);
                   setext (errorfname, ".err");
-                  if (!(errorfile = fopen (errorfname, "wb")))
+                  if (!(errorfile = fopen (errorfname, "w"))) // text file for WinDOS
                     {
                       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], errorfname);
                       continue;
@@ -653,7 +660,7 @@ ucon64_dat_indexer (void)
                        "\nWarning: DAT file contains a duplicate CRC32 (0x%x)!\n"
                        "  First game with this CRC32: \"%s\"\n"
                        "  Ignoring game:              \"%s\"\n",
-                      key.crc32, dat.name, current_name);
+                      dat.current_crc32, dat.name, current_name);
 
               duplicates++;
               fseek (fdat, current_filepos, SEEK_SET);
@@ -669,9 +676,6 @@ ucon64_dat_indexer (void)
                        MAX_GAMES_FOR_CONSOLE);
               break;
             }
-          // We have to sort after each addition, because we have to search if
-          //  a CRC32 is already present
-          qsort (idx_entries, pos, sizeof (st_idx_entry_t), idx_compare);
 #else
           fwrite (&dat.current_crc32, sizeof (uint32_t), 1, fh);
 #endif
@@ -680,6 +684,7 @@ ucon64_dat_indexer (void)
           pos++;
         }
 #ifdef  NEW_CODE
+      qsort (idx_entries, pos, sizeof (st_idx_entry_t), idx_compare);
       fwrite (idx_entries, 1, pos * sizeof (st_idx_entry_t), fh);
 #endif
       ucon64_gauge (start_time, size, size);

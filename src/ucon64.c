@@ -830,7 +830,9 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             break;
 
           default:
-            if (ucon64.dat_enabled && ucon64.console == UCON64_NES &&
+            // Use ucon64_dat instead of ucon64.dat_enabled in case the index
+            //  file could not be created/opened -> no segmentation fault
+            if (ucon64_dat && ucon64.console == UCON64_NES &&
                 (nes_get_file_type () == UNIF ||
                  nes_get_file_type () == INES ||
                  nes_get_file_type () == PASOFAMI))

@@ -10,6 +10,7 @@ A: You can optionally open the Makefile in an editor and change the defines<br /
 <br />
 "CD" enables/disables support for cd backups (if enabled cdrdao and/or<br />
 &nbsp;&nbsp;&nbsp;&nbsp; cdrecord should be installed!)<br />
+<br />
 Afterwards enter the following lines<br />
 <br />
 make -f Makefile.&#60;your&nbsp;OS&#62; clean<br />
@@ -36,7 +37,7 @@ Under Windows NT/2000/XP you will need a driver too (giveio/userport). Have a lo
 Q: Sometimes my terminal seems to be locked after I do<br />
 &nbsp;&nbsp; ucon64 -xswc "Super Metroid (JU).swc" | more<br />
 A: You are right, it <u>seems</u> to be locked, but the only thing that happened is
-that the character echoing of the terminal is disabled. Just don't do that ;-)<br />
+that the character echoing of the terminal is disabled by more. Just don't do that ;-)<br />
 </tt></p>
 <p><tt>
 Q: How do I specify a bank number for the GB Xchanger? This doesn't work<br />
@@ -98,6 +99,32 @@ A: No, you did not. When you use -chk uCON64 changes four bytes in the ROM dump,
 they match with the calculated checksum. However, the ROM stays just as bad as it was.
 Use -chk with care. -chk might be useful if you want to store a ROM somewhere without
 using a database with its checksum. You can then later check if the ROM is still the same
-as it was when you stored it by using the checksum that is stored in the ROM.
+as it was when you stored it by using the checksum that is stored in the ROM.<br />
+</tt></p>
+<p><tt>
+Q: Some SNES games don't work on my Super Wild Card. What can I do about that?<br />
+A: You can do several things. First make sure the original game cartidge doesn't contain
+any special chips that your Super Wild Card doesn't support (look at the rom type
+information). For example, if you are trying to upload a game like Super Mario Kart (which
+uses a DSP chip) your Super Wild Card should have an extension with the correct DSP chip
+(or have the right cartridge with that chip plugged in your SWC). Then, make sure you are
+using a good dump (look at the checksum information). Also verify that the backup header is
+correct. You can make uCON64 rewrite the header with -swc or -fig (the SWC send code of
+uCON64 supports Pro Fighter dumps). uCON64 uses the information in the ROM dump's header,
+so this is important! You can also try to rewrite the header with the option -hi or -nhi to
+force uCON64 to think it is a HiROM or a LoROM dump. For example:<br />
+&nbsp;&nbsp; ucon64 -swc -hi "Chrono Trigger (U).swc"<br />
+There are many (good) ROMs on the internet with incorrect headers, so this might well solve
+the problem.<br />
+Several games contain a copy protection that prevents them from running on a backup unit,
+so this can also be a reason why the game doesn't work. You can try -k to remove that
+protection. Several games also check if they are running on a PAL or an NTSC SNES. Use -f
+to remove that form of copy protection. Some other games check the ROM speed. You can use -l
+for those. Note that some games have more than one type of copy protection, so it might be
+necessary to use uCON64 several times with a different option.<br />
+</tt></p>
+<p><tt>
+Q: Which backup devices are supported by uCON64?<br />
+A: See <a href="hardware.html" target="_blank">hardware.html</a>.<br />
 </tt></p>
 </tt></body></html>

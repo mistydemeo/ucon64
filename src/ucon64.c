@@ -301,8 +301,8 @@ main (int argc, char *argv[])
   ucon64.backup = ((!strcmp (getProperty (ucon64.configfile, "backups", buf2, "1"), "1")) ?
                1 : 0);
 
-//  ucon64.argc = argc;
-//  for (x = 0; x < argc; x++)ucon64.argv[x] = argv[x];
+  ucon64.argc = argc;
+  for (x = 0; x < argc; x++)ucon64.argv[x] = argv[x];
 
   if (argc < 2)
     {

@@ -1107,7 +1107,7 @@ ucon64_testpad (const char *filename)
   the zipped dump and 12 seconds for the gzipped dump.
 */
 {
-  int c = 0, blocksize, i, n = 0;
+  int c = 0, blocksize, i, n = 0, start_n;
   unsigned char buffer[MAXBUFSIZE];
   FILE *file = fopen (filename, "rb");
 
@@ -1121,10 +1121,14 @@ ucon64_testpad (const char *filename)
           c = buffer[blocksize - 1];
           n = 0;
         }
+      start_n = n;
       for (i = blocksize - 1; i >= 0; i--)
         {
           if (buffer[i] != c)
-            break;
+            {
+              n -= start_n;
+              break;
+            }
           else
             {
               /*

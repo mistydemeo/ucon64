@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SWC_IO_MMX2         0x080
 #define SWC_IO_DUMP_BIOS    0x100
 
-#define SWC_IO_MAX          0xff                // highest valid dumping mode value
+#define SWC_IO_MAX          0x1ff               // highest valid dumping mode value
 
 extern const st_usage_t swc_usage[];
 

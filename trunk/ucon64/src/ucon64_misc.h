@@ -91,7 +91,7 @@ extern const char *unknown_usage[];
 
 
 /*
-  wrapper for misc.c/filebackup()
+  wrapper for misc.c/file_backup()
 
   if move_name != NULL then filename will just be moved (renamed) and NOT
   duplicated (faster); move_name will contain the new name then

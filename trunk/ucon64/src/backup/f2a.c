@@ -1076,13 +1076,9 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
 
       if (!i && head)
         {
-          buffer[0] = 0x2e;                     // start address
-          buffer[1] = 0x00;
-          buffer[2] = 0x00;
-          buffer[3] = 0xea;
-          memcpy (buffer + 4, gba_logodata, GBA_LOGODATA_LEN);
-          for (j = 0; j < 160 / 4; j++)         // 160 = 32-bit start address + logo size
-            ((int *) buffer)[j] = bswap_32 (((int *) buffer)[j]);
+          ((int *) buffer)[0] = me2le_32 (0x2e0000ea); // start address
+          for (j = 1; j < GBA_LOGODATA_LEN / 4 + 1; j++) // + 1 for start address
+            ((int *) buffer)[j] = bswap_32 (((int *) gba_logodata)[j - 1]);
         }
       if (parport_debug)
         fprintf (stderr, "sending chunk %d of %d\n", (int) (i / 1024) + 1,

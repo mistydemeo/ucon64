@@ -1,7 +1,7 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-written by 1999 - 2003 NoisyB (noisyb@gmx.net)
+written by 1999 - 2004 NoisyB (noisyb@gmx.net)
            2001 - 2004 dbjh
                   2001 Caz
            2002 - 2003 Jan-Erik Karlsson (Amiga)
@@ -1354,14 +1354,14 @@ ucon64_configfile_update (void)
 typedef struct
 {
   int id;
-  const char *emu;
-} st_emulate_t;
+  const char *command;
+} st_command_t;
 
 
 static int
 ucon64_configfile_create (void)
 {
-  st_emulate_t emulate[] = {
+  st_command_t emulate[] = {
     {UCON64_3DO,      ""},
     {UCON64_ATA,      ""},
     {UCON64_CD32,     ""},
@@ -1456,22 +1456,24 @@ ucon64_configfile_create (void)
   set_property (ucon64.configfile, "ilogo",       "ilogo.bin",    "path to iLinker logo file");
   set_property (ucon64.configfile, "gbaloader",   "loader.bin",   "path to GBA multi-game loader");
 
-  for (x = 0; emulate[x].emu; x++)
-    for (y = 0; options[y].name; y++)
-       if (emulate[x].id == options[y].val)
-         {
-           char buf[MAXBUFSIZE];
+  for (x = 0; emulate[x].command; x++)
+    for (y = 0; y < UCON64_MAX_ARGS /*options[y].name*/; y++)
+    {
+      if (emulate[x].id == options[y].val)
+        {
+          char buf[MAXBUFSIZE];
 
-           sprintf (buf, "emulate_%s", options[y].name);
+          sprintf (buf, "emulate_%s", options[y].name);
 
-           set_property (ucon64.configfile, buf, emulate[x].emu, !x ?
-             "emulate_<console shortcut>=<emulator with options>\n\n"
-             "You can also use CRC32 values for ROM specific emulation options:\n\n"
-             "emulate_0x<crc32>=<emulator with options>\n"
-             "emulate_<crc32>=<emulator with options>": NULL);
+          set_property (ucon64.configfile, buf, emulate[x].command, !x ?
+            "emulate_<console shortcut>=<emulator with options>\n\n"
+            "You can also use CRC32 values for ROM specific emulation options:\n\n"
+            "emulate_0x<crc32>=<emulator with options>\n"
+            "emulate_<crc32>=<emulator with options>" : NULL);
 
-           break;
-         }
+          break;
+        }
+    }
 
   return 0;
 }
@@ -1718,10 +1720,10 @@ ucon64_e (void)
   if (property == NULL)
     {
       fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
-              "       %s\n"
-              "TIP:   If the wrong console was detected you might try to force recognition\n"
-              "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
-              buf3, ucon64.configfile);
+               "       %s\n"
+               "TIP:   If the wrong console was detected you might try to force recognition\n"
+               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+               buf3, ucon64.configfile);
       return -1;
     }
 
@@ -1732,9 +1734,9 @@ ucon64_e (void)
   sync ();
 
   result = system (buf)
-#ifndef __MSDOS__
+#if     !(defined __MSDOS__ || defined _WIN32)
            >> 8                                 // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
+#endif                                          //  (does not apply to DJGPP, MinGW & VC++)
            ;
 
 #if 1
@@ -1746,8 +1748,8 @@ ucon64_e (void)
   if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
     {
       fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"
-               "TIP:   If the wrong emulator was used you might try to force recognition\n"
-               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+                       "TIP:   If the wrong emulator was used you might try to force recognition\n"
+                       "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
                result);
     }
 #endif

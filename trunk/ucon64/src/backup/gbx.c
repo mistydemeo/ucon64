@@ -61,6 +61,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
@@ -547,7 +548,7 @@ intel_check_status (void)
       if (time_out == 0)
         {
           fprintf (stderr, "\nERROR: Intel read status time out\n"
-                             "       Status = %x\n", intel_read_status ());
+                             "       Status = 0x%02x\n", intel_read_status ());
           out_adr_data (0, 0x50);               // clear status register
           return -1;
         }
@@ -567,7 +568,7 @@ intel_block_erase (unsigned int block)
       if (time_out == 0)
         {
           fprintf (stderr, "\nERROR: Intel block erase time out\n"
-                             "       Status = %x\n", intel_read_status ());
+                             "       Status = 0x%02x\n", intel_read_status ());
           return -1;
         }
     }
@@ -579,10 +580,10 @@ intel_block_erase (unsigned int block)
       time_out--;
       if (time_out == 0)
         {
-          fprintf (stderr, "\nERROR: Intel block erase time out at %x\n"
-                             "       Status = %x\n", block, intel_read_status ());
+          fprintf (stderr, "\nERROR: Intel block erase time out at 0x%x\n"
+                             "       Status = 0x%02x\n", block, intel_read_status ());
           out_adr_data (block, 0x50);           // clear status register
-          fprintf (stderr, "       Status = %x\n", intel_read_status ());
+          fprintf (stderr, "       Status = 0x%02x\n", intel_read_status ());
           return -1;
         }
     }
@@ -591,10 +592,10 @@ intel_block_erase (unsigned int block)
     return 0;
   else
     {
-      fprintf (stderr, "\nERROR: Intel block erase error at %x\n"
-                         "       Status = %x\n", block, intel_read_status ());
+      fprintf (stderr, "\nERROR: Intel block erase error at 0x%x\n"
+                         "       Status = 0x%02x\n", block, intel_read_status ());
       out_adr_data (block, 0x50);               // clear status register
-      fprintf (stderr, "       Status = %x\n", intel_read_status ());
+      fprintf (stderr, "       Status = 0x%02x\n", intel_read_status ());
       out_adr_data (0x0000, 0xff);              // read array
       return -1;
     }
@@ -754,6 +755,9 @@ check_card (void)
 
   memcpy (game_name, buffer + 0x34, 15);
   game_name[15] = 0;
+  for (i = 0; i < 15; i++)
+    if (!isprint ((int) game_name[i]))
+      game_name[i] = '.';
   printf ("Game name: \"%s\"\n", game_name);
 
   if (buffer[0x48] > 8)                         // ROM size
@@ -861,6 +865,7 @@ read_eeprom_16k (unsigned int bank)
       set_data_read
       for (i = 0; i < 256; i++)                 // page = 256
         buffer[idx + i] = read_data ();
+      idx += 256;
 
       /*
         One can select the game in 2-in-1 cartridges by writing the game number
@@ -876,26 +881,34 @@ read_eeprom_16k (unsigned int bank)
             out_byte ((unsigned char) rocket_game_no++);
             if (bank)
               {
-                // Reread the last page, because the page data came from the
+                // Reread the last two pages, because the data came from the
                 //  previously selected game (data is "mirrored"). This does not
                 //  apply to the first game.
-                set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40));
-                set_ai_data ((unsigned char) 0, 0);
-                set_ai_data ((unsigned char) 2, 0x81);
-                set_ai (3);
-                set_data_read
-                for (i = 0; i < 256; i++)
-                  buffer[idx + i] = read_data ();
+                int k;
+
+                idx = 0;
+                for (k = 0; k < 2; k++)
+                  {
+                    set_ai_data ((unsigned char) 1, (unsigned char) (k | 0x40));
+                    set_ai_data ((unsigned char) 0, 0);
+                    set_ai_data ((unsigned char) 2, 0x81);
+                    set_ai (3);
+                    set_data_read
+                    for (i = 0; i < 256; i++)
+                      buffer[idx + i] = read_data ();
+                    idx += 256;
+                  }
 
                 // remove last gauge
                 fputs ("\r                                                                              \r", stdout);
                 memcpy (game_name, buffer + 0x134, 15);
                 game_name[15] = 0;
+                for (i = 0; i < 15; i++)
+                  if (!isprint ((int) game_name[i]))
+                    game_name[i] = '.';
                 printf ("Found another game: \"%s\"\n\n", game_name);
               }
           }
-
-      idx += 256;
     }
 }
 
@@ -919,7 +932,7 @@ verify_eeprom_16k (unsigned int bank)
       for (i = 0; i < 256; i++)
         if (read_data () != buffer[idx + i])
           {
-            printf ("\nWARNING: Verify error at %ulx\n",
+            printf ("\nWARNING: Verify error at 0x%x\n",
                     (bank * 16384) + (j * 256) + i);
             return -1;
           }
@@ -1112,7 +1125,7 @@ intel_byte_write_32 (unsigned int block_adr, int idx)
       if (intel_check_status ())
         {
           fprintf (stderr, "\nERROR: Intel byte write command time out\n"
-                             "       Status = %x\n", intel_read_status ());
+                             "       Status = 0x%02x\n", intel_read_status ());
 //          dump_intel_data ();
           return -1;
         }
@@ -1141,7 +1154,7 @@ intel_buffer_write_32 (unsigned int block_adr, int idx)
       if (time_out == 0)
         {
           fprintf (stderr, "\nERROR: Intel buffer write command time out\n"
-                             "       Status = %x\n", intel_read_status ());
+                             "       Status = 0x%02x\n", intel_read_status ());
 //          dump_intel_data ();
           return -1;
         }
@@ -1182,7 +1195,7 @@ intel_write_eeprom_16k (unsigned int bank)
       if (intel_buffer_write_32 (block_adr, idx))
         {
           fprintf (stderr, "\nERROR: Write error\n"
-                             "       Status = %x\n", intel_read_status ());
+                             "       Status = 0x%02x\n", intel_read_status ());
           return -1;
         }
     }
@@ -1190,7 +1203,7 @@ intel_write_eeprom_16k (unsigned int bank)
   if (intel_check_status ())
     {
       fprintf (stderr, "\nERROR: Intel buffer write command error\n"
-                         "       Status = %x\n", intel_read_status ());
+                         "       Status = 0x%02x\n", intel_read_status ());
 //      dump_intel_data();
       return -1;
     }
@@ -1316,15 +1329,15 @@ win_id (void)
 
   delay_us (10);
   set_adr (0);                                  // adr2,adr1,adr0
-  printf ("Manufacturer code: %x\n", read_byte ());
+  printf ("Manufacturer code: 0x%02x\n", read_byte ());
   set_adr (1);                                  // adr2,adr1,adr0
-  printf ("Device code: %x\n", read_byte ());
+  printf ("Device code: 0x%02x\n", read_byte ());
 /*
   set_adr (2);                                  // adr2,adr1,adr0
-  printf ("First 16 k protection code: %x\n", read_byte ());
+  printf ("First 16 k protection code: 0x%02x\n", read_byte ());
   set_bank (0x2000, 0x1f);
   set_adr (0x7ff2);                             // adr2,adr1,adr0=0x7fff2
-  printf("Last 16 k protection code: %x\n", read_byte ());
+  printf("Last 16 k protection code: 0x%02x\n", read_byte ());
 */
 
   out_data (0, 0x55, 0x55, 0xaa);               // software product ID exit
@@ -1341,11 +1354,11 @@ mx_id (void)
   out_adr2_data (0x5555, 0x90);                 // adr2,adr1,adr0,data
 
   set_adr (0);                                  // adr2,adr1,adr0
-  printf ("Manufacturer code: %x\n", read_byte ());
+  printf ("Manufacturer code: 0x%02x\n", read_byte ());
   set_adr (2);                                  // adr2,adr1,adr0
-  printf ("Device code: %x\n", read_byte ());
+  printf ("Device code: 0x%02x\n", read_byte ());
   set_adr (4);                                  // adr2,adr1,adr0
-  printf ("First 16 k protection code: %x\n", read_byte ());
+  printf ("First 16 k protection code: 0x%02x\n", read_byte ());
   reset_to_read ();                             // reset to read mode
 }
 
@@ -1363,8 +1376,8 @@ intel_id (void)
     }
 //  mem_hexdump (buffer, 64, 0);
 
-  printf ("Manufacture code = %x\n", buffer[0]);
-  printf ("Device code = %x\n", buffer[1]);
+  printf ("Manufacture code = 0x%02x\n", buffer[0]);
+  printf ("Device code = 0x%02x\n", buffer[1]);
 }
 
 
@@ -1521,7 +1534,7 @@ test_intel (void)
   mem_hexdump (buffer, 64, 0);
 
   out_adr2_data (0x0000, 0x70);                 // read status register
-  printf ("Status register = %x\n", read_byte ());
+  printf ("Status register = 0x%02x\n", read_byte ());
 }
 
 
@@ -1567,7 +1580,7 @@ verify_card_from_file (const char *filename, unsigned int parport)
 */
       if (verify_eeprom_16k (bank))
         {
-          printf ("Verify card error at bank %x\n", bank);
+          printf ("Verify card error at bank 0x%x\n", bank);
           fclose (file);
           exit (1);
         }
@@ -1599,7 +1612,7 @@ gbx_init (unsigned int parport, int read_header)
 
   if (check_port () != 0)
     {
-      fputs ("ERROR: No GBX card present\n", stderr);
+      fputs ("ERROR: GBX not found or not turned on\n", stderr);
       exit (1);
     }
   init_port ();
@@ -1662,7 +1675,7 @@ gbx_read_rom (const char *filename, unsigned int parport)
     {
       read_eeprom_16k (bank);
       if (verify_eeprom_16k (bank))
-        printf ("Verify card error at bank %x\n", bank);
+        printf ("Verify card error at bank 0x%x\n", bank);
 
       fwrite (buffer, 1, 0x4000, file);
       n_bytes += 16 * 1024;
@@ -1729,7 +1742,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
         }
       if (write_eeprom_16k (bank))
         {
-          fprintf (stderr, "ERROR: Write card error at bank %x\n", bank);
+          fprintf (stderr, "ERROR: Write card error at bank 0x%x\n", bank);
           fclose (file);
           end_port ();
           exit (1);
@@ -1756,7 +1769,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
         }
       if (verify_eeprom_16k (bank))
         {
-          fprintf (stderr, "ERROR: Verify card error at bank %x\n", bank);
+          fprintf (stderr, "ERROR: Verify card error at bank 0x%x\n", bank);
           fclose (file);
           end_port ();
           exit (1);

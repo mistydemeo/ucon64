@@ -342,17 +342,13 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
 int
 doctor64_usage (int argc, char *argv[])
 {
-  if (argcmp (argc, argv, "-help"))
     printf ("%s\n", doctor64_TITLE);
 
   printf
     ("  -xv64		send/receive ROM to/from Doctor V64; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 
-  if (argcmp (argc, argv, "-help"))
-    {
 //TODO more info like technical info about cabeling and stuff for the copier
 
-    }
   return (0);
 }

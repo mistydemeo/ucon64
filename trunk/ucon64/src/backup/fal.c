@@ -1726,12 +1726,6 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
 int
 fal_usage (int argc, char *argv[])
 {
-  int verbose = 0;
-
-  if (argcmp (argc, argv, "-help"))
-    verbose = 1;
-
-  if (verbose)
     printf ("%s\n", fal_TITLE);
 
   printf
@@ -1748,7 +1742,6 @@ fal_usage (int argc, char *argv[])
      "                n can be 1, 2, 3 or 4\n"
      "                $FILE=PORT; receives automatically when SRAM does not exist\n");
 
-  if (verbose)
     printf ("\n"
             "                You only need to specify PORT if uCON64 doesn't detect the\n"
             "                (right) parallel port. If that is the case give a hardware\n"

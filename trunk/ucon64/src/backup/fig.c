@@ -23,18 +23,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 fig_usage (int argc, char *argv[])
 {
-  if (argcmp (argc, argv, "-help"))
-    printf ("%s\n", fig_TITLE);
+//    printf ("%s\n", fig_TITLE);
 
 /*
   printf
     ("TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 */
-  if (argcmp (argc, argv, "-help"))
-    {
 //TODO more info like technical info about cabeling and stuff for the copier
 
-    }
   return (0);
 }

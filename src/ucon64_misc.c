@@ -123,7 +123,7 @@ const char *unknown_usage[] =
   Return type is not const char *, because it may return move_name (indirectly
   via q_fbackup()), which is not a pointer to constant characters.
 */
-#if 0
+#if 1
 void
 ucon64_fbackup (char *move_name, const char *filename)
 {

@@ -58,6 +58,26 @@ fsize (const char *filename)
   return -1;
 }
 
+const st_dm_usage_t dm_usage[] = {
+  {"mksheet", "generate TOC and CUE sheet files for IMAGE; " OPTION_LONG_S "rom=IMAGE" /*\n"
+                OPTION_LONG_S "rom could also be an existing TOC or CUE file\n" */},
+#if 0
+// TODO
+  {"cdirip=N", "rip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE"},
+  {"nrgrip=N", "rip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE"},
+  {"rip", "rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK"},
+/*
+    OPTION_LONG_S "file=SECTOR_SIZE\n"
+      "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
+      "                  " OPTION_LONG_S "file=SECTOR_SIZE\n"
+      "                  " OPTION_LONG_S "file=SECTOR_SIZE is optional, uCON64 will always try to\n"
+      "                  detect the correct SECTOR_SIZE from the CD_IMAGE itself\n"
+      "                  SECTOR_SIZE can be 2048, 2052, 2056, 2324, 2332, 2336, 2340,\n"
+      "                  2352 (default), or custom values\n"
+*/
+#endif
+  {NULL, NULL}
+};
 
 
 void gauge_dummy (uint32_t pos, uint32_t total)

@@ -34,18 +34,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "gbx.h"
 const st_usage_t gbx_usage[] =
   {
-    {NULL, "Game Boy Xchanger/GBDoctor"},
-    {NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+    {NULL, NULL, "Game Boy Xchanger/GBDoctor"},
+    {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-    {"xgbx", "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+    {"xgbx", NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when ROM does not exist"},
-    {"xgbxs", "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"  
+    {"xgbxs", NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"  
                 "receives automatically when SRAM does not exist"},
-    {"xgbxb=BANK", "send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
+    {"xgbxb", "BANK", "send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
                      "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when ROM does not exist"},
 #endif // PARALLEL
-    {NULL, NULL}
+    {NULL, NULL, NULL}
   };
   
 #ifdef PARALLEL

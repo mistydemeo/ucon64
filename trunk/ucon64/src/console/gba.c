@@ -171,7 +171,7 @@ gba_n (st_rominfo_t *rominfo, const char *name)
 
   memset(buf, 0, MAXBUFSIZE - 1);
   strcpy (buf, name);
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, 0x0b,
             ucon64.rom, "r+b");
 
@@ -205,7 +205,7 @@ gba_logo (st_rominfo_t *rominfo)
   0x87, 0xf0, 0x3c, 0xaf, 0xd6, 0x25, 0xe4, 0x8b,
   0x38, 0x0a, 0xac, 0x72, 0x21, 0xd4, 0xf8, 0x07};
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (logodata,
             GBA_HEADER_START + rominfo->buheader_len + 0x04,
             LOGODATA_LEN, ucon64.rom, "r+b");
@@ -220,7 +220,7 @@ gba_chk (st_rominfo_t *rominfo)
 {
   char buf[2], chksum = gba_chksum (rominfo) & 0xff;
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
 
   q_fputc (ucon64.rom, GBA_HEADER_START + rominfo->buheader_len + 0xbd,
               chksum, "r+b");
@@ -239,7 +239,7 @@ gba_sram (st_rominfo_t *rominfo)
 {
   char buf[MAXBUFSIZE];
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".TMP");
   rename (ucon64.rom, buf);
@@ -450,7 +450,7 @@ gba_multi (st_rominfo_t *rominfo, int truncate_size, char *fname)
       n_files = ucon64.argc - 1;
     }
 
-  ucon64_fbackup (NULL, destname);
+  handle_existing_file (destname, NULL);
   if ((destfile = fopen (destname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);

@@ -25,11 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <limits.h>
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#include <sys/stat.h>
-#include <limits.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -44,7 +44,32 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cdi.h"
 #include "nero.h"
 
+
+// the version
 const uint32_t dm_version = LIB_VERSION (0, 0, 2);
+
+
+// "proposal" for a usage
+const st_dm_usage_t dm_usage[] = {
+#if 0
+  {"cdirip", "N", "rip/dump track N from DiscJuggler/CDI IMAGE"},
+  {"nrgrip", "N", "rip/dump track N from Nero/NRG IMAGE"},
+  {"rip", NULL, "rip/dump file(s) from a TRACK"},
+#endif
+  {"bin2iso", NULL, "convert binary TRACK to ISO (if possible)"},
+  {"mksheet", NULL, "generate TOC and CUE sheet files for IMAGE" /*\n"
+                "could also be an existing TOC or CUE file\n" */},
+  {NULL, NULL, NULL}
+};
+
+
+// msgs
+const char *libdm_msg[] = {
+  "ERROR: %s has been deprecated\n",
+  "ERROR: unknown/unsupported track mode\n",
+  "ERROR: the images track mode is already MODE1/2048\n",
+  NULL
+};
 
 
 int
@@ -58,56 +83,22 @@ fsize (const char *filename)
   return -1;
 }
 
-const st_dm_usage_t dm_usage[] = {
-  {"mksheet", NULL, "generate TOC and CUE sheet files for IMAGE; " OPTION_LONG_S "rom=IMAGE" /*\n"
-                OPTION_LONG_S "rom could also be an existing TOC or CUE file\n" */},
-#if 0
-// TODO
-  {"cdirip", "N", "rip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE"},
-  {"nrgrip", "N", "rip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE"},
-  {"rip", NULL, "rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK"},
-/*
-    OPTION_LONG_S "file=SECTOR_SIZE\n"
-      "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
-      "                  " OPTION_LONG_S "file=SECTOR_SIZE\n"
-      "                  " OPTION_LONG_S "file=SECTOR_SIZE is optional, uCON64 will always try to\n"
-      "                  detect the correct SECTOR_SIZE from the CD_IMAGE itself\n"
-      "                  SECTOR_SIZE can be 2048, 2052, 2056, 2324, 2332, 2336, 2340,\n"
-      "                  2352 (default), or custom values\n"
-*/
-#endif
-  {NULL, NULL, NULL}
-};
-
 
 void gauge_dummy (uint32_t pos, uint32_t total)
 {
+  return;
 }
 
-//static void (gauge *) (int,int) = gauge_dummy;
 
-
-const char *libdm_msg[] = {
-  "ERROR: %s has been deprecated\n",
-  NULL
-};
-
-
-static const char pvd[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x01" "CD001" "\x01" "\0";
-static const char svd[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x02" "CD001" "\x01" "\0";
-static const char vdt[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\xFF" "CD001" "\x01" "\0";
-
-static const char sub_header[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
-
-static const char sync_data[12] =
+const char pvd_magic[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x01" "CD001" "\x01" "\0";
+const char svd_magic[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x02" "CD001" "\x01" "\0";
+const char vdt_magic[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\xFF" "CD001" "\x01" "\0";
+const char sub_header[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
+const char sync_data[12] =
   { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
 
 #if 0
   const st_track_modes_t track_modes[] = {
-#if 0
-    {, 512, , "/512", ""},
-    {, 1024, , "/1024", ""},
-#endif
     {1, 2048, 0, 0, "MODE1/2048", "MODE1"},
     {1, 2352, 16, 288, "MODE1/2352", "MODE1_RAW"},
     {2, 2336, 8, 280, "MODE2/2336", "MODE2"},
@@ -124,13 +115,32 @@ static const char sync_data[12] =
 #endif
     {0, 0, 0, 0, NULL, NULL}
   };
+#else
+  typedef struct
+    {
+      int sector_size;
+      int mode;
+      int seek_header;
+      int seek_ecc;
+    } st_probe_t;
+    
+  const st_probe_t probe[] = {
+#ifdef __MAC__
+      {2336, 2, 0, 280},
+      {2352, 2, 16, 280},
+//      {2056, 2, 0, 0},
+#endif
+      {2336, 2, 8, 280},  // MODE2_2336
+      {2352, 2, 24, 280}, // MODE2_2352
+      {2352, 1, 16, 288}, // MODE1_2352
+      {2048, 1, 0, 0},    // MODE1_2048
+      {0, 0, 0, 0}
+    };
 #endif
 
 
-
-
 void
-writewavheader (FILE * fdest, uint32_t track_length)
+writewavheader (FILE * fdest, int track_length)
 {
   wav_header_t wav_header;
 
@@ -170,11 +180,10 @@ to_bcd (int i)
   return i % 10 | ((i / 10) % 10) << 4;
 }
 #else
-int32_t
-to_bcd (int32_t value)
-//binary coded decimal
+int
+to_bcd (int value)
 {
-  int32_t a, b;
+  int a, b;
   a = (value / 10) * 16;
   b = value % 10;
   return (a + b);
@@ -191,10 +200,9 @@ to_bcd (int32_t value)
   expressed as a sector count relative to either the beginning of the
   medium or the beginning of the current track.
 */
-
 #if 1
 int
-lba_to_msf (uint32_t lba, dm_msf_t *mp)
+lba_to_msf (int lba, dm_msf_t *mp)
 {
   int m;
   int s;
@@ -237,7 +245,7 @@ lba_to_msf (uint32_t lba, dm_msf_t *mp)
 }
 #else
 int
-lba_to_msf (uint32_t lba, struct cdrom_msf *msf)
+lba_to_msf (int lba, struct cdrom_msf *msf)
 {
   if (lba >= -CD_MSF_OFFSET)
     {
@@ -260,7 +268,7 @@ lba_to_msf (uint32_t lba, struct cdrom_msf *msf)
 
 
 #if 1
-uint32_t
+int
 msf_to_lba (int m, int s, int f, int force_positive)
 {
   long ret = m * 60 + s;
@@ -274,8 +282,8 @@ msf_to_lba (int m, int s, int f, int force_positive)
   return (ret);
 }
 #else
-int32_t
-msf2lba (struct cdrom_msf *msf)
+int
+msf_to_lba (struct cdrom_msf *msf)
 {
   return (msf->cdmsf_min0 * CD_SECS * CD_FRAMES +
           msf->cdmsf_sec0 * CD_FRAMES + msf->cdmsf_frame0);
@@ -308,39 +316,21 @@ read_raw_frame (int32_t fd, int32_t lba, unsigned char *buf)
 #endif
 
 
-static int32_t
-seek_pvd (int32_t sector_size, int32_t mode, const char *filename)
-// will search for valid PVD in sector 16 of source image
-{
-  uint32_t start = sector_size * 16;
-  char buf[10];
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return 1;
-
-  if (sector_size == 2352)
-    start += 16;                // header
-  if (mode == 2)
-    start += 8;                 // subheader
-
-  fseek (fh, start, SEEK_SET);
-  fread (buf, 1, 8, fh);
-  fclose (fh);
-
-  if (!memcmp (pvd, buf, 8))
-    return 1;
-
-  return 0;
-}
-
-
 dm_image_t *
 dm_open (const char *image_filename)
 // recurses through all <image_type>_init functions to find correct image type
 {
-  dm_image_t *image;
+  dm_image_t *image = NULL;
+  dm_track_t *track = image->track;
+  int x = 0;
+  char buf[MAXBUFSIZE];
   FILE *fh = NULL;
+
+  if (!(fh = fopen (image->filename, "rb")))
+    {
+      free (image);
+      return NULL;
+    }
 
   if (!(image = (dm_image_t *) malloc (sizeof (dm_image_t))))
     return NULL;
@@ -349,90 +339,39 @@ dm_open (const char *image_filename)
 
   strcpy (image->filename, image_filename);
 
-  if (!(fh = fopen (image->filename, "rb")))
-    {
-      free (image);
-      return NULL;
-    }
-
-//  image->type =
-//    !cdi_init (image) ? CDI_FORMAT : DEFAULT_FORMAT;
-  if (cdi_init (image) != 0)
-    {
-      fclose (fh);
-      free (image);
-      return NULL;
-    }
-    
-  image->type = CDI_FORMAT;
-
-#if 0
-    !nrg_open (image) ? NRG_FORMAT : 
-    !iso_init (image) ? ISO_FORMAT :
-    !ccd_open (image) ? CCD_FORMAT :
-    !bin_open (image) ? BIN_FORMAT : DEFAULT_FORMAT
-#endif
-
-#if 0
-    if (!memcmp (sync_data, buf, 12))
-    {
-      switch (buf[15])
+  fread (buf, 1, 16, fh);
+  if (!memcmp (sync_data, buf, 12))
+    for (x = 0; probe[x].mode; x++)
+      if (probe[x].mode == buf[15])
         {
-        case 2:
-          if (seek_pvd (2336, 2, image_filename))
-            {
-              image->sector_size = 2336;
-              track->mode = 2;
-#ifdef  __MAC__
-              image->seek_header = 0;
-#else
-              image->seek_header = 8;
-#endif
-              image->seek_ecc = 280;
-            }
-          else if (seek_pvd (2352, 2, image_filename))
-            {
-              image->sector_size = 2352;
-#ifdef  __MAC__
-              image->seek_header = 16;
-#else
-              image->seek_header = 24;
-#endif
-              image->seek_ecc = 280;
-            }
-          else if (seek_pvd (2056, 2, image_filename))
-            {
-              image->sector_size = 2056;
-            }
-          track->mode = 2;
-          break;
+// will search for valid PVD in sector 16 of source image
+            int start = probe[x].sector_size * 16;
 
-        case 1:
-          if (seek_pvd (2352, 1, image_filename))
-            {
-              image->sector_size = 2352;
-              image->seek_header = 16;
-              image->seek_ecc = 288;
-            }
-          else if (seek_pvd (2048, 1, image_filename))
-            {
-              image->sector_size = 2048;
-            }
-          track->mode = 1;
-          break;
+            if (probe[x].sector_size == 2352)
+              start += 16;                // header
+            if (probe[x].mode == 2)
+              start += 8;                 // subheader
 
-        default:
-          image->sector_size = 2048;
-          track->mode = 1;
-          break;
+            fseek (fh, start, SEEK_SET);
+            fread (buf, 1, 8, fh);
+
+            if (!memcmp (pvd_magic, buf, 8))
+              {
+                track->sector_size = probe[x].sector_size;
+                track->mode = probe[x].mode;
+                track->seek_header = probe[x].seek_header;
+                track->seek_ecc = probe[x].seek_ecc;
+                break;
+              }
         }
-    }
-#endif
+  fclose (fh);
+
   return image;
 }
 
 
-int dm_close (dm_image_t *image)
+int
+dm_close (dm_image_t *image)
 {
 //  fclose (image->fh);
   free (image);
@@ -441,26 +380,16 @@ int dm_close (dm_image_t *image)
 
 
 static int32_t
-sector_read (char *buffer, int32_t sector_size, int32_t mode, FILE * fsource)
+sector_read (char *buffer, dm_track_t *track, FILE * fsource)
 // will put user data into buffer no matter the source libdiscmage
 {
-  int32_t status;
+  int status;
 
-  if (sector_size == 2352)
-    fseek (fsource, 16, SEEK_CUR);      // header
-
-  if (mode == 2)
-    fseek (fsource, 8, SEEK_CUR);       // subheader
+  fseek (fsource, track->seek_header, SEEK_CUR);
 
   status = fread (buffer, 2048, 1, fsource);
 
-  if (sector_size >= 2336)
-    {
-      fseek (fsource, 280, SEEK_CUR);
-
-      if (mode == 1)
-        fseek (fsource, 8, SEEK_CUR);
-    }
+  fseek (fsource, track->seek_ecc, SEEK_CUR);
 
   return status;
 }
@@ -480,70 +409,28 @@ dm_rip (dm_image_t *image)
 }
 
 
-int32_t
-dm_bin2iso (dm_image_t * image)
+int
+dm_bin2iso (const char *fname, void (* gauge) (int, int))
 {
+  dm_image_t *image = NULL;
   dm_track_t *track = image->track;
-  int32_t seek_header = 0, seek_ecc = 0, sector_size = 0, i, size;
+  uint32_t i, size;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
-//  time_t starttime = time (NULL);
+  
+  if (!(image = dm_open (fname))) return -1;
 
-  if (track->mode == 1)
-    switch (track->sector_size)
-      {
-      case 2048:
-        fprintf (stderr,
-                 "ERROR: the images track mode is already MODE1/2048\n");
-        return -1;
-
-      case 2352:
-        seek_header = 16;
-        seek_ecc = 288;
-        sector_size = 2352;
-        break;
-
-      default:
-        break;
-      }
-  else if (track->mode == 2)
-    switch (track->sector_size)
-      {
-      case 2336:
-#ifdef  __MAC__                 // macintosh
-        seek_header = 0;
-#else
-        seek_header = 8;
-#endif
-        seek_ecc = 280;
-        sector_size = 2336;
-        break;
-
-      case 2352:
-#ifdef  __MAC__                 // macintosh
-        seek_header = 16;
-#else
-        seek_header = 24;
-#endif
-        seek_ecc = 280;
-        sector_size = 2352;
-        break;
-
-      default:
-        fprintf (stderr, "ERROR: unknown/unsupported track mode");
-        return -1;
-      }
+  if (track->mode == 1 && track->sector_size == 2048)
+    fprintf (stderr, libdm_msg[ALREADY_2048]);
 
   strcpy (buf, basename (image->filename));
-#if 0
-  setext (buf, ".ISO");
-#else
-  strcat (buf, ".ISO");
-#endif
-  size = fsize (image->filename) / sector_size;
+  set_suffix (buf, ".ISO");
+
+  size = fsize (image->filename) / track->sector_size;
 
   if (!(src = fopen (image->filename, "rb")))
     return -1;
+
   if (!(dest = fopen (buf, "wb")))
     {
       fclose (src);
@@ -552,26 +439,23 @@ dm_bin2iso (dm_image_t * image)
 
   for (i = 0; i < size; i++)
     {
-      fseek (src, seek_header, SEEK_CUR);
-#ifdef  __MAC__
-      if (track_mode == MODE2_2336 || track_mode == MODE2_2352)
-        {
-          fread (buf, 1, 2056, src);
-          fwrite (buf, 1, 2056, dest);
-        }
-      else
-#endif
-        {
-          fread (buf, 1, 2048, src);
-          fwrite (buf, 1, 2048, dest);
-        }
-      fseek (src, seek_ecc, SEEK_CUR);
+      fseek (src, track->seek_header, SEEK_CUR);
 
-//      gauge (starttime, i * sector_size, size * sector_size);
+#ifdef  __MAC__
+      fread (buf, 1, 2056, src);
+      fwrite (buf, 1, 2056, dest);
+#else
+      fread (buf, 1, 2048, src);
+      fwrite (buf, 1, 2048, dest);
+#endif
+      fseek (src, track->seek_ecc, SEEK_CUR);
+
+      gauge (i * track->sector_size, size * track->sector_size);
     }
 
   fclose (dest);
   fclose (src);
+  dm_close (image);
 
   return 0;
 }
@@ -584,6 +468,7 @@ dm_cdi2nero (dm_image_t * image)
 }
 
 
+#if 0
 int32_t
 dm_isofix (dm_image_t * image)
 /*
@@ -875,6 +760,7 @@ dm_isofix (dm_image_t * image)
 
   return 0;
 }
+#endif
 
 
 int

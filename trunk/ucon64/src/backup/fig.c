@@ -32,14 +32,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t fig_usage[] =
   {
-    {NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"},
-    {NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
+    {NULL, NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"},
+    {NULL, NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
 #ifdef  PARALLEL
 #if 0
 // TODO
-    {"xfig", "send/receive ROM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
+    {"xfig", NULL, "send/receive ROM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when " OPTION_LONG_S "rom does not exist"},
 #endif
 #endif  // PARALLEL
-    {NULL, NULL}
+    {NULL, NULL, NULL}
   };

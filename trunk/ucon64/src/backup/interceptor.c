@@ -33,9 +33,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t interceptor_usage[] =
   {
-    {NULL, "Mega Disk/Super Disk (Interceptor),"},
-    {NULL, "  19XX Taiwan Sang Ting Co. Ltd."},
-    {NULL, NULL}
+    {NULL, NULL, "Mega Disk/Super Disk (Interceptor),"},
+    {NULL, NULL, "  19XX Taiwan Sang Ting Co. Ltd."},
+    {NULL, NULL, NULL}
   };
 
 #ifdef PARALLEL

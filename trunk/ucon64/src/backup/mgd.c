@@ -36,11 +36,10 @@ const st_usage_t mgd_usage[] =
     {NULL, NULL, "Multi Game Doctor (2)/Multi Game Hunter/MGH/RAW"},
     {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
     {NULL, NULL, "?Makko Toys Co., Ltd.?"},
-#ifdef TODO
-#warning TODO  --xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW
-#endif // TODO
+#if 0
     {"xmgd", "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when " OPTION_LONG_S "rom does not exist"},
+#endif
     {NULL, NULL, NULL}
   };
 

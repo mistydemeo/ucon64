@@ -37,26 +37,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t fal_usage[] =
   {
-    {NULL, "Flash Advance Linker"},
-    {NULL, "2001 Visoly http://www.visoly.com"},
+    {NULL, NULL, "Flash Advance Linker"},
+    {NULL, NULL, "2001 Visoly http://www.visoly.com"},
 #ifdef PARALLEL
-    {"xfal", "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+    {"xfal", NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically (32 Mbits) when ROM does not exist"},
-    {"xfalmulti=SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
+    {"xfalmulti", "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
                           "multirom truncated to SIZE Mbit); file with loader must be\n"
                           "specified first, then all the ROMs; " OPTION_LONG_S "port=PORT"},
-    {"xfalc=N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+    {"xfalc", "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                    "N can be 8, 16, 32, 64, 128 or 256"},
 #if 0
-    "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
+    {"xfalm", NULL, "use SPP mode, default is EPP"},
 #endif
-    {"xfals", "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+    {"xfals", NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist"},
-    {"xfalb=BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
+    {"xfalb", "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
                      "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when SRAM does not exist"},
 #endif // PARALLEL
-    {NULL, NULL}
+    {NULL, NULL, NULL}
 };
 
 

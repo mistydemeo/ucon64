@@ -52,32 +52,19 @@ const st_usage_t genesis_usage[] =
     {NULL, NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"},
     {NULL, NULL, "1989/19XX/19XX SEGA http://www.sega.com"},
     {"gen", NULL, "force recognition"},
-#if 0
-    "  " OPTION_LONG_S "hd          force ROM has SMD header (+512 Bytes)\n"
-    "  " OPTION_LONG_S "nhd         force ROM has no SMD header (MGD2/MGH/RAW)\n"
-    "  " OPTION_LONG_S "ns          force ROM is not split\n"
-#endif
     {"smd", NULL, "convert to Super Magic Drive/SMD"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
-                 OPTION_LONG_S "rom=SRAM"},
+                 OPTION_LONG_S "rom" OPTARG_S "SRAM"},
     {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
                OPTION_LONG_S "stp just strips the first 512 bytes"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
-#ifdef TODO
-#warning TODO  --gf     convert Sega CD country code to Europe
-#warning TODO  --ga     convert Sega CD country code to U.S.A.
-#warning TODO  --gc     convert to Genecyst (emulator)/GSV save state
-#warning TODO  --ge     convert to GenEm (emulator)/SAV save state
-#warning TODO  --gym    convert GYM (Genecyst) sound to WAV
-#warning TODO  --cym    convert CYM (Callus emulator) sound to WAV
-#endif // TODO
 #if 0
-    "TODO:  " OPTION_LONG_S "gf     convert Sega CD country code to Europe; ROM=$CD_IMAGE\n"
-    "TODO:  " OPTION_LONG_S "ga     convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE\n"
-    "TODO:  " OPTION_LONG_S "gc     convert to Genecyst (emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "ge     convert to GenEm (emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "gym    convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE\n"
-    "TODO:  " OPTION_LONG_S "cym    convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE\n"
+    {"gf", NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE"},
+    {"ga", NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE"},
+    {"gc", NULL, "convert to Genecyst (emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE"},
+    {"ge", NULL, "convert to GenEm (emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE"},
+    {"gym", NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE"},
+    {"cym", NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE"},
 #endif
     {"n", "NEW_NAME", "change foreign ROM name to NEW_NAME"},
     {"n2", "NEW_NAME", "change Japanese ROM name to NEW_NAME"},
@@ -85,16 +72,11 @@ const st_usage_t genesis_usage[] =
     {"s", NULL, "split ROM into 4 Mb parts (for backup unit(s) with fdd)"},
 // NOTE: part size number should match with size actually used
 #if 0
-    "  " OPTION_S "p           pad ROM to full Mb\n"
+    {"p", NULL, "pad ROM to full Mb"},
 #endif
     {"chk", NULL, "fix ROM checksum"},
     {"1991", NULL, "fix old third party ROMs to work with consoles build after\n"
                 "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\""},
-#if 0
-    "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAAAA:VVVV\n"
-    "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXXX-XXXX\n"
-    "TODO:  " OPTION_LONG_S "gg     apply GameGenie code (permanent); " OPTION_LONG_S "file=XXXX-XXXX\n"
-#endif
     {NULL, NULL, NULL}
   };
 
@@ -164,8 +146,6 @@ genesis_smd (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMD");
-  ucon64_output_fname (dest_name, 0);
-  ucon64_fbackup (NULL, dest_name);
 
   save_smd (dest_name, rom_buffer, &header, genesis_rom_size);
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -352,7 +332,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   buf[8] = 0;
   sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
   ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
 
   save_bin (dest_name, rom_buffer, genesis_rom_size);
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -495,7 +475,7 @@ genesis_j (st_rominfo_t *rominfo)
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".078");
       ucon64_output_fname (dest_name, 0);
-      ucon64_fbackup (NULL, dest_name);
+      handle_existing_file (dest_name, NULL);
       remove (dest_name);
 
       strcpy (src_name, ucon64.rom);
@@ -519,7 +499,7 @@ genesis_j (st_rominfo_t *rominfo)
       set_suffix (dest_name, ".SMD");
       strcpy (src_name, ucon64.rom);
       ucon64_output_fname (dest_name, 0);
-      ucon64_fbackup (NULL, dest_name);
+      handle_existing_file (dest_name, NULL);
 
       q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
       block_size = q_fsize (src_name) - rominfo->buheader_len;
@@ -566,7 +546,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + 48], buf, 48);
     }
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   if (type == SMD)
     {
       st_smd_header_t smd_header;
@@ -618,7 +598,7 @@ genesis_chk (st_rominfo_t *rominfo)
 
   mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   if (type == SMD)
     {
       st_smd_header_t smd_header;

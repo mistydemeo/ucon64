@@ -88,6 +88,10 @@ typedef struct
   uint32_t total_length;
   uint32_t start_lba;
   uint32_t filename_length;
+
+  uint32_t seek_header;
+  uint32_t seek_ecc;
+
 } dm_track_t;
 
 
@@ -120,9 +124,7 @@ typedef struct
   int track_type, save_as_iso, pregap,convert, fulldata, cutall, cutfirst;
   char do_convert, do_cut;
 
-  uint32_t seek_header;
   int type;
-  uint32_t seek_ecc;
   char *common;
   char *cdrdao;
 } dm_image_t;
@@ -176,8 +178,7 @@ TODO:  dm_cdifix()   fix a cdi image
   dm_mktoc()  automagically generates toc sheets
   dm_mkcue()  automagically generates cue sheets
 */
-extern int dm_set_gauge (int (*gauge) (uint32_t, uint32_t));
-extern int dm_bin2iso (dm_image_t *image);
+extern int dm_bin2iso (const char *fname, void (* gauge) (int, int));
 extern int dm_cdirip (dm_image_t *image);
 extern int dm_nrgrip (dm_image_t *image);
 extern int dm_rip (dm_image_t *image);

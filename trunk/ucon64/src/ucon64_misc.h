@@ -167,7 +167,6 @@ extern const char *ucon64_msg[];
   Read the comment at the header of handle_existing_file() to see how it works!
 */
 extern void handle_existing_file (const char *dest, char *src);
-#define ucon64_fbackup(a,b) (handle_existing_file(b,a))
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
 #define OF_FORCE_BASENAME 1

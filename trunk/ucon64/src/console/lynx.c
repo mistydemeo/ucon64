@@ -77,7 +77,7 @@ lynx_lyx (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".LYX");
 
-  ucon64_fbackup (NULL, buf);
+  handle_existing_file (buf, NULL);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf, "wb");
 
   fprintf (stdout, ucon64_msg[WROTE], buf);
@@ -123,7 +123,7 @@ lynx_lnx (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".LNX");
 
-  ucon64_fbackup (NULL, buf);
+  handle_existing_file (buf, NULL);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), buf, "wb");
   q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), buf, "ab");
 
@@ -147,7 +147,7 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
 
   header.rotation = rotation;                   // header.rotation is an 8-bit field
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
@@ -193,7 +193,7 @@ lynx_n (st_rominfo_t *rominfo, const char *name)
   memset (header.cartname, 0, sizeof (header.cartname));
   strncpy (header.cartname, name, sizeof (header.cartname));
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
@@ -225,7 +225,7 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
     *bankvar = atol (value) * 4;
 #endif
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);

@@ -33,8 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t z64_usage[] =
   {
-    {NULL, "Z64"},
-    {NULL, NULL}
+    {NULL, NULL, "Z64"},
+    {NULL, NULL, NULL}
   };
 
 #ifdef PARALLEL

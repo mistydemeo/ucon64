@@ -785,7 +785,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 
   if (!dat)
     {
-      fprintf (stdout, ucon64_msg[DAT_ERROR], ucon64.crc32);
+      fprintf (stdout, ucon64_msg[DAT_NOT_FOUND], ucon64.crc32);
       return;
     }
 

@@ -109,7 +109,7 @@ static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_process_rom (const char *fname, int console, int show_nfo);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
-static int ucon64_libdiscmage (void);
+static int ucon64_discmage (void);
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
@@ -365,6 +365,7 @@ main (int argc, char **argv)
 {
   int x = 0, c = 0, console, show_nfo, rom_index;
   char buf[MAXBUFSIZE], *ptr = NULL;
+  struct stat fstate;
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -388,9 +389,9 @@ main (int argc, char **argv)
 
   ucon64.argc = argc;
   ucon64.argv = argv;                           // must be set prior to calling
-                                                //  ucon64_libdiscmage()
+                                                //  ucon64_discmage()
   ucon64_configfile ();
-  ucon64.discmage_enabled = ucon64_libdiscmage ();
+  ucon64.discmage_enabled = ucon64_discmage ();
 
   ucon64.show_nfo = TRUE;
 
@@ -440,10 +441,11 @@ main (int argc, char **argv)
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
 
-  if (!access (ucon64.configdir, F_OK))
-    ucon64.dat_enabled = 1;
-  else
-    ucon64.dat_enabled = 0;
+  ucon64.dat_enabled = 0;
+  if (!access (ucon64.configdir, R_OK | W_OK | X_OK))
+    if (!stat (ucon64.configdir, &fstate))
+      if (S_ISDIR (fstate.st_mode))
+        ucon64.dat_enabled = 1;
 
 //  if (!access (ucon64.configfile, F_OK))
 //    fprintf (stdout, ucon64_msg[READ_CONFIG_FILE], ucon64.configfile);
@@ -504,10 +506,6 @@ main (int argc, char **argv)
       int n_entries;
 #endif
 
-      // Was the last argument the name of a (the) patch file?
-      if (rom_index == argc - 1)
-        if (!strcmp (argv[rom_index], ucon64.file))
-          break;
 #if 0 // TODO: detect nonsense arguments. Using access() requires users to
       //       always specify -rom or -port, which is annoying.
       if (access (argv[rom_index], F_OK) != 0)
@@ -543,7 +541,7 @@ main (int argc, char **argv)
 
 
 int
-ucon64_libdiscmage (void)
+ucon64_discmage (void)
 {
   uint32_t version;
 #ifdef  DLOPEN
@@ -684,10 +682,12 @@ ucon64_execute_options (void)
 #include "options.c"
 
       /*
-        "special" options
-        -multi (and -xfalmulti) takes more than one file as argument, but
-        should be executed only once.
-        stop also after sending one ROM to a copier ("multizip")
+        "special" options:
+        - -multi (and -xfalmulti) takes more than one file as argument, but
+          should be executed only once.
+        - stop after sending one ROM to a copier ("multizip")
+        - stop after applying a patch so that the patch file won't be
+          interpreted as ROM
       */
       for (x = 0; ucon64_wf[x].option != 0; x++)
         if (ucon64_wf[x].option == ucon64_option)
@@ -830,7 +830,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
   if (access (romfile, F_OK | R_OK) == -1)
     return -1;
-  if (!stat (romfile, &fstate) == -1)
+  if (stat (romfile, &fstate) == -1)
     return -1;
   if (S_ISREG (fstate.st_mode) != TRUE)
     return -1;
@@ -1362,7 +1362,7 @@ ucon64_usage (int argc, char *argv[])
               ucon64_render_usage (usage_array[x].usage[y]);
 
             single = 1; // we show only the usage for the specified console(s)
- 
+
             printf ("\n");
           }
     }
@@ -1374,7 +1374,7 @@ ucon64_usage (int argc, char *argv[])
           int y = 0;
           for (; usage_array[x].usage[y]; y++)
             ucon64_render_usage (usage_array[x].usage[y]);
-            
+
           printf ("\n");
         }
   }

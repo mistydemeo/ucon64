@@ -105,9 +105,11 @@ extern const st_usage_t ucon64_patching_usage[];
   WF_SHOW_NFO_AFTER show nfo output after processing rom
   WF_ROM_REQUIRED   for this option a [--rom=]ROM is required
   WF_SPECIAL_OPT    a "special" option:
-                    -multi (and -xfalmulti) takes more than one file as
-                    argument, but should be executed only once.
-                    stop after sending one ROM to a copier ("multizip")
+                    - -multi (and -xfalmulti) takes more than one file as
+                      argument, but should be executed only once.
+                    - stop after sending one ROM to a copier ("multizip")
+                    - stop after applying a patch so that the patch file won't
+                      be interpreted as ROM
   ...
 
   example:
@@ -150,7 +152,8 @@ enum
   BUFFER_ERROR,                                 // not enough memory
   ROM_BUFFER_ERROR,
   FILE_BUFFER_ERROR,
-  DAT_ERROR,
+  DAT_NOT_FOUND,
+  DAT_NOT_ENABLED,
   READ_CONFIG_FILE
 };
 

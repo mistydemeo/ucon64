@@ -80,6 +80,12 @@ open_module (char *module_name)
       exit (1);
     }
 
+  if (sym->size != sizeof (st_symbol_t))
+    {
+      fprintf (stderr, "Incompatible DXE module: %s\n", module_name);
+      exit (1);
+    }
+
   // initialize the import/export structure
 
   /*

@@ -285,12 +285,12 @@ swc_read_rom (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 
@@ -378,12 +378,12 @@ swc_write_rom (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 
@@ -467,12 +467,12 @@ swc_read_sram (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 
@@ -526,12 +526,12 @@ swc_write_sram (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 

@@ -143,27 +143,26 @@ makeppf_main (int argc, const char *argv[])
   unsigned char anz;            /* Hell YES! UNSIGNED CHAR! */
   int i, z, a, x, y, osize, psize, fsize, seekpos = 0, pos;
 
-
-//        printf("MakePPF v2.0 Linux/Unix by Icarus/Paradox\n");
+//  printf("MakePPF v2.0 Linux/Unix by Icarus/Paradox\n");
   if (argc == 1 || argc < 4)
     {
-//        printf("Usage: MakePPF <Original Bin> <Patched Bin> <ppffile> [file_id.diz]\n");
-      exit (0);
+//      printf("Usage: MakePPF <Original Bin> <Patched Bin> <ppffile> [file_id.diz]\n");
+      return -1;
     }
 
   /* Open all neccessary files */
   originalbin = fopen (argv[1], "rb");
   if (originalbin == NULL)
     {
-      printf ("File %s does not exist. (Original BIN)\n", argv[1]);
-      exit (0);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], argv[1]);
+      return -1;
     }
   patchedbin = fopen (argv[2], "rb");
   if (patchedbin == NULL)
     {
-      printf ("File %s does not exist. (Patched BIN)\n", argv[2]);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], argv[2]);
       fclose (originalbin);
-      exit (0);
+      return -1;
     }
   osize = q_fsize (argv[1]);
   psize = q_fsize (argv[2]);
@@ -172,47 +171,45 @@ makeppf_main (int argc, const char *argv[])
       fprintf (stderr, "ERROR: Filesize does not match\n");
       fclose (originalbin);
       fclose (patchedbin);
-      exit (0);
+      return -1;
     }
   if (argc >= 5)
     {
       fileid = fopen (argv[4], "rb");
       if (fileid == NULL)
         {
-          fprintf (stderr, "ERROR: File %s does not exist. (File_id.diz)\n", argv[4]);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], argv[4]);
           fclose (patchedbin);
           fclose (originalbin);
-          exit (0);
+          return -1;
         }
     }
   ppffile = fopen (argv[3], "wb+");
   if (ppffile == NULL)
     {
-      fprintf (stderr, "ERROR: Could not create file %s\n", argv[3]);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], argv[3]);
       if (argc >= 5)
         fclose (fileid);
       fclose (patchedbin);
       fclose (originalbin);
-      exit (0);
+      return -1;
     }
 
   for (i = 0; i < 50; i++)
-    {
-      desc[i] = 0x20;
-    }
+    desc[i] = 0x20;
 
   /* creating PPF2.0 header */
-  printf ("Creating PPF2.0 header data.. ");
+  printf ("Creating PPF2.0 header data...");
   fwrite ("PPF20", 5, 1, ppffile);      /* Magic (PPF20) */
-  fwrite (&enc, 1, 1, ppffile); /* Enc.Method (0x01) */
+  fwrite (&enc, 1, 1, ppffile);         /* Enc.Method (0x01) */
   fwrite (desc, 50, 1, ppffile);        /* Description line */
   fwrite (&osize, 4, 1, ppffile);       /* BINfile size */
   fseek (originalbin, 0x9320, SEEK_SET);
   fread (block, 1024, 1, originalbin);
   fwrite (block, 1024, 1, ppffile);     /* 1024 byte block */
-  printf ("done!\n");
+  printf ("Done\n");
 
-  printf ("Writing patchdata, please wait.. ");
+  printf ("Writing patchdata, please wait...");
   fflush (stdout);
 
   /* Finding changes.. i know it slow.. so feel free to optimize */
@@ -288,12 +285,12 @@ makeppf_main (int argc, const char *argv[])
         }
       while (x != a);
     }
-  printf ("done!\n");
+  printf ("Done\n");
 
   /* was a file_id.diz argument present? */
   if (argc >= 5)
     {
-      printf ("Adding file_id.diz ...");
+      printf ("Adding file_id.diz...");
       fsize = q_fsize (argv[4]);
       if (fsize > 3072)
         fsize = 3072;           /* File id only up to 3072 bytes! */
@@ -302,7 +299,7 @@ makeppf_main (int argc, const char *argv[])
       fwrite (fileidbuf, fsize, 1, ppffile);
       fwrite ("@END_FILE_ID.DIZ", 16, 1, ppffile);
       fwrite (&fsize, 4, 1, ppffile);
-      printf ("done!\n");
+      printf ("Done\n");
     }
 
   fclose (ppffile);             /* Thats it! */
@@ -338,7 +335,6 @@ applyppf_main (int argc, const char *argv[])
     {
 #if 0
       printf("Usage: ApplyPPF <Binfile> <PPF-File>\n");
-      exit (0);
 #endif
       return -1;
     }
@@ -347,25 +343,25 @@ applyppf_main (int argc, const char *argv[])
   binfile = fopen (argv[1], "rb+");
   if (binfile == NULL)
     {
-      printf ("File %s does not exist.\n", argv[1]);
-      exit (0);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], argv[1]);
+      return -1;
     }
 
   ppffile = fopen (argv[2], "rb");
   if (ppffile == NULL)
     {
-      printf ("File %s does not exist.\n", argv[2]);
-      exit (0);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], argv[2]);
+      return -1;
     }
 
   /* Is it a PPF File ? */
   fread (buffer, 3, 1, ppffile);
   if (strncmp ("PPF", buffer, 3))
     {
-      printf ("File %s is *NO* PPF file.\n", argv[2]);
+      fprintf (stderr, "ERROR: %s is not a valid PPF file\n", argv[2]);
       fclose (ppffile);
       fclose (binfile);
-      exit (0);
+      return -1;
     }
 
   ppfsize = q_fsize (argv[2]);
@@ -391,7 +387,7 @@ applyppf_main (int argc, const char *argv[])
       count = ppfsize;
       count -= 56;
       seekpos = 56;
-      printf ("Patching ... ");
+      printf ("Patching...");
       break;
     case 1:
       /* Show PPF-Patchinformation. */
@@ -428,7 +424,7 @@ applyppf_main (int argc, const char *argv[])
       binlen = q_fsize (argv[1]);
       if (dizlen != binlen)
         {
-          fprintf (stderr, "ERROR: the size of the IMAGE is not %d Bytes\n", dizlen);
+          fprintf (stderr, "ERROR: The size of the image is not %d Bytes\n", dizlen);
           fclose (ppffile);
           fclose (binfile);
           return -1;
@@ -442,7 +438,7 @@ applyppf_main (int argc, const char *argv[])
       in = memcmp (ppfblock, binblock, 1024);
       if (in != 0)
         {
-          fprintf (stderr, "ERROR: this patch does not belong to this IMAGE\n");
+          fprintf (stderr, "ERROR: This patch does not belong to this image\n");
           fclose (ppffile);
           fclose (binfile);
           return -1;
@@ -462,15 +458,15 @@ applyppf_main (int argc, const char *argv[])
           count -= dizlensave;
           seekpos = 1084;
         }
-      printf ("Patching ... ");
+      printf ("Patching...");
       fflush (stdout);
       break;
     default:
       /* Enc. Method wasnt 0 or 1 i bet you wont see this */
-      printf ("Unknown Encodingmethod! - check for updates.\n");
+      fprintf (stderr, "ERROR: Unknown encoding method! Check for updates\n");
       fclose (ppffile);
       fclose (binfile);
-      exit (0);
+      return -1;
     }
 
   /* Patch the Image */
@@ -488,7 +484,7 @@ applyppf_main (int argc, const char *argv[])
     }
   while (count != 0);           /* if not -> LOOOOOP! */
 
-  printf ("DONE..\n");          /* byebye :) */
+  printf ("Done\n");          /* byebye :) */
   fclose (ppffile);
   fclose (binfile);
   return 0;
@@ -515,6 +511,6 @@ addppfid (const char *filename)
   q_fwrite (buf, pos, strlen (buf), filename, "r+b");
 
   q_fwrite (&fsize, fsize, 4, filename, "r+b");
-  printf ("done!\n");
+  printf ("Done\n");
   return 0;
 }

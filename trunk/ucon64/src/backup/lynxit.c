@@ -541,7 +541,8 @@ cart_verify (unsigned char *filename)
 
   if ((fp = fopen (filename, "rb")) == NULL)
     {
-      MESSAGE (("ERROR    : Could not open %s\n", filename));
+//      MESSAGE (("ERROR    : Could not open %s\n", filename));
+      MESSAGE ((ucon64_msg[OPEN_READ_ERROR], filename));
       return FALSE;
     }
 
@@ -1026,8 +1027,8 @@ lynxit_main (int argc, char **argv)
 }
 
 /*
-  It will save you some work if you don't fully integrate the code above with uCON64's code,
-  because it is a project separate from the uCON64 project.
+  It will save you some work if you don't fully integrate the code above with
+  uCON64's code, because it is a project separate from the uCON64 project.
 */
 int lynxit_argc;
 char *lynxit_argv[128];

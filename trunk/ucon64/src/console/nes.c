@@ -965,7 +965,7 @@ nes_unif (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
 
@@ -985,7 +985,7 @@ nes_unif (st_rominfo_t *rominfo)
     {
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
           return -1;
         }
 
@@ -998,7 +998,7 @@ nes_unif (st_rominfo_t *rominfo)
     {
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
-          fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", rom_size);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           exit (1);
         }
       q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
@@ -1082,7 +1082,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
       size = prg_size + chr_size;
       if ((data = (unsigned char *) malloc (size)) == NULL)
         {
-          fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", size);
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
           exit (1);
         }
       memcpy (data, prg_data, prg_size);
@@ -1097,7 +1097,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
           chr_data = (unsigned char *) malloc (chr_size);
           if (prg_data == NULL || chr_data == NULL)
             {
-              fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", size);
+              fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
               exit (1);
             }
         }
@@ -1359,7 +1359,7 @@ nes_ines (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
 
@@ -1371,7 +1371,7 @@ nes_ines (st_rominfo_t *rominfo)
     {
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
           return -1;
         }
 
@@ -1384,7 +1384,7 @@ nes_ines (st_rominfo_t *rominfo)
     {
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
-          fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", rom_size);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           exit (1);
         }
       q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
@@ -1485,12 +1485,12 @@ nes_dint (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
       return -1;
     }
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
 
@@ -1679,7 +1679,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
   size = prg_size + chr_size + ((ines_header.ctrl1 & INES_TRAINER) ? 512 : 0);
   if ((buffer = (unsigned char *) malloc (size)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", size);
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
       return -1;
     }
 
@@ -1802,7 +1802,7 @@ nes_s (st_rominfo_t *rominfo)
 
   if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
       return -1;
     }
 
@@ -2023,7 +2023,7 @@ nes_init (st_rominfo_t *rominfo)
       rom_size = rominfo->file_size - UNIF_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
-          fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", rom_size);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           exit (1);
         }
       q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.rom);
@@ -2393,7 +2393,7 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
 
   if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
       return -1;
     }
 
@@ -2514,7 +2514,7 @@ nes_fds (st_rominfo_t *rominfo)
     }
   if ((buffer = (char *) malloc (65500)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", 65500);
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], 65500);
       return -1;
     }
 

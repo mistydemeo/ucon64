@@ -267,7 +267,7 @@ saveram_pc_main (int argc, char *argv[], char *envp[])
 /*
   if ((fp = fopen (FILENAME, "wb")) == NULL)
     {
-      fprintf (stderr, "Can't open %s for writing\n", FILENAME);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], FILENAME);
       exit (5);
     }
 */
@@ -278,7 +278,7 @@ saveram_pc_main (int argc, char *argv[], char *envp[])
 
   if ((fp = fopen (FILENAME2, "rb")) == NULL)
     {
-      fprintf (stderr, "Can't open %s for reading\n", FILENAME2);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], FILENAME2);
       exit (6);
     }
   i = fread (buffer, 0x8000, 1, fp);

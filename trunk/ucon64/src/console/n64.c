@@ -577,7 +577,7 @@ n64_chksum (st_rominfo_t *rominfo)
       if ((n == 0) || ((n & 3) != 0))
         {
           if ((clen != 0) || (n != 0))
-            fprintf (stderr, "ERROR: Short read, checksum may be incorrect.\n");
+            printf ("WARNING: Short read, checksum may be incorrect.\n");
           break;
         }
       for (i = 0; i < n; i += 4)

@@ -233,7 +233,7 @@ snes_dint (st_rominfo_t *rominfo)
   puts ("Converting to deinterleaved format...");
   if (!(buffer = (unsigned char *) malloc (size)))
     {
-      fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
     }
   strcpy (dest_name, ucon64.rom);
@@ -242,12 +242,12 @@ snes_dint (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
       return -1;
     }
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
 
@@ -381,12 +381,12 @@ snes_convert_sramfile (const void *header)
   handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
       return -1;
     }
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
 
@@ -951,14 +951,12 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (!(srcbuf = (unsigned char *) malloc (size)))
         {
-          fprintf (stderr, "ERROR: Not enough memory for src ROM buffer (%d bytes)\n",
-                   (int) size);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) size);
           exit (1);
         }
       if (!(dstbuf = (unsigned char *) malloc (newsize)))
         {
-          fprintf (stderr, "ERROR: Not enough memory for dst ROM buffer (%d bytes)\n",
-                   (int) newsize);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) newsize);
           exit (1);
         }
 
@@ -1348,12 +1346,12 @@ Same here.
   handle_existing_file (ucon64.rom, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ucon64.rom);
       return -1;
     }
   if (rominfo->buheader_len)                    // copy header (if present)
@@ -1496,12 +1494,12 @@ af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken 
   handle_existing_file (ucon64.rom, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ucon64.rom);
       return -1;
     }
   if (rominfo->buheader_len)                    // copy header (if present)
@@ -1600,12 +1598,12 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   handle_existing_file (ucon64.rom, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ucon64.rom);
       return -1;
     }
   if (rominfo->buheader_len)                    // copy header (if present)
@@ -2062,7 +2060,7 @@ snes_init (st_rominfo_t *rominfo)
 
   if (!(rom_buffer = (unsigned char *) malloc (size)))
     {
-      fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;                                // don't exit(), we might've been
     }                                           //  called from -lsv
   q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);

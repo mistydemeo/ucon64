@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.18 2002-11-11 01:22:39 dbjh Exp $
+ * $Id: gg.c,v 1.19 2002-12-13 00:08:20 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -1061,7 +1061,7 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
   CPUaddress = -1;
   switch (ucon64.console)
     {
-      // interleaved images (GD3 (SNES) & SMD (Genesis) should be allowed to
+      // interleaved images (GD3 (SNES) & SMD (Genesis)) should be allowed to
       //  be patched
       case UCON64_GB:
       case UCON64_SMS:
@@ -1092,9 +1092,9 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
     printf ("%-12s = %s\n", code, buf);
   sscanf (buf, "%lx:%lx:*", &address, &value);
 
-  if (address > size)
+  if (address >= size)
     {
-      fprintf (stderr, "ERROR: ROM is smaller than %ld Bytes\n", address);
+      fprintf (stderr, "ERROR: address is too high for this ROM (%ld)\n", address);
       return -1;
     }
 

@@ -148,8 +148,7 @@ Byte6 - Additional capabilities(?)
 
   if (!(rom_buffer = (unsigned char *) malloc (rominfo->file_size)))
     {
-      fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
-               rominfo->file_size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rominfo->file_size);
       return -1;
     }
   q_fread (rom_buffer, 0, rominfo->file_size, ucon64.rom);

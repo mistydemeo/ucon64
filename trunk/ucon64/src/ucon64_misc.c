@@ -66,6 +66,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/jaguar.h"
 
 
+/*
+  This is a string pool. gcc 2.9x generates something like this itself, but it
+  seems gcc 3.x does not. By using a string pool the executable will be
+  smaller than without it.
+*/
 const char *ucon64_msg[] = {
   "ERROR: Please check cables and connection\n"
   "       Turn the backup unit off and on\n"
@@ -80,6 +85,11 @@ const char *ucon64_msg[] = {
   "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
 
   "Wrote output to: %s\n",
+  "ERROR: Can't open %s for reading\n",
+  "ERROR: Can't open %s for writing\n",
+  "ERROR: Not enough memory for buffer (%d bytes)\n",
+  "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
+  "ERROR: Not enough memory for file buffer (%d bytes)\n",
   NULL
 };
 
@@ -539,7 +549,7 @@ ucon64_pad (const char *filename, int start, int size)
       stat (filename, &fstate);
       if (chmod (filename, fstate.st_mode | S_IWUSR))
         {
-          fprintf (stderr, "ERROR: Can't open %s for writing\n", filename); // msg is not a typo
+          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename); // msg is not a typo
           exit (1);
         }
       truncate (filename, size + start);
@@ -549,7 +559,7 @@ ucon64_pad (const char *filename, int start, int size)
       // don't use truncate() to enlarge files, because the result is undefined (by POSIX)
       if ((file = fopen (filename, "ab")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
           exit (1);
         }
       sizeleft = size - oldsize;

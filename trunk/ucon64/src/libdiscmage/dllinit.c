@@ -89,7 +89,7 @@ st_map_t *symbol;
 int
 dxe_init (void)
 {
-  symbol = map_create (14);                     // Read comment in map.h!
+  symbol = map_create (19);
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
   symbol = map_put (symbol, "dm_get_version", dm_get_version);

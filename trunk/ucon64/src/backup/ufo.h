@@ -79,8 +79,8 @@ Byte-Offset  Function
                10: A22=0 selects SRAM
                11: A22=1 selects SRAM
 17          SRAM type
-               0x00: Linear	(HiROM)
-               0x03: Skip	(LoROM)
+               0x00: Linear (HiROM)
+               0x03: Skip (LoROM)
 
 ====  End SRAM address mapping config  ================
 
@@ -136,7 +136,7 @@ typedef struct st_ufo_header
   unsigned char sram_a20_a21;
   unsigned char sram_a22_a23;
   unsigned char sram_type;
-  unsigned char pad3[488];
+  unsigned char pad2[488];
 } st_ufo_header_t;
 
 #define UFO_HEADER_START 0

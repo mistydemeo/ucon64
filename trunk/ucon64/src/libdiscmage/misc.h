@@ -227,7 +227,7 @@ extern int kbhit (void);
 #endif
 
 #ifdef  __CYGWIN__
-extern unsigned char *fix_character_set (unsigned char *value);
+extern char *fix_character_set (char *value);
 #endif
 
 /*

@@ -1763,26 +1763,27 @@ gauge (time_t init_time, int pos, int size)
   the file system. We fix this.
   TODO: fix the same problem for other non-ASCII characters (> 127).
 */
-unsigned char *
-fix_character_set (unsigned char *value)
+char *
+fix_character_set (char *str)
 {
-  int n, l = strlen ((const char *) value);
+  int n, l = strlen (str);
+  unsigned char *ptr = (unsigned char *) str;
 
   for (n = 0; n < l; n++)
     {
-      if (value[n] == 0x89)                     // e diaeresis
-        value[n] = 0xeb;
-      else if (value[n] == 0x84)                // a diaeresis
-        value[n] = 0xe4;
-      else if (value[n] == 0x8b)                // i diaeresis
-        value[n] = 0xef;
-      else if (value[n] == 0x94)                // o diaeresis
-        value[n] = 0xf6;
-      else if (value[n] == 0x81)                // u diaeresis
-        value[n] = 0xfc;
+      if (ptr[n] == 0x89)                       // e diaeresis
+        ptr[n] = 0xeb;
+      else if (ptr[n] == 0x84)                  // a diaeresis
+        ptr[n] = 0xe4;
+      else if (ptr[n] == 0x8b)                  // i diaeresis
+        ptr[n] = 0xef;
+      else if (ptr[n] == 0x94)                  // o diaeresis
+        ptr[n] = 0xf6;
+      else if (ptr[n] == 0x81)                  // u diaeresis
+        ptr[n] = 0xfc;
     }
 
-  return value;
+  return str;
 }
 #endif
 

@@ -342,9 +342,9 @@ extern int fsize (const char *filename);
 
 
 /*
-  dm_init()  this will init libdiscmage and try to recognize the image format, etc.
+  dm_open()  this will init libdiscmage and try to recognize the image format, etc.
 */
-extern dm_image_t *dm_init (const char *image_filename);
+extern dm_image_t *dm_open (const char *image_filename);
 extern int dm_close (dm_image_t *image);
 
 
@@ -359,7 +359,8 @@ TODO:  dm_cdifix()   fix a cdi image
 */
 extern int32_t dm_bin2iso (dm_image_t *image);
 extern int32_t dm_cdirip (dm_image_t *image);
-//extern int32_t dm_nerorip (dm_image_t *image);
+extern int32_t dm_nrgrip (dm_image_t *image);
+extern int32_t dm_rip (dm_image_t *image);
 extern int32_t dm_cdi2nero (dm_image_t *image);
 //extern int32_t dm_isofix (dm_image_t *image);
 

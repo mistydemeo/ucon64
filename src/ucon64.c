@@ -277,11 +277,6 @@ main (int argc, char *argv[])
   printf ("Uses code from various people. See 'developers.html' for more!\n");
   printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
-  rom.console = ucon64_UNKNOWN;
-  ucon64_flush (argc, argv, &rom);
-
-  if (!strlen (rom.rom))//no $ROM? then just use current working dir
-    getcwd (rom.rom, sizeof (rom.rom));
 
   ucon64_configfile ();
 
@@ -298,6 +293,18 @@ main (int argc, char *argv[])
        ucon64_usage (argc, argv);
        return 0;
     }
+
+  rom.console = ucon64_UNKNOWN;
+  ucon64_flush (argc, argv, &rom);
+
+  if (!strlen (rom.rom))//no $ROM? then just use current working dir
+    getcwd (rom.rom, sizeof (rom.rom));
+
+  if (!access (rom.rom, F_OK))
+    {
+      ucon64_init (&rom);
+    }
+
 /*
   getopt_long_only()
 */
@@ -1075,7 +1082,7 @@ while ((c =
     {
       if(!skip_init_nfo)
       {
-        ucon64_init (&rom);
+//        ucon64_init (&rom);
         if (rom.console != ucon64_UNKNOWN)
           ucon64_nfo (&rom);
       }

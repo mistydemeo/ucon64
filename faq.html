@@ -315,7 +315,7 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
 <br>
 <p>
 <a name="4"><b>Q4</b>: How do I install uCON64?</a><br>
-<b>A</b>: It depends if you on what operating system you use. First read the
+<b>A</b>: It depends on what operating system you use. First read the
    information specific for your operating system. Then continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
@@ -405,7 +405,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
    The command line environment<br>
    uCON64 is a command line program and is usually started from a program like
-   command.com (Windows&nbsp;9x/ME) or cmd.exe (Windows&nbsp;NT/200/XP). You
+   command.com (Windows&nbsp;9x/ME) or cmd.exe (Windows&nbsp;NT/2000/XP). You
    can start command.com or cmd.exe by choosing the option "Run..." from the
    start menu. You have to type the word command.com or cmd.exe yourself.
    Command.com and cmd.exe are command line interpreters. That means that they
@@ -420,7 +420,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    ucon64.exe to that directory.<br>
    The path is defined by the environment variable PATH. You can check the
    current value of that variable with the command:<br>
-   &nbsp;&nbsp; echo %PATH<br>
+   &nbsp;&nbsp; echo %PATH%<br>
    You could copy uCON64 to one of those directories. However, we recommend
    putting ucon64.exe in a directory of its own (on Windows). So, you should
    modify the value of PATH. On Windows&nbsp;9x/ME you should do that in the
@@ -428,11 +428,12 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    &nbsp;&nbsp; set PATH=%PATH%;c:\ucon64<br>
    Replace c:\ucon64 with the drive and directory where you extracted the
    uCON64 files to. Save the modified c:\autoexec.bat and reboot.
-<!-- TODO
-   On Windows&nbsp;NT/2000/XP you should...
--->
+   On Windows&nbsp;XP (NT/2000?) you should press the buttons or icons start
+   -&#62; Control Panel -&#62; System -&#62; Advanced -&#62; Environment
+   Variables and edit the value of path in the section System variables or
+   else in the section User variables.
    After you have made your changes (and have rebooted your PC if you are using
-   Windows&nbsp;9x/ME or DOS) check the value of PATH again.It should now list
+   Windows&nbsp;9x/ME or DOS) check the value of PATH again. It should now list
    the directory you just added.<br>
 <br>
 <a name="configbin"><b>How to configure the uCON64 executable</b></a><br>
@@ -441,10 +442,11 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    If you have not run uCON64 before you should see a message that it created
    a file with a name like ucon64.cfg (DOS version) or .ucon64rc (all other
    versions). Search for the line that starts with "configuration file". It
-   should say "present" between the parenthesis. The file name after the colon
+   should say "present" between the parentheses. The file name after the colon
    is the name of the configuration file. The configuration file may contain
    names of variables that influence the behaviour of uCON64. Here follows a
    table of the variable names uCON64 recognises:<br>
+<br>
 <table border="1">
   <tr>
     <th><tt>variable name<tt></th>
@@ -511,7 +513,6 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    <a href="#25">question 25</a>.<br>
    You might also want to make use of DAT files. See
    <a href="#36">question 36</a> for more information.<br>
-<br>
 <br>
 <p>
 <a name="5"><b>Q5</b>: Sometimes my terminal seems to be locked after "ucon64

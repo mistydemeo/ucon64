@@ -805,7 +805,7 @@ pcengine_check (unsigned char *buf, unsigned int len)
       if (buf[i] == 0x85 || buf[i] == 0x8d)
         f5 = 1;
     }
-  if ((f4 > 200) || (f1 > 200) && (f2 + f3 != 2))
+  if ((f4 > 200) || ((f1 > 200) && (f2 + f3 != 2)))
     return 0;
   if (f2 + f3 + f5 >= 2)
     return 1;

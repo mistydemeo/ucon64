@@ -165,6 +165,7 @@ io_error (void)
 // This function could be changed to take a string argument that describes the
 //  error. Or take an integer code that we can interpret here.
 {
+  fflush (stdout);
   fprintf (stderr, "ERROR: Communication with Game Doctor failed\n");
   fflush (stderr);
   // calling fflush() seems to be necessary under Msys in order to make the

@@ -3,6 +3,7 @@ fig.h - Super PRO Fighter support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
+                  2003 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify

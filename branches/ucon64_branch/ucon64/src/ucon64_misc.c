@@ -374,7 +374,7 @@ const st_usage_t ucon64_options_usage[] = {
 const st_usage_t ucon64_padding_usage[] = {
   {NULL, NULL, "Padding"},
   {"ispad", NULL, "check if ROM is padded"},
-  {"pad", NULL, "pad ROM to full Mb"},
+  {"pad", NULL, "pad ROM to next Mb"},
   {"p", NULL, "same as " OPTION_LONG_S "pad"},
   {"padn", "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
   {"strip", "N", "strip N Bytes from end of ROM"},
@@ -749,7 +749,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL,                                         // 9Z
   "Telenet", "Hori", NULL, NULL, "Konami",
   "K.Amusement Leasing Co.", "Kawada", "Takara", NULL, "Technos Japan Corp.",
-  "JVC (Europe/Japan)/Victor Musical Indutries", NULL, "Toei Animation", "Toho", NULL,
+  "JVC (Europe/Japan)/Victor Musical Industries", NULL, "Toei Animation", "Toho", NULL,
   "Namco", "Media Rings Corp.", "J-Wing", NULL, "Pioneer LDC",
   "KID", "Mediafactory", NULL, NULL, NULL,
   "Infogrames Hudson", NULL, NULL, NULL, NULL,

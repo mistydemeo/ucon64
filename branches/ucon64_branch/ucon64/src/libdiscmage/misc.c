@@ -2532,6 +2532,7 @@ sync (void)
 {
   _commit (fileno (stdout));
   _commit (fileno (stderr));
+  fflush (NULL);                                // flushes all streams opened for output
   return 0;
 }
 #endif

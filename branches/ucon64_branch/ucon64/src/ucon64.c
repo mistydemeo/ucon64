@@ -317,7 +317,7 @@ static st_rominfo_t *
 ucon64_rom_flush (st_rominfo_t * rominfo)
 {
   if (rominfo)
-    memset (rominfo, 0L, sizeof (st_rominfo_t));
+    memset (rominfo, 0, sizeof (st_rominfo_t));
 
   ucon64.rominfo = NULL;
   ucon64.crc32 = ucon64.fcrc32 = 0;             // yes, this belongs here

@@ -649,61 +649,68 @@ snes_swc (st_rominfo_t *rominfo)
 
 
 // header format is specified in src/backup/fig.h
-int
-snes_fig (st_rominfo_t *rominfo)
+void
+snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header)
 {
-  st_fig_header_t header;
   int size, uses_DSP;
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
-  q_fread (&header, 0, rominfo->buheader_len > (int) FIG_HEADER_LEN ?
-                         (int) FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
-  reset_header (&header);
   size = ucon64.file_size - rominfo->buheader_len;
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
-  header.multi = snes_split ? 0x40 : 0;
-  header.hirom = snes_hirom ? 0x80 : 0;
+  header->size_low = size / 8192;
+  header->size_high = size / 8192 >> 8;
+  header->multi = snes_split ? 0x40 : 0;
+  header->hirom = snes_hirom ? 0x80 : 0;
 
   uses_DSP = snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
              snes_header.rom_type == 5 || snes_header.rom_type == 0xf6;
 
   if ((snes_header.rom_type & 0xf0) == 0x10)    // uses FX(2) chip
     {
-      header.emulation1 = 0x11;
-      header.emulation2 = 2;
+      header->emulation1 = 0x11;
+      header->emulation2 = 2;
     }
   else
     {
 #if 0                                           // memset() set all fields to 0
-      header.emulation1 = 0;                    // default value for LoROM dumps
+      header->emulation1 = 0;                   // default value for LoROM dumps
       if (snes_sramsize == 32 * 1024)
-        header.emulation2 = 0;
+        header->emulation2 = 0;
       else
 #endif
       if (snes_sramsize == 8 * 1024 || snes_sramsize == 2 * 1024)
-        header.emulation2 = 0x80;
+        header->emulation2 = 0x80;
       else if (snes_sramsize == 0)
         {
-          header.emulation1 = 0x77;
-          header.emulation2 = 0x83;
+          header->emulation1 = 0x77;
+          header->emulation2 = 0x83;
         }
 
       if (snes_hirom)
         {
-          header.emulation2 |= 2;
+          header->emulation2 |= 2;
           if (uses_DSP)
-            header.emulation1 |= 0xf0;
+            header->emulation1 |= 0xf0;
           if (snes_sramsize != 0)
-            header.emulation1 |= 0xdd;
+            header->emulation1 |= 0xdd;
         }
       else if (uses_DSP)                        // LoROM
         {
-          header.emulation1 &= 0x0f;
-          header.emulation1 |= 0x40;            // LoROM && SRAM == 0 && DSP => 0x47
+          header->emulation1 &= 0x0f;
+          header->emulation1 |= 0x40;           // LoROM && SRAM == 0 && DSP => 0x47
         }
     }
+}
 
+
+int
+snes_fig (st_rominfo_t *rominfo)
+{
+  st_fig_header_t header;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+
+  q_fread (&header, 0, rominfo->buheader_len > (int) FIG_HEADER_LEN ?
+                         (int) FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
+  reset_header (&header);
+  snes_set_fig_header (rominfo, &header);
   set_nsrt_info (rominfo, (unsigned char *) &header);
 
   strcpy (dest_name, ucon64.rom);
@@ -712,7 +719,8 @@ snes_fig (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+  q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size - rominfo->buheader_len,
+          dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();

@@ -129,74 +129,120 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
 <p>
 <a name="2"><b>Q2</b>: How do I compile uCON64?</a><br>
-<b>A</b>: To create a DOS executable you'll need
-   <a href="http://www.delorie.com/djgpp/" target="_blank">DJGPP</a>,
-   a DOS port of gcc and other GNU development tools.<br>
-   To create a Win32 executable you'll need
-   <a href="http://www.cygwin.com" target="_blank">Cygwin</a>,
-   a Windows port of gcc and many other GNU tools and libraries.<br>
-   uCON64 1.9.8 can also be build with Visual C++. See below the "GNU help" for
-   further instructions.
+<b>A</b>: You'll need either GCC or Visual C++. uCON64 can be compiled for Unix
+   (GNU/Linux, Solaris, FreeBSD), DOS, BeOS and Windows (95/98/NT/2000/XP). It
+   should also be possible to compile uCON64 for AmigaOS, but that port is not
+   directly supported by us, because we don't have access to a machine running
+   AmigaOS. The Amiga port is being maintained by Jan-Erik Karlsson.<br>
+   A DOS port of GCC (and other GNU development tools) named DJGPP is
+   available from
+   <a href="http://www.delorie.com/djgpp/" target="_blank">http://www.delorie.com/djgpp/</a>.
+   A Win32 port of GCC (and many other GNU tools and libraries) named Cygwin
+   is available from
+   <a href="http://www.cygwin.com" target="_blank">http://www.cygwin.com</a>.<br>
 <br>
-   If you use a Bash compatible shell first enter the following line:<br>
+   Some properties of uCON64 are configurable (only) at compile time. For
+   example whether uCON64 will be able to read zip files or whether it will be
+   able to communicate with backup devices connected to a parallel port. The
+   presence of these features is controlled by the header file config.h in
+   combination with the makefiles. There are two ways to create a config.h and
+   makefiles for uCON64:<br>
+   1.) Run the configure script "configure".<br>
+   You can do that with:<br>
    &nbsp;&nbsp; ./configure<br>
+<br>
+   However, the configure script can't be executed (directly) from command.com
+   or cmd.exe. command.com is the default shell on Windows&nbsp;9x, cmd.exe is
+   the default shell on Windows&nbsp;XP (NT/2000). So, the second way to get a
+   config.h and the accompanying makefiles is:<br>
+   2.) Copy a tried-and-tested config.h "template" to a file config.h and copy
+   a Makefile "template" to a file Makefile.<br>
+   For DOS (DJGPP) copy config.h.orig to config.h, Makefile.orig to Makefile
+   and libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do the same
+   for Cygwin, but since you can run configure in Cygwin's Bash this is not the
+   preferred way for Cygwin.<br>
+   For Windows (Visual C++) copy config.h.vc6 to config.h. Don't copy
+   any of the Makefile.vc6 files. You may do so, but don't complain if these
+   instructions don't seem to be right after having done that.<br>
 <br>
    Pass the option --without-zlib to the configure script if you don't want to
    enable gzip &amp; zip support. zlib is available from
-   <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.<br>
-   If you use a Bash incompatible shell (like command.com or cmd.exe), copy
-   Makefile.orig to Makefile, libdiscmage/Makefile.orig to libdiscmage/Makefile
-   and config.h.orig to config.h.<br>
-   Now you can optionally open Makefile and config.h in an editor and
-   change the defines.<br>
+   <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.
+   If you want to enable zlib support under DOS or Windows (Visual C++) you
+   have to define the constant HAVE_ZLIB_H in config.h (remove the "//" in
+   front of the line that defines it) <i>and</i> ZLIB in Makefile and
+   libdiscmage/Makefile (remove the "#" in front of the line that defines it).<br>
+   If you want to change other things in config.h or the makefiles do so before
+   proceeding to the next step.<br>
 <br>
-   For DJGPP and Cygwin you should either copy the file libgcc.a to the
-   standard library directory or edit libdiscmage/Makefile so that the
-   variable GCCA_DIR points to the directory that contains libgcc.a.<br>
+   By default the library discmage will also be compiled. Discmage is used for
+   several CD-related functions in uCON64, but isn't required for non
+   CD-related functions. For example, you won't need discmage for any of the
+   SNES functions. So, if you don't have a reason to not compile discmage do
+   the following for DJGPP and Cygwin:<br>
+   - either copy the file libgcc.a to the standard library directory<br>
+   - or edit libdiscmage/Makefile so that the variable GCCA_DIR points to the
+   directory that contains libgcc.a<br>
+   The first technique (copying the file) is prefered.<br>
    If you don't intend to use the functionality that libdiscmage provides you
    could skip the previous step and pass the argument "ucon64" (without the
-   quotes) as argument to make ("ucon64.exe" on WinDOS). So instead of just
-   typing "make" type "make ucon64".<br>
-   Note that if you want to enable zlib support under DOS you must define the
-   constant HAVE_ZLIB_H in config.h (remove the "//" in front of the line that
-   defines it) <i>and</i> ZLIB in Makefile and libdiscmage/Makefile.<br>
-   Then enter the following lines:<br>
+   quotes) as argument to make ("ucon64.exe" on WinDOS).<br>
+   Now read the relevant section for the compiler you're using.<br>
+<br>
+   <b>GCC</b> (including DJGPP and Cygwin)<br>
+<br>
+   If you have compiled uCON64 in the same directory before, first type:<br>
    &nbsp;&nbsp; make clean<br>
+<br>
+   If you want to compile the source code including discmage type:<br>
    &nbsp;&nbsp; make<br>
+   If you don't want to compile discmage the last command would like this for
+   DJGPP and Cygwin:<br>
+   &nbsp;&nbsp; make ucon64.exe<br>
+   Otherwise it would like this:<br>
+   &nbsp;&nbsp; make ucon64<br>
+<br>
+   On Unix systems other than GNU/Linux you might need to use 'gmake' (GNU
+   make) instead of 'make'. If the last command has been successfully executed
+   you can find the executable in the directory where you ran make. For DOS and
+   Cygwin you are now ready to proceed to <a href="#3">question 3</a>. For the
+   other platforms one extra command is needed (or simple handy):<br>
    &nbsp;&nbsp; make install<br>
 <br>
-   On Unix systems other than Linux you might need to use 'gmake' instead of
-   'make'. Under Unix the last command will ask for root's password, because
-   uCON64 needs to be setuid root for parallel port access. Under BeOS the last
-   command will open a dialog window. Just follow the instructions. Under DOS
-   and Windows (but also under Unix and BeOS) you can find the executable in
-   the directory where you ran make.<br>
-   To build uCON64 with Visual C++, first copy config.h.vc6 to config.h. If you
-   want to enable zlib support you should follow the same steps as when using
-   the GNU tools with the exception that you should edit Makefile.vc6 and
-   libdiscmage/Makefile.vc6. Then start a command prompt, go to the correct
-   directory and enter the following lines:<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6 clean<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6<br>
+   Under Unix this command will ask for root's password, because uCON64 needs
+   to be setuid root for parallel port access. If you configured uCON64 without
+   support for parallel port backup units, uCON64 needn't be setuid root. Just
+   copy uCON64 to any directory you like.<br>
+   Under BeOS the last command will open a dialog window. Just follow the
+   instructions.<br>
 <br>
-   If you don't want to compile libdiscmage pass "ucon64.exe" as argument to
-   nmake:<br>
+   <b>Visual C++</b><br>
+<br>
+   Start a command shell or "prompt" and go to the correct directory. If you
+   have compiled uCON64 in the same directory before, first type:<br>
+   &nbsp;&nbsp; nmake -f Makefile.vc6 clean<br>
+<br>
+   If you want to compile the source code including discmage type:<br>
+   &nbsp;&nbsp; nmake -f Makefile.vc6<br>
+   If you don't want to compile discmage the last command would like this:<br>
    &nbsp;&nbsp; nmake -f Makefile.vc6 ucon64.exe<br>
 <br>
-   You could use UPX to compress the executable. UPX is available from
+   Under GNU/Linux, DOS and Windows you could use UPX to compress the
+   executable. UPX is available from
    <a href="http://upx.sourceforge.net" target="_blank">http://upx.sourceforge.net</a>.<br>
 <br>
 <p>
 <a name="3"><b>Q3</b>: How do I install uCON64?</a><br>
-<b>A</b>: You already did if you followed the directions in the previous answer
-   (you downloaded the source package). If you downloaded the binary package
-   you can ignore the previous question. If you don't use WinDOS run install.sh
-   (Unix) or install_beos.sh (BeOS) and edit $HOME/.ucon64rc. If you use WinDOS
-   you may want to copy ucon64.exe to a directory in your PATH and maybe edit
-   ucon64.cfg (DOS version) or .ucon64rc (Win32 version). uCON64 will create
-   a configuration file if it can't find one. If you use DOS or Windows&nbsp;9x
-   and don't want uCON64 to create ucon64.cfg or .ucon64rc files all over the
-   place (current directories) see <a href="#24">question 24</a>.<br>
+<b>A</b>: You already did (for Unix and BeOS) if you followed the directions in
+   the previous answer (you downloaded the source package). If you downloaded
+   the binary package you can ignore the previous question. If you don't use
+   WinDOS run install.sh (Unix) or install_beos.sh (BeOS) and edit
+   $HOME/.ucon64rc. If you use WinDOS you may want to copy ucon64.exe to a
+   directory in your PATH and maybe edit ucon64.cfg (DOS version) or .ucon64rc
+   (Win32 version). uCON64 will create a configuration file if it can't find
+   one. If you use DOS or Windows&nbsp;9x and don't want uCON64 to create
+   ucon64.cfg or .ucon64rc files all over the place (current directories) see
+   <a href="#24">question 24</a>.<br>
    You might also want to make use of DAT files. See
    <a href="#35">question 35</a> for more information.<br>
 <br>

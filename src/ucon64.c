@@ -602,26 +602,26 @@ main (int argc, char **argv)
               result = ucon64_process_rom (buf);
             else if (S_ISDIR (fstate.st_mode))  // a dir?
               {
+                char *p;
+#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
+                /*
+                  Note that this code doesn't make much sense for Cygwin,
+                  because at least the version I use (1.3.6, dbjh) doesn't
+                  support current directories for drives.
+                */
+                c = toupper (buf[0]);
+                if (buf[strlen (buf) - 1] == FILE_SEPARATOR ||
+                    (c >= 'A' && c <= 'Z' && buf[1] == ':' && buf[2] == 0))
+#else
+                if (buf[strlen (buf) - 1] == FILE_SEPARATOR)
+#endif
+                  p = "";
+                else
+                  p = FILE_SEPARATOR_S;
+
 #ifndef _WIN32
                 if ((dp = opendir (buf)))
                   {
-                    char *p;
-#if     defined __MSDOS__ || defined __CYGWIN__
-                    /*
-                      Note that this code doesn't make much sense for Cygwin,
-                      because at least the version I use (1.3.6, dbjh) doesn't
-                      support current directories for drives.
-                    */
-                    c = toupper (buf[0]);
-                    if (buf[strlen (buf) - 1] == FILE_SEPARATOR ||
-                        (c >= 'A' && c <= 'Z' && buf[1] == ':' && buf[2] == 0))
-#else
-                    if (buf[strlen (buf) - 1] == FILE_SEPARATOR)
-#endif
-                      p = "";
-                    else
-                      p = FILE_SEPARATOR_S;
-
                     while ((ep = readdir (dp)))
                       {
                         sprintf (buf2, "%s%s%s", buf, p, ep->d_name);
@@ -641,7 +641,7 @@ main (int argc, char **argv)
                   {
                     do
                       {
-                        sprintf (buf2, "%s" FILE_SEPARATOR_S "%s", buf, find_data.cFileName);
+                        sprintf (buf2, "%s%s%s", buf, p, find_data.cFileName);
                         if (stat (buf2, &fstate) != -1)
                           if (S_ISREG (fstate.st_mode))
                             {

@@ -22,9 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-//#ifdef  HAVE_DIRENT_H
-//#include <dirent.h>
-//#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -384,7 +381,11 @@ switch (c)
 
   case UCON64_83:
   case UCON64_RR83:
-    ucon64.force_83 = 1;
+    ucon64.fname_len = 1; // 1 == 8.3
+    break;
+
+  case UCON64_FORCE63:
+    ucon64.fname_len = 2; // 2 == 63.x (Joilet)
     break;
 
   case UCON64_Q:
@@ -411,8 +412,8 @@ switch (c)
 static int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX], *p;
-  char buf2[FILENAME_MAX];
+  char buf[FILENAME_MAX + 1], *suffix = (char *) get_suffix (ucon64.rom);
+  char buf2[FILENAME_MAX + 1];
 
   buf[0] = 0;
 
@@ -420,43 +421,47 @@ ucon64_rename (int mode)
     if (ucon64.rominfo)
       if (ucon64.rominfo->name)
         strcpy (buf, strtrim (ucon64.rominfo->name));
+        
 
   if (!buf[0] || mode == UCON64_RENAME) // GoodXXXX mode
     if (ucon64.dat)
       if (ucon64.dat->fname)
         {
-          p = (char *) get_suffix (ucon64.dat->fname);
+          char *p = (char *) get_suffix (ucon64.dat->fname);
+          strcpy (buf, ucon64.dat->fname);
 
-          if (stricmp (p, ".nes") &&                    // NES
-              stricmp (p, ".fds") &&                    // NES FDS
-              stricmp (p, ".gb") &&                     // Game Boy
-              stricmp (p, ".gbc") &&                    // Game Boy Color
-              stricmp (p, ".gba") &&                    // Game Boy Advance
-              stricmp (p, ".smc") &&                    // SNES
-//              stricmp (p, ".smd") &&                    // Genesis
-              stricmp (p, ".v64"))                      // Nintendo 64
-            strcpy (buf, ucon64.dat->fname);
-          else
-            {
-              strcpy (buf2, ucon64.dat->fname);
-              buf2[strlen (ucon64.dat->fname) - strlen (p)] = 0;
-              strcpy (buf, strtrim (buf2));
-            }
+          if (p)
+            if (p[0])
+              if (strlen (p) < 5) //TODO: what is a suffix and what is a dot in a name?
+                if (stricmp (p, ".nes") &&                    // NES
+                    stricmp (p, ".fds") &&                    // NES FDS
+//                    stricmp (p, ".smd") &&                    // Genesis
+                    stricmp (p, ".gb") &&                     // Game Boy
+                    stricmp (p, ".gbc") &&                    // Game Boy Color
+                    stricmp (p, ".gba") &&                    // Game Boy Advance
+                    stricmp (p, ".smc") &&                    // SNES
+                    stricmp (p, ".v64"))                      // Nintendo 64
+                {
+                  buf[strlen (buf) - strlen (suffix)] = 0;
+                  suffix = p;
+                }
         }
 
   if (!buf[0]) return 0;
+
+  if (ucon64.fname_len == 2)
+    buf[63] = 0;
+  else if (ucon64.fname_len == 1)
+    buf[8] = 0;
+
+  set_suffix (buf, suffix);
   
-  strcpy (buf2, to_func (buf, strlen (buf), tofname)); // replace chars the fs might not like
-
-  if (ucon64.force_83)
-    buf2[8] = 0;
-
-  sprintf (buf, "%s%s", strtrim (buf2), get_suffix (ucon64.rom));
-
-  if (ucon64.force_83)
+  if (ucon64.fname_len == 1)
     buf[12] = 0;
 
-  if (!strcmp (basename2 (ucon64.rom), basename2 (buf)))
+  strcpy (buf2, to_func (buf, strlen (buf), tofname)); // replace chars the fs might not like
+
+  if (!strcmp (basename2 (ucon64.rom), basename2 (buf2)))
     {
 #ifdef  DEBUG
       printf ("Found \"%s\"\n", ucon64.rom);
@@ -464,12 +469,12 @@ ucon64_rename (int mode)
       return 0;
     }
 
-  if (access (buf, F_OK))
+  if (access (buf2, F_OK))
     { // file with name buf doesn't exist
       printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom),
-      basename2 (buf));
+      basename2 (buf2));
 #ifndef DEBUG
-      rename (ucon64.rom, buf);
+      rename (ucon64.rom, buf2);
 #endif      
     }
   else
@@ -477,7 +482,7 @@ ucon64_rename (int mode)
       // TODO: here should come some code that checks if buf is really
       //       the file that its name suggests
       //       DON'T remove file with name buf! That would be stupid.
-      printf ("File \"%s\" already exists, skipping \"%s\"\n", buf, ucon64.rom);
+      printf ("File \"%s\" already exists, skipping \"%s\"\n", buf2, ucon64.rom);
     }
 
   return 0;
@@ -819,7 +824,7 @@ switch (c)
     break;
 
   case UCON64_RR83:
-    ucon64.force_83 = 1;
+    ucon64.fname_len = 1;
   case UCON64_RROM:
     ucon64_rename (UCON64_RROM);
     break;

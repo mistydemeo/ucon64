@@ -718,6 +718,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_83, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
   {UCON64_BS, UCON64_SNES, snes_usage,            WF_SWITCH},
   {UCON64_FILE, UCON64_UNKNOWN, NULL,          WF_SWITCH},
+  {UCON64_FORCE63, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
   {UCON64_FRONTEND, UCON64_UNKNOWN, NULL,      WF_SWITCH},
 //  {UCON64_GOOD, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
   {UCON64_HD, UCON64_UNKNOWN, ucon64_options_usage,            WF_SWITCH},

@@ -105,7 +105,16 @@ typedef struct
   int argc;
   char **argv;
 
+// TODO?: rename to fname
   const char *rom;                              // ROM (cmdline) with path
+
+/* 
+  force fname output format for --rrom, --rename, etc...
+  fname_len == 1 -> 8.3
+  fname_len == 2 -> 63.x
+*/ 
+  int fname_len;
+
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   int file_size;                                // (uncompressed) ROM file size
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
@@ -135,7 +144,6 @@ typedef struct
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
-  int force_83;                                 // force 8.3 name output for --rrom, --rename, etc...
   int quiet;                                    // quiet == -1 means verbose + 1
 
   uint32_t flags;                                 // detect and init ROM info

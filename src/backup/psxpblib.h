@@ -40,10 +40,11 @@
 
 #ifdef _PSXPB_LINUX_
 #include <string.h>
-#include <sys/io.h>
+//#include <sys/io.h>
+#include "../ucon64_misc.h"
 #include <unistd.h>
-#define	psx_outportb(P, B) outb(B, P)
-#define psx_inportb(P) inb(P)
+#define	psx_outportb(P, B) outportb(B, P)
+#define psx_inportb(P) inportb(P)
 #endif
 
 

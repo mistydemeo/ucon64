@@ -39,8 +39,7 @@ const st_usage_t smc_usage[] =
     {NULL, NULL, "Super Magic Card"},
     {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef PARALLEL
-    {"xsmc", NULL, "send ROM (in FFE format) to Super Magic Card; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when ROM does not exist"},
+    {"xsmc", NULL, "send ROM (in FFE format) to Super Magic Card; " OPTION_LONG_S "port=PORT"},
     {"xsmcr", NULL, "send/receive RTS data to/from Super Magic Card; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when RTS file does not exist"},
 #endif // PARALLEL

@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
-#include "n64/n64.h"
+#include "n64.h"
 #include "patch/ips.h"
 #include "patch/aps.h"
 #include "backup/doctor64.h"

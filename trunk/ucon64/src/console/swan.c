@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
-#include "swan/swan.h"
+#include "swan.h"
 
 static int swan_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 

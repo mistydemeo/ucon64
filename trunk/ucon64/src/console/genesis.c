@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
-#include "genesis/genesis.h"
+#include "console/genesis.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
 #include "backup/cdrw.h"

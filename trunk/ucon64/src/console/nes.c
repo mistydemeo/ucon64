@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
-#include "nes/nes.h"
+#include "nes.h"
 
 #define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
 

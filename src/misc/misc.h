@@ -258,7 +258,7 @@ extern int kbhit (void);
 #endif
 
 #ifdef  __CYGWIN__
-extern char *fix_character_set (char *value);
+extern char *fix_character_set (char *str);
 #endif
 
 #ifdef  _WIN32

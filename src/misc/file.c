@@ -470,9 +470,9 @@ get_suffix (const char *filename)
   if (!(p = basename2 (filename)))
     p = filename;
   if (!(s = strrchr (p, '.')))
-    s = strchr (p, 0);                         // strchr(p, 0) and NOT "" is the
+    s = strchr (p, 0);                          // strchr(p, 0) and NOT "" is the
   if (s == p)                                   //  suffix of a file without suffix
-    s = strchr (p, 0);                         // files can start with '.'
+    s = strchr (p, 0);                          // files can start with '.'
 
   return s;
 }
@@ -709,7 +709,6 @@ fcopy_func (void *buffer, int n, void *object)
 int
 fcopy (const char *src, size_t start, size_t len, const char *dest, const char *mode)
 {
-  // Note: DON'T merge fcopy() and fcopy_raw() with a flag. fcopy_raw() must be fast - dbjh
   FILE *output;
   int result = 0;
 
@@ -724,20 +723,20 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
 
   fseek (output, 0, SEEK_END);
 
-  result = quick_io_func (fcopy_func, MAXBUFSIZE, // suggested func_maxlen
-                          (void *) output, start, len, src, "rb");
+  result = quick_io_func (fcopy_func, MAXBUFSIZE, output, start, len, src, "rb");
 
   fclose (output);
   sync ();
 
-  return (result == -1 ? result : 0);
+  return result == -1 ? result : 0;
 }
 
 
 int
 fcopy_raw (const char *src, const char *dest)
 // Raw file copy function. Raw, because it will copy the file data as it is,
-//  unlike fcopy()
+//  unlike fcopy(). Don't merge fcopy_raw() with fcopy(). They have both their
+//  uses.
 {
 #ifdef  USE_ZLIB
 #undef  fopen
@@ -796,18 +795,17 @@ quick_io_open (const char *filename, const char *mode)
 
   if (*mode == 'w' || *mode == 'a' || mode[1] == '+') // will we write to it?
     if (!access (filename, F_OK))               // exists?
-//      if (access (filename, W_OK) == -1)        // writable?
-        {
-          struct stat fstate;
-          // First (try to) change the file mode or we won't be able to write to it if
-          //  it's a read-only file.
-          stat (filename, &fstate);
-          if (chmod (filename, fstate.st_mode | S_IWUSR))
-            {
-              errno = EACCES;
-              return NULL;
-            }
-        }
+      {
+        struct stat fstate;
+        // First (try to) change the file mode or we won't be able to write to
+        //  it if it's a read-only file.
+        stat (filename, &fstate);
+        if (chmod (filename, fstate.st_mode | S_IWUSR))
+          {
+            errno = EACCES;
+            return NULL;
+          }
+      }
 
   if ((fh = fopen (filename, (const char *) mode)) == NULL)
     {
@@ -881,9 +879,7 @@ quick_io_func_inline (int (*func) (void *, int, void *), int func_maxlen,
   for (; i < buffer_len; i += func_size)
     {
       func_size = MIN (func_size, buffer_len - i);
-
       func_result = func ((char *) buffer + i, func_size, object);
-
       if (func_result < func_size)
         break;
     }
@@ -895,21 +891,25 @@ quick_io_func_inline (int (*func) (void *, int, void *), int func_maxlen,
 int
 quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
                size_t start, size_t len, const char *filename, const char *mode)
+// func() takes buffer, length and object (optional), func_maxlen is maximum
+//  length passed to func()
 {
   void *buffer = NULL;
   int buffer_maxlen = 0, buffer_len = 0, func_len = 0;
   size_t len_done = 0;
   FILE *fh = NULL;
 
-  // one of the advantages of quick_io_func is a more dynamic memory allocation
-  if ((buffer = malloc (len * sizeof (unsigned char))))
-    buffer_maxlen = len;
-  else if ((buffer = malloc (func_maxlen * sizeof (unsigned char))))
-    buffer_maxlen = func_maxlen;
-  else
-    return -1;
+  if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
+    if ((buffer = malloc (len)))                //  in their entirety
+      buffer_maxlen = len;
+  if (!buffer)
+    {
+      if ((buffer = malloc (func_maxlen)))
+        buffer_maxlen = func_maxlen;
+      else
+        return -1;
+    }
 
-  // see quick_io_open() itself for more advantages
   if (!(fh = quick_io_open (filename, (const char *) mode)))
     {
       free (buffer);
@@ -924,25 +924,25 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
         break;
 
       func_len = quick_io_func_inline (func, func_maxlen, object, buffer, buffer_len);
-      
+
       if (func_len < buffer_len) // less than buffer_len? this must be the end
         break;                   //  or a problem (if write mode)
 
       if (*mode == 'w' || *mode == 'a' || mode[1] == '+')
-        { 
+        {
           fseek (fh, -buffer_len, SEEK_CUR);
           fwrite (buffer, 1, buffer_len, fh);
           /*
-            This appears to be a bug in DJGPP and Solaris. Without an extra call to
-            fseek() a part of the file won't be written (DJGPP: after 8 MB, Solaris:
-            after 12 MB).
+            This appears to be a bug in DJGPP and Solaris (for ecample, when
+            called from ucon64_fbswap16()). Without an extra call to fseek() a
+            part of the file won't be written (DJGPP: after 8 MB, Solaris: after
+            12 MB).
           */
           fseek (fh, 0, SEEK_CUR);
         }
     }
 
   fclose (fh);
-
   free (buffer);
   sync ();
 

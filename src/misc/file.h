@@ -127,10 +127,8 @@ extern int fsizeof (const char *filename);
 extern int quick_io (void *buffer, size_t start, size_t len, const char *fname,
                      const char *mode);
 extern int quick_io_c (int value, size_t pos, const char *fname, const char *mode);
-extern int quick_io_func (int (*callback_func) (void *, int, void *),  // buffer, length and object
-                          int func_maxlen,      // max. length func() takes
-                          void *object,         // (optional) object used by func
-                          size_t start, size_t len, const char *fname,
-                          const char *mode);
+extern int quick_io_func (int (*callback_func) (void *, int, void *),
+                          int func_maxlen, void *object, size_t start,
+                          size_t len, const char *fname, const char *mode);
 
 #endif // MISC_FILE_H

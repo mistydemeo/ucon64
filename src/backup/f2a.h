@@ -28,7 +28,7 @@ extern const st_usage_t f2a_usage[];
 
 #ifdef PARALLEL
 extern int f2a_read_rom (const char *filename, unsigned int parport, int size);
-extern int f2a_write_rom (const char *filename, unsigned int parport);
+extern int f2a_write_rom (const char *filename, unsigned int parport, int size);
 extern int f2a_read_sram (const char *filename, unsigned int parport, int bank);
 extern int f2a_write_sram (const char *filename, unsigned int parport, int bank);
 #endif // PARALLEL

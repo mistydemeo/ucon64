@@ -1,10 +1,10 @@
 /*
 f2a.c - Flash 2 Advance support for uCON64
 
-written by 2003 Ulrich Hecht (uli@emulinks.de)
-           2003 David Voswinkel (d.voswinkel@netcologne.de)
-           2004 NoisyB (noisyb@gmx.net)
-           2004 dbjh
+written by 2003        Ulrich Hecht (uli@emulinks.de)
+           2003 - 2004 David Voswinkel (d.voswinkel@netcologne.de)
+           2004        NoisyB (noisyb@gmx.net)
+           2004        dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -28,8 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-//#include <assert.h>                           // assert() is evil! E V I L !
 #include <fcntl.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/timeb.h>
 #ifdef  HAVE_UNISTD_H
@@ -43,7 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "f2a.h"
 #include "console/gba.h"
 #ifdef  HAVE_USB_H
-#include <sys/types.h>
 #include "misc_usb.h"
 #endif
 #ifdef  PARALLEL
@@ -58,11 +57,8 @@ const st_usage_t f2a_usage[] =
 #ifdef PARALLEL
     {"xf2a", NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
                    "receives automatically (32 Mbits) when ROM does not exist"},
-/*
-    {"xf2amulti", "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra) (makes\n"
-                          "temporary multirom truncated to SIZE Mbit); file with loader\n"
-                          "must be specified first, then all the ROMs; " OPTION_LONG_S "port=PORT"},
-*/
+    {"xf2amulti", "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
+                          "loader in the configuration file; " OPTION_LONG_S "port=PORT"},
     {"xf2ac", "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n"
                    OPTION_LONG_S "port=PORT"},
     {"xf2as", NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
@@ -187,12 +183,14 @@ static const unsigned char header[] = {
 enum
 {
   UPLOAD_FAILED = 0,
-  CANNOT_GET_FILE_SIZE
+  CANNOT_GET_FILE_SIZE,
+  UPLOAD_ROM
 };
 
 static const char *f2a_msg[] = {
   "ERROR: Upload failed\n",
   "ERROR: Can't determine size of file \"%s\"\n",
+  "Uploading %s, %d kB, padded to %d kB\n",
   NULL
 };
 
@@ -215,7 +213,6 @@ f2a_init_usb (void)
   recvmsg rm;
   char iclientu_fname[FILENAME_MAX];
 
-//  assert (sizeof (recvmsg) == 64);
   memset (&rm, 0, sizeof (rm));
 
   if (usb_connect ())
@@ -409,8 +406,6 @@ f2a_read_usb (int address, int size, const char *filename)
   f2a_sendmsg_t sm;
   char buffer[1024];
 
-//  assert ((size & 1023) == 0);
-
   memset (&sm, 0, SENDMSG_SIZE);
 
   if ((file = fopen (filename, "wb")) == NULL)
@@ -442,6 +437,7 @@ f2a_read_usb (int address, int size, const char *filename)
           fclose (file);
           return -1;                            // see comment for fopen() call
         }
+      ucon64_gauge (starttime, i * 1024, size);
     }
   fclose (file);
   return 0;
@@ -452,32 +448,29 @@ static int
 f2a_write_usb (int numfiles, char **files, int address)
 {
   f2a_sendmsg_t sm;
-  int i, j, fsize;
+  int i, j, fsize, size, n;
   char buffer[1024];
   FILE *file;
 
-  memset (&sm, 0, SENDMSG_SIZE);
-
   // initialize command buffer
+  memset (&sm, 0, SENDMSG_SIZE);
   sm.command = CMD_WRITEDATA;
   sm.magic = MAGIC_NUMBER;
   sm.unknown = 0xa;                             // no idea what this is...
 
   for (j = 0; j < numfiles; j++)
     {
-      if (ucon64.quiet < 1)
-        printf ("Sending file %d: %s\n", j, files[j]);
-
       if ((fsize = q_fsize (files[j])) == -1)
         {
           fprintf (stderr, f2a_msg[CANNOT_GET_FILE_SIZE], files[j]);
           return -1;
         }
-
-      // round up to 32k, FIXME: This has to be 128k for Turbo carts
-      if (fsize & (32768 - 1))
-        fsize += 32768;
-      fsize &= ~(32768 - 1);
+      // Round up to 32 kB. FIXME: This has to be 128 kB for Turbo carts
+      size = fsize;
+      if (size & (32768 - 1))
+        size += 32768;
+      size &= ~(32768 - 1);
+      printf (f2a_msg[UPLOAD_ROM], files[j], fsize / 1024, size / 1024);
 
       if ((file = fopen (files[j], "rb")) == NULL)
         {
@@ -487,25 +480,30 @@ f2a_write_usb (int numfiles, char **files, int address)
         }
 
       // flash the ROM
-      sm.size = fsize;
+      sm.size = size;
       sm.address = address;
-      sm.sizekb = fsize / 1024;
+      sm.sizekb = size / 1024;
 
       if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
 
-      for (i = 0; i < fsize; i += 1024)
+      for (i = 0; i < size; i += 1024)
         {
           //printf ("writing chunk %d\n", i);
-          if (!fread (buffer, 1024, 1, file))   // note order of arguments
+          n = fread (buffer, 1, 1024, file);
+          memset (buffer + n, 0, 1024 - n);
+          if (ferror (file))
             {
+              fputc ('\n', stderr);
               fprintf (stderr, ucon64_msg[READ_ERROR], files[j]);
               fclose (file);
               return -1;                        // see comment for fopen() call
             }
           if (misc_usb_write (f2ahandle, buffer, 1024) == -1)
             return -1;
+          ucon64_gauge (starttime, i, size);
         }
+      fputc ('\n', stdout);                     // start new gauge on new line
 
       fclose (file);
       address += fsize;
@@ -774,8 +772,7 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
       if (size & (32768 - 1))
         size += 32768;
       size &= ~(32768 - 1);
-      printf ("Uploading %s, %d kB, padded to %d kB\n",
-               files[j], (int) (fsize / 1024), (int) (size / 1024));
+      printf (f2a_msg[UPLOAD_ROM], files[j], fsize / 1024, size / 1024);
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, addr, size,
                                (unsigned char *) files[j], HEAD, FLIP, 0, 1))
         {
@@ -890,7 +887,7 @@ static int
 f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int flip)
 {
   unsigned char buffer[1024], recv[4]; //, *mbuffer;
-  int i, j; //, n, progress;
+  int i, j;
   f2a_msg_cmd_t msg_cmd;
   FILE *file;
 
@@ -960,21 +957,7 @@ f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int fli
         fprintf (stderr, "reading chunk %d of %d\n", (int) (i / 1024) + 1,
                  (int) (size / 1024));
       else
-        {
-#if 1
-          ucon64_gauge (starttime, i, size);
-#else
-          progress = (int) ((100.0 / size) * (i + (1024)));
-          printf ("\r[");
-          for (n = 0; n <= 100; n++)
-            if (n <= progress)
-              printf ("=");
-            else
-              printf (" ");
-          printf ("]\r");
-          fflush (stdout);
-#endif
-        }
+        ucon64_gauge (starttime, i, size);
     }
   if (!parport_debug)
     fputc ('\n', stdout);
@@ -1020,12 +1003,9 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
                      int head, int flip, unsigned int exec, int mode)
 {
   unsigned char recv[4], buffer[1024];
-  int i, j, n, progress;
+  int i, j;
   f2a_msg_cmd_t msg_cmd;
   FILE *file = NULL;
-
-  (void) n;
-  (void) progress;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
   msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
@@ -1063,22 +1043,15 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
     {
       if (mode == 1)
         {
-          if (!feof (file))
+          j = fread (buffer, 1, 1024, file);
+          memset (buffer + j, 0, 1024 - j);
+          if (ferror (file))
             {
-              memset (buffer, 0, 1024);
-              if (!fread (buffer, 1024, 1, file)) // note order of arguments
-                {
-                  if (ferror (file))
-                    {
-                      fputc ('\n', stderr);
-                      fprintf (stderr, ucon64_msg[READ_ERROR], (char *) resource);
-                      fclose (file);
-                      return -1;
-                    }
-                }
-           }
-          else
-            memset (buffer, 0, 1024);
+              fputc ('\n', stderr);
+              fprintf (stderr, ucon64_msg[READ_ERROR], (char *) resource);
+              fclose (file);
+              return -1;
+            }
         }
       else
         memcpy (buffer, resource, 1024);
@@ -1089,7 +1062,9 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
 
       if (!i && head)
         {
+#if 1 // Overwriting the start address makes sense for some files... - dbjh
           ((int *) buffer)[0] = me2le_32 (0x2e0000ea); // start address
+#endif
           for (j = 1; j < GBA_LOGODATA_LEN / 4 + 1; j++) // + 1 for start address
             ((int *) buffer)[j] = bswap_32 (((int *) gba_logodata)[j - 1]);
         }
@@ -1097,29 +1072,17 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
         fprintf (stderr, "sending chunk %d of %d\n", (int) (i / 1024) + 1,
                  (int) (size / 1024));
       else
-        {
-#if 1
-          ucon64_gauge (starttime, i, size);
-#else
-          progress = (int) ((100.0 / size) * (i + 1024));
-          printf ("\r[");
-          for (n = 0; n <= 100; n++)
-            if (n <= progress)
-              printf ("=");
-            else
-              printf (" ");
-          printf ("]\r");
-          fflush (stdout);
-#endif
-        }
+        ucon64_gauge (starttime, i, size);
       f2a_send_raw_par (buffer, 1024);
       if (mode == 0)
         resource += 1024;
     }
   if (!parport_debug)
-    fputc ('\n', stdout);
+    fputc ('\n', stdout);                       // start new gauge on new line
+
   if (mode == 1)
     fclose (file);
+
   return 0;
 }
 
@@ -1277,17 +1240,63 @@ f2a_read_rom (const char *filename, unsigned int parport, int size)
 
 
 int
-f2a_write_rom (const char *filename, unsigned int parport)
+f2a_write_rom (const char *filename, unsigned int parport, int size)
 {
-  int offset = 0;
-  char *files[1] = { (char *) filename };
+  int offset = 0, n, n_files, n_files_max = 0, fsize, totalsize = LOADER_SIZE;
+  char **files = NULL, *file_mem[1];
+  struct stat fstate;
+
+  if (filename)                                 // -xf2a
+    {
+      files = file_mem;
+      files[0] = (char *) filename;
+      n_files = 1;
+    }
+  else                                          // -xf2amulti=SIZE
+    {
+      n_files = 0;
+      for (n = 1; n < ucon64.argc; n++)
+        {
+          if (access (ucon64.argv[n], F_OK))
+            continue;                           // "file" does not exist (option)
+          stat (ucon64.argv[n], &fstate);
+          if (!S_ISREG (fstate.st_mode))
+            continue;
+
+          if (n_files == n_files_max)
+            {
+              n_files_max += 20;                // allocate mem for 20 extra pointers
+              if ((files = (char **) realloc (files, n_files_max * 4)) == NULL)
+                {
+                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], n_files_max * 4);
+                  exit (1);
+                }
+            }
+
+          fsize = q_fsize (ucon64.argv[n]);
+          if (totalsize + fsize > size)
+            {
+              printf ("WARNING: The sum of the sizes of the files is larger then the specified flash\n"
+                      "         card size (%d Mbit). Skipping files, starting with\n"
+                      "         %s\n",
+                      size / MBIT, ucon64.argv[n]);
+              break;
+            }
+          totalsize += fsize;
+
+          files[n_files] = ucon64.argv[n];
+          n_files++;
+        }
+      if (n_files == 0)
+        return -1;
+    }
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
   if (ucon64.usbport)
     {
       f2a_init_usb ();
-      f2a_write_usb (1, files, 0x8000000 + offset * MBIT);
+      f2a_write_usb (n_files, files, 0x8000000 + offset * MBIT);
       misc_usb_close (f2ahandle);
     }
   else
@@ -1295,8 +1304,12 @@ f2a_write_rom (const char *filename, unsigned int parport)
     {
       f2a_init_par (parport, 10);
       //f2a_erase_par (0x08000000, size * MBIT);
-      f2a_write_par (1, files, 0x8000000 + offset * MBIT);
+      f2a_write_par (n_files, files, 0x8000000 + offset * MBIT);
     }
+
+  if (!filename)
+    free (files);
+
   return 0;
 }
 
@@ -1313,9 +1326,8 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
     }
   else
     {
-      if (bank < 1) // || bank > 4)
+      if (bank < 1)
         {
-//          fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
           fprintf (stderr, "ERROR: Bank must be a number larger than or equal to 1\n");
           exit (1);
         }
@@ -1350,9 +1362,8 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
   if (bank == UCON64_UNKNOWN)
     bank = 1;
   else
-    if (bank < 1) // || bank > 4)
+    if (bank < 1)
       {
-//        fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
         fprintf (stderr, "ERROR: Bank must be a number larger than or equal to 1\n");
         exit (1);
       }

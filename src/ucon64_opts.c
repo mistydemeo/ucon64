@@ -104,6 +104,12 @@ ucon64_switches (int c, const char *optarg)
 #define PARALLEL_STATUS "no"
 #endif
 
+#ifdef  HAVE_USB_H
+#define USB_STATUS "yes"
+#else
+#define USB_STATUS "no"
+#endif
+
 #ifdef  ANSI_COLOR
 #define ANSI_COLOR_STATUS "yes"
 #else
@@ -146,12 +152,14 @@ ucon64_switches (int c, const char *optarg)
               "platform:                          %s\n"
               "endianess:                         %s\n"
               "debug:                             %s\n"
-              "parallel port backup unit support: %s\n",
+              "parallel port backup unit support: %s\n"
+              "USB port backup unit support:      %s\n",
               UCON64_VERSION_S, __DATE__,
               CURRENT_OS_S,
               ENDIANESS_STATUS,
               DEBUG_STATUS,
-              PARALLEL_STATUS);
+              PARALLEL_STATUS,
+              USB_STATUS);
 
 #if     defined AMIGA && defined PARALLEL
       printf ("parallel port device:              %s\n", ucon64.parport_dev);
@@ -1760,7 +1768,7 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XLIT:
 #if 0
-//   write does not exist for the current lynxit interface
+      // write does not exist for the current lynxit interface
       if (!access (ucon64.rom, F_OK))
         {
           if (lynxit_write_rom (ucon64.rom, ucon64.parport) != 0)
@@ -1779,31 +1787,12 @@ ucon64_options (int c, const char *optarg)
       if (access (ucon64.rom, F_OK) != 0)
         f2a_read_rom (ucon64.rom, ucon64.parport, 32);
       else
-        f2a_write_rom (ucon64.rom, ucon64.parport);
+        f2a_write_rom (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XF2AMULTI:
-      tmpnam2 (src_name);
-      ucon64_temp_file = src_name;
-      register_func (remove_temp_file);
-      // gba_multi() calls ucon64_file_handler() so the directory part will be
-      //  stripped from src_name. The directory should be used though.
-      if (!ucon64.output_path[0])
-        {
-          char *dir = dirname2 (src_name);
-          strcpy (ucon64.output_path, dir);
-          if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
-            strcat (ucon64.output_path, FILE_SEPARATOR_S);
-          free (dir);
-        }
-      gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name);
-
-      ucon64.file_size = q_fsize (src_name);
-      f2a_write_rom (src_name, ucon64.parport);
-
-      unregister_func (remove_temp_file);
-      remove_temp_file ();
+      f2a_write_rom (NULL, ucon64.parport, strtol (optarg, NULL, 10) * MBIT);
       fputc ('\n', stdout);
       break;
 

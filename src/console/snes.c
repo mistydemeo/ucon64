@@ -47,6 +47,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ALT_HILO                                // use alternative Hi/LoROM detection method
 #define GD3_HEADER_MAPSIZE 0x18
 #define NSRT_HEADER_VERSION 22                  // version 2.2 header
+#define DETECT_SMC_COM_FUCKED_UP_LOROM 1        // adds support for interleaved LoROMs
+#define DETECT_INSNEST_FUCKED_UP_LOROM 1        // only adds support for its 24 Mbit 
+                                                //  interleaved LoROM "format"
 
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
@@ -167,7 +170,7 @@ typedef struct st_snes_header
 
 static st_snes_header_t snes_header;
 static int snes_split, snes_sramsize, snes_header_base, snes_hirom,
-           snes_hirom_changed, nsrt_header, force_interleaved, bs_dump, st_dump;
+           snes_hirom_ok, nsrt_header, force_interleaved, bs_dump, st_dump;
 static snes_file_t type;
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] = {
@@ -1828,14 +1831,32 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   else
     {
       int org_snes_header_base = snes_header_base;
+#ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
       snes_header_base = size / 2;
-      if (check_banktype (rom_buffer, size / 2) > banktype_score)
+      if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
         {
           interleaved = 1;
           snes_hirom = 0;
-          snes_hirom_changed = 1;               // keep snes_deinterleave()
+          snes_hirom_ok = 1;                    // keep snes_deinterleave()
           check_map_type = 0;                   //  from changing snes_hirom
         }
+#endif
+#ifdef  DETECT_INSNEST_FUCKED_UP_LOROM
+// "the most advanced and researched Super Nintendo ROM utility available", what a joke
+// They don't support their own "format"...
+      if (!interleaved && size == 24 * MBIT)
+        {
+          snes_header_base = 16 * MBIT;
+          if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
+            {
+              interleaved = 1;
+              snes_hirom = 0;
+              snes_hirom_ok = 2;                // fix for snes_deinterleave()
+              force_interleaved = 1;            //  and another
+              check_map_type = 0;
+            }
+        }
+#endif
       snes_header_base = org_snes_header_base;
     }
   if (check_map_type && !snes_hirom)
@@ -1863,20 +1884,20 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
   if (nblocks * 2 > 256)
     return -1;                                  // file > 8 MB
 
-  if (rominfo->interleaved == 2)
+  if (rominfo->interleaved == 2)                // WTF is this format? Is it a format at all?
     {
       for (i = 0; i < nblocks * 2; i++)
         blocks[i] = (i & ~0x1e) | ((i & 2) << 2) | ((i & 4) << 2) |
           ((i & 8) >> 2) | ((i & 16) >> 2);
     }
-  else
+  else // rominfo->interleaved == 1
     {
-      if (!snes_hirom_changed)
+      if (!snes_hirom_ok)
         {
-          snes_hirom = snes_hirom ? 0 : SNES_HIROM;
-          snes_hirom_changed = 1;
+          snes_hirom = SNES_HIROM;
+          snes_hirom_ok = 1;
         }
-      if (snes_hirom && type == GD3 && rom_size == 24 * MBIT)
+      if ((snes_hirom || snes_hirom_ok == 2) && type == GD3 && rom_size == 24 * MBIT)
         { // Fix-up the weird 24 Mbit Game Doctor HiROM format
           unsigned char *p1, *p2, *p3;
 
@@ -1898,6 +1919,7 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
         }
     }
 
+  // TODO: change this code into something decent
   for (i = 0; i < nblocks * 2; i++)
     {
       for (j = i; j < nblocks * 2; j++)
@@ -1917,6 +1939,7 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
     }
 
 #ifdef  ALT_HILO
+  // TODO: remove this code? It's only necessary if snes_testinterleaved() fails
   score_hi = check_banktype (rom_buffer, snes_header_base + SNES_HIROM);
   score_lo = check_banktype (rom_buffer, snes_header_base);
 
@@ -2267,7 +2290,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
   if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
     {
       snes_hirom = ucon64.snes_hirom;
-      snes_hirom_changed = 1;                   // keep snes_deinterleave()
+      snes_hirom_ok = 1;                        // keep snes_deinterleave()
     }                                           //  from changing snes_hirom
 
   if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
@@ -2315,7 +2338,7 @@ snes_init (st_rominfo_t *rominfo)
     "Part size + Sound link",
     "Part size"};
 
-  snes_hirom_changed = 0;                       // idem
+  snes_hirom_ok = 0;                            // init these vars here, for -lsv
   snes_sramsize = 0;                            // idem
   type = SMC;                                   // idem, SMC indicates unknown copier type
   bs_dump = 0;                                  // for -lsv, but also just to init it

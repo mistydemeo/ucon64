@@ -117,7 +117,7 @@ int sendFilename(unsigned int baseport, char name[])
   char mname[12];
 
   memset(mname, ' ', 11);
-  c = (strrchr(name, '/')>strrchr(name, '\\'))?strrchr(name, '/'):strrchr(name, '\\');
+  c = (strrchr(name, FILE_SEPARATOR));
   if( c == NULL ) {
     c = name;
   } else {

@@ -762,6 +762,7 @@ else
 
 printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 	"     %s -help|less (to see everything in less)\n"
+	"     give the force recognition option a try if something went wrong\n"
 	"\n"
 	"Report problems/ideas/fixes to noisyb@gmx.net\n"
 	"\n"
@@ -773,7 +774,6 @@ printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 
 
 /*
-sentimental crap...
 _ __ ________________________________________________________________ __ _
                                                       ___
     .,,,,     .---._ Oo  .::::. .::::. :::   :::    __\__\

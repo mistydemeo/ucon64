@@ -36,6 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "cdi.h"
 #include "nero.h"
+#include "toc.h"
+#include "cue.h"
 
 static const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
@@ -315,9 +317,9 @@ dm_reopen (const char *fname, dm_image_t *image_p)
   static st_probe_t probe[] = 
     {
       {DM_CDI, cdi_init, "CDI (DiscJuggler) Image"},
+      {DM_CUE, cue_init, "Image with CUE file"},
+      {DM_TOC, toc_init, "Image with TOC file"},
 #if 0
-      {DM_ISO, iso_init, "ISO Image"},
-      {DM_BIN, bin_init, "BIN Image"},
       {DM_NRG, nrg_init, "NRG (Nero) Image"}, // nero
       {DM_CCD, ccd_init, "CCD (CloneCD) Image"},
       {DM_UNKNOWN, NULL, "Unknown Image"},

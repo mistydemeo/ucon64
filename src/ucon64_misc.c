@@ -185,16 +185,20 @@ handle_existing_file (const char *dest, char *src)
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
+#ifdef  DEBUG
               printf ("case: 1a, src: %s\n", src?src:"NULL");
               fflush (stdout);
+#endif
 //              ucon64_fbak (NULL, dest);
               q_fbackup (dest, BAK_DUPE);
               if (src) setext (src, ".BAK");
             }                                   // must match with what q_fbackup() does
           else
             {                                   // case 1b
+#ifdef  DEBUG
               printf ("case: 1b, src: %s\n", src?src:"NULL");
               fflush (stdout);
+#endif              
 //              ucon64_fbak (src, dest);       // arg 1 != NULL -> rename
               strcpy (src, q_fbackup (dest, BAK_MOVE));
               ucon64_temp_file = src;
@@ -202,8 +206,10 @@ handle_existing_file (const char *dest, char *src)
         }
       else
         {
+#ifdef  DEBUG
           printf ("case: 2\n");
           fflush (stdout);
+#endif          
 //          ucon64_fbak (NULL, dest);            // case 2 (ucon64_fbak() handles a & b)
           q_fbackup (dest, BAK_DUPE);
         }

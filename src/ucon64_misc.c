@@ -298,12 +298,10 @@ long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  int size, pos, c;
+  int size = rominfo->file_size;
+  int pos = rominfo->file_size - 2;
+  int c = q_fgetc (filename, rominfo->file_size - 1);
   char *buf;
-
-  size = rominfo->file_size;
-  pos = size - 2;
-  c = q_fgetc (filename, size - 1);
 
   if (!(buf = (char *) malloc ((size + 2) * sizeof (char))))
     return -1;
@@ -319,25 +317,27 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
   return size > 1 ? size : 0;
 }
 #else
-
-
 long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  int pos, c;
+  int pos = rominfo->file_size - 2;
+  int c = q_fgetc (filename, rominfo->file_size - 1);
   char buf[MAXBUFSIZE];
-
-  pos = rominfo->file_size - 2;
-  c = q_fgetc (filename, pos + 1);
 
   while (q_fread (buf, pos - (pos % MAXBUFSIZE),
            pos % MAXBUFSIZE, filename) > 0)
     {
-      while ((pos % MAXBUFSIZE) >= 0)
+      while (1)
         {
-          if (c != buf[pos % MAXBUFSIZE])
+          if (OFFSET (buf, (pos % MAXBUFSIZE) - 1) != c)
             return rominfo->file_size - pos + 1;
+
+          if (!(pos % MAXBUFSIZE))
+            {
+              pos--;
+              break;
+            }
           pos--;
         }
     }
@@ -516,7 +516,7 @@ ucon64_parport_init (unsigned int port)
     }
 #else 
 
-#ifdef __i386__
+#ifdef __i386__ // 0x3bc, 0x378, 0x278
 
   if (!port) // no port specified or forced yet?
     {

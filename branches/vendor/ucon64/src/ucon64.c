@@ -113,7 +113,9 @@ if(ucon64_file()[0])
 	sscanf(buf,"%x",&ucon64_parport);
 }
 if(!(ucon64_parport=parport_probe(ucon64_parport)))
-	printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
+{
+//	printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
+}
 else printf("0x%x\n\n",ucon64_parport);
 
 if(argcmp(argc,argv,"-crc"))
@@ -497,6 +499,7 @@ int ucon64_probe(int argc,char *argv[])
 	else if(genesis_probe(argc,argv)!=-1)console=ucon64_GENESIS;
 	else if(nintendo64_probe(argc,argv)!=-1)console=ucon64_N64;
 	else if(nes_probe(argc,argv)!=-1)console=ucon64_NES;
+	else if(lynx_probe(argc,argv)!=-1)console=ucon64_LYNX;
 	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
 	else if(gbadvance_probe(argc,argv)!=-1)console=ucon64_GBA;
 	else if(jaguar_probe(argc,argv)!=-1)console=ucon64_JAGUAR;
@@ -529,6 +532,7 @@ TODO:  -dbs	search ROM database (all entries) by CRC32; $ROM=CRC32\n\
   -pad		pad ROM to full Mb\n\
   -padhd	pad ROM to full Mb (regarding to +512 Bytes header)\n\
   -ispad	check if ROM is padded\n\
+TODO:  -strip	strip Bytes from end of ROM; $FILE=VALUE\n\
   -stp		strip first 512 Bytes (possible header) from ROM\n\
   -ins		insert 512 Bytes (0x00) before ROM\n\
   -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n\

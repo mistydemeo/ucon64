@@ -442,8 +442,8 @@ size_t quickfread(	void *dest
 
 	if(!(fh=fopen(src,"rb")))return(-1);
 	fseek(fh,start,SEEK_SET);
-	result=fread(dest,len,1,fh);
-	dest[len]=0;
+	result=fread((void *)dest,len,1,fh);
+//	dest[len]=0;
 	fclose(fh);
 	return(result);
 }

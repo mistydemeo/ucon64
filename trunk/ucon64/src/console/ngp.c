@@ -60,11 +60,8 @@ int
 ngp_init (st_rominfo_t *rominfo)
 {
   int result = -1;
-  char *snk_code = "COPYRIGHT BY SNK CORPORATION";
-#ifdef CONSOLE_PROBE
-  char *third_code = " LICENSED BY SNK CORPORATION";
-#endif // CONSOLE_PROBE
-  char buf[MAXBUFSIZE];
+  char *snk_code = "COPYRIGHT BY SNK CORPORATION",
+       *third_code = " LICENSED BY SNK CORPORATION", buf[MAXBUFSIZE];
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
@@ -72,13 +69,11 @@ ngp_init (st_rominfo_t *rominfo)
   q_fread (&ngp_header, NGP_HEADER_START +
       rominfo->buheader_start, NGP_HEADER_LEN, ucon64.rom);
 
-#ifdef CONSOLE_PROBE
   if (!strncmp (&OFFSET (ngp_header, 0), snk_code, strlen(snk_code)) ||
       !strncmp (&OFFSET (ngp_header, 0), third_code, strlen(third_code)))
       result = 0;
   else
     result = -1;
-#endif // CONSOLE_PROBE
   if (ucon64.console == UCON64_NGP)
     result = 0;
 

@@ -132,9 +132,6 @@ neogeo_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 
-//#ifdef CONSOLE_PROBE
-//#endif // CONSOLE_PROBE
-
   rominfo->console_usage = neogeo_usage;
   rominfo->copier_usage = unknown_usage;
 

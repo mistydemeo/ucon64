@@ -710,7 +710,6 @@ genesis_init (st_rominfo_t *rominfo)
       return 0;                                 // rest is nonsense for SRAM file
     }
 
-#ifdef CONSOLE_PROBE
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6)
     {
       type = SMD;
@@ -718,7 +717,6 @@ genesis_init (st_rominfo_t *rominfo)
     }
   else
     type = BIN;
-#endif // CONSOLE_PROBE
 
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     rominfo->buheader_len = ucon64.buheader_len;
@@ -726,7 +724,6 @@ genesis_init (st_rominfo_t *rominfo)
   rominfo->interleaved = (UCON64_ISSET (ucon64.interleaved)) ?
     ucon64.interleaved : genesis_testinterleaved (rominfo);
 
-#ifdef CONSOLE_PROBE
   if (type == SMD || rominfo->interleaved)
     {
       type = SMD;                               // if only rominfo->interleaved
@@ -746,7 +743,6 @@ genesis_init (st_rominfo_t *rominfo)
     result = 0;
   else
     result = -1;
-#endif // CONSOLE_PROBE
 
   if (ucon64.console == UCON64_GENESIS)
     result = 0;

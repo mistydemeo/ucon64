@@ -251,9 +251,6 @@ sms_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
-//#ifdef CONSOLE_PROBE
-//#endif // CONSOLE_PROBE
-
   rominfo->console_usage = sms_usage;
   rominfo->copier_usage = (ucon64.buheader_len) ? mgd_usage : smd_usage;
 

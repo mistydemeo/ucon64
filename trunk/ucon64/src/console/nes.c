@@ -1904,20 +1904,16 @@ nes_n (st_rominfo_t *rominfo)
 int
 nes_init (st_rominfo_t *rominfo)
 {
-#ifdef CONSOLE_PROBE
-  unsigned char magic[15];
-#endif // CONSOLE_PROBE
+  unsigned char magic[15], *rom_buffer;
   int result = -1, size, x, y, n, crc = 0;
   // currently 92 bytes is enough for ctrl_str, but extra space avoids
   //  introducing bugs when controller type text would be changed
   char buf[MAXBUFSIZE], ctrl_str[200], *str, *str_list[8];
-  unsigned char *rom_buffer;
   st_unif_chunk_t *unif_chunk, *unif_chunk2;
 
   internal_name = NULL;                         // reset this var, see nes_n()
   type = PASOFAMI;                              // reset type, see below
 
-#ifdef CONSOLE_PROBE
   q_fread (magic, 0, 15, ucon64.rom);
   if (memcmp (magic, INES_SIG_S, 4) == 0)
     {
@@ -1970,7 +1966,6 @@ nes_init (st_rominfo_t *rominfo)
             }
         }
     }
-#endif
   if (ucon64.console == UCON64_NES)
     result = 0;
 

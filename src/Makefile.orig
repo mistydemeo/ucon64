@@ -6,7 +6,8 @@ CFLAGS=-I. -Wall -O3
 LDFLAGS=-s
 #LDFLAGS+=-lz
 
-OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
+OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o cdi.o \
+	nero.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -118,7 +119,7 @@ unzip.o: unzip.h
 misc.o: misc.h config.h
 quick_io.o: quick_io.h misc.h config.h
 ucon64.o: switches.c options.c $(UCON64_STD_H)
-ucon64_misc.o: $(UCON64_STD_H)
+ucon64_misc.o: cdi.h nero.h $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)

@@ -81,6 +81,25 @@ typedef struct st_unknown_header
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
 extern const char *unknown_usage[];
 
+
+typedef struct st_wav_header
+{
+  char magic[4];
+  unsigned int total_length;
+  char type[4];
+  char fmt[4];
+  unsigned int header_length;
+  unsigned short format;
+  unsigned short channels;
+  unsigned int samplerate;
+  unsigned int bitrate;
+  unsigned short blockalign;
+  unsigned short bitspersample;
+  char data[4];
+  unsigned int data_length;
+} st_wav_header_t;
+
+
 extern char *ucon64_temp_file;
 
 /*
@@ -126,6 +145,11 @@ extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);
 extern int ucon64_mktoc (st_rominfo_t *rominfo);
 extern int ucon64_mkcue (st_rominfo_t *rominfo);
+//extern int ucon64_toc2cue (const char *toc_file);
+extern int ucon64_cdirip (const char *image);
+extern int ucon64_cdi2nero (const char *image);
+//extern int ucon64_isofix (const char *image);
+//extern int ucon64_readiso (const char *image);
 
 extern int ucon64_e (const char *rominfo);
 extern int ucon64_ls (const char *path, int mode);

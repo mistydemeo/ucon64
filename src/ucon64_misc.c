@@ -27,13 +27,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <limits.h>
+#ifdef _WIN32
+//#include <windows.h>
+//#include <shlobj.h>
+#endif // _WIN32
 
 #if     defined __unix__ || defined __BEOS__
 #include <unistd.h>                             // ioperm() (libc5)
 #endif
 
 #include "config.h"
-
 #ifdef  BACKUP
 #ifdef  __FreeBSD__
 #include <machine/sysarch.h>
@@ -50,6 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64_misc.h"
+#include "cdi.h"
 
 #include "console/snes.h"
 #include "console/gb.h"
@@ -75,6 +80,15 @@ const st_track_modes_t track_modes[] = {
   {"MODE2/2352", "MODE2_RAW"},
   {NULL, NULL}
 };
+
+
+static const char PVD_STRING[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x01" "CD001" "\x01" "\0";
+static const char SVD_STRING[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x02" "CD001" "\x01" "\0";
+static const char VDT_STRING[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\xFF" "CD001" "\x01" "\0";
+static const char SYNC_DATA[12] =
+  { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
+static const char SUB_HEADER[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
+
 
 const char *ucon64_parport_error =
   "ERROR: please check cables and connection\n"
@@ -889,9 +903,6 @@ ucon64_testsplit (const char *filename)
 int
 ucon64_bin2iso (const char *image, int track_mode)
 {
-#ifdef TODO
-#warning TODO nrg2iso and cdi2iso
-#endif
   int seek_header, seek_ecc, sector_size, i, size;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
@@ -972,10 +983,10 @@ ucon64_bin2iso (const char *image, int track_mode)
   return 0;
 }
 
-
-// seek_pvd() will search for valid PVD in sector 16 of source image
+//#if 1
 int
 seek_pvd (int sector_size, int mode, const char *filename)
+// will search for valid PVD in sector 16 of source image
 {
   const char PVD_STRING[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x01" "CD001" "\x01" "\0";
 #if 0
@@ -995,8 +1006,8 @@ seek_pvd (int sector_size, int mode, const char *filename)
   fread (buffer, 1, 8, fsource);
 #endif
   q_fread (buf, 16 * sector_size
-    + ((sector_size == 2352) ? 16 : 0) // header
-    + ((mode == 2) ? 8 : 0)            // subheader
+    + (sector_size == 2352 ? 16 : 0) // header
+    + (mode == 2 ? 8 : 0)            // subheader
     , 8, filename);
 
   if (!memcmp (PVD_STRING, buf, 8)
@@ -1009,6 +1020,27 @@ seek_pvd (int sector_size, int mode, const char *filename)
 
   return 0;
 }
+//#else
+static int
+seek_pvd2 (char *buffer, int sector_size, int mode, FILE * fsource)
+// will search for valid PVD in sector 16 of source image
+{
+  fseek (fsource, 16 * sector_size, SEEK_SET);  // boot area
+
+  if (sector_size == 2352)
+    fseek (fsource, 16, SEEK_CUR);      // header
+
+  if (mode == 2)
+    fseek (fsource, 8, SEEK_CUR);       // subheader
+
+  fread (buffer, 1, 8, fsource);
+
+  if (!memcmp (PVD_STRING, buffer, 8))
+    return 1;
+
+  return 0;
+}
+//#endif
 
 
 int
@@ -1139,7 +1171,8 @@ ucon64_mkcue (st_rominfo_t *rominfo)
 }
 
 
-int ucon64_e (const char *romfile)
+int 
+ucon64_e (const char *romfile)
 {
   int result, x;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
@@ -1495,7 +1528,7 @@ ucon64_configfile (void)
 
 
 int
-toc2cue (char *filename)
+ucon64_toc2cue (const char *toc_file)
 {
 #if 0
 #include "util.h"
@@ -1727,5 +1760,898 @@ read_raw_frame (int fd, int lba, unsigned char *buf)
     fprintf (stderr, "ERROR: ioctl CDROMREADMODE2\n");
 
   return rc;
+}
+#endif
+
+
+static void
+write_wav_header (FILE * fdest, int track_length) 
+{
+  st_wav_header_t wav;
+
+  strcpy (wav.magic, "RIFF");
+  strcpy (wav.type, "WAVE");
+  strcpy (wav.fmt, "fmt ");
+  strcpy (wav.data, "data");
+  
+  wav.header_length = 16;
+  wav.format = 1;
+  wav.channels = 2;
+  wav.samplerate = 44100;
+  wav.bitrate = 176400;
+  wav.blockalign = 4;
+  wav.bitspersample = 16;
+
+  wav.data_length = track_length * 2352;
+  wav.total_length = wav.data_length + 8 + 16 + 12;
+
+#ifdef DEBUG
+  fprintf (stderr, "%d\n", sizeof (st_wav_header_t));
+  fflush (stderr);
+#endif  
+    
+  fwrite (&wav, sizeof (st_wav_header_t), 1, fdest);
+}
+
+
+struct buffer_s
+{
+  FILE * file;
+  char *ptr;
+  int index;
+  int size;
+};
+
+
+static int
+BufWrite (char *data, int data_size, struct buffer_s *buffer)
+{
+  int write_length;
+  if (data_size > (buffer->size + (buffer->size - buffer->index - 1)))
+    return 0;                   // unimplemented
+  if (buffer->index + data_size < buffer->size) // 1 menos
+    {
+      memcpy ((buffer->ptr + buffer->index), data, data_size);
+      buffer->index += data_size;
+    }
+  else
+    {
+      write_length = buffer->size - buffer->index;
+      memcpy ((buffer->ptr + buffer->index), data, write_length);
+      fwrite (buffer->ptr, buffer->size, 1, buffer->file);
+      memcpy (buffer->ptr, data + write_length, data_size - write_length);
+      buffer->index = data_size - write_length;
+    }
+  return 1;
+}
+
+
+static int
+BufWriteFlush (struct buffer_s *buffer)
+{
+  fwrite (buffer->ptr, buffer->index, 1, buffer->file);
+  buffer->index = 0;
+  return 1;
+}
+
+
+static int
+BufRead (char *data, int data_size, struct buffer_s *buffer, int filesize)
+{
+  int read_length, max_length, pos;
+  if (data_size > (buffer->size + (buffer->size - buffer->index - 1)))
+    return 0;                   // unimplemented
+  if (filesize == 0)            // no cuenta
+    {
+      max_length = buffer->size;
+    }
+  else
+    {
+      pos = ftell (buffer->file);
+      if (pos > filesize)
+        max_length = 0;
+      else
+        max_length =
+          ((pos + buffer->size) > filesize) ? (filesize - pos) : buffer->size;
+    }
+  if (buffer->index == 0)
+    {
+      fread (buffer->ptr, max_length, 1, buffer->file);
+    }
+  if (buffer->index + data_size <= buffer->size)
+    {
+      memcpy (data, buffer->ptr + buffer->index, data_size);
+      buffer->index += data_size;
+      if (buffer->index >= buffer->size)
+        buffer->index = 0;
+    }
+  else
+    {
+      read_length = buffer->size - buffer->index;
+      memcpy (data, buffer->ptr + buffer->index, read_length);
+      fread (buffer->ptr, max_length, 1, buffer->file);
+      memcpy (data + read_length, buffer->ptr, data_size - read_length);
+      buffer->index = data_size - read_length;
+    }
+  return 1;
+}
+
+
+char *global_read_buffer_ptr;
+char *global_write_buffer_ptr;
+
+#define DEFAULT_FORMAT   0
+#define ISO_FORMAT       1
+#define BIN_FORMAT       2
+  
+#define SHOW_INTERVAL 2000
+  
+#define READ_BUF_SIZE  1024*1024
+#define WRITE_BUF_SIZE 1024*1024
+
+typedef struct st_opts
+{
+  char cutfirst;
+  char cutall;
+  char convert;
+  char fulldata;
+  char rawaudio;
+  char swap;
+  char pregap;
+} st_opts_t;
+
+typedef struct st_flags
+{
+  char do_cut;
+  char do_convert;
+//  char create_cuesheet;
+  char save_as_iso;
+} st_flags_t;
+
+static const char STR_TDISC_CUE_FILENAME[] = "tdisc.cue";
+static const char STR_TDISCN_CUE_FILENAME[] = "tdisc%d.cue";
+static const char STR_TAUDIO_RAW_FILENAME[] = "taudio%02d.raw";
+static const char STR_TAUDIO_WAV_FILENAME[] = "taudio%02d.wav";
+static const char STR_TDATA_ISO_FILENAME[] = "tdata%02d.iso";
+static const char STR_TDATA_BIN_FILENAME[] = "tdata%02d.bin";
+
+
+static void
+save_cue_sheet (FILE * fcuesheet, st_image_t * image, st_track_t * track,
+              st_opts_t * opts, st_flags_t * flags)
+{
+  char track_format_string[10];
+
+  strcpy (track_format_string, opts->swap ? "MOTOROLA" : "BINARY");
+
+  if (track->mode == 0)
+
+    {
+      if (opts->rawaudio)
+        fprintf (fcuesheet, "FILE TAUDIO%02d.RAW %s\r\n"
+                 "  TRACK %02d AUDIO\r\n", track->global_current_track,
+                 track_format_string, track->number);
+
+      else
+        fprintf (fcuesheet, "FILE TAUDIO%02d.WAV WAVE\r\n"
+                 "  TRACK %02d AUDIO\r\n", track->global_current_track,
+                 track->number);
+      if (track->global_current_track > 1 && !opts->pregap 
+          && track->pregap_length > 0)
+        fprintf (fcuesheet, "    PREGAP 00:02:00\r\n");
+
+    }
+  else
+    {
+      if (flags->save_as_iso)
+        fprintf (fcuesheet, "FILE TDATA%02d.ISO BINARY\r\n"
+                 "  TRACK %02d MODE%d/2048\r\n",
+                 track->global_current_track, track->number, track->mode);
+
+      else
+        fprintf (fcuesheet, "FILE TDATA%02d.BIN BINARY\r\n"
+                 "  TRACK %02d MODE%d/%d\r\n", track->global_current_track,
+                 track->number, track->mode, track->sector_size);
+    }
+
+  fprintf (fcuesheet, "    INDEX 01 00:00:00\r\n");
+  if (opts->pregap && track->mode != 0 && image->remaining_tracks > 1)  // instead of saving pregap
+    fprintf (fcuesheet, "  POSTGAP 00:02:00\r\n");
+}
+
+
+static int
+sector_read (char *buffer, int sector_size, int mode, FILE * fsource)
+// will put user data into buffer no matter the source format
+{
+  int status;
+
+  if (sector_size == 2352)
+    fseek (fsource, 16, SEEK_CUR);      // header
+
+  if (mode == 2)
+    fseek (fsource, 8, SEEK_CUR);       // subheader
+
+  status = fread (buffer, 2048, 1, fsource);
+
+  if (sector_size >= 2336)
+    {
+      fseek (fsource, 280, SEEK_CUR);
+
+      if (mode == 1)
+        fseek (fsource, 8, SEEK_CUR);
+    }
+
+  return status;
+}
+
+
+static void
+save_track (FILE * fh, st_image_t * image, st_track_t * track, st_opts_t * opts,
+           st_flags_t * flags) 
+{
+  unsigned int i;
+  int track_length;
+  unsigned int header_length = 0;
+  int all_fine;
+  char buffer[2352], imagename[13];
+  static time_t start_time = 0;
+  FILE *fdest;
+  struct buffer_s read_buffer;
+  struct buffer_s write_buffer;
+
+  if (!start_time) start_time = time (0);
+
+  fseek (fh, track->position, SEEK_SET);
+
+  if (track->mode == 0)
+        sprintf (imagename, opts->rawaudio ? STR_TAUDIO_RAW_FILENAME :
+                  STR_TAUDIO_WAV_FILENAME,
+                  track->global_current_track);
+  else
+      sprintf (imagename, flags->save_as_iso ? STR_TDATA_ISO_FILENAME :
+                STR_TDATA_BIN_FILENAME,
+                track->global_current_track);
+
+  if (!(fdest = fopen (imagename, "wb")))
+    {
+//    error
+      return;
+    }
+    
+  read_buffer.file = fh;
+  read_buffer.size = READ_BUF_SIZE;
+  read_buffer.index = 0;
+  read_buffer.ptr = global_read_buffer_ptr;
+
+  write_buffer.file = fdest;
+  write_buffer.size = WRITE_BUF_SIZE;
+  write_buffer.index = 0;
+  write_buffer.ptr = global_write_buffer_ptr;
+
+  fseek (fh, track->pregap_length * track->sector_size, SEEK_CUR);       // always skip pregap
+
+  if (flags->do_cut != 0) printf ("[cut: %d] ", flags->do_cut);
+
+  track_length = track->length - flags->do_cut;       // para no modificar valor original
+
+  if (opts->pregap && track->mode == 0 && image->remaining_tracks > 1) // quick hack to save next track pregap (audio tracks only)
+    track_length += track->pregap_length;       // if this isn't last track in current session
+
+//  printf (flags->do_convert ? "[ISO]\n" : "\n");
+
+  if (flags->do_convert)
+    {
+      if (track->mode == 2)
+        {
+          switch (track->sector_size)
+            {
+            case 2352:
+              header_length = 24;
+              break;
+            case 2336:
+              header_length = 8;
+              break;
+            default:
+              header_length = 0;
+            }
+        }
+      else
+        {
+          switch (track->sector_size)
+            {
+            case 2352:
+              header_length = 16;
+              break;
+            case 2048:
+            default:
+              header_length = 0;
+            }
+        }
+    }
+
+  if (track->mode == 0 && !opts->rawaudio)
+    write_wav_header (fdest, track_length);
+
+  for (i = 0; i < track_length; i++)
+    {
+      if (!(i % 128))
+//        show_counter (i, track_length, image->length, ftell (fh));
+        ucon64_gauge(start_time, ftell (fh), image->length);
+
+      BufRead (buffer, track->sector_size, &read_buffer, image->length);
+
+      if (track->mode == 0 && opts->swap)
+        mem_swap (buffer, track->sector_size);
+
+      all_fine = flags->do_convert ? 
+                   BufWrite (buffer + header_length, 2048, &write_buffer) :
+                   BufWrite (buffer, track->sector_size, &write_buffer);
+
+      if (!all_fine)
+        {
+          fprintf (stderr, "ERROR: %s\n", imagename);
+          return;
+        }
+      
+    }
+  
+//  if (flags->do_cut)
+//    fseek (fh, flags->do_cut * track->sector_size, SEEK_CUR);
+    
+  fseek (fh, track->position, SEEK_SET);
+  
+//  fseek(fh, track->pregap_length * track->sector_size, SEEK_CUR);
+//  fseek(fh, track->length * track->sector_size, SEEK_CUR);
+  fseek (fh, track->total_length * track->sector_size, SEEK_CUR);
+  
+  BufWriteFlush (&write_buffer);
+  fflush (fdest);
+  fclose (fdest);
+}
+
+
+int
+ucon64_cdirip (const char *imagename)
+{
+  char cuesheetname[13];
+  FILE *fh = NULL, *fcuesheet = NULL;
+  st_image_t image;
+  st_track_t track;
+  st_opts_t opts;
+  st_flags_t flags;
+
+  if (!(global_read_buffer_ptr = (char *) malloc (READ_BUF_SIZE)))
+    return -1;
+
+  if (!(global_write_buffer_ptr = (char *) malloc (WRITE_BUF_SIZE)))
+    {
+      free (global_read_buffer_ptr);
+      return -1;
+    }
+
+  if (!(fh = fopen (ucon64.rom, "rb")))
+    return -1;
+
+  memset (&image, 0, sizeof (st_image_t));
+  memset (&track, 0, sizeof (st_track_t));
+
+#if 0
+  image.global_current_session =
+  track.global_current_track =
+  track.position = 0;
+#endif
+  cdi_init (fh, &image, ucon64.rom);
+
+  printf ("DiscJuggler/CDI version: ");
+
+  switch (image.version)
+    {
+      case CDI_V2:
+        printf ("2.x\n");
+        break;
+        
+      case CDI_V3:
+        printf ("3.x\n");
+        break;
+        
+#if 0
+      case CDI_V4:
+        printf ("4.x\n");
+        break;
+#endif        
+
+      default:
+        printf ("%s (not supported)\n", UCON64_UNKNOWN_S);
+        fclose (fh);
+        return -1;
+    }
+  printf ("\n");
+
+  memset (&opts, 0, sizeof (st_opts_t));
+  memset (&flags, 0, sizeof (st_flags_t));
+
+  opts.convert = ISO_FORMAT;    // Linux only!
+#if 0
+  opts.convert = ISO_FORMAT;    // iso
+  opts.convert = BIN_FORMAT;    // bin
+  opts.rawaudio = TRUE;         // raw
+  opts.cutfirst = TRUE;         // cut
+  opts.cutall = TRUE;           // cutall
+  opts.fulldata = TRUE;         // full
+  opts.swap = TRUE;             // swap
+  opts.showspeed = TRUE;        // speed
+  opts.pregap = TRUE;           // pregap data will be saved
+
+  opts.cutall = TRUE;           // cdrecord
+  opts.convert = ISO_FORMAT;    // cdrecord
+
+  opts.cutall = TRUE;           // winoncd
+  opts.convert = ISO_FORMAT;    // winoncd
+  opts.rawaudio = TRUE;         // winoncd
+
+  opts.cutall = TRUE;           // fireburner
+  opts.convert = BIN_FORMAT;    // fireburner
+#endif
+
+  cdi_get_sessions (fh, &image);
+
+  if (image.sessions == 0)
+    {
+      fprintf (stderr, "ERROR: Bad format: Could not find header\n");
+      fclose (fh);
+      return -1;
+    }
+
+// rip
+
+  for (image.remaining_sessions = image.sessions;
+       image.remaining_sessions > 0; image.remaining_sessions--)
+    {
+      image.global_current_session++;
+
+      cdi_get_tracks (fh, &image);
+      image.header_position = ftell (fh);
+
+      if (!image.tracks)
+        {
+//           printf ("Open session\n");
+          cdi_skip_next_session (fh, &image);
+          continue;
+        }
+
+      if (image.global_current_session == 1)
+        {
+          if (ask_type (fh, image.header_position) == 2)
+            {
+              if (opts.convert != ISO_FORMAT)
+                opts.convert = BIN_FORMAT;
+            }
+        }
+
+// Create cuesheet
+      if (image.global_current_session == 1)
+        sprintf (cuesheetname, STR_TDISC_CUE_FILENAME);
+      else
+        sprintf (cuesheetname, STR_TDISCN_CUE_FILENAME,
+                 image.global_current_session);
+
+      if (!(fcuesheet = fopen (cuesheetname, "wb")))
+        {
+          fprintf (stderr, "ERROR: could not create cue sheet\n");
+//              fclose (fh);
+//              return -1;
+        }
+
+// rip tracks from seesion
+
+      for (image.remaining_tracks = image.tracks;
+           image.remaining_tracks > 0; image.remaining_tracks--)
+        {
+          track.global_current_track++;
+          track.number = image.tracks - image.remaining_tracks + 1;
+          cdi_read_track (fh, &image, &track);
+          image.header_position = ftell (fh);
+
+         printf ("Session: %d/%d\n",
+                  image.global_current_session, image.sessions);
+
+          printf ("Track: %d/%d\n", track.global_current_track, image.tracks);
+          printf ("Mode: %s/%d\n", track.mode == 0 ? "Audio" :
+                  track.mode == 1 ? "Mode1" : "Mode2",
+                  track.sector_size);
+
+          if (opts.pregap)
+            printf ("Pregap: %d\n", track.pregap_length);
+
+          printf ("Size: %d (%d Bytes)\n"
+                  "LBA: %d\n\n",
+                  track.length, track.length * track.sector_size ,track.start_lba);
+
+          if (track.pregap_length != 150)
+            fprintf (stderr,
+                     "WARNING: This track seems to have a non-standard pregap (%d Bytes)\n",
+                     track.pregap_length);
+
+          if (track.length < 0 && opts.pregap == FALSE)
+            {
+              fprintf (stderr, "ERROR: Negative track size found\n"
+//                           "       You must extract image with /pregap option"
+                );
+              return -1;
+            }
+
+// Decidir si cortar
+          if (!opts.fulldata && track.mode != 0
+              && image.global_current_session == 1 && image.sessions > 1)
+            flags.do_cut = 2;
+
+          else if (!(track.mode != 0 && opts.fulldata))
+            {
+              flags.do_cut = (opts.cutall ? 2 : 0) +
+                ((opts.cutfirst && track.global_current_track == 1) ? 2 : 0);
+            }
+          else
+            flags.do_cut = 0;
+
+// Decidir si convertir
+          if (track.mode != 0 && track.sector_size != 2048)
+            switch (opts.convert)
+              {
+              case BIN_FORMAT:
+                flags.do_convert = FALSE;
+                break;
+
+              case ISO_FORMAT:
+                flags.do_convert = TRUE;
+                break;
+
+              case DEFAULT_FORMAT:
+              default:
+                flags.do_convert =
+                  (track.mode == 1 || image.global_current_session > 1) ?
+                    TRUE : FALSE;
+              }
+          else
+            flags.do_convert = FALSE;
+
+          flags.save_as_iso =
+            (track.sector_size == 2048 ||
+             (track.mode != 0 && flags.do_convert)) ? TRUE : FALSE;
+
+// Guardar la pista
+          if (track.total_length < track.length + track.pregap_length)
+            {
+              fprintf (stderr, "SKIPPING: This track seems truncated\n");
+              fseek (fh, track.position + track.total_length, SEEK_SET);
+              track.position = ftell (fh);
+            }
+          else
+            {
+#if 1
+              save_track (fh, &image, &track, &opts, &flags);
+              track.position = ftell (fh);
+              printf ("\n\n");
+//TODO toc?
+              if (!(track.mode == 2 && flags.do_convert))
+                save_cue_sheet (fcuesheet, &image, &track, &opts, &flags);
+#endif
+            }
+          fseek (fh, image.header_position, SEEK_SET);
+        }
+      fclose (fcuesheet);
+
+      cdi_skip_next_session (fh, &image);
+    }
+
+  free (global_write_buffer_ptr);
+  free (global_read_buffer_ptr);
+
+  fclose (fh);
+  return 0;
+}
+
+
+int
+ucon64_cdi2nero (const char *image)
+{
+  return 0;
+}
+
+
+
+
+int
+ucon64_isofix (const char *image)
+/*
+  ISO start LBA fixing routine
+                                                    
+  This tool will take an ISO image with PVD pointing 
+  to bad DR offset and add padding data so actual DR 
+  gets located in right absolute address.            
+                                                    
+  Original boot area, PVD, SVD and VDT are copied to 
+  the start of new, fixed ISO image.                 
+                                                    
+  Supported input image formats are: 2048, 2336,     
+  2352 and 2056 bytes per sector. All of them are    
+  converted to 2048 bytes per sector when writing    
+  excluding 2056 format which is needed by Mac users.
+*/
+{
+  int sector_size = 2048, mode = 1;
+  int image_length, remaining_length, last_pos, i;
+  
+  
+  static time_t start_time = 0;
+
+  char destfname[256];
+  char string[256];
+  char buffer[4096];
+
+  int last_vd = FALSE;
+  int extractbootonly = FALSE;
+  int extractheaderonly = FALSE;
+  int macformat = FALSE;
+  int isoformat = FALSE;
+  int start_lba = strtol (ucon64.file, NULL, 10); // !!!!!
+
+  FILE *fsource, *fdest = NULL, *fboot = NULL, *fheader = NULL;
+
+  if (!start_time) start_time = time (0);
+  if (!start_lba) start_lba = 0; // ????
+
+  strcpy (destfname, "fixed.iso");
+
+  extractbootonly = TRUE; // boot
+  extractheaderonly = TRUE; // header
+  macformat = TRUE; // mac
+  isoformat = TRUE; // iso
+
+  strcpy (string, ucon64.rom);
+
+  if (!(fsource = fopen (string, "rb")))
+    return -1;
+
+  fseek (fsource, 0L, SEEK_END);
+  image_length = ftell (fsource);
+  fseek (fsource, 0L, SEEK_SET);
+
+// detect format
+
+  fread (buffer, 1, 16, fsource);
+  if (!memcmp (SYNC_DATA, buffer, 12))  // raw (2352)
+    {
+      sector_size = 2352;
+      switch (buffer[15])
+        {
+        case 2:
+          mode = 2;
+          break;
+        case 1:
+          mode = 1;
+          break;
+        default:
+          {
+            printf ("Unsupported track mode (%d)", buffer[15]);
+            return -1;
+          }
+        }
+      if (seek_pvd2 (buffer, 2352, mode, fsource) == 0)
+        {
+          printf ("Could not find PVD!\n");
+          return -1;
+        }
+    }
+  else if (seek_pvd2 (buffer, 2048, 1, fsource))
+    {
+      sector_size = 2048;
+      mode = 1;
+    }
+  else if (seek_pvd2 (buffer, 2336, 2, fsource))
+    {
+      sector_size = 2336;
+      mode = 2;
+    }
+  else if (seek_pvd2 (buffer, 2056, 2, fsource))
+    {
+      sector_size = 2056;
+      mode = 2;
+      macformat = TRUE;
+    }
+  else
+    {
+      fprintf (stderr, "ERROR: Could not find PVD\n");
+      return -1;
+    }
+
+  if (isoformat == TRUE)
+    macformat = FALSE;
+
+  printf ("sector size = %d, mode = %d\n", sector_size, mode);
+
+// detect format end
+
+  if (extractbootonly == FALSE && extractheaderonly == FALSE)
+    {
+  if (start_lba <= 0)
+    {
+      fprintf (stderr, "ERROR: Bad LBA value");
+      return -1;
+    }
+
+
+      printf ("Creating destination file '%s'...\n", destfname);
+
+      if (!(fdest = fopen (destfname, "wb")))
+        return -1;
+    }
+
+  if (extractheaderonly == FALSE || (extractheaderonly == TRUE && extractbootonly == TRUE))
+    {
+      printf ("Saving boot area to file 'bootfile.bin'...\n");
+      fboot = fopen ("bootfile.bin", "wb");
+    }
+  if (extractbootonly == FALSE || (extractheaderonly == TRUE && extractbootonly == TRUE))
+    {
+      printf ("Saving ISO header to file 'header.iso'...\n");
+      fheader = fopen ("header.iso", "wb");
+    }
+
+// save boot area
+
+  fseek (fsource, 0L, SEEK_SET);
+  for (i = 0; i < 16; i++)
+    {
+      sector_read (buffer, sector_size, mode, fsource);
+      if (extractbootonly == FALSE && extractheaderonly == FALSE)
+        {
+          if (macformat == TRUE)
+            fwrite (SUB_HEADER, 8, 1, fdest);
+          fwrite (buffer, 2048, 1, fdest);
+        }
+      if (extractheaderonly == FALSE
+          || (extractheaderonly == TRUE && extractbootonly == TRUE))
+        {
+          if (macformat == TRUE)
+            fwrite (SUB_HEADER, 8, 1, fboot);
+          fwrite (buffer, 2048, 1, fboot);
+        }
+      if (extractbootonly == FALSE
+          || (extractheaderonly == TRUE && extractbootonly == TRUE))
+        {
+          if (macformat == TRUE)
+            fwrite (SUB_HEADER, 8, 1, fheader);
+          fwrite (buffer, 2048, 1, fheader);
+        }
+    }
+
+  if (extractheaderonly == FALSE || (extractheaderonly == TRUE && extractbootonly == TRUE))
+    fclose (fboot);
+  if (extractbootonly == TRUE && extractheaderonly == FALSE)
+    return 0;                   // boot saved, exit
+
+// seek & copy pvd etc.
+
+  last_pos = ftell (fsource);   // start of pvd
+
+  do
+    {
+      sector_read (buffer, sector_size, mode, fsource);
+
+      if (!memcmp (PVD_STRING, buffer, 8))
+        {
+          printf ("Found PVD at sector %d\n", last_pos / sector_size);
+        }
+      else if (!memcmp (SVD_STRING, buffer, 8))
+        {
+          printf ("Found SVD at sector %d\n", last_pos / sector_size);
+        }
+      else if (!memcmp (VDT_STRING, buffer, 8))
+        {
+          printf ("Found VDT at sector %d\n", last_pos / sector_size);
+          last_vd = TRUE;
+        }
+      else
+        {
+          fprintf (stderr, "ERROR: Found unknown Volume Descriptor");
+          return -1;
+        }
+
+      if (extractbootonly == FALSE && extractheaderonly == FALSE)
+        {
+          if (macformat == TRUE)
+            fwrite (SUB_HEADER, 8, 1, fdest);
+          fwrite (buffer, 2048, 1, fdest);
+        }
+
+      if (macformat == TRUE)
+        fwrite (SUB_HEADER, 8, 1, fheader);
+      fwrite (buffer, 2048, 1, fheader);
+      last_pos = ftell (fsource);
+    }
+  while (last_vd == FALSE);
+
+// add padding data to header file
+
+  memset (&buffer, 0, sizeof (buffer));
+
+  remaining_length = 300 - (last_pos / sector_size);
+
+  for (i = 0; i < remaining_length; i++)
+    {
+      if (macformat == TRUE)
+        fwrite (SUB_HEADER, 8, 1, fheader);
+      fwrite (buffer, 2048, 1, fheader);
+    }
+
+  fclose (fheader);
+
+  if (extractheaderonly == TRUE)
+    return 0; // header saved
+
+// add padding data to iso image
+
+  if (last_pos > start_lba * sector_size)
+    {
+      fprintf (stderr, "ERROR: LBA value is too small\n"
+                       "       It should be at least %d for current ISO image (probably greater)",
+               last_pos / sector_size);
+      return -1;
+    }
+
+  if (start_lba < 11700)
+    fprintf (stderr, "WARNING: LBA value should be greater or equal to 11700 for multisession\n"
+             "         images\n");
+
+  printf ("Adding padding data up to start LBA value...");
+
+  remaining_length = start_lba - (last_pos / sector_size);
+
+  for (i = 0; i < remaining_length; i++)
+    {
+      if (!(i % 512))
+        ucon64_gauge (start_time, i, remaining_length);
+
+      if (macformat == TRUE)
+        fwrite (SUB_HEADER, 8, 1, fdest);
+
+      if (!fwrite (buffer, 2048, 1, fdest))
+        return -1;
+    }
+
+// append original iso image
+
+  fseek (fsource, 0L, SEEK_SET);
+
+  remaining_length = image_length / sector_size;
+
+  for (i = 0; i < remaining_length; i++)
+    {
+      if (!(i % 512))
+        ucon64_gauge (start_time, i, remaining_length);
+
+      if (!sector_read (buffer, sector_size, mode, fsource))
+        return -1;
+
+      if (macformat == TRUE)
+        fwrite (SUB_HEADER, 8, 1, fdest);
+
+      if (!fwrite (buffer, 2048, 1, fdest))
+        return -1;
+    }
+
+  fclose (fsource);
+  fclose (fdest);
+
+  return 0;
+}
+
+
+#if 0
+int
+ucon64_readiso (const char *image)
+{
+  return 0;
 }
 #endif

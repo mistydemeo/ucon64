@@ -607,7 +607,7 @@ main (int argc, char **argv)
         {
           int stop = 0;
 
-          if ((stop = ucon64_process_rom (argv[rom_index], console, show_nfo)))
+          if (ucon64_process_rom (argv[rom_index], console, show_nfo))
             break;
           for (unzip_current_file_nr = 1; unzip_current_file_nr < n_entries;
                unzip_current_file_nr++)
@@ -1261,7 +1261,8 @@ ucon64_usage (int argc, char *argv[])
       "                  %s,\n"
       "                  %s,\n"
       "                  %s,\n"
-      "                  %s, and %s\n"
+      "                  %s and\n"
+      "                  %s\n"
       "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
       "                  combined with " OPTION_LONG_S "good, " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 use the filenames\n"
       "                  from the DATabase instead of internal names and sort the ROMs\n"
@@ -1279,8 +1280,8 @@ ucon64_usage (int argc, char *argv[])
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
 *visit NEWNet #rareroms*
 
-Usage: GoodSNES	[rename|move|scan[d]|scannew[d]|list[d]|audit[2]
-		[changes[-]][changesnew[-]][quiet][dirs|inplace][deep][sepX]
+Usage: GoodSNES [rename|move|scan[d]|scannew[d]|list[d]|audit[2]
+                [changes[-]][changesnew[-]][quiet][dirs|inplace][deep][sepX]
 
 rename     = Rename files
 renamebad  = Rename bad checksummed files
@@ -1298,7 +1299,7 @@ quiet      = Suppress most non-error messages
 sepX       = Replaces space in filenames with char X ('nosep' removes spaces)
 deep       = Adds more detail to scanfiles (where applicable)
 force63    = Force all filenames into Joliet CD format
-Hit ENTER to continue 
+Hit ENTER to continue
 Several output files are created depending on selected options:
 
 GoodSNES.db  = database of scanned ROMs

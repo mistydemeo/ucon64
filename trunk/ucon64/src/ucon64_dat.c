@@ -70,7 +70,7 @@ typedef struct
 static DIR *ddat = NULL;
 static FILE *fdat = NULL;
 static long filepos_line = 0;
-static int warning = 0; // show the warning only once when indexing
+static int warning = 0;                         // show the warning only once when indexing
 
 
 static void
@@ -125,7 +125,7 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
   char buf[MAXBUFSIZE];
 #endif
 
-  // Hell yes!!! I (NoisyB) use get_property() here...
+  // Hell yes! I (NoisyB) use get_property() here...
   strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author));
   dat->author[sizeof (dat->author) - 1] = 0;
   strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version));
@@ -213,7 +213,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
 
   for (pos = 0; console_type[pos].id; pos++)
     {
-      // Don't use stristr(), because it is less reliable.
+      // Don't use stristr(), because it is probably less reliable.
       if (!strnicmp (fname, console_type[pos].id, strlen (console_type[pos].id)))
         {
           dat->console = console_type[pos].console;
@@ -238,10 +238,9 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
 
 static st_ucon64_dat_t *
 line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
-{
 // parse a dat entry into st_ucon64_dat_t
+{
   static const char *dat_country[] = {
-//maybe we should default to goodtool.cfg here?
     "(1) Japan & Korea",
     "(A) Australia",
     "(B) non U.S.A. (Genesis)",
@@ -270,9 +269,8 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     "(UE) U.S.A. & Europe",
     NULL
   };
-
-  unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL };
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *p = NULL;
+  unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE],
+                *p = NULL;
   uint32_t pos = 0;
 
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
@@ -282,7 +280,8 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   for (pos = 0;
        (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
-       && pos < (MAX_FIELDS_IN_DAT - 1); pos++);
+       && pos < (MAX_FIELDS_IN_DAT - 1); pos++)
+    ;
 
   memset (dat, 0, sizeof (st_ucon64_dat_t));
 
@@ -302,7 +301,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   p = dat->name;
   // Often flags contain numbers, so don't search for the closing bracket
-  sprintf (buf2,
+  sprintf (buf,
     "%s%s%s%s%s%s%s%s%s%s",
     (strstr (p, "[a") ? "Alternate, " : ""),
     (strstr (p, "[p") ? "Pirate, " : ""),
@@ -314,11 +313,11 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     (strstr (p, "[x") ? "Bad Checksum, " : ""),
     (strstr (p, "[o") ? "Overdump, " : ""),
     (strstr (p, "[!]") ? "Verified Good Dump, " : "")); // [!] is ok
-  if (buf2[0])
+  if (buf[0])
     {
-      if ((p = strrchr (buf2, ',')))
+      if ((p = strrchr (buf, ',')))
         *p = 0;
-      sprintf (dat->misc, "Flags: %s", buf2);
+      sprintf (dat->misc, "Flags: %s", buf);
     }
 
   p = dat->name;
@@ -343,8 +342,8 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
 uint32_t
 line_to_crc (const char *dat_entry)
-{
 // get crc32 of current line
+{
   unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL };
   uint32_t pos = 0, crc32 = 0;
   char buf[MAXBUFSIZE];
@@ -553,7 +552,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
       if (idx_entry)                            // crc32 found
         {
           // open dat file and read entry
-          while (get_dat_entry (fname_dat, dat, crc32, idx_entry->filepos))
+          if (get_dat_entry (fname_dat, dat, crc32, idx_entry->filepos))
             if (crc32 == dat->current_crc32)
               {
                 strcpy (dat->datfile, basename (fname_dat));

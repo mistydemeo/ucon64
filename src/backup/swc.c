@@ -43,22 +43,20 @@ const st_usage_t swc_usage[] =
     {NULL, NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC"},
     {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef PARALLEL
-    {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
+    {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
                    "receives automatically when ROM does not exist"},
     {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
 #if 0
 // hidden, undocumented option because we don't want people to "accidentally"
 //  create overdumps
-    {"xswc-super", NULL, "receive ROM (forced 32 Mb) from Super Wild Card*/(all)SWC"},
+    {"xswc-super", NULL, "receive ROM (forced 32 Mb) from Super Wild Card*/SWC"},
 #endif
-    {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
+    {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist"},
+    {"xswcc", NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
                     OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
-    {"xswcc", NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/(all)SWC;\n"
-                    OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
-    {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/(all)SWC;\n"
-                    OPTION_LONG_S "port=PORT\n"
+    {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when RTS file does not exist"},
 #endif // PARALLEL
     {NULL, NULL, NULL}

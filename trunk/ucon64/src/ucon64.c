@@ -127,7 +127,6 @@ static const st_getopt2_t lf[] =
     bsl_usage,
     ips_usage,
     aps_usage,
-    pal4u_usage,
     ppf_usage,
     gg_usage,
     lf,

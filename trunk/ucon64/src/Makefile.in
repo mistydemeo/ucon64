@@ -96,8 +96,7 @@ endif
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         misc/chksum.o misc/file.o misc/getopt.o misc/getopt2.o \
         misc/misc.o misc/parallel.o misc/property.o misc/string.o \
-        patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/pal4u.o \
-        patch/ppf.o \
+        patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/ppf.o \
         console/dc.o console/gb.o console/gba.o console/genesis.o \
         console/jaguar.o console/lynx.o console/n64.o console/neogeo.o \
         console/nes.o console/ngp.o console/pce.o console/psx.o console/sms.o \
@@ -308,8 +307,8 @@ ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
           backup/pce-pro.h backup/pl.h backup/smc.h backup/smd.h \
           backup/smsgg-pro.h backup/ssc.h backup/swc.h backup/tototek.h \
           backup/ufo.h backup/yoko.h backup/z64.h \
-          patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
-          patch/ppf.h $(UCON64_STD_H)
+          patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h \
+          $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
 ucon64_misc.o: misc/dlopen.h $(UCON64_STD_H)
 ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
@@ -325,8 +324,8 @@ ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                backup/smc.h backup/smd.h backup/smsgg-pro.h backup/ssc.h \
                backup/swc.h backup/tototek.h backup/ufo.h backup/yoko.h \
                backup/z64.h \
-               patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
-               patch/ppf.h $(UCON64_STD_H)
+               patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h \
+               $(UCON64_STD_H)
 console/dc.o: console/dc.h $(UCON64_STD_H)
 console/gb.o: console/gb.h backup/mgd.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
@@ -375,5 +374,4 @@ patch/aps.o: patch/aps.h $(UCON64_STD_H)
 patch/bsl.o: patch/bsl.h $(UCON64_STD_H)
 patch/gg.o: patch/gg.h $(UCON64_STD_H)
 patch/ips.o: patch/ips.h $(UCON64_STD_H)
-patch/pal4u.o: patch/pal4u.h $(UCON64_STD_H)
 patch/ppf.o: patch/ppf.h $(UCON64_STD_H)

@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "misc_par.h"
 #include "ucon64_misc.h"
-#include "backup/tototek.h"
+#include "tototek.h"
 #include "pce-pro.h"
 
 

@@ -383,6 +383,9 @@ MD-PRO flash card programmer
   --xmds        send/receive SRAM to/from MD-PRO flash card programmer
                   --port=PORT
                   receives automatically when SRAM does not exist
+  --xmdb=BANK   send/receive SRAM to/from MD-PRO BANK
+                  BANK can be a number from 1 to 4; --port=PORT
+                  receives automatically when SRAM does not exist
 
 Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)
   --gb          force recognition
@@ -432,6 +435,9 @@ Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
   --mgd         convert to Multi Game Doctor*/MGD2/RAW
   --swap        swap bits of all bytes in file (TurboGrafx-16 &#60;-&#62; PC-Engine)
    -f           fix region protection
+  --multi=SIZE  make multi-game file for use with PCE-PRO flash card,
+                  truncated to SIZE Mbit; file with loader must be specified
+                  first, then all the ROMs, multi-game file to create last
 Magic Super Griffin/MSG
   --xmsg        send/receive ROM to/from Magic Super Griffin/MSG; --port=PORT
                   receives automatically when ROM does not exist
@@ -492,12 +498,18 @@ Sega Master System(II/III)/Game Gear (Handheld)
   --smd         convert to Super Magic Drive/SMD
   --smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD
   --chk         fix ROM checksum (SMS only)
+  --multi=SIZE  make multi-game file for use with SMS-PRO/GG-PRO flash card,
+                  truncated to SIZE Mbit; file with loader must be specified
+                  first, then all the ROMs, multi-game file to create last
 SMS-PRO/GG-PRO flash card programmer
   --xgg         send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer
                   --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
   --xggs        send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer
                   --port=PORT
+                  receives automatically when SRAM does not exist
+  --xggb=BANK   send/receive SRAM to/from SMS-PRO/GG-PRO BANK
+                  BANK can be a number from 1 to 4; --port=PORT
                   receives automatically when SRAM does not exist
 
 WonderSwan/WonderSwan Color/SwanCrystal

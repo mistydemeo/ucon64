@@ -3,16 +3,16 @@ Q: How do I compile uCON64?<br />
 A: You can optionally open the Makefile in an editor and change the defines<br />
 <br />
 DB enables/disables the internal ROM database<br />
-&nbsp;&nbsp; disabled with an # in front uCON64 will be only ~250kB in size!<br />
+&nbsp;&nbsp; disabled with a # in front uCON64 will be only ~250kB in size!<br />
 <br />
 BACKUP enables/disables support for backup units<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; disabled with an # in front<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; disabled with a # in front<br />
 <br />
 Afterwards enter the following lines<br />
 <br />
-make -f Makefile.&#60;your OS&#62; clean<br />
-make -f Makefile.&#60;your OS&#62;<br />
-make -f Makefile.&#60;your OS&#62; install<br />
+make -f Makefile.&#60;your&nbsp;OS&#62; clean<br />
+make -f Makefile.&#60;your&nbsp;OS&#62;<br />
+make -f Makefile.&#60;your&nbsp;OS&#62; install<br />
 <br />
 Under Unix (Linux) the last command will ask for root's password, because
 uCON64 needs to be setuid root for parallel port access.<br />
@@ -21,13 +21,13 @@ instructions.
 <p><tt>
 Q: How do I install uCON64?<br />
 A: You already did if you followed the directions in the previous answer (you
-downloaded the source package). If you don't use WinDOS run install_&#60;your OS&#62;.sh
-and edit $HOME/.ucon64rc. If you use WinDOS you might want to copy ucon64.exe to a
-directory in your PATH and maybe edit ucon64.cfg.<br />
+downloaded the source package). If you don't use WinDOS run
+install_&#60;your&nbsp;OS&#62;.sh and edit $HOME/.ucon64rc. If you use WinDOS you may
+want to copy ucon64.exe to a directory in your PATH and maybe edit ucon64.cfg.<br />
 <br />
 BeOS users will also need Caz's driver inside ioport.zip or available at
 <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a><br /><br />
-Under Windows NT/2000/XP you will also need a driver (giveio/userport). Have a look at
+Under Windows NT/2000/XP you will need a driver too (giveio/userport). Have a look at
 <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
 </tt></p>
 <p><tt>
@@ -35,5 +35,28 @@ Q: Sometimes my terminal seems to be locked after I do<br />
 &nbsp;&nbsp; ucon64 -xswc "Super Metroid (JU).swc" | more<br />
 A: You are right, it <u>seems</u> to be locked, but the only thing that happened is
 that the character echoing of the terminal is disabled. Just don't do that ;-)<br />
+</tt></p>
+<p><tt>
+Q: How do I specify a bank number for the GB Xchanger? This doesn't work<br />
+&nbsp;&nbsp; ucon64 -xgbxb&#60;0&#62; "Pokemon (Green).sav"<br />
+A: You should leave out those angle brackets. This should work<br />
+&nbsp;&nbsp; ucon64 -xgbxb0 "Pokemon (Green).sav"<br />
+</tt></p>
+<p><tt>
+Q: How do I make uCON64 display only information about a ROM? When I use * I get
+strange results.<br />
+A: The help says that * will show info to indicate that <u>every</u> uCON64 option
+will show information about a ROM. Note that sometimes you will need to specify the
+console type for uCON64, because the ROM dump is damaged. For example<br />
+&nbsp;&nbsp; ucon64 -snes "Super Aleste (J) [t1].swc"<br />
+</tt></p>
+<p><tt>
+Q: I have two parallel ports in my PC and my Flash Advance Linker is connected to the
+second. However, when I try to use uCON64 to send a demo to the FAL something goes wrong.
+What happened?<br />
+A: Well, many things could have gone wrong, but uCON64 only detects your first parallel
+port (it stops probing for a parallel port if it finds one). So, you should specify the
+address of the second parallel port on the command line. For example<br />
+&nbsp;&nbsp; ucon64 -xfal demo.gba 0x278<br />
 </tt></p>
 </tt></body></html>

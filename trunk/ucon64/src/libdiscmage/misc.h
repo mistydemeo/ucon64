@@ -44,13 +44,6 @@ extern "C" {
 #endif
 #endif
 
-// WIN32 stands for __WIN32, _WIN32 and WIN32
-#if     defined __WIN32 || defined _WIN32 || defined WIN32 || defined (_MSC_VER)
-#ifndef WIN32
-#define WIN32
-#endif
-#endif
-
 #if     defined __linux__ || defined __FreeBSD__ || \
         defined __BEOS__ || defined __solaris__ || defined HAVE_INTTYPES_H
 #include <inttypes.h>
@@ -69,14 +62,18 @@ typedef u_int64_t uint64_t;
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
-#ifndef WIN32
+#ifndef _WIN32
 typedef unsigned long long int uint64_t;
+#else
+typedef unsigned __int64 uint64_t;
 #endif
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
-#ifndef WIN32
+#ifndef _WIN32
 typedef signed long long int int64_t;
+#else
+typedef signed __int64 int64_t;
 #endif
 #endif // OWN_INTTYPES
 #endif
@@ -129,7 +126,7 @@ typedef signed long long int int64_t;
   #else
     #define CURRENT_OS_S "Unix"
   #endif
-#elif   defined WIN32
+#elif   defined _WIN32
     #define CURRENT_OS_S "Win32"
 #elif   defined __APPLE__
   #if   defined __POWERPC__ || defined __ppc__
@@ -247,8 +244,10 @@ extern char *strcasestr2 (const char *str, const char *search);
 //#else
 //#define stristr strcasestr
 //#endif
+#ifndef _WIN32
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
+#endif
 extern char *strtrim (char *str);
 extern const char *get_suffix (const char *filename);
 extern char *set_suffix (char *filename, const char *suffix);
@@ -420,6 +419,29 @@ extern const char *get_property (const char *filename, const char *propname, cha
 extern int32_t get_property_int (const char *filename, const char *propname, char divider);
 extern int set_property (const char *filename, const char *propname, const char *value);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
+
+
+#ifdef  _WIN32
+// Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
+//  are defined in header files.
+
+#include <io.h>
+#include <sys/types.h>
+#include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
+#include <direct.h>                             //  come after <sys/types.h>. Yep, that's M$.
+
+#define S_IWUSR _S_IWRITE
+#define S_IRUSR _S_IREAD
+#define F_OK 00
+#define W_OK 02
+#define R_OK 04
+#define STDIN_FILENO (fileno (stdin))
+#define STDOUT_FILENO (fileno (stdout))
+#define STDERR_FILENO (fileno (stderr))
+
+int truncate (const char *path, off_t size);
+int sync (void);
+#endif
 
 #ifdef __cplusplus
 }

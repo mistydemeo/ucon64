@@ -31,11 +31,11 @@ int
 fig_usage (int argc, char *argv[])
 {
 #ifdef BACKUP
-
+#if 0
     printf (fig_TITLE "\n"
     "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
-
+#endif
 #endif BACKUP
   return 0;
 }

@@ -1198,10 +1198,12 @@ int
 cd64_usage (int argc, char *argv[])
 {
 #ifdef BACKUP
+#if 0
 
     printf ("%s\n", cd64_TITLE);
   printf ("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
           "		receives automatically when $ROM does not exist\n");
+#endif
 #endif // BACKUP
   return 0;
 }

@@ -77,14 +77,14 @@ int
 dex_usage (int argc, char *argv[])
 {
 #ifdef BACKUP
-
+#if 0
     printf ("%s\n", dex_TITLE);
 
 
   printf
     ("TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT\n"
      "		receives automatically when $ROM(=SRAM) does not exist\n");
-
 #endif
+#endif // BACKUP
   return 0;
 }

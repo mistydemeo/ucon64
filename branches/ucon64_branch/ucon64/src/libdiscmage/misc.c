@@ -2,7 +2,7 @@
 misc.c - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
            2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
@@ -69,7 +69,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
 #include <termios.h>
 typedef struct termios tty_t;
 #endif
@@ -94,11 +95,10 @@ static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 static int misc_ansi_color = 0;
 
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
 static void set_tty (tty_t *param);
 #endif
-
-void deinit_conio (void);
 
 
 #if 0                                           // currently not used
@@ -697,32 +697,10 @@ mem_swap_w (void *buffer, uint32_t n)
 }
 
 
-#ifdef  DEBUG
-static void
-mem_hexdump_code (const void *buffer, uint32_t n, int virtual_start)
-// hexdump something into C code (for development)
-{
-  uint32_t pos;
-  const unsigned char *p = (const unsigned char *) buffer;
-
-  for (pos = 0; pos < n; pos++, p++)
-    {
-      printf ("0x%02x, ", *p);
-
-      if (!((pos + 1) & 7))
-        fprintf (stdout, "// 0x%x (%d)\n", pos + virtual_start + 1, pos + virtual_start + 1);
-    }
-}
-#endif
-
-
 void
 mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
 // hexdump something
 {
-#ifdef  DEBUG
-  mem_hexdump_code (buffer, n, virtual_start);
-#else
   uint32_t pos;
   char buf[17];
   const unsigned char *p = (const unsigned char *) buffer;
@@ -743,7 +721,6 @@ mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
       *(buf + (pos & 15)) = 0;
       puts (buf);
     }
-#endif
 }
 
 
@@ -1463,7 +1440,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       currentsize2, requiredsize2, currentsize3, requiredsize3;
   FILE *srcfile;
 
-  strcpy (src_name, filename);
+  realpath2 (filename, src_name);
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
     sprintf (src_name, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, filename);
@@ -2119,7 +2096,8 @@ tmpnam2 (char *temp)
 }
 
 
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
@@ -2218,11 +2196,30 @@ kbhit (void)
   return key_pressed;
 #endif
 }
-#elif   defined AMIGA                           // (__unix__ && !__MSDOS__) || __BEOS__
-int
+#elif   defined AMIGA                           // (__unix__ && !__MSDOS__) ||
+int                                             //  __BEOS__ ||__APPLE__
 kbhit (void)
 {
   return GetKey () != 0xff ? 1 : 0;
+}
+
+
+int
+getch (void)
+{
+  BPTR con_fileh;
+  int temp;
+
+  con_fileh = Input ();
+  // put the console into RAW mode which makes getchar() behave like getch()?
+  if (con_fileh)
+    SetMode (con_fileh, 1);
+  temp = getchar ();
+  // put the console out of RAW mode (might make sense)
+  if (con_fileh)
+    SetMode (con_fileh, 0);
+
+  return temp;
 }
 #endif                                          // AMIGA
 
@@ -2369,7 +2366,7 @@ wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
-#elif   defined __unix__
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
@@ -2409,15 +2406,27 @@ q_fbackup (const char *filename, int mode)
           exit (1);
         }
     }
-  else
-    // handle the case where filename has the suffix ".BAK".
+  else // handle the case where filename has the suffix ".BAK".
     {
-      strcpy (buf, basename (tmpnam2 (buf)));
+      char *dir = dirname2 (filename), buf2[FILENAME_MAX];
+
+      if (dir == NULL)
+        {
+          fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
+          exit (1);
+        }
+      strcpy (buf, dir);
+      if (buf[0] != 0)
+        if (buf[strlen (buf) - 1] != FILE_SEPARATOR)
+          strcat (buf, FILE_SEPARATOR_S);
+
+      strcat (buf, basename (tmpnam2 (buf2)));
       if (rename (filename, buf))
         {
           fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
+      free (dir);
     }
 
   switch (mode)
@@ -2573,6 +2582,12 @@ q_fswap (const char *filename, int start, int len, swap_t type)
         mem_swap_w (buf, seg_len);
       fseek (fh, -seg_len, SEEK_CUR);
       fwrite (buf, 1, seg_len, fh);
+      /*
+        This appears to be a bug in DJGPP and Solaris. Without an extra call to
+        fseek() a part of the file won't be swapped (DJGPP: after 8 MB, Solaris:
+        after 12 MB).
+      */
+      fseek (fh, 0, SEEK_CUR);
     }
 
   fclose (fh);
@@ -2755,7 +2770,7 @@ chmod (const char *path, mode_t mode)
                        (mode & S_IWUSR ? 0 : FIBF_WRITE | FIBF_DELETE) |
                        (mode & S_IXUSR ? 0 : FIBF_EXECUTE) |
                        (mode & S_IRGRP ? FIBF_GRP_READ : 0) |
-                       (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE: 0) |
+                       (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE : 0) |
                        (mode & S_IXGRP ? FIBF_GRP_EXECUTE : 0) |
                        (mode & S_IROTH ? FIBF_OTR_READ : 0) |
                        (mode & S_IWOTH ? FIBF_OTR_WRITE | FIBF_OTR_DELETE : 0) |

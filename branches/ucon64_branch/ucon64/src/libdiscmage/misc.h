@@ -2,7 +2,7 @@
 misc.h - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
            2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
@@ -96,7 +96,7 @@ typedef signed __int64 int64_t;
 #ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
-#define SAFE_STRCPY(a,b) strncpy(a,b,sizeof(a)-1);a[sizeof(a)-1]=0;
+
 #define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
 #define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 //#define RANDOM(min, max) ((rand () % (max - min)) + min)
@@ -142,7 +142,7 @@ typedef signed __int64 int64_t;
   #endif
 #elif   defined __APPLE__
   #if   defined __POWERPC__ || defined __ppc__
-    #define CURRENT_OS_S "Apple (ppc)"
+    #define CURRENT_OS_S "Apple (PPC)"
   #else
     #define CURRENT_OS_S "Apple"
   #endif
@@ -150,9 +150,9 @@ typedef signed __int64 int64_t;
   #define CURRENT_OS_S "BeOS"
 #elif   defined AMIGA
   #if defined __PPC__
-    #define CURRENT_OS_S "AmigaPPC"
+    #define CURRENT_OS_S "Amiga (PPC)"
   #else
-    #define CURRENT_OS_S "Amiga"                // 68k
+    #define CURRENT_OS_S "Amiga (68K)"
   #endif
 #else
   #define CURRENT_OS_S "?"
@@ -186,8 +186,9 @@ typedef signed __int64 int64_t;
 #define le2me_64(x) (x)
 #endif
 
-#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
-// Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS, Amiga
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined AMIGA || defined __APPLE__      // Mac OS X actually
+// GNU/Linux, Solaris, FreeBSD, Cygwin, BeOS, Amiga, Mac (OS X)
 #define FILE_SEPARATOR '/'
 #define FILE_SEPARATOR_S "/"
 #else // DJGPP, Win32
@@ -209,7 +210,8 @@ typedef signed __int64 int64_t;
 #define ARGS_MAX 128
 #endif // ARGS_MAX
 
-#if (defined __unix__ && !defined __MSDOS__) || defined __BEOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
 extern void init_conio (void);
 extern void deinit_conio (void);
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
@@ -224,7 +226,9 @@ extern int kbhit (void);                        // may only be used after init_c
 
 #elif   defined AMIGA
 extern int kbhit (void);
-#define getch           getchar
+//#define getch           getchar
+// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
+//  getch().
 #endif
 
 #ifdef  __CYGWIN__

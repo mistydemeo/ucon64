@@ -1,7 +1,7 @@
 /*
 dlopen.c - DLL support code
 
-written by 2002 - 2003 dbjh
+written by 2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #ifdef  DJGPP
 #include <sys/dxe.h>
-#elif   defined __unix__                       // also defined under Cygwin (and DJGPP)
-#include <dlfcn.h>
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually; __unix__ is also
+#include <dlfcn.h>                              //  defined under Cygwin (and DJGPP)
 #elif   defined _WIN32
 #include <windows.h>
 #elif   defined __BEOS__
@@ -192,7 +192,14 @@ open_module (char *module_name)
     dxe_map = map_create (10);
   dxe_map = map_put (dxe_map, (void *) new_handle, sym);
   handle = (void *) new_handle++;
-#elif   defined __unix__
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
+  /*
+    We use dlcompat under Mac OS X simply because it's there. I (dbjh) don't
+    want to add extra code only because "using the native api's is the supported
+    method of loading dynamically on Mac OS X" (Peter O'Gorman, maintainer of
+    dlcompat). Besides, dlcompat has been tested while any new code we add, not.
+    RTLD_NOW is ignored by dlcompat (7-12-2003).
+  */
   if ((handle = dlopen (module_name, RTLD_LAZY)) == NULL)
     {
       fputs (dlerror (), stderr);
@@ -246,8 +253,8 @@ get_symbol (void *handle, char *symbol_name)
       fprintf (stderr, "Could not find symbol: %s\n", symbol_name);
       exit (1);
     }
-#elif   defined __unix__
-  char *strptr;
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually, see
+  char *strptr;                                 //  comment in open_module()
 
   symptr = dlsym (handle, symbol_name);
   if ((strptr = (char *) dlerror ()) != NULL)   // this is "the correct way"

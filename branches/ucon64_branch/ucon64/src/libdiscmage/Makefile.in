@@ -20,6 +20,20 @@ ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 LDFLAGS=-s
+# On Mac OS X using -s gives the following warning:
+# /usr/bin/libtool: -static not specified, -s invalid
+
+# The test for Cygwin should be done before the test for DJGPP, because the
+# environment variable DJGPP can be set under Bash for people who have
+# installed both gcc (and friends) ports.
+
+GCC_WIN=0
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+GCC_WIN=1
+endif
+ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
+GCC_WIN=1
+endif
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o\
@@ -29,20 +43,14 @@ LIBS=-lz
 OBJECTS+=unzip.o map.o miscz.o
 else
 LIBS=
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+ifeq ($(GCC_WIN),1)
 else
-ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
-else
-ifdef DJGPP                             # DJGPP code in dllinit needs map code                          
+ifdef DJGPP                             # DJGPP code in dllinit needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # ZLIB
 
-# The test for Cygwin should be done before the test for DJGPP, because the
-# environment variable DJGPP can be set under Bash for people who have
-# installed both gcc (and friends) ports.
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
@@ -97,20 +105,30 @@ DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)
 # $(LDFLAGS) must come after $(OBJECTS)
 FULLLIBNAME=$(LIBNAME).dxe
 
-else                                    # Unix or BeOS
+else                                    # Unix, BeOS or Mac OS X (Darwin)
 
 CFLAGS+=-fPIC
-ifdef DLOPEN
-FULLLIBNAME=$(LIBNAME).so
+
+ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+FULLLIBNAME=$(LIBNAME).dylib
 else
-FULLLIBNAME=lib$(LIBNAME).so
+FULLLIBNAME=$(LIBNAME).so
+endif
+
+ifndef DLOPEN                           # GNU specific: "simply expanded variable"
+FULLLIBNAME:=$(addprefix lib,$(FULLLIBNAME))
 endif
 
 ifeq ($(OSTYPE),beos)
 LDFLAGS+=-nostart
 else
+ifeq ($(findstring darwin,$(OSTYPE)),darwin)
+LDFLAGS+=-dynamiclib
+else
 LDFLAGS+=-shared
-endif
+endif                                   # darwin
+endif                                   # beos
+
 DLLFLAGS+=$(LDFLAGS) $(OBJECTS) $(LIBS) -o $(FULLLIBNAME)
 
 endif                                   # DJGPP
@@ -122,32 +140,24 @@ all: $(FULLLIBNAME)
 
 
 clean:
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
-              tmp.def tmp.base tmp.exp
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+ifeq ($(GCC_WIN),1)
+	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
               tmp.def tmp.base tmp.exp
 else
 ifdef DJGPP
-	del $(LIBNAME).dxe
+	del $(FULLLIBNAME)
 ifndef DLOPEN
 	del $(LIBNAME).a
 endif
 	del *.o
-else                                    # Unix or BeOS
-	rm -f *.so $(OBJECTS) *.core *.stackdump *.o
+else                                    # Unix, BeOS or Mac OS X (Darwin)
+	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 distclean: clean
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f Makefile config.log config.status config.cache config.h
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	rm -f Makefile config.log config.status config.cache config.h
 else
 ifdef DJGPP
@@ -159,35 +169,14 @@ ifdef DJGPP
 else
 	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-
-ifndef DLOPEN
-$(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
-else
-$(LIBNAME).dll: $(OBJECTS)
-endif
-	echo EXPORTS > tmp.def
-#	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
-	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
-# We use nm instead of dlltool --output-def, so that we don't have to
-# specify explicitly (in the source code) which symbols should be exported
-
-	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
-	@echo "      symbols, read faq.html question 3"
-	ld --base-file tmp.base $(DLLFLAGS)
-	dlltool $(DLLTOOLFLAGS)
-	ld tmp.exp $(DLLFLAGS)
-
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 
 ifndef DLOPEN
 $(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
@@ -224,15 +213,15 @@ ifndef DLOPEN
 	ar rs $(LIBNAME).a djimport.o map.o dlopen.o
 endif
 
-else                                    # Unix or BeOS
-# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH
+else                                    # Unix, BeOS or Mac OS X (Darwin)
+# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH, Darwin
+# uses LD_LIBRARY_PATH, DYLD_LIBRARY_PATH and DYLD_FALLBACK_LIBRARY_PATH
 
 $(FULLLIBNAME): $(OBJECTS)
 	$(CC) $(DLLFLAGS)
 
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 install:
@@ -245,16 +234,14 @@ ifndef DLOPEN
 	[ -d $(DESTDIR)$(includedir) ] || \
 	    (mkdir -p $(DESTDIR)$(includedir); chmod 755 $(DESTDIR)$(includedir))
 	$(INSTALL_DATA) lib$(LIBNAME).h $(DESTDIR)$(includedir)/$(LIBNAME).h
-else
 endif
-
 
 uninstall:
 ifndef DLOPEN
 	rm -f $(DESTDIR)$(libdir)/$(FULLLIBNAME)
 	rm -f $(DESTDIR)$(includedir)/$(LIBNAME).h
-else
 endif
+
 
 # Dependencies
 LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h

@@ -23,11 +23,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include "ucon64.h"
 
-const char *cd64_usage[] =
+
+const st_usage_t cd64_usage[] =
   {
-    "CD64",
-    "19XX UFO http://www.cd64.com",
+    {NULL, "CD64"},
+    {NULL, "19XX UFO http://www.cd64.com"},
 #ifdef TODO
 #warning TODO -xcd64        send/receive ROM to/from CD64
 #endif // TODO
@@ -37,7 +39,7 @@ const char *cd64_usage[] =
     "             receives automatically when " OPTION_LONG_S "rom does not exist\n",
 #endif
 #endif // PARALLEL
-    NULL
+    {NULL, NULL}
   };
 
 #ifdef PARALLEL

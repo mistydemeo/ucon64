@@ -47,23 +47,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "patch/bsl.h"
 
 
-const char *gameboy_usage[] =
+const st_usage_t gameboy_usage[] =
   {
-    "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)",
-    "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com",
-    "  " OPTION_LONG_S "gb          force recognition\n"
+    {NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)"},
+    {NULL, "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"},
+    {"gb", "force recognition"},
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has SSC header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no SSC header\n"
 #endif
-    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME\n"
-    "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/RAW\n"
-    "  " OPTION_LONG_S "ssc         convert to Super Smart Card/SSC (+512 Bytes)\n"
-    "  " OPTION_LONG_S "sgb         convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX\n"
-    "  " OPTION_LONG_S "gbx         convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC\n"
-    "  " OPTION_LONG_S "n2gb=EMU    convert for use with Kami's FC EMUlator (NES emulator);\n"
-    "                  " OPTION_LONG_S "rom=NES_ROM\n"
-    "  " OPTION_LONG_S "chk         fix ROM checksum\n"
+    {"n=NEW_NAME", "change internal ROM name to NEW_NAME"},
+    {"mgd", "convert to Multi Game*/MGD2/RAW"},
+    {"ssc", "convert to Super Smart Card/SSC (+512 Bytes)"},
+    {"sgb", "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"},
+    {"gbx", "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
+    {"n2gb=EMU", "convert for use with Kami's FC EMUlator (NES emulator);\n"
+                    OPTION_LONG_S "rom=NES_ROM"},
+    {"chk", "fix ROM checksum"},
 #if 0
     "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
     "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXX-XXX or " OPTION_LONG_S "rom=XXX-XXX-XXX\n"
@@ -74,8 +74,7 @@ const char *gameboy_usage[] =
 #endif // TODO
     "TODO:  " OPTION_LONG_S "gs     apply GameShark code (permanent)\n"
 #endif
-    ,
-    NULL
+    {NULL, NULL}
   };
 
 
@@ -580,8 +579,8 @@ gameboy_init (st_rominfo_t *rominfo)
   sprintf (buf, "Start address: %04x", value);
   strcat (rominfo->misc, buf);
 
-  rominfo->console_usage = gameboy_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len) ? mgd_usage : ssc_usage;
+  rominfo->console_usage = (const st_usage_t **)gameboy_usage;
+  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ? mgd_usage : ssc_usage);
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {

@@ -44,6 +44,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cdi.h"
 #include "nero.h"
 
+const uint32_t dm_version = LINUX_VERSION (0,0,1);
+
+
 int
 fsize (const char *filename)
 {

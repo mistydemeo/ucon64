@@ -34,31 +34,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "neogeo.h"
 
-const char *neogeo_usage[] =
+const st_usage_t neogeo_usage[] =
   {
-    "Neo Geo/Neo Geo CD(Z)/MVS",
-    "1990/1994 SNK http://www.neogeo.co.jp",
-    "  " OPTION_LONG_S "ng          force recognition"
-    "\n"
+    {NULL, "Neo Geo/Neo Geo CD(Z)/MVS"},
+    {NULL, "1990/1994 SNK http://www.neogeo.co.jp"},
+    {"ng", "force recognition"},
 #if 0
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
     "TODO:  " OPTION_LONG_S "mgd   convert to Multi Game Doctor/MGD2/RAW\n"
     "TODO:  " OPTION_LONG_S "mvs   convert to Arcade/MVS\n"
 #endif
-    "  " OPTION_LONG_S "bios        convert NeoCD BIOS to work with NeoCD emulator; " OPTION_LONG_S "rom=BIOS\n"
-    "                  http://www.illusion-city.com/neo/\n"
+    {"bios", "convert NeoCD BIOS to work with NeoCD emulator; " OPTION_LONG_S "rom=BIOS\n"
+               "http://www.illusion-city.com/neo/"},
 #if 0
-    "TODO:  " OPTION_S "j     join split ROM\n"
-    "TODO:  " OPTION_S "s     split ROM into 4Mb parts (for backup unit(s) with fdd)\n"
-    "TODO:  " OPTION_LONG_S "ngs   convert Neo Geo sound to WAV; " OPTION_LONG_S "rom=*_m1.rom or *_v*.rom\n"
+    "TODO:  " OPTION_S "j     join split ROM"
+    "TODO:  " OPTION_S "s     split ROM into 4Mb parts (for backup unit(s) with fdd)"
+    "TODO:  " OPTION_LONG_S "ngs   convert Neo Geo sound to WAV; " OPTION_LONG_S "rom=*_m1.rom or *_v*.rom"
 #endif
-    "  " OPTION_LONG_S "sam         convert SAM/M.A.M.E. sound to WAV; " OPTION_LONG_S "rom=SAMFILE\n"
+    {"sam", "convert SAM/M.A.M.E. sound to WAV; " OPTION_LONG_S "rom=SAMFILE"},
 //    "TODO: " OPTION_LONG_S "chkm    check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
-//    "                  " OPTION_LONG_S "rom=DIRECTORY\n"
+//    "                  " OPTION_LONG_S "rom=DIRECTORY"
 //    "INFO: actually this option does the same as Goodxxxx, Romcenter, etc.\n"
 //    "      Therefore you must have the DAT files for Arcade installed\n"
-    ,
-    NULL
+    {NULL, NULL}
   };
 
 
@@ -120,8 +118,8 @@ neogeo_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 
-  rominfo->console_usage = neogeo_usage;
-  rominfo->copier_usage = unknown_usage;
+  rominfo->console_usage = (const st_usage_t **)neogeo_usage;
+  rominfo->copier_usage = (const st_usage_t **)unknown_usage;
 
   return result;
 }

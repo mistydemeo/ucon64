@@ -47,22 +47,22 @@ static int save_smd (const char *name, unsigned char *rom_buffer, st_smd_header_
 static int save_bin (const char *name, unsigned char *rom_buffer, long size);
 
 
-const char *genesis_usage[] =
+const st_usage_t genesis_usage[] =
   {
-    "Genesis/Sega Mega Drive/Sega CD/32X/Nomad",
-    "1989/19XX/19XX SEGA http://www.sega.com",
-    "  " OPTION_LONG_S "gen         force recognition\n"
+    {NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"},
+    {NULL, "1989/19XX/19XX SEGA http://www.sega.com"},
+    {"gen", "force recognition"},
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has SMD header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no SMD header (MGD2/MGH/RAW)\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
 #endif
-    "  " OPTION_LONG_S "smd         convert to Super Magic Drive/SMD\n"
-    "  " OPTION_LONG_S "smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
-    "                  " OPTION_LONG_S "rom=SRAM\n"
-    "  " OPTION_LONG_S "stp         convert SRAM from backup unit for use with an emulator\n"
-    "                  " OPTION_LONG_S "stp just strips the first 512 bytes\n"
-    "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/MGH/RAW\n"
+    {"smd", "convert to Super Magic Drive/SMD"},
+    {"smds", "convert emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
+                 OPTION_LONG_S "rom=SRAM"},
+    {"stp", "convert SRAM from backup unit for use with an emulator\n"
+               OPTION_LONG_S "stp just strips the first 512 bytes"},
+    {"mgd", "convert to Multi Game*/MGD2/MGH/RAW"},
 #ifdef TODO
 #warning TODO  --gf     convert Sega CD country code to Europe
 #warning TODO  --ga     convert Sega CD country code to U.S.A.
@@ -79,24 +79,23 @@ const char *genesis_usage[] =
     "TODO:  " OPTION_LONG_S "gym    convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE\n"
     "TODO:  " OPTION_LONG_S "cym    convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE\n"
 #endif
-    "  " OPTION_S "n=NEW_NAME  change foreign ROM name to NEW_NAME\n"
-    "  " OPTION_LONG_S "n2=NEW_NAME change Japanese ROM name to NEW_NAME\n"
-    "  " OPTION_S "j           join split ROM\n"
-    "  " OPTION_S "s           split ROM into 4 Mb parts (for backup unit(s) with fdd)\n"
+    {"n=NEW_NAME", "change foreign ROM name to NEW_NAME"},
+    {"n2=NEW_NAME", "change Japanese ROM name to NEW_NAME"},
+    {"j", "join split ROM"},
+    {"s", "split ROM into 4 Mb parts (for backup unit(s) with fdd)"},
 // NOTE: part size number should match with size actually used
 #if 0
     "  " OPTION_S "p           pad ROM to full Mb\n"
 #endif
-    "  " OPTION_LONG_S "chk         fix ROM checksum\n"
-    "  " OPTION_LONG_S "1991        fix old third party ROMs to work with consoles build after\n"
-    "                  October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"\n"
+    {"chk", "fix ROM checksum"},
+    {"1991", "fix old third party ROMs to work with consoles build after\n"
+                "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\""},
 #if 0
     "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAAAA:VVVV\n"
     "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXXX-XXXX\n"
     "TODO:  " OPTION_LONG_S "gg     apply GameGenie code (permanent); " OPTION_LONG_S "file=XXXX-XXXX\n"
 #endif
-    ,
-    NULL
+    {NULL, NULL}
   };
 
 
@@ -849,7 +848,7 @@ genesis_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = SMD_HEADER_LEN;
       strcpy (rominfo->name, "Name: N/A");
       rominfo->console_usage = NULL;
-      rominfo->copier_usage = smd_usage;
+      rominfo->copier_usage = (const st_usage_t **)smd_usage;
       rominfo->maker = "Manufacturer: You?";
       rominfo->country = "Country: Your country?";
       rominfo->has_internal_crc = 0;
@@ -1031,8 +1030,8 @@ genesis_init (st_rominfo_t *rominfo)
       rominfo->internal_crc2[0] = 0;
       free (rom_buffer);
     }
-  rominfo->console_usage = genesis_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len) ? mgd_usage : smd_usage;
+  rominfo->console_usage = (const st_usage_t **)genesis_usage;
+  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ? mgd_usage : smd_usage);
 
   return result;
 }

@@ -28,11 +28,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "ucon64.h"
 
-const char *yoko_usage[] =
+const st_usage_t yoko_usage[] =
   {
-    "YOKO backup unit",
-    NULL
+    {NULL, "YOKO backup unit"},
+    {NULL, NULL}
   };
 
 #ifdef PARALLEL

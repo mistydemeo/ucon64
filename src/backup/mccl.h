@@ -19,7 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GBCAMERA_H
 #define GBCAMERA_H
-extern const char *mccl_usage[];
+extern const st_usage_t mccl_usage[];
 
 #ifdef PARALLEL
 extern int mccl_read (const char *filename, unsigned int parport);

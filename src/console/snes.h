@@ -27,10 +27,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef enum { SWC, GD3, FIG, MGD, SMC } snes_file_t;
 
-extern const char *snes_usage[];
+extern const st_usage_t snes_usage[];
 
 extern int snes_chk (st_rominfo_t *rominfo);
-extern int snes_col (st_rominfo_t *rominfo);
+extern int snes_col (const char *color);
 extern int snes_dint (st_rominfo_t *rominfo);
 extern int snes_f (st_rominfo_t *rominfo);
 extern int snes_fig (st_rominfo_t *rominfo);

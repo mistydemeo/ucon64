@@ -34,13 +34,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/fpl.h"
 
 
-const char *ngp_usage[] =
+const st_usage_t ngp_usage[] =
   {
-    "Neo Geo Pocket/Neo Geo Pocket Color",
-    "1998/1999 SNK http://www.neogeo.co.jp",
-    "  " OPTION_LONG_S "ngp         force recognition"
-    "\n",
-    NULL
+    {NULL, "Neo Geo Pocket/Neo Geo Pocket Color"},
+    {NULL, "1998/1999 SNK http://www.neogeo.co.jp"},
+    {"ngp", "force recognition"},
+    {NULL, NULL}
 };
 
 
@@ -95,8 +94,8 @@ ngp_init (st_rominfo_t *rominfo)
       "Unknown");
   strcat (rominfo->misc, buf);
 
-  rominfo->console_usage = ngp_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len) ? fpl_usage : unknown_usage;
+  rominfo->console_usage = (const st_usage_t **)ngp_usage;
+  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ? fpl_usage : unknown_usage);
 
   return result;
 }

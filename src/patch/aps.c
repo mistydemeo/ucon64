@@ -36,14 +36,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "aps.h"
 
 
-const char *aps_usage[] =
+const st_usage_t aps_usage[] =
   {
-    NULL,
-    NULL,
-    "  " OPTION_S "a           apply APS PATCH to ROM (APS<=v1.2)\n"
-    "  " OPTION_LONG_S "mka=ORG_ROM create APS patch; " OPTION_LONG_S "rom=MOD_ROM\n"
-    "  " OPTION_LONG_S "na=DESC     change APS single line DESCRIPTION\n",
-    NULL
+    {"a", "apply APS PATCH to ROM (APS<=v1.2)"},
+    {"mka=ORG_ROM", "create APS patch; " OPTION_LONG_S "rom=MOD_ROM"},
+    {"na=DESC", "change APS single line DESCRIPTION"},
+    {NULL, NULL}
   };
   
 /* Apply an APS (Advanced Patch System) File for N64 Images

@@ -28,7 +28,7 @@ extern int doctor64jr_write (const char *filename, long start, long len,
                       unsigned int parport);
 #endif // PARALLEL
 
-extern const char *doctor64jr_usage[];
+extern const st_usage_t doctor64jr_usage[];
 
 #define DOCTOR64JR_HEADER_START 0
 #define DOCTOR64JR_HEADER_LEN 0

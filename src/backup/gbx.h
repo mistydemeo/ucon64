@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GBX_H
 #define GBX_H
 
-extern const char *gbx_usage[];
+extern const st_usage_t gbx_usage[];
 
 #define GBX_HEADER_START 0
 #define GBX_HEADER_LEN 0

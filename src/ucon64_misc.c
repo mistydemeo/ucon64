@@ -101,195 +101,288 @@ const char *ucon64_msg[] = {
   NULL
 };
 
-const char *unknown_usage[] =
+const st_usage_t unknown_usage[] =
   {
-    "Unknown backup unit/emulator",
-    NULL,
-    NULL,
-    NULL
+    {NULL, "Unknown backup unit/emulator"},
+    {NULL, NULL}
   };
 
-const char *gc_usage[] =
+const st_usage_t gc_usage[] =
   {
-    "Nintendo Game Cube/Panasonic Gamecube Q\n",
-    "2001/2002 Nintendo http://www.nintendo.com\n",
-    "  " OPTION_LONG_S "gc     force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Nintendo Game Cube/Panasonic Gamecube Q\n"},
+    {NULL, "2001/2002 Nintendo http://www.nintendo.com\n"},
+    {"gc", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *s16_usage[] =
+const st_usage_t s16_usage[] =
   {
-    "Sega System 16(A/B)/Sega System 18/dual 68000\n"
-    "1987/19XX/19XX SEGA http://www.sega.com\n",
-    "  " OPTION_LONG_S "s16       force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Sega System 16(A/B)/Sega System 18/dual 68000\n"},
+    {NULL, "1987/19XX/19XX SEGA http://www.sega.com\n"},
+    {"s16", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *atari_usage[] =
+const st_usage_t atari_usage[] =
   {
-    "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr\n",
-    "1977/1982/1984/1986 Atari\n",
-    "  " OPTION_LONG_S "ata         force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr\n"},
+    {NULL, "1977/1982/1984/1986 Atari\n"},
+    {"ata", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *coleco_usage[] =
+const st_usage_t coleco_usage[] =
   {
-    "ColecoVision\n",
-    "1982\n",
-    "  " OPTION_LONG_S "coleco     force recognition\n",
-    NULL,
-    NULL
+    {NULL, "ColecoVision\n"},
+    {NULL, "1982\n"},
+    {"coleco", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *vboy_usage[] =
+const st_usage_t vboy_usage[] =
   {
-    "Nintendo Virtual Boy\n",
-    "19XX Nintendo http://www.nintendo.com\n",
-    "  " OPTION_LONG_S "vboy       force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Nintendo Virtual Boy\n"},
+    {NULL, "19XX Nintendo http://www.nintendo.com\n"},
+    {"vboy", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *vectrex_usage[] =
+const st_usage_t vectrex_usage[] =
   {
-    "Vectrex\n",
-    "1982\n",
-    "  " OPTION_LONG_S "vec         force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Vectrex\n"},
+    {NULL, "1982\n"},
+    {"vec", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *intelli_usage[] =
+const st_usage_t intelli_usage[] =
   {
-    "Intellivision\n",
-    "1979 Mattel\n",
-    "  " OPTION_LONG_S "intelli             force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Intellivision\n"},
+    {NULL, "1979 Mattel\n"},
+    {"intelli", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *gp32_usage[] =
+const st_usage_t gp32_usage[] =
   {
-    "GP32 Game System\n",
-    "2002 Gamepark http://www.gamepark.co.kr\n",
-    "  " OPTION_LONG_S "gp32        force recognition\n",
-    NULL,
-    NULL
+    {NULL, "GP32 Game System\n"},
+    {NULL, "2002 Gamepark http://www.gamepark.co.kr\n"},
+    {"gp32", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *ps2_usage[] =
+const st_usage_t ps2_usage[] =
   {
-    "Playstation 2\n",
-    "2000 Sony http://www.playstation.com\n",
-    "  " OPTION_LONG_S "ps2      force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Playstation 2\n"},
+    {NULL, "2000 Sony http://www.playstation.com\n"},
+    {"ps2", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *xbox_usage[] =
+const st_usage_t xbox_usage[] =
   {
-    "XBox\n",
-    "2001 Microsoft http://www.xbox.com\n",
-    "  " OPTION_LONG_S "xbox        force recognition\n",
-    NULL,
-    NULL
+    {NULL, "XBox\n"},
+    {NULL, "2001 Microsoft http://www.xbox.com\n"},
+    {"xbox", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *sat_usage[] =
+const st_usage_t sat_usage[] =
   {
-    "Saturn\n",
-    "1994 SEGA http://www.sega.com\n",
-    "  " OPTION_LONG_S "sat      force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Saturn\n"},
+    {NULL, "1994 SEGA http://www.sega.com\n"},
+    {"sat", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *real3do_usage[] =
+const st_usage_t real3do_usage[] =
   {
-    "Real3DO\n",
-    "1993 Panasonic/Goldstar/Philips\n",
-    "  " OPTION_LONG_S "3do        force recognition\n",
-    NULL,
-    NULL
+    {NULL, "Real3DO\n"},
+    {NULL, "1993 Panasonic/Goldstar/Philips\n"},
+    {"3do", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *cd32_usage[] =
+const st_usage_t cd32_usage[] =
   {
-    "CD32\n",
-    "1993 Commodore\n",
-    "  " OPTION_LONG_S "cd32      force recognition\n",
-    NULL,
-    NULL
+    {NULL, "CD32\n"},
+    {NULL, "1993 Commodore\n"},
+    {"cd32", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *cdi_usage[] =
+const st_usage_t cdi_usage[] =
   {
-    "CD-i",
-    "1991 Philips",
-    "  " OPTION_LONG_S "cdi       force recognition\n",
-    NULL,
-    NULL
+    {NULL, "CD-i"},
+    {NULL, "1991 Philips"},
+    {"cdi", "force recognition\n"},
+    {NULL, NULL}
   };
 
-const char *vc4000_usage[] =
+const st_usage_t vc4000_usage[] =
   {
-    "Interton VC4000",
-    "~1980",
-    NULL,
-    NULL,
-    NULL
+    {NULL, "Interton VC4000"},
+    {NULL, "~1980"},
+    {NULL, NULL}
   };
 
-const char *odyssey2_usage[] =
+const st_usage_t odyssey2_usage[] =
   {
-    "G7400+/Odyssey²",
-    "1978",
-    NULL,
-    NULL,
-    NULL
+    {NULL, "G7400+/Odyssey²"},
+    {NULL, "1978"},
+    {NULL, NULL}
   };
 
-const char *channelf_usage[] =
+const st_usage_t channelf_usage[] =
   {
-    "FC Channel F",
-    "1976",
-    NULL,
-    NULL,
-    NULL
+    {NULL, "FC Channel F"},
+    {NULL, "1976"},
+    {NULL, NULL}
   };
 
-const char *odyssey_usage[] =
+const st_usage_t odyssey_usage[] =
   {
-    "Magnavox Odyssey",
-    "1972 Ralph Baer (USA)",
-    NULL,
-    NULL,
-    NULL
+    {NULL, "Magnavox Odyssey"},
+    {NULL, "1972 Ralph Baer (USA)"},
+    {NULL, NULL}
   };
 
-const char *gamecom_usage[] =
+const st_usage_t gamecom_usage[] =
   {
-    "Game.com",
-    "? Tiger",
-    NULL,
-    NULL,
-    NULL
+    {NULL, "Game.com"},
+    {NULL, "? Tiger"},
+    {NULL, NULL}
   };
 
-const char *mame_usage[] =
+const st_usage_t mame_usage[] =
   {
-    "M.A.M.E. (Multiple Arcade Machine Emulator)",
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    {NULL, "M.A.M.E. (Multiple Arcade Machine Emulator)"},
+    {NULL, NULL}
   };
 
 #if 0
+N-Gage (Handheld)
+2003 Nokia http://www.n-gage.com
+
+
+Nintendo Game Cube/Panasonic Gamecube Q
+2001/2002 Nintendo http://www.nintendo.com
+gc
+Sega System 16(A/B)/Sega System 18/dual 68000
+1987/19XX/19XX SEGA http://www.sega.com
+s16
+Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
+1977/1982/1984/1986 Atari
+ata
+ColecoVision
+1982
+coleco
+Nintendo Virtual Boy
+19XX Nintendo http://www.nintendo.com
+vboy
+Vectrex
+1982
+vec
+Intellivision
+1979 Mattel
+intelli
+GP32 Game System
+2002 Gamepark http://www.gamepark.co.kr
+gp32
+Playstation 2
+2000 Sony http://www.playstation.com
+ps2
+XBox
+2001 Microsoft http://www.xbox.com
+xbox
+Saturn
+1994 SEGA http://www.sega.com
+sat
+Real3DO
+1993
+3do
+CD32
+1993 Commodore
+cd32
+CD-i
+1991
+cdi
+
+Vectrex (1982)
+Colecovision (1982)
+Interton VC4000 (~1980)
+Intellivision (1979)
+G7400+/Odyssey² (1978)
+Channel F (1976)
+Odyssey (Ralph Baer/USA/1972)
+Virtual Boy
+Real 3DO 1993 Panasonic/Goldstar/Philips?
+Game.com ? Tiger
+CD-i (1991) 1991
+Vectrex 1982
+Colecovision 1982
+Interton VC4000 ~1980
+Intellivision 1979
+G7400+/Odyssey² 1978
+Channel F 1976
+Odyssey 1972 Ralph Baer
+
+X-Box
+Game Cube
+Indrema
+Nuon
+GB Advance
+Playstation 2
+Dreamcast
+Nintendo 64
+Playstation
+Virtual Boy
+Saturn
+Sega 32X
+Jaguar
+3DO
+Sega CD
+Philips CDI
+Super Nintendo
+Neo·Geo
+Game Gear
+Lynx
+GameBoy
+Turbo Grafx 16
+Genesis
+XE System
+Master System
+Atari 7800
+Nintendo
+Commodore 64
+Coleco Vision
+Atari 5200
+Arcadia
+Vectrex
+Microvision
+Adv. Vision
+RDI Halcyon
+Intellivision
+Odyssey 2
+Astrocade
+Home Arcade
+Atari 2600
+RCA Studio 2
+FC Channel F
+Telstar
+Atari Pong
+PONG
+Odyssey
+
+gametz.com
+gameaxe.com
+sys2064.com
+logiqx.com
+romcenter.com
+emuchina.net
+
+Bandai announced that a new version of the system, the SwanCrystal, will debut in Japan this July.
+
 Indrema
 Nuon
 Saturn

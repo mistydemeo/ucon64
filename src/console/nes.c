@@ -40,54 +40,54 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
 
 
-const char *nes_usage[] =
+const st_usage_t nes_usage[] =
   {
-    "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)",
-    "1983 Nintendo http://www.nintendo.com",
-    "  " OPTION_LONG_S "nes         force recognition\n"
+    {NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"},
+    {NULL, "1983 Nintendo http://www.nintendo.com"},
+    {"nes", "force recognition"},
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has FFE header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no FFE header\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
 #endif
-    "  " OPTION_LONG_S "unif        convert to UNIF format/UNF (uses default values)\n"
-    "  " OPTION_LONG_S "ines        convert to iNES format/NES (uses default values)\n"
-    "  " OPTION_LONG_S "ineshd      extract iNES header from ROM (16 Bytes)\n"
-    "  " OPTION_S "j           join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)\n"
-    "  " OPTION_LONG_S "pasofami    convert to Pasofami/PRM/700/PRG/CHR\n"
-    "  " OPTION_S "s           convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)\n"
-    "  " OPTION_LONG_S "ffe         convert to FFE format\n"
-    "  " OPTION_LONG_S "mapr=MAPR   specify board name or mapper number for conversion options\n"
-    "                  MAPR must be a board name for UNIF or a number for Pasofami\n"
-    "                  and iNES\n"
-    "  " OPTION_LONG_S "dint        convert to non-interleaved format\n"
-    "  " OPTION_LONG_S "ctrl=TYPE   specify controller type (UNIF only)\n"
-    "                  TYPE='0' regular joypad\n"
-    "                  TYPE='1' zapper\n"
-    "                  TYPE='2' R.O.B.\n"
-    "                  TYPE='3' Arkanoid controller\n"
-    "                  TYPE='4' powerpad\n"
-    "                  TYPE='5' four-score adapter\n"
-    "  " OPTION_LONG_S "ntsc        specify TV standard is NTSC (UNIF only)\n"
-    "  " OPTION_LONG_S "pal         specify TV standard is PAL (UNIF only)\n"
-    "  " OPTION_LONG_S "bat         specify battery is present\n"
-    "  " OPTION_LONG_S "nbat        specify battery is not present\n"
-    "  " OPTION_LONG_S "vram        specify VRAM override (UNIF only)\n"
-    "  " OPTION_LONG_S "nvram       specify no VRAM override (UNIF only)\n"
-    "  " OPTION_LONG_S "mirr=MTYPE  specify mirroring type\n"
-    "                  MTYPE='0' horizontal mirroring\n"
-    "                  MTYPE='1' vertical mirroring\n"
-    "                  MTYPE='2' mirror all pages from $2000 (UNIF only)\n"
-    "                  MTYPE='3' mirror all pages from $2400 (UNIF only)\n"
-    "                  MTYPE='4' four screens of VRAM\n"
-    "                  MTYPE='5' mirroring controlled by mapper hardware (UNIF only)\n"
+    {"unif", "convert to UNIF format/UNF (uses default values)"},
+    {"ines", "convert to iNES format/NES (uses default values)"},
+    {"ineshd", "extract iNES header from ROM (16 Bytes)"},
+    {"j", "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)"},
+    {"pasofami", "convert to Pasofami/PRM/700/PRG/CHR"},
+    {"s", "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)"},
+    {"ffe", "convert to FFE format"},
+    {"mapr=MAPR", "specify board name or mapper number for conversion options\n"
+                     "MAPR must be a board name for UNIF or a number for Pasofami\n"
+                     "and iNES"},
+    {"dint", "convert to non-interleaved format"},
+    {"ctrl=TYPE", "specify controller type (UNIF only)\n"
+                     "TYPE='0' regular joypad\n"
+                     "TYPE='1' zapper\n"
+                     "TYPE='2' R.O.B.\n"
+                     "TYPE='3' Arkanoid controller\n"
+                     "TYPE='4' powerpad\n"
+                     "TYPE='5' four-score adapter"},
+    {"ntsc", "specify TV standard is NTSC (UNIF only)"},
+    {"pal", "specify TV standard is PAL (UNIF only)"},
+    {"bat", "specify battery is present"},
+    {"nbat", "specify battery is not present"},
+    {"vram", "specify VRAM override (UNIF only)"},
+    {"nvram", "specify no VRAM override (UNIF only)"},
+    {"mirr=MTYPE", "specify mirroring type\n"
+                      "MTYPE='0' horizontal mirroring\n"
+                      "MTYPE='1' vertical mirroring\n"
+                      "MTYPE='2' mirror all pages from $2000 (UNIF only)\n"
+                      "MTYPE='3' mirror all pages from $2400 (UNIF only)\n"
+                      "MTYPE='4' four screens of VRAM\n"
+                      "MTYPE='5' mirroring controlled by mapper hardware (UNIF only)"},
 #if     UNIF_REVISION > 7
-    "  " OPTION_LONG_S "cmnt=TEXT   specify that TEXT should be used as comment (UNIF only)\n"
+    {"cmnt=TEXT", "specify that TEXT should be used as comment (UNIF only)"},
 #endif
-    "  " OPTION_LONG_S "dumpinfo=FILE use dumper info from FILE when converting to UNIF\n"
-    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME (UNIF only)\n"
-    "  " OPTION_LONG_S "fds         convert Famicom Disk System file (diskimage) from FAM to FDS\n"
-    "  " OPTION_LONG_S "fdsl        list Famicom Disk System/FDS (diskimage) contents\n"
+    {"dumpinfo=FILE", "use dumper info from FILE when converting to UNIF"},
+    {"n=NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)"},
+    {"fds", "convert Famicom Disk System file (diskimage) from FAM to FDS"},
+    {"fdsl", "list Famicom Disk System/FDS (diskimage) contents"},
 #if 0
     "TODO  " OPTION_LONG_S "fam     convert Famicom Disk System file (diskimage) from FDS to FAM\n"
     "TODO:  " OPTION_LONG_S "tr     truncate doubled PRG/CHR\n"
@@ -97,8 +97,8 @@ const char *nes_usage[] =
     "  " OPTION_LONG_S "gg          apply GameGenie code (permanent);\n"
     "                  " OPTION_LONG_S "file=XXXXXX or " OPTION_LONG_S "file=XXXXXXXX\n"
 #endif
-      ,
-      NULL};
+      {NULL, NULL} 
+  };
 
 #if 0
 const char *nes_boardtypes = {
@@ -4949,11 +4949,30 @@ static const st_nes_data_t nes_data[] = {
 
 nes_file_t type;
 
-static const char *ines_usage[] = {"iNES header", NULL},
-                  *unif_usage[] = {"UNIF header", NULL},
-                  *ffe_usage[] = {"FFE header", NULL},
-                  *pasofami_usage[] = {"Pasofami file", NULL},
-                  *fds_usage[] = {"Famicom Disk System file (diskimage)", NULL};
+static const st_usage_t ines_usage[] = {
+    {NULL, "iNES header"},
+    {NULL, NULL}
+  };
+
+static const st_usage_t unif_usage[] = {
+    {NULL, "UNIF header"},
+    {NULL, NULL}
+  };
+
+static const st_usage_t ffe_usage[] = {
+    {NULL, "FFE header"},
+    {NULL, NULL}
+  };
+
+static const st_usage_t pasofami_usage[] = {
+    {NULL, "Pasofami file"},
+    {NULL, NULL}
+  };
+
+static const st_usage_t fds_usage[] = {
+    {NULL, "Famicom Disk System file (diskimage)"},
+    {NULL, NULL}
+  };
 
 static st_ines_header_t ines_header;
 static st_unif_header_t unif_header;
@@ -6789,7 +6808,7 @@ nes_init (st_rominfo_t *rominfo)
   switch (type)
     {
     case INES:
-      rominfo->copier_usage = ines_usage;
+      rominfo->copier_usage = (const st_usage_t **)ines_usage;
       rominfo->buheader_start = INES_HEADER_START;
       rominfo->buheader_len = INES_HEADER_LEN;
       q_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.rom);
@@ -6836,7 +6855,7 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
       break;
     case UNIF:
-      rominfo->copier_usage = unif_usage;
+      rominfo->copier_usage = (const st_usage_t **)unif_usage;
       rominfo->buheader_start = UNIF_HEADER_START;
       rominfo->buheader_len = UNIF_HEADER_LEN;
       q_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.rom);
@@ -7086,7 +7105,7 @@ nes_init (st_rominfo_t *rominfo)
         Either a *.PRM header file, a 512-byte *.700 trainer file, a *.PRG
         ROM data file or a *.CHR VROM data file.
       */
-      rominfo->copier_usage = pasofami_usage;
+      rominfo->copier_usage = (const st_usage_t **)pasofami_usage;
       rominfo->buheader_start = 0;
       strcpy (buf, ucon64.rom);
       setext (buf, ".PRM");
@@ -7159,14 +7178,14 @@ nes_init (st_rominfo_t *rominfo)
         because there is no information about the image other than it's size
         and CRC.
       */
-      rominfo->copier_usage = ffe_usage;
+      rominfo->copier_usage = (const st_usage_t **) ffe_usage;
       rominfo->buheader_start = UNKNOWN_HEADER_START;
       rominfo->buheader_len = UNKNOWN_HEADER_LEN;
       q_fread (&ffe_header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &ffe_header;
       break;
     case FDS:
-      rominfo->copier_usage = fds_usage;
+      rominfo->copier_usage = (const st_usage_t **)fds_usage;
       rominfo->country = "Japan";
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
@@ -7176,7 +7195,7 @@ nes_init (st_rominfo_t *rominfo)
       ucon64.crc32 = q_fcrc32 (ucon64.rom, 0);
       break;
     case FAM:
-      rominfo->copier_usage = fds_usage;
+      rominfo->copier_usage = (const st_usage_t **)fds_usage;
       rominfo->country = "Japan";
 
       // FAM files don't have a header. Instead they seem to have a 192 byte trailer.
@@ -7226,7 +7245,7 @@ nes_init (st_rominfo_t *rominfo)
           }
       }
 
-  rominfo->console_usage = nes_usage;
+  rominfo->console_usage = (const st_usage_t **)nes_usage;
 
   return result;
 }

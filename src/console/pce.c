@@ -43,20 +43,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 // static unsigned int pcengine_chksum (st_rominfo_t *rominfo);
 
-const char *pcengine_usage[] =
+const st_usage_t pcengine_usage[] =
   {
-    "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)",
-    "1987/19XX/19XX NEC",
-    "  " OPTION_LONG_S "pce         force recognition"
-    "\n"
+    {NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)"},
+    {NULL, "1987/19XX/19XX NEC"},
+    {"pce", "force recognition"},
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has SMG header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no SMG header (MGD2/RAW)\n"
 #endif
-    "  " OPTION_LONG_S "smg         convert to Super Magic Griffin/SMG\n"
-    "  " OPTION_LONG_S "mgd         convert to Multi Game Doctor*/MGD2/RAW\n"
-    ,
-    NULL
+    {"smg", "convert to Super Magic Griffin/SMG"},
+    {"mgd", "convert to Multi Game Doctor*/MGD2/RAW"},
+    {NULL, NULL}
 };
 
 
@@ -731,8 +729,8 @@ pcengine_init (st_rominfo_t *rominfo)
   rominfo->internal_crc2[0] = 0;
 #endif
 
-  rominfo->console_usage = pcengine_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len) ? mgd_usage : unknown_usage;
+  rominfo->console_usage = (const st_usage_t **)pcengine_usage;
+  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ? mgd_usage : unknown_usage);
 
   ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
   // additional info

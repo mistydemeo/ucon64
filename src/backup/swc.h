@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SWC_H
 #define SWC_H
 
-extern const char *swc_usage[];
+extern const st_usage_t swc_usage[];
 
 // For the header format, see ffe.h
 typedef struct st_swc_header

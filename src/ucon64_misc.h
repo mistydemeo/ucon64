@@ -71,27 +71,27 @@ typedef struct //st_unknown_header
 /*
   usage for consoles not directly supported by uCON64
 */
-extern const char *unknown_usage[];
-extern const char *atari_usage[];
-extern const char *cd32_usage[];
-extern const char *cdi_usage[];
-extern const char *channelf_usage[];
-extern const char *coleco_usage[];
-extern const char *gamecom_usage[];
-extern const char *gc_usage[];
-extern const char *gp32_usage[];
-extern const char *intelli_usage[];
-extern const char *odyssey2_usage[];
-extern const char *odyssey_usage[];
-extern const char *ps2_usage[];
-extern const char *real3do_usage[];
-extern const char *s16_usage[];
-extern const char *sat_usage[];
-extern const char *vboy_usage[];
-extern const char *vc4000_usage[];
-extern const char *vectrex_usage[];
-extern const char *xbox_usage[];
-extern const char *mame_usage[];
+extern const st_usage_t unknown_usage[];
+extern const st_usage_t atari_usage[];
+extern const st_usage_t cd32_usage[];
+extern const st_usage_t cdi_usage[];
+extern const st_usage_t channelf_usage[];
+extern const st_usage_t coleco_usage[];
+extern const st_usage_t gamecom_usage[];
+extern const st_usage_t gc_usage[];
+extern const st_usage_t gp32_usage[];
+extern const st_usage_t intelli_usage[];
+extern const st_usage_t odyssey2_usage[];
+extern const st_usage_t odyssey_usage[];
+extern const st_usage_t ps2_usage[];
+extern const st_usage_t real3do_usage[];
+extern const st_usage_t s16_usage[];
+extern const st_usage_t sat_usage[];
+extern const st_usage_t vboy_usage[];
+extern const st_usage_t vc4000_usage[];
+extern const st_usage_t vectrex_usage[];
+extern const st_usage_t xbox_usage[];
+extern const st_usage_t mame_usage[];
 
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);

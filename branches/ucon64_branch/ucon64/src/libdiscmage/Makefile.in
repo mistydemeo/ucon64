@@ -235,8 +235,8 @@ endif                                   # msys
 endif                                   # cygwin
 
 
-ifndef DLOPEN
 install:
+ifndef DLOPEN
 	[ -d $(DESTDIR)$(libdir) ] || \
 	    (mkdir -p $(DESTDIR)$(libdir); chmod 755 $(DESTDIR)$(libdir))
 	$(INSTALL_DATA) $(FULLLIBNAME) $(DESTDIR)$(libdir)/$(FULLLIBNAME)
@@ -245,14 +245,16 @@ install:
 	[ -d $(DESTDIR)$(includedir) ] || \
 	    (mkdir -p $(DESTDIR)$(includedir); chmod 755 $(DESTDIR)$(includedir))
 	$(INSTALL_DATA) lib$(LIBNAME).h $(DESTDIR)$(includedir)/$(LIBNAME).h
+else
 endif
 
-ifndef DLOPEN
+
 uninstall:
+ifndef DLOPEN
 	rm -f $(DESTDIR)$(libdir)/$(FULLLIBNAME)
 	rm -f $(DESTDIR)$(includedir)/$(LIBNAME).h
+else
 endif
-
 
 # Dependencies
 LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h

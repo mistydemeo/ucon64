@@ -1917,26 +1917,34 @@ ucon64_configfile (void)
 #endif
                    "#\n"
 #if     defined __MSDOS__
+#ifdef  DLOPEN
                    "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
                    "netgui_path=~\\netgui.dxe\n"
+#endif
                    "ucon64_configdir=~\n"
                    "ucon64_datdir=~\n"
                    "ucon64_skindir=~\n"
 #elif   defined __CYGWIN__
+#ifdef  DLOPEN
                    "discmage_path=~/discmage.dll\n"
                    "netgui_path=~/netgui.dll\n"
+#endif
                    "ucon64_configdir=~\n"
                    "ucon64_datdir=~\n"
                    "ucon64_skindir=~\n"
 #elif   defined _WIN32
+#ifdef  DLOPEN
                    "discmage_path=~\\discmage.dll\n"
                    "netgui_path=~/netgui.dll\n"
+#endif
                    "ucon64_configdir=~\n"
                    "ucon64_datdir=~\n"
                    "ucon64_skindir=~\n"
 #elif   defined __unix__ || defined __BEOS__
+#ifdef  DLOPEN
                    "discmage_path=~/.ucon64/discmage.so\n"
                    "netgui_path=~/.ucon64/netgui.so\n"
+#endif
                    "ucon64_configdir=~/.ucon64\n"
                    "ucon64_datdir=~/.ucon64/dat\n"
                    "ucon64_skindir=~/.ucon64/skin\n"
@@ -1999,6 +2007,8 @@ ucon64_configfile (void)
                    "#\n"
                    "ace_extract=unace e \"%%s\"\n"
 #endif
+#endif
+#if 0
                    "#\n"
                    "# uCON64 can operate as frontend for CD burning software to make backups\n"
                    "# for CD-based consoles \n"

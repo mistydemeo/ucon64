@@ -704,15 +704,35 @@ int save_bin (const char *name, unsigned char *rom_buffer, long size)
 static int
 genesis_testinterleaved (st_rominfo_t *rominfo)
 {
-  unsigned char buf[16384], buf2[16384];
+  unsigned char *buf, *buf2;
+
+  if (!(buf = (unsigned char *) malloc (16384)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], 16384);
+      return -1;
+    }
+
+  if (!(buf2 = (unsigned char *) malloc (16384)))
+    {
+      free (buf);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], 16384);
+      return -1;
+    }
 
   q_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
   deinterleave_chunk (buf2, buf);
+  free (buf);
 
   if (!memcmp (buf2 + GENESIS_HEADER_START, "SEGA", 4))
-    return 1;
+    {
+      free (buf2);
+      return 1;
+    }
   else
-    return 0;
+    {
+      free (buf2);
+      return 0;
+    }
 }
 
 

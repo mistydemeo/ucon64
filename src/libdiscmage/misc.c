@@ -3155,27 +3155,52 @@ _popen (const char *path, const char *mode)
   long fhflags;
   char *apipe = malloc (strlen (path) + 7);
 
+  sprintf(apipe,"PIPE:%08lx.%08lx",(ULONG)FindTask(NULL),(ULONG)time(0));
   if (!apipe)
     return NULL;
 
-  strcpy (apipe, "APIPE:");
-  strcat (apipe, path);
+  //strcpy (apipe, "APIPE:");
+  //strcat (apipe, path);
 
   if (*mode == 'w')
     fhflags = MODE_NEWFILE;
   else
     fhflags = MODE_OLDFILE;
 
-  if (!(fh = Open (apipe, fhflags)))
-    return NULL;
-
-  return fdopen (fd, mode);
+  //if (!(fh = Open (apipe, fhflags)))
+    //return NULL;
+  if (fh = Open(apipe, fhflags))
+  {
+    switch(SystemTags(path,
+                    SYS_Input, Input(),
+                    SYS_Output, fh,
+                    SYS_Asynch, TRUE,
+                    SYS_UserShell, TRUE,
+                    NP_CloseInput, FALSE,
+                    TAG_END))
+    {
+      case 0:
+        return(fopen(apipe, mode));
+      break;
+      case -1:
+        Close(fh);
+        return 0;
+      break;
+      default:
+        return 0;
+      break;
+    }
+  }
+  return 0;
+  //return fdopen (fd, mode);  int fd;
 }
-
 
 int
 _pclose (FILE *stream)
 {
-  return fclose (stream);
+  if (stream)
+    return fclose (stream);
+  else
+    return -1;
 }
 #endif                                          // AMIGA

@@ -1,0 +1,62 @@
+.PHONY: all clean distclean install flc uninstall
+
+#@DEFINE_ANSI_COLOR_MAKE@
+#@DEFINE_DEBUG_MAKE@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@
+libdir=@libdir@
+
+INSTALL=@INSTALL@
+INSTALL_PROGRAM=@INSTALL_PROGRAM@
+INSTALL_DATA=@INSTALL_DATA@
+#RANLIB=@RANLIB@
+
+CC=@CC@
+CFLAGS=-I. -Wall -W -O3 @DEFS@
+LDFLAGS=-s
+
+OBJECTS=flc.o flc_misc.o filter/filter_misc.o filter/id3.o filter/met.o filter/txt.o \
+	misc/file.o misc/filter.o misc/getopt.o misc/getopt2.o misc/misc.o \
+	misc/property.o misc/rmdir2.o misc/string.o
+
+all: flc
+
+clean:
+	rm -f $(OBJECTS) DEADJOE flc *~ */*~ */*/*~ *.core 
+
+distclean: clean
+	rm -f Makefile config.log config.status config.cache config.h
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
+
+flc: $(OBJECTS)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+
+install:
+	cp flc $(prefix)/bin
+
+uninstall:
+	rm -f $(prefix)/bin/flc
+
+# Dependencies
+
+# Most source files include these
+FLC_STD_H=flc.h flc_misc.h flc_defines.h config.h filter/filter.h
+
+flc.o: flc_misc.h misc/getopt.h $(FLC_STD_H)
+flc_misc.o: $(FLC_STD_H)
+filter/filter_misc.o: $(FLC_STD_H)
+filter/txt.o: filter/txt.h $(FLC_STD_H)
+filter/met.o: filter/met.h $(FLC_STD_H)
+filter/id3.o: filter/id3.h $(FLC_STD_H)
+misc/file.o: misc/misc.h
+misc/getopt.o: misc/getopt.h
+misc/getopt2.o: misc/getopt2.h
+misc/misc.o: misc/misc.h
+misc/property.o: misc/property.h
+misc/rmdir2.o: misc/rmdir2.h
+misc/string.o: misc/string.h
+misc/filter.o: misc/filter.h

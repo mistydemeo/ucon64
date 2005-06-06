@@ -17,7 +17,7 @@ CC=@CC@
 CFLAGS=-I. -Wall -W -O3 @DEFS@
 LDFLAGS=-s
 
-OBJECTS=flc.o flc_misc.o filter/filter_misc.o filter/id3.o filter/met.o filter/txt.o \
+OBJECTS=flc.o flc_misc.o flc_filter.o filter/id3.o filter/met.o filter/txt.o \
 	misc/file.o misc/filter.o misc/getopt.o misc/getopt2.o misc/misc.o \
 	misc/property.o misc/rmdir2.o misc/string.o
 
@@ -44,11 +44,10 @@ uninstall:
 # Dependencies
 
 # Most source files include these
-FLC_STD_H=flc.h flc_misc.h flc_defines.h config.h filter/filter.h
+FLC_STD_H=flc.h flc_misc.h flc_defines.h config.h
 
 flc.o: flc_misc.h misc/getopt.h $(FLC_STD_H)
 flc_misc.o: $(FLC_STD_H)
-filter/filter_misc.o: $(FLC_STD_H)
 filter/txt.o: filter/txt.h $(FLC_STD_H)
 filter/met.o: filter/met.h $(FLC_STD_H)
 filter/id3.o: filter/id3.h $(FLC_STD_H)

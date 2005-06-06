@@ -22,9 +22,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include "misc/filter.h"
-#include "id3.h"
-#include "met.h"
-#include "txt.h"
+#include "filter/id3.h"
+#include "filter/met.h"
+#include "filter/txt.h"
 
 const st_filter_t *filter[] = {
   &id3_filter,

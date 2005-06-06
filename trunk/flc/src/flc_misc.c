@@ -37,10 +37,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/filter.h"
 #include "misc/property.h"
 #include "misc/string.h"
-#include "filter/filter.h"
 #include "flc.h"
 #include "flc_misc.h"
 #include "flc_defines.h"
+#include "flc_filter.h"
 
 
 #ifndef TRUE

@@ -116,8 +116,8 @@ Q38: <a href="#38">uCON64 displays too many lines for my DOS-box. What can I do
    about that?</a><br>
 <br>
 Q39: <a href="#39">When will the next version of uCON64 be released? I have
-   heard the next version is able to crack my favourite SNES game, but I do not
-   know how to use CVS or a compiler.</a><br>
+   heard the next version is able to fix the protection of my favourite SNES
+   game, but I do not know how to use CVS or a compiler.</a><br>
 <br>
 Q40: <a href="#40">What is the format of the snes*.txt files?</a><br>
 <br>
@@ -1153,8 +1153,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
 <p>
 <a name="39"><b>Q39</b>: When will the next version of uCON64 be released? I
-   have heard the next version is able to crack my favourite SNES game, but I
-   do not know how to use CVS or a compiler.</a><br>
+   have heard the next version is able to fix the protection of my favourite SNES
+   game, but I do not know how to use CVS or a compiler.</a><br>
 <b>A</b>: We know when we will release a new version only just before we do so.
    But starting with uCON64 1.9.8beta8 this is not a problem for you at all.
    The only requirement is that you are able to read and use a text editor ;-)<br>
@@ -1178,13 +1178,13 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    \xaf/\xbf will not bring you far. Searching for \xXX\x80 neither. It takes a
    bit too much text to explain all the details, so just follow the directions.
    Note that I did not advise to search for \x80\x40\x80, because that is what
-   the sequence should be after uCON64 has cracked or fixed the game.<br>
+   the sequence should be after uCON64 has fixed the game.<br>
    For Mega Man X you will find the lines:<br>
    &nbsp;&nbsp; n += change_mem (buffer, bytesread, "!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, 0,<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                  "\xaf\xbf", 2, "\xcf\xdf", 2);<br>
    Now open the file snescopy.txt. If you are trying to get uCON64 support new
-   NTSC or PAL cracks open snesntsc.txt or snespal.txt respectively. Then copy
+   NTSC or PAL protection fixes open snesntsc.txt or snespal.txt respectively. Then copy
    the parts "!*\x80\x00!*\x80\x40\xf0", '*', '!', "\x80", 0, "\xaf\xbf" and
    "\xcf\xdf" to a new line in that file. Note that 0 is the 9th parameter.
    Also note that "\xaf\xbf" and "\xcf\xdf" are all parameters between double
@@ -1211,11 +1211,11 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    you will run uCON64 (this is not necessarily the same directory as the one
    where the uCON64 executable might be located!) or in uCON64's configuration
    directory. Use the option -version to find out which directory that is. Then
-   try if uCON64 is able to crack your game. uCON64 will display a warning
-   message if it detects an error in your new line. If you made a mistake with
-   escape symbols uCON64 might very well crash. You can use the switch -v (in
-   combination with -k, -f or -l) to make uCON64 display what information it
-   reads from the file.<br>
+   try if uCON64 is able to fix the protection of your game. uCON64 will display
+   a warning message if it detects an error in your new line. If you made a
+   mistake with escape symbols uCON64 might very well crash. You can use the
+   switch -v (in combination with -k, -f or -l) to make uCON64 display what
+   information it reads from the file.<br>
    If you cannot find which line you need you will either have to add a line to
    snescopy.txt, snespal.txt or snesntsc.txt for every code that is not already
    mentioned in those files or ask someone else to do it for you. For example

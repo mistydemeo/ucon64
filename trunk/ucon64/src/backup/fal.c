@@ -2,7 +2,7 @@
 fal.c - Flash Linker Advance support for uCON64
 
 Copyright (c) 2001        Jeff Frohwein
-Copyright (c) 2001        NoisyB <noisyb@gmx.net>
+Copyright (c) 2001        NoisyB
 Copyright (c) 2001 - 2004 dbjh
 
 

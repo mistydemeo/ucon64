@@ -2,7 +2,7 @@
 f2a.h - Flash 2 Advance support for uCON64
 
 Copyright (c) 2003 Ulrich Hecht <uli@emulinks.de>
-Copyright (c) 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 2004 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify

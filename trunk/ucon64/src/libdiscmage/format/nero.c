@@ -1,7 +1,7 @@
 /*
 nero.c - Nero image support for libdiscmage
 
-Copyright (c) 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2003 NoisyB
 based on specs and code by Dext
 
 

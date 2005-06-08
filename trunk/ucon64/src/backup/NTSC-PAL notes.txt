@@ -1,6 +1,6 @@
 Legend for Code1:
 0 = seems to work without modification
-1 = needs crack (uCON64 option -k)
+1 = needs protection fix (uCON64 option -k)
 2 = needs NTSC/PAL fix (uCON64 option -f)
 3 = needs backup unit header fix
 4 = seems to work, but doesn't work correctly
@@ -52,7 +52,7 @@ Code1 is valid for an SWC 2.8cc 32 Mbit PAL. For example Terranigma has a Code1
 of 0, but a Code2 of P3, because it runs without modification on a PAL SNES but
 needs an NTSC/PAL fix for an NTSC SNES.
 The prefix N indicates an NTSC protection code, the prefix P indicates a PAL
-protection code. Cracking or fixing an NTSC protection code makes a game run
+protection code. Fixing an NTSC protection code makes a game run
 on a PAL SNES and vice versa.
 
 

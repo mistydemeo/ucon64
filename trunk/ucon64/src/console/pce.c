@@ -1,7 +1,7 @@
 /*
 pce.c - PC-Engine support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2003 - 2004 dbjh
 
 
@@ -801,7 +801,7 @@ pcengine_f (st_rominfo_t *rominfo)
 /*
   Region protection codes are found in (American) TurboGrafx-16 games. It
   prevents those games from running on a PC-Engine. One search pattern seems
-  sufficient to fix/crack all TG-16 games. In addition to that, the protection
+  sufficient to fix all TG-16 games. In addition to that, the protection
   code appears to be always somewhere in the first 32 kB.
 */
 {

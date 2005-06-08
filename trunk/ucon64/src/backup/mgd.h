@@ -1,7 +1,7 @@
 /*
 mgd.h - Multi Game Doctor/Hunter support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2002 - 2004 dbjh
 
 

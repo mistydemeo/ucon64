@@ -1,7 +1,7 @@
 /*
 gba.c - Game Boy Advance support for uCON64
 
-Copyright (c) 2001        NoisyB <noisyb@gmx.net>
+Copyright (c) 2001        NoisyB
 Copyright (c) 2001 - 2004 dbjh
 
 

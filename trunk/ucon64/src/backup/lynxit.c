@@ -2,7 +2,7 @@
 lynxit.c - lynxit support for uCON64
 
 Copyright (c) 1997 - ???? K. Wilkins
-Copyright (c) 2002        NoisyB <noisyb@gmx.net>
+Copyright (c) 2002        NoisyB
 Copyright (c) 2004        dbjh
 
 

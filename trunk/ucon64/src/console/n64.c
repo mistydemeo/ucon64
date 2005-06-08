@@ -1,8 +1,12 @@
 /*
 n64.c - Nintendo 64 support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2005 Parasyte
+
+05-06-2005 / Parasyte:
+  Added support for remaining CIC algorithms in n64_chksum()
 
 
 This program is free software; you can redistribute it and/or modify
@@ -136,7 +140,7 @@ const st_getopt2_t n64_usage[] =
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum\n"
-      "supports only 6102 and 6105 boot codes",
+      "supports 6101, 6102, 6103, 6105 and 6106 boot codes",
       &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
 #if 0
@@ -254,7 +258,7 @@ n64_f (st_rominfo_t *rominfo)
 {
   // TODO: PAL/NTSC fix
   (void) rominfo;                               // warning remover
-  fputs ("ERROR: The function for cracking N64 region protections is not yet implemented\n", stderr);
+  fputs ("ERROR: The function for fixing N64 region protections is not yet implemented\n", stderr);
   return 0;
 }
 
@@ -530,7 +534,7 @@ n64_init (st_rominfo_t *rominfo)
         }
 
       sprintf (rominfo->internal_crc2,
-               "2nd Checksum: %s, 0x%08x (calculated) %c= 0x%08x (internal)%s",
+               "2nd Checksum: %s, 0x%08x (calculated) %c= 0x%08x (internal)",
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((n64crc.crc2 == value) ?
@@ -541,10 +545,7 @@ n64_init (st_rominfo_t *rominfo)
                (n64crc.crc2 == value) ? "Ok" : "Bad",
 #endif
                n64crc.crc2,
-               (n64crc.crc2 == value) ? '=' : '!', value,
-               (n64crc.crc2 != value) ?
-                 "\nNOTE: The checksum routine supports only 6102 and 6105 boot codes" :
-                 "");
+               (n64crc.crc2 == value) ? '=' : '!', value);
     }
 
   rominfo->console_usage = n64_usage[0].help;
@@ -566,10 +567,12 @@ n64_init (st_rominfo_t *rominfo)
                            (b)[2^(s)] <<  8 | \
                            (b)[3^(s)] )
 
-#define CHECKSUM_START       0x1000 //(N64_HEADER_LEN + N64_BC_SIZE)
-#define CHECKSUM_LENGTH      0x100000
-#define CHECKSUM_STARTVALUE1 0xf8ca4ddc
-#define CHECKSUM_STARTVALUE2 0xdf26f436
+#define CHECKSUM_START   0x1000 //(N64_HEADER_LEN + N64_BC_SIZE)
+#define CHECKSUM_LENGTH  0x100000
+#define CHECKSUM_CIC6102 0xf8ca4ddc
+#define CHECKSUM_CIC6103 0xa3886759
+#define CHECKSUM_CIC6105 0xdf26f436
+#define CHECKSUM_CIC6106 0x1fea617a
 #define CALC_CRC32                              // see this as a marker, don't disable
 
 int
@@ -639,15 +642,25 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   if (rominfo->interleaved)
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
 #endif
-  if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0x98bc2c86)
+  if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0x0b050ee0)
+    {
+      bootcode = 6103;
+      i = CHECKSUM_CIC6103;
+    }
+  else if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0x98bc2c86)
     {
       bootcode = 6105;
-      i = CHECKSUM_STARTVALUE2;
+      i = CHECKSUM_CIC6105;
+    }
+  else if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0xacc8580a)
+    {
+      bootcode = 6106;
+      i = CHECKSUM_CIC6106;
     }
   else
     {
       bootcode = 0;                             // everything else
-      i = CHECKSUM_STARTVALUE1;
+      i = CHECKSUM_CIC6102;
     }
 
   t1 = i;
@@ -714,8 +727,21 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
         }
       clen -= n;
     }
-  n64crc.crc1 = t6 ^ t4 ^ t3;
-  n64crc.crc2 = t5 ^ t2 ^ t1;
+  if (bootcode == 6103)
+    {
+      n64crc.crc1 = (t6 ^ t4) + t3;
+      n64crc.crc2 = (t5 ^ t2) + t1;
+    }
+  else if (bootcode == 6106)
+    {
+      n64crc.crc1 = (t6 * t4) + t3;
+      n64crc.crc2 = (t5 * t2) + t1;
+    }
+  else
+    {
+      n64crc.crc1 = t6 ^ t4 ^ t3;
+      n64crc.crc2 = t5 ^ t2 ^ t1;
+    }
 
 #ifdef  CALC_CRC32
   if (!rominfo->interleaved)

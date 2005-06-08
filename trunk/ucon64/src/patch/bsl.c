@@ -2,7 +2,7 @@
 bsl.c - Baseline patcher support for uCON64
 
 Copyright (c) ???? - ???? The White Knight
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2003        dbjh
 
 

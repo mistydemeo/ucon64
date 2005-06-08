@@ -44,7 +44,7 @@
  * or the equivalent for your platform.
  */
 /*
-Portions copyright (c) 2001 - 2002 NoisyB <noisyb@gmx.net>
+Portions copyright (c) 2001 - 2002 NoisyB
 Portions copyright (c) 2002        dbjh
 */
 #ifdef  HAVE_CONFIG_H

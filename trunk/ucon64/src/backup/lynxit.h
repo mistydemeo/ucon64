@@ -2,7 +2,7 @@
 lynxit.h - lynxit support for uCON64
 
 Copyright (c) 1997 - ???? K. Wilkins
-Copyright (c) 2002        NoisyB <noisyb@gmx.net>
+Copyright (c) 2002        NoisyB
 
 
 This program is free software; you can redistribute it and/or modify

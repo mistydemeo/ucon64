@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2004 NoisyB
 Copyright (c) 2001 - 2005 dbjh
 
 
@@ -811,7 +811,7 @@ ucon64_execute_options (void)
 //              getopt2_usage (p);
 
             fputs ("       Is the option you used available for the current console system?\n"
-                   "       Please report bugs to noisyb@gmx.net or ucon64-announce@lists.sf.net\n\n",
+                   "       Please report bugs to ucon64-main@lists.sf.net or http://ucon64.sf.net\n\n",
                    stderr);
 
             return -1;
@@ -1434,6 +1434,5 @@ ucon64_usage (int argc, char *argv[])
 
   puts ("     Give the force recognition switch a try if something went wrong\n"
         "\n"
-        "Please report any problems/ideas/fixes to noisyb@gmx.net or\n"
-        "ucon64-announce@lists.sf.net or visit http://ucon64.sf.net\n");
+        "Please report anything to ucon64-main@lists.sf.net or http://ucon64.sf.net\n");
 }

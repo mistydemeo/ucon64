@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2004 NoisyB
 Copyright (c) 2001 - 2004 dbjh
 
 

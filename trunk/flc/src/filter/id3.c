@@ -1,7 +1,7 @@
 /*
 id3.c - mp3 ID3 support for flc
 
-Copyright (c) 2004 by NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 by NoisyB
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

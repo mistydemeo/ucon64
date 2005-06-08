@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(flc, 1.1.0, noisyb@gmx.net)
+AC_INIT(flc, 1.1.0, ucon64-main@lists.sf.net)
 AC_CONFIG_HEADER(config.h)
 
 # Checks for programs.

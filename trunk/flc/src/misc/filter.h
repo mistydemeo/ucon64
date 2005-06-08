@@ -2,7 +2,7 @@
 filter.h - Simple filter and cache framework for any file, stream or data
            processing application
            
-written by 2005 NoisyB (noisyb@gmx.net)
+written by 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify

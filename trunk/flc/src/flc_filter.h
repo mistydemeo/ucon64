@@ -1,7 +1,7 @@
 /*
 filter.h - support of different archive/file inputs for flc
 
-Copyright (c) 2005 by NoisyB (noisyb@gmx.net)
+Copyright (c) 2005 by NoisyB
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

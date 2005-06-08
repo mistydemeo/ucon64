@@ -3,7 +3,7 @@ flc
 shows the FILE_ID.DIZ of archives/files
 useful for FTP admins or people who have a lot to do with FILE_ID.DIZ
 
-Copyright (C) 1999-2004 by NoisyB (noisyb@gmx.net)
+Copyright (C) 1999-2004 by NoisyB
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ main (int argc, char *argv[])
   int option_index = 0;
   const st_getopt2_t options[] = {
     {NULL,      0, 0, 0, NULL,
-      "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2004 by NoisyB (noisyb@gmx.net)\n"
+      "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2004 by NoisyB\n"
       "This may be freely redistributed under the terms of the GNU Public License\n\n"
       "Usage: flc [OPTION]... [FILE]...\n", NULL},
     {"t",       0, 0, 't', NULL,   "sort by modification time", (void *) (FLC_SORT|FLC_DATE)},
@@ -116,7 +116,7 @@ main (int argc, char *argv[])
     {"h",       0, 0, 'h', NULL,   NULL, NULL},
     {NULL,      0, 0, 0,   NULL,
       "\nAmiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
-      "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n", NULL},
+      "Report problems to ucon64-main@lists.sf.net or go to http://ucon64.sf.net\n", NULL},
     {NULL,      0, 0, 0,   NULL,   NULL, NULL}
   };
 

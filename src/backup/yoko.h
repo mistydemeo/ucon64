@@ -1,7 +1,7 @@
 /*
 yoko.h - minimal support for Yoko backup unit (Atari 2600, etc.)
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify

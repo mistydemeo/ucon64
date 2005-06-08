@@ -1,7 +1,7 @@
 /*
 cdi.c - DiscJuggler/CDI image support for libdiscmage
 
-Copyright (c) 2002 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 NoisyB
 based on specs and code by Dext
 
 

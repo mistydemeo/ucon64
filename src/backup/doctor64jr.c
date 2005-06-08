@@ -1,7 +1,7 @@
 /*
 doctor64jr.c - Bung Doctor V64 Junior support for uCON64
 
-Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2002 NoisyB
 Copyright (c) 2004        dbjh
 
 

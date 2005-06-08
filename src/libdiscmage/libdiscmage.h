@@ -1,7 +1,7 @@
 /*
 libdiscmage.h - libdiscmage
 
-Copyright (c) 2002 - 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 - 2004 NoisyB
 Copyright (c) 2002 - 2004 dbjh
 
 

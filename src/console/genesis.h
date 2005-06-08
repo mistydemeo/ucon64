@@ -1,7 +1,7 @@
 /*
 genesis.h - Sega Genesis/Mega Drive support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2002 - 2003 dbjh
 
 

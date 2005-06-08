@@ -3,7 +3,7 @@ f2a.c - Flash 2 Advance support for uCON64
 
 Copyright (c) 2003        Ulrich Hecht <uli@emulinks.de>
 Copyright (c) 2003 - 2004 David Voswinkel <d.voswinkel@netcologne.de>
-Copyright (c) 2004        NoisyB <noisyb@gmx.net>
+Copyright (c) 2004        NoisyB
 Copyright (c) 2004        dbjh
 
 

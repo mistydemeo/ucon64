@@ -1,7 +1,7 @@
 /*
 other.h - other/proprietary image support for libdiscmage
 
-Copyright (c) 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2003 NoisyB
 Gamecube support is based on specs from GC-NFO.COM - [w] / GC-NFO
 
 

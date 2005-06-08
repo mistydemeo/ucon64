@@ -2,7 +2,7 @@
 chksum.h - miscellaneous checksum functions
            SHA1, MD5, CRC16 and CRC32
 
-Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2004 NoisyB
 Copyright (c) 2001 - 2004 dbjh
 
 sha1 - Copyright (c) 2002, Dr Brian Gladman <brg@gladman.me.uk>, Worcester, UK.

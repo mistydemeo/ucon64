@@ -1,7 +1,7 @@
 /*
 format.h - support of different image formats for libdiscmage
 
-Copyright (c) 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 NoisyB
 
 
 This library is free software; you can redistribute it and/or

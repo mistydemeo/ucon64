@@ -1,7 +1,7 @@
 /*
 genesis.c - Sega Genesis/Mega Drive support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2002 - 2004 dbjh
 
 
@@ -964,7 +964,7 @@ genesis_f (st_rominfo_t *rominfo)
     In the Philipines the television standard is NTSC, but do games made
     for the Philipines exist?
     Just like with SNES we don't guarantee anything for files that needn't be
-    fixed/cracked/patched.
+    fixed/patched.
   */
   if (genesis_tv_standard == 0)               // NTSC (Japan, U.S.A. or Brazil ('4'))
     return genesis_fix_ntsc_protection (rominfo);

@@ -1,7 +1,7 @@
 /*
 toc.c - TOC support for libdiscmage
 
-Copyright (c) 2002 - 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 - 2003 NoisyB
 
 
 This library is free software; you can redistribute it and/or

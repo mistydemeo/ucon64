@@ -1,7 +1,7 @@
 /*
 ngp.c - NeoGeo Pocket support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2001        Gulliver
 
 

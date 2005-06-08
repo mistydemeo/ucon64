@@ -1,7 +1,7 @@
 /*
 gbx.c - Game Boy Xchanger/GBDoctor support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2001 - 2004 dbjh
 Based on gbt15.c - Copyright (c) Bung Enterprises
 

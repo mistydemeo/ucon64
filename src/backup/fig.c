@@ -1,7 +1,7 @@
 /*
 fig.c - Super PRO Fighter support for uCON64
 
-Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2002 NoisyB
 Copyright (c) 2001 - 2004 dbjh
 Copyright (c) 2003 - 2004 JohnDie
 

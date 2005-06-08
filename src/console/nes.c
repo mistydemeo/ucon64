@@ -1,7 +1,7 @@
 /*
 nes.c - Nintendo Entertainment System support for uCON64
 
-Copyright (c) 1999 - 2003 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2003 NoisyB
 Copyright (c) 2002 - 2005 dbjh
 
 

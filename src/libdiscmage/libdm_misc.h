@@ -1,7 +1,7 @@
 /*
 libdm_misc.h - libdiscmage miscellaneous
 
-Copyright (c) 2002 - 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 - 2003 NoisyB
 Copyright (c) 2002 - 2004 dbjh
 
 

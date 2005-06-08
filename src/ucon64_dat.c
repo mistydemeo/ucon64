@@ -1,7 +1,7 @@
 /*
 ucon64_dat.c - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
-Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2004 NoisyB
 Copyright (c) 2002 - 2004 dbjh
 
 
@@ -1132,7 +1132,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
       // RomCenter uses files in DOS text format, so we generate a file in that format
       fprintf (ucon64_datfile, "[CREDITS]\r\n"
                                "author=uCON64\r\n"
-                               "email=noisyb@gmx.net\r\n"
+                               "email=ucon64-main@lists.sf.net\r\n"
                                "homepage=uCON64 homepage\r\n"
                                "url=ucon64.sf.net\r\n"
                                "version=%s-%s\r\n"

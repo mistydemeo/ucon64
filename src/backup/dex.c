@@ -1,7 +1,7 @@
 /*
 dex.c - DexDrive support for uCON64
 
-Copyright (c) 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 2002 NoisyB
 Copyright (c) 2004 dbjh
 
 

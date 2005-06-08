@@ -1,7 +1,7 @@
 /*
 snes.c - Super NES support for uCON64
 
-Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2002 NoisyB
 Copyright (c) 2001 - 2004 dbjh
 Copyright (c) 2002 - 2003 John Weidman
 Copyright (c) 2004        JohnDie
@@ -280,7 +280,7 @@ const st_getopt2_t snes_usage[] =
 #endif
     {
       "k", 0, 0, UCON64_K,
-      NULL, "remove protection (crack)",
+      NULL, "remove protection",
       &ucon64_wf[WF_OBJ_SNES_DEFAULT]
     },
     {
@@ -1872,7 +1872,7 @@ when it has been patched with -f.
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
-  puts ("Attempting crack...");
+  puts ("Attempting protection fix...");
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);

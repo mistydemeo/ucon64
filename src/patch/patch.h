@@ -1,7 +1,7 @@
 /*
 patch.h - single header file for all patch functions
 
-Copyright (c) 2003 NoisyB <noisyb@gmx.net>
+Copyright (c) 2003 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify

@@ -1224,7 +1224,7 @@ gba_sc (void)
   pos = ftell (destfile);                       // truncate() this later
 
   // calculate and write new start address
-  printf ("New start address: 0x%08x\n", pos - GBA_MENU_SIZE + 0x8000000);
+  printf ("New start address: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 0x8000000));
   address = ((pos - GBA_MENU_SIZE - 8) >> 2) & 0xffffff;
   fseek (destfile, 0, SEEK_SET);
 #ifdef  WORDS_BIGENDIAN
@@ -1233,7 +1233,7 @@ gba_sc (void)
   fwrite (&address, 1, 3, destfile);
 
   // calculate and write new address at offset 0x60
-  printf ("New offset 0x60 address: 0x%08x\n", pos - GBA_MENU_SIZE + 846);
+  printf ("New offset 0x60 address: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 846));
   address = (pos - GBA_MENU_SIZE + 846 - 2) & 0xffffff;
   if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
     address |= 0x09000000;                      // 0x09 == "large" jmp?
@@ -1246,7 +1246,7 @@ gba_sc (void)
   fwrite (&address, 1, 4, destfile);
 
   // calculate and write new address in menu
-  printf ("New address in menu: 0x%08x\n", pos - GBA_MENU_SIZE + 846 - 53076);
+  printf ("New address in menu: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 846 - 53076));
   address = (pos - GBA_MENU_SIZE + 846 - 53076 - 2) & 0xffffff;
   if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
     address |= 0x09000000;                      // 0x09 == "large" jmp?

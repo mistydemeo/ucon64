@@ -8,7 +8,7 @@ Software: uCON64 1.9.8-3
 
 Legend:
 0 = seems to work without modification
-1 = needs protection fix (uCON64 option -k)
+1 = needs crack (uCON64 option -k)
 2 = needs NTSC/PAL fix (uCON64 option -f)
 3 = needs backup unit header fix
 4 = seems to work, but doesn't work correctly
@@ -23,8 +23,8 @@ Comment:
 I use the word seems, because I have tested most games only for a few minutes
 or so. Even for games that I played from the beginning till the end I can't be
 sure if they run as they do from a cartridge.
-Of course I tried to fix the games that displayed a protection screen.
-The games that have that code can't be fixed with uCON64.
+Of course I tried to crack or fix the games that displayed a copy protection
+screen. The games that have that code can't be cracked with uCON64.
 Non-playing music seems to be a BS-specific problem.
 For some games I put an extra comment after the character sequence "<=". In
 some comments I mention the so-called emulation mode select byte. This is the

@@ -62,7 +62,7 @@ extern "C" {
   stristr()     same as strcasestr()
   stricmp()     same as strcasecmp()
   strnicmp()    same as strncasecmp()
-  strcasestr()  strcasestr() clone for non-GNU platforms
+  strcasestr2() strcasestr() clone for non-GNU platforms
 */
 extern char *strtriml (char *str);
 extern char *strtrimr (char *str);

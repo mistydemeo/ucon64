@@ -1,7 +1,7 @@
 /*
-gba.h - Game Boy Advance support for uCON64
+sc.h - support for Super Card
 
-Copyright (c) 2001 NoisyB
+Copyright (c) 2004 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,21 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef GBA_H
-#define GBA_H
+#ifndef SC_H
+#define SC_H
 
-#define GBA_LOGODATA_LEN 156
-
-extern const st_getopt2_t gba_usage[];
-extern const unsigned char gba_logodata[];
-
-extern int gba_chk (st_rominfo_t *rominfo);
-extern int gba_crp (st_rominfo_t *rominfo, const char *value);
-extern int gba_init (st_rominfo_t *rominfo);
-extern int gba_logo (st_rominfo_t *rominfo);
-extern int gba_n (st_rominfo_t *rominfo, const char *name);
-extern int gba_sram (void);
-extern int gba_multi (int truncate_size, char *fname);
-extern int gba_sc (void);
+extern const st_getopt2_t sc_usage[];
 
 #endif

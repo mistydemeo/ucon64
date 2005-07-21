@@ -56,6 +56,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
+static long int
+strtol2 (const char *str, char **tail)
+{
+  long int i;
+
+  return (i = strtol (str, tail, 10)) ? i : strtol (str, tail, 16);
+}
+
+
 int
 ucon64_switches (st_ucon64_t *p)
 {
@@ -184,7 +193,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_FRONTEND:
-      ucon64.frontend = 1;                      // used by ucon64_gauge()
+      ucon64.frontend = 1;                      // used by (for example) ucon64_gauge()
       break;
 
     case UCON64_NBAK:
@@ -430,7 +439,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 #endif // USE_PARALLEL
 
-    case UCON64_PATCH: // falling through, so --patch is an alias for --file
+    case UCON64_PATCH: // --patch and --file are the same
     case UCON64_FILE:
       ucon64.file = optarg;
       break;
@@ -1588,6 +1597,10 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_SRAM:
       gba_sram ();
+      break;
+
+    case UCON64_SC:
+      gba_sc ();
       break;
 
     case UCON64_SSC:

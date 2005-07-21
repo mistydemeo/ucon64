@@ -280,7 +280,7 @@ const st_getopt2_t snes_usage[] =
 #endif
     {
       "k", 0, 0, UCON64_K,
-      NULL, "remove protection",
+      NULL, "remove protection (crack)",
       &ucon64_wf[WF_OBJ_SNES_DEFAULT]
     },
     {
@@ -1872,7 +1872,7 @@ when it has been patched with -f.
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
-  puts ("Attempting protection fix...");
+  puts ("Attempting crack...");
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);

@@ -167,9 +167,8 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
   unregister_func() unregisters a previously registered function
                   returns -1 if it fails, 0 if it was successful
   handle_registered_funcs() calls all the registered functions
-  wait2           wait (sleep) a specified number of milliseconds
+  wait2()         wait (sleep) a specified number of milliseconds
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
-  strtol2()       tries base == 16 after base == 10 failed
 */
 typedef struct st_cm_set
 {
@@ -215,10 +214,8 @@ extern int drop_privileges (void);
 extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);
-
 extern void wait2 (int nmillis);
 extern char *getenv2 (const char *variable);
-extern long int strtol2 (const char *str, char **tail);
 
 /*
   Portability (conio.h, etc...)

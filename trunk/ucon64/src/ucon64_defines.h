@@ -240,6 +240,7 @@ enum
   UCON64_RU,
   UCON64_S,
   UCON64_SAM,
+  UCON64_SC,
   UCON64_SCAN,
   UCON64_SCR,
   UCON64_SGB,
@@ -379,23 +380,20 @@ enum
   WF_NFO | WF_MFO_AFTER
                     a ROM is required and info will be shown before and
                     after it has been processed
-
-  important:
-    we shift these flags 16 bit because they share the same integer with
-    those UCON64_<console> defines in st_getopt2_t
 */
-#define WF_DEFAULT   (WF_PROBE | WF_INIT | WF_NFO)
-#define WF_PROBE     (1)
-#define WF_INIT      (1 << 1)
-#define WF_NFO       (1 << 2)
-#define WF_STOP      (1 << 3)
-#define WF_NFO_AFTER (1 << 4)
-#define WF_NO_ROM    (1 << 5)
-#define WF_PAR       (1 << 6)
-#define WF_USB       (1 << 7)
-#define WF_SERIAL    (1 << 8)
-#define WF_NO_CRC32  (1 << 9)
-#define WF_NO_SPLIT  (1 << 10)
-#define WF_SWITCH    (1 << 11)
+#define WF_DEFAULT    (WF_PROBE | WF_INIT | WF_NFO)
+#define WF_PROBE      (1)
+#define WF_INIT       (1 << 1)
+#define WF_NFO        (1 << 2)
+#define WF_STOP       (1 << 3)
+#define WF_NFO_AFTER  (1 << 4)
+#define WF_NO_ROM     (1 << 5)
+#define WF_PAR        (1 << 6)
+#define WF_USB        (1 << 7)
+#define WF_SERIAL     (1 << 8)
+#define WF_NO_CRC32   (1 << 9)
+#define WF_NO_SPLIT   (1 << 10)
+#define WF_SWITCH     (1 << 11)
+#define WF_NO_ARCHIVE (1 << 12)
 
 #endif // UCON64_DEFINES_H

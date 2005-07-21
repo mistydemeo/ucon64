@@ -1,8 +1,8 @@
 /*
 gba.c - Game Boy Advance support for uCON64
 
-Copyright (c) 2001        NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2001 - 2005 NoisyB
+Copyright (c) 2001 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
+#include "misc/bswap.h"
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/property.h"
@@ -46,6 +47,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GBA_NAME_LEN 12
 #define GBA_HEADER_START 0
 #define GBA_HEADER_LEN (sizeof (st_gba_header_t))
+#define GBA_MENU_SIZE 20916
+#define GBA_BLANK_SIZE 52232
+#define GBA_SAV_TEMPLATE_SIZE 65536
+#define GBA_SCI_TEMPLATE_SIZE 458752
 
 
 static int gba_chksum (void);
@@ -80,6 +85,16 @@ const st_getopt2_t gba_usage[] =
     {
       "sram", 0, 0, UCON64_SRAM,
       NULL, "patch ROM for SRAM saving",
+      &ucon64_wf[WF_OBJ_GBA_DEFAULT]
+    },
+    {
+      "sc", 0, 0, UCON64_SC,
+      NULL, "convert to Super Card (CF to GBA Adapter)/SCZ\n"
+#if 0
+            "enables \"Saver patch\", \"restart to Menu\" and\n"
+            "\"Real Time Save\""
+#endif
+            "(creates SAV and SCI templates)",
       &ucon64_wf[WF_OBJ_GBA_DEFAULT]
     },
     {
@@ -194,6 +209,8 @@ Offset bdh-bdh - Complement   check   -  This  hexadecimal  byte  have  to  be
 Offset beh-bfh - Reserved  area  -  Fixed,  00h filled area without any useful
                  information.
 */
+
+
 typedef struct st_gba_header
 {
   unsigned char start[4];                       // 0x00
@@ -387,7 +404,7 @@ gba_sram (void)
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
-  if ((destfile = fopen (dest_name, "rb+")) == NULL)
+  if ((destfile = fopen (dest_name, "r+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
@@ -846,5 +863,436 @@ gba_multi (int truncate_size, char *multi_fname)
            size_pow2 / MBIT, size_pow2_lesser / MBIT, size_pow2_lesser / MBIT,
            totalsize / (float) MBIT);
 
+  return 0;
+}
+
+
+static int
+gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
+{
+  // reverse engineered from SuperCard.exe
+  const unsigned char saver_patch_orig[38] = {
+    0xf0, 0xb5, 0xa0, 0xb0, 0x0d, 0x1c, 0x16, 0x1c,
+    0x1f, 0x1c, 0x03, 0x04, 0x1c, 0x0c, 0x0f, 0x4a,
+    0x10, 0x88, 0x0f, 0x49, 0x08, 0x40, 0x03, 0x21,
+    0x08, 0x43, 0x10, 0x80, 0x0d, 0x48, 0x00, 0x68,
+    0x01, 0x68, 0x80, 0x20, 0x80, 0x02
+  },
+  saver_patch_repl[38] = {
+    0x70, 0xb5, 0xa0, 0xb0, 0x00, 0x03, 0x40, 0x18,
+    0xe0, 0x21, 0x09, 0x05, 0x09, 0x18, 0x08, 0x78,
+    0x10, 0x70, 0x01, 0x3b, 0x01, 0x32, 0x01, 0x31,
+    0x00, 0x2b, 0xf8, 0xd1, 0x00, 0x20, 0x20, 0xb0,
+    0x70, 0xbc, 0x02, 0xbc, 0x08, 0x47
+  },
+  saver_patch2_orig[38] = {
+    0xf0, 0xb5, 0x90, 0xb0, 0x0f, 0x1c, 0x00, 0x04,
+    0x04, 0x0c, 0x0f, 0x2c, 0x04, 0xd9, 0x01, 0x48,
+    0x40, 0xe0, 0x00, 0x00, 0xff, 0x80, 0x00, 0x00,
+    0x20, 0x1c, 0xff, 0xf7, 0xd7, 0xfe, 0x00, 0x04,
+    0x05, 0x0c, 0x00, 0x2d, 0x35, 0xd1
+  },
+  saver_patch2_repl[38] = {
+    0x70, 0xb5, 0x00, 0x03, 0x0a, 0x1c, 0xe0, 0x21,
+    0x09, 0x05, 0x41, 0x18, 0x01, 0x23, 0x1b, 0x03,
+    0x10, 0x78, 0x08, 0x70, 0x01, 0x3b, 0x01, 0x32,
+    0x01, 0x31, 0x00, 0x2b, 0xf8, 0xd1, 0x00, 0x20,
+    0x70, 0xbc, 0x02, 0xbc, 0x08, 0x47
+  },
+  saver_patch3_orig[38] = {
+    0xa2, 0xb0, 0x0d, 0x1c, 0x00, 0x04, 0x03, 0x0c,
+    0x03, 0x48, 0x00, 0x68, 0x80, 0x88, 0x83, 0x42,
+    0x05, 0xd3, 0x01, 0x48,
+    0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f,         // 6 byte wildcard
+    0xff, 0x80, 0x00, 0x00,
+    0x3f,                                       // 1 byte wildcard
+    0x48, 0x06, 0x1c, 0x00, 0x68, 0x01, 0x7a
+  },
+  saver_patch3_repl[38] = {
+    0x00, 0x04, 0x0a, 0x1c, 0x40, 0x0b, 0xe0, 0x21,
+    0x09, 0x05, 0x41, 0x18, 0x07, 0x31, 0x00, 0x23,
+    0x08, 0x78, 0x10, 0x70,
+    0x01, 0x33, 0x01, 0x32, 0x01, 0x39,
+    0x07, 0x2b, 0xf8, 0xd9,
+    0x00,
+    0x20, 0x70, 0xbc, 0x02, 0xbc, 0x08, 0x47
+  },
+  saver_patch4_orig[40] = {
+    0x30, 0xb5,
+    0xa9, 0xb0, 0x0d, 0x1c, 0x00, 0x04, 0x04, 0x0c,
+    0x03, 0x48, 0x00, 0x68, 0x80, 0x88, 0x84, 0x42,
+    0x05, 0xd3, 0x01, 0x48,
+    0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f,         // 6 byte wildcard
+    0xff, 0x80, 0x00, 0x00, 0x0f, 0x48,
+    0x00, 0x68, 0x00, 0x7a, 0x40, 0x00
+  },
+  saver_patch4_repl[40] = {
+    0x70, 0xb5,
+    0x00, 0x04, 0x0a, 0x1c, 0x40, 0x0b, 0xe0, 0x21,
+    0x09, 0x05, 0x41, 0x18, 0x07, 0x31, 0x00, 0x23,
+    0x10, 0x78, 0x08, 0x70,
+    0x01, 0x33, 0x01, 0x32, 0x01, 0x39,
+    0x07, 0x2b, 0xf8, 0xd9, 0x00, 0x20,
+    0x70, 0xbc, 0x02, 0xbc, 0x08, 0x47
+  },
+  saver_patch5_orig[42] = {
+    0xf0, 0xb5, 0x90, 0xb0, 0x0f, 0x1c, 0x00, 0x04,
+    0x04, 0x0c, 0x03, 0x48, 0x00, 0x68, 0x40, 0x89,
+    0x84, 0x42, 0x05, 0xd3, 0x01, 0x48, 0x41, 0xe0,
+    0xf0, 0x89, 0x03, 0x02, 0xff, 0x80, 0x00, 0x00,
+    0x20, 0x1c, 0xff, 0xf7, 0xd3, 0xfe, 0x00, 0x04,
+    0x05, 0x0c
+  },
+  saver_patch5_repl[42] = {
+    0x7c, 0xb5, 0x90, 0xb0, 0x00, 0x03, 0x0a, 0x1c,
+    0xe0, 0x21, 0x09, 0x05, 0x09, 0x18, 0x01, 0x23,
+    0x1b, 0x03, 0x10, 0x78, 0x08, 0x70, 0x01, 0x3b,
+    0x01, 0x32, 0x01, 0x31, 0x00, 0x2b, 0xf8, 0xd1,
+    0x00, 0x20, 0x10, 0xb0, 0x7c, 0xbc, 0x02, 0xbc,
+    0x08, 0x47
+  };
+  int found = 0;
+  unsigned char *ptr = NULL;
+
+  for (ptr = buffer;
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch_orig, 38, 0));
+       ptr++)
+    {
+      if (ucon64.quiet < 0)
+        printf ("offset: 0x%08x\n", (int) (ptr - buffer));
+      fseek (destfile, ptr - buffer, SEEK_SET);
+      fwrite (saver_patch_repl, 1, 38, destfile);
+      found++;
+    }  
+
+  for (ptr = buffer;
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch2_orig, 38, 0));
+       ptr++)
+    {
+      if (ucon64.quiet < 0)
+        printf ("offset: 0x%08x\n", (int) (ptr - buffer));
+      fseek (destfile, ptr - buffer, SEEK_SET);
+      fwrite (saver_patch2_repl, 1, 38, destfile);
+      found++;
+    }  
+
+  for (ptr = buffer;
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch3_orig, 38, MEMMEM2_WCARD (0x3f)));
+       ptr++)
+    {
+      if (ucon64.quiet < 0)
+        printf ("offset: 0x%08x\n", (int) (ptr - buffer));
+      fseek (destfile, ptr - buffer, SEEK_SET);
+      fwrite (saver_patch3_repl, 1, 38, destfile);
+      found++;
+    }  
+
+  for (ptr = buffer;
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch4_orig, 40, MEMMEM2_WCARD (0x3f)));
+       ptr++)
+    {
+      if (ucon64.quiet < 0)
+        printf ("offset: 0x%08x\n", (int) (ptr - buffer));
+      fseek (destfile, ptr - buffer, SEEK_SET);
+      fwrite (saver_patch4_repl, 1, 40, destfile);
+      found++;
+    }  
+
+  for (ptr = buffer;
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch5_orig, 42, 0));
+       ptr++)
+    {
+      if (ucon64.quiet < 0)
+        printf ("offset: 0x%08x\n", (int) (ptr - buffer));
+      fseek (destfile, ptr - buffer, SEEK_SET);
+      fwrite (saver_patch5_repl, 1, 42, destfile);
+      found++;
+    }  
+
+  fprintf (stdout, "%d saver patches applied\n", found);
+
+  return 0;
+}
+
+
+// We allocate one buffer for the templates and loader (not for each structure)
+#if     GBA_SCI_TEMPLATE_SIZE < GBA_BLANK_SIZE || \
+        GBA_SCI_TEMPLATE_SIZE < GBA_MENU_SIZE || \
+        GBA_SCI_TEMPLATE_SIZE < GBA_SAV_TEMPLATE_SIZE
+#error GBA_SCI_TEMPLATE_SIZE is too small
+#endif
+
+int
+gba_sc (void)
+/*
+  reverse engineered from SuperCard.exe
+  
+  BOND EON only?
+  a0 7f 00 03 00 80 00 03
+  a0 7f 00 03 f0 7f 00 03
+  
+  0e 48 39 68  01 60 0e 48 -> 00 48 00 47  01 fb 7f 08
+  0003756c  0a 1c 02 80  0e 48 39 68  01 60 0e 48  79 68 01 60 TONY HAWK 2!
+  0003756c  0a 1c 02 80  00 48 00 47  01 fb 7f 08  79 68 01 60
+      
+  d0 -> e0
+  00037842  7f 08 27 e0  d0 20 00 05  01 88 01 22 TONY HAWK 2!
+  00037842  7f 08 27 e0  e0 20 00 05  01 88 01 22
+  
+  08 80 -> c0 46
+  00039870  08 88 07 48  08 80 00 f0  e5 f8 01 f0  a9 f8 01 f0 PINOBEE only?
+  00039870  08 88 07 48  c0 46 00 f0  e5 f8 01 f0  a9 f8 01 f0
+  
+  08 80 -> c0 46
+  00000238  3a 4c 20 1c  08 80 3a 49  3a 48 08 60  4a 60 3a 48 PINOBEE
+  00000238  3a 4c 20 1c  c0 46 3a 49  3a 48 08 60  4a 60 3a 48
+  
+  01 60 -> c0 46
+  000000fa  09 02 14 31  01 60 27 49  28 48 08 60  40 21 09 03 CT SPECIAL F only?
+  000000fa  09 02 14 31  c0 46 27 49  28 48 08 60  40 21 09 03
+*/
+{
+  const unsigned char sc_orig[14][6] =
+    {
+      {0x04, 0x02, 0x00, 0x04, 0x01, 0x20},
+      {0x04, 0x02, 0x00, 0x04, 0x14, 0x40},
+      {0x04, 0x02, 0x00, 0x04, 0x38, 0x68},
+      {0x04, 0x02, 0x00, 0x04, 0xa0, 0x0f},
+      {0x04, 0x02, 0x00, 0x04, 0xb4, 0x05},
+      {0x04, 0x02, 0x00, 0x04, 0xb4, 0x45},
+      {0x04, 0x02, 0x00, 0x04, 0xb6, 0x45},
+      {0x04, 0x02, 0x00, 0x04, 0xb7, 0x45},
+      {0x04, 0x02, 0x00, 0x04, 0xd4, 0x00},
+      {0x04, 0x02, 0x00, 0x04, 0xe3, 0xff},
+      {0x04, 0x02, 0x00, 0x04, 0xf8, 0x20},
+      {0x04, 0x02, 0x00, 0x04, 0xfc, 0xff},
+      {0x04, 0x02, 0x00, 0x04, 0xfe, 0x2f},
+//      {0x04, 0x02, 0x00, 0x04, 0xfe, 0xff},     // CASTLEVANIA1 + CROUCHING TI only?
+                                                //  they have it but work also without it
+      {0x04, 0x02, 0x00, 0x04, 0xff, 0xf8}
+    },
+    sc_repl[4] =
+      {0x00, 0x00, 0x00, 0x00},                 // overwrite only the 0x04 0x02 0x00 0x04 part
+    sc2_orig[4] =
+      {0xfc, 0x7f, 0x00, 0x03},                 // replace this everywhere
+    sc2_repl = 0xa0,
+    sc3_orig[92] =
+      {
+        // replace this at offset 0xee only
+        0x80, 0xe3,
+        0x81, 0x1f, 0xa0, 0xe3,
+        0xb1, 0x00, 0x8c,                       // diff
+        0xe1,
+        0xd4, 0xc0, 0x8c, 0xe2, 0x74, 0x00, 0x9f, 0xe5,
+        0x74, 0x10, 0x9f, 0xe5, 0x74, 0x30, 0x9f, 0xe5,
+        0x01, 0x30, 0x43, 0xe0, 0x21, 0x23, 0xa0, 0xe3,
+        0x43, 0x21, 0x82, 0xe1, 0x07, 0x00, 0x8c, 0xe8,
+        0x03, 0x00, 0x80, 0xe0, 0x60, 0x10, 0x9f, 0xe5,
+        0x60, 0x30, 0x9f, 0xe5, 0x01, 0x30, 0x43, 0xe0,
+        0x21, 0x23, 0xa0, 0xe3, 0x43, 0x21, 0x82, 0xe1,
+        0x07, 0x00, 0x8c, 0xe8, 0x64, 0x30, 0x9f, 0xe5,
+        0x13, 0xff, 0x2f, 0xe1, 0x15, 0x49, 0x13, 0x48,
+        0x16, 0x4b, 0x42, 0x1a, 0xd2, 0x1a, 0x02, 0x20,
+        0xfe, 0x46
+      },
+    sc3_repl[92] =
+      {
+        0x80, 0xe3,
+        0x81, 0x1f, 0xa0, 0xe3,
+        0x00, 0x00, 0xa0,                       // diff
+        0xe1,
+        0xd4, 0xc0, 0x8c, 0xe2, 0x74, 0x00, 0x9f, 0xe5,
+        0x74, 0x10, 0x9f, 0xe5, 0x74, 0x30, 0x9f, 0xe5,
+        0x01, 0x30, 0x43, 0xe0, 0x21, 0x23, 0xa0, 0xe3,
+        0x43, 0x21, 0x82, 0xe1, 0x07, 0x00, 0x8c, 0xe8,
+        0x03, 0x00, 0x80, 0xe0, 0x60, 0x10, 0x9f, 0xe5,
+        0x60, 0x30, 0x9f, 0xe5, 0x01, 0x30, 0x43, 0xe0,
+        0x21, 0x23, 0xa0, 0xe3, 0x43, 0x21, 0x82, 0xe1,
+        0x07, 0x00, 0x8c, 0xe8, 0x64, 0x30, 0x9f, 0xe5,
+        0x13, 0xff, 0x2f, 0xe1, 0x15, 0x49, 0x13, 0x48,
+        0x16, 0x4b, 0x42, 0x1a, 0xd2, 0x1a, 0x02, 0x20,
+        0xfe, 0x46
+      };
+  int x = 0;
+  unsigned int fsize = ucon64.file_size, padded = 0;
+  uint32_t address = 0, pos = 0;
+  char dest_name[FILENAME_MAX], fname[FILENAME_MAX];
+  unsigned char *buffer, *ptr = NULL;
+  FILE *destfile;
+  
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, NULL, 0);
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+
+  if ((destfile = fopen (dest_name, "rb+")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (!(buffer = (unsigned char *) malloc (fsize)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], fsize);
+      fclose (destfile);
+      exit (1);
+    }
+  if (fread (buffer, 1, fsize, destfile) != fsize)
+    {
+      fprintf (stderr, ucon64_msg[READ_ERROR], dest_name);
+      free (buffer);
+      fclose (destfile);
+      return -1;
+    }
+
+  // saver patch
+  gba_saver_patch (destfile, buffer, fsize);
+
+  // restart
+  for (ptr = buffer;
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), sc_orig[0], 4, 0)) &&
+       (ptr - buffer) < 7445976;                // seems like < 7445976 is far enough
+                                                // SONICPINBALL 64Mb (< 7445976)
+                                                // AGB KIRBY DX (< 10223404) 128Mb
+       ptr++)
+    for (x = 0; x < 14; x++)
+      if (!memcmp (ptr, sc_orig[x], 6))         // Do the last 2 bytes match?
+        {
+          if (ucon64.quiet < 0)
+            printf ("offset: 0x%08x\n", (int) (ptr - buffer));
+          fseek (destfile, ptr - buffer, SEEK_SET);
+          fwrite (sc_repl, 1, 4, destfile);
+        }  
+
+  for (ptr = buffer;
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), sc2_orig, 4, 0)) &&
+       (ptr - buffer) < 7445660;                // seems like < 7445660 is far enough
+                                                // SONICPINBALL 64 Mb (< 7445660)
+                                                // AGB KIRBY DX (< 10223428) 128Mb
+       ptr++)
+    {
+      if (ucon64.quiet < 0)
+        printf ("offset: 0x%08x\n", (int) (ptr - buffer));
+      fseek (destfile, ptr - buffer, SEEK_SET);
+      fputc (sc2_repl, destfile);
+    }  
+
+  if (!memcmp (buffer + 0xee, &sc3_orig, 92))
+    {
+      if (ucon64.quiet < 0)
+        printf ("offset: 0x%08x\n", 0xee);
+      fseek (destfile, 0xee, SEEK_SET);
+      fwrite (sc3_repl, 1, 92, destfile);
+    }  
+
+  // write menu (intro) at end of ROM
+  // SuperCard.exe ignores padding with anything else than 0xff Bytes
+  fseek (destfile, -1, SEEK_END);
+  if ((unsigned char) fgetc (destfile) == 0xff)
+    padded = ucon64_testpad (ucon64.rom);
+  fseek (destfile, fsize - padded, SEEK_SET);
+
+  printf ("Writing restart menu at offset: 0x%08x\n", fsize - padded);
+
+  // there is a 52232 bytes blank before the actual menu
+  if (!(buffer = (unsigned char *) realloc (buffer, GBA_SCI_TEMPLATE_SIZE)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], GBA_SCI_TEMPLATE_SIZE);
+      fclose (destfile);
+      exit (1);
+    }
+  memset (buffer, 0, GBA_BLANK_SIZE);
+  fwrite (buffer, 1, GBA_BLANK_SIZE, destfile);
+
+  /*
+    menu[0x2f0]:
+    0xe0,                               // some kind of chksum? changes into 0xee, 0xf0, ...
+    0xff, 0x00, 0x0e, 0x01, 0x00, 0x00, 0x00,
+    0xc0, 0x00, 0x00, 0x08,             // the old start address 0xc0 changes into 0xc8 sometimes
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0xf0, 0xfd, 0x00, 0x0e,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x08,             // address in menu
+    0x00, 0x00, 0x00, 0x00,
+  */
+  // write the menu (the formulas will NOT be optimized)
+  get_property_fname (ucon64.configfile, "gbaloader_sc", fname, "sc_menu.bin");
+  if (ucon64_fread (buffer, 0, GBA_MENU_SIZE, fname) <= 0)
+    {
+      fprintf (stderr, "ERROR: Could not load Super Card loader (%s)\n", fname);
+      exit (1);                                 // fatal
+    }
+  fwrite (buffer, 1, GBA_MENU_SIZE, destfile);
+  pos = ftell (destfile);                       // truncate() this later
+
+  // calculate and write new start address
+  printf ("New start address: 0x%08x\n", pos - GBA_MENU_SIZE + 0x8000000);
+  address = ((pos - GBA_MENU_SIZE - 8) >> 2) & 0xffffff;
+  fseek (destfile, 0, SEEK_SET);
+#ifdef  WORDS_BIGENDIAN
+  address = bswap_32 (address);
+#endif
+  fwrite (&address, 1, 3, destfile);
+
+  // calculate and write new address at offset 0x60
+  printf ("New offset 0x60 address: 0x%08x\n", pos - GBA_MENU_SIZE + 846);
+  address = (pos - GBA_MENU_SIZE + 846 - 2) & 0xffffff;
+  if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
+    address |= 0x09000000;                      // 0x09 == "large" jmp?
+  else
+    address |= 0x08000000;
+  fseek (destfile, 0x60, SEEK_SET);
+#ifdef  WORDS_BIGENDIAN
+  address = bswap_32 (address);
+#endif
+  fwrite (&address, 1, 4, destfile);
+
+  // calculate and write new address in menu
+  printf ("New address in menu: 0x%08x\n", pos - GBA_MENU_SIZE + 846 - 53076);
+  address = (pos - GBA_MENU_SIZE + 846 - 53076 - 2) & 0xffffff;
+  if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
+    address |= 0x09000000;                      // 0x09 == "large" jmp?
+  else
+    address |= 0x08000000;
+  fseek (destfile, pos - GBA_MENU_SIZE + 784, SEEK_SET);
+#ifdef  WORDS_BIGENDIAN
+  address = bswap_32 (address);
+#endif
+  fwrite (&address, 1, 4, destfile);
+
+  fclose (destfile);
+
+  puts ("Removing padded bytes");
+  truncate2 (dest_name, pos);
+  puts ("Super Card conversion applied");
+  printf (ucon64_msg[WROTE], dest_name);
+
+  // write SAV template
+  set_suffix (dest_name, ".sav");
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  memset (buffer, 0, GBA_SAV_TEMPLATE_SIZE);
+  buffer[2] = 0xaa;
+  buffer[3] = 0x55;
+  fwrite (buffer, 1, GBA_SAV_TEMPLATE_SIZE, destfile);
+  fclose (destfile);
+  printf (ucon64_msg[WROTE], dest_name);
+
+  // write SCI template
+  set_suffix (dest_name, ".sci");
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  memset (buffer, 0, GBA_SCI_TEMPLATE_SIZE);
+  buffer[2] = 0xaa;
+  buffer[3] = 0x55;
+  fwrite (buffer, 1, GBA_SCI_TEMPLATE_SIZE, destfile);
+  fclose (destfile);
+  printf (ucon64_msg[WROTE], dest_name);
+
+  free (buffer);
   return 0;
 }

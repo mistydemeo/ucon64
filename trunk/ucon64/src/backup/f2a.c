@@ -260,27 +260,22 @@ exec (const char *program, int argc, ...)
   va_start (argptr, argc);
   if (fork () == 0)
     {
-      int n, size;
+      int n;
       char *argv[argc + 1], *arg;
 
-      size = strlen (program) + 1;
-      if ((argv[0] = (char *) malloc (size)) == NULL)
+      if ((argv[0] = strdup (program)) == NULL)
         {
-          fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], strlen (program) + 1);
           exit (1);
         }
-      strcpy (argv[0], program);
-
       for (n = 1; n < argc; n++)
         {
           arg = (char *) va_arg (argptr, char *); // get next argument
-          size = strlen (arg) + 1;
-          if ((argv[n] = (char *) malloc (size)) == NULL)
+          if ((argv[n] = strdup (arg)) == NULL)
             {
-              fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
+              fprintf (stderr, ucon64_msg[BUFFER_ERROR], strlen (arg) + 1);
               exit (1);
             }
-          strcpy (argv[n], arg);
         }
       argv[n] = 0;
 

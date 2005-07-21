@@ -71,7 +71,7 @@
 #define HAVE_VPRINTF 1
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "ucon64-main@lists.sf.net"
+#define PACKAGE_BUGREPORT "ucon64-main@lists.sourceforge.net"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "uCON64"

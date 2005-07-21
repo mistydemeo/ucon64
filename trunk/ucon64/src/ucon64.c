@@ -150,6 +150,10 @@ static const st_getopt2_t lf[] =
     fal_usage,
 #endif
 #endif // USE_PARALLEL || USE_USB
+#if 0
+// this backup unit uses CF cards for transfer
+   sc_usage,
+#endif
     lf,
     n64_usage,
 #ifdef  USE_PARALLEL
@@ -1434,5 +1438,6 @@ ucon64_usage (int argc, char *argv[])
 
   puts ("     Give the force recognition switch a try if something went wrong\n"
         "\n"
-        "Please report anything to ucon64-main@lists.sf.net or http://ucon64.sf.net\n");
+        "Please report problems, fixes or ideas to ucon64-main@lists.sf.net or visit\n"
+        "http://ucon64.sourceforge.net\n");
 }

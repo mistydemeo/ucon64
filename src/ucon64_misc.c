@@ -1755,6 +1755,10 @@ ucon64_configfile_create (void)
         "gbaloader", "loader.bin",
         "path to GBA multi-game loader"
       },
+      {
+        "gbaloader_sc", "sc_menu.bin",
+        "path to GBA multi-game loader (Super Card)"
+      },
       {NULL, NULL, NULL}
     };
 

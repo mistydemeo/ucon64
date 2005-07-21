@@ -141,6 +141,8 @@ strarg_debug (int argc, char **argv)
     fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
 
   fflush (stderr);
+
+  return 0;
 }
 #endif
 

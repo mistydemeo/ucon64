@@ -316,6 +316,8 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
   for (pos = 0; pos < bufferlen; pos++, p++)
     if (flags & DUMPER_PRINT)
       {
+//        fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
+//          (int) (pos + virtual_start));
         fprintf (output, "%c", isprint (*p) ||
 #ifdef USE_ANSI_COLOR
                                *p == 0x1b || // ESC
@@ -1082,15 +1084,6 @@ getenv2 (const char *variable)
 }
 
 
-long int
-strtol2 (const char *str, char **tail)
-{
-  long int i;
-
-  return ((i = strtol (str, tail, 10))) ? i : strtol (str, tail, 16);
-}
-
-
 #if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
         defined __APPLE__                       // Mac OS X actually
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
@@ -1428,46 +1421,36 @@ _popen (const char *path, const char *mode)
   BPTR fh;
   long fhflags;
   char *apipe = malloc (strlen (path) + 7);
-
-  sprintf(apipe,"PIPE:%08lx.%08lx",(ULONG)FindTask(NULL),(ULONG)time(0));
   if (!apipe)
     return NULL;
 
-  //strcpy (apipe, "APIPE:");
-  //strcat (apipe, path);
+  sprintf (apipe, "PIPE:%08lx.%08lx", (ULONG) FindTask (NULL), (ULONG) time (0));
 
   if (*mode == 'w')
     fhflags = MODE_NEWFILE;
   else
     fhflags = MODE_OLDFILE;
 
-  //if (!(fh = Open (apipe, fhflags)))
-    //return NULL;
-  if (fh = Open(apipe, fhflags))
-  {
-    switch(SystemTags(path,
-                    SYS_Input, Input(),
-                    SYS_Output, fh,
-                    SYS_Asynch, TRUE,
-                    SYS_UserShell, TRUE,
-                    NP_CloseInput, FALSE,
-                    TAG_END))
+  if (fh = Open (apipe, fhflags))
     {
-      case 0:
-        return(fopen(apipe, mode));
-      break;
-      case -1:
-        Close(fh);
-        return 0;
-      break;
-      default:
-        return 0;
-      break;
+      switch (SystemTags(path, SYS_Input, Input(), SYS_Output, fh, SYS_Asynch,
+                TRUE, SYS_UserShell, TRUE, NP_CloseInput, FALSE, TAG_END))
+        {
+        case 0:
+          return fopen (apipe, mode);
+          break;
+        case -1:
+          Close (fh);
+          return 0;
+          break;
+        default:
+          return 0;
+          break;
+        }
     }
-  }
   return 0;
-  //return fdopen (fd, mode);  int fd;
 }
+
 
 int
 _pclose (FILE *stream)

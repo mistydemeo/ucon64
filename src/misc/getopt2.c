@@ -1,7 +1,8 @@
 /*
 getopt2.c - getopt1() extension
 
-Copyright (c) 2004 NoisyB
+Copyright (c) 2004 - 2005 NoisyB
+Copyright (c) 2005        dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -23,8 +24,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <sys/stat.h>
+#ifdef  HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef  _WIN32
+#include <windows.h>
+#endif
+#include "file.h"
 #include "getopt.h"                             // struct option
 #include "getopt2.h"
+#include "string.h"
 
 
 #ifdef  MAXBUFSIZE
@@ -241,7 +256,7 @@ getopt2_usage (const st_getopt2_t *usage)
             fputc ('\n', stdout);
           }
       }
-#endif  // DEBUG
+#endif // DEBUG
 }
 
 
@@ -356,9 +371,111 @@ getopt2_get_index_by_val (const st_getopt2_t *option, int val)
 }
 
 
+static int
+getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
+                        int *calls, int flags)
+{
+  char path[FILENAME_MAX], *p;
+  struct stat fstate;
+
+  if (strlen (fname) >= FILENAME_MAX - 2)
+    return 0;
+
+  p = (char *) basename2 (fname);
+  if (!strcmp (p, ".") || !strcmp (p, ".."))
+    return 0;
+
+  realpath2 (fname, path); 
+
+  if (stat (path, &fstate) != 0)
+    return 0;
+
+  if (S_ISREG (fstate.st_mode) ||
+       (S_ISDIR (fstate.st_mode) &&
+        !(flags & GETOPT2_FILE_FILES_ONLY) &&
+        !(flags & GETOPT2_FILE_RECURSIVE)))
+    {
+#ifdef  DEBUG
+      printf ("callback_func() == %s\n", path);
+      fflush (stdout);
+#endif
+
+      if (!callback_func (path)) 
+        (*calls)++;
+      return 0;
+    }
+
+  if (S_ISDIR (fstate.st_mode) && (flags & GETOPT2_FILE_RECURSIVE))
+    {
+#ifndef _WIN32
+      struct dirent *ep;
+      DIR *dp;
+#else
+      char search_pattern[FILENAME_MAX];
+      WIN32_FIND_DATA find_data;
+      HANDLE dp;
+#endif
+      char buf[FILENAME_MAX], c;
+
+#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
+      c = toupper (path[0]);
+      if (path[strlen (path) - 1] == FILE_SEPARATOR ||
+          (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == 0))
+#else
+      if (path[strlen (path) - 1] == FILE_SEPARATOR)
+#endif
+        p = "";
+      else
+        p = FILE_SEPARATOR_S;
+
+#ifndef _WIN32
+      if ((dp = opendir (path)))
+        {
+          while ((ep = readdir (dp)))
+            if (strcmp (ep->d_name, ".") != 0 &&
+                strcmp (ep->d_name, "..") != 0)
+              {
+                sprintf (buf, "%s%s%s", path, p, ep->d_name);
+                getopt2_file_recursion (buf, callback_func, calls, flags);
+              }
+          closedir (dp);
+        }
+#else
+      sprintf (search_pattern, "%s%s*", path, p);
+      if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
+        {
+          do
+            if (strcmp (find_data.cFileName, ".") != 0 &&
+                strcmp (find_data.cFileName, "..") != 0)
+              {
+                sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
+                getopt2_file_recursion (buf, callback_func, calls, flags);
+              }
+          while (FindNextFile (dp, &find_data));
+          FindClose (dp);
+        }
+#endif
+    }
+
+  return 0;
+}
+
+
+int
+getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int flags)
+{
+  (void) flags;
+  int x = optind, calls = 0;
+
+  for (; x < argc; x++)
+    getopt2_file_recursion (argv[x], callback_func, &calls, flags);
+
+  return calls;
+}
+
+
 #if TEST
 // compile with -DTEST to build an executable
-// WTF? - dbjh
 
 enum
 {

@@ -3147,53 +3147,41 @@ readlink (const char *path, char *buf, int bufsize)
 
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
-FILE *
-_popen (const char *path, const char *mode)
 {
   int fd;
   BPTR fh;
   long fhflags;
   char *apipe = malloc (strlen (path) + 7);
-
-  sprintf(apipe,"PIPE:%08lx.%08lx",(ULONG)FindTask(NULL),(ULONG)time(0));
   if (!apipe)
     return NULL;
 
-  //strcpy (apipe, "APIPE:");
-  //strcat (apipe, path);
+  sprintf (apipe, "PIPE:%08lx.%08lx", (ULONG) FindTask (NULL), (ULONG) time (0));
 
   if (*mode == 'w')
     fhflags = MODE_NEWFILE;
   else
     fhflags = MODE_OLDFILE;
 
-  //if (!(fh = Open (apipe, fhflags)))
-    //return NULL;
-  if (fh = Open(apipe, fhflags))
-  {
-    switch(SystemTags(path,
-                    SYS_Input, Input(),
-                    SYS_Output, fh,
-                    SYS_Asynch, TRUE,
-                    SYS_UserShell, TRUE,
-                    NP_CloseInput, FALSE,
-                    TAG_END))
+  if (fh = Open (apipe, fhflags))
     {
-      case 0:
-        return(fopen(apipe, mode));
-      break;
-      case -1:
-        Close(fh);
-        return 0;
-      break;
-      default:
-        return 0;
-      break;
+      switch (SystemTags(path, SYS_Input, Input(), SYS_Output, fh, SYS_Asynch,
+                TRUE, SYS_UserShell, TRUE, NP_CloseInput, FALSE, TAG_END))
+        {
+        case 0:
+          return fopen (apipe, mode);
+          break;
+        case -1:
+          Close (fh);
+          return 0;
+          break;
+        default:
+          return 0;
+          break;
+        }
     }
-  }
   return 0;
-  //return fdopen (fd, mode);  int fd;
 }
+
 
 int
 _pclose (FILE *stream)

@@ -3,7 +3,7 @@ n64.c - Nintendo 64 support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2002 - 2004 dbjh
-Copyright (c) 2005 Parasyte
+Copyright (c) 2005        Parasyte
 
 05-06-2005 / Parasyte:
   Added support for remaining CIC algorithms in n64_chksum()
@@ -258,7 +258,7 @@ n64_f (st_rominfo_t *rominfo)
 {
   // TODO: PAL/NTSC fix
   (void) rominfo;                               // warning remover
-  fputs ("ERROR: The function for fixing N64 region protections is not yet implemented\n", stderr);
+  fputs ("ERROR: The function for cracking N64 region protections is not yet implemented\n", stderr);
   return 0;
 }
 
@@ -581,7 +581,7 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
   unsigned int i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
                rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START,
-               n = 0, bootcode; // using ucon64.file_size is ok for n64_init() & n64_sram()
+               n, bootcode; // using ucon64.file_size is ok for n64_init() & n64_sram()
   FILE *file;
 #ifdef  CALC_CRC32
   unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32
@@ -642,17 +642,18 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   if (rominfo->interleaved)
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
 #endif
-  if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0x0b050ee0)
+  n = crc32 (0, bootcode_buf, N64_BC_SIZE);
+  if (n == 0x0b050ee0)
     {
       bootcode = 6103;
       i = CHECKSUM_CIC6103;
     }
-  else if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0x98bc2c86)
+  else if (n == 0x98bc2c86)
     {
       bootcode = 6105;
       i = CHECKSUM_CIC6105;
     }
-  else if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0xacc8580a)
+  else if (n == 0xacc8580a)
     {
       bootcode = 6106;
       i = CHECKSUM_CIC6106;
@@ -734,8 +735,8 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
     }
   else if (bootcode == 6106)
     {
-      n64crc.crc1 = (t6 * t4) + t3;
-      n64crc.crc2 = (t5 * t2) + t1;
+      n64crc.crc1 = t6 * t4 + t3;
+      n64crc.crc2 = t5 * t2 + t1;
     }
   else
     {

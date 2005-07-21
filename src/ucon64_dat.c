@@ -2,7 +2,7 @@
 ucon64_dat.c - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
 Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1087,6 +1087,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             break;
           case UCON64_SMS:
             console_name = "SMS/Game Gear";
+            plugin = "sms.dll";         // change this to gg.dll (in DAT file) for GG ROMs
             break;
           case UCON64_SNES:
             console_name = "SNES";
@@ -1132,7 +1133,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
       // RomCenter uses files in DOS text format, so we generate a file in that format
       fprintf (ucon64_datfile, "[CREDITS]\r\n"
                                "author=uCON64\r\n"
-                               "email=ucon64-main@lists.sf.net\r\n"
+                               "email=ucon64-main@lists.sourceforge.net\r\n"
                                "homepage=uCON64 homepage\r\n"
                                "url=ucon64.sf.net\r\n"
                                "version=%s-%s\r\n"

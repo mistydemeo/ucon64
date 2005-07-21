@@ -964,7 +964,7 @@ genesis_f (st_rominfo_t *rominfo)
     In the Philipines the television standard is NTSC, but do games made
     for the Philipines exist?
     Just like with SNES we don't guarantee anything for files that needn't be
-    fixed/patched.
+    fixed/cracked/patched.
   */
   if (genesis_tv_standard == 0)               // NTSC (Japan, U.S.A. or Brazil ('4'))
     return genesis_fix_ntsc_protection (rominfo);

@@ -2,7 +2,7 @@
 pce.c - PC-Engine support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2003 - 2004 dbjh
+Copyright (c) 2003 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -46,17 +46,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define PCENGINE_HEADER_START 0x448
-#define PCENGINE_HEADER_LEN (sizeof (st_pce_header_t))
+#define PCENGINE_HEADER_LEN 0x30
 
-
-// static unsigned int pcengine_chksum (st_rominfo_t *rominfo);
 
 const st_getopt2_t pcengine_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\n"
-      "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)"/*"1987/19XX/19XX NEC"*/,
+      "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)"/*"1987/1990 NEC"*/,
       NULL
     },
     {
@@ -639,14 +637,6 @@ static const st_pce_data_t pce_data[] =
   {0xff898f87, 52, "NAPH-1010", 310890, NULL},
   {0xffd92458, 22, "T4955754200953", 0, "1p"}
 };
-
-
-typedef struct st_pce_header
-{
-  char pad[48];
-} st_pce_header_t;
-
-st_pce_header_t pce_header;
 
 
 static int

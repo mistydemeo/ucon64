@@ -2,7 +2,7 @@
 snes.c - Super NES support for uCON64
 
 Copyright (c) 1999 - 2002 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2001 - 2005 dbjh
 Copyright (c) 2002 - 2003 John Weidman
 Copyright (c) 2004        JohnDie
 
@@ -123,14 +123,6 @@ const st_getopt2_t snes_usage[] =
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
 #endif
-#if 0
-// the next switch remains undocumented until we know of a good checksum algorithm
-    {
-      "id", 0, 0, UCON64_ID,
-      NULL, "force -gd3 to produce a unique file name",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
-    },
-#endif
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved format (GD3/UFO)",
@@ -176,6 +168,20 @@ const st_getopt2_t snes_usage[] =
       NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)",
       &ucon64_wf[WF_OBJ_SNES_DEFAULT_NO_SPLIT]
     },
+#if 0
+// the next switch remains undocumented until we know of a good checksum algorithm
+    {
+      "id", 0, 0, UCON64_ID,
+      NULL, "force -gd3 to produce a unique file name",
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+    },
+#endif
+    {
+      "idnum", 1, 0, UCON64_IDNUM,
+      "NUM", "make -gd3 produce file names where first file has numerical\n"
+      "identifier NUM, next NUM + 1, etc. ",
+      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+    },
     {
       "gd3s", 0, 0, UCON64_GD3S,
       NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*",
@@ -212,22 +218,6 @@ const st_getopt2_t snes_usage[] =
       &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
     },
     {
-      "stp", 0, 0, UCON64_STP,
-      NULL, "convert SRAM from backup unit for use with an emulator\n"
-      OPTION_LONG_S "stp just strips the first 512 bytes",
-      NULL
-    },
-    {
-      "dbuh", 0, 0, UCON64_DBUH,
-      NULL, "display (relevant part of) backup unit header",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT]
-    },
-    {
-      "dint", 0, 0, UCON64_DINT,
-      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
-    },
-    {
       "ctrl", 1, 0, UCON64_CTRL,
       "TYPE", "specify type of controller in port 1 for emu when converting\n"
       "TYPE=0 gamepad\n"
@@ -248,6 +238,22 @@ const st_getopt2_t snes_usage[] =
       "TYPE=6 multitap\n"
       "TYPE=7 mouse / super scope / gamepad",
       &ucon64_wf[WF_OBJ_SNES_SWITCH]
+    },
+    {
+      "stp", 0, 0, UCON64_STP,
+      NULL, "convert SRAM from backup unit for use with an emulator\n"
+      OPTION_LONG_S "stp just strips the first 512 bytes",
+      NULL
+    },
+    {
+      "dbuh", 0, 0, UCON64_DBUH,
+      NULL, "display (relevant part of) backup unit header",
+      &ucon64_wf[WF_OBJ_SNES_DEFAULT]
+    },
+    {
+      "dint", 0, 0, UCON64_DINT,
+      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
     },
     {
       "col", 1, 0, UCON64_COL,
@@ -894,53 +900,75 @@ static void
 make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
               unsigned char *buffer, int newsize)
 {
-  char dest_name[FILENAME_MAX], *p, id_str[3];
+  char dest_name[FILENAME_MAX], *p, id_str[4];
   int n, size = ucon64.file_size - rominfo->buheader_len;
 
   strcpy (dest_name, filename);
 
   if (UCON64_ISSET (ucon64.id))
     {
-      /*
-        We include the underscore so that we can encode a base 37 number (10
-        digits + 26 characters in alphabet + underscore = 37). The ID is 3
-        characters long which makes it possible to have 37^3 = 50653 different
-        IDs. If we wouldn't include the underscore we would have 46656
-        different IDs.
-        We can't use the SNES checksum because several ROM dumps have the same
-        checksum (not only PD files!). Nor can we use the internal SNES
-        checksum, because several beta ROM dumps have an internal checksum of
-        0 or 0xffff.
-      */
-      unsigned int local_buffer = !buffer, d2, d1, d0, id = 0;
-
-      if (local_buffer)
+      if (ucon64.id >= 0)
+        // code for -idnum=NUM
         {
-          if (!(buffer = (unsigned char *) malloc (size)))
+          static int current_id = -1;
+
+          if (current_id == -1)
+            current_id = ucon64.id;
+          else if (current_id > 999)
             {
-              fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+              fprintf (stderr, "ERROR: Not enough IDs available for all files\n");
               exit (1);
             }
-          ucon64_fread (buffer, ucon64.rominfo->buheader_len, size, dest_name);
-          if (rominfo->interleaved)
-            snes_deinterleave (rominfo, &buffer, size);
+          sprintf (id_str, "%03d", current_id);
+          current_id++;
+
+          p = id_str;
         }
-
-      for (n = 0; n < size; n++)
-        id += buffer[n] ^ (n & 0xff);
-      id %= 37 * 37 * 37;               // ensure value can be encoded with 3 base 37 digits
-
-      if (local_buffer)
-        free (buffer);
-
-      d2 = id / (37 * 37);
-      d1 = (id % (37 * 37)) / 37;
-      d0 = id % 37;
-      id_str[0] = d2 == 36 ? '_' : (d2 <= 9 ? d2 + '0' : d2 + 'A' - 10);
-      id_str[1] = d1 == 36 ? '_' : (d1 <= 9 ? d1 + '0' : d1 + 'A' - 10);
-      id_str[2] = d0 == 36 ? '_' : (d0 <= 9 ? d0 + '0' : d0 + 'A' - 10);
-
-      p = id_str;
+      else
+        // code for -id
+        {
+          /*
+            We include the underscore so that we can encode a base 37 number
+            (10 digits + 26 characters in alphabet + underscore = 37). The ID
+            is 3 characters long which makes it possible to have 37^3 = 50653
+            different IDs. If we wouldn't include the underscore we would have
+            46656 different IDs.
+            We can't use the SNES checksum because several ROM dumps have the
+            same checksum (not only PD files!). Nor can we use the internal
+            SNES checksum, because several beta ROM dumps have an internal
+            checksum of 0 or 0xffff.
+          */
+          unsigned int local_buffer = !buffer, d2, d1, d0, id = 0;
+    
+          if (local_buffer)
+            {
+              if (!(buffer = (unsigned char *) malloc (size)))
+                {
+                  fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+                  exit (1);
+                }
+              ucon64_fread (buffer, ucon64.rominfo->buheader_len, size, dest_name);
+              if (rominfo->interleaved)
+                snes_deinterleave (rominfo, &buffer, size);
+            }
+    
+          for (n = 0; n < size; n++)
+            id += buffer[n] ^ (n & 0xff);
+          id %= 37 * 37 * 37;                   // ensure value can be encoded with 3 base 37 digits
+    
+          if (local_buffer)
+            free (buffer);
+    
+          d2 = id / (37 * 37);
+          d1 = (id % (37 * 37)) / 37;
+          d0 = id % 37;
+          id_str[0] = d2 == 36 ? '_' : (d2 <= 9 ? d2 + '0' : d2 + 'A' - 10);
+          id_str[1] = d1 == 36 ? '_' : (d1 <= 9 ? d1 + '0' : d1 + 'A' - 10);
+          id_str[2] = d0 == 36 ? '_' : (d0 <= 9 ? d0 + '0' : d0 + 'A' - 10);
+          id_str[3] = 0;                        // terminate string
+    
+          p = id_str;
+        }
     }
   else
     p = (char *) basename2 (dest_name);

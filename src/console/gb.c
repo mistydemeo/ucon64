@@ -55,7 +55,7 @@ const st_getopt2_t gameboy_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)"
+      NULL, "Game Boy/(Super GB)/GB Pocket/Color GB"
       /*"1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"*/,
       NULL
     },

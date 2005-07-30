@@ -55,7 +55,7 @@ const st_getopt2_t sms_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Sega Master System(II/III)/Game Gear (Handheld)"/*"1986/19XX SEGA http://www.sega.com"*/,
+      NULL, "Sega Master System(II/III)/Game Gear (Handheld)"/*"1986/1990 SEGA http://www.sega.com"*/,
       NULL
     },
     {
@@ -65,12 +65,12 @@ const st_getopt2_t sms_usage[] =
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved format (SMD)",
+      NULL, "force ROM is in interleaved format",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved format (RAW)",
+      NULL, "force ROM is not in interleaved format",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
@@ -169,8 +169,8 @@ sms_smd (st_rominfo_t *rominfo)
   int size = ucon64.file_size - rominfo->buheader_len;
 
   memset (&header, 0, SMD_HEADER_LEN);
-  header.size = size / 8192 >> 8;
-  header.id0 = 3; //size / 8192;
+  header.size = size / 16384;
+  header.id0 = 1;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 6;
@@ -186,8 +186,10 @@ sms_smd (st_rominfo_t *rominfo)
       exit (1);
     }
   ucon64_fread (buffer, rominfo->buheader_len, size, src_name);
-  if (!rominfo->interleaved)
-    smd_interleave (buffer, size);
+  // uCON64 1.9.8-2, 1.9.8-3, 1.9.8-4 and 2.0.0 interleave SMS ROMs, but SMS
+  //  ROMs should never be interleaved
+  if (rominfo->interleaved)
+    smd_deinterleave (buffer, size);
 
   ucon64_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
   ucon64_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
@@ -675,7 +677,7 @@ sms_init (st_rominfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   rominfo->console_usage = sms_usage[0].help;
-  rominfo->copier_usage = rominfo->interleaved ? smd_usage[0].help : mgd_usage[0].help;
+  rominfo->copier_usage = !rominfo->buheader_len ? mgd_usage[0].help : smd_usage[0].help;
 
   return result;
 }

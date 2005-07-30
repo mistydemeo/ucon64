@@ -1,8 +1,8 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2005 NoisyB
+Copyright (c) 2001 - 2005 dbjh
 Copyright (c) 2001        Caz
 Copyright (c) 2002 - 2003 Jan-Erik Karlsson (Amiga)
 
@@ -330,34 +330,6 @@ const st_getopt2_t unknown_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   },
-  coleco_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "ColecoVision"/*"1982"*/,
-      NULL
-    },
-    {
-      "coleco", 0, 0, UCON64_COLECO,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_COLECO_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  vboy_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Nintendo Virtual Boy"/*"19XX Nintendo http://www.nintendo.com"*/,
-      NULL
-    },
-    {
-      "vboy", 0, 0, UCON64_VBOY,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_VBOY_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
   vectrex_usage[] =
   {
     {
@@ -390,7 +362,7 @@ const st_getopt2_t unknown_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "GP32 Game System"/*"2002 Gamepark http://www.gamepark.co.kr"*/,
+      NULL, "GP32 Game System"/*"2001 Gamepark http://www.gamepark.co.kr"*/,
       NULL
     },
     {
@@ -524,7 +496,7 @@ const st_getopt2_t unknown_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game.com"/*"? Tiger"*/,
+      NULL, "Game.com"/*"1997 Tiger Electronics"*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -540,12 +512,15 @@ const st_getopt2_t unknown_usage[] =
   };
 
 #if 0
+Microvision (Handheld)/1979 MB
+Supervision/1991 Hartung
+Pokemon Mini/200X Nintendo http://www.nintendo.com
+N-Gage/2003 Nokia http://www.n-gage.com
+PSP (Playstation Portable)/2005 Sony http://www.playstation.com
 Adv. Vision
 Arcadia
 Astrocade
 Indrema
-Microvision
-N-Gage 2003 Nokia http://www.n-gage.com
 Nuon
 RCA Studio 2
 RDI Halcyon
@@ -760,6 +735,7 @@ const st_getopt2_t ucon64_options_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
+// hidden options
 const st_getopt2_t ucon64_options_without_usage[] =
   {
     {
@@ -846,11 +822,6 @@ const st_getopt2_t ucon64_options_without_usage[] =
       &ucon64_wf[WF_OBJ_SAT_SWITCH]
     },
     {
-      "vboy", 0, 0, UCON64_VBOY,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_VBOY_SWITCH]
-    },
-    {
       "vec", 0, 0, UCON64_VEC,
       NULL, NULL,
       &ucon64_wf[WF_OBJ_VEC_SWITCH]
@@ -859,11 +830,6 @@ const st_getopt2_t ucon64_options_without_usage[] =
       "xbox", 0, 0, UCON64_XBOX,
       NULL, NULL,
       &ucon64_wf[WF_OBJ_XBOX_SWITCH]
-    },
-    {
-      "coleco", 0, 0, UCON64_COLECO,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_COLECO_SWITCH]
     },
     {
       "gc", 0, 0, UCON64_GC,
@@ -1648,6 +1614,8 @@ ucon64_configfile_update (void)
 
   sprintf (buf, "%d", UCON64_CONFIG_VERSION);
   set_property (ucon64.configfile, "version", buf, "uCON64 configuration");
+  set_property (ucon64.configfile, "gbaloader_sc", "sc_menu.bin",
+                "path to GBA multi-game loader (Super Card)");
 
   return 0;
 }

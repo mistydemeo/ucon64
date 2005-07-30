@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef CONSOLE_H
 #define CONSOLE_H
+#include "coleco.h"
 #include "dc.h"
 #include "gb.h"
 #include "gba.h"
@@ -35,4 +36,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "sms.h"
 #include "snes.h"
 #include "swan.h"
+#include "vboy.h"
 #endif // CONSOLE_H

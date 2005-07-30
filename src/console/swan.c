@@ -41,7 +41,7 @@ const st_getopt2_t swan_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "WonderSwan/WonderSwan Color/SwanCrystal"/*"19XX/19XX/2002 Bandai"*/,
+      NULL, "WonderSwan/WonderSwan Color/SwanCrystal"/*"1999/2000/2002 Bandai"*/,
       NULL
     },
     {

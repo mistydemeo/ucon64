@@ -1,7 +1,7 @@
 /*
 ffe.h - General Front Far East copier routines for uCON64
 
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     0      - Low byte of 8 kB page count
              SMD: 16 kB page count
     1      - High byte of 8 kB page count
-             SMD: File ID code 0 (3, not: high byte of 16 kB page count)
+             SMD: File ID code 0 (3 for Genesis/Mega Drive games, 1 for
+                  SMS/Game Gear games, not: high byte of 16 kB page count)
              Magic Griffin: Emulation mode select, first byte?
     2      - Emulation mode select (SWC/SMC/Magic Griffin, second byte?)
              Bit 7 6 5 4 3 2 1 0

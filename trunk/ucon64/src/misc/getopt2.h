@@ -91,7 +91,6 @@ extern const st_getopt2_t *getopt2_get_index_by_val (const st_getopt2_t *option,
 #define GETOPT2_FILE_RECURSIVE  (1 << 1)
 extern int getopt2_file (int argc, char **argv, int (* callback_func) (const char *), int flags);
 
-
 #ifdef  __cplusplus
 }
 #endif

@@ -151,8 +151,8 @@ static const st_getopt2_t lf[] =
 #endif
 #endif // USE_PARALLEL || USE_USB
 #if 0
-// this backup unit uses CF cards for transfer
-   sc_usage,
+    // this backup unit uses CF cards for transfer
+    sc_usage,
 #endif
     lf,
     n64_usage,
@@ -223,6 +223,10 @@ static const st_getopt2_t lf[] =
 #endif
     lf,
     atari_usage,
+    lf,
+    coleco_usage,
+    lf,
+    vboy_usage,
     NULL
   };
 
@@ -911,7 +915,7 @@ ucon64_rom_handling (void)
   if (!(ucon64.flags & WF_INIT))
     return 0;
 
-  // "walk through" <console>_init()
+  // Try to find the correct console by analysing the ROM
   if (ucon64.flags & WF_PROBE)
     {
       if (ucon64.rominfo)
@@ -1042,7 +1046,7 @@ ucon64_probe (st_rominfo_t * rominfo)
     } st_probe_t;
 
 // auto recognition
-#define AUTO (1)
+#define AUTO 1
 
   int x = 0;
   st_probe_t probe[] =
@@ -1060,12 +1064,14 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
       {UCON64_SMS, sms_init, AUTO},
+      {UCON64_COLECO, coleco_init, AUTO},
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
       {UCON64_NGP, ngp_init, AUTO},
       {UCON64_SWAN, swan_init, AUTO},
       {UCON64_JAG, jaguar_init, AUTO},
-      {UCON64_PCE, pcengine_init, AUTO},
+      {UCON64_VBOY, vboy_init, 0},
+      {UCON64_PCE, pcengine_init, 0}, // AUTO still works with non-PCE files
       {UCON64_NG, neogeo_init, 0},
       {UCON64_SWAN, swan_init, 0},
       {UCON64_DC, dc_init, 0},
@@ -1073,12 +1079,10 @@ ucon64_probe (st_rominfo_t * rominfo)
 #if 0
       {UCON64_GC, NULL, 0},
       {UCON64_GP32, NULL, 0},
-      {UCON64_COLECO, NULL, 0},
       {UCON64_INTELLI, NULL, 0},
       {UCON64_S16, NULL, 0},
       {UCON64_ATA, NULL, 0},
       {UCON64_VEC, NULL, 0},
-      {UCON64_VBOY, NULL, 0},
 #endif
       {UCON64_UNKNOWN, unknown_init, 0},
       {0, NULL, 0}

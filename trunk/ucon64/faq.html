@@ -1500,8 +1500,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
    dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
    The meaning of "interleaved" depends on the console type. Interleaved
-   formats exist for NES, Sega Master System, Game Gear, PC-Engine, Genesis,
-   SNES and Nintendo 64.<br>
+   formats exist for NES, PC-Engine, Genesis, SNES and Nintendo 64.<br>
    Deinterleaving is the opposite of interleaving a ROM dump. It is the process
    of converting the data to "binary" format. Binary in the sense as how the
    data (in a cartridge) is presented to the CPU.<br>
@@ -1515,18 +1514,6 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Cannot be interleaved with uCON64.<br>
    Can be deinterleaved with uCON64 using the option -dint.<br>
 <br>
-   Sega Master System, Game Gear and Genesis<br>
-   Interleaved Sega Master System, Game Gear and Genesis dumps are produced by
-   the Super Magic Drive and the Multi Game Doctor 2.<br>
-   For the SMD: for each block of 16384 bytes of the ROM all bytes at even
-   offsets are stored in the upper half of the dumped block. The bytes at odd
-   offsets are stored in the lower half. So, each dumped block first contains
-   8192 "odd bytes" then 8192 "even bytes".<br>
-   For the MGD2: all odd bytes of the file are stored in the first half of the
-   file, all even bytes in the second half.<br>
-   Can be interleaved with uCON64 using the option -smd or -mgd.<br>
-   Can be deinterleaved with uCON64 using the option -bin.<br>
-<br>
    PC-Engine<br>
    Interleaved PC-Engine or TurboGrafx-16 dumps are not produced by a specific
    copier. It depends on the HuCARD (PC-Engine/TurboGrafx-16 game cartridge).
@@ -1538,6 +1525,18 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    suitable for a TurboGrafx-16. You can use the option -swap afterwards if you
    want to play the game on a PC-Engine.<br>
    Can be deinterleaved with uCON64 using the option -msg.<br>
+<br>
+   Genesis<br>
+   Interleaved Genesis dumps are produced by the Super Magic Drive and the
+   Multi Game Doctor 2.<br>
+   For the SMD: for each block of 16384 bytes of the ROM all bytes at even
+   offsets are stored in the upper half of the dumped block. The bytes at odd
+   offsets are stored in the lower half. So, each dumped block first contains
+   8192 "odd bytes" then 8192 "even bytes".<br>
+   For the MGD2: all odd bytes of the file are stored in the first half of the
+   file, all even bytes in the second half.<br>
+   Can be interleaved with uCON64 using the option -smd or -mgd.<br>
+   Can be deinterleaved with uCON64 using the option -bin.<br>
 <br>
    SNES<br>
    Interleaved SNES dumps are produced by the Game Doctor and the Super UFO

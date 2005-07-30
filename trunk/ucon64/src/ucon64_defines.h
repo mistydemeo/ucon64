@@ -1,8 +1,8 @@
 /*
 ucon64_defines.h - definitions for uCON64
 
-Copyright (c) 2002 - 2003 NoisyB
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 NoisyB
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -45,12 +45,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_VERSION_S "2.0.1"
 
 /* program version counter */
-//#define UCON64_VERSION (200)
+//#define UCON64_VERSION 201
 
 /* version of config file layout */
-#define UCON64_CONFIG_VERSION (207)
+#define UCON64_CONFIG_VERSION 208
 
-#define MBIT (131072)
+#define MBIT 131072
 #define TOMBIT(x) ((int)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 
@@ -63,8 +63,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // maximum number of arguments uCON64 takes from the cmdline
 #define UCON64_MAX_ARGS 512
 
-#define UCON64_OPTION (1000)
-#define UCON64_CONSOLE (0)
+#define UCON64_OPTION 1000
+#define UCON64_CONSOLE 0
 
 // options (consoles)
 // these defines shall not exceed 0xffff since they share the same integer
@@ -102,7 +102,7 @@ enum
   UCON64_SWAN,
   UCON64_VBOY,
   UCON64_VEC,
-  UCON64_XBOX,
+  UCON64_XBOX
 };
 
 // options
@@ -164,6 +164,7 @@ enum
   UCON64_HI,
   UCON64_I,
   UCON64_ID,
+  UCON64_IDNUM,
   UCON64_IDPPF,
   UCON64_INES,
   UCON64_INESHD,

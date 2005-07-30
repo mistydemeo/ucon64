@@ -178,7 +178,7 @@ typedef struct
 #endif
   void *dat;                                    // info from DATabase (st_ucon64_dat_t *)
   st_rominfo_t *rominfo;                        // info from <console>_init() (st_rominfo_t *)
-  const st_getopt2_t *options;                        // all options with help (st_getopt2_t)
+  const st_getopt2_t *options;                  // all options with help (st_getopt2_t)
 } st_ucon64_t;
 
 typedef struct

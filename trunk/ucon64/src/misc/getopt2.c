@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
@@ -35,6 +36,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #ifdef  _WIN32
 #include <windows.h>
+#ifndef __MINGW32__
+#include <sys/stat.h>
+#define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
+#define S_ISREG(mode) ((mode) & _S_IFREG ? 1 : 0)
+#endif
 #endif
 #include "file.h"
 #include "getopt.h"                             // struct option
@@ -464,8 +470,8 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
 int
 getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int flags)
 {
-  (void) flags;
   int x = optind, calls = 0;
+  (void) flags;
 
   for (; x < argc; x++)
     getopt2_file_recursion (argv[x], callback_func, &calls, flags);

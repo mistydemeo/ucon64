@@ -59,7 +59,7 @@ const st_getopt2_t gba_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game Boy Advance"/*"2001 Nintendo http://www.nintendo.com"*/,
+      NULL, "Game Boy Advance (SP)"/*"2001 Nintendo http://www.nintendo.com"*/,
       NULL
     },
     {
@@ -123,7 +123,7 @@ const st_getopt2_t gba_usage[] =
 
 
 /*
-Offset 00h-03h - Start  Address - A 32 bit ARM B command with jump destination
+Offset 00h-03h - Start  address - A 32 bit ARM B command with jump destination
                  to  the  start  address of the program, cannot be manipulated
                  with this tool, there's no reason.
 
@@ -1052,10 +1052,11 @@ gba_sc (void)
   000000fa  09 02 14 31  c0 46 27 49  28 48 08 60  40 21 09 03
 */
 {
-  const unsigned char sc_orig[14][6] =
+  const unsigned char sc_orig[15][6] =
     {
       {0x04, 0x02, 0x00, 0x04, 0x01, 0x20},
       {0x04, 0x02, 0x00, 0x04, 0x14, 0x40},
+      {0x04, 0x02, 0x00, 0x04, 0x14, 0xb2},
       {0x04, 0x02, 0x00, 0x04, 0x38, 0x68},
       {0x04, 0x02, 0x00, 0x04, 0xa0, 0x0f},
       {0x04, 0x02, 0x00, 0x04, 0xb4, 0x05},
@@ -1262,7 +1263,7 @@ gba_sc (void)
 
   puts ("Removing padded bytes");
   truncate2 (dest_name, pos);
-  puts ("Super Card conversion applied");
+  puts ("Super Card conversion done");
   printf (ucon64_msg[WROTE], dest_name);
 
   // write SAV template

@@ -584,7 +584,18 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_ID:
-      ucon64.id = 1;
+      ucon64.id = -2;                           // just a value other than
+      break;                                    //  UCON64_UNKNOWN and smaller than 0
+
+    case UCON64_IDNUM:
+      ucon64.id = strtol (optarg, NULL, 10);
+      if (ucon64.id < 0)
+        ucon64.id = 0;
+      else if (ucon64.id > 999)
+        {
+          fprintf (stderr, "ERROR: NUM must be smaller than 999\n");
+          exit (1);
+        }
       break;
 
     case UCON64_REGION:

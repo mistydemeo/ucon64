@@ -42,7 +42,7 @@ const st_getopt2_t psx_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Playstation (One)/Playstation 2 (CD only)"/*"1994/(2000) Sony http://www.playstation.com"*/,
+      NULL, "Playstation (One)"/*"1994/(2000) Sony http://www.playstation.com"*/,
       NULL
     },
     {

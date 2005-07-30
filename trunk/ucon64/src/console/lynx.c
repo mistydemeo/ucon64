@@ -2,7 +2,7 @@
 lynx.c - Atari Lynx support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2003 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -113,7 +113,7 @@ lynx_lyx (st_rominfo_t *rominfo)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: This is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
     }
 
@@ -137,7 +137,7 @@ lynx_lnx (st_rominfo_t *rominfo)
 
   if (rominfo->buheader_len != 0)
     {
-      fprintf (stderr, "ERROR: This seems to already be an LNX file\n\n");
+      fprintf (stderr, "ERROR: This seems to already be an LNX file\n");
       return -1;
     }
 
@@ -183,7 +183,7 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: This is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
     }
 
@@ -230,7 +230,7 @@ lynx_n (st_rominfo_t *rominfo, const char *name)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: This is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
     }
 
@@ -258,7 +258,7 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: This is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
     }
 
@@ -271,7 +271,7 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
 #ifdef  WORDS_BIGENDIAN
     *bankvar = bswap_16 (atol (value) * 4);
 #else
-    *bankvar = atol (value) * 4;
+    *bankvar = (short int) atol (value) * 4;
 #endif
 
   strcpy (dest_name, ucon64.rom);

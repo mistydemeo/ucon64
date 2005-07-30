@@ -34,10 +34,11 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         misc/misc.obj misc/parallel.obj misc/property.obj misc/string.obj \
         misc/dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/ppf.obj \
-        console/dc.obj console/gb.obj console/gba.obj console/genesis.obj \
-        console/jaguar.obj console/lynx.obj console/n64.obj \
-        console/neogeo.obj console/nes.obj console/ngp.obj console/pce.obj \
-        console/psx.obj console/sms.obj console/snes.obj console/swan.obj \
+        console/coleco.obj console/dc.obj console/gb.obj console/gba.obj \
+        console/genesis.obj console/jaguar.obj console/lynx.obj \
+        console/n64.obj console/neogeo.obj console/nes.obj console/ngp.obj \
+        console/pce.obj console/psx.obj console/sms.obj console/snes.obj \
+        console/swan.obj console/vboy.obj \
         backup/cd64.obj backup/cmc.obj backup/dex.obj backup/doctor64.obj \
         backup/doctor64jr.obj backup/f2a.obj backup/fal.obj backup/ffe.obj \
         backup/fig.obj backup/gbx.obj backup/gd.obj backup/interceptor.obj \
@@ -169,6 +170,7 @@ ucon64_opts.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                  backup/z64.h \
                  patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h \
                  $(UCON64_STD_H)
+console/coleco.obj: console/coleco.h $(UCON64_STD_H)
 console/dc.obj: console/dc.h $(UCON64_STD_H)
 console/gb.obj: console/gb.h backup/mgd.h $(UCON64_STD_H)
 console/gba.obj: console/gba.h $(UCON64_STD_H)
@@ -184,6 +186,7 @@ console/psx.obj: console/psx.h $(UCON64_STD_H)
 console/sms.obj: console/sms.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
 console/snes.obj: console/snes.h backup/mgd.h $(UCON64_STD_H)
 console/swan.obj: console/swan.h $(UCON64_STD_H)
+console/vboy.obj: console/vboy.h $(UCON64_STD_H)
 backup/cd64.obj: backup/cd64.h $(UCON64_STD_H)
 backup/cmc.obj: backup/cmc.h $(UCON64_STD_H)
 backup/dex.obj: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)

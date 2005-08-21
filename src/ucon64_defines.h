@@ -230,10 +230,11 @@ enum
   UCON64_PRINT,
   UCON64_Q,
   UCON64_QQ,                                    // already reserved ;-)
+  UCON64_R83,
+  UCON64_RDAT,
   UCON64_REGION,
-  UCON64_RENAME,
+  UCON64_RJOLIET,
   UCON64_RROM,
-  UCON64_RR83,
   UCON64_RL,
   UCON64_ROM,
   UCON64_ROTL,
@@ -338,7 +339,7 @@ enum
   UCON64_XV64,
   UCON64_Z64,
 
-  UCON64_FORCE63,
+//  UCON64_FORCE63,
   UCON64_GUI,
 
   // Keep these (libdiscmage) options separate

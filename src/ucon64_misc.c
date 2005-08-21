@@ -69,6 +69,7 @@ st_ucon64_obj_t ucon64_wf[] =
     {0, WF_NO_ROM},                             // WF_OBJ_ALL_NO_ROM
     {0, WF_STOP | WF_NO_ROM},                   // WF_OBJ_ALL_STOP_NO_ROM
     {0, WF_DEFAULT | WF_STOP | WF_NO_ROM},      // WF_OBJ_ALL_DEFAULT_STOP_NO_ROM
+    {0, WF_NO_ARCHIVE},                         // WF_OBJ_ALL_NO_ARCHIVE
     {0, WF_INIT},                               // WF_OBJ_ALL_INIT
     {0, WF_INIT | WF_PROBE},                    // WF_OBJ_ALL_INIT_PROBE
     {0, WF_INIT | WF_PROBE | WF_STOP},          // WF_OBJ_ALL_INIT_PROBE_STOP,
@@ -774,9 +775,24 @@ const st_getopt2_t ucon64_options_without_usage[] =
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
-      "83", 0, 0, UCON64_RR83,                  // is now "rr83"
+      "rename", 0, 0, UCON64_RDAT,              // is now "rdat"
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+    },
+    {
+      "force63", 0, 0, UCON64_RJOLIET,          // is now "rjoilet"
+      NULL, NULL,
+      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+    },
+    {
+      "rr83", 0, 0, UCON64_R83,                 // is now "r83"
+      NULL, NULL,
+      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+    },
+    {
+      "83", 0, 0, UCON64_R83,                   // is now "r83"
+      NULL, NULL,
+      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
     },
 #if 0
     {
@@ -1091,8 +1107,8 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL
-  };                                            // IZ
+    NULL                                        // IZ
+  };
 
 
 #ifdef  USE_DISCMAGE
@@ -1451,7 +1467,7 @@ ucon64_output_fname (char *requested_fname, int flags)
 
   /*
     Keep the requested suffix, but only if it isn't ".zip" or ".gz". This
-    because we currently don't write to zip or gzip files. Otherwise the output
+    because we don't write to zip or gzip files. Otherwise the output
     file would have the suffix ".zip" or ".gz" while it isn't a zip or gzip
     file. uCON64 handles such files correctly, because it looks at the file
     data itself, but many programs don't.
@@ -1875,9 +1891,9 @@ ucon64_rename (int mode)
 {
   char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80];
   const char *p, *p2;
+  unsigned int crc = 0;
   int good_name;
 
-  buf[0] = 0;
   strncpy (suffix, get_suffix (ucon64.rom), sizeof (suffix))[sizeof (suffix) - 1] = 0; // in case suffix is >= 80 chars
 
   switch (mode)
@@ -1891,7 +1907,7 @@ ucon64_rename (int mode)
           }
       break;
 
-    case UCON64_RENAME:                         // GoodXXXX style rename
+    case UCON64_RDAT:                           // GoodXXXX style rename
       if (ucon64.dat)
         if (((st_ucon64_dat_t *) ucon64.dat)->fname)
           {
@@ -1917,17 +1933,94 @@ ucon64_rename (int mode)
           }
       break;
 
+    case UCON64_RJOLIET:
+      /*
+        We *have* to look at the structure of the file name, i.e., handle
+        "base name" and suffix differently. This is necessary, because it's
+        usual that file names are identified by their suffix (especially on
+        Windows).
+        In order to be able to say that the base name and/or the suffix is too
+        long, we have to specify a maximum length for both. We chose maximum
+        lengths for the base name and the suffix of 48 and 16 characters
+        respectively. These are arbitrary limits of course. The limits could
+        just as well have been 60 and 4 characters. Note that the boundary will
+        be adjusted if only one part is too long.
+        If either the base name or the suffix is too long, we replace the last
+        three characters of the base name with the three most significant
+        digits of the CRC32 value of the full name.
+      */
+      {
+        int len, len2;
+        p = basename2 (ucon64.rom);
+        len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
+        if (len <= 64)                  // Joliet maximum file name length is 64 chars
+          {
+            printf ("Skipping \"%s\"\n", p);
+            return 0;
+          }
+        strcpy (buf, p);
+        crc = crc32 (0, (unsigned char *) buf, len);
+        len2 = strlen (suffix);
+        len -= len2;
+        if (len2 <= 16)                 // len > 48
+          len = 64 - len2 - 3;
+        else                            // len2 > 16
+          {
+            if (len <= 48 - 3)
+              len2 = 64 - len - 3;
+            else                        // len > 48 - 3
+              {
+                len = 48 - 3;
+                len2 = 16;
+              }
+            suffix[len2] = 0;
+          }
+        // NOTE: The implementation of snprintf() in glibc 2.3.5-10 (FC4)
+        //  terminates the string. So, a size argument of 4 results in 3
+        //  characters plus a string terminator.
+        snprintf (buf + len, 4, "%0x", crc);
+        buf[len + 3] = 0;
+      }
+      break;
+
+    case UCON64_R83:
+      /*
+        The code for handling "FAT" file names is similar to the code that
+        handles Joliet file names, except that the maximum lengths for base
+        name and suffix are fixed (8 and 4 respectively).
+        Note that FAT is quoted, as this code mainly limits the file name
+        length. It doesn't guarantee that the file name is correct for FAT file
+        systems. For example, a file with a name with a leading period (not a
+        valid file name on a FAT file system) doesn't get special treatment.
+      */
+      {
+        int len, len2;
+        p = basename2 (ucon64.rom);
+        len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
+        strcpy (buf, p);
+        crc = crc32 (0, (unsigned char *) buf, len);
+        len2 = strlen (suffix);
+        len -= len2;
+        if (len <= 8 && len2 <= 4)      // FAT maximum file name length is 8 + 4 chars
+          {                             //  (we include the period with the suffix)
+            printf ("Skipping \"%s\"\n", p);
+            return 0;
+          }
+        if (len > 8 - 3)
+          len = 8 - 3;
+        if (len2 > 4)
+          suffix[4] = 0;
+        snprintf (buf + len, 4, "%0x", crc);
+        buf[len + 3] = 0;
+      }
+      break;
+
     default:
       return 0;                                 // invalid mode
     }
 
   if (!buf[0])
     return 0;
-
-  if (ucon64.fname_len == UCON64_FORCE63)
-    buf[63] = 0;
-  else if (ucon64.fname_len == UCON64_RR83)
-    buf[8] = 0;
 
   // replace chars the fs might not like
   strcpy (buf2, to_func (buf, strlen (buf), tofname));
@@ -1967,7 +2060,7 @@ ucon64_rename (int mode)
   //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
   strcat (buf2, suffix);
 
-  if (ucon64.fname_len == UCON64_RR83)
+  if (mode == UCON64_R83)
     buf2[12] = 0;
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
@@ -2000,7 +2093,7 @@ ucon64_rename (int mode)
   else
     printf ("Moving \"%s\"\n", p);
 #ifndef DEBUG
-  rename2 (ucon64.rom, buf2);                   // rename2() must be used!
+  rename2 (ucon64.rom, buf2);                   // rename_2_() must be used!
 #endif
 #ifdef  USE_ZLIB
   unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack

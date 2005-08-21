@@ -344,7 +344,7 @@ char *
 realpath2 (const char *path, char *full_path)
 // enhanced realpath() which returns the absolute path of a file
 {
-  char path1[FILENAME_MAX];
+  char path1[FILENAME_MAX + 1];
   const char *path2;
 
   if (path[0] == '~')

@@ -131,7 +131,7 @@ static eeprom_t eeprom_type;
 static parport_mode_t port_mode;
 
 
-static volatile void
+static void
 delay_us (int n_us)
 // Hmmm, usleep() can be used under UNIX, but default under DOS is delay() which
 //  waits for a number of milliseconds... Better use the same code on all platforms.

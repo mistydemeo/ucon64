@@ -562,14 +562,6 @@ ucon64_switches (st_ucon64_t *p)
       ucon64.dump_info = optarg;
       break;
 
-    case UCON64_RR83:
-      ucon64.fname_len = UCON64_RR83;
-      break;
-
-    case UCON64_FORCE63:
-      ucon64.fname_len = UCON64_FORCE63;
-      break;
-
     case UCON64_Q:
     case UCON64_QQ:                             // for now -qq is equivalent to -q
       ucon64.quiet = 1;
@@ -700,26 +692,6 @@ ucon64_options (st_ucon64_t *p)
         fputc ('\n', stdout);
       ucon64_chksum (NULL, buf, NULL, ucon64.rom, value);
       printf ("Checksum (MD5): 0x%s\n\n", buf);
-      break;
-
-    case UCON64_RL:
-      strcpy (buf, basename2 (ucon64.rom));
-      printf ("Renaming \"%s\" to ", buf);
-      strlwr (buf);
-      printf ("\"%s\"\n", buf);
-      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      rename2 (ucon64.rom, buf);
-      strcpy ((char *) ucon64.rom, buf);
-      break;
-
-    case UCON64_RU:
-      strcpy (buf, basename2 (ucon64.rom));
-      printf ("Renaming \"%s\" to ", buf);
-      strupr (buf);
-      printf ("\"%s\"\n", buf);
-      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      rename2 (ucon64.rom, buf);
-      strcpy ((char *) ucon64.rom, buf);
       break;
 
     case UCON64_HEX:
@@ -964,14 +936,40 @@ ucon64_options (st_ucon64_t *p)
           }
       break;
 
-    case UCON64_RENAME:
-      ucon64_rename (UCON64_RENAME);
+    case UCON64_RDAT:
+      ucon64_rename (UCON64_RDAT);
       break;
 
-    case UCON64_RR83:
-      ucon64.fname_len = UCON64_RR83;
     case UCON64_RROM:
       ucon64_rename (UCON64_RROM);
+      break;
+
+    case UCON64_R83:
+      ucon64_rename (UCON64_R83);
+      break;
+                
+    case UCON64_RJOLIET:
+      ucon64_rename (UCON64_RJOLIET);
+      break;
+
+    case UCON64_RL:
+      strcpy (buf, basename2 (ucon64.rom));
+      printf ("Renaming \"%s\" to ", buf);
+      strlwr (buf);
+      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      printf ("\"%s\"\n", buf);
+      rename2 (ucon64.rom, buf);
+      strcpy ((char *) ucon64.rom, buf);
+      break;
+
+    case UCON64_RU:
+      strcpy (buf, basename2 (ucon64.rom));
+      printf ("Renaming \"%s\" to ", buf);
+      strupr (buf);
+      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      printf ("\"%s\"\n", buf);
+      rename2 (ucon64.rom, buf);
+      strcpy ((char *) ucon64.rom, buf);
       break;
 
 #ifdef  USE_DISCMAGE

@@ -417,11 +417,11 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       struct dirent *ep;
       DIR *dp;
 #else
-      char search_pattern[FILENAME_MAX];
+      char search_pattern[FILENAME_MAX], c;
       WIN32_FIND_DATA find_data;
       HANDLE dp;
 #endif
-      char buf[FILENAME_MAX], c;
+      char buf[FILENAME_MAX];
 
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       c = toupper (path[0]);

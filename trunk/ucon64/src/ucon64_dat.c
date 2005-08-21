@@ -125,37 +125,35 @@ const st_getopt2_t ucon64_dat_usage[] =
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
     },
     {
-      "rrom", 0, 0, UCON64_RROM,
-      NULL, "rename ROMs to their internal names",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
-    },
-    {
-      "rename", 0, 0, UCON64_RENAME,
+      "rdat", 0, 0, UCON64_RDAT,
       NULL, "rename ROMs to their DATabase names\n"
       "use -o to specify an output directory",
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
     },
     {
-      "rr83", 0, 0, UCON64_RR83,
-      NULL, "force to rename to 8.3 filenames",
+      "rrom", 0, 0, UCON64_RROM,
+      NULL, "rename ROMs to their internal names (if any)",
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
     },
     {
-      "force63", 0, 0, UCON64_FORCE63,
-      NULL, "force to rename all filenames into Joliet CD format\n"
-      "like: GoodXXXX rename inplace force63 ...\n"
-      "TIP: using " OPTION_LONG_S "nes would process only NES ROMs",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      "r83", 0, 0, UCON64_R83,
+      NULL, "rename to 8.3 filenames",
+      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+    },
+    {
+      "rjoliet", 0, 0, UCON64_RJOLIET,
+      NULL, "rename to Joliet compatible filenames",
+      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
     },
     {
       "rl", 0, 0, UCON64_RL,
-      NULL, "rename ROMs to lowercase",
-      NULL
+      NULL, "rename to lowercase",
+      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE] 
     },
     {
       "ru", 0, 0, UCON64_RU,
-      NULL, "rename ROMs to uppercase",
-      NULL
+      NULL, "rename to uppercase",
+      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
     },
 #if 0
     {
@@ -276,12 +274,20 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
 {
   char buf[50 * 80];                            // should be enough
 
-  // Hell yes! I (NoisyB) use get_property() here...
-  strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author))[sizeof (dat->author) - 1] = 0;
-  strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version))[sizeof (dat->version) - 1] = 0;
-  strncpy (dat->refname, get_property (fname, "refname", buf, ""), sizeof (dat->refname))[sizeof (dat->refname) - 1] = 0;
-  strcpy (dat->comment, get_property (fname, "comment", buf, ""));
-  strncpy (dat->date, get_property (fname, "date", buf, "?"), sizeof (dat->date))[sizeof (dat->date) - 1] = 0;
+  get_property (fname, "author", buf, "Unknown");
+  strncpy (dat->author, buf, sizeof (dat->author))[sizeof (dat->author) - 1] = 0;
+
+  get_property (fname, "version", buf, "?");
+  strncpy (dat->version, buf, sizeof (dat->version))[sizeof (dat->version) - 1] = 0;
+
+  get_property (fname, "refname", buf, "");
+  strncpy (dat->refname, buf, sizeof (dat->refname))[sizeof (dat->refname) - 1] = 0;
+
+  get_property (fname, "comment", buf, "");
+  strncpy (dat->comment, buf, sizeof (dat->comment))[sizeof (dat->comment) - 1] = 0;
+
+  get_property (fname, "date", buf, "?");
+  strncpy (dat->date, buf, sizeof (dat->date))[sizeof (dat->date) - 1] = 0;
 
   return dat;
 }

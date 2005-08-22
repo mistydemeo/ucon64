@@ -417,7 +417,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       struct dirent *ep;
       DIR *dp;
 #else
-      char search_pattern[FILENAME_MAX]
+      char search_pattern[FILENAME_MAX];
       WIN32_FIND_DATA find_data;
       HANDLE dp;
 #endif

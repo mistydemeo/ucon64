@@ -4,7 +4,7 @@ f2a.c - Flash 2 Advance support for uCON64
 Copyright (c) 2003        Ulrich Hecht <uli@emulinks.de>
 Copyright (c) 2003 - 2004 David Voswinkel <d.voswinkel@netcologne.de>
 Copyright (c) 2004        NoisyB
-Copyright (c) 2004        dbjh
+Copyright (c) 2004 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -380,6 +380,7 @@ f2a_connect_usb (void)
 
                   snprintf (device_path, 160, "/proc/bus/usb/%s/%s",
                             bus->dirname, dev->filename);
+                  device_path[160 - 1] = 0;
                   exitstatus = exec ("/sbin/fxload", 7, "-D", device_path, "-I",
                                      f2afirmware_fname, "-t", "an21",
                                      ucon64.quiet < 0 ? "-vv" : "-v");
@@ -391,6 +392,7 @@ f2a_connect_usb (void)
                                   "/sbin/fxload -D %s -I %s -t an21 -vv" :
                                   "/sbin/fxload -D %s -I %s -t an21 -v",
                                 device_path, f2afirmware_fname);
+                      cmd[10 * 80 - 1] = 0;
                       fprintf (stderr, "ERROR: Could not upload EZUSB firmware using fxload. Command:\n"
                                        "       %s\n", cmd);
                       return -1;

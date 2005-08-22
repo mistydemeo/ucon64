@@ -85,20 +85,8 @@ strcasestr2 (const char *str, const char *search)
 {
   if (!(*search))
     return (char *) str;
-#if 0
-  else
-    {
-      int len = strlen (search);
 
-      for (; *str; str++)
-        if (!strnicmp (str, search, len))
-          return (char *) str;
-    }
-
-  return NULL;
-#else
   return (char *) memmem2 (str, strlen (str), search, strlen (search), MEMMEM2_CASE);
-#endif
 }
 
 
@@ -224,19 +212,3 @@ memmem2 (const void *buffer, size_t bufferlen,
 
   return NULL;
 }
-
-
-#if 0
-int
-memwcmp (const void *buffer, const void *search, unsigned int searchlen, int wildcard)
-{
-  unsigned int n;
-
-  for (n = 0; n < searchlen; n++)
-    if (((unsigned char *) search)[n] != wildcard &&
-        ((unsigned char *) buffer)[n] != ((unsigned char *) search)[n])
-      return -1;
-
-  return 0;
-}
-#endif

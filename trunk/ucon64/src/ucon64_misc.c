@@ -1630,8 +1630,10 @@ ucon64_configfile_update (void)
 
   sprintf (buf, "%d", UCON64_CONFIG_VERSION);
   set_property (ucon64.configfile, "version", buf, "uCON64 configuration");
+#if 0 // TODO: Add some *smart* code for updating the config file
   set_property (ucon64.configfile, "gbaloader_sc", "sc_menu.bin",
                 "path to GBA multi-game loader (Super Card)");
+#endif
 
   return 0;
 }
@@ -1805,7 +1807,6 @@ ucon64_configfile_create (void)
 
   return 0;
 }
-
 
 int
 ucon64_configfile (void)

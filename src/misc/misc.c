@@ -128,6 +128,7 @@ vprintf2 (const char *format, va_list argptr)
                        "                Please send a bug report\n", MAXBUFSIZE);
       exit (1);
     }
+  output[MAXBUFSIZE - 1] = 0;
 
   if ((ptr = strchr (output, 0x1b)) == NULL)
     fputs (output, stdout);

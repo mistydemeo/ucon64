@@ -5,7 +5,7 @@
  * I/O routines for CD64 device
  *
  * (c) 2004 Ryan Underwood
- * Portions (c) 2004 Daniel Horchner (OpenBSD, FreeBSD, BeOS, Win32, DOS)
+ * Portions (c) 2004, 2005 Daniel Horchner (OpenBSD, FreeBSD, BeOS, Win32, DOS)
  *
  * May be distributed under the terms of the GNU Lesser/Library General Public
  * License, or any later version of the same, as published by the Free Software
@@ -257,7 +257,8 @@ int cd64_open_ppdev(struct cd64_t *cd64) {
 	/* This should be a port number only, not an address */
 	if (cd64->port > PARPORT_MAX) return 0;
 
-	snprintf(realdev, 128, device, cd64->port);
+	snprintf(realdev, 128+1, device, cd64->port);
+	realdev[128] = 0;
 
 	if ((cd64->ppdevfd = open(realdev, O_RDWR)) == -1) {
 		cd64->notice_callback2("open: %s", strerror(errno));
@@ -775,12 +776,13 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 	}
 #elif defined _WIN32 || defined __CYGWIN__
 	{
-		char fname[FILENAME_MAX];
+		char fname[FILENAME_MAX+1];
 		io_driver_found = 0;
 
 		if (!cd64->io_driver_dir[0]) strcpy(cd64->io_driver_dir, ".");
-		snprintf (fname, FILENAME_MAX, "%s" FILE_SEPARATOR_S "%s",
+		snprintf (fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
 		          cd64->io_driver_dir, "dlportio.dll");
+		fname[FILENAME_MAX] = 0;
 		if (access(fname, F_OK) == 0) {
 			io_driver = open_module(fname, cd64);
 
@@ -794,8 +796,9 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		}
 
 		if (!io_driver_found) {
-			snprintf (fname, FILENAME_MAX, "%s" FILE_SEPARATOR_S "%s",
+			snprintf (fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
 			          cd64->io_driver_dir, "io.dll");
+			fname[FILENAME_MAX] = 0;
 			if (access(fname, F_OK) == 0) {
 				io_driver = open_module(fname, cd64);
 

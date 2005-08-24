@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #ifdef _WIN32
 #include <windows.h>
+#define snprintf _snprintf
 #endif
 #include "misc/misc.h"
 #include "misc/string.h"

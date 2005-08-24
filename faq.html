@@ -192,13 +192,30 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
-   To compile uCON64 you need a compiler :-) You can use either GCC (GNU
-   Compiler Collection) or the Visual C++ compiler. GCC can be freely
-   downloaded from <a href="http://www.gnu.org/order/ftp.html" target="_blank">
-   http://www.gnu.org/order/ftp.html</a>. Visual C++ can be bought for about 60
-   euro (at 15 May 2003) in most computer shops.<br>
    uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD, OpenBSD), DOS,
    BeOS, Windows (95/98/ME/NT/2000/XP), AmigaOS (PPC/68K) and Mac OS X.<br>
+   To compile uCON64 you need a compiler :-) You can use either GCC (GNU
+   Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
+   <a href="http://www.gnu.org/order/ftp.html" target="_blank">
+   http://www.gnu.org/order/ftp.html</a>.<br>
+   A free version of Visual C++, Microsoft Visual C++ Toolkit 2003, can be
+   downloaded from
+   <a href="http://msdn.microsoft.com/visualc/vctoolkit2003/" target="_blank">
+   http://msdn.microsoft.com/visualc/vctoolkit2003/</a>. If you want to compile
+   uCON64 with this version of Visual C++, you will also have to download the
+   Platform SDK, available from <a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en" target="_blank">
+   http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en</a>.
+   In the Microsoft Platform SDK Setup Wizard, choose Custom Installation and
+   disable everything except Microsoft Windows Core SDK, subsection Build
+   Environment. Enable one option, for example Build Environment (x86 32-bit).
+   At the moment we do not support building uCON64 with Microsoft Visual C++
+   Toolkit 2003, only with the regular versions of Visual C++, version 6 or 7.<br>
+   <!--
+     The problem is that Visual C++ Toolkit 2003 doesn't come with nmake.exe,
+     lib.exe and setargv.obj. I did a test with GNU make and could compile a
+     binary with libcd64 support (DLL), but I don't feel like maintaining yet
+     another Makefile.
+   -->
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from <a href="http://www.delorie.com/djgpp/" target="_blank">
    http://www.delorie.com/djgpp/</a>. A Win32 port of GCC (and many other GNU

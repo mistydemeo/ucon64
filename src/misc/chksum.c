@@ -456,11 +456,6 @@ md5_final (s_md5_ctx_t *mdContext)
 }
 
 
-// CRC16
-//#define WITH_CRC16                            // currently not used
-
-#if     !defined USE_ZLIB || defined WITH_CRC16
-
 #define CRC16_POLYNOMIAL 0xa001
 #define CRC32_POLYNOMIAL 0xedb88320
 
@@ -486,10 +481,8 @@ init_crc_table (void *table, unsigned int polynomial)
         ((unsigned short *) table)[i] = (unsigned short) crc;
     }
 }
-#endif
 
 
-#ifdef  WITH_CRC16
 
 static unsigned short *crc16_table = NULL;
 
@@ -519,12 +512,10 @@ chksum_crc16 (unsigned short crc, const void *buffer, unsigned int size)
     crc = (crc >> 8) ^ crc16_table[(crc ^ *p++) & 0xff];
   return ~crc;
 }
-#endif
 
 
 // CRC32
 #ifndef USE_ZLIB
-
 static unsigned int *crc32_table = NULL;
 
 

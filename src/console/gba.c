@@ -89,7 +89,7 @@ const st_getopt2_t gba_usage[] =
     },
     {
       "sc", 0, 0, UCON64_SC,
-      NULL, "convert to Super Card (CF to GBA Adapter)/SCZ\n"
+      NULL, "convert to Super Card (CF to GBA Adapter)\n"
 #if 0
             "enables \"Saver patch\", \"restart to Menu\" and\n"
             "\"Real Time Save\""
@@ -655,7 +655,7 @@ gba_init (st_rominfo_t *rominfo)
     "Unknown country";
 
   // misc stuff
-  sprintf (buf, "Version: %d\n", gba_header.version);
+  sprintf (buf, "Version: v1.%d\n", gba_header.version);
   strcat (rominfo->misc, buf);
 
   sprintf (buf, "Device type: 0x%02x\n", gba_header.device_type);
@@ -1154,7 +1154,7 @@ gba_sc (void)
                                                 // SONICPINBALL 64Mb (< 7445976)
                                                 // AGB KIRBY DX (< 10223404) 128Mb
        ptr++)
-    for (x = 0; x < 14; x++)
+    for (x = 0; x < 15; x++)
       if (!memcmp (ptr, sc_orig[x], 6))         // Do the last 2 bytes match?
         {
           if (ucon64.quiet < 0)

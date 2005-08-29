@@ -155,6 +155,8 @@ static const st_getopt2_t lf[] =
     sc_usage,
 #endif
     lf,
+    nds_usage,
+    lf,
     n64_usage,
 #ifdef  USE_PARALLEL
     doctor64_usage,
@@ -1070,6 +1072,8 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_NGP, ngp_init, AUTO},
       {UCON64_SWAN, swan_init, AUTO},
       {UCON64_JAG, jaguar_init, AUTO},
+      {UCON64_ATA, atari_init, AUTO},
+      {UCON64_NDS, nds_init, AUTO},
       {UCON64_VBOY, vboy_init, 0},
       {UCON64_PCE, pcengine_init, 0}, // AUTO still works with non-PCE files
       {UCON64_NG, neogeo_init, 0},
@@ -1081,7 +1085,6 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_GP32, NULL, 0},
       {UCON64_INTELLI, NULL, 0},
       {UCON64_S16, NULL, 0},
-      {UCON64_ATA, NULL, 0},
       {UCON64_VEC, NULL, 0},
 #endif
       {UCON64_UNKNOWN, unknown_init, 0},

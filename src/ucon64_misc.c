@@ -79,6 +79,8 @@ st_ucon64_obj_t ucon64_wf[] =
     {0, WF_INIT | WF_PROBE | WF_NO_CRC32},      // WF_OBJ_ALL_INIT_PROBE_NO_CRC32
     {0, WF_INIT | WF_NO_SPLIT},                 // WF_OBJ_ALL_INIT_NO_SPLIT
 
+    {UCON64_ATA, WF_DEFAULT},                   // WF_OBJ_ATA_DEFAULT
+    {UCON64_ATA, WF_DEFAULT | WF_NO_SPLIT},     // WF_OBJ_ATA_DEFAULT_NO_SPLIT
     {UCON64_DC, WF_SWITCH},                     // WF_OBJ_DC_SWITCH
     {UCON64_DC, WF_DEFAULT},                    // WF_OBJ_DC_DEFAULT
     {UCON64_DC, WF_NO_ROM},                     // WF_OBJ_DC_NO_ROM
@@ -95,6 +97,7 @@ st_ucon64_obj_t ucon64_wf[] =
     {UCON64_N64, WF_SWITCH},                    // WF_OBJ_N64_SWITCH
     {UCON64_N64, WF_DEFAULT},                   // WF_OBJ_N64_DEFAULT
     {UCON64_N64, WF_INIT | WF_PROBE},           // WF_OBJ_N64_INIT_PROBE
+    {UCON64_NDS, WF_SWITCH},                    // WF_OBJ_NDS_SWITCH
     {UCON64_NG, WF_SWITCH},                     // WF_OBJ_NG_SWITCH
     {UCON64_NG, WF_DEFAULT},                    // WF_OBJ_NG_DEFAULT
     {UCON64_NES, WF_SWITCH},                    // WF_OBJ_NES_SWITCH
@@ -112,6 +115,7 @@ st_ucon64_obj_t ucon64_wf[] =
     {UCON64_SNES, WF_INIT | WF_PROBE},          // WF_OBJ_SNES_INIT_PROBE
     {UCON64_SWAN, WF_SWITCH},                   // WF_OBJ_SWAN_SWITCH
 
+    {UCON64_ATA, WF_STOP | WF_NO_ROM},          // WF_OBJ_ATA_STOP_NO_ROM
     {UCON64_N64, WF_STOP | WF_NO_ROM},          // WF_OBJ_N64_STOP_NO_ROM
     {UCON64_N64, WF_DEFAULT | WF_STOP},         // WF_OBJ_N64_DEFAULT_STOP
     {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM}, // WF_OBJ_N64_DEFAULT_STOP_NO_ROM
@@ -317,21 +321,6 @@ const st_getopt2_t unknown_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   },
-  atari_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr"
-      /*"1977/1982/1984/1986 Atari"*/,
-      NULL
-    },
-    {
-      "ata", 0, 0, UCON64_ATA,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_ATA_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
   vectrex_usage[] =
   {
     {
@@ -364,7 +353,7 @@ const st_getopt2_t unknown_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "GP32 Game System"/*"2001 Gamepark http://www.gamepark.co.kr"*/,
+      NULL, "GP32 Game System/GPX2 - F100"/*"2001 Gamepark http://www.gamepark.co.kr"*/,
       NULL
     },
     {
@@ -514,6 +503,9 @@ const st_getopt2_t unknown_usage[] =
   };
 
 #if 0
+Nintendo Revolution 2006
+XBox 360
+PS3
 Microvision (Handheld)/1979 MB
 Supervision/1991 Hartung
 Pokemon Mini/200X Nintendo http://www.nintendo.com

@@ -1,7 +1,7 @@
 /*
-console.h - single header for all console functions
+nfc.h - support for Neo Flash Card for NDS/SP/GBA
 
-Copyright (c) 2003 NoisyB
+Copyright (c) 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,25 +18,30 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef CONSOLE_H
-#define CONSOLE_H
-#include "atari.h"
-#include "coleco.h"
-#include "dc.h"
-#include "gb.h"
-#include "gba.h"
-#include "genesis.h"
-#include "jaguar.h"
-#include "lynx.h"
-#include "n64.h"
-#include "nds.h"
-#include "neogeo.h"
-#include "nes.h"
-#include "ngp.h"
-#include "pce.h"
-#include "psx.h"
-#include "sms.h"
-#include "snes.h"
-#include "swan.h"
-#include "vboy.h"
-#endif // CONSOLE_H
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include "misc/itypes.h"
+#include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+#include "nfc.h"
+
+
+const st_getopt2_t nfc_usage[] =
+  {
+    {
+      NULL, 0, 0, 0,
+      NULL, "Neo Flash Card"
+      /* "2005 NEO Flash Team http://www.neoflash.com" */,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };

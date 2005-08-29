@@ -939,7 +939,7 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
             checksum of 0 or 0xffff.
           */
           unsigned int local_buffer = !buffer, d2, d1, d0, id = 0;
-    
+
           if (local_buffer)
             {
               if (!(buffer = (unsigned char *) malloc (size)))
@@ -951,14 +951,14 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
               if (rominfo->interleaved)
                 snes_deinterleave (rominfo, &buffer, size);
             }
-    
+
           for (n = 0; n < size; n++)
             id += buffer[n] ^ (n & 0xff);
           id %= 37 * 37 * 37;                   // ensure value can be encoded with 3 base 37 digits
-    
+
           if (local_buffer)
             free (buffer);
-    
+
           d2 = id / (37 * 37);
           d1 = (id % (37 * 37)) / 37;
           d0 = id % 37;
@@ -966,7 +966,7 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
           id_str[1] = d1 == 36 ? '_' : (d1 <= 9 ? d1 + '0' : d1 + 'A' - 10);
           id_str[2] = d0 == 36 ? '_' : (d0 <= 9 ? d0 + '0' : d0 + 'A' - 10);
           id_str[3] = 0;                        // terminate string
-    
+
           p = id_str;
         }
     }
@@ -2452,7 +2452,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 
   if (size < 64 * 1024)                         // snes_deinterleave() reads blocks of 32 kB
     return 0;                                   // file cannot be interleaved
-    
+
   crc = crc32 (0, rom_buffer, 512);
   /*
     Special case hell
@@ -3130,7 +3130,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
       snes_hirom_ok = 1;
       if (size < (int) (SNES_HEADER_START + SNES_HIROM + SNES_HEADER_LEN))
         snes_hirom = 0;
-    }                                           
+    }
 
   if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
     {
@@ -3176,10 +3176,10 @@ snes_set_bs_dump (st_rominfo_t *rominfo, unsigned char *rom_buffer, int size)
 int
 snes_init (st_rominfo_t *rominfo)
 {
-  int x, y, size, calc_checksums, result = -1;  // it's no SNES ROM dump until detected otherwise
+  int x, y, size, calc_checksums, pos, result = -1;  // it's no SNES ROM dump until detected otherwise
   unsigned char *rom_buffer;
   st_unknown_header_t header = { 0, 0, 0, 0, 0, 0, { 0 }, 0, 0, 0, { 0 } };
-  char buf[MAXBUFSIZE], *str;
+  char *str;
 #define SNES_COUNTRY_MAX 0xe
   static const char *snes_country[SNES_COUNTRY_MAX] =
     {
@@ -3217,6 +3217,7 @@ snes_init (st_rominfo_t *rominfo)
   type = SMC;                                   // idem, SMC indicates unknown copier type
   bs_dump = 0;                                  // for -lsv, but also just to init it
   st_dump = 0;                                  // idem
+  pos = strlen (rominfo->misc);
 
   x = 0;
   ucon64_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
@@ -3239,15 +3240,15 @@ snes_init (st_rominfo_t *rominfo)
           rominfo->copier_usage = swc_usage[0].help;
           type = SWC;
           if (header.type == 5)
-            strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");
+            pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card SRAM file\n");
           else if (header.type == 8)
-            strcat (rominfo->misc, "Type: Super Wild Card RTS file\n");
+            pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card RTS file\n");
         }
       else if (x == UFO)
         {
           rominfo->copier_usage = ufo_usage[0].help;
           type = UFO;
-          strcat (rominfo->misc, "Type: Super UFO SRAM file\n");
+          pos += sprintf (rominfo->misc + pos, "Type: Super UFO SRAM file\n");
         }
       return 0;                                 // rest is nonsense for SRAM/RTS file
     }
@@ -3449,18 +3450,11 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = NULL_TO_UNKNOWN_S (snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)]);
 
       // misc stuff
-      sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "Internal size: %d Mb\n", 1 << (snes_header.rom_size - 7));
-      strcat (rominfo->misc, buf);
-/*
-      sprintf (buf, "Map type: %x\n", snes_header.map_type);
-      strcat (rominfo->misc, buf);
-*/
-      sprintf (buf, "ROM type: (%x) %s", snes_header.rom_type,
-               snes_rom_type[(snes_header.rom_type & 7) % 3]);
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
+      pos += sprintf (rominfo->misc + pos, "Internal size: %d Mb\n", 1 << (snes_header.rom_size - 7));
+//      pos += sprintf (rominfo->misc + pos, "Map type: %x\n", snes_header.map_type);
+      pos += sprintf (rominfo->misc + pos, "ROM type: (%x) %s", snes_header.rom_type,
+                      snes_rom_type[(snes_header.rom_type & 7) % 3]);
       if ((snes_header.rom_type & 0xf) >= 3)
         {
           if (snes_header.rom_type == 3 || snes_header.rom_type == 5)
@@ -3502,14 +3496,12 @@ snes_init (st_rominfo_t *rominfo)
           else
             str = "Unknown";
 
-          sprintf (buf, " + %s", str);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, " + %s", str);
         }
-      strcat (rominfo->misc, "\n");
+      pos += sprintf (rominfo->misc + pos, "\n");
 
-      sprintf (buf, "ROM speed: %s\n",
-               snes_header.map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "ROM speed: %s\n",
+                      snes_header.map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
 
       if (snes_header.rom_type == 0x13 || snes_header.rom_type == 0x1a ||
           snes_header.rom_type == 0x14 || snes_header.rom_type == 0x15)
@@ -3527,10 +3519,9 @@ snes_init (st_rominfo_t *rominfo)
         }
 
       if (!snes_sramsize && !snes_sfx_sramsize)
-        sprintf (buf, "SRAM: No\n");
+        pos += sprintf (rominfo->misc + pos, "SRAM: No\n");
       else
-        sprintf (buf, "SRAM: Yes, %d kBytes\n", (snes_sfx_sramsize ? snes_sfx_sramsize : snes_sramsize) / 1024);
-      strcat (rominfo->misc, buf);
+        pos += sprintf (rominfo->misc + pos, "SRAM: Yes, %d kBytes\n", (snes_sfx_sramsize ? snes_sfx_sramsize : snes_sramsize) / 1024);
     }
   else                                          // BS info
     {
@@ -3538,10 +3529,9 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = "Japan";
       // misc stuff
       if (bs_dump == 2)
-        sprintf (buf, "\nBroadcast Satellaview add-on cartridge dump\n");
+        pos += sprintf (rominfo->misc + pos, "\nBroadcast Satellaview add-on cartridge dump\n");
       else
-        sprintf (buf, "\nBroadcast Satellaview dump\n"); // new line is intentional
-      strcat (rominfo->misc, buf);
+        pos += sprintf (rominfo->misc + pos, "\nBroadcast Satellaview dump\n"); // new line is intentional
 
       x = snes_header.bs_day & 0x0f;
       if (x <= 3)
@@ -3550,36 +3540,26 @@ snes_init (st_rominfo_t *rominfo)
         y = (snes_header.bs_day >> 4) * 2 + 1;
       else // incorrect data
         y = 0;
-      sprintf (buf, "Dumping date: %d/%d\n", y, snes_header.bs_month >> 4);
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Dumping date: %d/%d\n", y, snes_header.bs_month >> 4);
+      pos += sprintf (rominfo->misc + pos, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
 
       // misc stuff
-      sprintf (buf, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> (4 + 1)) * 4);
-      strcat (rominfo->misc, buf);
-/*
-      sprintf (buf, "Map type: %x\n", snes_header.bs_map_type);
-      strcat (rominfo->misc, buf);
-*/
+      pos += sprintf (rominfo->misc + pos, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> (4 + 1)) * 4);
+//      pos += sprintf (rominfo->misc + pos, "Map type: %x\n", snes_header.bs_map_type);
       x = snes_header.bs_type >> 4;
-      sprintf (buf, "ROM type: (%x) %s\n", snes_header.bs_type,
-               x > 3 ? "Unknown" : snes_bs_type[x]);
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "ROM type: (%x) %s\n", snes_header.bs_type,
+                      x > 3 ? "Unknown" : snes_bs_type[x]);
 
       /*
         It seems logical that the same condition as for regular cartridge dumps
         tells whether it's a FastROM or a SlowROM. The original condition was
         "(snes_header.bs_map_type >> 4) > 2".
       */
-      sprintf (buf, "ROM speed: %s\n",
-               snes_header.bs_map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "ROM speed: %s\n",
+                      snes_header.bs_map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
     }
 
-  sprintf (buf, "Version: 1.%d", snes_header.version);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Version: 1.%d", snes_header.version);
 
   if (nsrt_header)
     handle_nsrt_header (rominfo, (unsigned char *) &header, snes_country);
@@ -4395,7 +4375,7 @@ static void
 handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
                     const char **snes_country)
 {
-  char buf[800], name[SNES_NAME_LEN + 1], *str_list[9] =
+  char name[SNES_NAME_LEN + 1], *str_list[9] =
     {
       "Gamepad", "Mouse", "Mouse / Gamepad", "Super Scope",
       "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
@@ -4414,18 +4394,18 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
     ctrl1 = 8;
   if (ctrl2 > 8)
     ctrl2 = 8;
-  sprintf (buf, "\nNSRT info:\n"
-                  "  Original country: %s\n"
-                  "  Original game name: \"%s\"\n"
-                  "  Original checksum: 0x%04x\n"
-                  "  Port 1 controller type: %s\n"
-                  "  Port 2 controller type: %s\n"
-                  "  Header version: %.1f",
+  sprintf (rominfo->misc + strlen (rominfo->misc),
+           "\nNSRT info:\n"
+           "  Original country: %s\n"
+           "  Original game name: \"%s\"\n"
+           "  Original checksum: 0x%04x\n"
+           "  Port 1 controller type: %s\n"
+           "  Port 2 controller type: %s\n"
+           "  Header version: %.1f",
            NULL_TO_UNKNOWN_S (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)]),
            name,
            header[0x1e6] + (header[0x1e7] << 8),
            str_list[ctrl1],
            str_list[ctrl2],
            header[0x1ec] / 10.f);
-  strcat (rominfo->misc, buf);
 }

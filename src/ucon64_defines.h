@@ -66,6 +66,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_OPTION 1000
 #define UCON64_CONSOLE 0
 
+
 // options (consoles)
 // these defines shall not exceed 0xffff since they share the same integer
 // with the workflow flags (below) in st_getopt2_t
@@ -87,6 +88,7 @@ enum
   UCON64_LYNX,
   UCON64_MAME,
   UCON64_N64,
+  UCON64_NDS,
   UCON64_NES,
   UCON64_NG,
   UCON64_NGP,

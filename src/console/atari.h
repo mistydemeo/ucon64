@@ -1,7 +1,10 @@
 /*
-console.h - single header for all console functions
+atari.h - Atari 2600/5200/7800 support for uCON64
 
-Copyright (c) 2003 NoisyB
+Copyright (c) 2004 NoisyB (noisyb@gmx.net)
+
+Inspired by code from makewav v4.1 and MakeBin v1.0, written by Bob Colbert
+  <rcolbert1@home.com>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,25 +21,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef CONSOLE_H
-#define CONSOLE_H
-#include "atari.h"
-#include "coleco.h"
-#include "dc.h"
-#include "gb.h"
-#include "gba.h"
-#include "genesis.h"
-#include "jaguar.h"
-#include "lynx.h"
-#include "n64.h"
-#include "nds.h"
-#include "neogeo.h"
-#include "nes.h"
-#include "ngp.h"
-#include "pce.h"
-#include "psx.h"
-#include "sms.h"
-#include "snes.h"
-#include "swan.h"
-#include "vboy.h"
-#endif // CONSOLE_H
+#ifndef ATARI_H
+#define ATARI_H
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+extern const st_getopt2_t atari_usage[];
+extern int atari_init (st_rominfo_t *rominfo);
+
+#ifdef  USE_LIB_MATH
+extern int atari_cc2 (const char *filename, int bsm);
+#endif
+#endif

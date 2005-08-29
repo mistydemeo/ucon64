@@ -97,19 +97,20 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         misc/chksum.o misc/file.o misc/getopt.o misc/getopt2.o \
         misc/misc.o misc/parallel.o misc/property.o misc/string.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/ppf.o \
-        console/coleco.o console/dc.o console/gb.o console/gba.o \
-        console/genesis.o console/jaguar.o console/lynx.o console/n64.o \
-        console/neogeo.o console/nes.o console/ngp.o console/pce.o \
-        console/psx.o console/sms.o console/snes.o console/swan.o \
-        console/vboy.o \
-        backup/cd64.o backup/cmc.o backup/dex.o backup/doctor64.o \
-        backup/doctor64jr.o backup/f2a.o backup/fal.o backup/ffe.o \
-        backup/fig.o backup/gbx.o backup/gd.o backup/interceptor.o \
-        backup/lynxit.o backup/mccl.o backup/mcd.o backup/md-pro.o \
-        backup/mgd.o backup/msg.o backup/pce-pro.o backup/pl.o \
-        backup/psxpblib.o backup/sflash.o backup/smc.o backup/smd.o \
-        backup/smsgg-pro.o backup/ssc.o backup/swc.o backup/tototek.o \
-        backup/ufo.o backup/yoko.o backup/z64.o
+        console/atari.o console/coleco.o console/dc.o console/gb.o \
+        console/gba.o console/genesis.o console/jaguar.o console/lynx.o \
+        console/n64.o console/nds.o console/neogeo.o console/nes.o \
+        console/ngp.o console/pce.o console/psx.o console/sms.o \
+        console/snes.o console/swan.o console/vboy.o \
+        backup/cc2.o backup/cd64.o backup/cmc.o backup/dex.o \
+        backup/doctor64.o backup/doctor64jr.o backup/f2a.o backup/fal.o \
+        backup/ffe.o backup/fig.o backup/gbx.o backup/gd.o \
+        backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
+        backup/md-pro.o backup/mgd.o backup/msg.o backup/nfc.o \
+        backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/sflash.o \
+        backup/smc.o backup/smd.o backup/smsgg-pro.o backup/spsc.o \
+        backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o backup/yoko.o \
+        backup/z64.o
 ifdef USE_ZLIB
 LDFLAGS+=-lz
 OBJECTS+=misc/archive.o misc/map.o misc/unzip.o
@@ -327,6 +328,7 @@ ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                backup/z64.h \
                patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h \
                $(UCON64_STD_H)
+console/atari.o: console/atari.h $(UCON64_STD_H)
 console/coleco.o: console/coleco.h $(UCON64_STD_H)
 console/dc.o: console/dc.h $(UCON64_STD_H)
 console/gb.o: console/gb.h backup/mgd.h $(UCON64_STD_H)
@@ -335,6 +337,7 @@ console/genesis.o: console/genesis.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
 console/jaguar.o: console/jaguar.h $(UCON64_STD_H)
 console/lynx.o: console/lynx.h $(UCON64_STD_H)
 console/n64.o: console/n64.h $(UCON64_STD_H)
+console/nds.o: console/nds.h $(UCON64_STD_H)
 console/neogeo.o: console/neogeo.h $(UCON64_STD_H)
 console/nes.o: console/nes.h $(UCON64_STD_H)
 console/ngp.o: console/ngp.h $(UCON64_STD_H)
@@ -344,6 +347,7 @@ console/sms.o: console/sms.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
 console/snes.o: console/snes.h backup/mgd.h $(UCON64_STD_H)
 console/swan.o: console/swan.h $(UCON64_STD_H)
 console/vboy.o: console/vboy.h $(UCON64_STD_H)
+backup/cc2.o: backup/cc2.h $(UCON64_STD_H)
 backup/cd64.o: backup/cd64.h $(UCON64_STD_H)
 backup/cmc.o: backup/cmc.h $(UCON64_STD_H)
 backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
@@ -361,6 +365,7 @@ backup/mcd.o: backup/mcd.h $(UCON64_STD_H)
 backup/md-pro.o: backup/md-pro.h backup/tototek.h $(UCON64_STD_H)
 backup/mgd.o: backup/mgd.h $(UCON64_STD_H)
 backup/msg.o: backup/msg.h backup/ffe.h $(UCON64_STD_H)
+backup/nfc.o: backup/nfc.h $(UCON64_STD_H)
 backup/pce-pro.o: backup/pce-pro.h backup/tototek.h $(UCON64_STD_H)
 backup/pl.o: backup/pl.h $(UCON64_STD_H)
 backup/psxpblib.o: backup/psxpblib.h $(UCON64_STD_H)
@@ -368,6 +373,7 @@ backup/sflash.o: backup/sflash.h backup/tototek.h $(UCON64_STD_H)
 backup/smc.o: backup/smc.h backup/ffe.h $(UCON64_STD_H)
 backup/smd.o: backup/smd.h backup/ffe.h $(UCON64_STD_H)
 backup/smsgg-pro.o: backup/smsgg-pro.h backup/tototek.h $(UCON64_STD_H)
+backup/spsc.o: backup/spsc.h $(UCON64_STD_H)
 backup/swc.o: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)
 backup/tototek.o: backup/tototek.h $(UCON64_STD_H)
 backup/ufo.o: backup/ufo.h $(UCON64_STD_H)

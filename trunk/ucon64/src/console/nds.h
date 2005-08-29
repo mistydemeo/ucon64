@@ -1,7 +1,7 @@
 /*
-console.h - single header for all console functions
+nds.h - Nintendo DS support for uCON64
 
-Copyright (c) 2003 NoisyB
+Copyright (c) 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,25 +18,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef CONSOLE_H
-#define CONSOLE_H
-#include "atari.h"
-#include "coleco.h"
-#include "dc.h"
-#include "gb.h"
-#include "gba.h"
-#include "genesis.h"
-#include "jaguar.h"
-#include "lynx.h"
-#include "n64.h"
-#include "nds.h"
-#include "neogeo.h"
-#include "nes.h"
-#include "ngp.h"
-#include "pce.h"
-#include "psx.h"
-#include "sms.h"
-#include "snes.h"
-#include "swan.h"
-#include "vboy.h"
-#endif // CONSOLE_H
+#ifndef NDS_H
+#define NDS_H
+
+extern const st_getopt2_t nds_usage[];
+
+extern int nds_init (st_rominfo_t *rominfo);
+extern int nds_n (st_rominfo_t *rominfo, const char *name);
+extern int nds_logo (st_rominfo_t *rominfo);
+extern int nds_chk (st_rominfo_t *rominfo);
+
+#endif

@@ -1,7 +1,7 @@
 /*
 ucon64_opts.c - switch()'es for all uCON64 options
 
-Copyright (c) 2002 - 2004 NoisyB
+Copyright (c) 2002 - 2005 NoisyB
 Copyright (c) 2002 - 2005 dbjh
 
 
@@ -727,17 +727,17 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_FIND:
-      ucon64_find (ucon64.rom, value, ucon64.file_size, optarg,
+      ucon64_find (ucon64.rom, 0, ucon64.file_size, optarg,
                    strlen (optarg), MEMCMP2_WCARD ('?'));
       break;
 
     case UCON64_FINDR:
-      ucon64_find (ucon64.rom, value, ucon64.file_size, optarg,
-                   strlen (optarg), MEMCMP2_WCARD ('?') | MEMCMP2_REL);
+      ucon64_find (ucon64.rom, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_REL);
       break;
 
     case UCON64_FINDI:
-      ucon64_find (ucon64.rom, value, ucon64.file_size, optarg, strlen (optarg),
+      ucon64_find (ucon64.rom, 0, ucon64.file_size, optarg, strlen (optarg),
                    MEMCMP2_WCARD ('?') | MEMCMP2_CASE);
       break;
 
@@ -1067,7 +1067,7 @@ ucon64_options (st_ucon64_t *p)
 #endif // USE_DISCMAGE
 
     case UCON64_DB:
-      if (ucon64.quiet > -1) // -db + -v == -dbv
+      if (ucon64.quiet > -1)
         {
           if (ucon64.dat_enabled)
             {
@@ -1195,6 +1195,9 @@ ucon64_options (st_ucon64_t *p)
           break;
         case UCON64_SWAN:
           swan_chk (ucon64.rominfo);
+          break;
+        case UCON64_NDS:
+          nds_chk (ucon64.rominfo);
           break;
         default:
 // The next msg has already been printed
@@ -1399,6 +1402,9 @@ ucon64_options (st_ucon64_t *p)
           case UCON64_GBA:
             gba_logo (ucon64.rominfo);
             break;
+          case UCON64_NDS:
+            nds_logo (ucon64.rominfo);
+            break;
           default:
 // The next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
@@ -1475,6 +1481,9 @@ ucon64_options (st_ucon64_t *p)
           break;
         case UCON64_SNES:
           snes_n (ucon64.rominfo, optarg);
+          break;
+        case UCON64_NDS:
+          nds_n (ucon64.rominfo, optarg);
           break;
         default:
 // The next msg has already been printed

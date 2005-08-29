@@ -1,7 +1,7 @@
 /*
-sc.c - support for SuperCard
+cc2.c - Cuttle Card (2) support for uCON64
 
-Copyright (c) 2004 NoisyB
+Copyright (c) 2004 NoisyB (noisyb@gmx.net)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -32,16 +32,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "sc.h"
+#include "ucon64_misc.h"
+#include "cc2.h"
 
 
-const st_getopt2_t sc_usage[] =
+const st_getopt2_t cc2_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Card (CF to GBA Adapter)"
-      /* "2004 Super Card http://www.supercard.cn" */,
+      NULL, "Cuttle Card (2)",/*"2001 Shell's Electronic http://www.shells.com"*/
       NULL
     },
+#if 0
+    {
+      "xcc2", 0, 0, UCON64_XCC2,
+      NULL, "send/receive ROM to/from Cuttle Card (2)\n"
+      "actually Cuttle Card (2) backup units use audio\n"
+      "input/output to transfer ROMs",
+      &ucon64_wf[WF_OBJ_ATA_STOP_NO_ROM]
+    },
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+

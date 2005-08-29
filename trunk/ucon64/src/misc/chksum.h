@@ -89,9 +89,8 @@ extern void md5_update (s_md5_ctx_t *mdContext, unsigned char *inBuf, unsigned i
 extern void md5_final (s_md5_ctx_t *mdContext);
 
 
-#ifdef  WITH_CRC16
 extern unsigned short chksum_crc16 (unsigned short crc, const void *buffer, unsigned int size);
-#endif
+
 
 #ifndef  USE_ZLIB
 extern unsigned int crc32 (unsigned int crc, const void *buffer, unsigned int size);

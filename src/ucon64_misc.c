@@ -1888,6 +1888,7 @@ ucon64_rename (int mode)
   unsigned int crc = 0;
   int good_name;
 
+  *buf = 0;
   strncpy (suffix, get_suffix (ucon64.rom), sizeof (suffix))[sizeof (suffix) - 1] = 0; // in case suffix is >= 80 chars
 
   switch (mode)
@@ -2087,7 +2088,11 @@ ucon64_rename (int mode)
   else
     printf ("Moving \"%s\"\n", p);
 #ifndef DEBUG
-  rename2 (ucon64.rom, buf2);                   // rename_2_() must be used!
+  if (rename2 (ucon64.rom, buf2) == -1)         // rename_2_() must be used!
+    {
+      fprintf (stderr, "ERROR: Could not rename \"%s\"\n", p);
+      return -1;
+    }
 #endif
 #ifdef  USE_ZLIB
   unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack

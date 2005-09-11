@@ -643,6 +643,10 @@ ucon64_options (st_ucon64_t *p)
   unsigned int checksum;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        *ptr = NULL;
+  #ifdef AMIGA
+    char tmpbuf[MAXBUFSIZE];
+    char tmpbuf2[MAXBUFSIZE];
+  #endif
   struct stat fstate;
   int c = p->option;
   const char *optarg = p->optarg;
@@ -953,22 +957,40 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_RL:
+      #ifdef AMIGA
+        tmpnam2 (tmpbuf);
+        strcpy (tmpbuf2, basename2 (tmpbuf));
+        rename2 (ucon64.rom, tmpbuf2);
+      #endif
       strcpy (buf, basename2 (ucon64.rom));
       printf ("Renaming \"%s\" to ", buf);
       strlwr (buf);
       ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
       printf ("\"%s\"\n", buf);
-      rename2 (ucon64.rom, buf);
+      #ifdef AMIGA
+        rename2 (tmpbuf2, buf);
+      #else
+        rename2 (ucon64.rom, buf);
+      #endif
       strcpy ((char *) ucon64.rom, buf);
       break;
 
     case UCON64_RU:
+      #ifdef AMIGA
+        tmpnam2 (tmpbuf);
+        strcpy (tmpbuf2, basename2 (tmpbuf));
+        rename2 (ucon64.rom, tmpbuf2);
+      #endif
       strcpy (buf, basename2 (ucon64.rom));
       printf ("Renaming \"%s\" to ", buf);
       strupr (buf);
       ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
       printf ("\"%s\"\n", buf);
-      rename2 (ucon64.rom, buf);
+      #ifdef AMIGA
+        rename2 (tmpbuf2, buf);
+      #else
+        rename2 (ucon64.rom, buf);
+      #endif
       strcpy ((char *) ucon64.rom, buf);
       break;
 

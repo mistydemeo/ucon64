@@ -24,6 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 
+#include "cc2.h"
+#include "spsc.h"
 #include "sc.h"
 #ifdef  USE_PARALLEL
 #include "cd64.h"

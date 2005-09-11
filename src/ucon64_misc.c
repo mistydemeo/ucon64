@@ -193,7 +193,7 @@ const st_getopt2_t libdm_usage[] =
     },
     {
       "disc", 0, 0, UCON64_DISC,
-      NULL, "force recognition; NEEDED",
+      NULL, "force recognition",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
@@ -679,7 +679,31 @@ const st_getopt2_t ucon64_options_usage[] =
     {
       "findr", 1, 0, UCON64_FINDR,
       "STR", "like " OPTION_LONG_S "find but looks also for shifted/relative similarities\n"
-      "(wildcard: disabled)",
+      "(no wildcard supported)",
+      &ucon64_wf[WF_OBJ_ALL_INIT]
+    },
+    {
+      "hfind", 1, 0, UCON64_HFIND,
+      "HEX", "find HEX codes in ROM; use quotation " OPTION_LONG_S "hfind=\"75 ? 4f 4e\"\n"
+             "(wildcard: '?')",
+      &ucon64_wf[WF_OBJ_ALL_INIT]
+    },
+    {
+      "hfindr", 1, 0, UCON64_HFINDR,
+      "HEX", "like " OPTION_LONG_S "hfind but looks also for shifted/relative similarities\n"
+      "(no wildcard supported)",
+      &ucon64_wf[WF_OBJ_ALL_INIT]
+    },
+    {
+      "dfind", 1, 0, UCON64_DFIND,
+      "DEC", "find DEC values in ROM; use quotation " OPTION_LONG_S "dfind=\"117 ? 79 78\"\n"
+             "(wildcard: '?')",
+      &ucon64_wf[WF_OBJ_ALL_INIT]
+    },
+    {
+      "dfindr", 1, 0, UCON64_DFINDR,
+      "DEC", "like " OPTION_LONG_S "dfind but looks also for shifted/relative similarities\n"
+      "(no wildcard supported)",
       &ucon64_wf[WF_OBJ_ALL_INIT]
     },
     {

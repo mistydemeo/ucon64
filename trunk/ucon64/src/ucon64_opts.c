@@ -3,6 +3,7 @@ ucon64_opts.c - switch()'es for all uCON64 options
 
 Copyright (c) 2002 - 2005 NoisyB
 Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 2005        Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -642,11 +643,10 @@ ucon64_options (st_ucon64_t *p)
   int value = 0, x = 0, padded;
   unsigned int checksum;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
-       *ptr = NULL;
-  #ifdef AMIGA
-    char tmpbuf[MAXBUFSIZE];
-    char tmpbuf2[MAXBUFSIZE];
-  #endif
+       *ptr = NULL, *values[UCON64_MAX_ARGS];
+#ifdef  AMIGA
+  char tmpbuf[MAXBUFSIZE];
+#endif
   struct stat fstate;
   int c = p->option;
   const char *optarg = p->optarg;
@@ -743,6 +743,50 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_FINDI:
       ucon64_find (ucon64.rom, 0, ucon64.file_size, optarg, strlen (optarg),
                    MEMCMP2_WCARD ('?') | MEMCMP2_CASE);
+      break;
+
+    case UCON64_HFIND:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 16) & 0xff))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_WCARD ('?'));
+      break;
+
+    case UCON64_HFINDR:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 16) & 0xff))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_REL);
+      break;
+
+    case UCON64_DFIND:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 10) & 0xff))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_WCARD ('?'));
+      break;
+
+    case UCON64_DFINDR:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 10) & 0xff))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_REL);
       break;
 
     case UCON64_PADHD:                          // deprecated
@@ -951,46 +995,44 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_R83:
       ucon64_rename (UCON64_R83);
       break;
-                
+
     case UCON64_RJOLIET:
       ucon64_rename (UCON64_RJOLIET);
       break;
 
     case UCON64_RL:
-      #ifdef AMIGA
-        tmpnam2 (tmpbuf);
-        strcpy (tmpbuf2, basename2 (tmpbuf));
-        rename2 (ucon64.rom, tmpbuf2);
-      #endif
+#ifdef  AMIGA
+      ptr = basename2 (tmpnam2 (tmpbuf));
+      rename2 (ucon64.rom, ptr);
+#endif
       strcpy (buf, basename2 (ucon64.rom));
       printf ("Renaming \"%s\" to ", buf);
       strlwr (buf);
       ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
       printf ("\"%s\"\n", buf);
-      #ifdef AMIGA
-        rename2 (tmpbuf2, buf);
-      #else
-        rename2 (ucon64.rom, buf);
-      #endif
+#ifdef  AMIGA
+      rename2 (ptr, buf);
+#else
+      rename2 (ucon64.rom, buf);
+#endif
       strcpy ((char *) ucon64.rom, buf);
       break;
 
     case UCON64_RU:
-      #ifdef AMIGA
-        tmpnam2 (tmpbuf);
-        strcpy (tmpbuf2, basename2 (tmpbuf));
-        rename2 (ucon64.rom, tmpbuf2);
-      #endif
+#ifdef  AMIGA
+      ptr = basename2 (tmpnam2 (tmpbuf));
+      rename2 (ucon64.rom, ptr);
+#endif
       strcpy (buf, basename2 (ucon64.rom));
       printf ("Renaming \"%s\" to ", buf);
       strupr (buf);
       ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
       printf ("\"%s\"\n", buf);
-      #ifdef AMIGA
-        rename2 (tmpbuf2, buf);
-      #else
-        rename2 (ucon64.rom, buf);
-      #endif
+#ifdef  AMIGA
+      rename2 (ptr, buf);
+#else
+      rename2 (ucon64.rom, buf);
+#endif
       strcpy ((char *) ucon64.rom, buf);
       break;
 

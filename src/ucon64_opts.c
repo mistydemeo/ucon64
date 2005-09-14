@@ -749,7 +749,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 16) & 0xff))
+        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
@@ -760,7 +760,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 16) & 0xff))
+        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
@@ -771,7 +771,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 10) & 0xff))
+        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
@@ -782,7 +782,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 10) & 0xff))
+        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.rom, 0, ucon64.file_size, buf,
@@ -1015,7 +1015,7 @@ ucon64_options (st_ucon64_t *p)
 #else
       rename2 (ucon64.rom, buf);
 #endif
-      strcpy ((char *) ucon64.rom, buf);
+      ucon64.rom = (const char *) buf;
       break;
 
     case UCON64_RU:
@@ -1033,7 +1033,7 @@ ucon64_options (st_ucon64_t *p)
 #else
       rename2 (ucon64.rom, buf);
 #endif
-      strcpy ((char *) ucon64.rom, buf);
+      ucon64.rom = (const char *) buf;
       break;
 
 #ifdef  USE_DISCMAGE

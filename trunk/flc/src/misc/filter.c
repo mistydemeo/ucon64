@@ -486,12 +486,6 @@ filter_object_read_by_id (st_filter_chain_t *fc,
   int pos = filter_get_pos (fc);
   int id = filter_get_id (fc, pos);
 
-#warning QUH_OPTION FIX
-  if (o_id == 1000) // QUH_OPTION FIX
-    {
-      sprintf (key, "%d:%d", filter_get_id (fc, pos), o_id);
-    }
-  else
   switch (fc->op)
     {
       case FILTER_INIT:
@@ -517,12 +511,6 @@ filter_object_write_by_id (st_filter_chain_t *fc,
   int pos = filter_get_pos (fc);
   int id = filter_get_id (fc, pos);
 
-#warning QUH_OPTION FIX
-  if (o_id == 1000) // QUH_OPTION FIX
-    {
-      sprintf (key, "%d:%d", filter_get_id (fc, pos), o_id);
-    }
-  else
   switch (fc->op)
     {
       case FILTER_INIT:
@@ -673,7 +661,6 @@ filter_get_all_id_s_in_array (const st_filter_t **f)
 const char *
 filter_get_all_id_s_in_chain (const st_filter_chain_t *fc)
 {
-#warning TODO: filter_get_all_id_s_in_chain
   (void) fc;
 //  return filter_get_all_id_s_in_array (&fc->all);
   return "";

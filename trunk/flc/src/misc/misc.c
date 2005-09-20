@@ -89,6 +89,14 @@ typedef struct termios tty_t;
 #define MAXBUFSIZE 32768
 
 
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+#ifndef MAX
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
+
+
 extern int errno;
 
 typedef struct st_func_node
@@ -838,117 +846,56 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 }
 
 
-#undef  GAUGE_LENGTH
-
-#if 1
 int
-gauge (FILE *output, time_t start_time, int pos, int size, unsigned int flags)
+gauge (int percent, int width, int color1, int color2)
 {
-#define GAUGE_LENGTH ((int64_t) 24)
-  int curr, bps, left, p, percentage;
-  char progress[1024];
+  int p;
+  char buf[1025];
 
-  if (pos > size || !size)
+  if (!width ||
+      percent < 0 ||
+      percent > 100)
     return -1;
 
-  percentage = (int) ((((int64_t) 100) * pos) / size);
+  width = MIN (width, 1024);
+    
+  p = (int) ((width * percent) / 100);
 
-  if (/* output != stdout && */ flags & GAUGE_PERCENT)
+  memset (&buf, '=', width);
+  buf[p] = 0;
+
+  if (color1 != -1 &&
+      color2 != -1)
+    if (p < width)
+      sprintf (&buf[p], "\x1b[3%d;4%dm", color1, color1);
+
+  memset (strchr (buf, 0), '-', (int) (width - p));
+
+  if (color1 != -1 &&
+      color2 != -1)
     {
-      fprintf (output, "%u\n", percentage);
-      fflush (output);
-
-      return 0;
+      buf[width + 8] = 0; // 8 == ansi code
+      fprintf (stdout, "[\x1b[3%d;4%dm%s\x1b[0m]", color2, color2, buf);
     }
-
-  if ((curr = time (0) - start_time) == 0)
-    curr = 1;                                   // `round up' to at least 1 sec (no division
-                                                //  by zero below)
-  bps = pos / curr;                             // # bytes/second (average transfer speed)
-  left = size - pos;
-  left /= bps ? bps : 1;
-
-  p = (int) ((GAUGE_LENGTH * pos) / size);
-  *progress = 0;
-  strncat (progress, "========================", p);
-
-//  if (flags & GAUGE_ANSI)
-  if (misc_ansi_color)
+  else
     {
-      progress[p] = 0;
-      if (p < GAUGE_LENGTH)
-        strcat (progress, "\x1b[31;41m");
+      buf[width] = 0;
+      fprintf (stdout, "[%s]", buf);
     }
-
-  strncat (&progress[p], "------------------------", (int) (GAUGE_LENGTH - p));
-
-  fprintf (output,
-//    (flags & GAUGE_ANSI) ?
-    misc_ansi_color ?
-      "\r%10d Bytes [\x1b[32;42m%s\x1b[0m] %d%%, BPS=%d, " :
-      "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
-
-  if (pos == size)
-    fprintf (output, "TOTAL=%02d:%02d", curr / 60, curr % 60); // DON'T print a newline
-  else if (pos)                                                //  -> gauge can be cleared
-    fprintf (output, "ETA=%02d:%02d  ", left / 60, left % 60);
-  else                                          // don't display a nonsense ETA
-    fputs ("ETA=?  ", stdout);
-
-  fflush (output);
 
   return 0;
 }
-#else
-int
-gauge (time_t init_time, int pos, int size, unsigned int flags)
+
+
+unsigned long
+bytes_per_second (time_t start_time, unsigned long pos)
 {
-#define GAUGE_LENGTH ((int64_t) 24)
+  int curr = (time (0) - start_time);
 
-  int curr, bps, left, p, percentage;
-  char progress[MAXBUFSIZE];
-
-  if (pos > size || !size)
-    return -1;
-
-  if ((curr = time (0) - init_time) == 0)
-    curr = 1;                                   // `round up' to at least 1 sec (no division
+  curr = MAX (curr, 1);                         // `round up' to at least 1 sec (no division
                                                 //  by zero below)
-  bps = pos / curr;                             // # bytes/second (average transfer speed)
-  left = size - pos;
-  left /= bps ? bps : 1;
-
-  p = (int) ((GAUGE_LENGTH * pos) / size);
-  *progress = 0;
-  strncat (progress, "========================", p);
-
-  if (misc_ansi_color)
-    {
-      progress[p] = 0;
-      if (p < GAUGE_LENGTH)
-        strcat (progress, "\x1b[31;41m");
-    }
-
-  strncat (&progress[p], "------------------------", (int) (GAUGE_LENGTH - p));
-
-  percentage = (int) ((((int64_t) 100) * pos) / size);
-
-  printf (
-    misc_ansi_color ? "\r%10d Bytes [\x1b[32;42m%s\x1b[0m] %d%%, BPS=%d, " :
-      "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
-
-  if (pos == size)
-    printf ("TOTAL=%02d:%02d", curr / 60, curr % 60); // DON'T print a newline
-  else if (pos)                                       //  -> gauge can be cleared
-    printf ("ETA=%02d:%02d  ", left / 60, left % 60);
-  else                                          // don't display a nonsense ETA
-    fputs ("ETA=?  ", stdout);
-
-  fflush (stdout);
-
-  return 0;
+  return (unsigned long) (pos / curr);          // # bytes/second (average transfer speed)
 }
-#endif
 
 
 #ifdef  __CYGWIN__

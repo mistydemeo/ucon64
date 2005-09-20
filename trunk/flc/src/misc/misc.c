@@ -35,7 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
 #include <sys/stat.h>                           // for S_IFLNK
-#include <sys/time.h>                           // gettimeofday()
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
@@ -129,6 +128,7 @@ vprintf2 (const char *format, va_list argptr)
                        "                Please send a bug report\n", MAXBUFSIZE);
       exit (1);
     }
+  output[MAXBUFSIZE - 1] = 0;
 
   if ((ptr = strchr (output, 0x1b)) == NULL)
     fputs (output, stdout);
@@ -838,6 +838,8 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 }
 
 
+#undef  GAUGE_LENGTH
+
 #if 1
 int
 gauge (FILE *output, time_t start_time, int pos, int size, unsigned int flags)
@@ -1322,19 +1324,6 @@ wait2 (int nmillis)
 }
 
 
-unsigned long
-time_ms (unsigned long *ms)
-{
-  unsigned long t = 0;
-  struct timeval tv;
-
-  if (!gettimeofday (&tv, NULL))
-    t = (unsigned long) (tv.tv_usec / 1000);
-
-  return ms ? *ms = t : t;
-}
-
-
 #ifdef  _WIN32
 int
 truncate (const char *path, off_t size)
@@ -1435,46 +1424,36 @@ _popen (const char *path, const char *mode)
   BPTR fh;
   long fhflags;
   char *apipe = malloc (strlen (path) + 7);
-
-  sprintf(apipe,"PIPE:%08lx.%08lx",(ULONG)FindTask(NULL),(ULONG)time(0));
   if (!apipe)
     return NULL;
 
-  //strcpy (apipe, "APIPE:");
-  //strcat (apipe, path);
+  sprintf (apipe, "PIPE:%08lx.%08lx", (ULONG) FindTask (NULL), (ULONG) time (0));
 
   if (*mode == 'w')
     fhflags = MODE_NEWFILE;
   else
     fhflags = MODE_OLDFILE;
 
-  //if (!(fh = Open (apipe, fhflags)))
-    //return NULL;
-  if (fh = Open(apipe, fhflags))
-  {
-    switch(SystemTags(path,
-                    SYS_Input, Input(),
-                    SYS_Output, fh,
-                    SYS_Asynch, TRUE,
-                    SYS_UserShell, TRUE,
-                    NP_CloseInput, FALSE,
-                    TAG_END))
+  if (fh = Open (apipe, fhflags))
     {
-      case 0:
-        return(fopen(apipe, mode));
-      break;
-      case -1:
-        Close(fh);
-        return 0;
-      break;
-      default:
-        return 0;
-      break;
+      switch (SystemTags(path, SYS_Input, Input(), SYS_Output, fh, SYS_Asynch,
+                TRUE, SYS_UserShell, TRUE, NP_CloseInput, FALSE, TAG_END))
+        {
+        case 0:
+          return fopen (apipe, mode);
+          break;
+        case -1:
+          Close (fh);
+          return 0;
+          break;
+        default:
+          return 0;
+          break;
+        }
     }
-  }
   return 0;
-  //return fdopen (fd, mode);  int fd;
 }
+
 
 int
 _pclose (FILE *stream)

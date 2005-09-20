@@ -33,12 +33,24 @@ extern "C" {
 typedef struct
 {
   const char *name;                             // property name
-  const char *value;                            // property value
-  const char *comment;                          // property comment, # COMMENT
+  const char *value_s;                          // property value
+  const char *comment_s;                        // property comment, # COMMENT
 } st_property_t;                                // NAME=VALUE
 
 
+#define PROPERTY_SEPARATOR '='
+#define PROPERTY_SEPARATOR_S "="
+#define PROPERTY_COMMENT '#'
+#define PROPERTY_COMMENT_S "#"
+
+
 /*
+  get_property_from_string()
+                         parse a property from a string where the property
+                         (prop_sep) and the comment separators can (must)
+                         be specified. This is useful for parsing a lot of
+                         things like http headers or property files with
+                         different separators
   get_property()       get value of propname from filename or return value
                          of env with name like propname or return def
   get_property_int()   like get_property() but returns an integer which is 0
@@ -52,12 +64,15 @@ typedef struct
   DELETE_PROPERTY()    like set_property but when value of propname is NULL
                          the whole property will disappear from filename
 */
-extern char *get_property (const char *filename, const char *propname, char *value,
-                           const char *def);
+extern char *get_property_from_string (char *str, const char *propname, const char prop_sep,
+                                       char *value_s, const char comment_sep);
+extern char *get_property (const char *filename, const char *propname,
+                           char *value, const char *def);
 extern int get_property_int (const char *filename, const char *propname);
 extern char *get_property_fname (const char *filename, const char *propname,
-                                 char *buffer, const char *def);
-extern int set_property (const char *filename, const char *propname, const char *value, const char *comment);
+                                 char *value_s, const char *def);
+extern int set_property (const char *filename, const char *propname,
+                         const char *value, const char *comment);
 extern int set_property_array (const char *filename, const st_property_t *prop);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL, NULL))
 

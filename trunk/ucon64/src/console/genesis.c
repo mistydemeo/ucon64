@@ -2,7 +2,7 @@
 genesis.c - Sega Genesis/Mega Drive support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/genesis.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
+#include "backup/md-pro.h"
 
 
 #define GENESIS_HEADER_START 256
@@ -1045,11 +1046,12 @@ save_rom (st_rominfo_t *rominfo, const char *name, unsigned char **buffer, int s
 
 static void
 write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
-                        int totalsize)
+                        int totalsize, int size)
 {
+  long int fpos = ftell (destfile);             // save file pointer
   static int sram_page = 0, file_no_sram = 0;
   int n;
-  unsigned char name[0x1c], flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
+  unsigned char name[0x1c], flags = 0;          // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
 
   fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0xff, destfile);                       // 0x0 = 0xff
@@ -1062,7 +1064,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
         name[n] = toupper (name[n]);            // according to Leo, MDPACKU4.BIN
     }                                           //  only supports upper case characters
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
-  fputc (0, destfile);                          // 0x1d = 0
+  fputc (size / MBIT, destfile);                // 0x1d = ROM size (not used by loader)
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 
   flags = 0x80;                                 // set F (?, default)
@@ -1076,7 +1078,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
           sram_page = 3;
         }
       flags |= sram_page++;
-      if ((ucon64.file_size - rominfo->buheader_len) <= 16 * MBIT)
+      if (size <= 16 * MBIT)
         flags &= ~0x80;                         // clear F (<=16 Mb & SRAM)
     }
   else
@@ -1103,8 +1105,9 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
 
       flags |= 8;                               // set V (enable region function)
     }
-
   fputc (flags, destfile);                      // 0x1f = flags
+
+  fseek (destfile, fpos, SEEK_SET);             // restore file pointer
 }
 
 
@@ -1112,8 +1115,8 @@ int
 genesis_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)                     // must be a multiple of 16 kB
-  int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
-      truncated = 0, paddedsize, org_do_not_calc_crc = ucon64.do_not_calc_crc;
+  int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
+      totalsize = 0, size, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
@@ -1219,18 +1222,19 @@ genesis_multi (int truncate_size, char *fname)
         }
       if (ucon64.rominfo->buheader_len)
         fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
+      size = ucon64.file_size - ucon64.rominfo->buheader_len;
 
       if (file_no == 0)
         {
           printf ("Loader: %s\n", ucon64.rom);
-          if (ucon64.file_size - ucon64.rominfo->buheader_len != MBIT)
+          if (size != MD_PRO_LOADER_SIZE)
             printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
         }
       else
         {
           printf ("ROM%d: %s\n", file_no, ucon64.rom);
-          write_game_table_entry (destfile, file_no, ucon64.rominfo, totalsize);
-          fseek (destfile, totalsize, SEEK_SET); // restore file pointer
+          write_game_table_entry (destfile, file_no, ucon64.rominfo, totalsize,
+                                  size);
         }
       file_no++;
 
@@ -1252,9 +1256,8 @@ genesis_multi (int truncate_size, char *fname)
               bytestowrite = truncate_size - totalsize;
               done = 1;
               truncated = 1;
-              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
-                      truncate_size / MBIT, ucon64.rom, ucon64.file_size -
-                        ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
+              printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
+                      truncate_size / MBIT, ucon64.rom, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
           if (bytestowrite == 0)
@@ -1262,33 +1265,21 @@ genesis_multi (int truncate_size, char *fname)
           fwrite (buffer, 1, bytestowrite, destfile);
           byteswritten += bytestowrite;
         }
-      fclose (srcfile);
-      if (truncated)
-        break;
 
-      // games have to be aligned to (start at) a 2 Mbit boundary
-      paddedsize = (totalsize + 2 * MBIT - 1) & ~(2 * MBIT - 1);
-//      printf ("paddedsize: %d (%f); totalsize: %d (%f)\n",
-//              paddedsize, paddedsize / (1.0 * MBIT), totalsize, totalsize / (1.0 * MBIT));
-      if (paddedsize > totalsize)
+      // Be sure the ROM size is a multiple of the buffer size used in
+      //  md_write_rom(), which is 0x4000 (16 kB, so using "buffer" is OK).
+      bytestowrite = ((size + 0x3fff) & ~0x3fff) - size;
+      if (bytestowrite)
         {
-          // I (dbjh) don't think it is really necessary to pad to the truncate
-          //  size, but it won't hurt
-          if (paddedsize > truncate_size)
-            {
-              truncated = 1;                    // not *really* truncated
-              paddedsize = truncate_size;
-            }
-
-          memset (buffer, 0, BUFSIZE);
-          while (totalsize < paddedsize)
-            {
-              bytestowrite = paddedsize - totalsize > BUFSIZE ?
-                              BUFSIZE : paddedsize - totalsize;
-              fwrite (buffer, 1, bytestowrite, destfile);
-              totalsize += bytestowrite;
-            }
+          memset (buffer, 0xff, bytestowrite);
+          totalsize += bytestowrite;
+          fwrite (buffer, 1, bytestowrite, destfile);
         }
+
+      // md_write_rom() handles alignment. Games have to be aligned to (start
+      //  at) a 2 Mbit boundary.
+      totalsize = (totalsize + 2 * MBIT - 1) & ~(2 * MBIT - 1);
+      fclose (srcfile);
       if (truncated)
         break;
     }

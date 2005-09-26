@@ -1,7 +1,7 @@
 /*
 smsgg-pro.c - SMS-PRO/GG-PRO flash card programmer support for uCON64
 
-Copyright (c) 2004 dbjh
+Copyright (c) 2004 - 2005 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -77,6 +77,7 @@ const st_getopt2_t smsggpro_usage[] =
 #ifdef  USE_PARALLEL
 
 static void eep_reset (void);
+static unsigned short int check_card (void);
 static void write_rom_by_byte (int *addr, unsigned char *buf);
 static void write_rom_by_page (int *addr, unsigned char *buf);
 static void write_ram_by_byte (int *addr, unsigned char *buf);
@@ -90,6 +91,23 @@ eep_reset (void)
   ttt_write_mem (0x000000, 0xff);               // reset EEP
   ttt_write_mem (0x200000, 0xff);               // reset EEP
   ttt_rom_disable ();
+}
+
+
+unsigned short int
+check_card (void)
+{
+  unsigned short int id;
+
+  eep_reset ();
+  id = ttt_get_id ();
+  if (id != 0xb0d0)
+    {
+      fprintf (stderr, "ERROR: SMS-PRO/GG-PRO flash card (programmer) not detected (ID: 0x%02hx)\n", id);
+      return 0;
+    }
+  else
+    return id;
 }
 
 
@@ -163,6 +181,14 @@ smsgg_read_rom (const char *filename, unsigned int parport, int size)
 
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
   blocksleft = size >> 8;
   eep_reset ();
   ttt_rom_enable ();
@@ -193,8 +219,8 @@ int
 smsgg_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
-  unsigned char buffer[0x4000];
-  int size, address = 0, bytesread, bytessend = 0;
+  unsigned char buffer[0x4000], game_table[32 * 0x10];
+  int game_no, size, romsize, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -206,27 +232,51 @@ smsgg_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
+  fseek (file, 0x2000, SEEK_SET);
+  bytesread = fread (game_table, 1, 32 * 0x10, file);
+  if (bytesread != 32 * 0x10)
+    {
+      fputs ("ERROR: Could not read game table from file\n", stderr);
+      fclose (file);
+      ttt_deinit_io ();
+      return -1;
+    }
+
   size = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
-  eep_reset ();
-  if (ttt_get_id () != 0xb0d0)
+  if (check_card () == 0)
     {
-      fputs ("ERROR: SMS-PRO/GG-PRO flash card (programmer) not detected\n", stderr);
-      fclose (file);
       ttt_deinit_io ();
+      fclose (file);
       exit (1);
     }
 
+  fseek (file, 0, SEEK_SET);
+
   starttime = time (NULL);
   eep_reset ();
-  while ((bytesread = fread (buffer, 1, 0x4000, file)))
+  for (game_no = -1; game_no < 32; game_no++)
     {
-      if ((address & 0xffff) == 0)
-        ttt_erase_block (address);
-      write_block (&address, buffer);
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      if (game_no >= 0)
+        {                                       // a game
+          if (game_table[game_no * 0x10] == 0)
+            continue;
+          romsize = game_table[game_no * 0x10 + 0x0d] * 16 * 1024;
+        }
+      else
+        romsize = SMSGG_PRO_LOADER_SIZE;        // the loader
+
+      while (romsize && (bytesread = fread (buffer, 1, 0x4000, file)))
+        {
+          if ((address & 0xffff) == 0)
+            ttt_erase_block (address);
+          write_block (&address, buffer);
+
+          bytessend += bytesread;
+          ucon64_gauge (starttime, bytessend, size);
+          romsize -= 0x4000;
+        }
     }
 
   fclose (file);
@@ -269,6 +319,14 @@ smsgg_read_sram (const char *filename, unsigned int parport, int start_bank)
 
   ttt_init_io (parport);
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
 
   if (read_block == ttt_read_ram_w)
     {
@@ -330,6 +388,13 @@ smsgg_write_sram (const char *filename, unsigned int parport, int start_bank)
 
   ttt_init_io (parport);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      exit (1);
+    }
 
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, 0x4000, file)))

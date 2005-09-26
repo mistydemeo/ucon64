@@ -1,7 +1,7 @@
 /*
 md-pro.c - MD-PRO flash card programmer support for uCON64
 
-Copyright (c) 2003 - 2004 dbjh
+Copyright (c) 2003 - 2005 dbjh
 Copyright (c) 2003        NoisyB
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
@@ -78,6 +78,7 @@ const st_getopt2_t mdpro_usage[] =
 #ifdef  USE_PARALLEL
 
 static void eep_reset (void);
+static unsigned short int check_card (void);
 static void write_rom_by_byte (int *addr, unsigned char *buf);
 static void write_rom_by_page (int *addr, unsigned char *buf);
 static void write_ram_by_byte (int *addr, unsigned char *buf);
@@ -95,6 +96,23 @@ eep_reset (void)
   ttt_write_mem (0x600000, 0xff);               // reset EEP chip 2
   ttt_write_mem (0x200000, 0xff);               // reset EEP chip 1
   ttt_rom_disable ();
+}
+
+
+unsigned short int
+check_card (void)
+{
+  unsigned short int id;
+
+  eep_reset ();
+  id = ttt_get_id ();
+  if ((id != 0xb0d0) && (id != 0x8916) && (id != 0x8917)) // Sharp 32M, Intel 64J3
+    {
+      fprintf (stderr, "ERROR: MD-PRO flash card (programmer) not detected (ID: 0x%02hx)\n", id);
+      return 0;
+    }
+  else
+    return id;
 }
 
 
@@ -160,8 +178,9 @@ int
 md_read_rom (const char *filename, unsigned int parport, int size)
 {
   FILE *file;
+  unsigned short int id;
   unsigned char buffer[0x100];
-  int blocksleft, address = 0, id;
+  int blocksleft, address = 0;
   time_t starttime;
   void (*read_block) (int, unsigned char *) = ttt_read_rom_w; // ttt_read_rom_b
 
@@ -172,8 +191,15 @@ md_read_rom (const char *filename, unsigned int parport, int size)
     }
   ttt_init_io (parport);
 
-  eep_reset ();
-  id = ttt_get_id ();
+  id = check_card ();
+  if (id == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
   if ((id == 0xb0d0 || id == 0x8916) && size > 32 * MBIT)
     size = 32 * MBIT;                           // Sharp or Intel 32 Mbit flash card
 #if 0
@@ -216,8 +242,8 @@ int
 md_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
-  unsigned char buffer[0x4000];
-  int size, address = 0, bytesread, bytessend = 0;
+  unsigned char buffer[0x4000], game_table[32 * 0x20];
+  int game_no, size, romsize, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -229,30 +255,54 @@ md_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
+  fseek (file, 0x8000, SEEK_SET);
+  bytesread = fread (game_table, 1, 32 * 0x20, file);
+  if (bytesread != 32 * 0x20)
+    {
+      fputs ("ERROR: Could not read game table from file\n", stderr);
+      fclose (file);
+      ttt_deinit_io ();
+      return -1;
+    }
+
   size = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
-  eep_reset ();
-  md_id = ttt_get_id ();
-  if ((md_id != 0xb0d0) && (md_id != 0x8916) && (md_id != 0x8917)) // Sharp 32M, Intel 64J3
+  md_id = check_card ();
+  if (md_id == 0)
     {
-      fputs ("ERROR: MD-PRO flash card (programmer) not detected\n", stderr);
-      fclose (file);
       ttt_deinit_io ();
+      fclose (file);
       exit (1);
     }
 
+  fseek (file, 0, SEEK_SET);
+
   starttime = time (NULL);
   eep_reset ();
-  while ((bytesread = fread (buffer, 1, 0x4000, file)))
+  for (game_no = -1; game_no < 32; game_no++)
     {
-      ucon64_bswap16_n (buffer, 0x4000);
-      if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
-          (((address & 0x1ffff) == 0) && (md_id == 0x8916 || md_id == 0x8917)))
-        ttt_erase_block (address);
-      write_block (&address, buffer);
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      if (game_no >= 0)
+        {                                       // a game
+          if (game_table[game_no * 0x20] == 0)
+            continue;
+          romsize = game_table[game_no * 0x20 + 0x1d] * MBIT;
+        }
+      else
+        romsize = MD_PRO_LOADER_SIZE;           // the loader
+
+      while (romsize && (bytesread = fread (buffer, 1, 0x4000, file)))
+        {
+          ucon64_bswap16_n (buffer, 0x4000);
+          if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
+              (((address & 0x1ffff) == 0) && (md_id == 0x8916 || md_id == 0x8917)))
+            ttt_erase_block (address);
+          write_block (&address, buffer);
+
+          bytessend += bytesread;
+          ucon64_gauge (starttime, bytessend, size);
+          romsize -= 0x4000;
+        }
     }
 
   fclose (file);
@@ -309,6 +359,14 @@ md_read_sram (const char *filename, unsigned int parport, int start_bank)
 
   ttt_init_io (parport);
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
 
   if (read_block == ttt_read_ram_w)
     {
@@ -377,6 +435,13 @@ md_write_sram (const char *filename, unsigned int parport, int start_bank)
 
   ttt_init_io (parport);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      exit (1);
+    }
 
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, 0x4000, file)))

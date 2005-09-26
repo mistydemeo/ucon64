@@ -1460,7 +1460,6 @@ fal_main (int argc, char **argv)
         }
 
       BackupSRAM (fp, BackupMemOffset, BackupMemSize);
-      fputc ('\n', stdout);
       fclose (fp);
     }
 
@@ -1482,7 +1481,6 @@ fal_main (int argc, char **argv)
         }
 
       RestoreSRAM (fp, BackupMemOffset);
-      fputc ('\n', stdout);
       fclose (fp);
     }
 
@@ -1503,7 +1501,6 @@ fal_main (int argc, char **argv)
           else
             ProgramNonTurboIntelFlash (fp);
         }
-      fputc ('\n', stdout);
       fclose (fp);
     }
 
@@ -1516,7 +1513,6 @@ fal_main (int argc, char **argv)
         }
 
       BackupROM (fp, ChipSize << 16);
-      fputc ('\n', stdout);
       fclose (fp);
     }
 
@@ -1534,8 +1530,8 @@ fal_main (int argc, char **argv)
     }
 #endif
 
-  ProgramExit (0);
-  exit (0);
+//  ProgramExit (0);
+  return 0;
 }
 
 

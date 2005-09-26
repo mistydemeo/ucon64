@@ -1,7 +1,7 @@
 /*
 pce-pro.h - PCE-PRO flash card programmer support for uCON64
 
-Copyright (c) 2004 dbjh
+Copyright (c) 2004 - 2005 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -24,6 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef PCE_PRO_H
 #define PCE_PRO_H
+
+#define PCE_PRO_LOADER_SIZE (56 * 1024)
 
 extern const st_getopt2_t pcepro_usage[];
 

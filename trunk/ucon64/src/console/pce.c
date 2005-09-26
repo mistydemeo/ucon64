@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "pce.h"
 #include "backup/mgd.h"
 #include "backup/msg.h"
+#include "backup/pce-pro.h"
 
 
 #define PCENGINE_HEADER_START 0x448
@@ -824,14 +825,15 @@ pcengine_f (st_rominfo_t *rominfo)
 
 
 static void
-write_game_table_entry (FILE *destfile, int file_no, int totalsize)
+write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 {
+  long int fpos = ftell (destfile);             // save file pointer
   int n;
   unsigned char name[0x1c];
   const char *p;
 
   fseek (destfile, 0xb000 + (file_no - 1) * 0x20, SEEK_SET);
-  fputc (0xff, destfile);                       // 0x0 = 0xff
+  fputc (0xff, destfile);                       // 0x0 = 0xff (= valid entry)
 
   memset (name, ' ', 0x1c);
   p = basename2 (ucon64.rom);
@@ -847,9 +849,11 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize)
         name[n] = toupper (name[n]);            // loader only supports upper case characters
     }
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
-  fputc (0, destfile);                          // 0x1d = 0
-  fputc (totalsize / MBIT, destfile);           // 0x1e = bank code
+  fputc (totalsize / MBIT, destfile);           // 0x1d = bank code
+  fputc (size / MBIT, destfile);                // 0x1e = ROM size (not used by loader)
   fputc (0, destfile);                          // 0x1f = flags (x, D (reserved), x, x, x, x, x, x)
+
+  fseek (destfile, fpos, SEEK_SET);             // restore file pointer
 }
 
 
@@ -857,8 +861,8 @@ int
 pcengine_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)
-  int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
-      truncated = 0, paddedsize, org_do_not_calc_crc = ucon64.do_not_calc_crc;
+  int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
+      totalsize = 0, size, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
@@ -924,18 +928,18 @@ pcengine_multi (int truncate_size, char *fname)
         }
       if (ucon64.rominfo->buheader_len)
         fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
+      size = ucon64.file_size - ucon64.rominfo->buheader_len;
 
       if (file_no == 0)
         {
           printf ("Loader: %s\n", ucon64.rom);
-          if (ucon64.file_size - ucon64.rominfo->buheader_len != 7 * 8192)
+          if (size != PCE_PRO_LOADER_SIZE)
             printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
         }
       else
         {
           printf ("ROM%d: %s\n", file_no, ucon64.rom);
-          write_game_table_entry (destfile, file_no, totalsize);
-          fseek (destfile, totalsize, SEEK_SET); // restore file pointer
+          write_game_table_entry (destfile, file_no, totalsize, size);
         }
       file_no++;
 
@@ -949,9 +953,8 @@ pcengine_multi (int truncate_size, char *fname)
               bytestowrite = truncate_size - totalsize;
               done = 1;
               truncated = 1;
-              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
-                      truncate_size / MBIT, ucon64.rom, ucon64.file_size -
-                        ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
+              printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
+                      truncate_size / MBIT, ucon64.rom, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
           if (bytestowrite == 0)
@@ -959,31 +962,23 @@ pcengine_multi (int truncate_size, char *fname)
           fwrite (buffer, 1, bytestowrite, destfile);
           byteswritten += bytestowrite;
         }
-      fclose (srcfile);
-      if (truncated)
-        break;
 
-      // games have to be aligned to (start at) a 1 Mbit boundary
-      paddedsize = (totalsize + MBIT - 1) & ~(MBIT - 1);
-//      printf ("paddedsize: %d (%f); totalsize: %d (%f)\n",
-//              paddedsize, paddedsize / (1.0 * MBIT), totalsize, totalsize / (1.0 * MBIT));
-      if (paddedsize > totalsize)
+      // Be sure the ROM size is a multiple of the buffer size used in
+      //  pce_write_rom(), which is 0x4000 (16 kB, so using "buffer" is OK).
+      bytestowrite = ((size + 0x3fff) & ~0x3fff) - size;
+      if (bytestowrite)
         {
-          if (paddedsize > truncate_size)
-            {
-              truncated = 1;                    // not *really* truncated
-              paddedsize = truncate_size;
-            }
-
-          memset (buffer, 0, BUFSIZE);
-          while (totalsize < paddedsize)
-            {
-              bytestowrite = paddedsize - totalsize > BUFSIZE ?
-                              BUFSIZE : paddedsize - totalsize;
-              fwrite (buffer, 1, bytestowrite, destfile);
-              totalsize += bytestowrite;
-            }
+          memset (buffer, 0xff, bytestowrite);
+          totalsize += bytestowrite;
+          fwrite (buffer, 1, bytestowrite, destfile);
         }
+
+      // pce_write_rom() handles alignment. Games have to be aligned to a Mbit
+      // boundary.
+      totalsize = (totalsize + MBIT - 1) & ~(MBIT - 1);
+      if (size == 3 * MBIT || size == 4 * MBIT)
+        totalsize += 2 * MBIT;
+      fclose (srcfile);
       if (truncated)
         break;
     }

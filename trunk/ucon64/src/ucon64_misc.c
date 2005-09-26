@@ -534,6 +534,14 @@ const st_getopt2_t ucon64_options_usage[] =
       "DIRECTORY", "specify output directory",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
+#if 0
+    // TODO: currently ucon64.recursive is disfunct due to our cmdline handling-per-file
+    {
+      "R", 0, 0, UCON64_R,
+      NULL, "process subdirectories recursively",
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+    },
+#endif
     {
       "nbak", 0, 0, UCON64_NBAK,
       NULL, "prevents backup files (*.BAK)",
@@ -1643,14 +1651,15 @@ ucon64_testsplit (const char *filename)
 static int
 ucon64_configfile_update (void)
 {
-  char buf[MAXBUFSIZE];
+  char buf[16];
 
+  // update the config version
   sprintf (buf, "%d", UCON64_CONFIG_VERSION);
   set_property (ucon64.configfile, "version", buf, "uCON64 configuration");
-#if 0 // TODO: Add some *smart* code for updating the config file
+
+  // new properties since the last release
   set_property (ucon64.configfile, "gbaloader_sc", "sc_menu.bin",
                 "path to GBA multi-game loader (Super Card)");
-#endif
 
   return 0;
 }
@@ -1666,6 +1675,7 @@ typedef struct
 static int
 ucon64_configfile_create (void)
 {
+  char buf[16];
   const st_getopt2_t *options = ucon64.options;
   const st_property_t props[] =
     {
@@ -1801,8 +1811,8 @@ ucon64_configfile_create (void)
     };
   int x = 0, y = 0;
 
-  ucon64_configfile_update ();
-
+  sprintf (buf, "%d", UCON64_CONFIG_VERSION);
+  set_property (ucon64.configfile, "version", buf, "uCON64 configuration");
   set_property_array (ucon64.configfile, props);
 
   for (x = 0; emulate[x].command; x++)
@@ -1877,6 +1887,7 @@ ucon64_configfile (void)
 
       fcopy (ucon64.configfile, 0, fsizeof (ucon64.configfile), buf, "wb"); // "wb" is correct for copying
 
+      // update the old configfile
       result = ucon64_configfile_update ();
 
       if (!result)

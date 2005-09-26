@@ -238,6 +238,7 @@ enum
   UCON64_QQ,                                    // already reserved ;-)
   UCON64_R83,
   UCON64_RDAT,
+  UCON64_R,
   UCON64_REGION,
   UCON64_RJOLIET,
   UCON64_RROM,

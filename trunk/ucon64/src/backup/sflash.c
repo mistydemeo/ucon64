@@ -2,6 +2,7 @@
 sflash.h - Super Flash flash card programmer support for uCON64
 
 Copyright (c) 2004 JohnDie
+Copyright (c) 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -66,6 +67,7 @@ const st_getopt2_t sflash_usage[] =
 #ifdef  USE_PARALLEL
 
 static void eep_reset (void);
+static unsigned short int check_card (void);
 static void write_rom_by_byte (int *addr, unsigned char *buf);
 static void write_rom_by_page (int *addr, unsigned char *buf);
 static void write_ram_by_byte (int *addr, unsigned char *buf);
@@ -81,6 +83,23 @@ eep_reset (void)
   ttt_write_mem (0x600000, 0xff);               // reset EEP chip 2
   ttt_write_mem (0x200000, 0xff);               // reset EEP chip 1
   ttt_rom_disable ();
+}
+
+
+unsigned short int
+check_card (void)
+{
+  unsigned short int id;
+
+  eep_reset ();
+  id = ttt_get_id ();
+  if (id != 0x8917)                             // Intel 64J3
+    {
+      fprintf (stderr, "ERROR: Super Flash flash card (programmer) not detected (ID: %02hx)\n", id);
+      return 0;
+    }
+  else
+    return id;
 }
 
 
@@ -154,6 +173,14 @@ sf_read_rom (const char *filename, unsigned int parport, int size)
 
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
   blocksleft = size >> 8;
   eep_reset ();
   ttt_rom_enable ();
@@ -198,24 +225,6 @@ sf_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  size = fsizeof (filename);
-  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
-
-  eep_reset ();
-  if (ttt_get_id () != 0x8917)                  // Intel 64J3
-    {
-      fputs ("ERROR: Super Flash flash card (programmer) not detected\n", stderr);
-      fclose (file);
-      ttt_deinit_io ();
-      exit (1);
-    }
-
-  starttime = time (NULL);
-
-  // Erase last block now, because we have to write to it anyway later. Erasing
-  //  it later could erase part of a game.
-  ttt_erase_block (0x7e0000);
-
   fseek (file, 0x4000, SEEK_SET);
   bytesread = fread (game_table, 1, 0x80, file);
   if (bytesread != 0x80)
@@ -223,10 +232,26 @@ sf_write_rom (const char *filename, unsigned int parport)
       fputs ("ERROR: Could not read game table from file\n", stderr);
       fclose (file);
       ttt_deinit_io ();
-      return 0;
+      return -1;
+    }
+
+  size = fsizeof (filename);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      exit (1);
     }
 
   fseek (file, 0x8000, SEEK_SET);
+
+  starttime = time (NULL);
+
+  // Erase last block now, because we have to write to it anyway later. Erasing
+  //  it later could erase part of a game.
+  ttt_erase_block (0x7e0000);
 
   for (game_no = 0; game_no < 4; game_no++)
     {
@@ -305,6 +330,14 @@ sf_read_sram (const char *filename, unsigned int parport)
   ttt_init_io (parport);
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
 //  ttt_ram_enable ();          // The next ttt_set_ai_data also enables ram access
   ttt_set_ai_data (6, 0x98);  // Enable cartridge access, auto address increment
 
@@ -351,12 +384,19 @@ sf_write_sram (const char *filename, unsigned int parport)
   ttt_init_io (parport);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      exit (1);
+    }
+
   ttt_ram_enable ();
 
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, 0x4000, file)))
     {
-      write_block (&address, buffer);             // 0x4000 bytes write
+      write_block (&address, buffer);           // 0x4000 bytes write
       bytessend += bytesread;
       if ((address & 0x3fff) == 0)
         ucon64_gauge (starttime, bytessend, size);

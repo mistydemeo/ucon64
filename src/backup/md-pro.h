@@ -1,7 +1,7 @@
 /*
 md-pro.h - MD-PRO flash card programmer support for uCON64
 
-Copyright (c) 2003 dbjh
+Copyright (c) 2003 - 2005 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -24,6 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MD_PRO_H
 #define MD_PRO_H
+
+#define MD_PRO_LOADER_SIZE (128 * 1024)
 
 extern const st_getopt2_t mdpro_usage[];
 

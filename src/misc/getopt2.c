@@ -398,17 +398,21 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
 
   if (S_ISREG (fstate.st_mode) ||
        (S_ISDIR (fstate.st_mode) &&
-        !(flags & GETOPT2_FILE_FILES_ONLY) &&
-        !(flags & GETOPT2_FILE_RECURSIVE)))
+        !(flags & GETOPT2_FILE_FILES_ONLY) && // IS a dir but should be passed to callback_func, too (logically)
+        !(flags & GETOPT2_FILE_RECURSIVE)))   // ...and NO recursion
     {
 #ifdef  DEBUG
       printf ("callback_func() == %s\n", path);
       fflush (stdout);
 #endif
 
-      if (!callback_func (path)) 
-        (*calls)++;
-      return 0;
+      if (!callback_func (path))
+        {
+          (*calls)++;
+          return 0;
+        }
+      else
+        return -1;
     }
 
   if (S_ISDIR (fstate.st_mode) && (flags & GETOPT2_FILE_RECURSIVE))

@@ -1,7 +1,7 @@
 /*
 pce-pro.c - PCE-PRO flash card programmer support for uCON64
 
-Copyright (c) 2004 dbjh
+Copyright (c) 2004 - 2005 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -64,6 +64,7 @@ const st_getopt2_t pcepro_usage[] =
 #ifdef  USE_PARALLEL
 
 static void eep_reset (void);
+static unsigned short int check_card (void);
 static void write_rom_by_byte (int *addr, unsigned char *buf);
 static void write_rom_by_page (int *addr, unsigned char *buf);
 
@@ -75,6 +76,23 @@ eep_reset (void)
   ttt_write_mem (0x000000, 0xff);               // reset EEP
   ttt_write_mem (0x200000, 0xff);               // reset EEP
   ttt_rom_disable ();
+}
+
+
+unsigned short int
+check_card (void)
+{
+  unsigned short int id;
+
+  eep_reset ();
+  id = ttt_get_id ();
+  if (id != 0xb0d0)
+    {
+      fprintf (stderr, "ERROR: PCE-PRO flash card (programmer) not detected (ID: 0x%02hx)\n", id);
+      return 0;
+    }
+  else
+    return id;
 }
 
 
@@ -122,6 +140,14 @@ pce_read_rom (const char *filename, unsigned int parport, int size)
 
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
   blocksleft = size >> 8;
   eep_reset ();
   ttt_rom_enable ();
@@ -152,8 +178,8 @@ int
 pce_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
-  unsigned char buffer[0x4000];
-  int size, fsize, address = 0, bytesread, bytessend = 0;
+  unsigned char buffer[0x4000], game_table[32 * 0x20];
+  int game_no, size, romsize, startaddress, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -165,34 +191,63 @@ pce_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  size = fsize = fsizeof (filename);
-  if (fsize == 4 * MBIT)
-    size += 2 * MBIT;
-  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
-
-  eep_reset ();
-  if (ttt_get_id () != 0xb0d0)
+  fseek (file, 0xb000, SEEK_SET);
+  bytesread = fread (game_table, 1, 32 * 0x20, file);
+  if (bytesread != 32 * 0x20)
     {
-      fputs ("ERROR: PCE-PRO flash card (programmer) not detected\n", stderr);
+      fputs ("ERROR: Could not read game table from file\n", stderr);
       fclose (file);
       ttt_deinit_io ();
+      return -1;
+    }
+
+  size = fsizeof (filename);
+  game_no = 0;
+  while (game_table[game_no * 0x20] && game_no < 32)
+    {
+      if (game_table[game_no * 0x20 + 0x1e] == 4)
+        size += 2 * MBIT;
+      game_no++;
+    }
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+
+  if (check_card () == 0)
+    {
+      ttt_deinit_io ();
+      fclose (file);
       exit (1);
     }
 
+  fseek (file, 0, SEEK_SET);
+
   starttime = time (NULL);
   eep_reset ();
-  while ((bytesread = fread (buffer, 1, 0x4000, file)))
+  for (game_no = -1; game_no < 32; game_no++)
     {
-      if ((address & 0xffff) == 0)
-        ttt_erase_block (address);
-      write_block (&address, buffer);
-      if ((fsize == 3 * MBIT) && (address == 2 * MBIT))
-        address += 2 * MBIT;
-      if ((fsize == 4 * MBIT) && (address == 4 * MBIT))
-        fseek (file, 2 * MBIT, SEEK_SET);
+      if (game_no >= 0)
+        {                                       // a game
+          if (game_table[game_no * 0x20] == 0)
+            continue;
+          romsize = game_table[game_no * 0x20 + 0x1e] * MBIT;
+        }
+      else
+        romsize = PCE_PRO_LOADER_SIZE;          // the loader
+      startaddress = address;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      while (romsize && (bytesread = fread (buffer, 1, 0x4000, file)))
+        {
+          if ((address & 0xffff) == 0)
+            ttt_erase_block (address);
+          write_block (&address, buffer);
+          if ((romsize == 3 * MBIT) && (address - startaddress == 2 * MBIT))
+            address += 2 * MBIT;
+          else if ((romsize == 4 * MBIT) && (address - startaddress == 4 * MBIT))
+            fseek (file, -2 * MBIT, SEEK_CUR);
+
+          bytessend += bytesread;
+          ucon64_gauge (starttime, bytessend, size);
+          romsize -= 0x4000;
+        }
     }
 
   fclose (file);

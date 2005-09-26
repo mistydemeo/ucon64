@@ -84,7 +84,7 @@ static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
 static st_rominfo_t *ucon64_probe (st_rominfo_t *rominfo);
 static int ucon64_rom_handling (void);
-static int ucon64_process_rom (char *fname);
+static int ucon64_process_rom (const char *fname);
 
 
 st_ucon64_t ucon64;                             // containes ptr to image, dat and rominfo
@@ -225,6 +225,11 @@ static const st_getopt2_t lf[] =
 #endif
     lf,
     atari_usage,
+#if 0
+// these backup units use audio to transfer ROMs
+    cc2_usage,
+    spsc_usage,
+#endif
     lf,
     coleco_usage,
     lf,
@@ -564,6 +569,7 @@ main (int argc, char **argv)
   if (rom_index == argc)
     ucon64_execute_options();
   else
+#if 0
     for (; rom_index < argc; rom_index++)
       {
         int result = 0;
@@ -646,13 +652,18 @@ main (int argc, char **argv)
         if (result == 1)
           break;
       }
+#else
+  // TODO: currently ucon64.recursive is disfunct due to our cmdline handling-per-file
+  getopt2_file (argc, argv, ucon64_process_rom, GETOPT2_FILE_FILES_ONLY |
+    (ucon64.recursive ? GETOPT2_FILE_RECURSIVE : 0));
+#endif
 
   return 0;
 }
 
 
 int
-ucon64_process_rom (char *fname)
+ucon64_process_rom (const char *fname)
 {
 #ifdef  USE_ZLIB
   int n_entries = unzip_get_number_entries (fname);
@@ -1000,32 +1011,32 @@ ucon64_rom_handling (void)
       if (ucon64.dat)
         switch (ucon64.console)
           {
-            case UCON64_SNES:
-            case UCON64_GEN:
-            case UCON64_GB:
-            case UCON64_GBA:
-            case UCON64_N64:
-              // These ROMs have internal headers with name, country, maker, etc.
-              break;
+          case UCON64_SNES:
+          case UCON64_GEN:
+          case UCON64_GB:
+          case UCON64_GBA:
+          case UCON64_N64:
+            // These ROMs have internal headers with name, country, maker, etc.
+            break;
 
-            default:
-              // Use ucon64.dat instead of ucon64.dat_enabled in case the index
-              //  file could not be created/opened -> no segmentation fault
-              if (ucon64.dat && ucon64.rominfo)
-                {
-                  if (!ucon64.rominfo->name[0])
-                    strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
-                  else if (ucon64.console == UCON64_NES)
-                    { // override the three-character FDS or FAM name
-                      int t = nes_get_file_type ();
-                      if (t == FDS || t == FAM)
-                        strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
-                    }
+          default:
+            // Use ucon64.dat instead of ucon64.dat_enabled in case the index
+            //  file could not be created/opened -> no segmentation fault
+            if (ucon64.dat && ucon64.rominfo)
+              {
+                if (!ucon64.rominfo->name[0])
+                  strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                else if (ucon64.console == UCON64_NES)
+                  { // override the three-character FDS or FAM name
+                    int t = nes_get_file_type ();
+                    if (t == FDS || t == FAM)
+                      strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                  }
 
-                  if (!ucon64.rominfo->country)
-                    ucon64.rominfo->country = NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->country);
-                }
-              break;
+                if (!ucon64.rominfo->country)
+                  ucon64.rominfo->country = NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->country);
+              }
+            break;
           }
     }
 

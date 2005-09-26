@@ -86,6 +86,7 @@ typedef struct
 
   // TODO?: rename to fname
   const char *rom;                              // ROM (cmdline) with path
+  int recursive;
 
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   int file_size;                                // (uncompressed) ROM file size (NOT console specific)

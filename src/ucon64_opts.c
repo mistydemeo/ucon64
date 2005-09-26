@@ -201,6 +201,10 @@ ucon64_switches (st_ucon64_t *p)
       ucon64.backup = 0;
       break;
 
+    case UCON64_R:
+      ucon64.recursive = 1;
+      break;
+
 #ifdef  USE_ANSI_COLOR
     case UCON64_NCOL:
       ucon64.ansi_color = 0;

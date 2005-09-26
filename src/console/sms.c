@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "sms.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
+#include "backup/smsgg-pro.h"
 
 
 #define SMS_HEADER_START 0x7ff0
@@ -263,8 +264,9 @@ sms_chk (st_rominfo_t *rominfo)
 
 
 static void
-write_game_table_entry (FILE *destfile, int file_no, int totalsize)
+write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 {
+  long int fpos = ftell (destfile);             // save file pointer
   static int sram_page = 0, sram_msg_printed = 0;
   int n;
   unsigned char name[0x0c], flags = 0;  // x, D (reserved), x, x, x, x, S1, S0
@@ -287,7 +289,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize)
         name[n] = toupper (name[n]);            // loader only supports upper case characters
     }
   fwrite (name, 1, 0x0c, destfile);             // 0x01 - 0x0c = name
-  fputc (0, destfile);                          // 0x0d = 0
+  fputc (size / 16384, destfile);               // 0x0d = ROM size (not used by loader)
   fputc (totalsize / 16384, destfile);          // 0x0e = bank code
 
   if (sram_page > 3)
@@ -300,8 +302,9 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize)
       sram_page = 3;
     }
   flags = sram_page++;
+  fputc (flags, destfile);                      // 0x0f = flags
 
-  fputc (flags, destfile);                      // 0x1f = flags
+  fseek (destfile, fpos, SEEK_SET);             // restore file pointer
 }
 
 
@@ -311,8 +314,8 @@ sms_multi (int truncate_size, char *fname)
 #define BUFSIZE 0x20000
 // BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
 //  equal to 1 Mbit (for check sum calculation)
-  int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
-      truncated = 0, paddedsize, org_do_not_calc_crc = ucon64.do_not_calc_crc;
+  int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
+      totalsize = 0, size, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
@@ -383,18 +386,18 @@ sms_multi (int truncate_size, char *fname)
         }
       if (ucon64.rominfo->buheader_len)
         fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
+      size = ucon64.file_size - ucon64.rominfo->buheader_len;
 
       if (file_no == 0)
         {
           printf ("Loader: %s\n", ucon64.rom);
-          if (ucon64.file_size - ucon64.rominfo->buheader_len != 3 * 16384)
+          if (size != SMSGG_PRO_LOADER_SIZE)
             printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
         }
       else
         {
           printf ("ROM%d: %s\n", file_no, ucon64.rom);
-          write_game_table_entry (destfile, file_no, totalsize);
-          fseek (destfile, totalsize, SEEK_SET); // restore file pointer
+          write_game_table_entry (destfile, file_no, totalsize, size);
         }
       file_no++;
 
@@ -411,9 +414,8 @@ sms_multi (int truncate_size, char *fname)
               bytestowrite = truncate_size - totalsize;
               done = 1;
               truncated = 1;
-              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
-                      truncate_size / MBIT, ucon64.rom, ucon64.file_size -
-                        ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
+              printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
+                      truncate_size / MBIT, ucon64.rom, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
           if (bytestowrite == 0)
@@ -421,31 +423,21 @@ sms_multi (int truncate_size, char *fname)
           fwrite (buffer, 1, bytestowrite, destfile);
           byteswritten += bytestowrite;
         }
-      fclose (srcfile);
-      if (truncated)
-        break;
 
-      // games have to be aligned to (start at) a 16 kB boundary
-      paddedsize = (totalsize + 16384 - 1) & ~(16384 - 1);
-//      printf ("paddedsize: %d (%f); totalsize: %d (%f)\n",
-//              paddedsize, paddedsize / (1.0 * MBIT), totalsize, totalsize / (1.0 * MBIT));
-      if (paddedsize > totalsize)
+      // Be sure the ROM size is a multiple of the buffer size used in
+      //  smsgg_write_rom(), which is 0x4000 (16 kB, so using "buffer" is OK).
+      bytestowrite = ((size + 0x3fff) & ~0x3fff) - size;
+      if (bytestowrite)
         {
-          if (paddedsize > truncate_size)
-            {
-              truncated = 1;                    // not *really* truncated
-              paddedsize = truncate_size;
-            }
-
-          memset (buffer, 0, BUFSIZE);
-          while (totalsize < paddedsize)
-            {
-              bytestowrite = paddedsize - totalsize > BUFSIZE ?
-                              BUFSIZE : paddedsize - totalsize;
-              fwrite (buffer, 1, bytestowrite, destfile);
-              totalsize += bytestowrite;
-            }
+          memset (buffer, 0xff, bytestowrite);
+          totalsize += bytestowrite;
+          fwrite (buffer, 1, bytestowrite, destfile);
         }
+
+      // smsgg_write_rom() handles alignment. Games have to be aligned to a 16
+      //  kB boundary.
+      totalsize = (totalsize + 16384 - 1) & ~(16384 - 1);
+      fclose (srcfile);
       if (truncated)
         break;
     }

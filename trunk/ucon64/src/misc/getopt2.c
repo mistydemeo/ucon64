@@ -401,22 +401,24 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
         !(flags & GETOPT2_FILE_FILES_ONLY) && // IS a dir but should be passed to callback_func, too (logically)
         !(flags & GETOPT2_FILE_RECURSIVE)))   // ...and NO recursion
     {
+      int result = 0; 
+
 #ifdef  DEBUG
       printf ("callback_func() == %s\n", path);
       fflush (stdout);
 #endif
 
-      if (!callback_func (path))
-        {
-          (*calls)++;
-          return 0;
-        }
-      else
-        return -1;
+      result = callback_func (path);
+
+      if (!result)
+        (*calls)++;
+
+      return result;
     }
 
   if (S_ISDIR (fstate.st_mode) && (flags & GETOPT2_FILE_RECURSIVE))
     {
+      int result = 0; 
 #ifndef _WIN32
       struct dirent *ep;
       DIR *dp;
@@ -446,7 +448,9 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
                 strcmp (ep->d_name, "..") != 0)
               {
                 sprintf (buf, "%s%s%s", path, p, ep->d_name);
-                getopt2_file_recursion (buf, callback_func, calls, flags);
+                result = getopt2_file_recursion (buf, callback_func, calls, flags);
+                if (result != 0)
+                  break;
               }
           closedir (dp);
         }
@@ -459,7 +463,9 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
                 strcmp (find_data.cFileName, "..") != 0)
               {
                 sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
-                getopt2_file_recursion (buf, callback_func, calls, flags);
+                result = getopt2_file_recursion (buf, callback_func, calls, flags);
+                if (result != 0)
+                  break;
               }
           while (FindNextFile (dp, &find_data));
           FindClose (dp);
@@ -474,11 +480,14 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
 int
 getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int flags)
 {
-  int x = optind, calls = 0;
-  (void) flags;
+  int x = optind, calls = 0, result = 0;
 
   for (; x < argc; x++)
-    getopt2_file_recursion (argv[x], callback_func, &calls, flags);
+    {
+      result = getopt2_file_recursion (argv[x], callback_func, &calls, flags);
+      if (result != 0)
+        break;
+    }
 
   return calls;
 }

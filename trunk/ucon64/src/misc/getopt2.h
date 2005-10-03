@@ -58,6 +58,10 @@ extern "C" {
   GETOPT2_FILE_RECURSIVE   pass all files/dirs with their realpath()'s recursively
   (GETOPT2_FILE_FILES_ONLY|GETOPT2_FILE_RECURSIVE)
                            pass only files with their realpath()'s recursively
+
+  callback_func()       getopt2_file() expects the callback_func to return the following
+                          values:
+                          0 == ok, 1 == skip the rest/break, -1 == failure/break
 */
 #define OPTION '-'
 #define OPTION_S "-"

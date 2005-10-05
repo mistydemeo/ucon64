@@ -89,14 +89,6 @@ typedef struct termios tty_t;
 #define MAXBUFSIZE 32768
 
 
-#ifndef MIN
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#endif
-#ifndef MAX
-#define MAX(a,b) ((a)>(b)?(a):(b))
-#endif
-
-
 extern int errno;
 
 typedef struct st_func_node
@@ -847,40 +839,41 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 
 
 int
-gauge (int percent, int width, int color1, int color2)
+gauge (int percent, int width, char ch1, char ch2, int color1, int color2)
 {
   int p;
-  char buf[1025];
+  char buf[1024 + 32]; // 32 == ansi code puffer
 
   if (!width ||
       percent < 0 ||
       percent > 100)
     return -1;
 
-  width = MIN (width, 1024);
+  if (1024 < width)
+    width = 1024;
     
   p = (int) ((width * percent) / 100);
 
-  memset (&buf, '=', width);
+  memset (&buf, ch1, p);
   buf[p] = 0;
 
-  if (color1 != -1 &&
-      color2 != -1)
-    if (p < width)
-      sprintf (&buf[p], "\x1b[3%d;4%dm", color1, color1);
+  if (p < width)
+    { 
+      if (color1 != -1 && color2 != -1)
+        sprintf (&buf[p], "\x1b[3%d;4%dm", color1, color1);
 
-  memset (strchr (buf, 0), '-', (int) (width - p));
+      memset (strchr (buf, 0), ch2, (int) (width - p));
+    }
 
-  if (color1 != -1 &&
-      color2 != -1)
+  if (color1 != -1 && color2 != -1)
     {
       buf[width + 8] = 0; // 8 == ansi code
-      fprintf (stdout, "[\x1b[3%d;4%dm%s\x1b[0m]", color2, color2, buf);
+      fprintf (stdout, "\x1b[3%d;4%dm%s\x1b[0m", color2, color2, buf);
     }
   else
     {
       buf[width] = 0;
-      fprintf (stdout, "[%s]", buf);
+      fputs (buf, stdout);
     }
 
   return 0;
@@ -890,11 +883,22 @@ gauge (int percent, int width, int color1, int color2)
 unsigned long
 bytes_per_second (time_t start_time, unsigned long pos)
 {
-  int curr = (time (0) - start_time);
+  long curr = time (0) - start_time;
 
-  curr = MAX (curr, 1);                         // `round up' to at least 1 sec (no division
+  if (curr < 1)
+    curr = 1;                                   // `round up' to at least 1 sec (no division
                                                 //  by zero below)
   return (unsigned long) (pos / curr);          // # bytes/second (average transfer speed)
+}
+
+
+int
+misc_percent (unsigned long pos, unsigned long len)
+{
+  if (len < 1)
+    len = 1;
+
+  return (int) ((((int64_t) 100) * pos) / len);
 }
 
 

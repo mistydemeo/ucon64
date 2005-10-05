@@ -1,7 +1,7 @@
 /*
 property.c - configfile handling
 
-Copyright (c) 2004 NoisyB
+Copyright (c) 2004 - 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  MAXBUFSIZE
 #undef  MAXBUFSIZE
-#endif  // MAXBUFSIZE
+#endif
 #define MAXBUFSIZE 32768
 
 
@@ -46,25 +46,30 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
                           char *value_s, const char comment_sep)
 {
   char str_end[6], *p = NULL, buf[MAXBUFSIZE];
+  int len = strlen (str);
 
-  strncpy (buf, str, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
+  if (len >= MAXBUFSIZE)
+    len = MAXBUFSIZE - 1;
+  memcpy (buf, str, len);
+  buf[len] = 0;
+
   p = strtriml (buf);
   if (*p == comment_sep || *p == '\n' || *p == '\r')
-    return NULL;                      // text after comment_sep is comment
+    return NULL;                                // text after comment_sep is comment
 
   sprintf (str_end, "%c\r\n", comment_sep);
-  if ((p = strpbrk (buf, str_end)))   // strip *any* returns and comments
+  if ((p = strpbrk (buf, str_end)))             // strip *any* returns and comments
     *p = 0;
 
   p = strchr (buf, prop_sep);
   if (p)
     {
-      *p = 0;                           // note that this "cuts" _buf_ ...
+      *p = 0;                                   // note that this "cuts" _buf_ ...
       p++;
     }
   strtriml (strtrimr (buf));
 
-  if (!stricmp (buf, propname))        // ...because we do _not_ use strnicmp()
+  if (!stricmp (buf, propname))                 // ...because we do _not_ use strnicmp()
     {
       // if no divider was found the propname must be a bool config entry
       //  (present or not present)

@@ -138,10 +138,10 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
   cleanup_cm_patterns() helper function for build_cm_patterns() to free all
                   memory allocated for a (list of) st_pattern_t structure(s)
   ansi_init()     initialize ANSI output
-  MISC_PERCENT()  macro with simple code that is done wrong the most times
   gauge()         simple gauge (uses ANSI is ansi_init() was successful)
                     if both color values are == -1, no color/ANSI will be used
   bytes_per_second() returns bytes/second
+  misc_percent()  returns percent
   clear_line ()   clear the current line (79 spaces)
   drop_privileges() switch to the real user and group id (leave "root mode")
   register_func() atexit() replacement
@@ -175,9 +175,9 @@ extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 
 extern int ansi_init (void);
 extern void clear_line (void);
-#define MISC_PERCENT(pos,len) ((int)((((int64_t)100)*pos)/MAX(len, 1)))
-extern int gauge (int percent, int width, int color1, int color2);
+extern int gauge (int percent, int width, char ch1, char ch2, int color1, int color2);
 extern unsigned long bytes_per_second (time_t start_time, unsigned long pos);
+extern int misc_percent (unsigned long pos, unsigned long len);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif

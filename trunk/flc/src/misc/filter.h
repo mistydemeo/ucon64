@@ -2,7 +2,7 @@
 filter.h - Simple filter framework for any file, stream or data
            processing application
            
-written by 2005 NoisyB (noisyb@gmx.net)
+written by 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -61,11 +61,13 @@ typedef struct st_filter_t
   // -1 == failed (will stop everything)
   //  0 == OK
   // >0 == skipped (that single filter will be ignored)
+  int (* demux) (void *);
+
   int (* open) (void *);
   int (* close) (void *);
 
-  int (* read) (void *);  // also: demux
-  int (* write) (void *); // also: decode (or encode)
+  int (* read) (void *);  // also: encode
+  int (* write) (void *); // also: decode
 
   int (* seek) (void *);
   int (* ctrl) (void *);
@@ -109,10 +111,12 @@ typedef struct st_filter_chain_t
 
   int pos;               // # of current filter (SET filters only)
   int total;             // # of all set filters (SET filters only)
-  int inited;             // filter were init()'ed (ALL filters)
-  int op;                 // (private) current filter operation FILTER_OPEN, FILTER_CLOSE, ...
-  char verbose;           // print verbose messages
-  char debug;             // print debug messages
+
+  // private
+  int inited[FILTER_MAX]; // filter were init()'ed (ALL filters)
+  int op;                 // current filter operation FILTER_OPEN, FILTER_CLOSE, ...
+  int debug;
+  int verbose;
 } st_filter_chain_t;
 
 
@@ -137,10 +141,9 @@ typedef struct st_filter_chain_t
                          try this for some transparency and to solve problems
   filter_free_chain()    free filter chain (use only once per process)
 
+  filter_demux()   wrapper for st_filter_t->demux (use always)
+
   filter_init()    wrapper for st_filter_t->init (use only once per process)
-                     IMPORTANT: it does NOT(!) make a difference if you call this before or after
-                     filter_set_chain(); always ALL filters with an init() will be init()'ed 
-                     (or quit()'ed) no matter what filter_set_chain() did
   filter_quit()    wrapper for st_filter_t->quit (use only once per process)
 
   filter_open()    wrapper for st_filter_t->open (use only once per file/data/stream)
@@ -179,7 +182,9 @@ extern void filter_st_filter_chain_t_sanity_check (st_filter_chain_t *fc);
 extern void filter_free_chain (st_filter_chain_t *);
 
 
-extern int filter_init (st_filter_chain_t *fc, void *o);
+extern int filter_demux (st_filter_chain_t *fc, void *o);
+
+extern int filter_init (st_filter_chain_t *fc, void *o, const int *filter_id);
 extern int filter_quit (st_filter_chain_t *fc, void *o);
 
 extern int filter_open (st_filter_chain_t *fc, void *o);

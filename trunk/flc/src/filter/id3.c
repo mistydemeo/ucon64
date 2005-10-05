@@ -268,6 +268,7 @@ const st_filter_t id3_filter = {
   "id3 tags (mp3)",
   ".mp3",
   4,
+  NULL,
   (int (*) (void *)) &id3_open,
   NULL,
   NULL,

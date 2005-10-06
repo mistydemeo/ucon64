@@ -213,7 +213,7 @@ sf_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[0x80];
-  int game_no, romsize, size, address = 0, bytesread, bytessend = 0;
+  int game_no, size, address = 0, bytesread, bytessend = 0, bytesleft;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -258,7 +258,7 @@ sf_write_rom (const char *filename, unsigned int parport)
       if (game_table[game_no * 0x20] == 0)
         continue;
 
-      romsize = game_table[game_no * 0x20 + 0x1f] * 0x8000;
+      bytesleft = game_table[game_no * 0x20 + 0x1f] * 0x8000;
 
       switch (game_table[game_no * 0x20 + 0x1d] & 0x60)
         {
@@ -279,7 +279,7 @@ sf_write_rom (const char *filename, unsigned int parport)
 
       eep_reset ();
 
-      while (romsize && (bytesread = fread (buffer, 1, 0x4000, file)))
+      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
         {
           if ((address & 0x1ffff) == 0)
             ttt_erase_block (address);
@@ -287,19 +287,19 @@ sf_write_rom (const char *filename, unsigned int parport)
             write_block (&address, buffer);
           bytessend += bytesread;
           ucon64_gauge (starttime, bytessend, size);
-          romsize -= 0x4000;
+          bytesleft -= 0x4000;
         }
     }
 
   fseek (file, 0, SEEK_SET);
-  romsize = 0x8000;
+  bytesleft = 0x8000;
   address = 0x7f8000;
-  while (romsize && (bytesread = fread (buffer, 1, 0x4000, file)))
+  while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
     {
       write_block (&address, buffer);
       bytessend += bytesread;
       ucon64_gauge (starttime, bytessend, size);
-      romsize -= 0x4000;
+      bytesleft -= 0x4000;
     }
 
   fclose (file);

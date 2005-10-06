@@ -243,7 +243,7 @@ md_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x20];
-  int game_no, size, romsize, address = 0, bytesread, bytessend = 0;
+  int game_no, size, address = 0, bytesread, bytessend = 0, bytesleft;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -280,18 +280,18 @@ md_write_rom (const char *filename, unsigned int parport)
 
   starttime = time (NULL);
   eep_reset ();
-  for (game_no = -1; game_no < 32; game_no++)
+  for (game_no = -1; game_no < 31; game_no++)
     {
       if (game_no >= 0)
         {                                       // a game
           if (game_table[game_no * 0x20] == 0)
-            continue;
-          romsize = game_table[game_no * 0x20 + 0x1d] * MBIT;
+            break;
+          bytesleft = game_table[game_no * 0x20 + 0x1d] * MBIT;
         }
       else
-        romsize = MD_PRO_LOADER_SIZE;           // the loader
+        bytesleft = MD_PRO_LOADER_SIZE;         // the loader
 
-      while (romsize && (bytesread = fread (buffer, 1, 0x4000, file)))
+      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
         {
           ucon64_bswap16_n (buffer, 0x4000);
           if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
@@ -301,8 +301,10 @@ md_write_rom (const char *filename, unsigned int parport)
 
           bytessend += bytesread;
           ucon64_gauge (starttime, bytessend, size);
-          romsize -= 0x4000;
+          bytesleft -= 0x4000;
         }
+      // Games have to be aligned to (start at) a 2 Mbit boundary.
+      address = (address + 2 * MBIT - 1) & ~(2 * MBIT - 1);
     }
 
   fclose (file);

@@ -1,7 +1,7 @@
 /*
 dllinit.c - DLL initialization code
 
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -81,7 +81,7 @@ st_symbol_t import_export =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   {0, NULL, NULL, 0, 0, 0, NULL, 0}, {0, NULL, NULL, 0, 0, 0, NULL, 0},
   {0, NULL, NULL, 0, 0, 0, NULL, 0}, NULL, NULL, NULL, 0
 };

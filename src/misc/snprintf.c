@@ -558,7 +558,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
    /* but the following code achieves better performance for cases
     * where format string is long and contains few conversions */
       const char *q = strchr(p+1,'%');
-      size_t n = !q ? strlen(p) : (q-p);
+      size_t n = !q ? strlen(p) : (size_t)(q-p);
       if (str_l < str_m) {
         size_t avail = str_m-str_l;
         fast_memcpy(str+str_l, p, (n>avail?avail:n));
@@ -707,7 +707,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
        /* memchr on HP does not like n > 2^31  !!! */
             const char *q = memchr(str_arg, '\0',
                              precision <= 0x7fffffff ? precision : 0x7fffffff);
-            str_arg_l = !q ? precision : (q-str_arg);
+            str_arg_l = !q ? precision : (size_t)(q-str_arg);
           }
           break;
         default: break;
@@ -946,7 +946,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
         if (n > 0) {
           if (str_l < str_m) {
             size_t avail = str_m-str_l;
-            fast_memset(str+str_l, (zero_padding?'0':' '), (n>avail?avail:n));
+            fast_memset(str+str_l, (zero_padding?'0':' '), ((size_t)n>avail?avail:(size_t)n));
           }
           str_l += n;
         }
@@ -963,7 +963,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
         if (n > 0) {
           if (str_l < str_m) {
             size_t avail = str_m-str_l;
-            fast_memcpy(str+str_l, str_arg, (n>avail?avail:n));
+            fast_memcpy(str+str_l, str_arg, ((size_t)n>avail?avail:(size_t)n));
           }
           str_l += n;
         }
@@ -972,7 +972,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
         if (n > 0) {
           if (str_l < str_m) {
             size_t avail = str_m-str_l;
-            fast_memset(str+str_l, '0', (n>avail?avail:n));
+            fast_memset(str+str_l, '0', ((size_t)n>avail?avail:(size_t)n));
           }
           str_l += n;
         }
@@ -984,7 +984,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
           if (str_l < str_m) {
             size_t avail = str_m-str_l;
             fast_memcpy(str+str_l, str_arg+zero_padding_insertion_ind,
-                        (n>avail?avail:n));
+                        ((size_t)n>avail?avail:(size_t)n));
           }
           str_l += n;
         }
@@ -995,7 +995,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
         if (n > 0) {
           if (str_l < str_m) {
             size_t avail = str_m-str_l;
-            fast_memset(str+str_l, ' ', (n>avail?avail:n));
+            fast_memset(str+str_l, ' ', ((size_t)n>avail?avail:(size_t)n));
           }
           str_l += n;
         }

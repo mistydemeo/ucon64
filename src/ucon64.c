@@ -413,7 +413,7 @@ main (int argc, char **argv)
   // flush st_ucon64_t
   memset (&ucon64, 0, sizeof (st_ucon64_t));
 
-  // these members of ucon64 (except rom) don't change per file
+  // these members of ucon64 (except rom and fname_arch) don't change per file
   ucon64.argc = argc;
   ucon64.argv = argv;                           // must be set prior to calling
                                                 //  ucon64_load_discmage() (for DOS)
@@ -579,6 +579,11 @@ main (int argc, char **argv)
 #endif
 
 
+#ifdef  USE_DISCMAGE
+  // load libdiscmage (should be done before handling the switches (--ver))
+  ucon64.discmage_enabled = ucon64_load_discmage ();
+#endif
+
   // switches
   for (x = 0; arg[x].val; x++)
     {
@@ -606,11 +611,6 @@ main (int argc, char **argv)
   */
   if (ucon64.dat_enabled)
     ucon64_dat_indexer ();              // update cache (index) files if necessary
-
-#ifdef  USE_DISCMAGE
-  // load libdiscmage
-  ucon64.discmage_enabled = ucon64_load_discmage ();
-#endif
 
 #ifdef  USE_PARALLEL
   /*
@@ -658,6 +658,9 @@ main (int argc, char **argv)
               ucon64 file dir1\* dir2\*
             Once the flag is set it is not necessary to check the remaining
             parameters.
+
+            TODO: Find a solution for the fact that the stat() implementation
+                  of MinGW and VC++ don't accept a path with an ending slash.
           */
           int i = optind;
           for (; i < argc; i++)

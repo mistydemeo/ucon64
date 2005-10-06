@@ -974,7 +974,7 @@ pcengine_multi (int truncate_size, char *fname)
         }
 
       // pce_write_rom() handles alignment. Games have to be aligned to a Mbit
-      // boundary.
+      //  boundary.
       totalsize = (totalsize + MBIT - 1) & ~(MBIT - 1);
       if (size == 3 * MBIT || size == 4 * MBIT)
         totalsize += 2 * MBIT;

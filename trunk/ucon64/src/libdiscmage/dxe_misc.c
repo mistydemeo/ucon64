@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   The original reason this file was created was because we can do the
   (re)definition of the names of the buffered file I/O functions only once.
   For a DXE they would have to be (re)defined twice if we want to be able to
-  use the zlib & unzip code in miscz.c; once to substitute the names to make
+  use the zlib & unzip code in misc_z.c; once to substitute the names to make
   code use the import/export "table" and once to make code use the f*2()
   functions in miscz.c.
 */
@@ -451,6 +451,13 @@ char *
 strtok (char *s1, const char *s2)
 {
   return import_export.strtok (s1, s2);
+}
+
+
+char *
+strerror (int error)
+{
+  return import_export.strerror (error);
 }
 
 

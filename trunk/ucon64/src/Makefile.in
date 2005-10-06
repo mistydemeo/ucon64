@@ -111,6 +111,9 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/smc.o backup/smd.o backup/smsgg-pro.o backup/spsc.o \
         backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o backup/yoko.o \
         backup/z64.o
+ifdef DJGPP
+OBJECTS+=misc/snprintf.o
+endif
 ifdef USE_ZLIB
 LDFLAGS+=-lz
 OBJECTS+=misc/archive.o misc/map.o misc/unzip.o

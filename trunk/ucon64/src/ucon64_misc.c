@@ -534,14 +534,11 @@ const st_getopt2_t ucon64_options_usage[] =
       "DIRECTORY", "specify output directory",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
-#if 0
-    // TODO: currently ucon64.recursive is disfunct due to our cmdline handling-per-file
     {
-      "R", 0, 0, UCON64_R,
+      "r", 0, 0, UCON64_R,
       NULL, "process subdirectories recursively",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
-#endif
     {
       "nbak", 0, 0, UCON64_NBAK,
       NULL, "prevents backup files (*.BAK)",
@@ -1598,9 +1595,61 @@ ucon64_testpad (const char *filename)
 
 
 int
-ucon64_gauge (time_t init_time, int pos, int size)
+ucon64_gauge (time_t start_time, int pos, int size)
 {
-  return gauge (stdout, init_time, pos, size, ucon64.frontend ? GAUGE_PERCENT : GAUGE_DEFAULT);
+  int bps, percentage, col1, col2;
+        
+  if (pos > size || !size)
+    return -1;
+
+  percentage = misc_percent (pos, size);
+
+  if (ucon64.frontend)
+    {
+      fprintf (stdout, "%u\n", percentage);
+      fflush (stdout);
+
+      return 0;
+    }
+
+  fprintf (stdout, "\r%10d Bytes [", pos);
+
+#ifdef  USE_ANSI_COLOR
+  if (ucon64.ansi_color)
+    {
+      col1 = 1;
+      col2 = 2;
+    }
+  else
+#endif
+    {
+      col1 = -1;
+      col2 = -1;
+    }
+  gauge (percentage, 22, '=', '-', col1, col2);
+
+  bps = bytes_per_second (start_time, pos);
+  fprintf (stdout, "] %d%%, BPS=%d, ", percentage, bps);
+
+  if (pos == size)
+    {
+      int curr = time (0) - start_time;
+      // "round up" to at least 1 sec (to be consistent with ETA)
+      if (curr < 1)
+        curr = 1;
+      fprintf (stdout, "TOTAL=%02d:%02d", curr / 60, curr % 60);
+    }
+  else if (pos)
+    {
+      int left = (size - pos) / MAX (bps, 1);
+      fprintf (stdout, "ETA=%02d:%02d  ", left / 60, left % 60);
+    }
+  else                                          // don't display a nonsense ETA
+    fputs ("ETA=?  ", stdout);
+
+  fflush (stdout);
+
+  return 0;
 }
 
 

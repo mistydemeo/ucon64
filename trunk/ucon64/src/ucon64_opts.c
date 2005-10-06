@@ -170,13 +170,13 @@ ucon64_switches (st_ucon64_t *p)
 #endif // DLOPEN
 
       printf ("discmage enabled:                  %s\n",
-        ucon64.discmage_enabled ? "yes" : "no");
+              ucon64.discmage_enabled ? "yes" : "no");
 
       if (ucon64.discmage_enabled)
         {
           x = dm_get_version ();
           printf ("discmage version:                  %d.%d.%d (%s)\n",
-            x >> 16, x >> 8, x, dm_get_version_s ());
+                  x >> 16, x >> 8, x, dm_get_version_s ());
         }
       else
         puts ("discmage version:                  not available");
@@ -644,15 +644,15 @@ ucon64_options (st_ucon64_t *p)
 #ifdef  USE_PARALLEL
   int enableRTS = -1;                           // for UCON64_XSWC & UCON64_XSWC2
 #endif
-  int value = 0, x = 0, padded;
+  int value = 0, x = 0, padded, c = p->option;
   unsigned int checksum;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        *ptr = NULL, *values[UCON64_MAX_ARGS];
 #ifdef  AMIGA
-  char tmpbuf[MAXBUFSIZE];
+  char tmpbuf[FILENAME_MAX];
 #endif
+  static char rename_buf[FILENAME_MAX];
   struct stat fstate;
-  int c = p->option;
   const char *optarg = p->optarg;
 
   if (ucon64.rom)
@@ -1009,17 +1009,17 @@ ucon64_options (st_ucon64_t *p)
       ptr = basename2 (tmpnam2 (tmpbuf));
       rename2 (ucon64.rom, ptr);
 #endif
-      strcpy (buf, basename2 (ucon64.rom));
-      printf ("Renaming \"%s\" to ", buf);
-      strlwr (buf);
-      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      printf ("\"%s\"\n", buf);
+      strcpy (rename_buf, basename2 (ucon64.rom));
+      printf ("Renaming \"%s\" to ", rename_buf);
+      strlwr (rename_buf);
+      ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      printf ("\"%s\"\n", rename_buf);
 #ifdef  AMIGA
-      rename2 (ptr, buf);
+      rename2 (ptr, rename_buf);
 #else
-      rename2 (ucon64.rom, buf);
+      rename2 (ucon64.rom, rename_buf);
 #endif
-      ucon64.rom = (const char *) buf;
+      ucon64.rom = (const char *) rename_buf;
       break;
 
     case UCON64_RU:
@@ -1027,17 +1027,17 @@ ucon64_options (st_ucon64_t *p)
       ptr = basename2 (tmpnam2 (tmpbuf));
       rename2 (ucon64.rom, ptr);
 #endif
-      strcpy (buf, basename2 (ucon64.rom));
-      printf ("Renaming \"%s\" to ", buf);
-      strupr (buf);
-      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      printf ("\"%s\"\n", buf);
+      strcpy (rename_buf, basename2 (ucon64.rom));
+      printf ("Renaming \"%s\" to ", rename_buf);
+      strupr (rename_buf);
+      ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      printf ("\"%s\"\n", rename_buf);
 #ifdef  AMIGA
-      rename2 (ptr, buf);
+      rename2 (ptr, rename_buf);
 #else
-      rename2 (ucon64.rom, buf);
+      rename2 (ucon64.rom, rename_buf);
 #endif
-      ucon64.rom = (const char *) buf;
+      ucon64.rom = (const char *) rename_buf;
       break;
 
 #ifdef  USE_DISCMAGE

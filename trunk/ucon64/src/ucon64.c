@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2004 NoisyB
+Copyright (c) 1999 - 2005 NoisyB
 Copyright (c) 2001 - 2005 dbjh
 
 
@@ -68,7 +68,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_ZLIB
 #include "misc/archive.h"
 #endif
-#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/getopt2.h"
 #include "misc/string.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -390,7 +390,7 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int x = 0, y = 0, rom_index = 0, c = 0;
+  int x = 0, y = 0, c = 0;
 #if (FILENAME_MAX < MAXBUFSIZE)
   static char buf[MAXBUFSIZE];
 #else
@@ -413,20 +413,41 @@ main (int argc, char **argv)
   // flush st_ucon64_t
   memset (&ucon64, 0, sizeof (st_ucon64_t));
 
+  // these members of ucon64 (except rom) don't change per file
+  ucon64.argc = argc;
+  ucon64.argv = argv;                           // must be set prior to calling
+                                                //  ucon64_load_discmage() (for DOS)
   ucon64.rom =
   ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
 
-  ucon64.parport_needed = 0;
+  ucon64.fname_arch[0] = 0;
+
+  ucon64.recursive =
+  ucon64.parport_needed =
+  ucon64.io_mode = 0;
+
+  ucon64.battery =
+  ucon64.bs_dump =
+  ucon64.buheader_len =
+  ucon64.console =
+  ucon64.controller =
+  ucon64.controller2 =
+  ucon64.do_not_calc_crc =
+  ucon64.id =
+  ucon64.interleaved =
+  ucon64.mirror =
+  ucon64.part_size =
+  ucon64.region =
+  ucon64.snes_header_base =
+  ucon64.snes_hirom =
+  ucon64.tv_standard =
+  ucon64.use_dump_info =
+  ucon64.vram = UCON64_UNKNOWN;
 
   ucon64.flags = WF_DEFAULT;
 
-  ucon64.fname_arch[0] = 0;
-
-  ucon64.argc = argc;
-  ucon64.argv = argv;                           // must be set prior to calling
-                                                //  ucon64_load_discmage() (for DOS)
 
   // convert (st_getopt2_t **) to (st_getopt2_t *)
   memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
@@ -455,7 +476,7 @@ main (int argc, char **argv)
   // ANSI colors?
   ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color");
   // the conditional call to ansi_init() has to be done *after* the check for
-  //  the switch -ncol
+  //  the switch --ncol
 #endif
 
   // parallel port?
@@ -502,14 +523,6 @@ main (int argc, char **argv)
             strcpy (ucon64.datdir, ucon64.configdir); // use .ucon64/ instead of .ucon64/dat/
             ucon64.dat_enabled = 1;
           }
-
-  if (ucon64.dat_enabled)
-    ucon64_dat_indexer ();  // update cache (index) files if necessary
-
-#ifdef  USE_DISCMAGE
-  // load libdiscmage
-  ucon64.discmage_enabled = ucon64_load_discmage ();
-#endif
 
   if (argc < 2)
     {
@@ -565,98 +578,98 @@ main (int argc, char **argv)
       arg[x].console);
 #endif
 
-  rom_index = optind;                           // save index of first file
-  if (rom_index == argc)
+
+  // switches
+  for (x = 0; arg[x].val; x++)
+    {
+      if (arg[x].console != UCON64_UNKNOWN)
+        ucon64.console = arg[x].console;
+      if (arg[x].flags)
+        ucon64.flags = arg[x].flags;
+      if (arg[x].val)
+        ucon64.option = arg[x].val;
+      ucon64.optarg = arg[x].optarg;
+
+//      if (ucon64.flags & WF_SWITCH)
+        ucon64_switches (&ucon64);
+    }
+
+#ifdef  USE_ANSI_COLOR
+  if (ucon64.ansi_color)
+    ucon64.ansi_color = ansi_init ();
+#endif
+
+  /*
+    Call ucon64_dat_indexer() after handling the switches and after calling
+    ansi_init() so that the progress bar is displayed correctly (colour/no
+    colour).
+  */
+  if (ucon64.dat_enabled)
+    ucon64_dat_indexer ();              // update cache (index) files if necessary
+
+#ifdef  USE_DISCMAGE
+  // load libdiscmage
+  ucon64.discmage_enabled = ucon64_load_discmage ();
+#endif
+
+#ifdef  USE_PARALLEL
+  /*
+    The copier options need root privileges for parport_open(). We can't use
+    ucon64.flags & WF_PAR to detect whether a (parallel port) copier option has
+    been specified, because another switch might've been specified after -port.
+  */
+  if (ucon64.parport_needed == 1)
+    ucon64.parport = parport_open (ucon64.parport);
+#endif
+#if     defined __unix__ && !defined __MSDOS__
+  /*
+    We can drop privileges after we have set up parallel port access. We cannot
+    drop privileges if the user wants to communicate with the USB version of the
+    F2A.
+    SECURITY WARNING: We stay in root mode if the user specified an F2A option!
+    We could of course drop privileges which requires the user to run uCON64 as
+    root (not setuid root), but we want to be user friendly. Besides, doing
+    things as root is bad anyway (from a security viewpoint).
+  */
+  if (ucon64.parport_needed != 2
+#ifdef  USE_USB
+      && !ucon64.usbport
+#endif
+     )
+    drop_privileges ();
+#endif // __unix__ && !__MSDOS__
+
+  if (optind == argc)                   // no file was specified (e.g. --db)
     ucon64_execute_options();
   else
-#if 0
-    for (; rom_index < argc; rom_index++)
-      {
-        int result = 0;
-        char buf2[FILENAME_MAX];
-#ifndef _WIN32
-        struct dirent *ep;
-        DIR *dp;
-#else
-        char search_pattern[FILENAME_MAX];
-        WIN32_FIND_DATA find_data;
-        HANDLE dp;
-#endif
-
-        realpath2 (argv[rom_index], buf);
-        if (stat (buf, &fstate) != -1)
-          {
-            if (S_ISREG (fstate.st_mode))
-              result = ucon64_process_rom (buf);
-            else if (S_ISDIR (fstate.st_mode))  // a dir?
-              {
-                char *p;
-#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
-                /*
-                  Note that this code doesn't make much sense for Cygwin,
-                  because at least the version I use (1.3.6, dbjh) doesn't
-                  support current directories for drives.
-                */
-                c = toupper (buf[0]);
-                if (buf[strlen (buf) - 1] == FILE_SEPARATOR ||
-                    (c >= 'A' && c <= 'Z' && buf[1] == ':' && buf[2] == 0))
-#else
-                if (buf[strlen (buf) - 1] == FILE_SEPARATOR)
-#endif
-                  p = "";
-                else
-                  p = FILE_SEPARATOR_S;
-
-#ifndef _WIN32
-                if ((dp = opendir (buf)))
-                  {
-                    while ((ep = readdir (dp)))
-                      {
-                        sprintf (buf2, "%s%s%s", buf, p, ep->d_name);
-                        if (stat (buf2, &fstate) != -1)
-                          if (S_ISREG (fstate.st_mode))
-                            {
-                              result = ucon64_process_rom (buf2);
-                              if (result == 1)
-                                break;
-                            }
-                      }
-                    closedir (dp);
-                  }
-#else
-                sprintf (search_pattern, "%s%s*", buf, p);
-                if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
-                  {
-                    do
-                      {
-                        sprintf (buf2, "%s%s%s", buf, p, find_data.cFileName);
-                        if (stat (buf2, &fstate) != -1)
-                          if (S_ISREG (fstate.st_mode))
-                            {
-                              result = ucon64_process_rom (buf2);
-                              if (result == 1)
-                                break;
-                            }
-                      }
-                    while (FindNextFile (dp, &find_data));
-                    FindClose (dp);
-                  }
-#endif
-              }
-            else
-              result = ucon64_process_rom (buf);
-          }
-        else
-          result = ucon64_process_rom (buf);
-
-        if (result == 1)
-          break;
-      }
-#else
-  // TODO: currently ucon64.recursive is disfunct due to our cmdline handling-per-file
-  getopt2_file (argc, argv, ucon64_process_rom, GETOPT2_FILE_FILES_ONLY |
-    (ucon64.recursive ? GETOPT2_FILE_RECURSIVE : 0));
-#endif
+    {
+      int flags = GETOPT2_FILE_FILES_ONLY;
+      if (ucon64.recursive)
+        flags |= GETOPT2_FILE_RECURSIVE;
+      else 
+        {
+          /*
+            Check if one of the parameters is a directory and if so, set the
+            flag GETOPT2_FILE_RECURSIVE_ONCE. This flag makes uCON64 behave
+            like version 2.0.0, i.e., specifying a directory is equivalent to
+            specifying all files in that directory. In commands:
+              ucon64 file dir1 dir2
+            is equivalent to:
+              ucon64 file dir1\* dir2\*
+            Once the flag is set it is not necessary to check the remaining
+            parameters.
+          */
+          int i = optind;
+          for (; i < argc; i++)
+            if (!stat (argv[i], &fstate))
+              if (S_ISDIR (fstate.st_mode))
+                {
+                  flags |= GETOPT2_FILE_RECURSIVE_ONCE;
+                  break;
+                }
+        }
+      getopt2_file (argc, argv, ucon64_process_rom, flags);
+    }
 
   return 0;
 }
@@ -665,8 +678,19 @@ main (int argc, char **argv)
 int
 ucon64_process_rom (const char *fname)
 {
+  struct stat fstate;
 #ifdef  USE_ZLIB
-  int n_entries = unzip_get_number_entries (fname);
+  int n_entries;
+#endif
+
+  if (stat (fname, &fstate) == -1)
+    return 0;
+
+  if (!S_ISREG (fstate.st_mode))
+    return 0;
+
+#ifdef  USE_ZLIB
+  n_entries = unzip_get_number_entries (fname);
   if (n_entries != -1)                          // it's a zip file
     {
       for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
@@ -716,91 +740,25 @@ int
 ucon64_execute_options (void)
 /*
   Execute all options for a single file.
-  Please, if you experience problems then try your luck with the flags
-  in ucon64_misc.c/ucon64_wf[] before changing things here or in
-  ucon64_rom_handling()
+  Please, if you experience problems then try your luck with the flags in
+  ucon64_misc.c/ucon64_wf[] before changing things here or in
+  ucon64_rom_handling().
 */
 {
   int c = 0, result = 0, x = 0, opts = 0;
-  static int first_call = 1;                    // first call to this function
 
+  // these members of ucon64 can change per file
   ucon64.dat = NULL;
 #ifdef  USE_DISCMAGE
   ucon64.image = NULL;
 #endif
   ucon64.rominfo = NULL;
 
-  ucon64.battery =
-  ucon64.bs_dump =
-  ucon64.buheader_len =
-  ucon64.console =
-  ucon64.controller =
-  ucon64.controller2 =
-  ucon64.do_not_calc_crc =
-  ucon64.id =
-  ucon64.interleaved =
-  ucon64.mirror =
-  ucon64.part_size =
-  ucon64.region =
-  ucon64.snes_header_base =
-  ucon64.snes_hirom =
-  ucon64.split =
-  ucon64.tv_standard =
-  ucon64.use_dump_info =
-  ucon64.vram = UCON64_UNKNOWN;
+  ucon64.split = UCON64_UNKNOWN;
 
   ucon64.file_size =
   ucon64.crc32 =
-  ucon64.fcrc32 =
-  ucon64.io_mode = 0;
-
-  // switches
-  for (x = 0; arg[x].val; x++)
-    {
-      if (arg[x].console != UCON64_UNKNOWN)
-        ucon64.console = arg[x].console;
-      if (arg[x].flags)
-        ucon64.flags = arg[x].flags;
-      if (arg[x].val)
-        ucon64.option = arg[x].val;
-      ucon64.optarg = arg[x].optarg;
-
-//      if (ucon64.flags & WF_SWITCH)
-        ucon64_switches (&ucon64);
-    }
-#ifdef  USE_ANSI_COLOR
-  if (ucon64.ansi_color && first_call)
-    ucon64.ansi_color = ansi_init ();
-#endif
-
-#ifdef  USE_PARALLEL
-  /*
-    The copier options need root privileges for parport_open()
-    We can't use ucon64.flags & WF_PAR to detect whether a (parallel port)
-    copier option has been specified, because another switch might've been
-    specified after -port.
-  */
-  if (ucon64.parport_needed == 1)
-    ucon64.parport = parport_open (ucon64.parport);
-#endif // USE_PARALLEL
-#if     defined __unix__ && !defined __MSDOS__
-  /*
-    We can drop privileges after we have set up parallel port access. We cannot
-    drop privileges if the user wants to communicate with the USB version of the
-    F2A.
-    SECURITY WARNING: We stay in root mode if the user specified an F2A option!
-    We could of course drop privileges which requires the user to run uCON64 as
-    root (not setuid root), but we want to be user friendly. Besides, doing
-    things as root is bad anyway (from a security viewpoint).
-  */
-  if (first_call && ucon64.parport_needed != 2
-#ifdef  USE_USB
-      && !ucon64.usbport
-#endif
-     )
-    drop_privileges ();
-#endif // __unix__ && !__MSDOS__
-  first_call = 0;
+  ucon64.fcrc32 = 0;
 
   for (x = 0; arg[x].val; x++)
     if (!(arg[x].flags & WF_SWITCH))
@@ -1114,7 +1072,7 @@ ucon64_probe (st_rominfo_t * rominfo)
             return rominfo;
           }
     }
-  else if (ucon64.file_size <= MAXROMSIZE)      // give auto_recognition a try
+  else if (ucon64.file_size <= MAXROMSIZE)      // give auto recognition a try
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)
@@ -1161,7 +1119,7 @@ ucon64_nfo (void)
                                     0);
         fputc ('\n', stdout);
 
-        return 0; // no crc calc. for disc images and therefore no dat entry either
+        return 0; // no crc calc. for disc images and therefore no DAT entry either
       }
 #endif
   // Use ucon64.fcrc32 for SNES, Genesis & SMS interleaved/N64 non-interleaved
@@ -1216,10 +1174,10 @@ void
 ucon64_rom_nfo (const st_rominfo_t *rominfo)
 {
   unsigned int padded = ucon64_testpad (ucon64.rom),
-    intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
-      ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
+               intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
+                         ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
   int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
-           ucon64_testsplit (ucon64.rom);
+                   ucon64_testsplit (ucon64.rom);
   char buf[MAXBUFSIZE];
 
   // backup unit header

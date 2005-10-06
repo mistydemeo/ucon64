@@ -1,8 +1,8 @@
 /*
 misc.h - miscellaneous functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2005 NoisyB
+Copyright (c) 2001 - 2005 dbjh
 Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
 
 
@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include <time.h>                               // gauge() prototype contains time_t
+#include <time.h>                               // bytes_per_second() requires time()
 #include <stdio.h>
 
 
@@ -138,28 +138,12 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
   cleanup_cm_patterns() helper function for build_cm_patterns() to free all
                   memory allocated for a (list of) st_pattern_t structure(s)
   ansi_init()     initialize ANSI output
-  gauge()         start_time
-                    time when gauge() was first started or when
-                    (you may use time(0) to set this)
-                    the gauge started
-                  pos
-                    current position
-                  size
-                    the expected end postion (size)
-                    given these values gauge will calculate many
-                    informative things like time, status bar, cps, etc.
-                    it can be used for procedures which take some time to
-                    inform the user about the actual gauge
-                  GAUGE_DEFAULT
-                    default gauge with full information, without ansi colors
-                  GAUGE_PERCENT
-                    lite/small gauge only showing percentage with linefeed
-                    without ansi colors (can be used with popen(), etc..)
-                  GAUGE_ANSI
-                    enable ansi colors
-                  GAUGE_DELETE_AFTER
-                    delete (clears the current line) gauge() after process
-                    has finished
+  gauge()         simple gauge (uses ANSI if ansi_init() was successful)
+                  if both color values are == -1, no color/ANSI will be used
+  bytes_per_second() returns bytes per second (useful in combination with
+                  gauge())
+  misc_percent()  returns percentage of progress (useful in combination with
+                  gauge())
   clear_line ()   clear the current line (79 spaces)
   drop_privileges() switch to the real user and group id (leave "root mode")
   register_func() atexit() replacement
@@ -193,21 +177,9 @@ extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 
 extern int ansi_init (void);
 extern void clear_line (void);
-
-#define GAUGE_PERCENT      (1)
-#if 0
-#define GAUGE_BPS          (1 << 1)
-#define GAUGE_GAUGE        (1 << 2)
-#define GAUGE_ANSI         (1 << 3)
-#define GAUGE_DELETE_AFTER (1 << 4)
-#define GAUGE_BYTES_POS    (1 << 5)
-#define GAUGE_LINEFEED_ON  (1 << 6)
-#define GAUGE_DEFAULT      (GAUGE_PERCENT | GAUGE_BPS | GAUGE_GAUGE | GAUGE_ANSI | GAUGE_BYTES_POS)
-#else
-#define GAUGE_DEFAULT      0
-#endif
-extern int gauge (FILE *output, time_t start_time, int pos, int total_size, unsigned int flags);
-
+extern int gauge (int percent, int width, char char1, char char2, int color1, int color2);
+extern int bytes_per_second (time_t start_time, int nbytes);
+extern int misc_percent (int pos, int len);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif

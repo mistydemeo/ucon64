@@ -1,7 +1,7 @@
 /*
 getopt2.h - getopt1() extension
 
-Copyright (c) 2004 NoisyB
+Copyright (c) 2004 - 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -53,9 +53,10 @@ extern "C" {
 
   getopt2_file()        runs callback_func with the realpath() of file/dir as string
                         flags:
-  0                        pass all files/dirs with their realpath()
-  GETOPT2_FILE_FILES_ONLY  pass only files with their realpath()
-  GETOPT2_FILE_RECURSIVE   pass all files/dirs with their realpath()'s recursively
+  0                           pass all files/dirs with their realpath()
+  GETOPT2_FILE_FILES_ONLY     pass only files with their realpath()
+  GETOPT2_FILE_RECURSIVE      pass all files/dirs with their realpath()'s recursively
+  GETOPT2_FILE_RECURSIVE_ONCE like GETOPT2_FILE_RECURSIVE, but only one level deep
   (GETOPT2_FILE_FILES_ONLY|GETOPT2_FILE_RECURSIVE)
                            pass only files with their realpath()'s recursively
 
@@ -91,8 +92,10 @@ extern int getopt2_long (struct option *long_option, const st_getopt2_t *option,
 extern int getopt2_long_only (struct option *long_option, const st_getopt2_t *option, int n);
 extern int getopt2_short (char *short_option, const st_getopt2_t *option, int n);
 extern const st_getopt2_t *getopt2_get_index_by_val (const st_getopt2_t *option, int val);
-#define GETOPT2_FILE_FILES_ONLY 1
-#define GETOPT2_FILE_RECURSIVE  (1 << 1)
+
+#define GETOPT2_FILE_FILES_ONLY     1
+#define GETOPT2_FILE_RECURSIVE      (1 << 1)
+#define GETOPT2_FILE_RECURSIVE_ONCE (1 << 2)
 extern int getopt2_file (int argc, char **argv, int (* callback_func) (const char *), int flags);
 
 #ifdef  __cplusplus

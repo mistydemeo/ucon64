@@ -323,7 +323,7 @@ int
 atari_init (st_rominfo_t * rominfo)
 {
   int i, j, bsmode, size = ucon64.file_size;
-  uint32_t crc32;
+  unsigned int crc32;
   static char copier_usage[80];
   unsigned char first, image[ATARI_ROM_SIZE], buffer[0x200];
   char md5[32];

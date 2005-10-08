@@ -681,16 +681,20 @@ main (int argc, char **argv)
 int
 ucon64_process_rom (const char *fname)
 {
-  struct stat fstate;
 #ifdef  USE_ZLIB
   int n_entries;
 #endif
 
-  if (stat (fname, &fstate) == -1)
-    return 0;
-
-  if (!S_ISREG (fstate.st_mode))
-    return 0;
+  // Try to get file status information only if the file exists. We have to
+  //  accept non-existing files for the dump options.
+  if (access (fname, F_OK) == 0)
+    {
+      struct stat fstate;
+      if (stat (fname, &fstate) == -1)
+        return 0;
+      if (!S_ISREG (fstate.st_mode))
+        return 0;
+    }
 
 #ifdef  USE_ZLIB
   n_entries = unzip_get_number_entries (fname);

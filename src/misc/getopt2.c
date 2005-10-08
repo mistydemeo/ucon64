@@ -380,20 +380,26 @@ static int
 getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
                         int *calls, int flags)
 {
-  char path[FILENAME_MAX], *p;
+  char path[FILENAME_MAX];
   struct stat fstate;
 
   if (strlen (fname) >= FILENAME_MAX - 2)
     return 0;
 
-  p = (char *) basename2 (fname);
-  if (!strcmp (p, ".") || !strcmp (p, ".."))
-    return 0;
+  realpath2 (fname, path);
 
-  realpath2 (fname, path); 
-
-  if (stat (path, &fstate) != 0)
-    return 0;
+  /*
+    Try to get file status information only if the file with name fname exists.
+    If the file does not exist I set st_mode to 0 instead of __S_IFREG, because I
+    don't know if the latter is portable. - dbjh
+  */
+  if (access (path, F_OK) == 0)
+    {
+      if (stat (path, &fstate) != 0)
+        return 0;
+    }
+  else
+    fstate.st_mode = 0;
 
   /*
     We test whether fname is a directory, because we handle directories
@@ -437,7 +443,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       WIN32_FIND_DATA find_data;
       HANDLE dp;
 #endif
-      char buf[FILENAME_MAX];
+      char buf[FILENAME_MAX], *p;
 
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       char c = toupper (path[0]);

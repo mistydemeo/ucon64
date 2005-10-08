@@ -655,7 +655,7 @@ gba_init (st_rominfo_t *rominfo)
     "Unknown country";
 
   // misc stuff
-  sprintf (buf, "Version: v1.%d\n", gba_header.version);
+  sprintf (buf, "Version: 1.%d\n", gba_header.version);
   strcat (rominfo->misc, buf);
 
   sprintf (buf, "Device type: 0x%02x\n", gba_header.device_type);

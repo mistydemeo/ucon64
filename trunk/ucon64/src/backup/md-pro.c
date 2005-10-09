@@ -243,7 +243,8 @@ md_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x20];
-  int game_no, size, address = 0, bytesread, bytessend = 0, bytesleft;
+  int game_no, size, address = 0, bytesread, bytessend = 0, bytesleft = 0,
+      multi_game;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -255,14 +256,23 @@ md_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  fseek (file, 0x8000, SEEK_SET);
-  bytesread = fread (game_table, 1, 32 * 0x20, file);
-  if (bytesread != 32 * 0x20)
+  fseek (file, 0x83f4, SEEK_SET);
+  buffer[0] = 0;
+  fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
+  // currently we ignore the version string (full string is "uCON64 2.0.1")
+  multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
+
+  if (multi_game)
     {
-      fputs ("ERROR: Could not read game table from file\n", stderr);
-      fclose (file);
-      ttt_deinit_io ();
-      return -1;
+      fseek (file, 0x8000, SEEK_SET);
+      bytesread = fread (game_table, 1, 32 * 0x20, file);
+      if (bytesread != 32 * 0x20)
+        {
+          fputs ("ERROR: Could not read game table from file\n", stderr);
+          fclose (file);
+          ttt_deinit_io ();
+          return -1;
+        }
     }
 
   size = fsizeof (filename);
@@ -279,16 +289,15 @@ md_write_rom (const char *filename, unsigned int parport)
   fseek (file, 0, SEEK_SET);
 
   starttime = time (NULL);
+  if (!multi_game)
+    bytesleft = size;                           // one file (no multi-game)
   eep_reset ();
-  for (game_no = -1; game_no < 31; game_no++)
+  game_no = -1;
+  do
     {
-      if (game_no >= 0)
-        {                                       // a game
-          if (game_table[game_no * 0x20] == 0)
-            break;
-          bytesleft = game_table[game_no * 0x20 + 0x1d] * MBIT;
-        }
-      else
+      if (game_no >= 0)                         // a game of a multi-game file
+        bytesleft = game_table[game_no * 0x20 + 0x1d] * MBIT;
+      else if (multi_game)
         bytesleft = MD_PRO_LOADER_SIZE;         // the loader
 
       while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
@@ -305,7 +314,9 @@ md_write_rom (const char *filename, unsigned int parport)
         }
       // Games have to be aligned to (start at) a 2 Mbit boundary.
       address = (address + 2 * MBIT - 1) & ~(2 * MBIT - 1);
+      game_no++;
     }
+  while (multi_game ? (game_table[game_no * 0x20] && game_no < 31) : 0);
 
   fclose (file);
   ttt_deinit_io ();

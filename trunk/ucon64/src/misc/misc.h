@@ -191,7 +191,7 @@ extern char *getenv2 (const char *variable);
 
 /*
   Portability (conio.h, etc...)
-  
+
   init_conio()         init console I/O
   deinit_conio()       stop console I/O
   getch()
@@ -211,19 +211,14 @@ extern void init_conio (void);
 extern void deinit_conio (void);
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
 extern int kbhit (void);                        // may only be used after init_conio()!
+#endif
 
-#elif   defined __MSDOS__
+#ifdef  __MSDOS__
 #include <conio.h>                              // getch()
 #include <pc.h>                                 // kbhit()
-
-#elif   defined _WIN32
-#include <conio.h>                              // kbhit() & getch()
-
-#elif   defined AMIGA
-extern int kbhit (void);
-//#define getch           getchar
-// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
-//  getch().
+// DJGPP doesn't have snprintf(). Last tested with the version that includes
+//  GCC 4.0.1. - dbjh
+#include "snprintf.h"
 #endif
 
 #ifdef  __CYGWIN__
@@ -234,6 +229,7 @@ extern char *fix_character_set (char *str);
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.
 
+#include <conio.h>                              // kbhit() & getch()
 #include <sys/types.h>
 
 extern int truncate (const char *path, off_t size);
@@ -292,8 +288,14 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #endif // DLL
 
 #endif // !__MINGW32__
+#define snprintf _snprintf
 
-#elif   defined AMIGA                           // _WIN32
+#endif // _WIN32
+
+#ifdef  AMIGA
+// The compiler used by Jan-Erik doesn't have snprintf(). - dbjh
+#include "snprintf.h"
+
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
 #ifndef pclose                                  // archive.h's definition gets higher "precedence"
@@ -304,7 +306,11 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #endif
 extern FILE *_popen (const char *path, const char *mode);
 extern int _pclose (FILE *stream);
-#endif                                          // AMIGA
+extern int kbhit (void);
+//#define getch           getchar
+// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
+//  getch().
+#endif
 
 #ifdef  __cplusplus
 }

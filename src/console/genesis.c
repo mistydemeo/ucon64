@@ -1286,6 +1286,14 @@ genesis_multi (int truncate_size, char *fname)
   // fill the next game table entry
   fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0, destfile);                          // indicate no next game
+
+  // Make it possible for md_write_rom() to detect that the file is a
+  //  multi-game file.
+  fseek (destfile, 0x83f4, SEEK_SET);
+  strncpy ((char *) buffer, "uCON64 " UCON64_VERSION_S, 12);
+  buffer[12] = 0;
+  fwrite (buffer, 1, strlen ((char *) buffer), destfile);
+
   fclose (destfile);
   ucon64.console = UCON64_GEN;
   ucon64.do_not_calc_crc = org_do_not_calc_crc;

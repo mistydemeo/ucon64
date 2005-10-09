@@ -445,6 +445,13 @@ sms_multi (int truncate_size, char *fname)
   fseek (destfile, 0x2000 + (file_no - 1) * 0x10, SEEK_SET);
   fputc (0, destfile);                          // indicate no next game
 
+  // Make it possible for smsgg_write_rom() to detect that the file is a
+  //  multi-game file.
+  fseek (destfile, 0x21f4, SEEK_SET);
+  strncpy ((char *) buffer, "uCON64 " UCON64_VERSION_S, 12);
+  buffer[12] = 0;
+  fwrite (buffer, 1, strlen ((char *) buffer), destfile);
+
   /*
     The SMS requires the check sum to match the data. The ToToTEK loaders have
     the lower nibble of the "check sum range byte" set to 0x0f. Maybe ToToTEK

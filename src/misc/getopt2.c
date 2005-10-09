@@ -37,8 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _WIN32
 #include <windows.h>
 #ifndef __MINGW32__
-#include <sys/stat.h>
+#include <io.h>
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
+#define F_OK 00
 #endif
 #endif
 #include "file.h"

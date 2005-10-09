@@ -179,8 +179,8 @@ pce_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x20];
-  int game_no, size, romsize, startaddress, address = 0, bytesread,
-      bytessend = 0, bytesleft;
+  int game_no, size, romsize = 0, startaddress, address = 0, bytesread,
+      bytessend = 0, bytesleft, multi_game;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -192,23 +192,42 @@ pce_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  fseek (file, 0xb000, SEEK_SET);
-  bytesread = fread (game_table, 1, 32 * 0x20, file);
-  if (bytesread != 32 * 0x20)
+  fseek (file, 0xb3f4, SEEK_SET);
+  buffer[0] = 0;
+  fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
+  // currently we ignore the version string (full string is "uCON64 2.0.1")
+  multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
+
+  if (multi_game)
     {
-      fputs ("ERROR: Could not read game table from file\n", stderr);
-      fclose (file);
-      ttt_deinit_io ();
-      return -1;
+      fseek (file, 0xb000, SEEK_SET);
+      bytesread = fread (game_table, 1, 32 * 0x20, file);
+      if (bytesread != 32 * 0x20)
+        {
+          fputs ("ERROR: Could not read game table from file\n", stderr);
+          fclose (file);
+          ttt_deinit_io ();
+          return -1;
+        }
     }
 
   size = fsizeof (filename);
-  game_no = 0;
-  while (game_table[game_no * 0x20] && game_no < 31)
+  // 4 Mbit games need the last 2 Mbit to be mirrored (so, they need 6 Mbit)
+  if (multi_game)
     {
-      if (game_table[game_no * 0x20 + 0x1e] == 4)
+      game_no = 0;
+      while (game_table[game_no * 0x20] && game_no < 31)
+        {
+          if (game_table[game_no * 0x20 + 0x1e] == 4)
+            size += 2 * MBIT;
+          game_no++;
+        }
+    }
+  else
+    {
+      romsize = size;                           // one file (no multi-game)
+      if (size == 4 * MBIT)
         size += 2 * MBIT;
-      game_no++;
     }
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
@@ -223,15 +242,12 @@ pce_write_rom (const char *filename, unsigned int parport)
 
   starttime = time (NULL);
   eep_reset ();
-  for (game_no = -1; game_no < 31; game_no++)
+  game_no = -1;
+  do
     {
-      if (game_no >= 0)
-        {                                       // a game
-          if (game_table[game_no * 0x20] == 0)
-            break;
-          romsize = game_table[game_no * 0x20 + 0x1e] * MBIT;
-        }
-      else
+      if (game_no >= 0)                         // a game of a multi-game file
+        romsize = game_table[game_no * 0x20 + 0x1e] * MBIT;
+      else if (multi_game)
         romsize = PCE_PRO_LOADER_SIZE;          // the loader
 
       bytesleft = romsize;
@@ -255,7 +271,9 @@ pce_write_rom (const char *filename, unsigned int parport)
         }
       // Games have to be aligned to a Mbit boundary.
       address = (address + MBIT - 1) & ~(MBIT - 1);
+      game_no++;
     }
+  while (multi_game ? (game_table[game_no * 0x20] && game_no < 31) : 0);
 
   fclose (file);
   ttt_deinit_io ();

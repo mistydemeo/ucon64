@@ -34,12 +34,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #ifdef  _WIN32
 #include <windows.h>
-#define snprintf _snprintf
-#endif
-#if     defined AMIGA || defined __MSDOS__
-// The compiler used by Jan-Erik doesn't have snprintf(). DJGPP (GCC 4.0.1)
-//  doesn't have it either. - dbjh
-#include "misc/snprintf.h"
 #endif
 #include "misc/misc.h"
 #include "misc/string.h"

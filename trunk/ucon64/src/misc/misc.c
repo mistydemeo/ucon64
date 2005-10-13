@@ -49,6 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <fcntl.h>
 #include <dos/dos.h>
 #include <dos/var.h>
+#include <dos/dostags.h>
 #include <libraries/lowlevel.h>                 // GetKey()
 #include <proto/dos.h>
 #include <proto/lowlevel.h>

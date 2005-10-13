@@ -50,6 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <fcntl.h>
 #include <dos/dos.h>
 #include <dos/var.h>
+#include <dos/dostags.h>
 #include <libraries/lowlevel.h>                 // GetKey()
 #include <proto/dos.h>
 #include <proto/lowlevel.h>
@@ -3144,9 +3145,10 @@ readlink (const char *path, char *buf, int bufsize)
   return -1;
 }
 
-
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
+FILE *
+_popen (const char *path, const char *mode)
 {
   int fd;
   BPTR fh;

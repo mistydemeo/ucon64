@@ -37,9 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _WIN32
 #include <windows.h>
 #ifndef __MINGW32__
-#include <sys/stat.h>
+#include <io.h>
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
-#define S_ISREG(mode) ((mode) & _S_IFREG ? 1 : 0)
+#define F_OK 00
 #endif
 #endif
 #include "file.h"
@@ -381,51 +381,61 @@ static int
 getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
                         int *calls, int flags)
 {
-  char path[FILENAME_MAX], *p;
+  char path[FILENAME_MAX];
   struct stat fstate;
 
   if (strlen (fname) >= FILENAME_MAX - 2)
     return 0;
 
-  p = (char *) basename2 (fname);
-  if (!strcmp (p, ".") || !strcmp (p, ".."))
-    return 0;
+  realpath2 (fname, path);
 
-  realpath2 (fname, path); 
-
-  if (stat (path, &fstate) != 0)
-    return 0;
-
-#if 1
-  // we use !S_ISDIR() instead of S_ISREG(), because S_ISREG()
-  // does not cover everything that is NOT a dir
-  if (!S_ISDIR (fstate.st_mode) || // is NOT a dir
-       (S_ISDIR (fstate.st_mode) && // IS a dir
-        !(flags & GETOPT2_FILE_FILES_ONLY) && // IS a dir but should be passed to callback_func, too (logically)
-        !(flags & GETOPT2_FILE_RECURSIVE)))   // ...and NO recursion
-#else
-  if (S_ISREG (fstate.st_mode) ||
-       (S_ISDIR (fstate.st_mode) &&
-        !(flags & GETOPT2_FILE_FILES_ONLY) && // IS a dir but should be passed to callback_func, too (logically)
-        !(flags & GETOPT2_FILE_RECURSIVE)))   // ...and NO recursion
-#endif
+  /*
+    Try to get file status information only if the file with name fname exists.
+    If the file does not exist I set st_mode to 0 instead of __S_IFREG, because I
+    don't know if the latter is portable. - dbjh
+  */
+  if (access (path, F_OK) == 0)
     {
+      if (stat (path, &fstate) != 0)
+        return 0;
+    }
+  else
+    fstate.st_mode = 0;
+
+  /*
+    We test whether fname is a directory, because we handle directories
+    differently. The callback function should test whether its argument is a
+    regular file, a character special file, a block special file, a FIFO
+    special file, a symbolic link or a socket. If the flags
+    GETOPT2_FILE_FILES_ONLY, GETOPT2_FILE_RECURSIVE and
+    GETOPT2_FILE_RECURSIVE_ONCE were not used by the calling function, it may
+    also have to test whether the argument is a directory.
+  */
+  if (S_ISDIR (fstate.st_mode) ?
+        !(flags & (GETOPT2_FILE_FILES_ONLY |
+                   GETOPT2_FILE_RECURSIVE |
+                   GETOPT2_FILE_RECURSIVE_ONCE)) :
+        1)                                      // everything else: call callback
+    {
+      int result = 0; 
+
 #ifdef  DEBUG
       printf ("callback_func() == %s\n", path);
       fflush (stdout);
 #endif
 
-      if (!callback_func (path))
-        {
-          (*calls)++;
-          return 0;
-        }
-      else
-        return -1;
+      result = callback_func (path);
+
+      if (!result)
+        (*calls)++;
+
+      return result;
     }
 
-  if (S_ISDIR (fstate.st_mode) && (flags & GETOPT2_FILE_RECURSIVE))
+  if (S_ISDIR (fstate.st_mode) &&
+      (flags & (GETOPT2_FILE_RECURSIVE | GETOPT2_FILE_RECURSIVE_ONCE)))
     {
+      int result = 0; 
 #ifndef _WIN32
       struct dirent *ep;
       DIR *dp;
@@ -434,7 +444,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       WIN32_FIND_DATA find_data;
       HANDLE dp;
 #endif
-      char buf[FILENAME_MAX];
+      char buf[FILENAME_MAX], *p;
 
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       char c = toupper (path[0]);
@@ -455,7 +465,10 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
                 strcmp (ep->d_name, "..") != 0)
               {
                 sprintf (buf, "%s%s%s", path, p, ep->d_name);
-                getopt2_file_recursion (buf, callback_func, calls, flags);
+                result = getopt2_file_recursion (buf, callback_func, calls,
+                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
+                if (result != 0)
+                  break;
               }
           closedir (dp);
         }
@@ -468,7 +481,10 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
                 strcmp (find_data.cFileName, "..") != 0)
               {
                 sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
-                getopt2_file_recursion (buf, callback_func, calls, flags);
+                result = getopt2_file_recursion (buf, callback_func, calls,
+                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
+                if (result != 0)
+                  break;
               }
           while (FindNextFile (dp, &find_data));
           FindClose (dp);
@@ -483,11 +499,14 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
 int
 getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int flags)
 {
-  int x = optind, calls = 0;
-  (void) flags;
+  int x = optind, calls = 0, result = 0;
 
   for (; x < argc; x++)
-    getopt2_file_recursion (argv[x], callback_func, &calls, flags);
+    {
+      result = getopt2_file_recursion (argv[x], callback_func, &calls, flags);
+      if (result != 0)
+        break;
+    }
 
   return calls;
 }

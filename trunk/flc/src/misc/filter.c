@@ -449,13 +449,17 @@ filter_object_write (st_filter_chain_t *fc,
       key_len = strlen (key_temp);
     }
 
-//printf ("filter_cache_write(): %s %d %s %ld\n", (char *) key, key_len, o, o_len);
-//fflush (stdout); 
+#ifdef  DEBUG
+  printf ("filter_cache_write(): %s %d %s %ld\n", (char *) key, key_len, o, o_len);
+  fflush (stdout); 
+#endif
 
   for (x = 0; x < FILTER_MAX_OBJ; x++)
   {
-//printf ("filter_cache_write(2): %d %s %d %s %d\n", x, (char *) fc->o[x].key, fc->o[x].key_len, key, key_len);
-//fflush (stdout); 
+#ifdef  DEBUG
+    printf ("filter_cache_write().2: %d %s %d %s %d\n", x, (char *) fc->o[x].key, fc->o[x].key_len, key, key_len);
+    fflush (stdout); 
+#endif
 
     if ((fc->o[x].key && !memcmp (fc->o[x].key, key, key_len) && fc->o[x].key_len == key_len && fc->o[x].key) ||
         !fc->o[x].key)
@@ -511,18 +515,20 @@ filter_object_read (st_filter_chain_t *fc,
 
   for (; x < FILTER_MAX_OBJ && fc->o[x].key; x++)
     {
-
-//printf ("filter_cache_read(): %s %d == %s %d\n", (char *) fc->o[x].key, fc->o[x].key_len, key, key_len);
-//fflush (stdout);
+#ifdef  DEBUG
+      printf ("filter_cache_read(): %s %d == %s %d\n", (char *) fc->o[x].key, fc->o[x].key_len, key, key_len);
+      fflush (stdout);
+#endif
 
       if (fc->o[x].key_len == key_len)
         if (!memcmp (fc->o[x].key, key, key_len))
           {
             memcpy (o, fc->o[x].o, MIN (o_len, fc->o[x].o_len));
 
-//printf ("filter_cache_read(2)->object: %s", (char *) o);
-//fflush (stdout);
-            
+#ifdef  DEBUG
+            printf ("filter_cache_read().2->object: %s", (char *) o);
+            fflush (stdout);
+#endif            
             return 0;
           }
     }

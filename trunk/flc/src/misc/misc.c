@@ -1,8 +1,8 @@
 /*
 misc.c - miscellaneous functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2005 NoisyB
+Copyright (c) 2001 - 2005 dbjh
 Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
 
 
@@ -59,9 +59,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_ZLIB
 #include "archive.h"
 #endif
-#include "file.h"
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined AMIGA || defined __APPLE__      // Mac OS X actually
+// GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
+#else // DJGPP, Win32
+#define FILE_SEPARATOR '\\'
+#define FILE_SEPARATOR_S "\\"
+#endif
+
 #include "misc.h"
-#include "getopt.h"                             // struct option
 
 #ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
@@ -839,22 +847,20 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 
 
 int
-gauge (int percent, int width, char ch1, char ch2, int color1, int color2)
+gauge (int percent, int width, char char1, char char2, int color1, int color2)
 {
   int p;
-  char buf[1024 + 32]; // 32 == ansi code puffer
+  char buf[1024 + 32];                          // 32 == ANSI code buffer
 
-  if (!width ||
-      percent < 0 ||
-      percent > 100)
+  if (!width || percent < 0 || percent > 100)
     return -1;
 
-  if (1024 < width)
+  if (width > 1024)
     width = 1024;
     
-  p = (int) ((width * percent) / 100);
+  p = (width * percent) / 100;
 
-  memset (&buf, ch1, p);
+  memset (buf, char1, p);
   buf[p] = 0;
 
   if (p < width)
@@ -862,12 +868,12 @@ gauge (int percent, int width, char ch1, char ch2, int color1, int color2)
       if (color1 != -1 && color2 != -1)
         sprintf (&buf[p], "\x1b[3%d;4%dm", color1, color1);
 
-      memset (strchr (buf, 0), ch2, (int) (width - p));
+      memset (strchr (buf, 0), char2, width - p);
     }
 
   if (color1 != -1 && color2 != -1)
     {
-      buf[width + 8] = 0; // 8 == ansi code
+      buf[width + 8] = 0;                       // 8 == ANSI code length
       fprintf (stdout, "\x1b[3%d;4%dm%s\x1b[0m", color2, color2, buf);
     }
   else
@@ -880,20 +886,20 @@ gauge (int percent, int width, char ch1, char ch2, int color1, int color2)
 }
 
 
-unsigned long
-bytes_per_second (time_t start_time, unsigned long pos)
+int
+bytes_per_second (time_t start_time, int nbytes)
 {
-  long curr = time (0) - start_time;
+  int curr = time (NULL) - start_time;
 
   if (curr < 1)
-    curr = 1;                                   // `round up' to at least 1 sec (no division
+    curr = 1;                                   // "round up" to at least 1 sec (no division
                                                 //  by zero below)
-  return (unsigned long) (pos / curr);          // # bytes/second (average transfer speed)
+  return nbytes / curr;                         // # bytes/second (average transfer speed)
 }
 
 
 int
-misc_percent (unsigned long pos, unsigned long len)
+misc_percent (int pos, int len)
 {
   if (len < 1)
     len = 1;

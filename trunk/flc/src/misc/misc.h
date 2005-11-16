@@ -1,8 +1,8 @@
 /*
 misc.h - miscellaneous functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2005 NoisyB
+Copyright (c) 2001 - 2005 dbjh
 Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
 
 
@@ -138,10 +138,12 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
   cleanup_cm_patterns() helper function for build_cm_patterns() to free all
                   memory allocated for a (list of) st_pattern_t structure(s)
   ansi_init()     initialize ANSI output
-  gauge()         simple gauge (uses ANSI is ansi_init() was successful)
-                    if both color values are == -1, no color/ANSI will be used
-  bytes_per_second() returns bytes/second
-  misc_percent()  returns percent
+  gauge()         simple gauge (uses ANSI if ansi_init() was successful)
+                  if both color values are == -1, no color/ANSI will be used
+  bytes_per_second() returns bytes per second (useful in combination with
+                  gauge())
+  misc_percent()  returns percentage of progress (useful in combination with
+                  gauge())
   clear_line ()   clear the current line (79 spaces)
   drop_privileges() switch to the real user and group id (leave "root mode")
   register_func() atexit() replacement
@@ -175,9 +177,9 @@ extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 
 extern int ansi_init (void);
 extern void clear_line (void);
-extern int gauge (int percent, int width, char ch1, char ch2, int color1, int color2);
-extern unsigned long bytes_per_second (time_t start_time, unsigned long pos);
-extern int misc_percent (unsigned long pos, unsigned long len);
+extern int gauge (int percent, int width, char char1, char char2, int color1, int color2);
+extern int bytes_per_second (time_t start_time, int nbytes);
+extern int misc_percent (int pos, int len);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif
@@ -189,7 +191,7 @@ extern char *getenv2 (const char *variable);
 
 /*
   Portability (conio.h, etc...)
-  
+
   init_conio()         init console I/O
   deinit_conio()       stop console I/O
   getch()
@@ -209,19 +211,14 @@ extern void init_conio (void);
 extern void deinit_conio (void);
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
 extern int kbhit (void);                        // may only be used after init_conio()!
+#endif
 
-#elif   defined __MSDOS__
+#ifdef  __MSDOS__
 #include <conio.h>                              // getch()
 #include <pc.h>                                 // kbhit()
-
-#elif   defined _WIN32
-#include <conio.h>                              // kbhit() & getch()
-
-#elif   defined AMIGA
-extern int kbhit (void);
-//#define getch           getchar
-// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
-//  getch().
+// DJGPP doesn't have snprintf(). Last tested with the version that includes
+//  GCC 4.0.1. - dbjh
+#include "snprintf.h"
 #endif
 
 #ifdef  __CYGWIN__
@@ -232,6 +229,7 @@ extern char *fix_character_set (char *str);
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.
 
+#include <conio.h>                              // kbhit() & getch()
 #include <sys/types.h>
 
 extern int truncate (const char *path, off_t size);
@@ -290,8 +288,14 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #endif // DLL
 
 #endif // !__MINGW32__
+#define snprintf _snprintf
 
-#elif   defined AMIGA                           // _WIN32
+#endif // _WIN32
+
+#ifdef  AMIGA
+// The compiler used by Jan-Erik doesn't have snprintf(). - dbjh
+#include "snprintf.h"
+
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
 #ifndef pclose                                  // archive.h's definition gets higher "precedence"
@@ -302,7 +306,11 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #endif
 extern FILE *_popen (const char *path, const char *mode);
 extern int _pclose (FILE *stream);
-#endif                                          // AMIGA
+extern int kbhit (void);
+//#define getch           getchar
+// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
+//  getch().
+#endif
 
 #ifdef  __cplusplus
 }

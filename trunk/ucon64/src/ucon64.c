@@ -304,7 +304,7 @@ ucon64_test (void)
       {UCON64_DC,	"ucon64 -dc", 0},
 #endif
       {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" test/test.txt", 0x644db1ce},
-      {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" test/test.txt", 0},
+      {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" test/test.txt", 0xc2ea61a1},
 #if 0
       {UCON64_DINT,	"ucon64 -dint", 0},
       {UCON64_DISC,	"ucon64 -disc", 0},
@@ -324,7 +324,7 @@ ucon64_test (void)
 #endif
       {UCON64_FIND,	"ucon64 -find \"abcd\" test/test.txt", 0x644db1ce},
       {UCON64_FINDI,	"ucon64 -findi \"ABcD\" test/test.txt", 0x8d601a86},
-      {UCON64_FINDR,	"ucon64 -findr \"1234\" test/test.txt", 0},
+      {UCON64_FINDR,	"ucon64 -findr \"1234\" test/test.txt", 0x515e124e},
 #if 0
       {UCON64_FRONTEND,	"ucon64 -frontend", 0},
       {UCON64_GB,	"ucon64 -gb", 0},
@@ -345,7 +345,7 @@ ucon64_test (void)
       {UCON64_HELP,	"ucon64 -help", 0x9576194e},
       {UCON64_HEX,	"ucon64 -hex test/test.txt", 0x9732f50c},
       {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" test/test.txt", 0x6c43021b},
-      {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" test/test.txt", 0},
+      {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" test/test.txt", 0xc2ea61a1},
 #if 0
       {UCON64_HI,	"ucon64 -hi", 0},
       {UCON64_I,	"ucon64 -i", 0},

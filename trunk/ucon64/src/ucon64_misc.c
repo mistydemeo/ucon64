@@ -2512,7 +2512,9 @@ ucon64_find_func (void *buffer, int n, void *object)
           o->found = o->pos - matchlen;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, compare, (o->searchlen + 0x0f) & ~0x0f, o->found, DUMPER_HEX);
+              dumper (stdout, compare,
+                MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0 + 1)),
+                o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
         }
@@ -2527,7 +2529,9 @@ ucon64_find_func (void *buffer, int n, void *object)
           o->found = o->pos + ptr1 - ptr0;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, ptr1, (o->searchlen + 0x0f) & ~0x0f, o->found, DUMPER_HEX);
+              dumper (stdout, ptr1,
+                MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0 + 1)),
+                o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
           ptr1++;

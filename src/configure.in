@@ -20,6 +20,18 @@ fi
 AC_MSG_RESULT($enable_debug)
 
 
+AC_MSG_CHECKING(whether test output is enabled)
+AC_ARG_ENABLE(test,
+              AC_HELP_STRING([--enable-test],
+                             [enable test output (default: no)]),
+              enable_test=$enableval,
+              enable_test=no)
+if test $enable_test = yes; then
+  AC_DEFINE(TEST, 1, [enable test output (default: no)])
+fi
+AC_MSG_RESULT($enable_test)
+
+
 AC_MSG_CHECKING(whether support for parallel port backup units is enabled)
 AC_ARG_ENABLE(parallel,
               AC_HELP_STRING([--enable-parallel],

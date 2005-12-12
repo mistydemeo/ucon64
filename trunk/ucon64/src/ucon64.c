@@ -252,6 +252,329 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
+#ifdef  TEST
+typedef struct
+{
+  int option;
+
+  const char *cmdline;
+  uint32_t crc32;    // crc32 of cmdline's output
+} st_ucon64_test_t;
+
+
+void
+ucon64_test (void)
+{
+  st_ucon64_test_t test[] =
+    {
+#if 0
+      {UCON64_1991,	"ucon64 -1991", 0},
+      {UCON64_3DO,	"ucon64 -3do", 0},
+      {UCON64_83,	"ucon64 -83", 0},
+      {UCON64_A,	"ucon64 -a", 0},
+      {UCON64_ATA,	"ucon64 -ata", 0},
+      {UCON64_B,	"ucon64 -b", 0},
+      {UCON64_B0,	"ucon64 -b0", 0},
+      {UCON64_B1,	"ucon64 -b1", 0},
+      {UCON64_BAT,	"ucon64 -bat", 0},
+      {UCON64_BIN,	"ucon64 -bin", 0},
+      {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0},
+      {UCON64_BIOS,	"ucon64 -bios", 0},
+      {UCON64_BOT,	"ucon64 -bot", 0},
+      {UCON64_BS,	"ucon64 -bs", 0},
+      {UCON64_C,	"ucon64 -c", 0},
+      {UCON64_CHK,	"ucon64 -chk", 0},
+      {UCON64_CMNT,	"ucon64 -cmnt", 0},
+      {UCON64_CODE,	"ucon64 -code", 0},
+      {UCON64_COL,	"ucon64 -col", 0},
+      {UCON64_COLECO,	"ucon64 -coleco", 0},
+      {UCON64_CRC,	"ucon64 -crc", 0},
+      {UCON64_CRCHD,	"ucon64 -crchd", 0},
+      {UCON64_CRP,	"ucon64 -crp", 0},
+      {UCON64_CS,	"ucon64 -cs", 0},
+      {UCON64_CTRL,	"ucon64 -ctrl", 0},
+      {UCON64_CTRL2,	"ucon64 -ctrl2", 0},
+      {UCON64_DB,	"ucon64 -db", 0},
+      {UCON64_DBS,	"ucon64 -dbs", 0},
+      {UCON64_DBUH,	"ucon64 -dbuh", 0},
+      {UCON64_DBV,	"ucon64 -dbv", 0},
+      {UCON64_DC,	"ucon64 -dc", 0},
+      {UCON64_DFIND,	"ucon64 -dfind", 0},
+      {UCON64_DFINDR,	"ucon64 -dfindr", 0},
+      {UCON64_DINT,	"ucon64 -dint", 0},
+      {UCON64_DISC,	"ucon64 -disc", 0},
+      {UCON64_DMIRR,	"ucon64 -dmirr", 0},
+      {UCON64_DNSRT,	"ucon64 -dnsrt", 0},
+      {UCON64_DUAL,	"ucon64 -dual", 0},
+      {UCON64_DUMPINFO,	"ucon64 -dumpinfo", 0},
+      {UCON64_E,	"ucon64 -e", 0},
+      {UCON64_EROM,	"ucon64 -erom", 0},
+      {UCON64_F,	"ucon64 -f", 0},
+      {UCON64_FDS,	"ucon64 -fds", 0},
+      {UCON64_FDSL,	"ucon64 -fdsl", 0},
+      {UCON64_FFE,	"ucon64 -ffe", 0},
+      {UCON64_FIG,	"ucon64 -fig", 0},
+      {UCON64_FIGS,	"ucon64 -figs", 0},
+      {UCON64_FILE,	"ucon64 -file", 0},
+      {UCON64_FIND,	"ucon64 -find", 0},
+      {UCON64_FINDI,	"ucon64 -findi", 0},
+      {UCON64_FINDR,	"ucon64 -findr", 0},
+      {UCON64_FORCE63,	"ucon64 -force63", 0},
+      {UCON64_FRONTEND,	"ucon64 -frontend", 0},
+      {UCON64_GB,	"ucon64 -gb", 0},
+      {UCON64_GBA,	"ucon64 -gba", 0},
+      {UCON64_GBX,	"ucon64 -gbx", 0},
+      {UCON64_GC,	"ucon64 -gc", 0},
+      {UCON64_GD3,	"ucon64 -gd3", 0},
+      {UCON64_GD3S,	"ucon64 -gd3s", 0},
+      {UCON64_GEN,	"ucon64 -gen", 0},
+      {UCON64_GG,	"ucon64 -gg", 0},
+      {UCON64_GGD,	"ucon64 -ggd", 0},
+      {UCON64_GGE,	"ucon64 -gge", 0},
+      {UCON64_GP32,	"ucon64 -gp32", 0},
+      {UCON64_H,	"ucon64 -h", 0},
+      {UCON64_HD,	"ucon64 -hd", 0},
+      {UCON64_HDN,	"ucon64 -hdn", 0},
+#endif
+      {UCON64_HELP,	"ucon64 -help", 0x9576194e},
+      {UCON64_HEX,	"ucon64 -hex test/test.txt", 0x9732f50c},
+      {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" test/test.txt", 0x6c43021b},
+      {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" test/test.txt", 0},
+#if 0
+      {UCON64_HI,	"ucon64 -hi", 0},
+      {UCON64_I,	"ucon64 -i", 0},
+      {UCON64_ID,	"ucon64 -id", 0},
+      {UCON64_IDNUM,	"ucon64 -idnum", 0},
+      {UCON64_IDPPF,	"ucon64 -idppf", 0},
+      {UCON64_INES,	"ucon64 -ines", 0},
+      {UCON64_INESHD,	"ucon64 -ineshd", 0},
+      {UCON64_INS,	"ucon64 -ins", 0},
+      {UCON64_INSN,	"ucon64 -insn", 0},
+      {UCON64_INT,	"ucon64 -int", 0},
+      {UCON64_INT2,	"ucon64 -int2", 0},
+      {UCON64_INTELLI,	"ucon64 -intelli", 0},
+      {UCON64_ISOFIX,	"ucon64 -isofix", 0},
+      {UCON64_ISPAD,	"ucon64 -ispad", 0},
+      {UCON64_J,	"ucon64 -j", 0},
+      {UCON64_JAG,	"ucon64 -jag", 0},
+      {UCON64_K,	"ucon64 -k", 0},
+      {UCON64_L,	"ucon64 -l", 0},
+      {UCON64_LNX,	"ucon64 -lnx", 0},
+      {UCON64_LOGO,	"ucon64 -logo", 0},
+      {UCON64_LS,	"ucon64 -ls", 0},
+      {UCON64_LSD,	"ucon64 -lsd", 0},
+      {UCON64_LSRAM,	"ucon64 -lsram", 0},
+      {UCON64_LSV,	"ucon64 -lsv", 0},
+      {UCON64_LYNX,	"ucon64 -lynx", 0},
+      {UCON64_LYX,	"ucon64 -lyx", 0},
+      {UCON64_MAPR,	"ucon64 -mapr", 0},
+      {UCON64_MD5,	"ucon64 -md5", 0},
+      {UCON64_MGD,	"ucon64 -mgd", 0},
+      {UCON64_MGDGG,	"ucon64 -mgdgg", 0},
+      {UCON64_MIRR,	"ucon64 -mirr", 0},
+      {UCON64_MKA,	"ucon64 -mka", 0},
+      {UCON64_MKCUE,	"ucon64 -mkcue", 0},
+      {UCON64_MKDAT,	"ucon64 -mkdat", 0},
+      {UCON64_MKI,	"ucon64 -mki", 0},
+      {UCON64_MKIP,	"ucon64 -mkip", 0},
+      {UCON64_MKPPF,	"ucon64 -mkppf", 0},
+      {UCON64_MKSHEET,	"ucon64 -mksheet", 0},
+      {UCON64_MKTOC,	"ucon64 -mktoc", 0},
+      {UCON64_MSG,	"ucon64 -msg", 0},
+      {UCON64_MULTI,	"ucon64 -multi", 0},
+      {UCON64_N,	"ucon64 -n", 0},
+      {UCON64_N2,	"ucon64 -n2", 0},
+      {UCON64_N2GB,	"ucon64 -n2gb", 0},
+      {UCON64_N64,	"ucon64 -n64", 0},
+      {UCON64_NA,	"ucon64 -na", 0},
+      {UCON64_NBAK,	"ucon64 -nbak", 0},
+      {UCON64_NBAT,	"ucon64 -nbat", 0},
+      {UCON64_NBS,	"ucon64 -nbs", 0},
+      {UCON64_NCOL,	"ucon64 -ncol", 0},
+      {UCON64_NDS,	"ucon64 -nds", 0},
+      {UCON64_NES,	"ucon64 -nes", 0},
+      {UCON64_NG,	"ucon64 -ng", 0},
+      {UCON64_NGP,	"ucon64 -ngp", 0},
+      {UCON64_NHD,	"ucon64 -nhd", 0},
+      {UCON64_NHI,	"ucon64 -nhi", 0},
+      {UCON64_NINT,	"ucon64 -nint", 0},
+      {UCON64_NPPF,	"ucon64 -nppf", 0},
+      {UCON64_NROT,	"ucon64 -nrot", 0},
+      {UCON64_NS,	"ucon64 -ns", 0},
+      {UCON64_NTSC,	"ucon64 -ntsc", 0},
+      {UCON64_NVRAM,	"ucon64 -nvram", 0},
+      {UCON64_O,	"ucon64 -o", 0},
+      {UCON64_P,	"ucon64 -p", 0},
+      {UCON64_PAD,	"ucon64 -pad", 0},
+      {UCON64_PADN,	"ucon64 -padn", 0},
+      {UCON64_PAL,	"ucon64 -pal", 0},
+      {UCON64_PARSE,	"ucon64 -parse", 0},
+      {UCON64_PASOFAMI,	"ucon64 -pasofami", 0},
+      {UCON64_PATCH,	"ucon64 -patch", 0},
+      {UCON64_PATTERN,	"ucon64 -pattern", 0},
+      {UCON64_PCE,	"ucon64 -pce", 0},
+      {UCON64_POKE,	"ucon64 -poke", 0},
+      {UCON64_PORT,	"ucon64 -port", 0},
+      {UCON64_PPF,	"ucon64 -ppf", 0},
+      {UCON64_PRINT,	"ucon64 -print", 0},
+      {UCON64_PS2,	"ucon64 -ps2", 0},
+      {UCON64_PSX,	"ucon64 -psx", 0},
+      {UCON64_Q,	"ucon64 -q", 0},
+      {UCON64_R,	"ucon64 -r", 0},
+      {UCON64_R83,	"ucon64 -r83", 0},
+      {UCON64_RDAT,	"ucon64 -rdat", 0},
+      {UCON64_REGION,	"ucon64 -region", 0},
+      {UCON64_RENAME,	"ucon64 -rename", 0},
+      {UCON64_RIP,	"ucon64 -rip", 0},
+      {UCON64_RJOLIET,	"ucon64 -rjoliet", 0},
+      {UCON64_RL,	"ucon64 -rl", 0},
+      {UCON64_ROM,	"ucon64 -rom", 0},
+      {UCON64_ROTL,	"ucon64 -rotl", 0},
+      {UCON64_ROTR,	"ucon64 -rotr", 0},
+      {UCON64_RR83,	"ucon64 -rr83", 0},
+      {UCON64_RROM,	"ucon64 -rrom", 0},
+      {UCON64_RU,	"ucon64 -ru", 0},
+      {UCON64_S,	"ucon64 -s", 0},
+      {UCON64_S16,	"ucon64 -s16", 0},
+      {UCON64_SAM,	"ucon64 -sam", 0},
+      {UCON64_SAT,	"ucon64 -sat", 0},
+      {UCON64_SC,	"ucon64 -sc", 0},
+      {UCON64_SCAN,	"ucon64 -scan", 0},
+      {UCON64_SCR,	"ucon64 -scr", 0},
+      {UCON64_SGB,	"ucon64 -sgb", 0},
+      {UCON64_SHA1,	"ucon64 -sha1", 0},
+      {UCON64_SMC,	"ucon64 -smc", 0},
+      {UCON64_SMD,	"ucon64 -smd", 0},
+      {UCON64_SMDS,	"ucon64 -smds", 0},
+      {UCON64_SMS,	"ucon64 -sms", 0},
+      {UCON64_SNES,	"ucon64 -snes", 0},
+      {UCON64_SRAM,	"ucon64 -sram", 0},
+      {UCON64_SSC,	"ucon64 -ssc", 0},
+      {UCON64_SSIZE,	"ucon64 -ssize", 0},
+      {UCON64_STP,	"ucon64 -stp", 0},
+      {UCON64_STPN,	"ucon64 -stpn", 0},
+      {UCON64_STRIP,	"ucon64 -strip", 0},
+      {UCON64_SWAN,	"ucon64 -swan", 0},
+      {UCON64_SWAP,	"ucon64 -swap", 0},
+      {UCON64_SWAP2,	"ucon64 -swap2", 0},
+      {UCON64_SWC,	"ucon64 -swc", 0},
+      {UCON64_SWCS,	"ucon64 -swcs", 0},
+      {UCON64_UFO,	"ucon64 -ufo", 0},
+      {UCON64_UFOS,	"ucon64 -ufos", 0},
+      {UCON64_UNIF,	"ucon64 -unif", 0},
+      {UCON64_UNSCR,	"ucon64 -unscr", 0},
+      {UCON64_USMS,	"ucon64 -usms", 0},
+      {UCON64_V,	"ucon64 -v", 0},
+      {UCON64_V64,	"ucon64 -v64", 0},
+      {UCON64_VBOY,	"ucon64 -vboy", 0},
+      {UCON64_VEC,	"ucon64 -vec", 0},
+      {UCON64_VERSION,	"ucon64 -version", 0},
+      {UCON64_VRAM,	"ucon64 -vram", 0},
+      {UCON64_XBOX,	"ucon64 -xbox", 0},
+      {UCON64_XCMC,	"ucon64 -xcmc", 0},
+      {UCON64_XCMCM,	"ucon64 -xcmcm", 0},
+      {UCON64_XCMCT,	"ucon64 -xcmct", 0},
+      {UCON64_XDEX,	"ucon64 -xdex", 0},
+      {UCON64_XDJR,	"ucon64 -xdjr", 0},
+      {UCON64_XF2A,	"ucon64 -xf2a", 0},
+      {UCON64_XF2AB,	"ucon64 -xf2ab", 0},
+      {UCON64_XF2AC,	"ucon64 -xf2ac", 0},
+      {UCON64_XF2AMULTI,	"ucon64 -xf2amulti", 0},
+      {UCON64_XF2AS,	"ucon64 -xf2as", 0},
+      {UCON64_XFAL,	"ucon64 -xfal", 0},
+      {UCON64_XFALB,	"ucon64 -xfalb", 0},
+      {UCON64_XFALC,	"ucon64 -xfalc", 0},
+      {UCON64_XFALM,	"ucon64 -xfalm", 0},
+      {UCON64_XFALMULTI,	"ucon64 -xfalmulti", 0},
+      {UCON64_XFALS,	"ucon64 -xfals", 0},
+      {UCON64_XFIG,	"ucon64 -xfig", 0},
+      {UCON64_XFIGC,	"ucon64 -xfigc", 0},
+      {UCON64_XFIGS,	"ucon64 -xfigs", 0},
+      {UCON64_XGBX,	"ucon64 -xgbx", 0},
+      {UCON64_XGBXB,	"ucon64 -xgbxb", 0},
+      {UCON64_XGBXM,	"ucon64 -xgbxm", 0},
+      {UCON64_XGBXS,	"ucon64 -xgbxs", 0},
+      {UCON64_XGD3,	"ucon64 -xgd3", 0},
+      {UCON64_XGD3R,	"ucon64 -xgd3r", 0},
+      {UCON64_XGD3S,	"ucon64 -xgd3s", 0},
+      {UCON64_XGD6,	"ucon64 -xgd6", 0},
+      {UCON64_XGD6R,	"ucon64 -xgd6r", 0},
+      {UCON64_XGD6S,	"ucon64 -xgd6s", 0},
+      {UCON64_XGG,	"ucon64 -xgg", 0},
+      {UCON64_XGGB,	"ucon64 -xggb", 0},
+      {UCON64_XGGS,	"ucon64 -xggs", 0},
+      {UCON64_XLIT,	"ucon64 -xlit", 0},
+      {UCON64_XMCCL,	"ucon64 -xmccl", 0},
+      {UCON64_XMCD,	"ucon64 -xmcd", 0},
+      {UCON64_XMD,	"ucon64 -xmd", 0},
+      {UCON64_XMDB,	"ucon64 -xmdb", 0},
+      {UCON64_XMDS,	"ucon64 -xmds", 0},
+      {UCON64_XMSG,	"ucon64 -xmsg", 0},
+      {UCON64_XPCE,	"ucon64 -xpce", 0},
+      {UCON64_XPL,	"ucon64 -xpl", 0},
+      {UCON64_XPLI,	"ucon64 -xpli", 0},
+      {UCON64_XPLM,	"ucon64 -xplm", 0},
+      {UCON64_XRESET,	"ucon64 -xreset", 0},
+      {UCON64_XSF,	"ucon64 -xsf", 0},
+      {UCON64_XSFS,	"ucon64 -xsfs", 0},
+      {UCON64_XSMC,	"ucon64 -xsmc", 0},
+      {UCON64_XSMCR,	"ucon64 -xsmcr", 0},
+      {UCON64_XSMD,	"ucon64 -xsmd", 0},
+      {UCON64_XSMDS,	"ucon64 -xsmds", 0},
+      {UCON64_XSWC,	"ucon64 -xswc", 0},
+      {UCON64_XSWC-IO,	"ucon64 -xswc-io", 0},
+      {UCON64_XSWC2,	"ucon64 -xswc2", 0},
+      {UCON64_XSWCC,	"ucon64 -xswcc", 0},
+      {UCON64_XSWCR,	"ucon64 -xswcr", 0},
+      {UCON64_XSWCS,	"ucon64 -xswcs", 0},
+      {UCON64_XV64,	"ucon64 -xv64", 0},
+      {UCON64_Z64,	"ucon64 -z64", 0},
+#endif
+      {0, NULL, 0}
+    };
+  int x = 0;
+  unsigned int crc;
+  char buf[MAXBUFSIZE];
+
+  for (; test[x].option; x++)
+    {
+      FILE *in, *out;
+
+      // NO testing?
+      if (!test[x].cmdline)
+        continue;
+        
+      sprintf (buf, "%s 2>&1", test[x].cmdline);
+      if (!(in = popen (buf, "r")))
+        {
+          fprintf (stderr, "ERROR: cmdline \"%s\"\n", test[x].cmdline);
+          continue;
+        }
+
+      sprintf (buf, "%d-output.txt", test[x].option);
+      out = fopen (buf, "w");
+      
+      crc = 0;
+      while ((fgets (buf, MAXBUFSIZE, in)))
+        {
+          crc = crc32 (crc, (const void *) &buf, strlen (buf));
+          fputs (buf, out);
+        }
+
+      printf ("option: %d crc: 0x%08x calc: 0x%08x status: %s\n",
+        test[x].option,
+        test[x].crc32,
+        crc,
+        test[x].crc32 == crc ? "OK" : "BUG?");
+      
+      fclose (in);
+      fclose (out);
+    }
+  exit (0);
+}
+#endif
+
+
 #ifdef  DEBUG
 void
 ucon64_runtime_debug_output (st_getopt2_t *p)
@@ -287,7 +610,7 @@ ucon64_runtime_debug (void)
     (y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options"));
 #endif
 
-#if 1
+#if 0
   // list all options as a single st_getopt2_t array
   for (x = 0; options[x].name || options[x].help; x++)
     if (options[x].name)
@@ -398,6 +721,11 @@ main (int argc, char **argv)
 #endif
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
+
+#ifdef  TEST
+  if (argc == 1)
+    ucon64_test ();
+#endif
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"

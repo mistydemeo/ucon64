@@ -270,7 +270,6 @@ ucon64_test (void)
 #if 0
       {UCON64_1991,	"ucon64 -1991", 0},
       {UCON64_3DO,	"ucon64 -3do", 0},
-      {UCON64_83,	"ucon64 -83", 0},
       {UCON64_A,	"ucon64 -a", 0},
       {UCON64_ATA,	"ucon64 -ata", 0},
       {UCON64_B,	"ucon64 -b", 0},
@@ -286,10 +285,14 @@ ucon64_test (void)
       {UCON64_CHK,	"ucon64 -chk", 0},
       {UCON64_CMNT,	"ucon64 -cmnt", 0},
       {UCON64_CODE,	"ucon64 -code", 0},
-      {UCON64_COL,	"ucon64 -col", 0},
+#endif
+      {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},
+#if 0
       {UCON64_COLECO,	"ucon64 -coleco", 0},
-      {UCON64_CRC,	"ucon64 -crc", 0},
-      {UCON64_CRCHD,	"ucon64 -crchd", 0},
+#endif
+      {UCON64_CRC,	"ucon64 -crc test/test2.txt", 0x0537c47e},
+      {UCON64_CRCHD,	"ucon64 -crchd test/test2.txt", 0xd5f0e3f7},
+#if 0
       {UCON64_CRP,	"ucon64 -crp", 0},
       {UCON64_CS,	"ucon64 -cs", 0},
       {UCON64_CTRL,	"ucon64 -ctrl", 0},
@@ -299,8 +302,10 @@ ucon64_test (void)
       {UCON64_DBUH,	"ucon64 -dbuh", 0},
       {UCON64_DBV,	"ucon64 -dbv", 0},
       {UCON64_DC,	"ucon64 -dc", 0},
-      {UCON64_DFIND,	"ucon64 -dfind", 0},
-      {UCON64_DFINDR,	"ucon64 -dfindr", 0},
+#endif
+      {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" test/test.txt", 0x644db1ce},
+      {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" test/test.txt", 0},
+#if 0
       {UCON64_DINT,	"ucon64 -dint", 0},
       {UCON64_DISC,	"ucon64 -disc", 0},
       {UCON64_DMIRR,	"ucon64 -dmirr", 0},
@@ -316,10 +321,11 @@ ucon64_test (void)
       {UCON64_FIG,	"ucon64 -fig", 0},
       {UCON64_FIGS,	"ucon64 -figs", 0},
       {UCON64_FILE,	"ucon64 -file", 0},
-      {UCON64_FIND,	"ucon64 -find", 0},
-      {UCON64_FINDI,	"ucon64 -findi", 0},
-      {UCON64_FINDR,	"ucon64 -findr", 0},
-      {UCON64_FORCE63,	"ucon64 -force63", 0},
+#endif
+      {UCON64_FIND,	"ucon64 -find \"abcd\" test/test.txt", 0x644db1ce},
+      {UCON64_FINDI,	"ucon64 -findi \"ABcD\" test/test.txt", 0x8d601a86},
+      {UCON64_FINDR,	"ucon64 -findr \"1234\" test/test.txt", 0},
+#if 0
       {UCON64_FRONTEND,	"ucon64 -frontend", 0},
       {UCON64_GB,	"ucon64 -gb", 0},
       {UCON64_GBA,	"ucon64 -gba", 0},
@@ -416,24 +422,39 @@ ucon64_test (void)
       {UCON64_POKE,	"ucon64 -poke", 0},
       {UCON64_PORT,	"ucon64 -port", 0},
       {UCON64_PPF,	"ucon64 -ppf", 0},
-      {UCON64_PRINT,	"ucon64 -print", 0},
+#endif
+      {UCON64_PRINT,	"ucon64 -print test/test.txt", 0x59823cd3},
+#if 0
       {UCON64_PS2,	"ucon64 -ps2", 0},
       {UCON64_PSX,	"ucon64 -psx", 0},
       {UCON64_Q,	"ucon64 -q", 0},
       {UCON64_R,	"ucon64 -r", 0},
-      {UCON64_R83,	"ucon64 -r83", 0},
+#endif
+      {UCON64_R83,      "echo >1234567890.abcd ;"
+                        "ucon64 -r83 1234567890.abcd ;"
+                        "rm 12345eeb.abc", 0x8dd379f0},
+#if 0
       {UCON64_RDAT,	"ucon64 -rdat", 0},
       {UCON64_REGION,	"ucon64 -region", 0},
       {UCON64_RENAME,	"ucon64 -rename", 0},
       {UCON64_RIP,	"ucon64 -rip", 0},
-      {UCON64_RJOLIET,	"ucon64 -rjoliet", 0},
-      {UCON64_RL,	"ucon64 -rl", 0},
+#endif
+      {UCON64_RJOLIET,  "echo >1234567890123456789012345678901234567890123456789012345678901234567890.abcd ;"
+                        "ucon64 -rjoliet 1234567890123456789012345678901234567890123456789012345678901234567890.abcd ;"
+                        "rm 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
+      {UCON64_RL,       "echo >12345678.ABC ;"
+                        "ucon64 -rl 12345678.ABC ;"
+                        "rm 12345678.abc", 0xd2293641},
+#if 0
       {UCON64_ROM,	"ucon64 -rom", 0},
       {UCON64_ROTL,	"ucon64 -rotl", 0},
       {UCON64_ROTR,	"ucon64 -rotr", 0},
-      {UCON64_RR83,	"ucon64 -rr83", 0},
       {UCON64_RROM,	"ucon64 -rrom", 0},
-      {UCON64_RU,	"ucon64 -ru", 0},
+#endif
+      {UCON64_RU,       "echo >12345678.abc ;"
+                        "ucon64 -ru 12345678.abc ;"
+                        "rm 12345678.ABC", 0x96254b18},
+#if 0
       {UCON64_S,	"ucon64 -s", 0},
       {UCON64_S16,	"ucon64 -s16", 0},
       {UCON64_SAM,	"ucon64 -sam", 0},
@@ -442,7 +463,9 @@ ucon64_test (void)
       {UCON64_SCAN,	"ucon64 -scan", 0},
       {UCON64_SCR,	"ucon64 -scr", 0},
       {UCON64_SGB,	"ucon64 -sgb", 0},
-      {UCON64_SHA1,	"ucon64 -sha1", 0},
+#endif
+      {UCON64_SHA1,	"ucon64 -sha1 test/test.txt", 0x434f7e9f},
+#if 0
       {UCON64_SMC,	"ucon64 -smc", 0},
       {UCON64_SMD,	"ucon64 -smd", 0},
       {UCON64_SMDS,	"ucon64 -smds", 0},
@@ -468,7 +491,9 @@ ucon64_test (void)
       {UCON64_V64,	"ucon64 -v64", 0},
       {UCON64_VBOY,	"ucon64 -vboy", 0},
       {UCON64_VEC,	"ucon64 -vec", 0},
-      {UCON64_VERSION,	"ucon64 -version", 0},
+#endif
+      {UCON64_VER,	"ucon64 -version", 0x9410757a},
+#if 0
       {UCON64_VRAM,	"ucon64 -vram", 0},
       {UCON64_XBOX,	"ucon64 -xbox", 0},
       {UCON64_XCMC,	"ucon64 -xcmc", 0},

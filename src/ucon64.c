@@ -255,7 +255,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 #ifdef  TEST
 typedef struct
 {
-  int option;
+  int val;
 
   const char *cmdline;
   uint32_t crc32;    // crc32 of cmdline's output
@@ -267,9 +267,8 @@ ucon64_test (void)
 {
   st_ucon64_test_t test[] =
     {
-#if 0
       {UCON64_1991,	"ucon64 -1991", 0},
-      {UCON64_3DO,	"ucon64 -3do", 0},
+//      {UCON64_3DO,	"ucon64 -3do", 0}, // hidden option
       {UCON64_A,	"ucon64 -a", 0},
       {UCON64_ATA,	"ucon64 -ata", 0},
       {UCON64_B,	"ucon64 -b", 0},
@@ -277,7 +276,7 @@ ucon64_test (void)
       {UCON64_B1,	"ucon64 -b1", 0},
       {UCON64_BAT,	"ucon64 -bat", 0},
       {UCON64_BIN,	"ucon64 -bin", 0},
-      {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0},
+//      {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0},
       {UCON64_BIOS,	"ucon64 -bios", 0},
       {UCON64_BOT,	"ucon64 -bot", 0},
       {UCON64_BS,	"ucon64 -bs", 0},
@@ -285,14 +284,10 @@ ucon64_test (void)
       {UCON64_CHK,	"ucon64 -chk", 0},
       {UCON64_CMNT,	"ucon64 -cmnt", 0},
       {UCON64_CODE,	"ucon64 -code", 0},
-#endif
       {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},
-#if 0
       {UCON64_COLECO,	"ucon64 -coleco", 0},
-#endif
       {UCON64_CRC,	"ucon64 -crc test/test2.txt", 0x0537c47e},
-      {UCON64_CRCHD,	"ucon64 -crchd test/test2.txt", 0xd5f0e3f7},
-#if 0
+      {UCON64_CRCHD,	"ucon64 -crchd test/test2.txt", 0xd5f0e3f7}, // hidden option
       {UCON64_CRP,	"ucon64 -crp", 0},
       {UCON64_CS,	"ucon64 -cs", 0},
       {UCON64_CTRL,	"ucon64 -ctrl", 0},
@@ -302,12 +297,10 @@ ucon64_test (void)
       {UCON64_DBUH,	"ucon64 -dbuh", 0},
       {UCON64_DBV,	"ucon64 -dbv", 0},
       {UCON64_DC,	"ucon64 -dc", 0},
-#endif
       {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" test/test.txt", 0x644db1ce},
       {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" test/test.txt", 0xc2ea61a1},
-#if 0
       {UCON64_DINT,	"ucon64 -dint", 0},
-      {UCON64_DISC,	"ucon64 -disc", 0},
+//      {UCON64_DISC,	"ucon64 -disc", 0},
       {UCON64_DMIRR,	"ucon64 -dmirr", 0},
       {UCON64_DNSRT,	"ucon64 -dnsrt", 0},
       {UCON64_DUAL,	"ucon64 -dual", 0},
@@ -320,36 +313,32 @@ ucon64_test (void)
       {UCON64_FFE,	"ucon64 -ffe", 0},
       {UCON64_FIG,	"ucon64 -fig", 0},
       {UCON64_FIGS,	"ucon64 -figs", 0},
-      {UCON64_FILE,	"ucon64 -file", 0},
-#endif
+      {UCON64_FILE,	"ucon64 -file", 0}, // hidden option
       {UCON64_FIND,	"ucon64 -find \"abcd\" test/test.txt", 0x644db1ce},
       {UCON64_FINDI,	"ucon64 -findi \"ABcD\" test/test.txt", 0x8d601a86},
       {UCON64_FINDR,	"ucon64 -findr \"1234\" test/test.txt", 0x515e124e},
-#if 0
-      {UCON64_FRONTEND,	"ucon64 -frontend", 0},
+      {UCON64_FRONTEND,	"ucon64 -frontend", 0}, // hidden option
       {UCON64_GB,	"ucon64 -gb", 0},
       {UCON64_GBA,	"ucon64 -gba", 0},
       {UCON64_GBX,	"ucon64 -gbx", 0},
-      {UCON64_GC,	"ucon64 -gc", 0},
+//      {UCON64_GC,	"ucon64 -gc", 0}, // hidden option
       {UCON64_GD3,	"ucon64 -gd3", 0},
       {UCON64_GD3S,	"ucon64 -gd3s", 0},
       {UCON64_GEN,	"ucon64 -gen", 0},
       {UCON64_GG,	"ucon64 -gg", 0},
       {UCON64_GGD,	"ucon64 -ggd", 0},
       {UCON64_GGE,	"ucon64 -gge", 0},
-      {UCON64_GP32,	"ucon64 -gp32", 0},
-      {UCON64_H,	"ucon64 -h", 0},
+//      {UCON64_GP32,	"ucon64 -gp32", 0}, // hidden option
+//      {UCON64_H,	"ucon64 -h", 0}, // hidden option
       {UCON64_HD,	"ucon64 -hd", 0},
       {UCON64_HDN,	"ucon64 -hdn", 0},
-#endif
       {UCON64_HELP,	"ucon64 -help", 0x9576194e},
       {UCON64_HEX,	"ucon64 -hex test/test.txt", 0x9732f50c},
       {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" test/test.txt", 0x6c43021b},
       {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" test/test.txt", 0xc2ea61a1},
-#if 0
       {UCON64_HI,	"ucon64 -hi", 0},
       {UCON64_I,	"ucon64 -i", 0},
-      {UCON64_ID,	"ucon64 -id", 0},
+      {UCON64_ID,	"ucon64 -id", 0}, // hidden option
       {UCON64_IDNUM,	"ucon64 -idnum", 0},
       {UCON64_IDPPF,	"ucon64 -idppf", 0},
       {UCON64_INES,	"ucon64 -ines", 0},
@@ -358,8 +347,8 @@ ucon64_test (void)
       {UCON64_INSN,	"ucon64 -insn", 0},
       {UCON64_INT,	"ucon64 -int", 0},
       {UCON64_INT2,	"ucon64 -int2", 0},
-      {UCON64_INTELLI,	"ucon64 -intelli", 0},
-      {UCON64_ISOFIX,	"ucon64 -isofix", 0},
+//      {UCON64_INTELLI,	"ucon64 -intelli", 0}, // hidden option
+//      {UCON64_ISOFIX,	"ucon64 -isofix", 0},
       {UCON64_ISPAD,	"ucon64 -ispad", 0},
       {UCON64_J,	"ucon64 -j", 0},
       {UCON64_JAG,	"ucon64 -jag", 0},
@@ -379,13 +368,13 @@ ucon64_test (void)
       {UCON64_MGDGG,	"ucon64 -mgdgg", 0},
       {UCON64_MIRR,	"ucon64 -mirr", 0},
       {UCON64_MKA,	"ucon64 -mka", 0},
-      {UCON64_MKCUE,	"ucon64 -mkcue", 0},
+//      {UCON64_MKCUE,	"ucon64 -mkcue", 0},
       {UCON64_MKDAT,	"ucon64 -mkdat", 0},
       {UCON64_MKI,	"ucon64 -mki", 0},
       {UCON64_MKIP,	"ucon64 -mkip", 0},
       {UCON64_MKPPF,	"ucon64 -mkppf", 0},
-      {UCON64_MKSHEET,	"ucon64 -mksheet", 0},
-      {UCON64_MKTOC,	"ucon64 -mktoc", 0},
+//      {UCON64_MKSHEET,	"ucon64 -mksheet", 0},
+//      {UCON64_MKTOC,	"ucon64 -mktoc", 0},
       {UCON64_MSG,	"ucon64 -msg", 0},
       {UCON64_MULTI,	"ucon64 -multi", 0},
       {UCON64_N,	"ucon64 -n", 0},
@@ -422,50 +411,39 @@ ucon64_test (void)
       {UCON64_POKE,	"ucon64 -poke", 0},
       {UCON64_PORT,	"ucon64 -port", 0},
       {UCON64_PPF,	"ucon64 -ppf", 0},
-#endif
       {UCON64_PRINT,	"ucon64 -print test/test.txt", 0x59823cd3},
-#if 0
-      {UCON64_PS2,	"ucon64 -ps2", 0},
+//      {UCON64_PS2,	"ucon64 -ps2", 0}, // hidden option
       {UCON64_PSX,	"ucon64 -psx", 0},
       {UCON64_Q,	"ucon64 -q", 0},
       {UCON64_R,	"ucon64 -r", 0},
-#endif
       {UCON64_R83,      "echo >1234567890.abcd ;"
                         "ucon64 -r83 1234567890.abcd ;"
                         "rm 12345eeb.abc", 0x8dd379f0},
-#if 0
       {UCON64_RDAT,	"ucon64 -rdat", 0},
       {UCON64_REGION,	"ucon64 -region", 0},
-      {UCON64_RENAME,	"ucon64 -rename", 0},
-      {UCON64_RIP,	"ucon64 -rip", 0},
-#endif
+//      {UCON64_RIP,	"ucon64 -rip", 0},
       {UCON64_RJOLIET,  "echo >1234567890123456789012345678901234567890123456789012345678901234567890.abcd ;"
                         "ucon64 -rjoliet 1234567890123456789012345678901234567890123456789012345678901234567890.abcd ;"
                         "rm 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
       {UCON64_RL,       "echo >12345678.ABC ;"
                         "ucon64 -rl 12345678.ABC ;"
                         "rm 12345678.abc", 0xd2293641},
-#if 0
       {UCON64_ROM,	"ucon64 -rom", 0},
       {UCON64_ROTL,	"ucon64 -rotl", 0},
       {UCON64_ROTR,	"ucon64 -rotr", 0},
       {UCON64_RROM,	"ucon64 -rrom", 0},
-#endif
       {UCON64_RU,       "echo >12345678.abc ;"
                         "ucon64 -ru 12345678.abc ;"
                         "rm 12345678.ABC", 0x96254b18},
-#if 0
       {UCON64_S,	"ucon64 -s", 0},
-      {UCON64_S16,	"ucon64 -s16", 0},
+//      {UCON64_S16,	"ucon64 -s16", 0}, // hidden option
       {UCON64_SAM,	"ucon64 -sam", 0},
-      {UCON64_SAT,	"ucon64 -sat", 0},
+//      {UCON64_SAT,	"ucon64 -sat", 0}, // hidden option
       {UCON64_SC,	"ucon64 -sc", 0},
       {UCON64_SCAN,	"ucon64 -scan", 0},
       {UCON64_SCR,	"ucon64 -scr", 0},
       {UCON64_SGB,	"ucon64 -sgb", 0},
-#endif
       {UCON64_SHA1,	"ucon64 -sha1 test/test.txt", 0x434f7e9f},
-#if 0
       {UCON64_SMC,	"ucon64 -smc", 0},
       {UCON64_SMD,	"ucon64 -smd", 0},
       {UCON64_SMDS,	"ucon64 -smds", 0},
@@ -490,12 +468,10 @@ ucon64_test (void)
       {UCON64_V,	"ucon64 -v", 0},
       {UCON64_V64,	"ucon64 -v64", 0},
       {UCON64_VBOY,	"ucon64 -vboy", 0},
-      {UCON64_VEC,	"ucon64 -vec", 0},
-#endif
+//      {UCON64_VEC,	"ucon64 -vec", 0}, // hidden option
       {UCON64_VER,	"ucon64 -version", 0x9410757a},
-#if 0
       {UCON64_VRAM,	"ucon64 -vram", 0},
-      {UCON64_XBOX,	"ucon64 -xbox", 0},
+//      {UCON64_XBOX,	"ucon64 -xbox", 0}, // hidden option
       {UCON64_XCMC,	"ucon64 -xcmc", 0},
       {UCON64_XCMCM,	"ucon64 -xcmcm", 0},
       {UCON64_XCMCT,	"ucon64 -xcmct", 0},
@@ -547,26 +523,59 @@ ucon64_test (void)
       {UCON64_XSMD,	"ucon64 -xsmd", 0},
       {UCON64_XSMDS,	"ucon64 -xsmds", 0},
       {UCON64_XSWC,	"ucon64 -xswc", 0},
-      {UCON64_XSWC-IO,	"ucon64 -xswc-io", 0},
+      {UCON64_XSWC_IO,	"ucon64 -xswc-io", 0},
       {UCON64_XSWC2,	"ucon64 -xswc2", 0},
       {UCON64_XSWCC,	"ucon64 -xswcc", 0},
       {UCON64_XSWCR,	"ucon64 -xswcr", 0},
       {UCON64_XSWCS,	"ucon64 -xswcs", 0},
       {UCON64_XV64,	"ucon64 -xv64", 0},
       {UCON64_Z64,	"ucon64 -z64", 0},
-#endif
       {0, NULL, 0}
     };
   int x = 0;
   unsigned int crc;
   char buf[MAXBUFSIZE];
 
-  for (; test[x].option; x++)
+#ifdef  DEBUG
+//#if 1
+  // this is why no external script is used for testing
+  {
+    int c = 0, y = 0;
+  
+    // convert (st_getopt2_t **) to (st_getopt2_t *)
+    memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
+    for (c = x = 0; option[x]; x++)
+      for (y = 0; option[x][y].name || option[x][y].help; y++)
+        if (c < UCON64_MAX_ARGS)
+          {
+            memcpy (&options[c], &option[x][y], sizeof (st_getopt2_t));
+            c++;
+          }
+
+    // do we test ALL options?
+    for (x = 0; options[x].name || options[x].help; x++)
+      if (options[x].val)
+        {
+          int found = 0;
+          for (y = 0; test[y].val; y++)
+            if (options[x].val == test[y].val)
+              {
+                found = 1;
+                break;
+              }
+            
+          if (!found)
+            printf ("option: %d \"%s\" will NOT be tested\n", options[x].val, options[x].name);
+        }
+  }              
+#endif
+
+  for (x = 0; test[x].val; x++)
     {
       FILE *in, *out;
 
       // NO testing?
-      if (!test[x].cmdline)
+      if (!test[x].cmdline || !test[x].crc32)
         continue;
         
       sprintf (buf, "%s 2>&1", test[x].cmdline);
@@ -576,7 +585,7 @@ ucon64_test (void)
           continue;
         }
 
-      sprintf (buf, "%d-output.txt", test[x].option);
+      sprintf (buf, "%d-output.txt", test[x].val);
       out = fopen (buf, "w");
       
       crc = 0;
@@ -587,7 +596,7 @@ ucon64_test (void)
         }
 
       printf ("option: %d crc: 0x%08x calc: 0x%08x status: %s\n",
-        test[x].option,
+        test[x].val,
         test[x].crc32,
         crc,
         test[x].crc32 == crc ? "OK" : "BUG?");

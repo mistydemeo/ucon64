@@ -87,8 +87,8 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* enable test output (default: no) */
-#undef TEST
+/* enable testing output (default: no) */
+#undef TESTING
 
 /* enable usage of color (default: yes) */
 #undef USE_ANSI_COLOR

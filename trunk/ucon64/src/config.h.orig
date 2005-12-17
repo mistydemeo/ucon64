@@ -89,7 +89,7 @@
 #define STDC_HEADERS 1
 
 /* enable test output (default: no) */
-#undef TEST
+#undef TESTING
 
 /* enable usage of color (default: yes) */
 #define USE_ANSI_COLOR 1

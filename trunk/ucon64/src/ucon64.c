@@ -252,7 +252,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-#ifdef  TEST
+#ifdef  TESTING
 typedef struct
 {
   int val;
@@ -281,7 +281,8 @@ ucon64_test (void)
       {UCON64_BOT,	"ucon64 -bot", 0},
       {UCON64_BS,	"ucon64 -bs", 0},
       {UCON64_C,	"ucon64 -c", 0},
-      {UCON64_CHK,	"ucon64 -chk", 0},
+      {UCON64_CHK,	"ucon64 -chk test/mode7jsc.smc;"
+                        "rm mode7jsc.smc", 0},
       {UCON64_CMNT,	"ucon64 -cmnt", 0},
       {UCON64_CODE,	"ucon64 -code", 0},
       {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},
@@ -349,7 +350,7 @@ ucon64_test (void)
       {UCON64_INT2,	"ucon64 -int2", 0},
 //      {UCON64_INTELLI,	"ucon64 -intelli", 0}, // hidden option
 //      {UCON64_ISOFIX,	"ucon64 -isofix", 0},
-      {UCON64_ISPAD,	"ucon64 -ispad", 0},
+      {UCON64_ISPAD,	"ucon64 -ispad test/test2.txt", 0xd420c88f},
       {UCON64_J,	"ucon64 -j", 0},
       {UCON64_JAG,	"ucon64 -jag", 0},
       {UCON64_K,	"ucon64 -k", 0},
@@ -472,6 +473,7 @@ ucon64_test (void)
       {UCON64_VER,	"ucon64 -version", 0x9410757a},
       {UCON64_VRAM,	"ucon64 -vram", 0},
 //      {UCON64_XBOX,	"ucon64 -xbox", 0}, // hidden option
+
       {UCON64_XCMC,	"ucon64 -xcmc", 0},
       {UCON64_XCMCM,	"ucon64 -xcmcm", 0},
       {UCON64_XCMCT,	"ucon64 -xcmct", 0},
@@ -529,6 +531,7 @@ ucon64_test (void)
       {UCON64_XSWCR,	"ucon64 -xswcr", 0},
       {UCON64_XSWCS,	"ucon64 -xswcs", 0},
       {UCON64_XV64,	"ucon64 -xv64", 0},
+
       {UCON64_Z64,	"ucon64 -z64", 0},
       {0, NULL, 0}
     };
@@ -756,7 +759,7 @@ main (int argc, char **argv)
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
 
-#ifdef  TEST
+#ifdef  TESTING
   if (argc == 1)
     ucon64_test ();
 #endif

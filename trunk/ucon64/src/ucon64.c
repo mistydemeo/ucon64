@@ -252,7 +252,8 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-#ifdef  TESTING
+#define TEST
+#ifdef  TEST
 typedef struct
 {
   int val;
@@ -270,7 +271,7 @@ ucon64_test (void)
       {UCON64_1991,	"ucon64 -1991", 0},
 //      {UCON64_3DO,	"ucon64 -3do", 0}, // hidden option
       {UCON64_A,	"ucon64 -a", 0},
-      {UCON64_ATA,	"ucon64 -ata", 0},
+      {UCON64_ATA,	"ucon64 -ata test/test3.txt", 0123},
       {UCON64_B,	"ucon64 -b", 0},
       {UCON64_B0,	"ucon64 -b0", 0},
       {UCON64_B1,	"ucon64 -b1", 0},
@@ -282,11 +283,11 @@ ucon64_test (void)
       {UCON64_BS,	"ucon64 -bs", 0},
       {UCON64_C,	"ucon64 -c", 0},
       {UCON64_CHK,	"ucon64 -chk test/mode7jsc.smc;"
-                        "rm mode7jsc.smc", 0},
+                        "rm -f mode7jsc.smc", 0},
       {UCON64_CMNT,	"ucon64 -cmnt", 0},
       {UCON64_CODE,	"ucon64 -code", 0},
       {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},
-      {UCON64_COLECO,	"ucon64 -coleco", 0},
+      {UCON64_COLECO,	"ucon64 -coleco test/test3.txt", 0x897ea55f},
       {UCON64_CRC,	"ucon64 -crc test/test2.txt", 0x0537c47e},
       {UCON64_CRCHD,	"ucon64 -crchd test/test2.txt", 0xd5f0e3f7}, // hidden option
       {UCON64_CRP,	"ucon64 -crp", 0},
@@ -297,7 +298,7 @@ ucon64_test (void)
       {UCON64_DBS,	"ucon64 -dbs", 0},
       {UCON64_DBUH,	"ucon64 -dbuh", 0},
       {UCON64_DBV,	"ucon64 -dbv", 0},
-      {UCON64_DC,	"ucon64 -dc", 0},
+      {UCON64_DC,	"ucon64 -dc test/test3.txt", 0x3e9558a8},
       {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" test/test.txt", 0x644db1ce},
       {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" test/test.txt", 0xc2ea61a1},
       {UCON64_DINT,	"ucon64 -dint", 0},
@@ -319,13 +320,13 @@ ucon64_test (void)
       {UCON64_FINDI,	"ucon64 -findi \"ABcD\" test/test.txt", 0x8d601a86},
       {UCON64_FINDR,	"ucon64 -findr \"1234\" test/test.txt", 0x515e124e},
       {UCON64_FRONTEND,	"ucon64 -frontend", 0}, // hidden option
-      {UCON64_GB,	"ucon64 -gb", 0},
-      {UCON64_GBA,	"ucon64 -gba", 0},
+      {UCON64_GB,	"ucon64 -gb test/test3.txt", 0x00827ad3},
+      {UCON64_GBA,	"ucon64 -gba test/test3.txt", 0x161ecf74},
       {UCON64_GBX,	"ucon64 -gbx", 0},
 //      {UCON64_GC,	"ucon64 -gc", 0}, // hidden option
       {UCON64_GD3,	"ucon64 -gd3", 0},
       {UCON64_GD3S,	"ucon64 -gd3s", 0},
-      {UCON64_GEN,	"ucon64 -gen", 0},
+      {UCON64_GEN,	"ucon64 -gen test/test3.txt", 0x0ae0bf61},
       {UCON64_GG,	"ucon64 -gg", 0},
       {UCON64_GGD,	"ucon64 -ggd", 0},
       {UCON64_GGE,	"ucon64 -gge", 0},
@@ -344,15 +345,19 @@ ucon64_test (void)
       {UCON64_IDPPF,	"ucon64 -idppf", 0},
       {UCON64_INES,	"ucon64 -ines", 0},
       {UCON64_INESHD,	"ucon64 -ineshd", 0},
-      {UCON64_INS,	"ucon64 -ins", 0},
-      {UCON64_INSN,	"ucon64 -insn", 0},
+      {UCON64_INS,      "ucon64 -ins test/test.txt 2>&1;"
+                        "ucon64 -crc test.txt 2>&1;"
+                        "rm -f test.txt test.bak", 0x69a04ca6},
+      {UCON64_INSN,     "ucon64 -insn=512 test/test.txt 2>&1;"
+                        "ucon64 -crc test.txt 2>&1;"
+                        "rm -f test.txt test.bak", 0x69a04ca6},
       {UCON64_INT,	"ucon64 -int", 0},
       {UCON64_INT2,	"ucon64 -int2", 0},
 //      {UCON64_INTELLI,	"ucon64 -intelli", 0}, // hidden option
 //      {UCON64_ISOFIX,	"ucon64 -isofix", 0},
       {UCON64_ISPAD,	"ucon64 -ispad test/test2.txt", 0xd420c88f},
       {UCON64_J,	"ucon64 -j", 0},
-      {UCON64_JAG,	"ucon64 -jag", 0},
+      {UCON64_JAG,	"ucon64 -jag test/test3.txt", 0xb7b810ce},
       {UCON64_K,	"ucon64 -k", 0},
       {UCON64_L,	"ucon64 -l", 0},
       {UCON64_LNX,	"ucon64 -lnx", 0},
@@ -361,7 +366,7 @@ ucon64_test (void)
       {UCON64_LSD,	"ucon64 -lsd", 0},
       {UCON64_LSRAM,	"ucon64 -lsram", 0},
       {UCON64_LSV,	"ucon64 -lsv", 0},
-      {UCON64_LYNX,	"ucon64 -lynx", 0},
+      {UCON64_LYNX,	"ucon64 -lynx test/test3.txt", 0xc0ec753d},
       {UCON64_LYX,	"ucon64 -lyx", 0},
       {UCON64_MAPR,	"ucon64 -mapr", 0},
       {UCON64_MD5,	"ucon64 -md5", 0},
@@ -381,7 +386,7 @@ ucon64_test (void)
       {UCON64_N,	"ucon64 -n", 0},
       {UCON64_N2,	"ucon64 -n2", 0},
       {UCON64_N2GB,	"ucon64 -n2gb", 0},
-      {UCON64_N64,	"ucon64 -n64", 0},
+      {UCON64_N64,	"ucon64 -n64 test/test3.txt", 0xf827b7c9},
       {UCON64_NA,	"ucon64 -na", 0},
       {UCON64_NBAK,	"ucon64 -nbak", 0},
       {UCON64_NBAT,	"ucon64 -nbat", 0},
@@ -414,28 +419,28 @@ ucon64_test (void)
       {UCON64_PPF,	"ucon64 -ppf", 0},
       {UCON64_PRINT,	"ucon64 -print test/test.txt", 0x59823cd3},
 //      {UCON64_PS2,	"ucon64 -ps2", 0}, // hidden option
-      {UCON64_PSX,	"ucon64 -psx", 0},
+      {UCON64_PSX,	"ucon64 -psx test/test3.txt", 0x41420339},
       {UCON64_Q,	"ucon64 -q", 0},
       {UCON64_R,	"ucon64 -r", 0},
-      {UCON64_R83,      "echo >1234567890.abcd ;"
-                        "ucon64 -r83 1234567890.abcd ;"
-                        "rm 12345eeb.abc", 0x8dd379f0},
+      {UCON64_R83,      "echo >1234567890.abcd;"
+                        "ucon64 -r83 1234567890.abcd;"
+                        "rm -f 12345eeb.abc", 0x8dd379f0},
       {UCON64_RDAT,	"ucon64 -rdat", 0},
       {UCON64_REGION,	"ucon64 -region", 0},
 //      {UCON64_RIP,	"ucon64 -rip", 0},
-      {UCON64_RJOLIET,  "echo >1234567890123456789012345678901234567890123456789012345678901234567890.abcd ;"
-                        "ucon64 -rjoliet 1234567890123456789012345678901234567890123456789012345678901234567890.abcd ;"
-                        "rm 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
-      {UCON64_RL,       "echo >12345678.ABC ;"
-                        "ucon64 -rl 12345678.ABC ;"
-                        "rm 12345678.abc", 0xd2293641},
+      {UCON64_RJOLIET,  "echo >1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
+                        "ucon64 -rjoliet 1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
+                        "rm -f 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
+      {UCON64_RL,       "echo >12345678.ABC;"
+                        "ucon64 -rl 12345678.ABC;"
+                        "rm -f 12345678.abc", 0xd2293641},
       {UCON64_ROM,	"ucon64 -rom", 0},
       {UCON64_ROTL,	"ucon64 -rotl", 0},
       {UCON64_ROTR,	"ucon64 -rotr", 0},
       {UCON64_RROM,	"ucon64 -rrom", 0},
-      {UCON64_RU,       "echo >12345678.abc ;"
-                        "ucon64 -ru 12345678.abc ;"
-                        "rm 12345678.ABC", 0x96254b18},
+      {UCON64_RU,       "echo >12345678.abc;"
+                        "ucon64 -ru 12345678.abc;"
+                        "rm -f 12345678.ABC", 0x96254b18},
       {UCON64_S,	"ucon64 -s", 0},
 //      {UCON64_S16,	"ucon64 -s16", 0}, // hidden option
       {UCON64_SAM,	"ucon64 -sam", 0},
@@ -448,15 +453,15 @@ ucon64_test (void)
       {UCON64_SMC,	"ucon64 -smc", 0},
       {UCON64_SMD,	"ucon64 -smd", 0},
       {UCON64_SMDS,	"ucon64 -smds", 0},
-      {UCON64_SMS,	"ucon64 -sms", 0},
-      {UCON64_SNES,	"ucon64 -snes", 0},
+      {UCON64_SMS,	"ucon64 -sms test/test3.txt", 0xebf1eecc},
+      {UCON64_SNES,	"ucon64 -snes test/test3.txt", 0x45450600},
       {UCON64_SRAM,	"ucon64 -sram", 0},
       {UCON64_SSC,	"ucon64 -ssc", 0},
       {UCON64_SSIZE,	"ucon64 -ssize", 0},
       {UCON64_STP,	"ucon64 -stp", 0},
       {UCON64_STPN,	"ucon64 -stpn", 0},
       {UCON64_STRIP,	"ucon64 -strip", 0},
-      {UCON64_SWAN,	"ucon64 -swan", 0},
+      {UCON64_SWAN,	"ucon64 -swan test/test3.txt", 0x26efa127},
       {UCON64_SWAP,	"ucon64 -swap", 0},
       {UCON64_SWAP2,	"ucon64 -swap2", 0},
       {UCON64_SWC,	"ucon64 -swc", 0},
@@ -468,7 +473,7 @@ ucon64_test (void)
       {UCON64_USMS,	"ucon64 -usms", 0},
       {UCON64_V,	"ucon64 -v", 0},
       {UCON64_V64,	"ucon64 -v64", 0},
-      {UCON64_VBOY,	"ucon64 -vboy", 0},
+      {UCON64_VBOY,	"ucon64 -vboy test/test3.txt", 0x2e189697},
 //      {UCON64_VEC,	"ucon64 -vec", 0}, // hidden option
       {UCON64_VER,	"ucon64 -version", 0x9410757a},
       {UCON64_VRAM,	"ucon64 -vram", 0},
@@ -759,7 +764,7 @@ main (int argc, char **argv)
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
 
-#ifdef  TESTING
+#ifdef  TEST
   if (argc == 1)
     ucon64_test ();
 #endif

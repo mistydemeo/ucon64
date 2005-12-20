@@ -844,7 +844,6 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          enable debug output (default: no)
-  --enable-testing        enable testing output (default: no)
   --enable-parallel       enable support for parallel port backup units
                           (default: yes)
   --enable-ppdev          use ppdev for parallel port I/O (default: no)
@@ -2350,26 +2349,6 @@ _ACEOF
 fi
 echo "$as_me:$LINENO: result: $enable_debug" >&5
 echo "${ECHO_T}$enable_debug" >&6
-
-
-echo "$as_me:$LINENO: checking whether testing output is enabled" >&5
-echo $ECHO_N "checking whether testing output is enabled... $ECHO_C" >&6
-# Check whether --enable-testing or --disable-testing was given.
-if test "${enable_testing+set}" = set; then
-  enableval="$enable_testing"
-  enable_testing=$enableval
-else
-  enable_testing=no
-fi;
-if test $enable_testing = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define TESTING 1
-_ACEOF
-
-fi
-echo "$as_me:$LINENO: result: $enable_testing" >&5
-echo "${ECHO_T}$enable_testing" >&6
 
 
 echo "$as_me:$LINENO: checking whether support for parallel port backup units is enabled" >&5

@@ -1,9 +1,9 @@
 A Super Wild Card compatibility list
-Version: 1.27
+Version: 1.28
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 30 November 2003
+Date: 12 Januari 2006
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
-Software: uCON64 1.9.8-3
+Software: uCON64 2.0.0
 
 
 Legend:
@@ -40,7 +40,7 @@ byte before sending the game. This causes that some games don't have code 3,
 because uCON64 already makes the required modification. For example, if Addams
 Family Values is loaded from diskette the emulation mode select byte should
 have the value 0x2c instead of the value 0x0c (before the file is split).
-For games marked with an asterisk uCON64 1.9.8-3 is required (or an updated
+For games marked with an asterisk uCON64 2.0.0 is required (or an updated
 version of snescopy.txt and/or snesntsc.txt/snespal.txt).
 
 
@@ -169,9 +169,11 @@ Code    Game
 2 -     Final Fight Guy (U)
 2 + 3 - Final Fight Tough (J) <= emulation mode select byte: 0x1c
 0 -     Final Fight (U)
+6 -     Fire Emblem - Seisen no Keifu (J)
+6+8+9 - Fire Emblem - Thraki 776 (J) (V.ROM) <= after pressing reset the game starts
 0 -     Flashback (E) (M2)
 0 -     Frogger (U)
-1*+2* - Front Mission - Gun Hazard (J) <= modification protection; code 0 for NTSC SNES
+1 + 2 - Front Mission - Gun Hazard (J) <= modification protection; code 0 for NTSC SNES
 0 -     Front Mission (J) (V1.0)
 0 -     F-Zero (E)
 0 -     Ganbare Goemon - Yuki hime Kyuushuutsu emaki (J) (V1.2)

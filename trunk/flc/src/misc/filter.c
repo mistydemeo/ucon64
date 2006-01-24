@@ -24,13 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/wait.h>  // waitpid()
-#include "misc/string.h"
-#include "misc/misc.h"
+#include "string.h"
+#include "misc.h"
 #include "filter.h"
 
 
@@ -56,8 +51,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-#define FILTER_DEBUG(fc,s) if(fc->debug){printf("\n%s\n\n", s);fflush(stdout);}
-#define FILTER_VERBOSE(fc,s) if(fc->verbose){printf("\n%s\n\n", s);fflush(stdout);}
+//#define TEST
+//#define TEST2
+
+#ifdef  TEST
+#define FILTER_TEST(fc,s) if(fc->debug){printf("\n%s\n\n", s);fflush(stdout);}
+#endif
 
 
 enum
@@ -74,6 +73,7 @@ enum
 };
 
 
+#ifdef  TEST
 void
 filter_st_filter_chain_t_sanity_check (st_filter_chain_t *fc)
 {
@@ -115,6 +115,7 @@ filter_st_filter_chain_t_sanity_check (st_filter_chain_t *fc)
 
   fflush (stdout);
 }
+#endif
 
 
 int
@@ -134,16 +135,9 @@ filter_set_chain (st_filter_chain_t *fc, const int *id)
         fc->set[fc->total] = id[fc->total];
     }
 
-//filter_st_filter_chain_t_sanity_check (fc);
-
-#if 1
-  fc->verbose = 0;
-  fc->debug = 0;
-#else
-  fc->verbose = 1;
-  fc->debug = 1;
+#ifdef  TEST
+  filter_st_filter_chain_t_sanity_check (fc);
 #endif
-
   return 0;
 }
 
@@ -212,13 +206,17 @@ static int
 filter_func (st_filter_chain_t *fc, void *o, int operation, const char *operation_s)
 {
   const st_filter_t *f = NULL;
+#ifndef TEST
+  (void) operation_s;
+#endif
 
-  if (fc->debug)
+#ifdef  TEST
     if (operation_s)
       {
         fprintf (stderr, "\nfilter: %s->%s()\n", filter_get_filter_by_id (fc, fc->set[fc->pos])->id_s, operation_s);
         fflush (stderr);
       }
+#endif
 
   if ((f = filter_get_filter_by_id (fc, fc->set[fc->pos])))
     switch (operation)
@@ -272,14 +270,16 @@ filter_func (st_filter_chain_t *fc, void *o, int operation, const char *operatio
 
   if (fc->result[fc->pos] == -1)
     {
-      if (fc->verbose)
-        fprintf (stderr, "ERROR: could not %s %s filter (failed)\n", operation_s, filter_get_filter_by_id (fc, fc->set[fc->pos])->id_s);
+#ifdef  TEST2
+      fprintf (stderr, "ERROR: could not %s %s filter (failed)\n", operation_s, filter_get_filter_by_id (fc, fc->set[fc->pos])->id_s);
+#endif
       return -1;
     }
 
+#ifdef  TEST2
   if (fc->result[fc->pos] > 0)
-    if (fc->verbose)
-      fprintf (stderr, "ERROR: could not %s %s filter (skipped; result: %d)\n", operation_s, filter_get_filter_by_id (fc, fc->set[fc->pos])->id_s, fc->result[fc->pos]);
+    fprintf (stderr, "ERROR: could not %s %s filter (skipped; result: %d)\n", operation_s, filter_get_filter_by_id (fc, fc->set[fc->pos])->id_s, fc->result[fc->pos]);
+#endif
 
   return 0;
 }
@@ -288,6 +288,7 @@ filter_func (st_filter_chain_t *fc, void *o, int operation, const char *operatio
 static int
 filter_func_ctrl (st_filter_chain_t *fc, void *o, int operation, const char *operation_s)
 {
+  // set current op
   fc->op = operation;
 
   switch (operation)
@@ -344,6 +345,7 @@ FILTER_TEMPLATE(quit, FILTER_QUIT, "quit")
 int
 filter_init (st_filter_chain_t *fc, void *o, const int *id)
 {
+  // set current op
   fc->op = FILTER_INIT;
 
 #if 1
@@ -381,7 +383,7 @@ filter_init (st_filter_chain_t *fc, void *o, const int *id)
   for (fc->pos = 0; fc->all[fc->pos]; fc->pos++)
     if (fc->all[fc->pos]->init)
       {
-        FILTER_DEBUG(fc, fc->all[fc->pos]->id_s);
+        FILTER_TEST(fc, fc->all[fc->pos]->id_s);
 
         fc->result[fc->pos] = fc->all[fc->pos]->init (o);
         fc->inited[fc->pos] = 1;
@@ -395,7 +397,7 @@ filter_init (st_filter_chain_t *fc, void *o, const int *id)
     {
       const st_filter_t *f = filter_get_filter_by_id (fc, fc->set[fc->pos]);
 
-      FILTER_DEBUG(fc, f->id_s);
+      FILTER_TEST(fc, f->id_s);
 
       if (f)
         if (f->init)
@@ -413,6 +415,7 @@ filter_quit (st_filter_chain_t *fc, void *o)
 {
   int total = 0;
   
+  // set current op
   fc->op = FILTER_QUIT;
   
   for (; fc->all[total]; total++);
@@ -421,7 +424,9 @@ filter_quit (st_filter_chain_t *fc, void *o)
     if (fc->inited[fc->pos])
       if (fc->all[fc->pos]->quit)
         {
-//          FILTER_DEBUG(fc, fc->all[fc->pos]->id_s);
+#ifdef  TEST
+//          FILTER_TEST(fc, fc->all[fc->pos]->id_s);
+#endif
 
           fc->all[fc->pos]->quit (o);
         }
@@ -432,173 +437,9 @@ filter_quit (st_filter_chain_t *fc, void *o)
 
 
 int
-filter_object_write (st_filter_chain_t *fc,
-                     void *key,
-                     unsigned short key_len,
-                     void *o,
-                     unsigned long o_len)
-{
-  int x = 0;
-  char key_temp[MAXBUFSIZE];
-
-  // default key
-  if (!key || !key_len)
-    {
-      sprintf (key_temp, "%d:%d", fc->pos, fc->set[fc->pos]);
-      key = key_temp;
-      key_len = strlen (key_temp);
-    }
-
-#ifdef  DEBUG
-  printf ("filter_cache_write(): %s %d %s %ld\n", (char *) key, key_len, o, o_len);
-  fflush (stdout); 
-#endif
-
-  for (x = 0; x < FILTER_MAX_OBJ; x++)
-  {
-#ifdef  DEBUG
-    printf ("filter_cache_write().2: %d %s %d %s %d\n", x, (char *) fc->o[x].key, fc->o[x].key_len, key, key_len);
-    fflush (stdout); 
-#endif
-
-    if ((fc->o[x].key && !memcmp (fc->o[x].key, key, key_len) && fc->o[x].key_len == key_len && fc->o[x].key) ||
-        !fc->o[x].key)
-      {
-        if (!fc->o[x].key)
-          if (!(fc->o[x].key = malloc (key_len)))
-            { 
-              memset (&fc->o[x], 0, sizeof (st_filter_object_t));
-              return -1;
-            }
-        
-        memcpy (fc->o[x].key, key, key_len);
-        fc->o[x].key_len = key_len;
-
-        if (fc->o[x].o)
-          free (fc->o[x].o);
-
-        if (!(fc->o[x].o = malloc (o_len)))
-          {
-            free (fc->o[x].key);
-            memset (&fc->o[x], 0, sizeof (st_filter_object_t));
-            return -1;
-          }
-
-        memcpy (fc->o[x].o, o, o_len);
-        fc->o[x].o_len = o_len;
-
-            
-        return 0;
-      }
-}
-  return -1;
-}
-
-
-int
-filter_object_read (st_filter_chain_t *fc,
-                    void *key,
-                    unsigned short key_len,
-                    void *o,
-                    unsigned long o_len)
-{
-  int x = 0;
-  char key_temp[MAXBUFSIZE];
-  
-  // default key
-  if (!key || !key_len)
-    {
-      sprintf (key_temp, "%d:%d", fc->pos, fc->set[fc->pos]);
-      key = key_temp;
-      key_len = strlen (key_temp);
-    }
-
-  for (; x < FILTER_MAX_OBJ && fc->o[x].key; x++)
-    {
-#ifdef  DEBUG
-      printf ("filter_cache_read(): %s %d == %s %d\n", (char *) fc->o[x].key, fc->o[x].key_len, key, key_len);
-      fflush (stdout);
-#endif
-
-      if (fc->o[x].key_len == key_len)
-        if (!memcmp (fc->o[x].key, key, key_len))
-          {
-            memcpy (o, fc->o[x].o, MIN (o_len, fc->o[x].o_len));
-
-#ifdef  DEBUG
-            printf ("filter_cache_read().2->object: %s", (char *) o);
-            fflush (stdout);
-#endif            
-            return 0;
-          }
-    }
-
-  return -1;
-}
-
-
-int
-filter_object_read_by_id (st_filter_chain_t *fc,
-                          int o_id,
-                          void *o,
-                          unsigned long o_len)
-{
-  char key[MAXBUFSIZE];
-  int pos = filter_get_pos (fc);
-  int id = filter_get_id (fc, pos);
-
-  switch (fc->op)
-    {
-      case FILTER_INIT:
-      case FILTER_QUIT:
-        sprintf (key, "%d:%d", filter_get_id (fc, pos), o_id);
-        break;
-        
-      default:
-        sprintf (key, "%d:%d:%d", filter_get_pos_by_id (fc, id), id, o_id);
-    }
-
-  return filter_object_read (fc, key, strlen (key) + 1, o, o_len);
-}
-
-
-int
-filter_object_write_by_id (st_filter_chain_t *fc,
-                           int o_id,
-                           void *o,
-                           unsigned long o_len)
-{
-  char key[MAXBUFSIZE];
-  int pos = filter_get_pos (fc);
-  int id = filter_get_id (fc, pos);
-
-  switch (fc->op)
-    {
-      case FILTER_INIT:
-      case FILTER_QUIT:
-        sprintf (key, "%d:%d", filter_get_id (fc, pos), o_id);
-        break;
-        
-      default:
-        sprintf (key, "%d:%d:%d", filter_get_pos_by_id (fc, id), id, o_id);
-    }
-
-  return filter_object_write (fc, key, strlen (key) + 1, o, o_len);
-}
-
-
-int
 filter_get_total (const st_filter_chain_t *fc)
 {
-#if 0
-  int total = 0
-
-  for (; fc->set[total]; total++);
-
-  return total;
-#else
   return fc->total;
-#endif
 }
 
 
@@ -615,6 +456,8 @@ filter_get_pos_by_id (const st_filter_chain_t *fc, int id)
   int x = 0;
   int pos = 0;
   
+  // a filter chain can have dupe id's when a filter is used more
+  // than once
   for (; fc->set[x] && x < fc->pos; x++)
     if (fc->set[x] == id)
       pos++;
@@ -675,6 +518,7 @@ filter_get_filter_by_id (const st_filter_chain_t *fc, int id)
 const st_filter_t *
 filter_get_filter_by_pos (const st_filter_chain_t *fc, int pos)
 {
+#warning ???
   return fc->all[fc->set[pos]];
 }
 
@@ -726,3 +570,88 @@ filter_get_all_id_s_in_chain (const st_filter_chain_t *fc)
 //  return filter_get_all_id_s_in_array (&fc->all);
   return "";
 }
+
+
+#define FILTER_KEY_SEP ":"
+char *
+filter_generate_key (int *pos, int *id, int *subkey)
+{
+  static char key_temp[MAXBUFSIZE];
+
+  *key_temp = 0;
+  
+  if (pos)
+    sprintf (key_temp, "%d", *pos);
+
+  if (id)
+    sprintf (strchr (key_temp, 0), "%s%d", pos ? FILTER_KEY_SEP : "", *id);
+
+  if (subkey)
+    sprintf (strchr (key_temp, 0), "%s%d", (pos || id) ? FILTER_KEY_SEP : "", *subkey);
+
+  return key_temp;
+}
+
+
+#if 1
+char *
+filter_get_key (st_filter_chain_t *fc, int *subkey)
+{
+#if 0
+  int pos = filter_get_pos_by_id (fc, fc->set[fc->pos]);
+#else
+  int pos = fc->pos;
+#endif
+
+  // subkey is optional and used if more than one object is
+  // get/set read/write from inside a filter
+
+  switch (fc->op)
+    {
+      // init() and quit() functions of filters share the same key
+      // no matter how often these filters repeat in the filter chain
+      // therefore the key doesn't include the position of the filter
+      // in the filter chain
+      case FILTER_INIT:
+      case FILTER_QUIT:
+        return filter_generate_key (NULL, &fc->set[fc->pos], subkey);
+
+      default:
+        return filter_generate_key (&pos, &fc->set[fc->pos], subkey);
+    }
+}
+#else
+char *
+filter_get_key (st_filter_chain_t *fc, int *subkey)
+{
+  static char key_temp[MAXBUFSIZE];
+
+  // subkey is optional and used if more than one object is
+  // get/set read/write from inside a filter
+  if (!subkey)
+    {
+      sprintf (key_temp, "%d" FILTER_KEY_SEP "%d", fc->pos, fc->set[fc->pos]);
+//      sprintf (key_temp, "%d" FILTER_KEY_SEP "%d", filter_get_pos_by_id (fc, fc->set[fc->pos]), fc->set[fc->pos]);
+
+      return key_temp;
+    }
+
+  switch (fc->op)
+    {
+      // init() and quit() functions of filters share the same key
+      // no matter how often these filters repeat in the filter chain
+      // therefore the key doesn't include the position of the filter
+      // in the filter chain
+      case FILTER_INIT:
+      case FILTER_QUIT:
+        break;
+
+      default:
+        sprintf (key_temp, "%d" FILTER_KEY_SEP, filter_get_pos_by_id (fc, fc->set[fc->pos]));
+    }
+
+  sprintf (strchr (key_temp, 0), "%d" FILTER_KEY_SEP "%d", fc->set[fc->pos], *subkey);
+
+  return key_temp;
+}
+#endif

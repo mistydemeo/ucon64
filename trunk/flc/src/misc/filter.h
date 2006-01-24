@@ -39,8 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define FILTER_MAX 128
 #endif
 
-#define FILTER_MAX_OBJ (FILTER_MAX*8)
-
 
 /*
   st_filter_t
@@ -78,21 +76,6 @@ typedef struct st_filter_t
 
 
 /*
-  st_filter_object_t
-  every filter can read/write objects
-TODO: make FILTER_MAX_OBJ with dynamic
-*/
-typedef struct
-{
-  void *key;                     // malloc'ed key
-  unsigned short key_len;        // key length
-      
-  void *o;                       // malloc'ed object
-  unsigned long o_len;           // object length
-} st_filter_object_t;
-
-
-/*
   st_filter_chain_t
   The filter chain struct that will be init'ed and returned by filter_init_filters*()
 */
@@ -107,16 +90,12 @@ typedef struct st_filter_chain_t
                                 //   id's of filters in all[] in the order set by filter_set_chain()
   time_t start_time[FILTER_MAX]; // start times of all set filters (SET filters only)
   int result[FILTER_MAX]; // results (SET filters only) (-1 == failed, 0 == OK, >0 == skipped)
-  st_filter_object_t o[FILTER_MAX_OBJ]; // objects for ALL filters
-
   int pos;               // # of current filter (SET filters only)
   int total;             // # of all set filters (SET filters only)
 
   // private
   int inited[FILTER_MAX]; // filter were init()'ed (ALL filters)
   int op;                 // current filter operation FILTER_OPEN, FILTER_CLOSE, ...
-  int debug;
-  int verbose;
 } st_filter_chain_t;
 
 
@@ -156,24 +135,6 @@ typedef struct st_filter_chain_t
   filter_ctrl()    wrapper for st_filter_t->ctrl (supposed to be used as often as necessary)
 
   NOTE: all wrappers will pass that (void *) argument to st_filter_t->(* func)()
-
-
-  filter_object_*() functions
-
-  are meant to be called from inside a filter
-  they are useful to avoid any (static) global variables in filters that might appear
-  more than just once in a filter chain
-
-  filter_object_write() writes an object into current-filter-exclusive cache identified by key
-  filter_object_read()  writes an object into current-filter-exclusive cache identified by key
-  filter_object_read_by_id()  like filter_object_read() but uses integer as key
-  filter_object_write_by_id() like filter_object_write() but uses integer as key
-
-  NOTE: objects with always be overwritten by new objects that have the same id
-  NOTE2: objects that are written during init/quit will be stored without the
-         information of their position in the filter chain (because it SHOULDN'T make sence
-         to have duplicates of objects that were created during init because init (and quit)
-         SHOULD be called only once per process)
 */
 extern st_filter_chain_t *filter_malloc_chain (const st_filter_t **);
 extern int filter_set_chain (st_filter_chain_t *fc, const int *filter_id);
@@ -196,27 +157,6 @@ extern int filter_seek (st_filter_chain_t *fc, void *o);
 extern int filter_ctrl (st_filter_chain_t *fc, void *o);
 
 
-extern int filter_object_read (st_filter_chain_t *fc,
-                               void *key,
-                               unsigned short key_len,
-                               void *o,
-                               unsigned long o_len);
-extern int filter_object_write (st_filter_chain_t *fc,
-                                void *key,
-                                unsigned short key_len,
-                                void *o,
-                                unsigned long o_len);
-
-extern int filter_object_read_by_id (st_filter_chain_t *fc,
-                                     int o_id,
-                                     void *o,
-                                     unsigned long o_len);
-extern int filter_object_write_by_id (st_filter_chain_t *fc,
-                                      int o_id,
-                                      void *o,
-                                      unsigned long o_len);
-
-
 /*
   filter_get_total()           get # of all set filters (SET filters only)
   filter_get_pos()             get # of current filter (SET filters only)
@@ -234,6 +174,19 @@ extern int filter_object_write_by_id (st_filter_chain_t *fc,
                                get comma separated id_s as a string (from st_filter_t array)
   filter_get_all_id_s_in_chain()
                                get comma separated id_s as a string (ALL filters)
+  filter_get_key()             get (generate) a unique key for get/set read/write an object
+                                 from inside a filter
+                                 subkey is optional and used if more than one object is
+                                 get/set read/write from inside a filter
+                                 keys are made of the position, filter id and (optional) a
+                                 subkey divided by ':'s
+  filter_generate_key()        manually generate a key that will be identical to what
+                               filter_get_key() would return
+  NOTE: objects with always be overwritten by new objects that have the same id
+  NOTE2: objects that are written during init/quit will be stored without the
+         information of their position in the filter chain (because it SHOULDN'T make sence
+         to have duplicates of objects that were created during init because init (and quit)
+         SHOULD be called only once per process)
 */
 extern int filter_get_total (const st_filter_chain_t *fc);
 extern int filter_get_pos (const st_filter_chain_t *fc);
@@ -243,14 +196,16 @@ extern const char * filter_get_id_s (const st_filter_chain_t *fc, int pos);
 //extern int filter_get_op (const st_filter_chain_t *fc);
 extern int filter_get_result (const st_filter_chain_t *fc, int pos);
 //extern time_t filter_get_start_time (const st_filter_chain_t *fc);
-
+#if 1
 extern const st_filter_t *filter_get_filter_by_id (const st_filter_chain_t *fc, int id);
 extern const st_filter_t *filter_get_filter_by_pos (const st_filter_chain_t *fc, int pos);
+#endif
 extern const st_filter_t *filter_get_filter_by_magic (const st_filter_chain_t *fc,
                                                       const unsigned char *magic, int magic_len);
-
 extern const char * filter_get_all_id_s_in_array (const st_filter_t **f);
 //extern const char * filter_get_all_id_s_in_chain (const st_filter_chain_t *fc);
+extern char *filter_get_key (st_filter_chain_t *fc, int *subkey);
+extern char *filter_generate_key (int *pos, int *id, int *subkey);
 
 
 #endif // MISC_FILTER_H

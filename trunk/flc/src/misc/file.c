@@ -2,7 +2,7 @@
 file.c - miscellaneous file functions
 
 Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2001 - 2005 dbjh
 Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga)
 
 
@@ -701,8 +701,7 @@ tmpnam2 (char *temp)
 static inline int
 fcopy_func (void *buffer, int n, void *object)
 {
-  fwrite (buffer, 1, n, (FILE *) object);
-  return n;
+  return fwrite (buffer, 1, n, (FILE *) object);
 }
 
 
@@ -874,17 +873,20 @@ static inline int
 quick_io_func_inline (int (*func) (void *, int, void *), int func_maxlen,
                       void *object, void *buffer, int buffer_len)
 {
+  // TODO: Clean this mess up. It hurts my brain. Code like this needs a
+  //       thorough explanation. - dbjh
   int i = 0, func_size = MIN (func_maxlen, buffer_len), func_result = 0;
 
-  for (; i < buffer_len; i += func_size)
+  while (i < buffer_len)
     {
       func_size = MIN (func_size, buffer_len - i);
       func_result = func ((char *) buffer + i, func_size, object);
+      i += func_result;
       if (func_result < func_size)
         break;
     }
 
-  return i + func_result;
+  return i;
 }
 
 
@@ -894,6 +896,7 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 // func() takes buffer, length and object (optional), func_maxlen is maximum
 //  length passed to func()
 {
+  // TODO: Clean this mess up. It's truly awful. - dbjh  
   void *buffer = NULL;
   int buffer_maxlen = 0, buffer_len = 0, func_len = 0;
   size_t len_done = 0;
@@ -920,6 +923,9 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 
   for (len_done = 0; len_done < len; len_done += buffer_len)
     {
+      if (len_done + buffer_maxlen > len)
+        buffer_maxlen = len - len_done;
+      
       if (!(buffer_len = fread (buffer, 1, buffer_maxlen, fh)))
         break;
 

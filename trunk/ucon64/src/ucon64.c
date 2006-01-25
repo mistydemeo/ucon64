@@ -275,7 +275,7 @@ ucon64_test (void)
       {UCON64_1991,	"ucon64 -1991", 0},
 //      {UCON64_3DO,	"ucon64 -3do", 0}, // hidden option
       {UCON64_A,	"ucon64 -a", 0},
-      {UCON64_ATA,	"ucon64 -ata /tmp/test/test.1mb", 0123},
+      {UCON64_ATA,	"ucon64 -ata /tmp/test/test.1mb", 1}, // FIX
       {UCON64_B,	"ucon64 -b", 0},
       {UCON64_B0,	"ucon64 -b0", 0},
       {UCON64_B1,	"ucon64 -b1", 0},
@@ -342,7 +342,7 @@ ucon64_test (void)
       {UCON64_HEX,	"ucon64 -hex /tmp/test/test.txt", 0x9732f50c},
       {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" /tmp/test/test.txt", 0x6c43021b},
       {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0xc2ea61a1},
-      {UCON64_HI,	"ucon64 -hi", 0},
+      {UCON64_HI,	"ucon64 -hi", 0}, // FIX
       {UCON64_I,	"ucon64 -i", 0},
       {UCON64_ID,	"ucon64 -id", 0}, // hidden option
       {UCON64_IDNUM,	"ucon64 -idnum", 0},
@@ -365,9 +365,9 @@ ucon64_test (void)
       {UCON64_K,	"ucon64 -k", 0},
       {UCON64_L,	"ucon64 -l", 0},
       {UCON64_LNX,	"ucon64 -lnx", 0},
-      {UCON64_LOGO,	"ucon64 -logo", 0},
-      {UCON64_LS,	"ucon64 -ls", 0},
-      {UCON64_LSD,	"ucon64 -lsd", 0},
+      {UCON64_LOGO,	"ucon64 -logo /tmp/test/test.gba", 0},
+      {UCON64_LS,	"ucon64 -ls /tmp/test", 1}, // FIX
+      {UCON64_LSD,	"ucon64 -lsd /tmp/test", 010},
       {UCON64_LSRAM,	"ucon64 -lsram", 0},
       {UCON64_LSV,	"ucon64 -lsv", 0},
       {UCON64_LYNX,	"ucon64 -lynx /tmp/test/test.1mb", 0xe87e6403},
@@ -395,7 +395,7 @@ ucon64_test (void)
       {UCON64_NBAK,	"ucon64 -nbak", 0},
       {UCON64_NBAT,	"ucon64 -nbat", 0},
       {UCON64_NBS,	"ucon64 -nbs", 0},
-      {UCON64_NCOL,	"ucon64 -ncol", 0},
+      {UCON64_NCOL,	"ucon64 -ncol -snes /tmp/test/test.1mb", 0xaf686a6a},
       {UCON64_NDS,	"ucon64 -nds", 0},
       {UCON64_NES,	"ucon64 -nes", 0},
       {UCON64_NG,	"ucon64 -ng", 0},
@@ -426,24 +426,24 @@ ucon64_test (void)
       {UCON64_PSX,	"ucon64 -psx /tmp/test/test.1mb", 0x6261c2e3},
       {UCON64_Q,	"ucon64 -q", 0},
       {UCON64_R,	"ucon64 -r", 0},
-      {UCON64_R83,      "echo >/tmp/1234567890.abcd;"
-                        "ucon64 -r83 /tmp/1234567890.abcd;"
+      {UCON64_R83,      "echo >/tmp/test/1234567890.abcd;"
+                        "ucon64 -r83 /tmp/test/1234567890.abcd;"
                         "rm -f 12345eeb.abc", 0x8dd379f0},
       {UCON64_RDAT,	"ucon64 -rdat", 0},
       {UCON64_REGION,	"ucon64 -region", 0},
 //      {UCON64_RIP,	"ucon64 -rip", 0},
-      {UCON64_RJOLIET,  "echo >/tmp/1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
-                        "ucon64 -rjoliet /tmp/1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
+      {UCON64_RJOLIET,  "echo >/tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
+                        "ucon64 -rjoliet /tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
                         "rm -f 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
-      {UCON64_RL,       "echo >/tmp/12345678.ABC;"
-                        "ucon64 -rl /tmp/12345678.ABC;"
+      {UCON64_RL,       "echo >/tmp/test/12345678.ABC;"
+                        "ucon64 -rl /tmp/test/12345678.ABC;"
                         "rm -f 12345678.abc", 0xd2293641},
       {UCON64_ROM,	"ucon64 -rom", 0},
       {UCON64_ROTL,	"ucon64 -rotl", 0},
       {UCON64_ROTR,	"ucon64 -rotr", 0},
       {UCON64_RROM,	"ucon64 -rrom", 0},
-      {UCON64_RU,       "echo >/tmp/12345678.abc;"
-                        "ucon64 -ru /tmp/12345678.abc;"
+      {UCON64_RU,       "echo >/tmp/test/12345678.abc;"
+                        "ucon64 -ru /tmp/test/12345678.abc;"
                         "rm -f 12345678.ABC", 0x96254b18},
       {UCON64_S,	"ucon64 -s", 0},
 //      {UCON64_S16,	"ucon64 -s16", 0}, // hidden option
@@ -590,7 +590,7 @@ ucon64_test (void)
       if (!test[x].cmdline || !test[x].crc32)
         continue;
         
-      sprintf (buf, "%s 2>&1", test[x].cmdline);
+      sprintf (buf, "%s", test[x].cmdline);
       if (!(in = popen (buf, "r")))
         {
           fprintf (stderr, "ERROR: cmdline \"%s\"\n", test[x].cmdline);

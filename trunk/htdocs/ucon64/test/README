@@ -3,6 +3,7 @@
      #define TEST
 
    in ucon64.c
+2) run "./configure --without-zlib && make && make install"
 2) copy test/ to /tmp
 3) copy test/test.dat to ~/.ucon64/dat/
-4) run ./ucon64
+4) run "./ucon64"

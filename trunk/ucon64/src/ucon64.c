@@ -338,7 +338,7 @@ ucon64_test (void)
 //      {UCON64_H,	"ucon64 -h", 0}, // hidden option
       {UCON64_HD,	"ucon64 -hd", 0},
       {UCON64_HDN,	"ucon64 -hdn", 0},
-      {UCON64_HELP,	"ucon64 -help", 0x9576194e},
+      {UCON64_HELP,	"ucon64 -help", 0x618f50d9},
       {UCON64_HEX,	"ucon64 -hex /tmp/test/test.txt", 0x9732f50c},
       {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" /tmp/test/test.txt", 0x6c43021b},
       {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0xc2ea61a1},
@@ -351,10 +351,10 @@ ucon64_test (void)
       {UCON64_INESHD,	"ucon64 -ineshd", 0},
       {UCON64_INS,      "ucon64 -ins /tmp/test/test.txt 2>&1;"
                         "ucon64 -crc test.txt 2>&1;"
-                        "rm -f test.txt test.bak", 0x69a04ca6},
+                        "rm -f test.txt test.bak", 0x546f6150},
       {UCON64_INSN,     "ucon64 -insn=512 /tmp/test/test.txt 2>&1;"
                         "ucon64 -crc test.txt 2>&1;"
-                        "rm -f test.txt test.bak", 0x69a04ca6},
+                        "rm -f test.txt test.bak", 0x546f6150},
       {UCON64_INT,	"ucon64 -int", 0},
       {UCON64_INT2,	"ucon64 -int2", 0},
 //      {UCON64_INTELLI,	"ucon64 -intelli", 0}, // hidden option
@@ -607,17 +607,18 @@ ucon64_test (void)
           fputs (buf, out);
         }
 
-      printf ("option: %d crc: 0x%08x calc: 0x%08x status: %s\n",
+      sprintf (buf, "option: %d crc: 0x%08x calc: 0x%08x status: %s\n",
         test[x].val,
         test[x].crc32,
         crc,
         test[x].crc32 == crc ? "OK" : "BUG?");
+
+      fputs ("^^^ ", out);
+      fputs (buf, out);
+      printf (buf); 
       
       fclose (in);
       fclose (out);
-
-      sprintf (buf, "%d-%08x-output.txt", test[x].val, crc);
-      rename (fname, buf);
     }
   exit (0);
 }

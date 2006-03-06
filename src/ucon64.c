@@ -556,7 +556,7 @@ ucon64_test (void)
 
       {UCON64_Z64,	"ucon64 -z64 /tmp/test/test.v64;"
                         "ucon64 test.z64;"
-                        "rm test.z64", 0xb22e87d2},
+                        "rm test.z64", 0xd0d878f6},
       {0, NULL, 0}
     };
   int x = 0;
@@ -631,9 +631,9 @@ ucon64_test (void)
         crc);
 
       if (test[x].crc32 == TEST_BUG)
-        strcpy (strchr (buf, 0), "BUG!\n");
+        sprintf (strchr (buf, 0), "BUG! (%s)\n", test[x].cmdline);
       else if (test[x].crc32 == TEST_TODO)
-        strcpy (strchr (buf, 0), "TODO\n");
+        sprintf (strchr (buf, 0), "TODO (%s)\n", test[x].cmdline);
       else  if (test[x].crc32 == crc)
         strcpy (strchr (buf, 0), "OK\n");
       else

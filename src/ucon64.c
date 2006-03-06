@@ -293,8 +293,9 @@ ucon64_test (void)
       {UCON64_BOT,	"ucon64 -bot", 0},
       {UCON64_BS,	"ucon64 -bs", 0},
       {UCON64_C,	"ucon64 -c", 0},
-      {UCON64_CHK,	"ucon64 -chk /tmp/test/mode7jsc.smc;"
-                        "rm -f mode7jsc.smc", 0},
+      {UCON64_CHK,	"ucon64 -chk /tmp/test/test.smc;"
+                        "ucon64 test.smc;"
+                        "rm test.smc", 0x0b463647},
       {UCON64_CMNT,	"ucon64 -cmnt", 0},
       {UCON64_CODE,	"ucon64 -code", 0},
       {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},

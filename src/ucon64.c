@@ -252,7 +252,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-#define TEST 
+//#define TEST 
 #ifdef  TEST
 typedef struct
 {

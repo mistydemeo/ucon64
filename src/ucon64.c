@@ -252,7 +252,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-//#define TEST
+//#define TEST 
 #ifdef  TEST
 typedef struct
 {
@@ -269,19 +269,27 @@ ucon64_test (void)
 // default prepare and cleanup macros
 #define TEST_START ""
 #define TEST_END   ""
+#define TEST_BREAK {0, NULL, 0},
 
   st_ucon64_test_t test[] =
     {
-      {UCON64_1991,	"ucon64 -1991", 0},
-//      {UCON64_3DO,	"ucon64 -3do", 0}, // hidden option
+      {UCON64_1991,	"ucon64 -1991 /tmp/test/test.smd;"
+                        "ucon64 -gen test.smd;"
+                        "rm test.smd", 0x281dac7d},
+      {UCON64_3DO,	"ucon64 -3do", 0}, // NO TEST: hidden option
       {UCON64_A,	"ucon64 -a", 0},
-      {UCON64_ATA,	"ucon64 -ata /tmp/test/test.1mb", 1}, // FIX
+      {UCON64_ATA,	"ucon64 -ata /tmp/test/test.64k", 0x4f1780bc},
       {UCON64_B,	"ucon64 -b", 0},
-      {UCON64_B0,	"ucon64 -b0", 0},
-      {UCON64_B1,	"ucon64 -b1", 0},
+      {UCON64_B0,	"ucon64 -b0 64 /tmp/test/test.lnx;"
+                        "ucon64 test.lnx;"
+                        "rm test.lnx", 0xf2ad1bda},
+      {UCON64_B1,	"ucon64 -b1 64 /tmp/test/test.lnx;"
+                        "ucon64 test.lnx;"
+                        "rm test.lnx", 0x19330453},
+//TEST_BREAK
       {UCON64_BAT,	"ucon64 -bat", 0},
       {UCON64_BIN,	"ucon64 -bin", 0},
-//      {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0},
+      {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0}, // NO TEST: deprecated
       {UCON64_BIOS,	"ucon64 -bios", 0},
       {UCON64_BOT,	"ucon64 -bot", 0},
       {UCON64_BS,	"ucon64 -bs", 0},
@@ -293,7 +301,7 @@ ucon64_test (void)
       {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},
       {UCON64_COLECO,	"ucon64 -coleco /tmp/test/test.1mb", 0xc83d8173},
       {UCON64_CRC,	"ucon64 -crc /tmp/test/test.2kb", 0xa0bc9d78},
-      {UCON64_CRCHD,	"ucon64 -crchd /tmp/test/test.2kb", 0x707bbaf1}, // hidden option
+      {UCON64_CRCHD,	"ucon64 -crchd /tmp/test/test.2kb", 0x707bbaf1}, // NO TEST: hidden option
       {UCON64_CRP,	"ucon64 -crp", 0},
       {UCON64_CS,	"ucon64 -cs", 0},
       {UCON64_CTRL,	"ucon64 -ctrl", 0},
@@ -306,7 +314,7 @@ ucon64_test (void)
       {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" /tmp/test/test.txt", 0x644db1ce},
       {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" /tmp/test/test.txt", 0xc2ea61a1},
       {UCON64_DINT,	"ucon64 -dint", 0},
-//      {UCON64_DISC,	"ucon64 -disc", 0},
+      {UCON64_DISC,	"ucon64 -disc", 0}, // NO TEST: deprecated
       {UCON64_DMIRR,	"ucon64 -dmirr", 0},
       {UCON64_DNSRT,	"ucon64 -dnsrt", 0},
       {UCON64_DUAL,	"ucon64 -dual", 0},
@@ -319,23 +327,22 @@ ucon64_test (void)
       {UCON64_FFE,	"ucon64 -ffe", 0},
       {UCON64_FIG,	"ucon64 -fig", 0},
       {UCON64_FIGS,	"ucon64 -figs", 0},
-      {UCON64_FILE,	"ucon64 -file", 0}, // hidden option
+      {UCON64_FILE,	"ucon64 -file", 0}, // NO TEST: hidden option
       {UCON64_FIND,	"ucon64 -find \"abcd\" /tmp/test/test.txt", 0x644db1ce},
       {UCON64_FINDI,	"ucon64 -findi \"ABcD\" /tmp/test/test.txt", 0x8d601a86},
       {UCON64_FINDR,	"ucon64 -findr \"1234\" /tmp/test/test.txt", 0x515e124e},
-      {UCON64_FRONTEND,	"ucon64 -frontend", 0}, // hidden option
+      {UCON64_FRONTEND,	"ucon64 -frontend", 0}, // NO TEST: hidden option
       {UCON64_GB,	"ucon64 -gb /tmp/test/test.1mb", 0x28a35286},
       {UCON64_GBA,	"ucon64 -gba /tmp/test/test.1mb", 0x5d21dc4f},
       {UCON64_GBX,	"ucon64 -gbx", 0},
-//      {UCON64_GC,	"ucon64 -gc", 0}, // hidden option
+      {UCON64_GC,	"ucon64 -gc", 0}, // NO TEST: hidden option
       {UCON64_GD3,	"ucon64 -gd3", 0},
       {UCON64_GD3S,	"ucon64 -gd3s", 0},
       {UCON64_GEN,	"ucon64 -gen /tmp/test/test.1mb", 0x3d3e74ba},
       {UCON64_GG,	"ucon64 -gg", 0},
       {UCON64_GGD,	"ucon64 -ggd", 0},
       {UCON64_GGE,	"ucon64 -gge", 0},
-//      {UCON64_GP32,	"ucon64 -gp32", 0}, // hidden option
-//      {UCON64_H,	"ucon64 -h", 0}, // hidden option
+      {UCON64_GP32,	"ucon64 -gp32", 0}, // NO TEST: hidden option
       {UCON64_HD,	"ucon64 -hd", 0},
       {UCON64_HDN,	"ucon64 -hdn", 0},
       {UCON64_HELP,	"ucon64 -help", 0x618f50d9},
@@ -344,21 +351,21 @@ ucon64_test (void)
       {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0xc2ea61a1},
       {UCON64_HI,	"ucon64 -hi", 0}, // FIX
       {UCON64_I,	"ucon64 -i", 0},
-      {UCON64_ID,	"ucon64 -id", 0}, // hidden option
+      {UCON64_ID,	"ucon64 -id", 0}, // NO TEST: hidden option
       {UCON64_IDNUM,	"ucon64 -idnum", 0},
       {UCON64_IDPPF,	"ucon64 -idppf", 0},
       {UCON64_INES,	"ucon64 -ines", 0},
       {UCON64_INESHD,	"ucon64 -ineshd", 0},
-      {UCON64_INS,      "ucon64 -ins /tmp/test/test.txt 2>&1;"
+      {UCON64_INS,      "ucon64 -ins /tmp/test/test.txt;"
                         "ucon64 -crc test.txt 2>&1;"
-                        "rm -f test.txt test.bak", 0x546f6150},
-      {UCON64_INSN,     "ucon64 -insn=512 /tmp/test/test.txt 2>&1;"
+                        "rm test.txt", 0x546f6150},
+      {UCON64_INSN,     "ucon64 -insn=512 /tmp/test/test.txt;"
                         "ucon64 -crc test.txt 2>&1;"
-                        "rm -f test.txt test.bak", 0x546f6150},
+                        "rm test.txt", 0x546f6150},
       {UCON64_INT,	"ucon64 -int", 0},
       {UCON64_INT2,	"ucon64 -int2", 0},
-//      {UCON64_INTELLI,	"ucon64 -intelli", 0}, // hidden option
-//      {UCON64_ISOFIX,	"ucon64 -isofix", 0},
+      {UCON64_INTELLI,	"ucon64 -intelli", 0}, // NO TEST: hidden option
+      {UCON64_ISOFIX,	"ucon64 -isofix", 0}, // NO TEST: deprecated
       {UCON64_ISPAD,	"ucon64 -ispad /tmp/test/test.2kb", 0xd420c88f},
       {UCON64_J,	"ucon64 -j", 0},
       {UCON64_JAG,	"ucon64 -jag /tmp/test/test.1mb", 0xda1ced1d},
@@ -366,8 +373,8 @@ ucon64_test (void)
       {UCON64_L,	"ucon64 -l", 0},
       {UCON64_LNX,	"ucon64 -lnx", 0},
       {UCON64_LOGO,	"ucon64 -logo /tmp/test/test.gba", 0},
-      {UCON64_LS,	"ucon64 -ls /tmp/test", 1}, // FIX
-      {UCON64_LSD,	"ucon64 -lsd /tmp/test", 010},
+      {UCON64_LS,	"ucon64 -ls /tmp/test/*", 1}, // FIX
+      {UCON64_LSD,	"ucon64 -lsd /tmp/test/*", 2},
       {UCON64_LSRAM,	"ucon64 -lsram", 0},
       {UCON64_LSV,	"ucon64 -lsv", 0},
       {UCON64_LYNX,	"ucon64 -lynx /tmp/test/test.1mb", 0xe87e6403},
@@ -378,13 +385,13 @@ ucon64_test (void)
       {UCON64_MGDGG,	"ucon64 -mgdgg", 0},
       {UCON64_MIRR,	"ucon64 -mirr", 0},
       {UCON64_MKA,	"ucon64 -mka", 0},
-//      {UCON64_MKCUE,	"ucon64 -mkcue", 0},
+      {UCON64_MKCUE,	"ucon64 -mkcue", 0}, // NO TEST: deprecated
       {UCON64_MKDAT,	"ucon64 -mkdat", 0},
       {UCON64_MKI,	"ucon64 -mki", 0},
       {UCON64_MKIP,	"ucon64 -mkip", 0},
       {UCON64_MKPPF,	"ucon64 -mkppf", 0},
-//      {UCON64_MKSHEET,	"ucon64 -mksheet", 0},
-//      {UCON64_MKTOC,	"ucon64 -mktoc", 0},
+      {UCON64_MKSHEET,	"ucon64 -mksheet", 0}, // NO TEST: deprecated
+      {UCON64_MKTOC,	"ucon64 -mktoc", 0}, // NO TEST: deprecated
       {UCON64_MSG,	"ucon64 -msg", 0},
       {UCON64_MULTI,	"ucon64 -multi", 0},
       {UCON64_N,	"ucon64 -n", 0},
@@ -422,33 +429,33 @@ ucon64_test (void)
       {UCON64_PORT,	"ucon64 -port", 0},
       {UCON64_PPF,	"ucon64 -ppf", 0},
       {UCON64_PRINT,	"ucon64 -print /tmp/test/test.txt", 0x59823cd3},
-//      {UCON64_PS2,	"ucon64 -ps2", 0}, // hidden option
+      {UCON64_PS2,	"ucon64 -ps2", 0}, // NO TEST: hidden option
       {UCON64_PSX,	"ucon64 -psx /tmp/test/test.1mb", 0x6261c2e3},
       {UCON64_Q,	"ucon64 -q", 0},
       {UCON64_R,	"ucon64 -r", 0},
-      {UCON64_R83,      "echo >/tmp/test/1234567890.abcd;"
-                        "ucon64 -r83 /tmp/test/1234567890.abcd;"
-                        "rm -f 12345eeb.abc", 0x8dd379f0},
+      {UCON64_R83,      "cp /tmp/test/1234567890.abcd .;"
+                        "ucon64 -r83 1234567890.abcd;"
+                        "rm 12345eeb.abc", 0x8dd379f0},
       {UCON64_RDAT,	"ucon64 -rdat", 0},
       {UCON64_REGION,	"ucon64 -region", 0},
-//      {UCON64_RIP,	"ucon64 -rip", 0},
-      {UCON64_RJOLIET,  "echo >/tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
-                        "ucon64 -rjoliet /tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
-                        "rm -f 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
-      {UCON64_RL,       "echo >/tmp/test/12345678.ABC;"
-                        "ucon64 -rl /tmp/test/12345678.ABC;"
-                        "rm -f 12345678.abc", 0xd2293641},
+      {UCON64_RIP,	"ucon64 -rip", 0}, // NO TEST: depreacted
+      {UCON64_RJOLIET,  "cp /tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd .;"
+                        "ucon64 -rjoliet 1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
+                        "rm 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
+      {UCON64_RL,       "cp /tmp/test/12345678.ABC .;"
+                        "ucon64 -rl 12345678.ABC;"
+                        "rm 12345678.abc", 0xd2293641},
       {UCON64_ROM,	"ucon64 -rom", 0},
       {UCON64_ROTL,	"ucon64 -rotl", 0},
       {UCON64_ROTR,	"ucon64 -rotr", 0},
       {UCON64_RROM,	"ucon64 -rrom", 0},
-      {UCON64_RU,       "echo >/tmp/test/12345678.abc;"
-                        "ucon64 -ru /tmp/test/12345678.abc;"
-                        "rm -f 12345678.ABC", 0x96254b18},
+      {UCON64_RU,       "cp /tmp/test/12345678.abc .;"
+                        "ucon64 -ru 12345678.abc;"
+                        "rm 12345678.ABC", 0x96254b18},
       {UCON64_S,	"ucon64 -s", 0},
-//      {UCON64_S16,	"ucon64 -s16", 0}, // hidden option
+      {UCON64_S16,	"ucon64 -s16", 0}, // NO TEST: hidden option
       {UCON64_SAM,	"ucon64 -sam", 0},
-//      {UCON64_SAT,	"ucon64 -sat", 0}, // hidden option
+      {UCON64_SAT,	"ucon64 -sat", 0}, // NO TEST: hidden option
       {UCON64_SC,	"ucon64 -sc", 0},
       {UCON64_SCAN,	"ucon64 -scan", 0},
       {UCON64_SCR,	"ucon64 -scr", 0},
@@ -468,7 +475,9 @@ ucon64_test (void)
       {UCON64_SWAN,	"ucon64 -swan /tmp/test/test.1mb", 0xcab92ee3},
       {UCON64_SWAP,	"ucon64 -swap", 0},
       {UCON64_SWAP2,	"ucon64 -swap2", 0},
-      {UCON64_SWC,	"ucon64 -swc", 0},
+      {UCON64_SWC,	"ucon64 -swc /tmp/test/test.1mb;"
+                        "ucon64 test.swc;"
+                        "rm test.swc", 0xf77967d6},
       {UCON64_SWCS,	"ucon64 -swcs", 0},
       {UCON64_UFO,	"ucon64 -ufo", 0},
       {UCON64_UFOS,	"ucon64 -ufos", 0},
@@ -478,10 +487,10 @@ ucon64_test (void)
       {UCON64_V,	"ucon64 -v", 0},
       {UCON64_V64,	"ucon64 -v64", 0},
       {UCON64_VBOY,	"ucon64 -vboy /tmp/test/test.1mb", 0xaf39c73d},
-//      {UCON64_VEC,	"ucon64 -vec", 0}, // hidden option
-      {UCON64_VER,	"ucon64 -version", 0xd4f49524},
+      {UCON64_VEC,	"ucon64 -vec", 0}, // NO TEST: hidden option
+      {UCON64_VER,	"ucon64 -version", 0}, // NO TEST: changes always
       {UCON64_VRAM,	"ucon64 -vram", 0},
-//      {UCON64_XBOX,	"ucon64 -xbox", 0}, // hidden option
+      {UCON64_XBOX,	"ucon64 -xbox", 0}, // NO TEST: hidden option
 
       {UCON64_XCMC,	"ucon64 -xcmc", 0},
       {UCON64_XCMCM,	"ucon64 -xcmcm", 0},

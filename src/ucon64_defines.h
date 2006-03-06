@@ -33,7 +33,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
+#ifndef LIB_VERSION
 #define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
+#endif
 #define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 //#define RANDOM(min, max) ((rand () % (max - min)) + min)
 #define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])

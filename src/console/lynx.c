@@ -141,16 +141,14 @@ lynx_lnx (st_rominfo_t *rominfo)
       return -1;
     }
 
+  memset (&header, 0, sizeof (st_lnx_header_t));
+
   header.page_size_bank0 = size > 4 * MBIT ? 4 * MBIT / 256 : size / 256;
   header.page_size_bank1 = size > 4 * MBIT ? (size - (4 * MBIT)) / 256 : 0;
 #ifdef  WORDS_BIGENDIAN
   header.page_size_bank0 = bswap_16 (header.page_size_bank0);
   header.page_size_bank1 = bswap_16 (header.page_size_bank1);
 #endif
-
-  memset (header.cartname, 0, sizeof (header.cartname));
-  memset (header.manufname, 0, sizeof (header.manufname));
-  memset (header.spare, 0, sizeof (header.spare));
 
 #ifdef  WORDS_BIGENDIAN
   header.version = bswap_16 (1);
@@ -160,7 +158,7 @@ lynx_lnx (st_rominfo_t *rominfo)
 
   memcpy (header.magic, "LYNX", 4);
   header.rotation = 0;
-  strncpy (header.cartname, ucon64.rom, sizeof (header.cartname));
+  strncpy (header.cartname, basename2 (ucon64.rom), sizeof (header.cartname))[sizeof (header.cartname) - 1] = 0;
   strcpy (header.manufname, "Atari");
 
   strcpy (dest_name, ucon64.rom);

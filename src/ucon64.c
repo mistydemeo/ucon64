@@ -252,7 +252,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-//#define TEST 
+#define TEST 
 #ifdef  TEST
 typedef struct
 {
@@ -293,8 +293,8 @@ ucon64_test (void)
       {UCON64_BOT,	"ucon64 -bot=test.bot /tmp/test/test.v64;"
                         "ucon64 -crc test.bot;"
                         "rm test.bot", 0x63a6cb68},
-      {UCON64_BS,	"ucon64 -bs", TEST_TODO},
-      {UCON64_C,	"ucon64 -c", TEST_TODO},
+      {UCON64_BS,	"ucon64 -bs /tmp/test/test.smc", 0x2e2842a4},
+      {UCON64_C,	"ucon64 -c /tmp/test/test.txt /tmp/test/12345678.abc", 0x7dfdb3bc},
       {UCON64_CHK,	"ucon64 -chk /tmp/test/test.smc;"
                         "ucon64 test.smc;"
                         "rm test.smc", 0x0b463647},
@@ -304,7 +304,7 @@ ucon64_test (void)
       {UCON64_COLECO,	"ucon64 -coleco /tmp/test/test.1mb", 0xc83d8173},
       {UCON64_CRC,	"ucon64 -crc /tmp/test/test.2kb", 0xa0bc9d78},
       {UCON64_CRP,	"ucon64 -crp", TEST_TODO},
-      {UCON64_CS,	"ucon64 -cs", TEST_TODO},
+      {UCON64_CS,	"ucon64 -cs /tmp/test/test.txt /tmp/test/12345678.abc", 0x20292e03},
       {UCON64_CTRL,	"ucon64 -ctrl", TEST_TODO},
       {UCON64_CTRL2,	"ucon64 -ctrl2", TEST_TODO},
       {UCON64_DB,	"ucon64 -db", TEST_TODO},

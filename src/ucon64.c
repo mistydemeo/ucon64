@@ -286,8 +286,7 @@ ucon64_test (void)
       {UCON64_B1,	"ucon64 -b1 64 /tmp/test/test.lnx;"
                         "ucon64 test.lnx;"
                         "rm test.lnx", 0x19330453},
-//TEST_BREAK
-      {UCON64_BAT,	"ucon64 -bat", 0},
+      {UCON64_BAT,	"ucon64 -bat /tmp/test/test.nes", 0xffffffff}, // TODO: fix
       {UCON64_BIN,	"ucon64 -bin", 0},
       {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0}, // NO TEST: deprecated
       {UCON64_BIOS,	"ucon64 -bios", 0},
@@ -349,7 +348,7 @@ ucon64_test (void)
       {UCON64_HEX,	"ucon64 -hex /tmp/test/test.txt", 0x9732f50c},
       {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" /tmp/test/test.txt", 0x6c43021b},
       {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0xc2ea61a1},
-      {UCON64_HI,	"ucon64 -hi", 0}, // FIX
+      {UCON64_HI,	"ucon64 -hi /tmp/test/test.smc", 0xffffffff}, // TODO: fix
       {UCON64_I,	"ucon64 -i", 0},
       {UCON64_ID,	"ucon64 -id", 0}, // NO TEST: hidden option
       {UCON64_IDNUM,	"ucon64 -idnum", 0},
@@ -373,8 +372,8 @@ ucon64_test (void)
       {UCON64_L,	"ucon64 -l", 0},
       {UCON64_LNX,	"ucon64 -lnx", 0},
       {UCON64_LOGO,	"ucon64 -logo /tmp/test/test.gba", 0},
-      {UCON64_LS,	"ucon64 -ls /tmp/test/*", 1}, // FIX
-      {UCON64_LSD,	"ucon64 -lsd /tmp/test/*", 2},
+      {UCON64_LS,	"ucon64 -ls /tmp/test/*", 0xffffffff}, // TODO: fix
+      {UCON64_LSD,	"ucon64 -lsd /tmp/test/*", 0xffffffff}, // TODO: fix 
       {UCON64_LSRAM,	"ucon64 -lsram", 0},
       {UCON64_LSV,	"ucon64 -lsv", 0},
       {UCON64_LYNX,	"ucon64 -lynx /tmp/test/test.1mb", 0xe87e6403},
@@ -481,76 +480,80 @@ ucon64_test (void)
       {UCON64_SWCS,	"ucon64 -swcs", 0},
       {UCON64_UFO,	"ucon64 -ufo", 0},
       {UCON64_UFOS,	"ucon64 -ufos", 0},
-      {UCON64_UNIF,	"ucon64 -unif", 0},
+      {UCON64_UNIF,	"ucon64 -unif /tmp/test/test.nes", 0xffffffff}, // TODO: fix
       {UCON64_UNSCR,	"ucon64 -unscr", 0},
       {UCON64_USMS,	"ucon64 -usms", 0},
       {UCON64_V,	"ucon64 -v", 0},
-      {UCON64_V64,	"ucon64 -v64", 0},
+      {UCON64_V64,	"ucon64 -v64 /tmp/test/test.z64;"
+                        "ucon64 test.v64;"
+                        "rm test.v64", 0x99fbd0bf},
       {UCON64_VBOY,	"ucon64 -vboy /tmp/test/test.1mb", 0xaf39c73d},
       {UCON64_VEC,	"ucon64 -vec", 0}, // NO TEST: hidden option
       {UCON64_VER,	"ucon64 -version", 0}, // NO TEST: changes always
       {UCON64_VRAM,	"ucon64 -vram", 0},
       {UCON64_XBOX,	"ucon64 -xbox", 0}, // NO TEST: hidden option
 
-      {UCON64_XCMC,	"ucon64 -xcmc", 0},
-      {UCON64_XCMCM,	"ucon64 -xcmcm", 0},
-      {UCON64_XCMCT,	"ucon64 -xcmct", 0},
-      {UCON64_XDEX,	"ucon64 -xdex", 0},
-      {UCON64_XDJR,	"ucon64 -xdjr", 0},
-      {UCON64_XF2A,	"ucon64 -xf2a", 0},
-      {UCON64_XF2AB,	"ucon64 -xf2ab", 0},
-      {UCON64_XF2AC,	"ucon64 -xf2ac", 0},
-      {UCON64_XF2AMULTI,	"ucon64 -xf2amulti", 0},
-      {UCON64_XF2AS,	"ucon64 -xf2as", 0},
-      {UCON64_XFAL,	"ucon64 -xfal", 0},
-      {UCON64_XFALB,	"ucon64 -xfalb", 0},
-      {UCON64_XFALC,	"ucon64 -xfalc", 0},
-      {UCON64_XFALM,	"ucon64 -xfalm", 0},
-      {UCON64_XFALMULTI,	"ucon64 -xfalmulti", 0},
-      {UCON64_XFALS,	"ucon64 -xfals", 0},
-      {UCON64_XFIG,	"ucon64 -xfig", 0},
-      {UCON64_XFIGC,	"ucon64 -xfigc", 0},
-      {UCON64_XFIGS,	"ucon64 -xfigs", 0},
-      {UCON64_XGBX,	"ucon64 -xgbx", 0},
-      {UCON64_XGBXB,	"ucon64 -xgbxb", 0},
-      {UCON64_XGBXM,	"ucon64 -xgbxm", 0},
-      {UCON64_XGBXS,	"ucon64 -xgbxs", 0},
-      {UCON64_XGD3,	"ucon64 -xgd3", 0},
-      {UCON64_XGD3R,	"ucon64 -xgd3r", 0},
-      {UCON64_XGD3S,	"ucon64 -xgd3s", 0},
-      {UCON64_XGD6,	"ucon64 -xgd6", 0},
-      {UCON64_XGD6R,	"ucon64 -xgd6r", 0},
-      {UCON64_XGD6S,	"ucon64 -xgd6s", 0},
-      {UCON64_XGG,	"ucon64 -xgg", 0},
-      {UCON64_XGGB,	"ucon64 -xggb", 0},
-      {UCON64_XGGS,	"ucon64 -xggs", 0},
-      {UCON64_XLIT,	"ucon64 -xlit", 0},
-      {UCON64_XMCCL,	"ucon64 -xmccl", 0},
-      {UCON64_XMCD,	"ucon64 -xmcd", 0},
-      {UCON64_XMD,	"ucon64 -xmd", 0},
-      {UCON64_XMDB,	"ucon64 -xmdb", 0},
-      {UCON64_XMDS,	"ucon64 -xmds", 0},
-      {UCON64_XMSG,	"ucon64 -xmsg", 0},
-      {UCON64_XPCE,	"ucon64 -xpce", 0},
-      {UCON64_XPL,	"ucon64 -xpl", 0},
-      {UCON64_XPLI,	"ucon64 -xpli", 0},
-      {UCON64_XPLM,	"ucon64 -xplm", 0},
-      {UCON64_XRESET,	"ucon64 -xreset", 0},
-      {UCON64_XSF,	"ucon64 -xsf", 0},
-      {UCON64_XSFS,	"ucon64 -xsfs", 0},
-      {UCON64_XSMC,	"ucon64 -xsmc", 0},
-      {UCON64_XSMCR,	"ucon64 -xsmcr", 0},
-      {UCON64_XSMD,	"ucon64 -xsmd", 0},
-      {UCON64_XSMDS,	"ucon64 -xsmds", 0},
-      {UCON64_XSWC,	"ucon64 -xswc", 0},
-      {UCON64_XSWC_IO,	"ucon64 -xswc-io", 0},
-      {UCON64_XSWC2,	"ucon64 -xswc2", 0},
-      {UCON64_XSWCC,	"ucon64 -xswcc", 0},
-      {UCON64_XSWCR,	"ucon64 -xswcr", 0},
-      {UCON64_XSWCS,	"ucon64 -xswcs", 0},
-      {UCON64_XV64,	"ucon64 -xv64", 0},
+      {UCON64_XCMC,	"ucon64 -xcmc", 0}, // NO TEST: transfer code
+      {UCON64_XCMCM,	"ucon64 -xcmcm", 0}, // NO TEST: transfer code
+      {UCON64_XCMCT,	"ucon64 -xcmct", 0}, // NO TEST: transfer code
+      {UCON64_XDEX,	"ucon64 -xdex", 0}, // NO TEST: transfer code
+      {UCON64_XDJR,	"ucon64 -xdjr", 0}, // NO TEST: transfer code
+      {UCON64_XF2A,	"ucon64 -xf2a", 0}, // NO TEST: transfer code
+      {UCON64_XF2AB,	"ucon64 -xf2ab", 0}, // NO TEST: transfer code
+      {UCON64_XF2AC,	"ucon64 -xf2ac", 0}, // NO TEST: transfer code
+      {UCON64_XF2AMULTI,	"ucon64 -xf2amulti", 0}, // NO TEST: transfer code
+      {UCON64_XF2AS,	"ucon64 -xf2as", 0}, // NO TEST: transfer code
+      {UCON64_XFAL,	"ucon64 -xfal", 0}, // NO TEST: transfer code
+      {UCON64_XFALB,	"ucon64 -xfalb", 0}, // NO TEST: transfer code
+      {UCON64_XFALC,	"ucon64 -xfalc", 0}, // NO TEST: transfer code
+      {UCON64_XFALM,	"ucon64 -xfalm", 0}, // NO TEST: transfer code
+      {UCON64_XFALMULTI,	"ucon64 -xfalmulti", 0}, // NO TEST: transfer code
+      {UCON64_XFALS,	"ucon64 -xfals", 0}, // NO TEST: transfer code
+      {UCON64_XFIG,	"ucon64 -xfig", 0}, // NO TEST: transfer code
+      {UCON64_XFIGC,	"ucon64 -xfigc", 0}, // NO TEST: transfer code
+      {UCON64_XFIGS,	"ucon64 -xfigs", 0}, // NO TEST: transfer code
+      {UCON64_XGBX,	"ucon64 -xgbx", 0}, // NO TEST: transfer code
+      {UCON64_XGBXB,	"ucon64 -xgbxb", 0}, // NO TEST: transfer code
+      {UCON64_XGBXM,	"ucon64 -xgbxm", 0}, // NO TEST: transfer code
+      {UCON64_XGBXS,	"ucon64 -xgbxs", 0}, // NO TEST: transfer code
+      {UCON64_XGD3,	"ucon64 -xgd3", 0}, // NO TEST: transfer code
+      {UCON64_XGD3R,	"ucon64 -xgd3r", 0}, // NO TEST: transfer code
+      {UCON64_XGD3S,	"ucon64 -xgd3s", 0}, // NO TEST: transfer code
+      {UCON64_XGD6,	"ucon64 -xgd6", 0}, // NO TEST: transfer code
+      {UCON64_XGD6R,	"ucon64 -xgd6r", 0}, // NO TEST: transfer code
+      {UCON64_XGD6S,	"ucon64 -xgd6s", 0}, // NO TEST: transfer code
+      {UCON64_XGG,	"ucon64 -xgg", 0}, // NO TEST: transfer code
+      {UCON64_XGGB,	"ucon64 -xggb", 0}, // NO TEST: transfer code
+      {UCON64_XGGS,	"ucon64 -xggs", 0}, // NO TEST: transfer code
+      {UCON64_XLIT,	"ucon64 -xlit", 0}, // NO TEST: transfer code
+      {UCON64_XMCCL,	"ucon64 -xmccl", 0}, // NO TEST: transfer code
+      {UCON64_XMCD,	"ucon64 -xmcd", 0}, // NO TEST: transfer code
+      {UCON64_XMD,	"ucon64 -xmd", 0}, // NO TEST: transfer code
+      {UCON64_XMDB,	"ucon64 -xmdb", 0}, // NO TEST: transfer code
+      {UCON64_XMDS,	"ucon64 -xmds", 0}, // NO TEST: transfer code
+      {UCON64_XMSG,	"ucon64 -xmsg", 0}, // NO TEST: transfer code
+      {UCON64_XPCE,	"ucon64 -xpce", 0}, // NO TEST: transfer code
+      {UCON64_XPL,	"ucon64 -xpl", 0}, // NO TEST: transfer code
+      {UCON64_XPLI,	"ucon64 -xpli", 0}, // NO TEST: transfer code
+      {UCON64_XPLM,	"ucon64 -xplm", 0}, // NO TEST: transfer code
+      {UCON64_XRESET,	"ucon64 -xreset", 0}, // NO TEST: transfer code
+      {UCON64_XSF,	"ucon64 -xsf", 0}, // NO TEST: transfer code
+      {UCON64_XSFS,	"ucon64 -xsfs", 0}, // NO TEST: transfer code
+      {UCON64_XSMC,	"ucon64 -xsmc", 0}, // NO TEST: transfer code
+      {UCON64_XSMCR,	"ucon64 -xsmcr", 0}, // NO TEST: transfer code
+      {UCON64_XSMD,	"ucon64 -xsmd", 0}, // NO TEST: transfer code
+      {UCON64_XSMDS,	"ucon64 -xsmds", 0}, // NO TEST: transfer code
+      {UCON64_XSWC,	"ucon64 -xswc", 0}, // NO TEST: transfer code
+      {UCON64_XSWC_IO,	"ucon64 -xswc-io", 0}, // NO TEST: transfer code
+      {UCON64_XSWC2,	"ucon64 -xswc2", 0}, // NO TEST: transfer code
+      {UCON64_XSWCC,	"ucon64 -xswcc", 0}, // NO TEST: transfer code
+      {UCON64_XSWCR,	"ucon64 -xswcr", 0}, // NO TEST: transfer code
+      {UCON64_XSWCS,	"ucon64 -xswcs", 0}, // NO TEST: transfer code
+      {UCON64_XV64,	"ucon64 -xv64", 0}, // NO TEST: transfer code
 
-      {UCON64_Z64,	"ucon64 -z64", 0},
+      {UCON64_Z64,	"ucon64 -z64 /tmp/test/test.v64;"
+                        "ucon64 test.z64;"
+                        "rm test.z64", 0xb22e87d2},
       {0, NULL, 0}
     };
   int x = 0;
@@ -616,11 +619,20 @@ ucon64_test (void)
           fputs (buf, out);
         }
 
-      sprintf (buf, "option: %d crc: 0x%08x calc: 0x%08x status: %s\n",
+      sprintf (buf, "option: %d crc: 0x%08x calc: 0x%08x status: ",
         test[x].val,
         test[x].crc32,
-        crc,
-        test[x].crc32 == crc ? "OK" : "BUG?");
+        crc);
+
+      switch (test[x].crc32)
+        {
+          case 0xffffffff:
+            strcpy (strchr (buf, 0), "BUG!\n");
+            break;
+
+          default:
+            strcpy (strchr (buf, 0), test[x].crc32 == crc ? "OK\n" : "BUG?\n");
+        }
 
       fputs ("^^^ ", out);
       fputs (buf, out);

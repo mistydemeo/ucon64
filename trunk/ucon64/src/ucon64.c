@@ -316,7 +316,7 @@ ucon64_test (void)
       {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" /tmp/test/test.txt", 0xc2ea61a1},
       {UCON64_DINT,	"ucon64 -dint /tmp/test/test.txt;"
                         "ucon64 -crc test.txt;"
-                        "rm test.txt", 3},
+                        "rm test.txt", 0xb8162c4f},
       {UCON64_DMIRR,	"ucon64 -dmirr", TEST_TODO},
       {UCON64_DNSRT,	"ucon64 -dnsrt", TEST_TODO},
       {UCON64_DUAL,	"ucon64 -dual", TEST_TODO},
@@ -341,12 +341,12 @@ ucon64_test (void)
       {UCON64_GG,	"ucon64 -gg", TEST_TODO},
       {UCON64_GGD,	"ucon64 -ggd", TEST_TODO},
       {UCON64_GGE,	"ucon64 -gge", TEST_TODO},
-      {UCON64_HD,	"ucon64 -hd", TEST_TODO},
-      {UCON64_HDN,	"ucon64 -hdn", TEST_TODO},
+      {UCON64_HD,	"ucon64 -snes -hd /tmp/test/test.1mb", 0xf4c33bd3},
+      {UCON64_HDN,	"ucon64 -snes -hdn=1024 /tmp/test/test.1mb", 0x15e95bfc},
       {UCON64_HEX,	"ucon64 -hex /tmp/test/test.txt", 0x9732f50c},
       {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" /tmp/test/test.txt", 0x6c43021b},
       {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0xc2ea61a1},
-      {UCON64_HI,	"ucon64 -hi /tmp/test/test.smc", TEST_BUG},
+      {UCON64_HI,	"ucon64 -snes -hi /tmp/test/test.1mb", 0xf4878fb5},
       {UCON64_I,	"ucon64 -i", TEST_TODO},
       {UCON64_IDNUM,	"ucon64 -idnum", TEST_TODO},
       {UCON64_IDPPF,	"ucon64 -idppf", TEST_TODO},
@@ -398,8 +398,8 @@ ucon64_test (void)
       {UCON64_NES,	"ucon64 -nes", TEST_TODO},
       {UCON64_NG,	"ucon64 -ng", TEST_TODO},
       {UCON64_NGP,	"ucon64 -ngp", TEST_TODO},
-      {UCON64_NHD,	"ucon64 -nhd", TEST_TODO},
-      {UCON64_NHI,	"ucon64 -nhi", TEST_TODO},
+      {UCON64_NHD,	"ucon64 -nhd /tmp/test/test.smc", 0xc1637acf},
+      {UCON64_NHI,	"ucon64 -snes -nhi /tmp/test/test.1mb", 0xaf686a6a},
       {UCON64_NINT,	"ucon64 -nint", TEST_TODO},
       {UCON64_NPPF,	"ucon64 -nppf", TEST_TODO},
       {UCON64_NROT,	"ucon64 -nrot", TEST_TODO},
@@ -421,7 +421,6 @@ ucon64_test (void)
       {UCON64_PPF,	"ucon64 -ppf", TEST_TODO},
       {UCON64_PRINT,	"ucon64 -print /tmp/test/test.txt", 0x59823cd3},
       {UCON64_PSX,	"ucon64 -psx /tmp/test/test.1mb", 0x6261c2e3},
-      {UCON64_R,	"ucon64 -r", TEST_TODO},
       {UCON64_R83,      "cp /tmp/test/1234567890.abcd .;"
                         "ucon64 -r83 1234567890.abcd;"
                         "rm 12345eeb.abc", 0x8dd379f0},
@@ -483,6 +482,7 @@ TEST_BREAK
       {UCON64_V,	"ucon64 -v", 0},        // NO TEST: verbose switch
       {UCON64_Q,	"ucon64 -q", 0},        // NO TEST: quiet switch
       {UCON64_HELP,	"ucon64 -help", 0},     // NO TEST: usage changes always
+      {UCON64_R,	"ucon64 -r", 0},        // NO TEST: recursion
 
       {UCON64_3DO,	"ucon64 -3do", 0},      // NO TEST: hidden option
       {UCON64_CRCHD,	"ucon64 -crchd /tmp/test/test.2kb", 0x707bbaf1}, // NO TEST: hidden option

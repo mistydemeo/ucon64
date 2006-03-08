@@ -358,8 +358,8 @@ ucon64_test (void)
       {UCON64_INSN,     "ucon64 -insn=512 /tmp/test/test.txt;"
                         "ucon64 -crc test.txt 2>&1;"
                         "rm test.txt", 0x546f6150},
-      {UCON64_INT,	"ucon64 -int", TEST_TODO},
-      {UCON64_INT2,	"ucon64 -int2", TEST_TODO},
+      {UCON64_INT,	"ucon64 -int /tmp/test/test.z64", 0x1a10b01a},
+      {UCON64_INT2,	"ucon64 -int2 /tmp/test/test.v64", 0xcc6fc2b3},
       {UCON64_ISPAD,	"ucon64 -ispad /tmp/test/test.2kb", 0xd420c88f},
       {UCON64_J,	"ucon64 -j", TEST_TODO},
       {UCON64_JAG,	"ucon64 -jag /tmp/test/test.1mb", 0xda1ced1d},
@@ -390,7 +390,6 @@ ucon64_test (void)
       {UCON64_N2GB,	"ucon64 -n2gb", TEST_TODO},
       {UCON64_N64,	"ucon64 -n64 /tmp/test/test.1mb", 0x63be7ef1},
       {UCON64_NA,	"ucon64 -na", TEST_TODO},
-      {UCON64_NBAK,	"ucon64 -nbak", TEST_TODO},
       {UCON64_NBAT,	"ucon64 -nbat", TEST_TODO},
       {UCON64_NBS,	"ucon64 -nbs", TEST_TODO},
       {UCON64_NCOL,	"ucon64 -ncol -snes /tmp/test/test.1mb", 0xaf686a6a},
@@ -406,7 +405,6 @@ ucon64_test (void)
       {UCON64_NS,	"ucon64 -ns", TEST_TODO},
       {UCON64_NTSC,	"ucon64 -ntsc", TEST_TODO},
       {UCON64_NVRAM,	"ucon64 -nvram", TEST_TODO},
-      {UCON64_O,	"ucon64 -o", TEST_TODO},
       {UCON64_P,	"ucon64 -p", TEST_TODO},
       {UCON64_PAD,	"ucon64 -pad", TEST_TODO},
       {UCON64_PADN,	"ucon64 -padn", TEST_TODO},
@@ -417,7 +415,6 @@ ucon64_test (void)
       {UCON64_PATTERN,	"ucon64 -pattern", TEST_TODO},
       {UCON64_PCE,	"ucon64 -pce", TEST_TODO},
       {UCON64_POKE,	"ucon64 -poke", TEST_TODO},
-      {UCON64_PORT,	"ucon64 -port", TEST_TODO},
       {UCON64_PPF,	"ucon64 -ppf", TEST_TODO},
       {UCON64_PRINT,	"ucon64 -print /tmp/test/test.txt", 0x59823cd3},
       {UCON64_PSX,	"ucon64 -psx /tmp/test/test.1mb", 0x6261c2e3},
@@ -432,10 +429,11 @@ ucon64_test (void)
       {UCON64_RL,       "cp /tmp/test/12345678.ABC .;"
                         "ucon64 -rl 12345678.ABC;"
                         "rm 12345678.abc", 0xd2293641},
-      {UCON64_ROM,	"ucon64 -rom", TEST_TODO},
       {UCON64_ROTL,	"ucon64 -rotl", TEST_TODO},
       {UCON64_ROTR,	"ucon64 -rotr", TEST_TODO},
-      {UCON64_RROM,	"ucon64 -rrom", TEST_TODO},
+      {UCON64_RROM,	"cp /tmp/test/test.smc .;"
+                        "ucon64 -rrom test.smc;"
+                        "rm \"Mode 7 interactive de.smc\"", 0xd996d275},
       {UCON64_RU,       "cp /tmp/test/12345678.abc .;"
                         "ucon64 -ru 12345678.abc;"
                         "rm 12345678.ABC", 0x96254b18},
@@ -454,12 +452,22 @@ ucon64_test (void)
       {UCON64_SRAM,	"ucon64 -sram", TEST_TODO},
       {UCON64_SSC,	"ucon64 -ssc", TEST_TODO},
       {UCON64_SSIZE,	"ucon64 -ssize", TEST_TODO},
-      {UCON64_STP,	"ucon64 -stp", TEST_TODO},
-      {UCON64_STPN,	"ucon64 -stpn", TEST_TODO},
-      {UCON64_STRIP,	"ucon64 -strip", TEST_TODO},
+      {UCON64_STP,	"ucon64 -stp /tmp/test/test.64k;"
+                        "ucon64 -crc test.64k;"
+                        "rm test.64k", 0xf288f5a8},
+      {UCON64_STPN,	"ucon64 -stpn=512 /tmp/test/test.64k;"
+                        "ucon64 -crc test.64k;"
+                        "rm test.64k", 0xf288f5a8},
+      {UCON64_STRIP,	"ucon64 -strip=512 /tmp/test/test.64k;"
+                        "ucon64 -crc test.64k;"
+                        "rm test.64k", 0xf288f5a8},
       {UCON64_SWAN,	"ucon64 -swan /tmp/test/test.1mb", 0xcab92ee3},
-      {UCON64_SWAP,	"ucon64 -swap", TEST_TODO},
-      {UCON64_SWAP2,	"ucon64 -swap2", TEST_TODO},
+      {UCON64_SWAP,	"ucon64 -swap /tmp/test/test.txt;"
+                        "ucon64 -crc test.txt;"
+                        "rm test.txt", 0xb8162c4f},
+      {UCON64_SWAP2,	"ucon64 -swap2 /tmp/test/test.txt;"
+                        "ucon64 -crc test.txt;"
+                        "rm test.txt", 0x8be86737},
       {UCON64_SWC,	"ucon64 -swc /tmp/test/test.1mb;"
                         "ucon64 test.swc;"
                         "rm test.swc", 0xf77967d6},
@@ -483,20 +491,23 @@ TEST_BREAK
       {UCON64_Q,	"ucon64 -q", 0},        // NO TEST: quiet switch
       {UCON64_HELP,	"ucon64 -help", 0},     // NO TEST: usage changes always
       {UCON64_R,	"ucon64 -r", 0},        // NO TEST: recursion
+      {UCON64_O,        "ucon64 -o", 0},        // NO TEST: output
+      {UCON64_NBAK,	"ucon64 -nbak", 0},     // NO TEST: no backup
 
-      {UCON64_3DO,	"ucon64 -3do", 0},      // NO TEST: hidden option
-      {UCON64_CRCHD,	"ucon64 -crchd /tmp/test/test.2kb", 0x707bbaf1}, // NO TEST: hidden option
-      {UCON64_FILE,	"ucon64 -file", 0},     // NO TEST: hidden option
-      {UCON64_FRONTEND,	"ucon64 -frontend", 0}, // NO TEST: hidden option
-      {UCON64_GC,	"ucon64 -gc", 0},       // NO TEST: hidden option
-      {UCON64_GP32,	"ucon64 -gp32", 0},     // NO TEST: hidden option
-      {UCON64_ID,	"ucon64 -id", 0},       // NO TEST: hidden option
-      {UCON64_INTELLI,	"ucon64 -intelli", 0},  // NO TEST: hidden option
-      {UCON64_PS2,	"ucon64 -ps2", 0},      // NO TEST: hidden option
-      {UCON64_S16,	"ucon64 -s16", 0},      // NO TEST: hidden option
-      {UCON64_SAT,	"ucon64 -sat", 0},      // NO TEST: hidden option
-      {UCON64_VEC,	"ucon64 -vec", 0},      // NO TEST: hidden option
-      {UCON64_XBOX,	"ucon64 -xbox", 0},     // NO TEST: hidden option
+      {UCON64_ROM,      "ucon64 -rom", 0},      // NO TEST: hidden option or deprecated
+      {UCON64_3DO,	"ucon64 -3do", 0},      // NO TEST: hidden option or deprecated
+      {UCON64_CRCHD,	"ucon64 -crchd /tmp/test/test.2kb", 0x707bbaf1}, // NO TEST: hidden option or deprecated
+      {UCON64_FILE,	"ucon64 -file", 0},     // NO TEST: hidden option or deprecated
+      {UCON64_FRONTEND,	"ucon64 -frontend", 0}, // NO TEST: hidden option or deprecated
+      {UCON64_GC,	"ucon64 -gc", 0},       // NO TEST: hidden option or deprecated
+      {UCON64_GP32,	"ucon64 -gp32", 0},     // NO TEST: hidden option or deprecated
+      {UCON64_ID,	"ucon64 -id", 0},       // NO TEST: hidden option or deprecated
+      {UCON64_INTELLI,	"ucon64 -intelli", 0},  // NO TEST: hidden option or deprecated
+      {UCON64_PS2,	"ucon64 -ps2", 0},      // NO TEST: hidden option or deprecated
+      {UCON64_S16,	"ucon64 -s16", 0},      // NO TEST: hidden option or deprecated
+      {UCON64_SAT,	"ucon64 -sat", 0},      // NO TEST: hidden option or deprecated
+      {UCON64_VEC,	"ucon64 -vec", 0},      // NO TEST: hidden option or deprecated
+      {UCON64_XBOX,	"ucon64 -xbox", 0},     // NO TEST: hidden option or deprecated
 
       {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0},  // NO TEST: discmage
       {UCON64_DISC,	"ucon64 -disc", 0},     // NO TEST: discmage
@@ -506,6 +517,7 @@ TEST_BREAK
       {UCON64_MKTOC,	"ucon64 -mktoc", 0},    // NO TEST: discmage
       {UCON64_RIP,	"ucon64 -rip", 0},      // NO TEST: discmage
 
+      {UCON64_PORT,     "ucon64 -port", 0},     // NO TEST: transfer code
       {UCON64_XCMC,	"ucon64 -xcmc", 0},     // NO TEST: transfer code
       {UCON64_XCMCM,	"ucon64 -xcmcm", 0},    // NO TEST: transfer code
       {UCON64_XCMCT,	"ucon64 -xcmct", 0},    // NO TEST: transfer code

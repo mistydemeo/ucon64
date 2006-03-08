@@ -1919,10 +1919,7 @@ ucon64_configfile (void)
       result = ucon64_configfile_create ();
 
       if (!result)
-        {
-          sync ();
-          printf ("OK\n\n");
-        }
+        printf ("OK\n\n");
       else
         printf ("FAILED\n\n");
     }
@@ -1939,10 +1936,7 @@ ucon64_configfile (void)
       result = ucon64_configfile_update ();
 
       if (!result)
-        {
-          sync ();
-          printf ("OK\n\n");
-        }
+        printf ("OK\n\n");
       else
         printf ("FAILED\n\n");
     }
@@ -2228,7 +2222,6 @@ ucon64_e (void)
 
   puts (buf);
   fflush (stdout);
-  sync ();
 
   result = system (buf)
 #if     !(defined __MSDOS__ || defined _WIN32)
@@ -2672,6 +2665,7 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *cr
 
   result = quick_io_func (ucon64_chksum_func, MAXBUFSIZE, &o, start,
                           fsizeof (filename) - start, filename, "rb");
+
   if (sha1_s)
     {
       unsigned char buf[MAXBUFSIZE];

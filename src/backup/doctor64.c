@@ -346,7 +346,7 @@ doctor64_read (const char *filename, unsigned int parport)
       fwrite (buf, 1, sizeof buf, fh);
       ucon64_gauge (inittime, bytesreceived, size);
     }
-  sync ();
+
   fclose (fh);
   return 0;
 }

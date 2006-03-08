@@ -2735,7 +2735,6 @@ q_fbackup (const char *filename, int mode)
           fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
           exit (1);
         }
-      sync ();
       return buf;
     }
 }
@@ -2775,7 +2774,6 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
 
   fclose (fh);
   fclose (fh2);
-  sync ();
   return 0;
 }
 
@@ -2864,7 +2862,7 @@ q_fswap (const char *filename, int start, int len, swap_t type)
     }
 
   fclose (fh);
-  sync ();
+
   return 0;
 }
 
@@ -3020,7 +3018,7 @@ process_file (const char *src, int start, int len, const char *dest, const char 
 
   fclose (fh);
   fclose (fh2);
-  sync ();
+
   return 0;
 }
 #endif

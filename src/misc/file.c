@@ -725,7 +725,6 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
   result = quick_io_func (fcopy_func, MAXBUFSIZE, output, start, len, src, "rb");
 
   fclose (output);
-  sync ();
 
   return result == -1 ? result : 0;
 }
@@ -950,7 +949,6 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 
   fclose (fh);
   free (buffer);
-  sync ();
 
   // returns total bytes processed or if (func() < 0) it returns that error value
   return func_len < 0 ? func_len : ((int) len_done + func_len);
@@ -1009,7 +1007,7 @@ mkbak (const char *filename, backup_t type)
           fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
           exit (1);
         }
-      sync ();
+
       return buf;
     }
 }

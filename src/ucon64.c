@@ -299,7 +299,7 @@ ucon64_test (void)
                         "ucon64 test.smc;"
                         "rm test.smc", 0x0b463647},
       {UCON64_CMNT,	"ucon64 -cmnt", TEST_TODO},
-      {UCON64_CODE,	"ucon64 -code", TEST_TODO},
+      {UCON64_CODE,	"ucon64 -code /tmp/test/test.txt", TEST_BUG},
       {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},
       {UCON64_COLECO,	"ucon64 -coleco /tmp/test/test.1mb", 0xc83d8173},
       {UCON64_CRC,	"ucon64 -crc /tmp/test/test.2kb", 0xa0bc9d78},
@@ -314,7 +314,9 @@ ucon64_test (void)
       {UCON64_DC,	"ucon64 -dc /tmp/test/test.1mb", 0xf68b4bed},
       {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" /tmp/test/test.txt", 0x644db1ce},
       {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" /tmp/test/test.txt", 0xc2ea61a1},
-      {UCON64_DINT,	"ucon64 -dint", TEST_TODO},
+      {UCON64_DINT,	"ucon64 -dint /tmp/test/test.txt;"
+                        "ucon64 -crc test.txt;"
+                        "rm test.txt", 3},
       {UCON64_DMIRR,	"ucon64 -dmirr", TEST_TODO},
       {UCON64_DNSRT,	"ucon64 -dnsrt", TEST_TODO},
       {UCON64_DUAL,	"ucon64 -dual", TEST_TODO},
@@ -645,6 +647,7 @@ TEST_BREAK
         strcpy (strchr (buf, 0), "BUG?\n");
 
       printf (buf); 
+      fflush (stdout);
 
       if (test[x].crc32 != TEST_BUG && test[x].crc32 != TEST_TODO)
         {

@@ -192,13 +192,30 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
-   To compile uCON64 you need a compiler :-) You can use either GCC (GNU
-   Compiler Collection) or the Visual C++ compiler. GCC can be freely
-   downloaded from <a href="http://www.gnu.org/order/ftp.html" target="_blank">
-   http://www.gnu.org/order/ftp.html</a>. Visual C++ can be bought for about 60
-   euro (at 15 May 2003) in most computer shops.<br>
    uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD, OpenBSD), DOS,
    BeOS, Windows (95/98/ME/NT/2000/XP), AmigaOS (PPC/68K) and Mac OS X.<br>
+   To compile uCON64 you need a compiler :-) You can use either GCC (GNU
+   Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
+   <a href="http://www.gnu.org/order/ftp.html" target="_blank">
+   http://www.gnu.org/order/ftp.html</a>.<br>
+   A free version of Visual C++, Microsoft Visual C++ Toolkit 2003, can be
+   downloaded from
+   <a href="http://msdn.microsoft.com/visualc/vctoolkit2003/" target="_blank">
+   http://msdn.microsoft.com/visualc/vctoolkit2003/</a>. If you want to compile
+   uCON64 with this version of Visual C++, you will also have to download the
+   Platform SDK, available from <a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en" target="_blank">
+   http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en</a>.
+   In the Microsoft Platform SDK Setup Wizard, choose Custom Installation and
+   disable everything except Microsoft Windows Core SDK, subsection Build
+   Environment. Enable one option, for example Build Environment (x86 32-bit).
+   At the moment we do not support building uCON64 with Microsoft Visual C++
+   Toolkit 2003, only with the regular versions of Visual C++, version 6 or 7.<br>
+   <!--
+     The problem is that Visual C++ Toolkit 2003 doesn't come with nmake.exe,
+     lib.exe and setargv.obj. I did a test with GNU make and could compile a
+     binary with libcd64 support (DLL), but I don't feel like maintaining yet
+     another Makefile.
+   -->
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from <a href="http://www.delorie.com/djgpp/" target="_blank">
    http://www.delorie.com/djgpp/</a>. A Win32 port of GCC (and many other GNU
@@ -1102,8 +1119,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    configuration file.<br>
    Then copy all DAT files you have into that directory. You can download DAT
    files from sites like
-   <a href="http://emulationrealm.com/rcdat.php#Cowering_GoodTools" target="_blank">
-   http://emulationrealm.com/</a>,
+   <a href="http://emulationrealm.net/rcdat.php#Cowering_GoodTools" target="_blank">
+   http://emulationrealm.net/</a>,
    <a href="http://www.romcenter.com/" target="_blank">
    http://www.romcenter.com/</a> or
    <a href="http://www.rommanager.com/" target="_blank">
@@ -1500,8 +1517,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
    dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
    The meaning of "interleaved" depends on the console type. Interleaved
-   formats exist for NES, Sega Master System, Game Gear, PC-Engine, Genesis,
-   SNES and Nintendo 64.<br>
+   formats exist for NES, PC-Engine, Genesis, SNES and Nintendo 64.<br>
    Deinterleaving is the opposite of interleaving a ROM dump. It is the process
    of converting the data to "binary" format. Binary in the sense as how the
    data (in a cartridge) is presented to the CPU.<br>
@@ -1515,18 +1531,6 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Cannot be interleaved with uCON64.<br>
    Can be deinterleaved with uCON64 using the option -dint.<br>
 <br>
-   Sega Master System, Game Gear and Genesis<br>
-   Interleaved Sega Master System, Game Gear and Genesis dumps are produced by
-   the Super Magic Drive and the Multi Game Doctor 2.<br>
-   For the SMD: for each block of 16384 bytes of the ROM all bytes at even
-   offsets are stored in the upper half of the dumped block. The bytes at odd
-   offsets are stored in the lower half. So, each dumped block first contains
-   8192 "odd bytes" then 8192 "even bytes".<br>
-   For the MGD2: all odd bytes of the file are stored in the first half of the
-   file, all even bytes in the second half.<br>
-   Can be interleaved with uCON64 using the option -smd or -mgd.<br>
-   Can be deinterleaved with uCON64 using the option -bin.<br>
-<br>
    PC-Engine<br>
    Interleaved PC-Engine or TurboGrafx-16 dumps are not produced by a specific
    copier. It depends on the HuCARD (PC-Engine/TurboGrafx-16 game cartridge).
@@ -1538,6 +1542,18 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    suitable for a TurboGrafx-16. You can use the option -swap afterwards if you
    want to play the game on a PC-Engine.<br>
    Can be deinterleaved with uCON64 using the option -msg.<br>
+<br>
+   Genesis<br>
+   Interleaved Genesis dumps are produced by the Super Magic Drive and the
+   Multi Game Doctor 2.<br>
+   For the SMD: for each block of 16384 bytes of the ROM all bytes at even
+   offsets are stored in the upper half of the dumped block. The bytes at odd
+   offsets are stored in the lower half. So, each dumped block first contains
+   8192 "odd bytes" then 8192 "even bytes".<br>
+   For the MGD2: all odd bytes of the file are stored in the first half of the
+   file, all even bytes in the second half.<br>
+   Can be interleaved with uCON64 using the option -smd or -mgd.<br>
+   Can be deinterleaved with uCON64 using the option -bin.<br>
 <br>
    SNES<br>
    Interleaved SNES dumps are produced by the Game Doctor and the Super UFO

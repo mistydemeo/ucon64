@@ -38,6 +38,7 @@ Usage: ucon64 [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR|ARCHIVE]...
 
 Options
    -o=DIRECTORY specify output directory
+   -r           process subdirectories recursively
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
   --port=PORT   specify USB or parallel PORT={USB0, USB1, 3bc, 378, 278, ...}
@@ -60,7 +61,15 @@ Options
   --find=STRING find STRING in ROM (wildcard: '?')
   --findi=STR   like --find but ignores the case of alpha bytes
   --findr=STR   like --find but looks also for shifted/relative similarities
-                  (wildcard: disabled)
+                  (no wildcard supported)
+  --hfind=HEX   find HEX codes in ROM; use quotation --hfind="75 ? 4f 4e"
+                  (wildcard: '?')
+  --hfindr=HEX  like --hfind but looks also for shifted/relative similarities
+                  (no wildcard supported)
+  --dfind=DEC   find DEC values in ROM; use quotation --dfind="117 ? 79 78"
+                  (wildcard: '?')
+  --dfindr=DEC  like --dfind but looks also for shifted/relative similarities
+                  (no wildcard supported)
    -c=FILE      compare FILE with ROM for differences
   --cs=FILE     compare FILE with ROM for similarities
   --help        display this help and exit
@@ -90,15 +99,13 @@ DATabase (support for DAT files)
                   like: GoodXXXX scan ...
   --lsd         same as --scan
   --mkdat=DATFILE create DAT file; use -o to specify an output directory
-  --rrom        rename ROMs to their internal names
-  --rename      rename ROMs to their DATabase names
+  --rdat        rename ROMs to their DATabase names
                   use -o to specify an output directory
-  --rr83        force to rename to 8.3 filenames
-  --force63     force to rename all filenames into Joliet CD format
-                  like: GoodXXXX rename inplace force63 ...
-                  TIP: using --nes would process only NES ROMs
-  --rl          rename ROMs to lowercase
-  --ru          rename ROMs to uppercase
+  --rrom        rename ROMs to their internal names (if any)
+  --r83         rename to 8.3 filenames
+  --rjoliet     rename to Joliet compatible filenames
+  --rl          rename to lowercase
+  --ru          rename to uppercase
 
 Patching
   --poke=OFF:V  change byte at file offset OFF to value V (both in hexadecimal)
@@ -144,7 +151,7 @@ Patching
                   Super Nintendo Entertainment System/SNES/Super Famicom
 
 All disc-based consoles
-  --disc        force recognition; NEEDED
+  --disc        force recognition
   --rip=N       rip/dump track N from IMAGE
   --bin2iso=N   convert track N to ISO (if possible) by resizing
                   sectors to 2048 Bytes
@@ -162,18 +169,20 @@ Dreamcast
   --parse=TEMPLATE parse TEMPLATE file into a IP.BIN;
                   creates an empty template when TEMPLATE does not exist
 
-Playstation (One)/Playstation 2 (CD only)
+Playstation (One)
   --psx         force recognition
 DexDrive
   --xdex=N      send/receive Block N to/from DexDrive; --port=PORT
                   receives automatically when SRAM does not exist
 
-Game Boy Advance
+Game Boy Advance (SP)
   --gba         force recognition
    -n=NEW_NAME  change internal ROM name to NEW_NAME
   --logo        restore ROM logo character data (offset: 0x04-0x9F)
   --chk         fix ROM header checksum
   --sram        patch ROM for SRAM saving
+  --sc          convert to Super Card (CF to GBA Adapter)
+                  (creates SAV and SCI templates)
   --crp=WAIT_TIME slow down ROM access ("crash patch");
                   WAIT_TIME=0  default in most crash patches
                   WAIT_TIME=4  faster than 0, slower than 8
@@ -213,6 +222,12 @@ Flash Advance Linker
                   receives automatically when SRAM does not exist
   --xfalm       try to enable EPP mode, default is SPP mode
 
+Nintendo DS
+  --nds         force recognition
+   -n=NEW_NAME  change internal ROM name to NEW_NAME
+  --logo        restore ROM logo character data
+  --chk         fix ROM header checksum
+
 Nintendo 64
   --n64         force recognition
   --int         force ROM is in interleaved format (2143, V64)
@@ -233,7 +248,7 @@ Nintendo 64
                   ROM should be Jos Kwanten's UltraSMS ROM image
                   works only for SMS ROMs which are &#60;= 4 Mb in size
   --chk         fix ROM checksum
-                  supports only 6102 and 6105 boot codes
+                  supports 6101, 6102, 6103, 6105 and 6106 boot codes
 Doctor V64
   --xv64        send/receive ROM to/from Doctor V64; --port=PORT
                   receives automatically when ROM does not exist
@@ -275,6 +290,8 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --fig         convert to *Pro Fighter*/FIG
   --figs        convert emulator *.srm (SRAM) to *Pro Fighter*/FIG
   --gd3         convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
+  --idnum=NUM   make -gd3 produce file names where first file has numerical
+                  identifier NUM, next NUM + 1, etc. 
   --gd3s        convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
   --smc         convert to Super Magicom/SMC
@@ -282,10 +299,6 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --swcs        convert emulator *.srm (SRAM) to Super Wild Card*/SWC
   --ufo         convert to Super UFO
   --ufos        convert emulator *.srm (SRAM) to Super UFO
-  --stp         convert SRAM from backup unit for use with an emulator
-                  --stp just strips the first 512 bytes
-  --dbuh        display (relevant part of) backup unit header
-  --dint        deinterleave ROM (regardless whether the ROM is interleaved)
   --ctrl=TYPE   specify type of controller in port 1 for emu when converting
                   TYPE=0 gamepad
                   TYPE=1 mouse
@@ -300,6 +313,10 @@ Super Nintendo Entertainment System/SNES/Super Famicom
                   TYPE=5 Konami's justifier
                   TYPE=6 multitap
                   TYPE=7 mouse / super scope / gamepad
+  --stp         convert SRAM from backup unit for use with an emulator
+                  --stp just strips the first 512 bytes
+  --dbuh        display (relevant part of) backup unit header
+  --dint        deinterleave ROM (regardless whether the ROM is interleaved)
   --col=0xCOLOR convert 0xRRGGBB (HTML) &#60;-&#62; 0xXXXX (SNES)
    -j           join split ROM
    -s           split ROM; default part size is 8 Mb
@@ -424,7 +441,7 @@ Cyan's Megadrive ROM copier
                   SPEED=3 fast (default)
                   SPEED=4 full speed (risky)
 
-Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)
+Game Boy/(Super GB)/GB Pocket/Color GB
   --gb          force recognition
    -n=NEW_NAME  change internal ROM name to NEW_NAME
   --logo        restore ROM logo character data (offset: 0x104-0x134)
@@ -527,8 +544,8 @@ Super Magic Card
 
 Sega Master System(II/III)/Game Gear (Handheld)
   --sms         force recognition
-  --int         force ROM is in interleaved format (SMD)
-  --nint        force ROM is not in interleaved format (RAW)
+  --int         force ROM is in interleaved format
+  --nint        force ROM is not in interleaved format
   --mgd         convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)
   --mgdgg       same as --mgd, but gives GG name
   --smd         convert to Super Magic Drive/SMD
@@ -563,10 +580,16 @@ Pocket Linker
   --xpli        show information about inserted cartridge; --port=PORT
   --xplm        try to enable EPP mode, default is SPP mode
 
-Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
+Atari VCS 2600/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
   --ata         force recognition
 
-DATabase: 41983 known ROMs (DAT files: /home/daniel/.ucon64/dat)
+Coleco/ColecoVision
+  --coleco      force recognition
+
+Nintendo Virtual Boy
+  --vboy        force recognition
+
+DATabase: 3127 known ROMs (DAT files: /home/daniel/.ucon64/dat)
 
 NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)
       parallel port. If that is the case give a hardware address. For example:

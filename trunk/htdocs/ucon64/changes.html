@@ -637,7 +637,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   data) and -xf2ab=BANK (transfer 64 kB of SRAM data to "bank" BANK) (by NoisyB
   and dbjh, based on source code of Ulrich Hecht and David Voswinkel; many
   thanks to David Voswinkel for testing the parallel port code)<br>
-- added (GBA) -xfa2multi=SIZE send multiple ROMs to the F2A. You should not
+- added (GBA) -xf2amulti=SIZE send multiple ROMs to the F2A. You should not
   specify a loader file on the command line as a file argument. Specify one in
   the configuration file or set an environment variable (by dbjh)<br>
 - added (SNES) -dnsrt restore name, region and checksum from NSRT header and
@@ -752,10 +752,41 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   template) (by NoisyB)<br>
 - updated (NES) added support for new iNES header. Now --ntsc &amp; --pal work
   also for iNES files (by dbjh)<br>
-- updated (SMS) improved header length detection (by dbjh; many thanks to
-  Dweezledap for testing)<br>
+- updated (SMS/Game Gear) improved header length detection (by dbjh; many
+  thanks to Dweezledap for testing)<br>
 - added (N64) support for remaining 6101, 6103, and 6106 bootcodes (by
   Parasyte)<br>
+- added (Coleco) recognition of Coleco ROMs (by NoisyB)<br>
+- added (Virtual Boy) recognition of Nintendo Virtual Boy ROMs (by NoisyB)<br>
+- updated (SMS/Game Gear) --smd produces a proper SMD header (by dbjh)<br>
+- updated (SMS/Game Gear) --smd does not interleave SMS or Game Gear files
+  anymore. As far as we know, no backup unit produces or is able to handle
+  interleaved SMS or Game Gear files (by dbjh; thanks to Matthias for verifying
+  this with his SMD)<br>
+- added (SNES) --idnum=NUM make --gd3 produce file names where first file has
+  numerical identifier NUM, next NUM + 1, etc. (by dbjh)<br>
+- updated (all) added alternative options for --rr83 &amp; --force63 (--r83
+  &amp; --rjoliet respectively) (by NoisyB)<br>
+- updated (all) improved --r83 &amp; --rjoliet (by dbjh)<br>
+- added (NDS) recognition of Nintendo DS ROMs (by NoisyB)<br>
+- added (Atari) recognition of Atari VCS 2600 ROMs (by NoisyB)<br>
+- added (all) --hfind=HEX find HEX codes in ROM (wildcard: '?') (by NoisyB)<br>
+- added (all) --hfindr=HEX like --hfind but looks also for shifted/relative
+  similarities (by NoisyB)<br>
+- added (all) --dfind=DEC find DEC codes in ROM (wildcard: '?') (by NoisyB)<br>
+- added (all) --dfindr=DEC like --dfind but looks also for shifted/relative
+  similarities (by NoisyB)<br>
+- updated (PCE) --multi now creates a multi-game file that will actually work
+  on the PCE-PRO (by dbjh; many thanks to Bryan Lama for reporting this bug and
+  for testing)<br>
+- updated (PCE) --xpce now correctly handles 3 and 4 Mbit games that are part
+  of a multi-game file (by dbjh; thanks to Bryan Lama for testing)<br>
+- updated (PCE, Genesis, SMS/Game Gear) --multi now produces more efficient
+  multi-game files which results in shorter upload times (by dbjh)<br>
+- updated (PCE, Genesis, SMS/Game Gear, SNES) all transfer options for ToToTEK
+  devices now check for the presence of the device (only the upload ROM options
+  used to do the check) (by dbjh)<br>
+- added (all) -r process subdirectories recursively (by NoisyB and dbjh)<br>
 <br>
 <br>
 <br>

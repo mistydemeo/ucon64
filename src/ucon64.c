@@ -295,6 +295,11 @@ ucon64_test (void)
                         "rm test.bot", 0x63a6cb68},
       {UCON64_BS,	"ucon64 -bs /tmp/test/test.smc", 0x2e2842a4},
       {UCON64_C,	"ucon64 -c /tmp/test/test.txt /tmp/test/12345678.abc", 0x7dfdb3bc},
+#if 0
+      {UCON64_CC2,      "ucon64 -cc2 /tmp/test/test.16k;"
+                        "ucon64 -crc test.wav;" // crc should be 0xc5cdd20f
+                        "rm test.wav", 3},
+#endif
       {UCON64_CHK,	"ucon64 -chk /tmp/test/test.smc;"
                         "ucon64 test.smc;"
                         "rm test.smc", 0x0b463647},
@@ -380,7 +385,9 @@ ucon64_test (void)
       {UCON64_MIRR,	"ucon64 -mirr", TEST_TODO},
       {UCON64_MKA,	"ucon64 -mka", TEST_TODO},
       {UCON64_MKDAT,	"ucon64 -mkdat", TEST_TODO},
-      {UCON64_MKI,	"ucon64 -mki", TEST_TODO},
+      {UCON64_MKI,	"ucon64 -mki=/tmp/test/test.txt /tmp/test/test2.txt;"
+                        "ucon64 -crc test2.ips;"
+                        "rm test2.ips", 0x1d64288e},
       {UCON64_MKIP,	"ucon64 -mkip", TEST_TODO},
       {UCON64_MKPPF,	"ucon64 -mkppf", TEST_TODO},
       {UCON64_MSG,	"ucon64 -msg", TEST_TODO},
@@ -619,6 +626,7 @@ TEST_BREAK
   for (x = 0; test[x].val; x++)
     {
       FILE *in = NULL, *out = NULL;
+      const char *state = NULL;
 
       // NO testing?
       if (!test[x].cmdline || !test[x].crc32)
@@ -650,13 +658,15 @@ TEST_BREAK
         crc);
 
       if (test[x].crc32 == TEST_BUG)
-        sprintf (strchr (buf, 0), "BUG! (%s)\n", test[x].cmdline);
+        state = "BUG!";
       else if (test[x].crc32 == TEST_TODO)
-        sprintf (strchr (buf, 0), "TODO (%s)\n", test[x].cmdline);
+        state = "TODO ";
       else  if (test[x].crc32 == crc)
-        strcpy (strchr (buf, 0), "OK\n");
+        state = "OK ";
       else
-        strcpy (strchr (buf, 0), "BUG?\n");
+        state = "BUG?";
+
+      sprintf (strchr (buf, 0), "%5s (%s)\n", state, test[x].cmdline);
 
       printf (buf); 
       fflush (stdout);

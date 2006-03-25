@@ -248,7 +248,12 @@ gd3_send_prolog_byte (unsigned char data)
 
   outportb ((unsigned short) gd_port, data);    // set data
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
+  inportb ((unsigned short) (gd_port + PARPORT_CONTROL));     // Let data "settle down"
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+  
+  // Waiting again in gd3_send_byte() helps, so we wait here again too.
+  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
+    ;
 
   return GD_OK;
 }
@@ -295,7 +300,13 @@ gd3_send_byte (unsigned char data)
 
   outportb ((unsigned short) gd_port, data);    // set data
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
+  inportb ((unsigned short) (gd_port + PARPORT_CONTROL));     // Let data "settle down"
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+  
+  // Waiting here again improves the success chance of transfers on my PC. I've
+  //  no idea why, because we always wait before sending. - dbjh
+  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
+    ;
 }
 
 
@@ -580,7 +591,7 @@ gd6_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo
   Note: On most Game Doctor's the way you enter link mode to be able to upload
         the ROM to the unit is to hold down the R key on the controller while
         resetting the SNES. You will see the Game Doctor menu has a message that
-        says "LINKING..."
+        says "LINKING.."
 */
 int
 gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
@@ -695,6 +706,20 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
               fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
               exit (1);
             }
+      /*
+        When sending a "pre-split" file, opening the next file often causes
+        enough of a delay for the GDSF7. When sending an unsplit file without
+        an extra delay often results in the infamous "File Size Error !".
+        Adding the delay also results in the transfer code catching an I/O
+        error more often, instead of simply hanging (while the GDSF7 displays
+        "File Size Error !"). The delay seems *much* more important for HiROM
+        games than for LoROM games.
+        There's more to the "File Size Error !" than this as the transfer
+        reliability is still far from 100%, but the delay helps me a lot.
+        Note that this applies to the SF3 protocol. Using the SF6 protocol does
+        not work for me. - dbjh
+      */
+      wait2 (100);                              // 100 ms seems a good value
 
       send_header = i == 0 ? 1 : 0;
       if (gd_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)

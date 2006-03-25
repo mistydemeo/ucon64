@@ -2,7 +2,7 @@
 gd.c - Game Doctor support for uCON64
 
 Copyright (c) 2002 - 2003 John Weidman
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2006 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

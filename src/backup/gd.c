@@ -251,10 +251,6 @@ gd3_send_prolog_byte (unsigned char data)
   inportb ((unsigned short) (gd_port + PARPORT_CONTROL));     // Let data "settle down"
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
   
-  // Waiting again in gd3_send_byte() helps, so we wait here again too.
-  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
-    ;
-
   return GD_OK;
 }
 
@@ -302,11 +298,6 @@ gd3_send_byte (unsigned char data)
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
   inportb ((unsigned short) (gd_port + PARPORT_CONTROL));     // Let data "settle down"
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
-  
-  // Waiting here again improves the success chance of transfers on my PC. I've
-  //  no idea why, because we always wait before sending. - dbjh
-  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
-    ;
 }
 
 

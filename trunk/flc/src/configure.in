@@ -51,4 +51,4 @@ dnl AC_FUNC_STAT
 dnl AC_FUNC_STRFTIME
 dnl AC_CHECK_FUNCS([atexit getcwd memset mkdir rmdir strchr strcspn strncasecmp strpbrk strrchr strspn strtol])
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(config.mak)

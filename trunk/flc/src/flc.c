@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"
 #include "misc/property.h"
 #include "misc/file.h"
+#include "misc/filter.h"
 #include "misc/misc.h"
 #include "flc.h"
 #include "flc_defines.h"
@@ -43,7 +44,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/rmdir2.h"  
 
 static void flc_exit (void);
-static int flc_configfile (void);
 
 st_flc_t flc; // workflow
 static st_file_t file[FLC_MAX_FILES];
@@ -90,6 +90,51 @@ main (int argc, char *argv[])
   int x = 0, c;
   FILE *fh = NULL;
   int option_index = 0;
+  int result = 0;
+  st_property_t props[] = {
+    {
+      "lha_test", "lha t \"%s\"",
+      "LHA support\n"
+      "%s will be replaced with the file/archive name"
+    },
+    {
+      "lha_extract", "lha efi \"%s\" " FLC_ID_NAMES,
+      NULL
+    },
+    {
+      "lzh_test", "lha t \"%s\"",
+      "LZH support"
+    },
+    {
+      "lzh_extract", "lha efi \"%s\" " FLC_ID_NAMES,
+      NULL
+    },
+    {
+      "zip_test", "unzip -t \"%s\"",
+      "ZIP support"
+    },
+    {
+      "zip_extract", "unzip -xojC \"%s\" " FLC_ID_NAMES,
+      NULL
+    },
+    {
+      "rar_test", "unrar t \"%s\"",
+      "RAR support"
+    },
+    {
+      "rar_extract", "unrar x \"%s\" " FLC_ID_NAMES,
+      NULL
+    },
+    {
+      "ace_test", "unace t \"%s\"",
+      "ACE support"
+    },
+    {
+      "ace_extract", "unace e \"%s\" " FLC_ID_NAMES,
+      NULL
+    },
+    {NULL, NULL, NULL}
+  };
   const st_getopt2_t options[] = {
     {NULL,      0, 0, 0, NULL,
       "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2004 by NoisyB\n"
@@ -122,7 +167,13 @@ main (int argc, char *argv[])
 
   memset (&flc, 0, sizeof (st_flc_t));
 
-  flc_configfile ();
+  realpath2 (PROPERTY_HOME_RC ("flc"), flc.configfile);
+
+  result = property_check (flc.configfile, FLC_CONFIG_VERSION, 1);
+  if (result == 1) // update needed
+    result = set_property_array (flc.configfile, props);
+  if (result == -1) // property_check() or update failed
+    return -1;
 
   getcwd (flc.cwd, FILENAME_MAX);
   if (atexit (flc_exit) == -1)
@@ -218,109 +269,6 @@ main (int argc, char *argv[])
 
   if (fh != stdout)
     fclose (fh);
-
-  return 0;
-}
-
-
-// configfile handling
-int
-flc_configfile (void)
-{
-#if     FILENAME_MAX > MAXBUFSIZE
-  char buf[FILENAME_MAX + 1];
-#else
-  char buf[MAXBUFSIZE + 1];
-#endif
-  char *dirname;
-  FILE *fh = NULL;
-  st_property_t prop[] = {
-    {
-      "lha_test", "lha t \"%s\"",
-      "LHA support\n"
-      "%s will be replaced with the file/archive name"
-    },
-    {
-      "lha_extract", "lha efi \"%s\" " FLC_ID_NAMES,
-      NULL
-    },
-    {
-      "lzh_test", "lha t \"%s\"",
-      "LZH support"
-    },
-    {
-      "lzh_extract", "lha efi \"%s\" " FLC_ID_NAMES,
-      NULL
-    },
-    {
-      "zip_test", "unzip -t \"%s\"",
-      "ZIP support"
-    },
-    {
-      "zip_extract", "unzip -xojC \"%s\" " FLC_ID_NAMES,
-      NULL
-    },
-    {
-      "rar_test", "unrar t \"%s\"",
-      "RAR support"
-    },
-    {
-      "rar_extract", "unrar x \"%s\" " FLC_ID_NAMES,
-      NULL
-    },
-    {
-      "ace_test", "unace t \"%s\"",
-      "ACE support"
-    },
-    {
-      "ace_extract", "unace e \"%s\" " FLC_ID_NAMES,
-      NULL
-    },
-    {NULL, NULL, NULL}
-  };
-  dirname = getenv2 ("HOME");
-  sprintf (flc.configfile, "%s" FILE_SEPARATOR_S
-#ifdef  __MSDOS__
-    "flc.cfg"
-#else
-    ".flcrc"
-#endif
-    , dirname);
-#ifdef  DJGPP
-  // this is DJGPP specific - not necessary, but prevents confusion
-  change_mem (flc.configfile, strlen (flc.configfile), "/", 1, 0, 0, "\\", 1, 0);
-#endif
-
-  if (!access (flc.configfile, F_OK))
-    {
-      if (get_property_int (flc.configfile, "version") < FLC_CONFIG_VERSION)
-        {
-          strcpy (buf, flc.configfile);
-          set_suffix (buf, ".OLD");
-
-          printf ("NOTE: updating config: will be renamed to %s...", buf);
-
-          rename (flc.configfile, buf);
-
-          sync ();
-        }
-      else return 0;
-    }
-  else printf ("WARNING: %s not found: creating...", flc.configfile);
-
-  if (!(fh = fopen (flc.configfile, "w"))) // opening the file in text mode
-    {                                         //  avoids trouble under DOS
-      printf ("FAILED\n\n");
-      return -1;
-    }
-  fclose (fh);                              // we'll use set_property() from now
-
-  sprintf (buf, "%d", FLC_CONFIG_VERSION);
-  set_property (flc.configfile, "version", buf, "flc config");
-
-  set_property_array (flc.configfile, prop);
-  
-  printf ("OK\n\n");
 
   return 0;
 }

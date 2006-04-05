@@ -2,7 +2,7 @@
 filter.h - Simple filter framework for any file, stream or data
            processing application
            
-written by 2005 NoisyB
+Copyright (c) 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -50,7 +50,7 @@ typedef struct st_filter_t
   int id;
   const char *id_s;       // very plain description (suggestion: max. 10 chars, acronyms)
   const void *magic;      // optional (could be file suffix)
-  int magic_len;          // optional
+  int magic_len;          // optional (if(magic_len == -1) strlen(magic) will be used)
 //  unsigned long flags;    // examples: MODE, READ, DEC, WRITE, ENC, IN, OUT, DEMUX
 //  char fork;              // run filter in child process? (FALSE or TRUE)
 //  void *object;           // optional
@@ -81,21 +81,23 @@ typedef struct st_filter_t
 */
 typedef struct st_filter_chain_t
 {
-  // ALL filters
+  // ALL filters variables
   st_filter_t *all[FILTER_MAX]; // ALL unsorted filters (init and quit use this)
+  int all_total;                // # of ALL filters
+//  int all_pos;                  // # of current SET filter in ALL filter array
+  int inited[FILTER_MAX];       // id of filters which were init()'ed
 
-  // SET filters
+  // SET filters variables
   int set[FILTER_MAX];          // currently used filters (ignored by init and quit)
                                 //   set by filter_set_chain() (default: ALL filters (but unsorted))
                                 //   id's of filters in all[] in the order set by filter_set_chain()
-  time_t start_time[FILTER_MAX]; // start times of all set filters (SET filters only)
-  int result[FILTER_MAX]; // results (SET filters only) (-1 == failed, 0 == OK, >0 == skipped)
-  int pos;               // # of current filter (SET filters only)
-  int total;             // # of all set filters (SET filters only)
+  int total;                    // # of SET filters
+  int pos;                      // # of current SET filter
+  time_t start_time[FILTER_MAX]; // start time of first filter
+  int result[FILTER_MAX];       // result from last filter (-1 == failed, 0 == OK, >0 == skipped)
 
-  // private
-  int inited[FILTER_MAX]; // filter were init()'ed (ALL filters)
-  int op;                 // current filter operation FILTER_OPEN, FILTER_CLOSE, ...
+  // other variables
+  int op;                       // current filter operation FILTER_OPEN, FILTER_CLOSE, ...
 } st_filter_chain_t;
 
 
@@ -158,22 +160,31 @@ extern int filter_ctrl (st_filter_chain_t *fc, void *o);
 
 
 /*
-  filter_get_total()           get # of all set filters (SET filters only)
-  filter_get_pos()             get # of current filter (SET filters only)
-  filter_get_pos_by_id()       get # of current filter (filters with id only)
-  filter_get_id()              get id of filter in pos (SET filters only)
-  filter_get_id_s()            get id_s of filter in pos (SET filters only)
-  filter_get_result()          get last result (SET filters only) (-1 == failed, 0 == OK, >0 == skipped)
-  filter_get_start_time()      get start time of the 1st filter (SET filters only)
+  ALL filters functions
 
-  filter_get_filter_by_id()    get st_filter_t by id (ALL filters)
-  filter_get_filter_by_pos()   get st_filter_t by pos (ALL filters)
-  filter_get_filter_by_magic() get st_filter_t by magic (ALL filters)
-
+  filter_get_filter_total      get # of ALL filters
+  filter_get_filter_by_id()    get st_filter_t by id
+  filter_get_filter_by_pos()   get st_filter_t by pos
+  filter_get_filter_by_magic() get st_filter_t by magic
   filter_get_all_id_s_in_array()
-                               get comma separated id_s as a string (from st_filter_t array)
+                               get comma separated id_s as a string
   filter_get_all_id_s_in_chain()
-                               get comma separated id_s as a string (ALL filters)
+                               get comma separated id_s as a string
+
+
+  SET filters functions
+
+  filter_get_total()           get # of SET filters
+  filter_get_pos()             get # of current filter
+  filter_get_pos_by_id()       get # of current filter
+  filter_get_id()              get id of filter in pos
+  filter_get_id_s()            get id_s of filter in pos
+  filter_get_result()          get last result (-1 == failed, 0 == OK, >0 == skipped)
+  filter_get_start_time()      get start time of the 1st filter
+
+
+  Other filter functions
+
   filter_get_key()             get (generate) a unique key for get/set read/write an object
                                  from inside a filter
                                  subkey is optional and used if more than one object is
@@ -188,22 +199,27 @@ extern int filter_ctrl (st_filter_chain_t *fc, void *o);
          to have duplicates of objects that were created during init because init (and quit)
          SHOULD be called only once per process)
 */
-extern int filter_get_total (const st_filter_chain_t *fc);
-extern int filter_get_pos (const st_filter_chain_t *fc);
-extern int filter_get_pos_by_id (const st_filter_chain_t *fc, int id);
-extern int filter_get_id (const st_filter_chain_t *fc, int pos);
-extern const char * filter_get_id_s (const st_filter_chain_t *fc, int pos);
-//extern int filter_get_op (const st_filter_chain_t *fc);
-extern int filter_get_result (const st_filter_chain_t *fc, int pos);
-//extern time_t filter_get_start_time (const st_filter_chain_t *fc);
-#if 1
+extern int filter_get_filter_total (const st_filter_chain_t *fc);
 extern const st_filter_t *filter_get_filter_by_id (const st_filter_chain_t *fc, int id);
 extern const st_filter_t *filter_get_filter_by_pos (const st_filter_chain_t *fc, int pos);
-#endif
 extern const st_filter_t *filter_get_filter_by_magic (const st_filter_chain_t *fc,
                                                       const unsigned char *magic, int magic_len);
-extern const char * filter_get_all_id_s_in_array (const st_filter_t **f);
-//extern const char * filter_get_all_id_s_in_chain (const st_filter_chain_t *fc);
+extern const char *filter_get_all_id_s_in_array (const st_filter_t **f);
+
+//extern const char *filter_get_all_id_s_in_chain (const st_filter_chain_t *fc);
+
+
+extern int filter_get_total (const st_filter_chain_t *fc);
+extern int filter_get_pos (const st_filter_chain_t *fc);
+extern int filter_get_id (const st_filter_chain_t *fc, int pos);
+extern const char *filter_get_id_s (const st_filter_chain_t *fc, int pos);
+
+//extern int filter_get_pos_by_id (const st_filter_chain_t *fc, int id);
+//extern int filter_get_op (const st_filter_chain_t *fc);
+//extern int filter_get_result (const st_filter_chain_t *fc, int pos);
+//extern time_t filter_get_start_time (const st_filter_chain_t *fc);
+
+
 extern char *filter_get_key (st_filter_chain_t *fc, int *subkey);
 extern char *filter_generate_key (int *pos, int *id, int *subkey);
 

@@ -54,9 +54,14 @@ flc_exit (void)
 {
   chdir (flc.cwd);
 
-//  if (flc.temp[0])
-//    rmdir2 (flc.temp);
-//    rmdir (flc.temp);
+#if 0
+  if (flc.temp[0])
+#if 0
+    rmdir2 (flc.temp);
+#else
+    rmdir (flc.temp);
+#endif
+#endif
 }
 
 
@@ -176,11 +181,7 @@ main (int argc, char *argv[])
     return -1;
 
   getcwd (flc.cwd, FILENAME_MAX);
-  if (atexit (flc_exit) == -1)
-    {
-      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
-      exit (1);
-    }
+  atexit (flc_exit);
                       
   getopt2_short (short_options, options, ARGS_MAX);
   getopt2_long_only (long_only_options, options, ARGS_MAX);

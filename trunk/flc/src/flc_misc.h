@@ -22,4 +22,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern int extract (st_file_t * file, const char *fname);
 extern int sort (st_file_t * file);
 extern int output (FILE *fp, const st_file_t *file);
+extern const st_filter_t *filter[];
 #endif // FLC_MISC_H

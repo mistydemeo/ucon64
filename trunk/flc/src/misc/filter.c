@@ -2,7 +2,7 @@
 filter.c - Simple filter framework for any file, stream or data
            processing application
                       
-written by 2005 NoisyB
+Copyright (c) 2005 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -123,38 +123,38 @@ filter_set_chain (st_filter_chain_t *fc, const int *id)
 {
   memset (&fc->set, 0, sizeof (int) * FILTER_MAX);
 
-  // enable filters
-  if (!id) // set ALL filters (default)
-    {
-      for (fc->total = 0; fc->total < FILTER_MAX && fc->all[fc->total]; fc->total++)
-        fc->set[fc->total] = fc->all[fc->total]->id;
-    }
-  else
+  // set filters
+  if (id)
     {
       for (fc->total = 0; fc->total < FILTER_MAX && id[fc->total]; fc->total++)
         fc->set[fc->total] = id[fc->total];
+    }
+  else
+    {
+      for (fc->total = 0; fc->total < FILTER_MAX && fc->all[fc->total]; fc->total++)
+        fc->set[fc->total] = fc->all[fc->total]->id;
     }
 
 #ifdef  TEST
   filter_st_filter_chain_t_sanity_check (fc);
 #endif
+
   return 0;
 }
 
 
 st_filter_chain_t *
-filter_malloc_chain (/* int max_filter_chains, int max_filters, int max_objects, */const st_filter_t **filter)
+filter_malloc_chain (const st_filter_t **filter)
 {
-  int total = 0;
+  int x = 0;
   st_filter_chain_t *fc = NULL;
-  int id_chain[FILTER_MAX];
 
   if (!(fc = (st_filter_chain_t *) malloc (sizeof (st_filter_chain_t))))
     return NULL;
 
   memset (fc, 0, sizeof (st_filter_chain_t));
-
-  for (total = 0; total < FILTER_MAX && filter[total]; total++);
+  
+  for (fc->all_total = 0; fc->all_total < FILTER_MAX && filter[fc->all_total]; fc->all_total++);
 
 #if 0
   if (!(fc->all = (st_filter_t **) malloc (total * sizeof (st_filter_t *))))
@@ -165,12 +165,9 @@ filter_malloc_chain (/* int max_filter_chains, int max_filters, int max_objects,
 #endif
 
   // malloc chain
-  for (fc->total = 0; fc->total < total; fc->total++)
-    if ((fc->all[fc->total] = (st_filter_t *) malloc (sizeof (st_filter_t))))
-      {
-        memcpy (fc->all[fc->total], filter[fc->total], sizeof (st_filter_t));
-        id_chain[fc->total] = fc->all[fc->total]->id; // by default ALL total are set
-      }
+  for (x = 0; x < fc->all_total; x++)
+    if ((fc->all[x] = (st_filter_t *) malloc (sizeof (st_filter_t))))
+      memcpy (fc->all[x], filter[x], sizeof (st_filter_t));
     else
       {
         filter_free_chain (fc);
@@ -191,11 +188,11 @@ filter_malloc_chain (/* int max_filter_chains, int max_filters, int max_objects,
 void
 filter_free_chain (st_filter_chain_t *fc)
 {
-  while (fc->total > 0)
+  while (fc->all_total > 0)
     {
-      free (fc->all[fc->total - 1]);
-//      fc->all[fc->total - 1] = NULL;
-      fc->total--;
+      free (fc->all[fc->all_total - 1]);
+//      fc->all[fc->all_total - 1] = NULL;
+      fc->all_total--;
     }
   free (fc);
 //  fc = NULL;
@@ -336,104 +333,180 @@ FILTER_TEMPLATE(ctrl, FILTER_CTRL, "ctrl")
 
 FILTER_TEMPLATE(seek, FILTER_SEEK, "seek")
 
-#if 0
-FILTER_TEMPLATE(init, FILTER_INIT, "init")
+
+static int
+filter_was_inited (st_filter_chain_t *fc, int id)
+{
+  int x = 0;
+  
+  for (; fc->inited[x]; x++)
+    if (fc->inited[x] == id)
+      return 1;
+
+  return 0;
+}
 
 
-FILTER_TEMPLATE(quit, FILTER_QUIT, "quit")
-#else
+static int
+filter_inited (st_filter_chain_t *fc, void *o, int id)
+{
+  const st_filter_t *f = NULL;
+  int x = 0;
+
+  if (filter_was_inited (fc, id)) // don't init filters twice
+    return 0;
+
+  f = filter_get_filter_by_id (fc, id);
+  if (f)
+    if (f->init)
+      fc->result[fc->pos] = f->init (o);
+
+  for (; fc->inited[x]; x++) // get next free marker
+    if (fc->inited[x] == id) // already marked as inited
+      return fc->result[fc->pos];
+
+  fc->inited[x] = id;
+
+  return fc->result[fc->pos];
+}
+
+
 int
 filter_init (st_filter_chain_t *fc, void *o, const int *id)
 {
+  int result = 0;
+
   // set current op
   fc->op = FILTER_INIT;
 
-#if 1
-  if (!id) // init ALL filters (default)
+  if (id)
     {
-      for (fc->pos = 0; fc->pos < FILTER_MAX && fc->all[fc->pos]; fc->pos++)
-        {
-          const st_filter_t *f = filter_get_filter_by_id (fc, fc->all[fc->pos]->id);
-                
-          if (f)
-            if (f->init)
-              fc->result[fc->pos] = f->init (o);
-
-          fc->inited[fc->pos] = 1;
-        }
+      for (fc->pos = 0; fc->pos < FILTER_MAX && id[fc->pos]; fc->pos++)
+        if (filter_inited (fc, o, id[fc->pos]) == -1) // TODO: skips?
+          result = -1; 
     }
   else
     {
-      for (fc->pos = 0; fc->pos < FILTER_MAX && id[fc->pos]; fc->pos++)
-        {
-          const st_filter_t *f = filter_get_filter_by_id (fc, id[fc->pos]);
-
-          if (f)
-            if (f->init)
-              fc->result[fc->pos] = f->init (o);
-
-          fc->inited[fc->pos] = 1;
-        }
+      for (fc->pos = 0; fc->pos < FILTER_MAX && fc->all[fc->pos]; fc->pos++)
+        if (filter_inited (fc, o, fc->all[fc->pos]->id) == -1)
+          result = -1;
     }
-#endif
 
-
-#if 0
-  // init _always_ ALL filters?
-  for (fc->pos = 0; fc->all[fc->pos]; fc->pos++)
-    if (fc->all[fc->pos]->init)
-      {
-        FILTER_TEST(fc, fc->all[fc->pos]->id_s);
-
-        fc->result[fc->pos] = fc->all[fc->pos]->init (o);
-        fc->inited[fc->pos] = 1;
-      }
-#endif
-
-
-#if 0
-  // init only the needed filters?
-  for (fc->pos = 0; fc->set[fc->pos]; fc->pos++)
-    {
-      const st_filter_t *f = filter_get_filter_by_id (fc, fc->set[fc->pos]);
-
-      FILTER_TEST(fc, f->id_s);
-
-      if (f)
-        if (f->init)
-          fc->result[fc->pos] = f->init (o);
-      fc->inited[fc->pos] = 1;
-    }                  
-#endif
-
-  return 0;
+  return result;
 }
 
 
 int
 filter_quit (st_filter_chain_t *fc, void *o)
 {
-  int total = 0;
-  
+  int x = 0;
+
   // set current op
   fc->op = FILTER_QUIT;
   
-  for (; fc->all[total]; total++);
-
-  for (fc->pos = total; fc->pos-- > 0;) // reverse
-    if (fc->inited[fc->pos])
-      if (fc->all[fc->pos]->quit)
+  for (x = fc->all_total; x-- > 0;) // quit filters in reverse order
+    if (filter_was_inited (fc, fc->all[x]->id))
+      if (fc->all[x]->quit)
         {
 #ifdef  TEST
-//          FILTER_TEST(fc, fc->all[fc->pos]->id_s);
+//          FILTER_TEST(fc, fc->all[x]->id_s);
 #endif
 
-          fc->all[fc->pos]->quit (o);
+          fc->all[x]->quit (o);
         }
 
-  return 0;
+  memset (&fc->inited, 0, sizeof (int) * FILTER_MAX);
+  
+  return 0; // always success
 }
-#endif
+
+
+int
+filter_get_filter_total (const st_filter_chain_t *fc)
+{
+  return fc->all_total;
+}
+
+
+const st_filter_t *
+filter_get_filter_by_id (const st_filter_chain_t *fc, int id)
+{
+  int x = 0;
+
+  for (; fc->all[x]; x++)
+    if (fc->all[x]->id == id)
+      return fc->all[x];
+
+  return NULL;
+}
+
+
+const st_filter_t *
+filter_get_filter_by_pos (const st_filter_chain_t *fc, int pos)
+{
+  int x = 0;
+
+  for (; fc->all[x]; x++)
+    if (fc->all[x]->id == fc->set[pos])
+      return fc->all[x];
+
+  return NULL;
+}
+
+
+const st_filter_t *
+filter_get_filter_by_magic (const st_filter_chain_t *fc, const unsigned char *magic, int magic_len)
+{
+  int x = 0;
+
+  if (magic && magic_len > 0)
+    for (; fc->all[x]; x++)
+      {
+        int m_len = fc->all[x]->magic_len;
+
+        if (m_len == -1)
+          m_len = strlen (fc->all[x]->magic);
+
+        if (fc->all[x]->magic && m_len > 0)
+          if (!memcmp (fc->all[x]->magic, magic, magic_len) ||
+              memmem2 (fc->all[x]->magic, m_len, magic, magic_len, 0))
+          return fc->all[x];
+      }
+  return NULL;
+}
+
+
+const char *
+filter_get_all_id_s_in_array (const st_filter_t **f)
+{
+  static char buf[MAXBUFSIZE];
+  char *p = buf;
+  int x = 0;
+
+  *p = 0;
+  for (; f[x]; x++)
+    if (f[x]->id_s)
+      {
+        p = strchr (p, 0);
+        sprintf (p, "%s, ", f[x]->id_s);
+      }
+    
+  // remove last ','
+  p = strchr (p, 0);
+  if (p)
+    *(p - 2)= 0;
+          
+  return buf;
+}
+
+
+const char *
+filter_get_all_id_s_in_chain (const st_filter_chain_t *fc)
+{
+  (void) fc;
+//  return filter_get_all_id_s_in_array (&fc->all);
+  return "";
+}
 
 
 int
@@ -499,76 +572,6 @@ time_t
 filter_get_start_time (const st_filter_chain_t *fc)
 {
   return fc->start_time[filter_get_pos (fc)];
-}
-
-
-const st_filter_t *
-filter_get_filter_by_id (const st_filter_chain_t *fc, int id)
-{
-  int x = 0;
-
-  for (; fc->all[x]; x++)
-    if (fc->all[x]->id == id)
-      return fc->all[x];
-
-  return NULL;
-}
-
-
-const st_filter_t *
-filter_get_filter_by_pos (const st_filter_chain_t *fc, int pos)
-{
-#warning ???
-  return fc->all[fc->set[pos]];
-}
-
-
-const st_filter_t *
-filter_get_filter_by_magic (const st_filter_chain_t *fc, const unsigned char *magic, int magic_len)
-{
-  int x = 0;
-
-  if (magic && magic_len > 0)
-    for (; fc->all[x]; x++)
-      if (fc->all[x]->magic && fc->all[x]->magic_len > 0)
-        if (!memcmp (fc->all[x]->magic, magic, magic_len) ||
-            memmem2 (fc->all[x]->magic, fc->all[x]->magic_len, magic, magic_len, 0))
-          return fc->all[x];
-
-  return NULL;
-}
-
-
-const char *
-filter_get_all_id_s_in_array (const st_filter_t **f)
-{
-  static char buf[MAXBUFSIZE];
-  char *p = buf;
-  int x = 0;
-
-  *p = 0;
-  for (; f[x]; x++)
-    if (f[x]->id_s)
-      {
-        p = strchr (p, 0);
-        sprintf (p, "%s, ", f[x]->id_s);
-      }
-    
-  // remove last ','
-  p = strchr (p, 0);
-  if (p)
-    *(p - 2)= 0;
-          
-  return buf;
-}
-
-
-const char *
-filter_get_all_id_s_in_chain (const st_filter_chain_t *fc)
-{
-  (void) fc;
-//  return filter_get_all_id_s_in_array (&fc->all);
-  return "";
 }
 
 

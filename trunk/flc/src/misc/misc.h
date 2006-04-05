@@ -22,15 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MISC_H
 #define MISC_H
-
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB, USE_ANSI_COLOR support
 #endif
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
 #include <string.h>
 #include <time.h>                               // bytes_per_second() requires time()
 #include <stdio.h>
@@ -117,6 +114,8 @@ extern "C" {
                 show position as hex value (default)
                 DUMPER_DEC_COUNT
                 show position as decimal value
+                DUMPER_HEX_UPPER
+                show hex values in uppercase (default: lowercase)
 */
 #define DUMPER_HEX       (0)
 #define DUMPER_HEX_COUNT (0)
@@ -126,6 +125,7 @@ extern "C" {
 #define DUMPER_DEC       (1 << 3)
 #define DUMPER_DEC_COUNT (1 << 4)
 #define DUMPER_DEFAULT   (DUMPER_HEX_COUNT|DUMPER_HEX)
+//#define DUMPER_HEX_UPPER (1 << 5)
 extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
                     int virtual_start, unsigned int flags);
 
@@ -137,14 +137,10 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
                   from a file
   cleanup_cm_patterns() helper function for build_cm_patterns() to free all
                   memory allocated for a (list of) st_pattern_t structure(s)
-  ansi_init()     initialize ANSI output
-  gauge()         simple gauge (uses ANSI if ansi_init() was successful)
-                  if both color values are == -1, no color/ANSI will be used
   bytes_per_second() returns bytes per second (useful in combination with
                   gauge())
   misc_percent()  returns percentage of progress (useful in combination with
                   gauge())
-  clear_line ()   clear the current line (79 spaces)
   drop_privileges() switch to the real user and group id (leave "root mode")
   register_func() atexit() replacement
                   returns -1 if it fails, 0 if it was successful
@@ -175,9 +171,6 @@ extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
 extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose);
 extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 
-extern int ansi_init (void);
-extern void clear_line (void);
-extern int gauge (int percent, int width, char char1, char char2, int color1, int color2);
 extern int bytes_per_second (time_t start_time, int nbytes);
 extern int misc_percent (int pos, int len);
 #if     defined __unix__ && !defined __MSDOS__
@@ -188,39 +181,18 @@ extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);
 extern void wait2 (int nmillis);
 extern char *getenv2 (const char *variable);
+extern int misc_digits (unsigned long value);
+
 
 /*
-  Portability (conio.h, etc...)
+  Portability and Fixes
 
-  init_conio()         init console I/O
-  deinit_conio()       stop console I/O
-  getch()
-  kbhit()
   fix_character_set()  fixes some Cygwin problems with filenames
   truncate()
   sync()
   popen()
   pclose()
-  vprintf2()
-  printf2()
-  fprintf2()
 */
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined __APPLE__                       // Mac OS X actually
-extern void init_conio (void);
-extern void deinit_conio (void);
-#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
-extern int kbhit (void);                        // may only be used after init_conio()!
-#endif
-
-#ifdef  __MSDOS__
-#include <conio.h>                              // getch()
-#include <pc.h>                                 // kbhit()
-// DJGPP doesn't have snprintf(). Last tested with the version that includes
-//  GCC 4.0.1. - dbjh
-#include "snprintf.h"
-#endif
-
 #ifdef  __CYGWIN__
 extern char *fix_character_set (char *str);
 #endif
@@ -228,12 +200,11 @@ extern char *fix_character_set (char *str);
 #ifdef  _WIN32
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.
-
-#include <conio.h>                              // kbhit() & getch()
 #include <sys/types.h>
 
 extern int truncate (const char *path, off_t size);
 extern int sync (void);
+
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
 #ifndef pclose                                  // archive.h's definition gets higher "precedence"
@@ -242,23 +213,11 @@ extern int sync (void);
 #ifndef popen                                   // idem
 #define popen   _popen
 #endif
-
-#ifdef  USE_ANSI_COLOR
-#include <stdarg.h>
-
-extern int vprintf2 (const char *format, va_list argptr);
-extern int printf2 (const char *format, ...);
-extern int fprintf2 (FILE *file, const char *format, ...);
-#define vprintf vprintf2
-#define printf  printf2
-#define fprintf fprintf2
-#endif // USE_ANSI_COLOR
-
 #ifndef __MINGW32__
 #include <io.h>
 #include <direct.h>
 #include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
-                                                //  come after <sys/types.h>. Yep, that's M$.
+
 #define S_IWUSR _S_IWRITE
 #define S_IRUSR _S_IREAD
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
@@ -304,16 +263,15 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #ifndef popen                                   // idem
 #define popen   _popen
 #endif
+#endif
+
+#ifdef  AMIGA
 extern FILE *_popen (const char *path, const char *mode);
 extern int _pclose (FILE *stream);
-extern int kbhit (void);
-//#define getch           getchar
-// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
-//  getch().
 #endif
+
 
 #ifdef  __cplusplus
 }
 #endif
-
 #endif // MISC_H

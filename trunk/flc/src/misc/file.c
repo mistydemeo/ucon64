@@ -312,34 +312,6 @@ realpath (const char *path, char *full_path)
 #endif
 
 
-#if 0
-st_strpath_t *
-strpath (st_strpath_t *path, const char *path_s)
-{
-// TODO: compare this with splitpath()
-  if (path_s == NULL)
-    return NULL;
-
-  realpath2 (path_s, path->realpath);
-
-#if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
-  if (isalpha (path->realpath[0]) &&
-      path->realpath[1] == ':' &&
-      path->realpath[2] == FILE_SEPARATOR)
-    sprintf (path->drive, "%c:\\", toupper (path->realpath[0]));
-#else
-  strcpy (path->drive, FILE_SEPARATOR_S);
-#endif
-
-  dirname2 (path_s, path->dirname);
-  strcpy (path->basename, basename2 (path_s));
-  strcpy (path->suffix, get_suffix (path_s));
-
-  return path;
-}
-#endif
-
-
 char *
 realpath2 (const char *path, char *full_path)
 // enhanced realpath() which returns the absolute path of a file
@@ -724,8 +696,8 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
 
   result = quick_io_func (fcopy_func, MAXBUFSIZE, output, start, len, src, "rb");
 
+//  fsync (output);
   fclose (output);
-  sync ();
 
   return result == -1 ? result : 0;
 }
@@ -948,9 +920,9 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
         }
     }
 
+//  fsync (fh);
   fclose (fh);
   free (buffer);
-  sync ();
 
   // returns total bytes processed or if (func() < 0) it returns that error value
   return func_len < 0 ? func_len : ((int) len_done + func_len);
@@ -1009,7 +981,6 @@ mkbak (const char *filename, backup_t type)
           fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
           exit (1);
         }
-      sync ();
       return buf;
     }
 }

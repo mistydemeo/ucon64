@@ -40,7 +40,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "flc.h"
 #include "flc_misc.h"
 #include "flc_defines.h"
-#include "flc_filter.h"
+
+
+#include "filter/id3.h"
+#include "filter/met.h"
+#include "filter/txt.h"
 
 
 #ifndef TRUE
@@ -50,6 +54,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
+
+
+const st_filter_t *filter[] = {
+  &id3_filter,
+  &met_filter,
+  &txt_filter,
+  NULL
+};
 
 
 int
@@ -256,14 +268,13 @@ input_from_filelist (const char *fname, st_file_t *file)
 int
 extract (st_file_t *file, const char *fname)
 {
+  const char *prop = NULL;
 #if     FILENAME_MAX > MAXBUFSIZE
   char buf[FILENAME_MAX];
-  char prop[FILENAME_MAX];
   char tmpfile[FILENAME_MAX];
   char suffix[FILENAME_MAX];
 #else
   char buf[MAXBUFSIZE];
-  char prop[MAXBUFSIZE];
   char tmpfile[MAXBUFSIZE];
   char suffix[MAXBUFSIZE];
 #endif
@@ -276,7 +287,7 @@ extract (st_file_t *file, const char *fname)
   memset (file, 0, sizeof (st_file_t));
 
   if (stat (fname, &puffer) == -1)
-    return -1;
+    return -1; 
   if (S_ISREG (puffer.st_mode) != TRUE)
     return -1;
 
@@ -300,7 +311,7 @@ extract (st_file_t *file, const char *fname)
     {
       // test with configfile
       sprintf (buf, "%s_test", suffix);
-      if (get_property (flc.configfile, buf, prop, NULL))
+      if ((prop = get_property (flc.configfile, buf, PROPERTY_MODE_TEXT)))
         if (*prop)
           {
             sprintf (buf, prop, fname);
@@ -318,7 +329,7 @@ extract (st_file_t *file, const char *fname)
 
   // extract with configfile
   sprintf (buf, "%s_extract", suffix);
-  if (get_property (flc.configfile, buf, prop, NULL))
+  if ((prop = get_property (flc.configfile, buf, PROPERTY_MODE_TEXT)))
     if (*prop)
       {
         chdir (flc.temp);

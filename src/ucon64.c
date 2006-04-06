@@ -684,7 +684,7 @@ TEST_BREAK
 #endif
 
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
 void
 ucon64_runtime_debug_output (st_getopt2_t *p)
 {
@@ -802,7 +802,7 @@ ucon64_runtime_debug (void)
   puts ("DEBUG: Sanity check finished");
   fflush (stdout);
 }
-//#endif  // DEBUG
+#endif  // DEBUG
 
 
 void
@@ -897,9 +897,9 @@ main (int argc, char **argv)
         }
   ucon64.options = options;
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
   ucon64_runtime_debug (); // check (st_getopt2_t *) options consistency
-//#endif
+#endif
 
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are

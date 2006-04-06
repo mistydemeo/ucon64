@@ -4467,7 +4467,7 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
-                    ac_config_files="$ac_config_files Makefile libdiscmage/Makefile"
+                    ac_config_files="$ac_config_files config.mak libdiscmage/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -4993,7 +4993,7 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
-  "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "config.mak" ) CONFIG_FILES="$CONFIG_FILES config.mak" ;;
   "libdiscmage/Makefile" ) CONFIG_FILES="$CONFIG_FILES libdiscmage/Makefile" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   "libdiscmage/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS libdiscmage/config.h" ;;

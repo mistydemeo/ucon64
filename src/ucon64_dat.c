@@ -86,6 +86,16 @@ static FILE *ucon64_datfile;                                  //  once when inde
 static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
+
+static st_ucon64_obj_t ucon64_dat_obj[] =
+  {
+    {0, WF_STOP | WF_NO_ROM},
+    {0, WF_INIT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_NO_ARCHIVE},
+    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT}
+  };
+
 const st_getopt2_t ucon64_dat_usage[] =
   {
     {
@@ -96,64 +106,64 @@ const st_getopt2_t ucon64_dat_usage[] =
     {
       "db", 0, 0, UCON64_DB,
       NULL, "DATabase statistics",
-      &ucon64_wf[WF_OBJ_ALL_STOP_NO_ROM]
+      &ucon64_dat_obj[0]
     },
     {
       "dbv", 0, 0, UCON64_DBV,
       NULL, "like " OPTION_LONG_S "db but more verbose",
-      &ucon64_wf[WF_OBJ_ALL_STOP_NO_ROM]
+      &ucon64_dat_obj[0]
     },
     {
       "dbs", 1, 0, UCON64_DBS,
       "CRC32", "search ROM with CRC32 in DATabase",
-      &ucon64_wf[WF_OBJ_ALL_STOP_NO_ROM]
+      &ucon64_dat_obj[0]
     },
     {
       "scan", 0, 0, UCON64_SCAN,
       NULL, "generate ROM list for all ROMs using DATabase\n"
       "like: GoodXXXX scan ...",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+      &ucon64_dat_obj[4]
     },
     {
       "lsd", 0, 0, UCON64_LSD,
       NULL, "same as " OPTION_LONG_S "scan",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &ucon64_dat_obj[2]
     },
     {
       "mkdat", 1, 0, UCON64_MKDAT,
       "DATFILE", "create DAT file; use -o to specify an output directory",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &ucon64_dat_obj[2]
     },
     {
       "rdat", 0, 0, UCON64_RDAT,
       NULL, "rename ROMs to their DATabase names\n"
       "use -o to specify an output directory",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+      &ucon64_dat_obj[4]
     },
     {
       "rrom", 0, 0, UCON64_RROM,
       NULL, "rename ROMs to their internal names (if any)",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+      &ucon64_dat_obj[4]
     },
     {
       "r83", 0, 0, UCON64_R83,
       NULL, "rename to 8.3 filenames",
-      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+      &ucon64_dat_obj[3]
     },
     {
       "rjoliet", 0, 0, UCON64_RJOLIET,
       NULL, "rename to Joliet compatible filenames",
-      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+      &ucon64_dat_obj[3]
     },
     {
       "rl", 0, 0, UCON64_RL,
       NULL, "rename to lowercase",
-      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE] 
+      &ucon64_dat_obj[3] 
     },
     {
       "ru", 0, 0, UCON64_RU,
       NULL, "rename to uppercase",
-      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+      &ucon64_dat_obj[3]
     },
 #if 0
     {

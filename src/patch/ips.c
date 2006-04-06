@@ -48,17 +48,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define BUFSIZE 65535
 //#define DEBUG_IPS
 
+
+static st_ucon64_obj_t ips_obj[] =
+  {
+    {0, WF_STOP}
+  };
+
 const st_getopt2_t ips_usage[] =
   {
     {
       "i", 0, 0, UCON64_I,
       NULL, "apply IPS PATCH to ROM (IPS<=v1.2)",
-      &ucon64_wf[WF_OBJ_ALL_STOP]
+      &ips_obj[0]
     },
     {
       "mki", 1, 0, UCON64_MKI,
       "ORG_ROM", "create IPS patch; ROM should be the modified ROM",
-      &ucon64_wf[WF_OBJ_ALL_STOP]
+      &ips_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

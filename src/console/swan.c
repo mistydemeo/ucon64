@@ -32,10 +32,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "swan.h"
 
 
 static int swan_chksum (unsigned char *rom_buffer);
+
+static st_ucon64_obj_t swan_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_SWAN, WF_SWITCH}
+  };
 
 const st_getopt2_t swan_usage[] =
   {
@@ -47,12 +54,12 @@ const st_getopt2_t swan_usage[] =
     {
       "swan", 0, 0, UCON64_SWAN,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_SWAN_SWITCH]
+      &swan_obj[1]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &swan_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };

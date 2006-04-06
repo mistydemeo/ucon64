@@ -904,6 +904,12 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
  * uCON64 wrapping *
  *******************/
 
+static st_ucon64_obj_t cmc_obj[] =
+  {
+    {UCON64_GEN, WF_STOP | WF_NO_ROM},
+    {UCON64_GEN, WF_SWITCH}
+  };
+
 const st_getopt2_t cmc_usage[] =
   {
     {
@@ -915,14 +921,14 @@ const st_getopt2_t cmc_usage[] =
     {
       "xcmc", 0, 0, UCON64_XCMC,
       NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
+      &cmc_obj[0]
     },
     {
       "xcmct", 1, 0, UCON64_XCMCT,
       "TEST", "run test TEST\n"
       "TEST=1 burn-in reliability test (specify speed)\n"
       "TEST=2 testbench mode (experts only)",
-      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
+      &cmc_obj[0]
     },
     {
       "xcmcm", 1, 0, UCON64_XCMCM,
@@ -931,7 +937,7 @@ const st_getopt2_t cmc_usage[] =
       "SPEED=2 medium\n"
       "SPEED=3 fast (default)\n"                // verify with value of DEFAULT_SPEED
       "SPEED=4 full speed (risky)",
-      &ucon64_wf[WF_OBJ_GEN_SWITCH]
+      &cmc_obj[1]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}

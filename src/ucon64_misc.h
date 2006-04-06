@@ -1,7 +1,7 @@
 /*
 ucon64_misc.h - miscellaneous functions for uCON64
 
-Copyright (c) 1999 - 2004 NoisyB
+Copyright (c) 1999 - 2006 NoisyB
 Copyright (c) 2001 - 2004 dbjh
 Copyright (c) 2001        Caz
 
@@ -52,168 +52,11 @@ extern int libdm_gauge (int pos, int size);
 
 
 /*
-  defines for unknown backup units/emulators
+  usage of miscellaneous options
 */
-typedef struct // st_unknown_header
-{
-  /*
-    Don't create fields that are larger than one byte! For example size_low and
-    size_high could be combined in one unsigned short int. However, this gives
-    problems with little endian vs. big endian machines (e.g. writing the header
-    to disk).
-  */
-  unsigned char size_low;
-  unsigned char size_high;
-  unsigned char emulation;
-  unsigned char hirom;
-  unsigned char emulation1;
-  unsigned char emulation2;
-  unsigned char pad[2];
-  unsigned char id1;
-  unsigned char id2;
-  unsigned char type;
-  unsigned char pad2[501];
-} st_unknown_header_t;
+extern const st_getopt2_t ucon64_options_usage[];
+extern const st_getopt2_t ucon64_padding_usage[];
 
-#define UNKNOWN_HEADER_START 0
-#define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
-
-extern int unknown_init (st_rominfo_t *rominfo);
-
-/*
-  usage for consoles not directly supported by uCON64
-*/
-extern const st_getopt2_t unknown_usage[],
-                          atari_usage[],
-                          cd32_usage[],
-                          cdi_usage[],
-                          channelf_usage[],
-                          coleco_usage[],
-                          gamecom_usage[],
-                          gc_usage[],
-                          gp32_usage[],
-                          intelli_usage[],
-                          odyssey2_usage[],
-                          odyssey_usage[],
-                          ps2_usage[],
-                          real3do_usage[],
-                          s16_usage[],
-                          sat_usage[],
-                          vboy_usage[],
-                          vc4000_usage[],
-                          vectrex_usage[],
-                          xbox_usage[],
-                          mame_usage[],
-
-                          ucon64_options_usage[],
-                          ucon64_options_without_usage[],
-                          ucon64_padding_usage[],
-                          ucon64_patching_usage[];
-
-#define NINTENDO_MAKER_LEN 684
-
-extern const char *nintendo_maker[];
-
-/*
-  uCON64 "workflow" objects
-
-  We want to do things compile-time. Using ucon64_wf is necessary for VC 6. GCC
-  (3) accepts casts in struct initialisations.
-*/
-enum
-{
-  WF_OBJ_ALL_SWITCH = 0,
-  WF_OBJ_ALL_DEFAULT,
-  WF_OBJ_ALL_DEFAULT_NO_SPLIT,
-  WF_OBJ_ALL_STOP,
-  WF_OBJ_ALL_NO_ROM,
-  WF_OBJ_ALL_STOP_NO_ROM,
-  WF_OBJ_ALL_DEFAULT_STOP_NO_ROM,
-  WF_OBJ_ALL_NO_ARCHIVE,
-  WF_OBJ_ALL_INIT,
-  WF_OBJ_ALL_INIT_PROBE,
-  WF_OBJ_ALL_INIT_PROBE_STOP,
-  WF_OBJ_ALL_INIT_PROBE_NO_ROM,
-  WF_OBJ_ALL_INIT_PROBE_NO_SPLIT,
-  WF_OBJ_ALL_INIT_PROBE_NO_CRC32,
-  WF_OBJ_ALL_INIT_NO_SPLIT,
-
-  WF_OBJ_ATA_DEFAULT,
-  WF_OBJ_ATA_DEFAULT_NO_SPLIT,
-  WF_OBJ_DC_SWITCH,
-  WF_OBJ_DC_DEFAULT,
-  WF_OBJ_DC_NO_ROM,
-  WF_OBJ_GB_SWITCH,
-  WF_OBJ_GB_DEFAULT,
-  WF_OBJ_GBA_SWITCH,
-  WF_OBJ_GBA_DEFAULT,
-  WF_OBJ_GEN_SWITCH,
-  WF_OBJ_GEN_DEFAULT,
-  WF_OBJ_GEN_DEFAULT_NO_SPLIT,
-  WF_OBJ_JAG_SWITCH,
-  WF_OBJ_LYNX_SWITCH,
-  WF_OBJ_LYNX_DEFAULT,
-  WF_OBJ_N64_SWITCH,
-  WF_OBJ_N64_DEFAULT,
-  WF_OBJ_N64_INIT_PROBE,
-  WF_OBJ_NDS_SWITCH,
-  WF_OBJ_NG_SWITCH,
-  WF_OBJ_NG_DEFAULT,
-  WF_OBJ_NES_SWITCH,
-  WF_OBJ_NES_DEFAULT,
-  WF_OBJ_NGP_SWITCH,
-  WF_OBJ_PCE_SWITCH,
-  WF_OBJ_PCE_DEFAULT,
-  WF_OBJ_PSX_SWITCH,
-  WF_OBJ_SMS_SWITCH,
-  WF_OBJ_SMS_DEFAULT_NO_SPLIT,
-  WF_OBJ_SNES_SWITCH,
-  WF_OBJ_SNES_DEFAULT,
-  WF_OBJ_SNES_DEFAULT_NO_SPLIT,
-  WF_OBJ_SNES_NO_ROM,
-  WF_OBJ_SNES_INIT_PROBE,
-  WF_OBJ_SWAN_SWITCH,
-
-  WF_OBJ_ATA_STOP_NO_ROM,
-  WF_OBJ_N64_STOP_NO_ROM,
-  WF_OBJ_N64_DEFAULT_STOP,
-  WF_OBJ_N64_DEFAULT_STOP_NO_ROM,
-  WF_OBJ_GEN_STOP_NO_ROM,
-  WF_OBJ_GEN_DEFAULT_STOP_NO_SPLIT_NO_ROM,
-  WF_OBJ_GBA_STOP_NO_ROM,
-  WF_OBJ_GBA_DEFAULT_STOP,
-  WF_OBJ_GBA_DEFAULT_STOP_NO_ROM,
-  WF_OBJ_SNES_STOP_NO_ROM,
-  WF_OBJ_SNES_DEFAULT_STOP_NO_ROM,
-  WF_OBJ_SNES_DEFAULT_STOP_NO_SPLIT_NO_ROM,
-  WF_OBJ_GB_STOP_NO_ROM,
-  WF_OBJ_GB_DEFAULT_STOP_NO_ROM,
-  WF_OBJ_LYNX_STOP_NO_ROM,
-  WF_OBJ_PCE_DEFAULT_STOP_NO_SPLIT_NO_ROM,
-  WF_OBJ_NGP_STOP_NO_ROM,
-  WF_OBJ_NGP_DEFAULT_STOP_NO_ROM,
-  WF_OBJ_NES_STOP_NO_ROM,
-  WF_OBJ_NES_DEFAULT_STOP_NO_SPLIT,
-  WF_OBJ_SMS_STOP_NO_ROM,
-  WF_OBJ_SMS_DEFAULT_STOP_NO_SPLIT_NO_ROM,
-
-  WF_OBJ_GC_SWITCH,
-  WF_OBJ_S16_SWITCH,
-  WF_OBJ_ATA_SWITCH,
-  WF_OBJ_COLECO_SWITCH,
-  WF_OBJ_VBOY_SWITCH,
-  WF_OBJ_VEC_SWITCH,
-  WF_OBJ_INTELLI_SWITCH,
-  WF_OBJ_GP32_SWITCH,
-  WF_OBJ_PS2_SWITCH,
-  WF_OBJ_XBOX_SWITCH,
-  WF_OBJ_SAT_SWITCH,
-  WF_OBJ_3DO_SWITCH,
-  WF_OBJ_CD32_SWITCH,
-  WF_OBJ_CDI_SWITCH,
-};
-
-extern st_ucon64_obj_t ucon64_wf[];
 
 /*
   uCON64 messages

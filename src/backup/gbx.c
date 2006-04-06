@@ -77,6 +77,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gb.h"                         // GB_NAME_LEN, gb_logodata,
                                                 //  rocket_logodata
 
+static st_ucon64_obj_t gbx_obj[] =
+  {
+    {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_GB, WF_STOP | WF_NO_ROM},
+    {UCON64_GB, WF_SWITCH}
+  };
+
 const st_getopt2_t gbx_usage[] =
   {
     {
@@ -89,25 +96,25 @@ const st_getopt2_t gbx_usage[] =
       "xgbx", 0, 0, UCON64_XGBX,
       NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      &ucon64_wf[WF_OBJ_GB_DEFAULT_STOP_NO_ROM]
+      &gbx_obj[0]
     },
     {
       "xgbxs", 0, 0, UCON64_XGBXS,
       NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GB_STOP_NO_ROM]
+      &gbx_obj[1]
     },
     {
       "xgbxb", 1, 0, UCON64_XGBXB,
       "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
       "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      &ucon64_wf[WF_OBJ_GB_STOP_NO_ROM]
+      &gbx_obj[1]
     },
     {
       "xgbxm", 0, 0, UCON64_XGBXM,
       NULL, "try to enable EPP mode, default is SPP mode",
-      &ucon64_wf[WF_OBJ_GB_SWITCH]
+      &gbx_obj[2]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

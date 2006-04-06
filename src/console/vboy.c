@@ -35,8 +35,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "vboy.h"
 
+
+static st_ucon64_obj_t vboy_obj[] =
+  {
+    {UCON64_VBOY, WF_SWITCH}
+  };
 
 const st_getopt2_t vboy_usage[] =
   {
@@ -48,7 +54,7 @@ const st_getopt2_t vboy_usage[] =
     {
       "vboy", 0, 0, UCON64_VBOY,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_VBOY_SWITCH]
+      &vboy_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

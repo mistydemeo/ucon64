@@ -43,12 +43,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "snes.h"
-#include "backup/mgd.h"
-#include "backup/gd.h"
-#include "backup/swc.h"
-#include "backup/fig.h"
-#include "backup/ufo.h"
+#include "backup/backup.h"
 
 
 #define SNES_HEADER_LEN (sizeof (st_snes_header_t))
@@ -78,6 +75,21 @@ static void handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
                                 const char **snes_country);
 
 
+static st_ucon64_obj_t snes_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT},
+    {UCON64_SNES, WF_SWITCH},
+    {UCON64_SNES, WF_DEFAULT},
+    {UCON64_SNES, WF_DEFAULT | WF_NO_SPLIT},
+    {UCON64_SNES, WF_NO_ROM},
+    {UCON64_SNES, WF_INIT | WF_PROBE}
+  };
+
 const st_getopt2_t snes_usage[] =
   {
     {
@@ -89,133 +101,133 @@ const st_getopt2_t snes_usage[] =
     {
       "snes", 0, 0, UCON64_SNES,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
     {
       "hi", 0, 0, UCON64_HI,
       NULL, "force ROM is HiROM",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
     {
       "nhi", 0, 0, UCON64_NHI,
       NULL, "force ROM is not HiROM",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
     {
       "erom", 0, 0, UCON64_EROM,
       NULL, "force ROM is \"Extended\" (combine with -hi for Extended HiROM)",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
 #if 0
     {
       "hd", 0, 0, UCON64_HD,
       NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
     {
       "nhd", 0, 0, UCON64_NHD,
       NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
     {
       "ns", 0, 0, UCON64_NS,
       NULL, "force ROM is not split",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
 #endif
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved format (GD3/UFO)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
     {
       "int2", 0, 0, UCON64_INT2,
       NULL, "force ROM is in interleaved format 2 (SFX)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
       NULL, "force ROM is not in interleaved format",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
     {
       "bs", 0, 0, UCON64_BS,
       NULL, "force ROM is a Broadcast Satellaview dump",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
     {
       "nbs", 0, 0, UCON64_NBS,
       NULL, "force ROM is a regular cartridge dump",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &snes_obj[1]
     },
     {
       "fig", 0, 0, UCON64_FIG,
       NULL, "convert to *Pro Fighter*/FIG",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_NO_SPLIT]
+      &snes_obj[8]
     },
     {
       "figs", 0, 0, UCON64_FIGS,
       NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/FIG",
-      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
+      &snes_obj[10]
     },
     {
       "gd3", 0, 0, UCON64_GD3,
       NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_NO_SPLIT]
+      &snes_obj[8]
     },
 #if 0
 // the next switch remains undocumented until we know of a good checksum algorithm
     {
       "id", 0, 0, UCON64_ID,
       NULL, "force -gd3 to produce a unique file name",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
 #endif
     {
       "idnum", 1, 0, UCON64_IDNUM,
       "NUM", "make -gd3 produce file names where first file has numerical\n"
       "identifier NUM, next NUM + 1, etc. ",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
     {
       "gd3s", 0, 0, UCON64_GD3S,
       NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*",
-      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
+      &snes_obj[10]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game*/MGD2/MGH/RAW",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &snes_obj[2]
     },
     {
       "smc", 0, 0, UCON64_SMC,
       NULL, "convert to Super Magicom/SMC",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_NO_SPLIT]
+      &snes_obj[8]
     },
     {
       "swc", 0, 0, UCON64_SWC,
       NULL, "convert to Super Wild Card*/SWC",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_NO_SPLIT]
+      &snes_obj[8]
     },
     {
       "swcs", 0, 0, UCON64_SWCS,
       NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/SWC",
-      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
+      &snes_obj[10]
     },
     {
       "ufo", 0, 0, UCON64_UFO,
       NULL, "convert to Super UFO",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_NO_SPLIT]
+      &snes_obj[8]
     },
     {
       "ufos", 0, 0, UCON64_UFOS,
       NULL, "convert emulator *.srm (SRAM) to Super UFO",
-      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
+      &snes_obj[10]
     },
     {
       "ctrl", 1, 0, UCON64_CTRL,
@@ -224,7 +236,7 @@ const st_getopt2_t snes_usage[] =
       "TYPE=1 mouse\n"
       "TYPE=2 mouse / gamepad\n"
       "TYPE=6 multitap",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
     {
       "ctrl2", 1, 0, UCON64_CTRL2,
@@ -237,7 +249,7 @@ const st_getopt2_t snes_usage[] =
       "TYPE=5 Konami's justifier\n"
       "TYPE=6 multitap\n"
       "TYPE=7 mouse / super scope / gamepad",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &snes_obj[6]
     },
     {
       "stp", 0, 0, UCON64_STP,
@@ -248,78 +260,78 @@ const st_getopt2_t snes_usage[] =
     {
       "dbuh", 0, 0, UCON64_DBUH,
       NULL, "display (relevant part of) backup unit header",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT]
+      &snes_obj[7]
     },
     {
       "dint", 0, 0, UCON64_DINT,
       NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+      &snes_obj[5]
     },
     {
       "col", 1, 0, UCON64_COL,
       "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)"
       /*"this routine was used to find green colors in games and\n"
       "to replace them with red colors (blood mode)"*/,
-      &ucon64_wf[WF_OBJ_SNES_NO_ROM]
+      &snes_obj[9]
     },
     {
       "j", 0, 0, UCON64_J,
       NULL, "join split ROM",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &snes_obj[3]
     },
     {
       "s", 0, 0, UCON64_S,
       NULL, "split ROM; default part size is 8 Mb",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &snes_obj[2]
     },
     {
       "ssize", 1, 0, UCON64_SSIZE,
       "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &snes_obj[0]
     },
 #if 0
     {
       "p", 0, 0, UCON64_P,
       NULL, "pad ROM to full Mb",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &snes_obj[1]
     },
 #endif
     {
       "k", 0, 0, UCON64_K,
       NULL, "remove protection (crack)",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT]
+      &snes_obj[7]
     },
     {
       "f", 0, 0, UCON64_F,
       NULL, "remove NTSC/PAL protection",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &snes_obj[1]
     },
     {
       "l", 0, 0, UCON64_L,
       NULL, "remove SlowROM checks",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT]
+      &snes_obj[7]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &snes_obj[1]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with Super Flash flash card,\n"
       "truncated to SIZE Mbit; file with loader must be specified\n"
       "first, then all the ROMs, multi-game file to create last",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
+      &snes_obj[4]
     },
     {
       "dmirr", 0, 0, UCON64_DMIRR,
       NULL, "\"de-mirror\" ROM (strip mirrored block from end of ROM)",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT]
+      &snes_obj[7]
     },
     {
       "dnsrt", 0, 0, UCON64_DNSRT,
       NULL, "\"de-NSRT\" ROM (restore name and checksum from NSRT header)",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT]
+      &snes_obj[7]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

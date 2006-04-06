@@ -35,8 +35,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "backup/backup.h"
+#include "console.h"
 #include "jaguar.h"
 
+
+static st_ucon64_obj_t jaguar_obj[] =
+  {
+    {UCON64_JAG, WF_SWITCH}
+  };
 
 const st_getopt2_t jaguar_usage[] =
   {
@@ -48,7 +55,7 @@ const st_getopt2_t jaguar_usage[] =
     {
       "jag", 0, 0, UCON64_JAG,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_JAG_SWITCH]
+      &jaguar_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };

@@ -1,5 +1,5 @@
 /*
-backup.h - single header file for all backup unit functions
+backup.h - backup support for uCON64 
 
 Copyright (c) 2003 NoisyB
 
@@ -61,5 +61,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #if     defined USE_PARALLEL || defined USE_USB
 #include "f2a.h"
 #endif
+
+
+/*
+  defines for unknown backup units/emulators
+*/
+typedef struct // st_unknown_header
+{
+  /*
+    Don't create fields that are larger than one byte! For example size_low and
+    size_high could be combined in one unsigned short int. However, this gives
+    problems with little endian vs. big endian machines (e.g. writing the header
+    to disk).
+  */
+  unsigned char size_low;
+  unsigned char size_high;
+  unsigned char emulation;
+  unsigned char hirom;
+  unsigned char emulation1;
+  unsigned char emulation2;
+  unsigned char pad[2];
+  unsigned char id1;
+  unsigned char id2;
+  unsigned char type;
+  unsigned char pad2[501];
+} st_unknown_header_t;
+
+#define UNKNOWN_HEADER_START 0
+#define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
+
 
 #endif // BACKUP_H

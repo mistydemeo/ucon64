@@ -44,6 +44,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/snes.h"                       // for snes_get_file_type ()
 
 
+static st_ucon64_obj_t swc_obj[] =
+  {
+    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
+    {UCON64_SNES, WF_STOP | WF_NO_ROM},
+    {UCON64_SNES, WF_SWITCH}
+  };
+
 const st_getopt2_t swc_usage[] =
   {
     {
@@ -57,12 +64,12 @@ const st_getopt2_t swc_usage[] =
       "xswc", 0, 0, UCON64_XSWC,
       NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_SPLIT_NO_ROM]
+      &swc_obj[0]
     },
     {
       "xswc2", 0, 0, UCON64_XSWC2,
       NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_SPLIT_NO_ROM]
+      &swc_obj[0]
     },
 #if 1
 /*
@@ -85,7 +92,7 @@ const st_getopt2_t swc_usage[] =
       "MODE=0x100 dump BIOS\n"
       "It is possible to combine flags. MODE=0x44 makes it possible\n"
       "to dump for example Yoshi's Island",
-      &ucon64_wf[WF_OBJ_SNES_SWITCH]
+      &swc_obj[2]
     },
 #endif
     {
@@ -93,19 +100,19 @@ const st_getopt2_t swc_usage[] =
       NULL,
       "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
+      &swc_obj[1]
     },
     {
       "xswcc", 0, 0, UCON64_XSWCC,
       NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
       OPTION_LONG_S "port=PORT\n" "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
+      &swc_obj[1]
     },
     {
       "xswcr", 0, 0, UCON64_XSWCR,
       NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when RTS file does not exist",
-      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
+      &swc_obj[1]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}

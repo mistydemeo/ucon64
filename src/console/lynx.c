@@ -38,8 +38,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "lynx.h"
 
+
+static st_ucon64_obj_t lynx_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_LYNX, WF_SWITCH},
+    {UCON64_LYNX, WF_DEFAULT}
+  };
 
 const st_getopt2_t lynx_usage[] =
   {
@@ -51,48 +59,48 @@ const st_getopt2_t lynx_usage[] =
     {
       "lynx", 0, 0, UCON64_LYNX,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_LYNX_SWITCH]
+      &lynx_obj[1]
     },
     {
       "lyx", 0, 0, UCON64_LYX,
       NULL, "convert to LYX/RAW (strip 64 Bytes LNX header)",
-      &ucon64_wf[WF_OBJ_LYNX_DEFAULT]
+      &lynx_obj[2]
     },
     {
       "lnx", 0, 0, UCON64_LNX,
       NULL, "convert to LNX (uses default values for the header);\n"
       "adjust the LNX header with the following options",
-      &ucon64_wf[WF_OBJ_LYNX_DEFAULT]
+      &lynx_obj[2]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &lynx_obj[0]
     },
     {
       "nrot", 0, 0, UCON64_NROT,
       NULL, "set no rotation (LNX only)",
-      &ucon64_wf[WF_OBJ_LYNX_DEFAULT]
+      &lynx_obj[2]
     },
     {
       "rotl", 0, 0, UCON64_ROTL,
       NULL, "set rotation left (LNX only)",
-      &ucon64_wf[WF_OBJ_LYNX_DEFAULT]
+      &lynx_obj[2]
     },
     {
       "rotr", 0, 0, UCON64_ROTR,
       NULL, "set rotation right (LNX only)",
-      &ucon64_wf[WF_OBJ_LYNX_DEFAULT]
+      &lynx_obj[2]
     },
     {
       "b0", 1, 0, UCON64_B0,
       "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)",
-      &ucon64_wf[WF_OBJ_LYNX_DEFAULT]
+      &lynx_obj[2]
     },
     {
       "b1", 1, 0, UCON64_B1,
       "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)",
-      &ucon64_wf[WF_OBJ_LYNX_DEFAULT]
+      &lynx_obj[2]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };

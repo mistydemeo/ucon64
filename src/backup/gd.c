@@ -41,6 +41,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/parallel.h"                      //  snes_get_snes_hirom()
 
 
+static st_ucon64_obj_t gd_obj[] =
+  {
+    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_SNES, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t gd_usage[] =
   {
     {
@@ -53,7 +59,7 @@ const st_getopt2_t gd_usage[] =
       "xgd3", 0, 0, UCON64_XGD3, // supports split files
       NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
       "this option uses the Game Doctor SF3 protocol",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_ROM]
+      &gd_obj[0]
     },
     {
       "xgd6", 0, 0, UCON64_XGD6,
@@ -64,30 +70,30 @@ const st_getopt2_t gd_usage[] =
       "receives automatically when ROM does not exist\n"
 #endif
       "this option uses the Game Doctor SF6 protocol",
-      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_ROM]
+      &gd_obj[0]
     },
     {
       "xgd3s", 0, 0, UCON64_XGD3S,
       NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
+      &gd_obj[1]
     },
     // --xgd3r should remain hidden until receiving works
     {
       "xgd3r", 0, 0, UCON64_XGD3R,
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
+      &gd_obj[1]
     },
     {
       "xgd6s", 0, 0, UCON64_XGD6S,
       NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
+      &gd_obj[1]
     },
     {
       "xgd6r", 0, 0, UCON64_XGD6R,
       NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n" OPTION_LONG_S "port=PORT\n"
       "receives automatically when saver file does not exist",
-      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
+      &gd_obj[1]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}

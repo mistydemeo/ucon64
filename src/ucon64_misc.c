@@ -1,7 +1,7 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-Copyright (c) 1999 - 2005 NoisyB
+Copyright (c) 1999 - 2006 NoisyB
 Copyright (c) 2001 - 2005 dbjh
 Copyright (c) 2001        Caz
 Copyright (c) 2002 - 2003 Jan-Erik Karlsson (Amiga)
@@ -54,105 +54,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "patch/patch.h"
 
 
-/*
-  uCON64 "workflow" objects
-
-  We want to do things compile-time. Using ucon64_wf is necessary for VC 6. GCC
-  (3) accepts casts in struct initialisations.
-*/
-st_ucon64_obj_t ucon64_wf[] =
-  {
-    {0, WF_SWITCH},                             // WF_OBJ_ALL_SWITCH
-    {0, WF_DEFAULT},                            // WF_OBJ_ALL_DEFAULT
-    {0, WF_DEFAULT | WF_NO_SPLIT},              // WF_OBJ_ALL_DEFAULT_NO_SPLIT
-    {0, WF_STOP},                               // WF_OBJ_ALL_STOP
-    {0, WF_NO_ROM},                             // WF_OBJ_ALL_NO_ROM
-    {0, WF_STOP | WF_NO_ROM},                   // WF_OBJ_ALL_STOP_NO_ROM
-    {0, WF_DEFAULT | WF_STOP | WF_NO_ROM},      // WF_OBJ_ALL_DEFAULT_STOP_NO_ROM
-    {0, WF_NO_ARCHIVE},                         // WF_OBJ_ALL_NO_ARCHIVE
-    {0, WF_INIT},                               // WF_OBJ_ALL_INIT
-    {0, WF_INIT | WF_PROBE},                    // WF_OBJ_ALL_INIT_PROBE
-    {0, WF_INIT | WF_PROBE | WF_STOP},          // WF_OBJ_ALL_INIT_PROBE_STOP,
-    {0, WF_INIT | WF_PROBE | WF_NO_ROM},        // WF_OBJ_ALL_INIT_PROBE_NO_ROM
-    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT},      // WF_OBJ_ALL_INIT_PROBE_NO_SPLIT
-    {0, WF_INIT | WF_PROBE | WF_NO_CRC32},      // WF_OBJ_ALL_INIT_PROBE_NO_CRC32
-    {0, WF_INIT | WF_NO_SPLIT},                 // WF_OBJ_ALL_INIT_NO_SPLIT
-
-    {UCON64_ATA, WF_DEFAULT},                   // WF_OBJ_ATA_DEFAULT
-    {UCON64_ATA, WF_DEFAULT | WF_NO_SPLIT},     // WF_OBJ_ATA_DEFAULT_NO_SPLIT
-    {UCON64_DC, WF_SWITCH},                     // WF_OBJ_DC_SWITCH
-    {UCON64_DC, WF_DEFAULT},                    // WF_OBJ_DC_DEFAULT
-    {UCON64_DC, WF_NO_ROM},                     // WF_OBJ_DC_NO_ROM
-    {UCON64_GB, WF_SWITCH},                     // WF_OBJ_GB_SWITCH
-    {UCON64_GB, WF_DEFAULT},                    // WF_OBJ_GB_DEFAULT
-    {UCON64_GBA, WF_SWITCH},                    // WF_OBJ_GBA_SWITCH
-    {UCON64_GBA, WF_DEFAULT},                   // WF_OBJ_GBA_DEFAULT
-    {UCON64_GEN, WF_SWITCH},                    // WF_OBJ_GEN_SWITCH
-    {UCON64_GEN, WF_DEFAULT},                   // WF_OBJ_GEN_DEFAULT
-    {UCON64_GEN, WF_DEFAULT | WF_NO_SPLIT},     // WF_OBJ_GEN_DEFAULT_NO_SPLIT
-    {UCON64_JAG, WF_SWITCH},                    // WF_OBJ_JAG_SWITCH
-    {UCON64_LYNX, WF_SWITCH},                   // WF_OBJ_LYNX_SWITCH
-    {UCON64_LYNX, WF_DEFAULT},                  // WF_OBJ_LYNX_DEFAULT
-    {UCON64_N64, WF_SWITCH},                    // WF_OBJ_N64_SWITCH
-    {UCON64_N64, WF_DEFAULT},                   // WF_OBJ_N64_DEFAULT
-    {UCON64_N64, WF_INIT | WF_PROBE},           // WF_OBJ_N64_INIT_PROBE
-    {UCON64_NDS, WF_SWITCH},                    // WF_OBJ_NDS_SWITCH
-    {UCON64_NG, WF_SWITCH},                     // WF_OBJ_NG_SWITCH
-    {UCON64_NG, WF_DEFAULT},                    // WF_OBJ_NG_DEFAULT
-    {UCON64_NES, WF_SWITCH},                    // WF_OBJ_NES_SWITCH
-    {UCON64_NES, WF_DEFAULT},                   // WF_OBJ_NES_DEFAULT
-    {UCON64_NGP, WF_SWITCH},                    // WF_OBJ_NGP_SWITCH
-    {UCON64_PCE, WF_SWITCH},                    // WF_OBJ_PCE_SWITCH
-    {UCON64_PCE, WF_DEFAULT},                   // WF_OBJ_PCE_DEFAULT
-    {UCON64_PSX, WF_SWITCH},                    // WF_OBJ_PSX_SWITCH
-    {UCON64_SMS, WF_SWITCH},                    // WF_OBJ_SMS_SWITCH
-    {UCON64_SMS, WF_DEFAULT | WF_NO_SPLIT},     // WF_OBJ_SMS_DEFAULT_NO_SPLIT
-    {UCON64_SNES, WF_SWITCH},                   // WF_OBJ_SNES_SWITCH
-    {UCON64_SNES, WF_DEFAULT},                  // WF_OBJ_SNES_DEFAULT
-    {UCON64_SNES, WF_DEFAULT | WF_NO_SPLIT},    // WF_OBJ_SNES_DEFAULT_NO_SPLIT
-    {UCON64_SNES, WF_NO_ROM},                   // WF_OBJ_SNES_NO_ROM
-    {UCON64_SNES, WF_INIT | WF_PROBE},          // WF_OBJ_SNES_INIT_PROBE
-    {UCON64_SWAN, WF_SWITCH},                   // WF_OBJ_SWAN_SWITCH
-
-    {UCON64_ATA, WF_STOP | WF_NO_ROM},          // WF_OBJ_ATA_STOP_NO_ROM
-    {UCON64_N64, WF_STOP | WF_NO_ROM},          // WF_OBJ_N64_STOP_NO_ROM
-    {UCON64_N64, WF_DEFAULT | WF_STOP},         // WF_OBJ_N64_DEFAULT_STOP
-    {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM}, // WF_OBJ_N64_DEFAULT_STOP_NO_ROM
-    {UCON64_GEN, WF_STOP | WF_NO_ROM},          // WF_OBJ_GEN_STOP_NO_ROM
-    {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}, // WF_OBJ_GEN_DEFAULT_STOP_NO_SPLIT_NO_ROM
-    {UCON64_GBA, WF_STOP | WF_NO_ROM},          // WF_OBJ_GBA_STOP_NO_ROM
-    {UCON64_GBA, WF_DEFAULT | WF_STOP},         // WF_OBJ_GBA_DEFAULT_STOP
-    {UCON64_GBA, WF_DEFAULT | WF_STOP | WF_NO_ROM}, // WF_OBJ_GBA_DEFAULT_STOP_NO_ROM
-    {UCON64_SNES, WF_STOP | WF_NO_ROM},         // WF_OBJ_SNES_STOP_NO_ROM
-    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_ROM}, // WF_OBJ_SNES_DEFAULT_STOP_NO_ROM
-    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}, // WF_OBJ_SNES_DEFAULT_STOP_NO_SPLIT_NO_ROM
-    {UCON64_GB, WF_STOP | WF_NO_ROM},           // WF_OBJ_GB_STOP_NO_ROM
-    {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM}, // WF_OBJ_GB_DEFAULT_STOP_NO_ROM
-    {UCON64_LYNX, WF_STOP | WF_NO_ROM},         // WF_OBJ_LYNX_STOP_NO_ROM
-    {UCON64_PCE, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}, // WF_OBJ_PCE_DEFAULT_STOP_NO_SPLIT_NO_ROM
-    {UCON64_NGP, WF_STOP | WF_NO_ROM},          // WF_OBJ_NGP_STOP_NO_ROM
-    {UCON64_NGP, WF_DEFAULT | WF_STOP | WF_NO_ROM}, // WF_OBJ_NGP_DEFAULT_STOP_NO_ROM
-    {UCON64_NES, WF_STOP | WF_NO_ROM},          // WF_OBJ_NES_STOP_NO_ROM
-    {UCON64_NES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT}, // WF_OBJ_NES_DEFAULT_STOP_NO_SPLIT
-    {UCON64_SMS, WF_STOP | WF_NO_ROM},          // WF_OBJ_SMS_STOP_NO_ROM
-    {UCON64_SMS, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}, // WF_OBJ_SMS_DEFAULT_STOP_NO_SPLIT_NO_ROM
-
-    {UCON64_GC, WF_SWITCH},                     // WF_OBJ_GC_SWITCH
-    {UCON64_S16, WF_SWITCH},                    // WF_OBJ_S16_SWITCH
-    {UCON64_ATA, WF_SWITCH},                    // WF_OBJ_ATA_SWITCH
-    {UCON64_COLECO, WF_SWITCH},                 // WF_OBJ_COLECO_SWITCH
-    {UCON64_VBOY, WF_SWITCH},                   // WF_OBJ_VBOY_SWITCH
-    {UCON64_VEC, WF_SWITCH},                    // WF_OBJ_VEC_SWITCH
-    {UCON64_INTELLI, WF_SWITCH},                // WF_OBJ_INTELLI_SWITCH
-    {UCON64_GP32, WF_SWITCH},                   // WF_OBJ_GP32_SWITCH
-    {UCON64_PS2, WF_SWITCH},                    // WF_OBJ_PS2_SWITCH
-    {UCON64_XBOX, WF_SWITCH},                   // WF_OBJ_XBOX_SWITCH
-    {UCON64_SAT, WF_SWITCH},                    // WF_OBJ_SAT_SWITCH
-    {UCON64_3DO, WF_SWITCH},                    // WF_OBJ_3DO_SWITCH
-    {UCON64_CD32, WF_SWITCH},                   // WF_OBJ_CD32_SWITCH
-    {UCON64_CDI, WF_SWITCH},                    // WF_OBJ_CDI_SWITCH
-  };
-
 #ifdef  USE_DISCMAGE
 #ifdef  DLOPEN
 #include "misc/dlopen.h"
@@ -183,6 +84,13 @@ static int (*dm_cue_write_ptr) (const dm_image_t *) = NULL;
 static int (*dm_rip_ptr) (const dm_image_t *, int, uint32_t) = NULL;
 #endif // DLOPEN
 
+
+static st_ucon64_obj_t libdm_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT}
+  };
+
 const st_getopt2_t libdm_usage[] =
   {
     {
@@ -193,12 +101,12 @@ const st_getopt2_t libdm_usage[] =
     {
       "disc", 0, 0, UCON64_DISC,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &libdm_obj[0]
     },
     {
       "rip", 1, 0, UCON64_RIP,
       "N", "rip/dump track N from IMAGE",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &libdm_obj[1]
     },
 #if 0
     {
@@ -210,37 +118,37 @@ const st_getopt2_t libdm_usage[] =
       "cdmage", 1, 0, UCON64_CDMAGE,
       "N", "like " OPTION_LONG_S "rip but writes always (padded) sectors with 2352 Bytes;\n"
       "this is what CDmage would do",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &libdm_obj[1]
     },
 #endif
     {
       "bin2iso", 1, 0, UCON64_BIN2ISO,
       "N", "convert track N to ISO (if possible) by resizing\n"
       "sectors to 2048 Bytes",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &libdm_obj[1]
     },
     {
       "isofix", 1, 0, UCON64_ISOFIX,
       "N", "fix corrupted track N (if possible)\n"
       "if PVD points to a bad DR offset it will add padding data\n"
       "so actual DR gets located in right absolute address",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &libdm_obj[1]
     },
     {
       "mkcue", 0, 0, UCON64_MKCUE,
       NULL, "generate CUE sheet for IMAGE or existing TOC sheet",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &libdm_obj[1]
     },
     {
       "mktoc", 0, 0, UCON64_MKTOC,
       NULL, "generate TOC sheet for IMAGE or existing CUE sheet",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &libdm_obj[1]
     },
     {
       // hidden option
       "mksheet", 0, 0, UCON64_MKSHEET,
       NULL, /* "same as " OPTION_LONG_S "mktoc and " OPTION_LONG_S "mkcue" */ NULL,
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &libdm_obj[1]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -285,241 +193,21 @@ const char *ucon64_msg[] =
     NULL
   };
 
-const st_getopt2_t unknown_usage[] =
+
+static st_ucon64_obj_t ucon64_option_obj[] =
   {
-    {NULL, 0, 0, 0, NULL, "Unknown backup unit/emulator", NULL},
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  gc_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Nintendo Game Cube/Panasonic Gamecube Q"
-      /*"2001/2002 Nintendo http://www.nintendo.com"*/,
-      NULL
-    },
-    {
-      "gc", 0, 0, UCON64_GC,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_GC_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  s16_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Sega System 16(A/B)/Sega System 18/dual 68000"
-      /*"1987/19XX/19XX SEGA http://www.sega.com"*/,
-      NULL
-    },
-    {
-      "s16", 0, 0, UCON64_S16,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_S16_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  vectrex_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Vectrex"/*"1982"*/,
-      NULL
-    },
-    {
-      "vec", 0, 0, UCON64_VEC,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_VEC_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  intelli_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Intellivision"/*"1979 Mattel"*/,
-      NULL
-    },
-    {
-      "intelli", 0, 0, UCON64_INTELLI,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_INTELLI_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  gp32_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "GP32 Game System/GPX2 - F100"/*"2001 Gamepark http://www.gamepark.co.kr"*/,
-      NULL
-    },
-    {
-      "gp32", 0, 0, UCON64_GP32,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_GP32_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  ps2_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Playstation 2"/*"2000 Sony http://www.playstation.com"*/,
-      NULL
-    },
-    {
-      "ps2", 0, 0, UCON64_PS2,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_PS2_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  xbox_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "XBox"/*"2001 Microsoft http://www.xbox.com"*/,
-      NULL
-    },
-    {
-      "xbox", 0, 0, UCON64_XBOX,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_XBOX_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  sat_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Saturn"/*"1994 SEGA http://www.sega.com"*/,
-      NULL
-    },
-    {
-      "sat", 0, 0, UCON64_SAT,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_SAT_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  real3do_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Real3DO"/*"1993 Panasonic/Goldstar/Philips"*/,
-      NULL
-    },
-    {
-      "3do", 0, 0, UCON64_3DO,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_3DO_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  cd32_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "CD32"/*"1993 Commodore"*/,
-      NULL
-    },
-    {
-      "cd32", 0, 0, UCON64_CD32,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_CD32_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  cdi_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "CD-i"/*"1991 Philips"*/,
-      NULL
-    },
-    {
-      "cdi", 0, 0, UCON64_CDI,
-      NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_CDI_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  vc4000_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Interton VC4000"/*"~1980"*/,
-      NULL
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  odyssey2_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "G7400+/Odyssey2"/*"1978"*/,
-      NULL
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  channelf_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "FC Channel F"/*"1976"*/,
-      NULL
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  odyssey_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Magnavox Odyssey"/*"1972 Ralph Baer (USA)"*/,
-      NULL
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  gamecom_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Game.com"/*"1997 Tiger Electronics"*/,
-      NULL
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  },
-  mame_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "M.A.M.E. (Multiple Arcade Machine Emulator)",
-      NULL
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_STOP},
+    {0, WF_NO_ROM},
+    {0, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {0, WF_NO_ARCHIVE},
+    {0, WF_INIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE | WF_NO_CRC32}
   };
 
-#if 0
-Nintendo Revolution 2006
-XBox 360
-PS3
-Microvision (Handheld)/1979 MB
-Supervision/1991 Hartung
-Pokemon Mini/200X Nintendo http://www.nintendo.com
-N-Gage/2003 Nokia http://www.n-gage.com
-PSP (Playstation Portable)/2005 Sony http://www.playstation.com
-Adv. Vision
-Arcadia
-Astrocade
-Indrema
-Nuon
-RCA Studio 2
-RDI Halcyon
-Telstar
-XE System
-#endif
 
 const st_getopt2_t ucon64_options_usage[] =
   {
@@ -531,23 +219,23 @@ const st_getopt2_t ucon64_options_usage[] =
     {
       "o", 1, 0, UCON64_O,
       "DIRECTORY", "specify output directory",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "r", 0, 0, UCON64_R,
       NULL, "process subdirectories recursively",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "nbak", 0, 0, UCON64_NBAK,
       NULL, "prevents backup files (*.BAK)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
 #ifdef  USE_ANSI_COLOR
     {
       "ncol", 0, 0, UCON64_NCOL,
       NULL, "disable ANSI colors in output",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
 #endif
 #if     defined USE_PARALLEL || defined USE_USB
@@ -571,29 +259,29 @@ const st_getopt2_t ucon64_options_usage[] =
         "3bc, 378, 278, "
 #endif
         "...}",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
 #endif // defined USE_PARALLEL || defined USE_USB
     {
       "hdn", 1, 0, UCON64_HDN,
       "N", "force ROM has backup unit/emulator header with size of N Bytes",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "hd", 0, 0, UCON64_HD,
       NULL, "same as " OPTION_LONG_S "hdn=512\n"
       "most backup units use a header with a size of 512 Bytes",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "nhd", 0, 0, UCON64_NHD,
       NULL, "force ROM has no backup unit/emulator header",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "ns", 0, 0, UCON64_NS,
       NULL, "force ROM is not split",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "e", 0, 0, UCON64_E,
@@ -602,7 +290,7 @@ const st_getopt2_t ucon64_options_usage[] =
 #else
       NULL, "emulate/run ROM (check .ucon64rc for all Emulator settings)",
 #endif
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &ucon64_option_obj[1]
     },
     {
       "crc", 0, 0, UCON64_CRC,
@@ -611,27 +299,27 @@ const st_getopt2_t ucon64_options_usage[] =
       "; this will also force calculation for\n"
       "files bigger than %d Bytes (%.4f Mb)"
 #endif
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_CRC32]
+      &ucon64_option_obj[9]
     },
     {
       "sha1", 0, 0, UCON64_SHA1,
       NULL, "show SHA1 value of ROM",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_CRC32]
+      &ucon64_option_obj[9]
     },
     {
       "md5", 0, 0, UCON64_MD5,
       NULL, "show MD5 value of ROM",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_CRC32]
+      &ucon64_option_obj[9]
     },
     {
       "ls", 0, 0, UCON64_LS,
       NULL, "generate ROM list for all recognized ROMs",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &ucon64_option_obj[7]
     },
     {
       "lsv", 0, 0, UCON64_LSV,
       NULL, "like " OPTION_LONG_S "ls but more verbose",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &ucon64_option_obj[7]
     },
     {
       "hex", 2, 0, UCON64_HEX,
@@ -673,42 +361,42 @@ const st_getopt2_t ucon64_options_usage[] =
     {
       "find", 1, 0, UCON64_FIND,
       "STRING", "find STRING in ROM (wildcard: '?')",
-      &ucon64_wf[WF_OBJ_ALL_INIT]
+      &ucon64_option_obj[6]
     },
     {
       "findi", 1, 0, UCON64_FINDI,
       "STR", "like " OPTION_LONG_S "find but ignores the case of alpha bytes",
-      &ucon64_wf[WF_OBJ_ALL_INIT]
+      &ucon64_option_obj[6]
     },
     {
       "findr", 1, 0, UCON64_FINDR,
       "STR", "like " OPTION_LONG_S "find but looks also for shifted/relative similarities\n"
       "(no wildcard supported)",
-      &ucon64_wf[WF_OBJ_ALL_INIT]
+      &ucon64_option_obj[6]
     },
     {
       "hfind", 1, 0, UCON64_HFIND,
       "HEX", "find HEX codes in ROM; use quotation " OPTION_LONG_S "hfind=\"75 ? 4f 4e\"\n"
              "(wildcard: '?')",
-      &ucon64_wf[WF_OBJ_ALL_INIT]
+      &ucon64_option_obj[6]
     },
     {
       "hfindr", 1, 0, UCON64_HFINDR,
       "HEX", "like " OPTION_LONG_S "hfind but looks also for shifted/relative similarities\n"
       "(no wildcard supported)",
-      &ucon64_wf[WF_OBJ_ALL_INIT]
+      &ucon64_option_obj[6]
     },
     {
       "dfind", 1, 0, UCON64_DFIND,
       "DEC", "find DEC values in ROM; use quotation " OPTION_LONG_S "dfind=\"117 ? 79 78\"\n"
              "(wildcard: '?')",
-      &ucon64_wf[WF_OBJ_ALL_INIT]
+      &ucon64_option_obj[6]
     },
     {
       "dfindr", 1, 0, UCON64_DFINDR,
       "DEC", "like " OPTION_LONG_S "dfind but looks also for shifted/relative similarities\n"
       "(no wildcard supported)",
-      &ucon64_wf[WF_OBJ_ALL_INIT]
+      &ucon64_option_obj[6]
     },
     {
       "c", 1, 0, UCON64_C,
@@ -723,158 +411,115 @@ const st_getopt2_t ucon64_options_usage[] =
     {
       "help", 0, 0, UCON64_HELP,
       NULL, "display this help and exit",
-      &ucon64_wf[WF_OBJ_ALL_STOP]
+      &ucon64_option_obj[2]
     },
     {
       "version", 0, 0, UCON64_VER,
       NULL, "output version information and exit",
-      &ucon64_wf[WF_OBJ_ALL_STOP]
+      &ucon64_option_obj[2]
     },
     {
       "q", 0, 0, UCON64_Q,
       NULL, "be quiet (don't show ROM info)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
 #if 0
     {
       "qq", 0, 0, UCON64_QQ,
       NULL, "be even more quiet",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
 #endif
     {
       "v", 0, 0, UCON64_V,
       NULL, "be more verbose (show backup unit headers also)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
 #ifdef  USE_PARALLEL
     {
       "xreset", 0, 0, UCON64_XRESET,
       NULL, "reset parallel port",
-      &ucon64_wf[WF_OBJ_ALL_NO_ROM]             // it's NOT a stop option
+      &ucon64_option_obj[3]             // it's NOT a stop option
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  };
-
-// hidden options
-const st_getopt2_t ucon64_options_without_usage[] =
-  {
+    // hidden options
     {
       "crchd", 0, 0, UCON64_CRCHD,              // backward compat.
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_CRC32]
+      &ucon64_option_obj[9]
     },
     {
       "file", 1, 0, UCON64_FILE,                // obsolete?
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "frontend", 0, 0, UCON64_FRONTEND,        // no usage?
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "?", 0, 0, UCON64_HELP,                   // same as --help
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_STOP]
+      &ucon64_option_obj[2]
     },
     {
       "h", 0, 0, UCON64_HELP,                   // same as --help
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_STOP]
+      &ucon64_option_obj[2]
     },
     {
       "id", 0, 0, UCON64_ID,                    // currently only used in snes.c
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "rom", 0, 0, UCON64_ROM,                  // obsolete?
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &ucon64_option_obj[0]
     },
     {
       "rename", 0, 0, UCON64_RDAT,              // is now "rdat"
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+      &ucon64_option_obj[8]
     },
     {
       "force63", 0, 0, UCON64_RJOLIET,          // is now "rjoilet"
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+      &ucon64_option_obj[5]
     },
     {
       "rr83", 0, 0, UCON64_R83,                 // is now "r83"
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+      &ucon64_option_obj[5]
     },
     {
       "83", 0, 0, UCON64_R83,                   // is now "r83"
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_NO_ARCHIVE]
+      &ucon64_option_obj[5]
     },
 #if 0
     {
       "xcdrw", 0, 0, UCON64_XCDRW, // obsolete
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_STOP_NO_ROM]
+      &ucon64_option_obj[4]
     },
     {
       "cdmage", 1, 0, UCON64_CDMAGE, // obsolete
       NULL, NULL,
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &ucon64_option_obj[1]
     },
 #endif
-    // these consoles are (still) not supported
-    {
-      "3do", 0, 0, UCON64_3DO,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_3DO_SWITCH]
-    },
-    {
-      "gp32", 0, 0, UCON64_GP32,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_GP32_SWITCH]
-    },
-    {
-      "intelli", 0, 0, UCON64_INTELLI,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_INTELLI_SWITCH]
-    },
-    {
-      "ps2", 0, 0, UCON64_PS2,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_PS2_SWITCH]
-    },
-    {
-      "s16", 0, 0, UCON64_S16,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_S16_SWITCH]
-    },
-    {
-      "sat", 0, 0, UCON64_SAT,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_SAT_SWITCH]
-    },
-    {
-      "vec", 0, 0, UCON64_VEC,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_VEC_SWITCH]
-    },
-    {
-      "xbox", 0, 0, UCON64_XBOX,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_XBOX_SWITCH]
-    },
-    {
-      "gc", 0, 0, UCON64_GC,
-      NULL, NULL,
-      &ucon64_wf[WF_OBJ_GC_SWITCH]
-    },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
+
+static st_ucon64_obj_t ucon64_padding_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {0, WF_INIT | WF_NO_SPLIT}
+  };
+
 
 const st_getopt2_t ucon64_padding_usage[] =
   {
@@ -886,22 +531,22 @@ const st_getopt2_t ucon64_padding_usage[] =
     {
       "ispad", 0, 0, UCON64_ISPAD,
       NULL, "check if ROM is padded",
-      &ucon64_wf[WF_OBJ_ALL_INIT_NO_SPLIT]
+      &ucon64_padding_obj[1]
     },
     {
       "pad", 0, 0, UCON64_PAD,
       NULL, "pad ROM to next Mb",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &ucon64_padding_obj[0]
     },
     {
       "p", 0, 0, UCON64_P,
       NULL, "same as " OPTION_LONG_S "pad",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &ucon64_padding_obj[0]
     },
     {
       "padn", 1, 0, UCON64_PADN,
       "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &ucon64_padding_obj[0]
     },
     {
       "strip", 1, 0, UCON64_STRIP,
@@ -933,203 +578,9 @@ const st_getopt2_t ucon64_padding_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_getopt2_t ucon64_patching_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Patching",
-      NULL
-    },
-    {
-      "poke", 1, 0, UCON64_POKE,
-      "OFF:V", "change byte at file offset OFF to value V (both in hexadecimal)",
-      NULL
-    },
-    {
-      "pattern", 1, 0, UCON64_PATTERN,
-      "FILE", "change ROM based on patterns specified in FILE",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
-    },
-    {
-      "patch", 1, 0, UCON64_PATCH,
-      "PATCH", "specify the PATCH for the following options\n"
-      "use this option or uCON64 expects the last commandline\n"
-      "argument to be the name of the PATCH file",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  };
 
 char *ucon64_temp_file = NULL;
 int (*ucon64_testsplit_callback) (const char *filename) = NULL;
-
-// _publisher_ strings for SNES, GB, GBC and GBA games
-const char *nintendo_maker[NINTENDO_MAKER_LEN] =
-  {
-    NULL, "Nintendo", "Rocket Games/Ajinomoto", "Imagineer-Zoom", "Gray Matter",
-    "Zamuse", "Falcom", NULL, "Capcom", "Hot B Co.",
-    "Jaleco", "Coconuts Japan", "Coconuts Japan/G.X.Media",
-      "Micronet", "Technos",
-    "Mebio Software", "Shouei System", "Starfish", NULL, "Mitsui Fudosan/Dentsu",
-    NULL, "Warashi Inc.", NULL, "Nowpro", NULL,
-    "Game Village", NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // 0Z
-    NULL, "Starfish", "Infocom", "Electronic Arts Japan", NULL,
-    "Cobra Team", "Human/Field", "KOEI", "Hudson Soft", "S.C.P./Game Village",
-    "Yanoman", NULL, "Tecmo Products", "Japan Glary Business", "Forum/OpenSystem",
-    "Virgin Games (Japan)", "SMDE", NULL, NULL, "Daikokudenki",
-    NULL, NULL, NULL, NULL, NULL,
-    "Creatures Inc.", "TDK Deep Impresion", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // 1Z
-    "Destination Software/KSS", "Sunsoft/Tokai Engineering",
-      "POW (Planning Office Wada)/VR 1 Japan", "Micro World", NULL,
-    "San-X", "Enix", "Loriciel/Electro Brain", "Kemco Japan", "Seta Co., Ltd.",
-    "Culture Brain", NULL, "Palsoft", "Visit Co., Ltd.", "Intec",
-    "System Sacom", "Poppo", "Ubisoft Japan", NULL, "Media Works",
-    "NEC InterChannel", "Tam", "Gajin/Jordan", "Smilesoft", NULL,
-    NULL, "Mediakite", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // 2Z
-    "Viacom", "Carrozzeria", "Dynamic", NULL, "Magifact",
-    "Hect", "Codemasters", "Taito/GAGA Communications", "Laguna",
-      "Telstar Fun & Games/Event/Taito",
-    NULL, "Arcade Zone Ltd.", "Entertainment International/Empire Software", "Loriciel",
-      "Gremlin Graphics",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // 3Z
-    "Seika Corp.", "UBI SOFT Entertainment Software", "Sunsoft US", NULL, "Life Fitness",
-    NULL, "System 3", "Spectrum Holobyte", NULL, "IREM",
-    NULL, "Raya Systems", "Renovation Products", "Malibu Games", NULL,
-    "Eidos/U.S. Gold", "Playmates Interactive", NULL, NULL, "Fox Interactive",
-    "Time Warner Interactive", NULL, NULL, NULL, NULL,
-    NULL, "Disney Interactive", NULL, "Black Pearl", NULL,
-    "Advanced Productions", NULL, NULL, "GT Interactive", "RARE",
-    "Crave Entertainment",                      // 4Z
-    "Absolute Entertainment", "Acclaim", "Activision", "American Sammy", "Take 2/GameTek",
-    "Hi Tech", "LJN Ltd.", NULL, "Mattel", NULL,
-    "Mindscape/Red Orb Entertainment", "Romstar", "Taxan", "Midway/Tradewest", NULL,
-    "American Softworks Corp.", "Majesco Sales Inc.", "3DO", NULL, NULL,
-    "Hasbro", "NewKidCo", "Telegames", "Metro3D", NULL,
-    "Vatical Entertainment", "LEGO Media", NULL, "Xicat Interactive", "Cryo Interactive",
-    NULL, NULL, "Red Storm Entertainment", "Microids", NULL,
-    "Conspiracy/Swing",                         // 5Z
-    "Titus", "Virgin Interactive", "Maxis", NULL, "LucasArts Entertainment",
-    NULL, NULL, "Ocean", NULL, "Electronic Arts",
-    NULL, "Laser Beam", NULL, NULL, "Elite Systems",
-    "Electro Brain", "The Learning Company", "BBC", NULL, "Software 2000",
-    NULL, "BAM! Entertainment", "Studio 3", NULL, NULL,
-    NULL, "Classified Games", NULL, "TDK Mediactive", NULL,
-    "DreamCatcher", "JoWood Produtions", "SEGA", "Wannado Edition",
-      "LSP (Light & Shadow Prod.)",
-    "ITE Media",                                // 6Z
-    "Infogrames", "Interplay", "JVC (US)", "Parker Brothers", NULL,
-    "SCI (Sales Curve Interactive)/Storm", NULL, NULL, "THQ Software", "Accolade Inc.",
-    "Triffix Entertainment", NULL, "Microprose Software",
-      "Universal Interactive/Sierra/Simon & Schuster", NULL,
-    "Kemco", "Rage Software", "Encore", NULL, "Zoo",
-    "BVM", "Simon & Schuster Interactive", "Asmik Ace Entertainment Inc./AIA",
-      "Empire Interactive", NULL,
-    NULL, "Jester Interactive", NULL, NULL, "Scholastic",
-    "Ignition Entertainment", NULL, "Stadlbauer", NULL, NULL,
-    NULL,                                       // 7Z
-    "Misawa", "Teichiku", "Namco Ltd.", "LOZC", "KOEI",
-    NULL, "Tokuma Shoten Intermedia", "Tsukuda Original", "DATAM-Polystar", NULL,
-    NULL, "Bulletproof Software", "Vic Tokai Inc.", NULL, "Character Soft",
-    "I'Max", "Saurus", NULL, NULL, "General Entertainment",
-    NULL, NULL, "I'Max", "Success", NULL,
-    "SEGA Japan", NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // 8Z
-    "Takara", "Chun Soft", "Video System Co., Ltd./McO'River", "BEC", NULL,
-    "Varie", "Yonezawa/S'pal", "Kaneko", NULL, "Victor Interactive Software/Pack in Video",
-    "Nichibutsu/Nihon Bussan", "Tecmo", "Imagineer", NULL, NULL,
-    "Nova", "Den'Z", "Bottom Up", NULL, "TGL (Technical Group Laboratory)",
-    NULL, "Hasbro Japan", NULL, "Marvelous Entertainment", NULL,
-    "Keynet Inc.", "Hands-On Entertainment", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // 9Z
-    "Telenet", "Hori", NULL, NULL, "Konami",
-    "K.Amusement Leasing Co.", "Kawada", "Takara", NULL, "Technos Japan Corp.",
-    "JVC (Europe/Japan)/Victor Musical Industries", NULL, "Toei Animation", "Toho", NULL,
-    "Namco", "Media Rings Corp.", "J-Wing", NULL, "Pioneer LDC",
-    "KID", "Mediafactory", NULL, NULL, NULL,
-    "Infogrames Hudson", NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // AZ
-    "Acclaim Japan", "ASCII Co./Nexoft" /*/Activision*/, "Bandai", NULL, "Enix",
-    NULL, "HAL Laboratory/Halken", "SNK", NULL, "Pony Canyon Hanbai",
-    "Culture Brain", "Sunsoft", "Toshiba EMI", "Sony Imagesoft", NULL,
-    "Sammy", "Magical", "Visco", NULL, "Compile",
-    NULL, "MTO Inc.", NULL, "Sunrise Interactive", NULL,
-    "Global A Entertainment", "Fuuki", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // BZ
-    "Taito", NULL, "Kemco", "Square", "Tokuma Shoten",
-    "Data East", "Tonkin House", NULL, "KOEI", NULL,
-    "Konami/Ultra/Palcom", "NTVIC/VAP", "Use Co., Ltd.", "Meldac",
-      "Pony Canyon (Japan)/FCI (US)",
-    "Angel/Sotsu Agency/Sunrise", "Yumedia/Aroma Co., Ltd.", NULL, NULL, "Boss",
-    "Axela/Crea-Tech", "Sekaibunka-Sha/Sumire kobo/Marigul Management Inc.",
-      "Konami Computer Entertainment Osaka", NULL, NULL,
-    "Enterbrain", NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // CZ
-    "Taito/Disco", "Sofel", "Quest Corp.", "Sigma", "Ask Kodansha",
-    NULL, "Naxat", "Copya System", "Capcom Co., Ltd.", "Banpresto",
-    "TOMY", "Acclaim/LJN Japan", NULL, "NCS", "Human Entertainment",
-    "Altron", "Jaleco", "Gaps Inc.", NULL, NULL,
-    NULL, NULL, NULL, "Elf", NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // DZ
-    "Jaleco", NULL, "Yutaka", "Varie", "T&ESoft",
-    "Epoch Co., Ltd.", NULL, "Athena", "Asmik", "Natsume",
-    "King Records", "Atlus", "Epic/Sony Records (Japan)", NULL,
-      "IGS (Information Global Service)",
-    NULL, "Chatnoir", "Right Stuff", NULL, NULL,
-    NULL, "Spike", "Konami Computer Entertainment Tokyo", "Alphadream Corp.", NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // EZ
-    "A Wave", "Motown Software", "Left Field Entertainment", "Extreme Ent. Grp.",
-      "TecMagik",
-    NULL, NULL, NULL, NULL, "Cybersoft",
-    NULL, "Psygnosis", NULL, NULL, "Davidson/Western Tech.",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // FZ
-    NULL, "PCCW Japan", NULL, NULL, "KiKi Co. Ltd.",
-    "Open Sesame Inc.", "Sims", "Broccoli", "Avex", NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // GZ
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL,                                       // HZ
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, "Yojigen", NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL                                        // IZ
-  };
 
 
 #ifdef  USE_DISCMAGE
@@ -1369,20 +820,6 @@ dm_rip (const dm_image_t *a, int b, uint32_t c)
 }
 #endif // DLOPEN
 #endif // USE_DISCMAGE
-
-
-int
-unknown_init (st_rominfo_t *rominfo)
-// init routine for all consoles missing in console/.
-{
-  ucon64.rominfo = rominfo;
-  ucon64.dat = NULL;
-#ifdef  USE_DISCMAGE
-  ucon64.image = NULL;
-#endif
-
-  return 0;
-}
 
 
 int

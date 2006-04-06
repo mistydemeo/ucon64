@@ -63,6 +63,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/property.h"
 
 
+static st_ucon64_obj_t f2a_obj[] =
+  {
+    {UCON64_GBA, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_GBA, WF_DEFAULT | WF_STOP},
+    {UCON64_GBA, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t f2a_usage[] =
   {
     {
@@ -75,31 +82,31 @@ const st_getopt2_t f2a_usage[] =
       "xf2a", 0, 0, UCON64_XF2A,
       NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
-      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP_NO_ROM]
+      &f2a_obj[0]
     },
     {
       "xf2amulti", 1, 0, UCON64_XF2AMULTI, // send only
       "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
       "loader in the configuration file; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP]
+      &f2a_obj[1]
     },
     {
       "xf2ac", 1, 0, UCON64_XF2AC,
       "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n" OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
+      &f2a_obj[2]
     },
     {
       "xf2as", 0, 0, UCON64_XF2AS,
       NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
+      &f2a_obj[2]
     },
     {
       "xf2ab", 1, 0, UCON64_XF2AB,
       "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
       "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
+      &f2a_obj[2]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

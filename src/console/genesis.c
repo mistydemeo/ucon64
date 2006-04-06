@@ -57,6 +57,18 @@ static int save_rom (st_rominfo_t *rominfo, const char *name,
                      unsigned char **buffer, int size);
 
 
+static st_ucon64_obj_t genesis_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_GEN, WF_SWITCH},
+    {UCON64_GEN, WF_DEFAULT},
+    {UCON64_GEN, WF_DEFAULT | WF_NO_SPLIT}
+  };
+
 const st_getopt2_t genesis_usage[] =
   {
     {
@@ -67,37 +79,37 @@ const st_getopt2_t genesis_usage[] =
     {
       "gen", 0, 0, UCON64_GEN,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_GEN_SWITCH]
+      &genesis_obj[5]
     },
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved format (SMD)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &genesis_obj[0]
     },
     {
       "int2", 0, 0, UCON64_INT2,
       NULL, "force ROM is in interleaved format 2 (MGD)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &genesis_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
       NULL, "force ROM is not in interleaved format (BIN/RAW)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &genesis_obj[0]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change foreign ROM name to NEW_NAME",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &genesis_obj[1]
     },
     {
       "n2", 1, 0, UCON64_N2,
       "NEW_NAME", "change Japanese ROM name to NEW_NAME",
-      &ucon64_wf[WF_OBJ_GEN_DEFAULT]
+      &genesis_obj[6]
     },
     {
       "smd", 0, 0, UCON64_SMD,
       NULL, "convert to Super Magic Drive/SMD",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &genesis_obj[2]
     },
     {
       "smds", 0, 0, UCON64_SMDS,
@@ -107,12 +119,12 @@ const st_getopt2_t genesis_usage[] =
     {
       "bin", 0, 0, UCON64_BIN,
       NULL, "convert to Magicom/BIN/RAW",
-      &ucon64_wf[WF_OBJ_GEN_DEFAULT_NO_SPLIT]
+      &genesis_obj[7]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game*/MGD2/MGH",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &genesis_obj[2]
     },
 #if 0
     {
@@ -145,40 +157,40 @@ const st_getopt2_t genesis_usage[] =
     {
       "j", 0, 0, UCON64_J,
       NULL, "join split ROM",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &genesis_obj[3]
     },
     {
       "s", 0, 0, UCON64_S,
       NULL, "split ROM; default part size is 8 Mb (4 Mb for SMD)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &genesis_obj[2]
     },
     {
       "ssize", 1, 0, UCON64_SSIZE,
       "SIZE", "specify split part size in Mbit",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &genesis_obj[0]
     },
     {
       "f", 0, 0, UCON64_F,
       NULL, "remove NTSC/PAL protection",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &genesis_obj[1]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &genesis_obj[1]
     },
     {
       "1991", 0, 0, UCON64_1991,
       NULL, "fix old third party ROMs to work with consoles build after\n"
       "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"",
-      &ucon64_wf[WF_OBJ_GEN_DEFAULT]
+      &genesis_obj[6]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with MD-PRO flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
       "all the ROMs, multi-game file to create last",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
+      &genesis_obj[4]
     },
     {
       "region", 1, 0, UCON64_REGION,
@@ -187,7 +199,7 @@ const st_getopt2_t genesis_usage[] =
       "CODE=1 force NTSC/U.S.A. for all games\n"
       "CODE=2 force PAL for all games\n"
       "CODE=x use whatever setting games expect",
-      &ucon64_wf[WF_OBJ_GEN_SWITCH]
+      &genesis_obj[5]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

@@ -39,17 +39,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
-#include "console/nes.h"
-#include "backup/gbx.h"
-#include "backup/mgd.h"
-#include "backup/ssc.h"
-#include "patch/ips.h"
-#include "patch/bsl.h"
+#include "backup/backup.h"
+#include "patch/patch.h"
+#include "console.h"
 #include "gb.h"
 
 
 #define GAMEBOY_HEADER_START 0x100
 #define GAMEBOY_HEADER_LEN (sizeof (st_gameboy_header_t))
+
+
+static st_ucon64_obj_t gameboy_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_GB, WF_SWITCH},
+    {UCON64_GB, WF_DEFAULT}
+  };
 
 const st_getopt2_t gameboy_usage[] =
   {
@@ -62,49 +67,49 @@ const st_getopt2_t gameboy_usage[] =
     {
       "gb", 0, 0, UCON64_GB,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_GB_SWITCH]
+      &gameboy_obj[1]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &gameboy_obj[0]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
       NULL, "restore ROM logo character data (offset: 0x104-0x134)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &gameboy_obj[0]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game*/MGD2/RAW",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &gameboy_obj[0]
     },
     {
       "ssc", 0, 0, UCON64_SSC,
       NULL, "convert to Super Smart Card/SSC",
-      &ucon64_wf[WF_OBJ_GB_DEFAULT]
+      &gameboy_obj[2]
     },
     {
       "sgb", 0, 0, UCON64_SGB,
       NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX",
-      &ucon64_wf[WF_OBJ_GB_DEFAULT]
+      &gameboy_obj[2]
     },
     {
       "gbx", 0, 0, UCON64_GBX,
       NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC",
-      &ucon64_wf[WF_OBJ_GB_DEFAULT]
+      &gameboy_obj[2]
     },
     {
       "n2gb", 1, 0, UCON64_N2GB,
       "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
       "ROM should be KAMI's FC Emulator ROM image\n"
       "NESROM should contain 16 kB of PRG data and 8 kB of CHR data",
-      &ucon64_wf[WF_OBJ_GB_DEFAULT]
+      &gameboy_obj[2]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &gameboy_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

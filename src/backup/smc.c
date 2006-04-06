@@ -38,6 +38,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smc.h"
 
 
+static st_ucon64_obj_t smc_obj[] =
+  {
+    {UCON64_NES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT},
+    {UCON64_NES, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t smc_usage[] =
   {
     {
@@ -49,13 +55,13 @@ const st_getopt2_t smc_usage[] =
     {
       "xsmc", 0, 0, UCON64_XSMC, // send only
       NULL, "send ROM (in FFE format) to Super Magic Card; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT_STOP_NO_SPLIT]
+      &smc_obj[0]
     },
     {
       "xsmcr", 0, 0, UCON64_XSMCR,
       NULL, "send/receive RTS data to/from Super Magic Card; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when RTS file does not exist",
-      &ucon64_wf[WF_OBJ_NES_STOP_NO_ROM]
+      &smc_obj[1]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

@@ -43,6 +43,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "md-pro.h"
 
 
+static st_ucon64_obj_t mdpro_obj[] =
+  {
+    {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
+    {UCON64_GEN, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t mdpro_usage[] =
   {
     {
@@ -55,20 +61,20 @@ const st_getopt2_t mdpro_usage[] =
       "xmd", 0, 0, UCON64_XMD,
       NULL, "send/receive ROM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
       "receives automatically (32/64 Mbits) when ROM does not exist",
-      &ucon64_wf[WF_OBJ_GEN_DEFAULT_STOP_NO_SPLIT_NO_ROM]
+      &mdpro_obj[0]
     },
     {
       "xmds", 0, 0, UCON64_XMDS,
       NULL, "send/receive SRAM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
+      &mdpro_obj[1]
     },
     {
       "xmdb", 1, 0, UCON64_XMDB,
       "BANK", "send/receive SRAM to/from MD-PRO BANK\n"
       "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
+      &mdpro_obj[1]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

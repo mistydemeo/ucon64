@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "n64.h"
 #include "patch/ips.h"
 #include "patch/aps.h"
@@ -57,6 +58,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define N64_BC_SIZE    (0x1000 - N64_HEADER_LEN)
 #define LAC_ROM_SIZE   1310720
 
+
+static st_ucon64_obj_t n64_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_INIT | WF_PROBE},
+    {UCON64_N64, WF_SWITCH},
+    {UCON64_N64, WF_DEFAULT},
+    {UCON64_N64, WF_INIT | WF_PROBE}
+  };
+
 const st_getopt2_t n64_usage[] =
   {
     {
@@ -67,42 +79,42 @@ const st_getopt2_t n64_usage[] =
     {
       "n64", 0, 0, UCON64_N64,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_N64_SWITCH]
+      &n64_obj[3]
     },
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved format (2143, V64)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &n64_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
       NULL, "force ROM is not in interleaved format (1234, Z64)",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &n64_obj[0]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &n64_obj[1]
     },
     {
       "v64", 0, 0, UCON64_V64,
       NULL, "convert to Doctor V64 (and compatibles/interleaved)",
-      &ucon64_wf[WF_OBJ_N64_DEFAULT]
+      &n64_obj[4]
     },
     {
       "z64", 0, 0, UCON64_Z64,
       NULL, "convert to Mr. Backup Z64 (not interleaved)",
-      &ucon64_wf[WF_OBJ_N64_DEFAULT]
+      &n64_obj[4]
     },
     {
       "dint", 0, 0, UCON64_DINT,
       NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &n64_obj[2]
     },
     {
       "swap", 0, 0, UCON64_SWAP,
       NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &n64_obj[2]
     },
     {
       "swap2", 0, 0, UCON64_SWAP2,
@@ -120,7 +132,7 @@ const st_getopt2_t n64_usage[] =
       "bot", 1, 0, UCON64_BOT,
       "BOOTCODE", "replace/extract BOOTCODE (4032 Bytes) in/from ROM;\n"
       "extracts automatically if BOOTCODE does not exist",
-      &ucon64_wf[WF_OBJ_N64_DEFAULT]
+      &n64_obj[4]
     },
     {
       "lsram", 1, 0, UCON64_LSRAM,
@@ -128,20 +140,20 @@ const st_getopt2_t n64_usage[] =
       "the SRAM must have a size of 512 Bytes\n"
       "this option generates a ROM which can be used to transfer\n"
       "SRAMs to your cartridge's SRAM (EEPROM)",
-      &ucon64_wf[WF_OBJ_N64_INIT_PROBE]
+      &n64_obj[5]
     },
     {
       "usms", 1, 0, UCON64_USMS,
       "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/Game Gear emulator);\n"
       "ROM should be Jos Kwanten's UltraSMS ROM image\n"
       "works only for SMS ROMs which are <= 4 Mb in size",
-      &ucon64_wf[WF_OBJ_N64_DEFAULT]
+      &n64_obj[4]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum\n"
       "supports 6101, 6102, 6103, 6105 and 6106 boot codes",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &n64_obj[1]
     },
 #if 0
     {

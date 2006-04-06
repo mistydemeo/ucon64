@@ -40,6 +40,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "dc.h"
 
 
+static st_ucon64_obj_t dc_obj[] =
+  {
+    {UCON64_DC, WF_SWITCH},
+    {UCON64_DC, WF_DEFAULT},
+    {UCON64_DC, WF_NO_ROM}
+  };
+
 const st_getopt2_t dc_usage[] =
   {
     {
@@ -50,7 +57,7 @@ const st_getopt2_t dc_usage[] =
     {
       "dc", 0, 0, UCON64_DC,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_DC_SWITCH]
+      &dc_obj[0]
     },
 #if 0
     {
@@ -62,12 +69,12 @@ const st_getopt2_t dc_usage[] =
     {
       "scr", 0, 0, UCON64_SCR,
       NULL, "scramble 1ST_READ.BIN for selfboot CDs",
-      &ucon64_wf[WF_OBJ_DC_DEFAULT]
+      &dc_obj[1]
     },
     {
       "unscr", 0, 0, UCON64_UNSCR,
       NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs",
-      &ucon64_wf[WF_OBJ_DC_DEFAULT]
+      &dc_obj[1]
     },
 #if 0
     {
@@ -79,13 +86,13 @@ const st_getopt2_t dc_usage[] =
     {
       "mkip", 0, 0, UCON64_MKIP,
       NULL, "generate IP.BIN file with default values",
-      &ucon64_wf[WF_OBJ_DC_NO_ROM]
+      &dc_obj[2]
     },
     {
       "parse", 1, 0, UCON64_PARSE,
       "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
       "creates an empty template when TEMPLATE does not exist",
-      &ucon64_wf[WF_OBJ_DC_NO_ROM]
+      &dc_obj[2]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

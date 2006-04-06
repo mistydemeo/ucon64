@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/nfc.h"
+#include "console.h"
 #include "nds.h"
 
 
@@ -49,6 +50,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int nds_chksum (void);
 
 
+static st_ucon64_obj_t nds_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_NDS, WF_SWITCH}
+  };
+
 const st_getopt2_t nds_usage[] =
   {
     {
@@ -59,22 +66,22 @@ const st_getopt2_t nds_usage[] =
     {
       "nds", 0, 0, UCON64_NDS,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_NDS_SWITCH]
+      &nds_obj[1]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &nds_obj[0]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
       NULL, "restore ROM logo character data",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &nds_obj[0]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM header checksum",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &nds_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

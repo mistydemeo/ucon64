@@ -40,6 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/string.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "gba.h"
 #include "backup/fal.h"
 
@@ -55,6 +56,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static int gba_chksum (void);
 
+
+static st_ucon64_obj_t gba_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_GBA, WF_SWITCH},
+    {UCON64_GBA, WF_DEFAULT}
+  };
+
 const st_getopt2_t gba_usage[] =
   {
     {
@@ -65,27 +75,27 @@ const st_getopt2_t gba_usage[] =
     {
       "gba", 0, 0, UCON64_GBA,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_GBA_SWITCH]
+      &gba_obj[2]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &gba_obj[0]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
       NULL, "restore ROM logo character data (offset: 0x04-0x9F)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &gba_obj[0]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM header checksum",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &gba_obj[0]
     },
     {
       "sram", 0, 0, UCON64_SRAM,
       NULL, "patch ROM for SRAM saving",
-      &ucon64_wf[WF_OBJ_GBA_DEFAULT]
+      &gba_obj[3]
     },
     {
       "sc", 0, 0, UCON64_SC,
@@ -95,7 +105,7 @@ const st_getopt2_t gba_usage[] =
             "\"Real Time Save\""
 #endif
             "(creates SAV and SCI templates)",
-      &ucon64_wf[WF_OBJ_GBA_DEFAULT]
+      &gba_obj[3]
     },
     {
       "crp", 1, 0, UCON64_CRP,
@@ -108,7 +118,7 @@ const st_getopt2_t gba_usage[] =
       "WAIT_TIME=20 default in most original cartridges\n"
       "WAIT_TIME=24 fastest cartridge access speed\n"
       "WAIT_TIME=28 faster than 8 but slower than 16",
-      &ucon64_wf[WF_OBJ_GBA_DEFAULT]
+      &gba_obj[3]
     },
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
     {
@@ -116,7 +126,7 @@ const st_getopt2_t gba_usage[] =
       "SIZE", "make multi-game file for use with FAL/F2A flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
       "all the ROMs, multi-game file to create last",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
+      &gba_obj[1]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

@@ -43,6 +43,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/parallel.h"
 
 
+static st_ucon64_obj_t lynxit_obj[] =
+  {
+    {UCON64_LYNX, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t lynxit_usage[] =
   {
     {
@@ -55,7 +60,7 @@ const st_getopt2_t lynxit_usage[] =
       "xlit", 0, 0, UCON64_XLIT,
       NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT",
 //    "                  receives automatically when ROM does not exist\n"
-      &ucon64_wf[WF_OBJ_LYNX_STOP_NO_ROM]
+      &lynxit_obj[0]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

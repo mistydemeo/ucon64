@@ -1,7 +1,7 @@
 /*
-patch.h - single header file for all patch functions
+patch.h - patch support for uCON64
 
-Copyright (c) 2003 NoisyB
+Copyright (c) 2003 - 2006 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -26,5 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "gg.h"
 #include "ips.h"
 #include "ppf.h"
+
+
+extern const st_getopt2_t patch_usage[];
+
 
 #endif

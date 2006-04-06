@@ -36,6 +36,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "mcd.h"
 
 
+static st_ucon64_obj_t mcd_obj[] =
+  {
+    {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}
+  };
+
 const st_getopt2_t mcd_usage[] =
   {
     {
@@ -47,7 +52,7 @@ const st_getopt2_t mcd_usage[] =
     {
       "xmcd", 0, 0, UCON64_XMCD,
       NULL, "receive ROM from Genesis/Sega CD; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_GEN_DEFAULT_STOP_NO_SPLIT_NO_ROM]
+      &mcd_obj[0]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

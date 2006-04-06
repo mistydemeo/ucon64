@@ -77,6 +77,11 @@ Data Read Procedure:
 #include "misc/parallel.h"
 
 
+static st_ucon64_obj_t mccl_obj[] =
+  {
+    {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t mccl_usage[] =
   {
     {
@@ -88,7 +93,7 @@ const st_getopt2_t mccl_usage[] =
     {
       "xmccl", 0, 0, UCON64_XMCCL,
       NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_GB_DEFAULT_STOP_NO_ROM]
+      &mccl_obj[0]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

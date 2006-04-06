@@ -37,8 +37,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "coleco.h"
 
+
+static st_ucon64_obj_t coleco_obj[] =
+  {
+    {UCON64_COLECO, WF_SWITCH}
+  };
 
 const st_getopt2_t coleco_usage[] =
   {
@@ -50,7 +56,7 @@ const st_getopt2_t coleco_usage[] =
     {
       "coleco", 0, 0, UCON64_COLECO,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_COLECO_SWITCH]
+      &coleco_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

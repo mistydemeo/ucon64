@@ -117,13 +117,12 @@ static const st_getopt2_t lf[] =
   *option[] =
   {
     ucon64_options_usage,
-    ucon64_options_without_usage,
     lf,
     ucon64_padding_usage,
     lf,
     ucon64_dat_usage,
     lf,
-    ucon64_patching_usage,
+    patch_usage,
     bsl_usage,
     ips_usage,
     aps_usage,
@@ -720,7 +719,7 @@ ucon64_runtime_debug (void)
     (y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options"));
 #endif
 
-#if 0
+#if 1
   // list all options as a single st_getopt2_t array
   for (x = 0; options[x].name || options[x].help; x++)
     if (options[x].name)

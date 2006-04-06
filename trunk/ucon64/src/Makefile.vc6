@@ -33,13 +33,13 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         misc/chksum.obj misc/file.obj misc/getopt.obj misc/getopt2.obj \
         misc/misc.obj misc/parallel.obj misc/property.obj misc/string.obj \
         misc/dlopen.obj \
-        patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/ppf.obj \
-        console/atari.obj console/coleco.obj console/dc.obj console/gb.obj \
+        patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/patch.obj patch/ppf.obj \
+        console/atari.obj console/coleco.obj console/console.obj console/dc.obj console/gb.obj \
         console/gba.obj console/genesis.obj console/jaguar.obj console/lynx.obj \
         console/n64.obj console/nds.obj console/neogeo.obj console/nes.obj \
         console/ngp.obj console/pce.obj console/psx.obj console/sms.obj \
         console/snes.obj console/swan.obj console/vboy.obj \
-        backup/cc2.obj backup/cd64.obj backup/cmc.obj backup/dex.obj \
+        backup/backup.obj backup/cc2.obj backup/cd64.obj backup/cmc.obj backup/dex.obj \
         backup/doctor64.obj backup/doctor64jr.obj backup/f2a.obj backup/fal.obj \
         backup/ffe.obj backup/fig.obj backup/gbx.obj backup/gd.obj \
         backup/interceptor.obj backup/lynxit.obj backup/mccl.obj backup/mcd.obj \
@@ -172,6 +172,7 @@ ucon64_opts.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                  patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h \
                  $(UCON64_STD_H)
 console/atari.obj: console/atari.h $(UCON64_STD_H)
+console/console.obj: console/console.h $(UCON64_STD_H)
 console/coleco.obj: console/coleco.h $(UCON64_STD_H)
 console/dc.obj: console/dc.h $(UCON64_STD_H)
 console/gb.obj: console/gb.h backup/mgd.h $(UCON64_STD_H)
@@ -192,6 +193,7 @@ console/sms.obj: console/sms.h backup/smd.h backup/mgd.h backup/smsgg-pro.h \
 console/snes.obj: console/snes.h backup/mgd.h $(UCON64_STD_H)
 console/swan.obj: console/swan.h $(UCON64_STD_H)
 console/vboy.obj: console/vboy.h $(UCON64_STD_H)
+backup/backup.obj: backup/backup.h $(UCON64_STD_H)
 backup/cc2.obj: backup/cc2.h $(UCON64_STD_H)
 backup/cd64.obj: backup/cd64.h $(UCON64_STD_H)
 backup/cmc.obj: backup/cmc.h $(UCON64_STD_H)
@@ -228,4 +230,5 @@ patch/aps.obj: patch/aps.h $(UCON64_STD_H)
 patch/bsl.obj: patch/bsl.h $(UCON64_STD_H)
 patch/gg.obj: patch/gg.h $(UCON64_STD_H)
 patch/ips.obj: patch/ips.h $(UCON64_STD_H)
+patch/patch.obj: patch/patch.h $(UCON64_STD_H)
 patch/ppf.obj: patch/ppf.h $(UCON64_STD_H)

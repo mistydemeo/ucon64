@@ -38,6 +38,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "psx.h"
 
 
+static st_ucon64_obj_t psx_obj[] =
+  {
+    {UCON64_PSX, WF_SWITCH}
+  };
+
 const st_getopt2_t psx_usage[] =
   {
     {
@@ -48,7 +53,7 @@ const st_getopt2_t psx_usage[] =
     {
       "psx", 0, 0, UCON64_PSX,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_PSX_SWITCH]
+      &psx_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };

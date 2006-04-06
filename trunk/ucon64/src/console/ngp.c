@@ -33,9 +33,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "ngp.h"
 #include "backup/pl.h"
 
+
+static st_ucon64_obj_t ngp_obj[] =
+  {
+    {UCON64_NGP, WF_SWITCH}
+  };
 
 const st_getopt2_t ngp_usage[] =
   {
@@ -47,7 +53,7 @@ const st_getopt2_t ngp_usage[] =
     {
       "ngp", 0, 0, UCON64_NGP,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_NGP_SWITCH]
+      &ngp_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

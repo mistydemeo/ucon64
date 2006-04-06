@@ -50,6 +50,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PCENGINE_HEADER_LEN 0x30
 
 
+static st_ucon64_obj_t pce_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_PCE, WF_SWITCH},
+    {UCON64_PCE, WF_DEFAULT}
+  };
+
 const st_getopt2_t pcengine_usage[] =
   {
     {
@@ -61,44 +72,44 @@ const st_getopt2_t pcengine_usage[] =
     {
       "pce", 0, 0, UCON64_PCE,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_PCE_SWITCH]
+      &pce_obj[5]
     },
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved (bit-swapped) format",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &pce_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
       NULL, "force ROM is not in interleaved (bit-swapped) format",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &pce_obj[0]
     },
     {
       "msg", 0, 0, UCON64_MSG,
       NULL, "convert to Magic Super Griffin/MSG",
-      &ucon64_wf[WF_OBJ_PCE_DEFAULT]
+      &pce_obj[6]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game Doctor*/MGD2/RAW",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &pce_obj[2]
     },
     {
       "swap", 0, 0, UCON64_SWAP,
       NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &pce_obj[3]
     },
     {
       "f", 0, 0, UCON64_F,
       NULL, "fix region protection",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &pce_obj[1]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with PCE-PRO flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
       "all the ROMs, multi-game file to create last",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
+      &pce_obj[4]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };

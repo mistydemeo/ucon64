@@ -40,6 +40,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gba.h"
 
 
+static st_ucon64_obj_t fal_obj[] =
+  {
+    {UCON64_GBA, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_GBA, WF_DEFAULT | WF_STOP},
+    {UCON64_GBA, WF_STOP | WF_NO_ROM},
+    {UCON64_GBA, WF_SWITCH}
+  };
+
 const st_getopt2_t fal_usage[] =
   {
     {
@@ -52,38 +60,38 @@ const st_getopt2_t fal_usage[] =
       "xfal", 0, 0, UCON64_XFAL,
       NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
-      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP_NO_ROM]
+      &fal_obj[0]
     },
     {
       "xfalmulti", 1, 0, UCON64_XFALMULTI, // send only
       "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
       "multi-game file truncated to SIZE Mbit); specify a loader in\n"
       "the configuration file; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP]
+      &fal_obj[1]
     },
     {
       "xfalc", 1, 0, UCON64_XFALC,
       "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
       "N can be 8, 16, 32, 64, 128 or 256",
-      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
+      &fal_obj[2]
     },
     {
       "xfals", 0, 0, UCON64_XFALS,
       NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
+      &fal_obj[2]
     },
     {
       "xfalb", 1, 0, UCON64_XFALB,
       "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
       "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
+      &fal_obj[2]
     },
     {
       "xfalm", 0, 0, UCON64_XFALM,
       NULL, "try to enable EPP mode, default is SPP mode",
-      &ucon64_wf[WF_OBJ_GBA_SWITCH]
+      &fal_obj[3]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}

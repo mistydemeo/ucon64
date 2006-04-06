@@ -177,7 +177,7 @@ AC_CHECK_FUNCS(realpath)
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
-AC_OUTPUT(Makefile libdiscmage/Makefile)
+AC_OUTPUT(config.mak libdiscmage/Makefile)
 
 echo
 echo NOTE: On non-Linux systems you might need to use gmake instead of make

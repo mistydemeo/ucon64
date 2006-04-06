@@ -38,6 +38,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "pl.h"
 
 
+static st_ucon64_obj_t pl_obj[] =
+  {
+    {UCON64_NGP, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_NGP, WF_STOP | WF_NO_ROM},
+    {UCON64_NGP, WF_SWITCH}
+  };
+
 const st_getopt2_t pl_usage[] =
   {
     {
@@ -50,17 +57,17 @@ const st_getopt2_t pl_usage[] =
       "xpl", 0, 0, UCON64_XPL,
       NULL, "send/receive ROM to/from Pocket Linker; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      &ucon64_wf[WF_OBJ_NGP_DEFAULT_STOP_NO_ROM]
+      &pl_obj[0]
     },
     {
       "xpli", 0, 0, UCON64_XPLI,
       NULL, "show information about inserted cartridge; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_NGP_STOP_NO_ROM]
+      &pl_obj[1]
     },
     {
       "xplm", 0, 0, UCON64_XPLM,
       NULL, "try to enable EPP mode, default is SPP mode",
-      &ucon64_wf[WF_OBJ_NGP_SWITCH]
+      &pl_obj[2]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}

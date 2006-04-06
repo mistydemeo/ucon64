@@ -39,6 +39,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smd.h"
 
 
+static st_ucon64_obj_t smd_obj[] =
+  {
+    {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
+    {UCON64_GEN, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t smd_usage[] =
   {
     {
@@ -51,13 +57,13 @@ const st_getopt2_t smd_usage[] =
       "xsmd", 0, 0, UCON64_XSMD,
       NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      &ucon64_wf[WF_OBJ_GEN_DEFAULT_STOP_NO_SPLIT_NO_ROM]
+      &smd_obj[0]
     },
     {
       "xsmds", 0, 0, UCON64_XSMDS,
       NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
+      &smd_obj[1]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}

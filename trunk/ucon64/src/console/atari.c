@@ -52,6 +52,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/spsc.h"
 
 
+static st_ucon64_obj_t atari_obj[] =
+  {
+    {UCON64_ATA, WF_SWITCH}
+  };
+
 const st_getopt2_t atari_usage[] =
   {
     {
@@ -63,7 +68,7 @@ const st_getopt2_t atari_usage[] =
     {
       "ata", 0, 0, UCON64_ATA,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_ATA_SWITCH]
+      &atari_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

@@ -48,6 +48,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
 
 
+static st_ucon64_obj_t nes_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT},
+    {UCON64_NES, WF_SWITCH},
+    {UCON64_NES, WF_DEFAULT}
+  };
+
 const st_getopt2_t nes_usage[] =
   {
     {
@@ -59,59 +70,59 @@ const st_getopt2_t nes_usage[] =
     {
       "nes", 0, 0, UCON64_NES,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &nes_obj[1]
     },
     {
       "unif", 0, 0, UCON64_UNIF,
       NULL, "convert to UNIF format/UNF (uses default values)",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT]
+      &nes_obj[6]
     },
     {
       "ines", 0, 0, UCON64_INES,
       NULL, "convert to iNES format/NES (uses default values)",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT]
+      &nes_obj[6]
     },
     {
       "ineshd", 0, 0, UCON64_INESHD,
       NULL, "extract iNES header from ROM (16 Bytes)",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT]
+      &nes_obj[6]
     },
     {
       "j", 0, 0, UCON64_J,
       NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+      &nes_obj[3]
     },
     {
       "pasofami", 0, 0, UCON64_PASOFAMI,
       NULL, "convert to Pasofami/PRM/700/PRG/CHR",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT]
+      &nes_obj[6]
     },
     {
       "s", 0, 0, UCON64_S,
       NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &nes_obj[2]
     },
     {
       "ffe", 0, 0, UCON64_FFE,
       NULL, "convert to FFE format (Super Magic Card)",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT]
+      &nes_obj[6]
     },
     {
       "mapr", 1, 0, UCON64_MAPR,
       "MAPR", "specify board name or mapper number for conversion options\n"
       "MAPR must be a board name for UNIF or a number for Pasofami\n"
       "and iNES",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "dint", 0, 0, UCON64_DINT,
       NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+      &nes_obj[4]
     },
     {
       "ctrl", 1, 0, UCON64_CTRL,
@@ -122,37 +133,37 @@ const st_getopt2_t nes_usage[] =
       "TYPE=3 Arkanoid controller\n"
       "TYPE=4 powerpad\n"
       "TYPE=5 four-score adapter",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &nes_obj[0]
     },
     {
       "ntsc", 0, 0, UCON64_NTSC,
       NULL, "specify TV standard is NTSC (UNIF/iNES only)",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "pal", 0, 0, UCON64_PAL,
       NULL, "specify TV standard is PAL (UNIF/iNES only)",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "bat", 0, 0, UCON64_BAT,
       NULL, "specify battery is present",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "nbat", 0, 0, UCON64_NBAT,
       NULL, "specify battery is not present",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "vram", 0, 0, UCON64_VRAM,
       NULL, "specify VRAM override (UNIF only)",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "nvram", 0, 0, UCON64_NVRAM,
       NULL, "specify no VRAM override (UNIF only)",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "mirr", 1, 0, UCON64_MIRR,
@@ -163,29 +174,29 @@ const st_getopt2_t nes_usage[] =
       "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
       "MTYPE=4 four screens of VRAM\n"
       "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
 #if     UNIF_REVISION > 7
     {
       "cmnt", 1, 0, UCON64_CMNT,
       "TEXT", "specify that TEXT should be used as comment (UNIF only)",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
 #endif
     {
       "dumpinfo", 1, 0, UCON64_DUMPINFO,
       "FILE", "use dumper info from FILE when converting to UNIF",
-      &ucon64_wf[WF_OBJ_NES_SWITCH]
+      &nes_obj[5]
     },
     {
       "fds", 0, 0, UCON64_FDS,
       NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT]
+      &nes_obj[6]
     },
     {
       "fdsl", 0, 0, UCON64_FDSL,
       NULL, "list Famicom Disk System/FDS (diskimage) contents",
-      &ucon64_wf[WF_OBJ_NES_DEFAULT]
+      &nes_obj[6]
     },
 #if 0
     {

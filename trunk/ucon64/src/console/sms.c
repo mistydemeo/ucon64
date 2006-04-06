@@ -52,6 +52,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int sms_chksum (unsigned char *rom_buffer, int rom_size);
 
 
+static st_ucon64_obj_t sms_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_SMS, WF_SWITCH},
+    {UCON64_SMS, WF_DEFAULT | WF_NO_SPLIT}
+  };
+
 const st_getopt2_t sms_usage[] =
   {
     {
@@ -62,32 +72,32 @@ const st_getopt2_t sms_usage[] =
     {
       "sms", 0, 0, UCON64_SMS,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_SMS_SWITCH]
+      &sms_obj[4]
     },
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved format",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &sms_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
       NULL, "force ROM is not in interleaved format",
-      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+      &sms_obj[0]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &sms_obj[2]
     },
     {
       "mgdgg", 0, 0, UCON64_MGDGG,
       NULL, "same as " OPTION_LONG_S "mgd, but gives GG name",
-      &ucon64_wf[WF_OBJ_SMS_DEFAULT_NO_SPLIT]
+      &sms_obj[5]
     },
     {
       "smd", 0, 0, UCON64_SMD,
       NULL, "convert to Super Magic Drive/SMD",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
+      &sms_obj[2]
     },
     {
       "smds", 0, 0, UCON64_SMDS,
@@ -97,14 +107,14 @@ const st_getopt2_t sms_usage[] =
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum (SMS only)",
-      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
+      &sms_obj[1]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with SMS-PRO/GG-PRO flash card,\n"
       "truncated to SIZE Mbit; file with loader must be specified\n"
       "first, then all the ROMs, multi-game file to create last",
-      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
+      &sms_obj[3]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

@@ -41,6 +41,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/parallel.h"
 
 
+static st_ucon64_obj_t doctor64_obj[] =
+  {
+    {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t doctor64_usage[] =
   {
     {
@@ -53,7 +58,7 @@ const st_getopt2_t doctor64_usage[] =
       "xv64", 0, 0, UCON64_XV64,
       NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP_NO_ROM]
+      &doctor64_obj[0]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

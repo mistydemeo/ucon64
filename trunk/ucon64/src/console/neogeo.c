@@ -35,8 +35,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console.h"
 #include "neogeo.h"
 
+
+static st_ucon64_obj_t neogeo_obj[] =
+  {
+    {UCON64_NG, WF_SWITCH},
+    {UCON64_NG, WF_DEFAULT}
+  };
 
 const st_getopt2_t neogeo_usage[] =
   {
@@ -48,7 +55,7 @@ const st_getopt2_t neogeo_usage[] =
     {
       "ng", 0, 0, UCON64_NG,
       NULL, "force recognition",
-      &ucon64_wf[WF_OBJ_NG_SWITCH]
+      &neogeo_obj[0]
     },
 #if 0
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
@@ -59,7 +66,7 @@ const st_getopt2_t neogeo_usage[] =
       "bios", 1, 0, UCON64_BIOS,
       "BIOS", "convert NeoCD BIOS to work with NeoCD emulator" /*;\n"
       "http://www.illusion-city.com/neo/"*/,
-      &ucon64_wf[WF_OBJ_NG_DEFAULT]
+      &neogeo_obj[1]
     },
 #if 0
     "TODO:  " OPTION_S "j     join split ROM"
@@ -69,7 +76,7 @@ const st_getopt2_t neogeo_usage[] =
     {
       "sam", 1, 0, UCON64_SAM,
       "SAMFILE", "convert SAM/M.A.M.E. sound to WAV",
-      &ucon64_wf[WF_OBJ_NG_DEFAULT]
+      &neogeo_obj[1]
     },
 //    "TODO: " OPTION_LONG_S "chkm    check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
 //    "                  " OPTION_LONG_S "rom=DIRECTORY"

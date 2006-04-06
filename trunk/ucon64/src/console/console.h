@@ -1,7 +1,7 @@
 /*
-console.h - single header for all console functions
+console.h - console support for uCON64
 
-Copyright (c) 2003 NoisyB
+Copyright (c) 2003 - 2006 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -39,4 +39,36 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "snes.h"
 #include "swan.h"
 #include "vboy.h"
+
+
+extern const st_getopt2_t unknown_usage[];
+extern int unknown_init (st_rominfo_t *rominfo);
+
+
+/*
+  usage for consoles not supported, yet
+*/
+extern const st_getopt2_t cd32_usage[];
+extern const st_getopt2_t cdi_usage[];
+extern const st_getopt2_t channelf_usage[];
+extern const st_getopt2_t gamecom_usage[];
+extern const st_getopt2_t gc_usage[];
+extern const st_getopt2_t gp32_usage[];
+extern const st_getopt2_t intelli_usage[];
+extern const st_getopt2_t mame_usage[];
+extern const st_getopt2_t odyssey2_usage[];
+extern const st_getopt2_t odyssey_usage[];
+extern const st_getopt2_t ps2_usage[];
+extern const st_getopt2_t real3do_usage[];
+extern const st_getopt2_t s16_usage[];
+extern const st_getopt2_t sat_usage[];
+extern const st_getopt2_t vc4000_usage[];
+extern const st_getopt2_t vectrex_usage[];
+extern const st_getopt2_t xbox_usage[];
+
+#define NINTENDO_MAKER_LEN 684
+
+extern const char *nintendo_maker[];
+
+
 #endif // CONSOLE_H

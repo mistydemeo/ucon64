@@ -85,13 +85,13 @@ static int (*dm_rip_ptr) (const dm_image_t *, int, uint32_t) = NULL;
 #endif // DLOPEN
 
 
-static st_ucon64_obj_t libdm_obj[] =
+static st_ucon64_obj_t discmage_obj[] =
   {
     {0, WF_SWITCH},
     {0, WF_DEFAULT}
   };
 
-const st_getopt2_t libdm_usage[] =
+const st_getopt2_t discmage_usage[] =
   {
     {
       NULL, 0, 0, 0,
@@ -101,12 +101,12 @@ const st_getopt2_t libdm_usage[] =
     {
       "disc", 0, 0, UCON64_DISC,
       NULL, "force recognition",
-      &libdm_obj[0]
+      &discmage_obj[0]
     },
     {
       "rip", 1, 0, UCON64_RIP,
       "N", "rip/dump track N from IMAGE",
-      &libdm_obj[1]
+      &discmage_obj[1]
     },
 #if 0
     {
@@ -118,37 +118,37 @@ const st_getopt2_t libdm_usage[] =
       "cdmage", 1, 0, UCON64_CDMAGE,
       "N", "like " OPTION_LONG_S "rip but writes always (padded) sectors with 2352 Bytes;\n"
       "this is what CDmage would do",
-      &libdm_obj[1]
+      &discmage_obj[1]
     },
 #endif
     {
       "bin2iso", 1, 0, UCON64_BIN2ISO,
       "N", "convert track N to ISO (if possible) by resizing\n"
       "sectors to 2048 Bytes",
-      &libdm_obj[1]
+      &discmage_obj[1]
     },
     {
       "isofix", 1, 0, UCON64_ISOFIX,
       "N", "fix corrupted track N (if possible)\n"
       "if PVD points to a bad DR offset it will add padding data\n"
       "so actual DR gets located in right absolute address",
-      &libdm_obj[1]
+      &discmage_obj[1]
     },
     {
       "mkcue", 0, 0, UCON64_MKCUE,
       NULL, "generate CUE sheet for IMAGE or existing TOC sheet",
-      &libdm_obj[1]
+      &discmage_obj[1]
     },
     {
       "mktoc", 0, 0, UCON64_MKTOC,
       NULL, "generate TOC sheet for IMAGE or existing CUE sheet",
-      &libdm_obj[1]
+      &discmage_obj[1]
     },
     {
       // hidden option
       "mksheet", 0, 0, UCON64_MKSHEET,
       NULL, /* "same as " OPTION_LONG_S "mktoc and " OPTION_LONG_S "mkcue" */ NULL,
-      &libdm_obj[1]
+      &discmage_obj[1]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -689,7 +689,7 @@ ucon64_load_discmage (void)
 
 
 int
-libdm_gauge (int pos, int size)
+discmage_gauge (int pos, int size)
 {
   static time_t init_time = 0;
 
@@ -1403,15 +1403,15 @@ ucon64_rename (int mode)
   int good_name;
 
   *buf = 0;
-  strncpy (suffix, get_suffix (ucon64.rom), sizeof (suffix))[sizeof (suffix) - 1] = 0; // in case suffix is >= 80 chars
+  strncpy (suffix, get_suffix (ucon64.fname), sizeof (suffix))[sizeof (suffix) - 1] = 0; // in case suffix is >= 80 chars
 
   switch (mode)
     {
     case UCON64_RROM:
-      if (ucon64.rominfo)
-        if (ucon64.rominfo->name)
+      if (ucon64.nfo)
+        if (ucon64.nfo->name)
           {
-            strcpy (buf, ucon64.rominfo->name);
+            strcpy (buf, ucon64.nfo->name);
             strtriml (strtrimr (buf));
           }
       break;
@@ -1460,7 +1460,7 @@ ucon64_rename (int mode)
       */
       {
         int len, len2;
-        p = basename2 (ucon64.rom);
+        p = basename2 (ucon64.fname);
         len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
         if (len <= 64)                  // Joliet maximum file name length is 64 chars
           {
@@ -1504,7 +1504,7 @@ ucon64_rename (int mode)
       */
       {
         int len, len2;
-        p = basename2 (ucon64.rom);
+        p = basename2 (ucon64.fname);
         len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
         strcpy (buf, p);
         crc = crc32 (0, (unsigned char *) buf, len);
@@ -1533,10 +1533,10 @@ ucon64_rename (int mode)
 
   // replace chars the fs might not like
   strcpy (buf2, to_func (buf, strlen (buf), tofname));
-  strcpy (buf, basename2 (ucon64.rom));
+  strcpy (buf, basename2 (ucon64.fname));
 
   p = (char *) get_suffix (buf);
-  // Remove the suffix from buf (ucon64.rom). Note that this isn't fool-proof.
+  // Remove the suffix from buf (ucon64.fname). Note that this isn't fool-proof.
   //  However, this is the best solution, because several DAT files contain
   //  "canonical" file names with a suffix. That is a STUPID bug.
   if (p)
@@ -1574,10 +1574,10 @@ ucon64_rename (int mode)
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
-  p = basename2 (ucon64.rom);
+  p = basename2 (ucon64.fname);
   p2 = basename2 (buf2);
 
-  if (one_file (ucon64.rom, buf2) && !strcmp (p, p2))
+  if (one_file (ucon64.fname, buf2) && !strcmp (p, p2))
     {                                           // skip only if the letter case
       printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
       return 0;
@@ -1602,7 +1602,7 @@ ucon64_rename (int mode)
   else
     printf ("Moving \"%s\"\n", p);
 #ifndef DEBUG
-  if (rename2 (ucon64.rom, buf2) == -1)         // rename_2_() must be used!
+  if (rename2 (ucon64.fname, buf2) == -1)         // rename_2_() must be used!
     {
       fprintf (stderr, "ERROR: Could not rename \"%s\"\n", p);
       return -1;
@@ -1655,7 +1655,7 @@ ucon64_e (void)
       return -1;
     }
 
-  sprintf (buf, "%s \"%s\"", value_p, ucon64.rom);
+  sprintf (buf, "%s \"%s\"", value_p, ucon64.fname);
 
   puts (buf);
   fflush (stdout);
@@ -1695,7 +1695,7 @@ ucon64_e (void)
   in memory corruption...
 */
 int
-ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
+ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[PATTERN_BUFSIZE];
@@ -1754,8 +1754,8 @@ ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
 
   puts ("Searching for patterns...");
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
@@ -2188,7 +2188,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 {
   st_ucon64_filefile_t o;
 
-  printf ("Comparing %s", basename2 (ucon64.rom));
+  printf ("Comparing %s", basename2 (ucon64.fname));
   if (ucon64.fname_arch[0])
     printf (" (%s)", basename2 (ucon64.fname_arch));
   printf (" with %s\n", filename1);
@@ -2246,7 +2246,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #endif
   FILE *file1, *file2;
 
-  printf ("Comparing %s", basename2 (ucon64.rom));
+  printf ("Comparing %s", basename2 (ucon64.fname));
   if (ucon64.fname_arch[0])
     printf (" (%s)", basename2 (ucon64.fname_arch));
   printf (" with %s\n", filename1);

@@ -72,7 +72,7 @@ st_ngp_header_t ngp_header;
 
 
 int
-ngp_init (st_rominfo_t *rominfo)
+ngp_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
   char *snk_code = "COPYRIGHT BY SNK CORPORATION",
@@ -81,7 +81,7 @@ ngp_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
   ucon64_fread (&ngp_header, NGP_HEADER_START + rominfo->buheader_len,
-    NGP_HEADER_LEN, ucon64.rom);
+    NGP_HEADER_LEN, ucon64.fname);
 
   if (!strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ||
       !strncmp ((const char *) &OFFSET (ngp_header, 0), third_code, strlen (third_code)))

@@ -268,15 +268,15 @@ const unsigned char gba_logodata[] =            // Note: not a static variable
 
 
 int
-gba_n (st_rominfo_t *rominfo, const char *name)
+gba_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[GBA_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, 0, GBA_NAME_LEN);
   strncpy (buf, name, GBA_NAME_LEN);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, GBA_NAME_LEN,
             dest_name, "r+b");
 
@@ -286,13 +286,13 @@ gba_n (st_rominfo_t *rominfo, const char *name)
 
 
 int
-gba_logo (st_rominfo_t *rominfo)
+gba_logo (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (gba_logodata, GBA_HEADER_START + rominfo->buheader_len + 0x04,
             GBA_LOGODATA_LEN, dest_name, "r+b");
 
@@ -302,13 +302,13 @@ gba_logo (st_rominfo_t *rominfo)
 
 
 int
-gba_chk (st_rominfo_t *rominfo)
+gba_chk (st_ucon64_nfo_t *rominfo)
 {
   char buf, dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   buf = rominfo->current_internal_crc;
   ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->buheader_len + 0xbd,
@@ -410,9 +410,9 @@ gba_sram (void)
   unsigned int fsize = ucon64.file_size;
   FILE *destfile;
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   if ((destfile = fopen (dest_name, "r+b")) == NULL)
     {
@@ -550,7 +550,7 @@ gba_sram (void)
 
 
 int
-gba_crp (st_rominfo_t *rominfo, const char *value)
+gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
 {
   FILE *srcfile, *destfile;
   int bytesread, n = 0;
@@ -565,8 +565,8 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
 
   puts ("Applying crash patch...");
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
@@ -607,7 +607,7 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
 
 
 int
-gba_init (st_rominfo_t *rominfo)
+gba_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value;
   char buf[MAXBUFSIZE];
@@ -616,7 +616,7 @@ gba_init (st_rominfo_t *rominfo)
     ucon64.buheader_len : 0;
 
   ucon64_fread (&gba_header, GBA_HEADER_START +
-           rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
+           rominfo->buheader_len, GBA_HEADER_LEN, ucon64.fname);
   if (/*gba_header.game_id_prefix == 'A' && */ // 'B' in Mario vs. Donkey Kong
       gba_header.start[3] == 0xea && gba_header.pad1 == 0x96 && gba_header.gba_type == 0)
     result = 0;
@@ -627,7 +627,7 @@ gba_init (st_rominfo_t *rominfo)
         ucon64.buheader_len : UNKNOWN_HEADER_LEN;
 
       ucon64_fread (&gba_header, GBA_HEADER_START +
-               rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
+               rominfo->buheader_len, GBA_HEADER_LEN, ucon64.fname);
       if (gba_header.game_id_prefix == 'A' && gba_header.gba_type == 0)
         result = 0;
       else
@@ -1131,9 +1131,9 @@ gba_sc (void)
   unsigned char *buffer, *ptr = NULL;
   FILE *destfile;
   
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   if ((destfile = fopen (dest_name, "rb+")) == NULL)
     {
@@ -1198,7 +1198,7 @@ gba_sc (void)
   // SuperCard.exe ignores padding with anything else than 0xff Bytes
   fseek (destfile, -1, SEEK_END);
   if ((unsigned char) fgetc (destfile) == 0xff)
-    padded = ucon64_testpad (ucon64.rom);
+    padded = ucon64_testpad (ucon64.fname);
   fseek (destfile, fsize - padded, SEEK_SET);
 
   printf ("Writing restart menu at offset: 0x%08x\n", fsize - padded);

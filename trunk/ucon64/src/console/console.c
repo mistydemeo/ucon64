@@ -41,10 +41,10 @@ const st_getopt2_t unknown_usage[] =
   };
 
 int
-unknown_init (st_rominfo_t *rominfo)
+unknown_init (st_ucon64_nfo_t *rominfo)
 // init routine for all consoles missing in console/.
 {
-  ucon64.rominfo = rominfo;
+  ucon64.nfo = rominfo;
   ucon64.dat = NULL;
 #ifdef  USE_DISCMAGE
   ucon64.image = NULL;

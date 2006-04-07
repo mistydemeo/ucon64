@@ -139,7 +139,7 @@ neogeo_s (void)
 
 
 int
-neogeo_init (st_rominfo_t *rominfo)
+neogeo_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
 

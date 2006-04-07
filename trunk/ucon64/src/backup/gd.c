@@ -136,7 +136,7 @@ static int gd6_send_bytes (unsigned char *data, int len);
 static int gd6_receive_bytes (unsigned char *buffer, int len);
 static int gd_send_unit_prolog (int header, unsigned size);
 static int gd_write_rom (const char *filename, unsigned int parport,
-                         st_rominfo_t *rominfo, const char *prolog_str);
+                         st_ucon64_nfo_t *rominfo, const char *prolog_str);
 static int gd_write_sram (const char *filename, unsigned int parport,
                           const char *prolog_str);
 static int gd_write_saver (const char *filename, unsigned int parport,
@@ -563,7 +563,7 @@ gd6_read_rom (const char *filename, unsigned int parport)
 
 
 int
-gd3_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
+gd3_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *rominfo)
 {
   gd_send_prolog_byte = gd3_send_prolog_byte;   // for gd_send_unit_prolog()
   gd_send_prolog_bytes = gd3_send_prolog_bytes;
@@ -574,7 +574,7 @@ gd3_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo
 
 
 int
-gd6_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
+gd6_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *rominfo)
 {
   gd_send_prolog_byte = gd6_send_prolog_byte;   // for gd_send_unit_prolog()
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
@@ -591,7 +591,7 @@ gd6_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo
         says "LINKING.."
 */
 int
-gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
+gd_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *rominfo,
               const char *prolog_str)
 {
   FILE *file = NULL;

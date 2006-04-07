@@ -322,7 +322,7 @@ is_probably_3f (const unsigned char *image, unsigned int size)
 
 
 int
-atari_init (st_rominfo_t * rominfo)
+atari_init (st_ucon64_nfo_t * rominfo)
 {
   int i, j, bsmode, size = ucon64.file_size;
   unsigned int crc32;
@@ -338,8 +338,8 @@ atari_init (st_rominfo_t * rominfo)
       size != 0x8000 && size != 0x10000 && size != 0x20000)
     return -1;
 
-  ucon64_fread (image, 0, size, ucon64.rom);
-  ucon64_chksum (NULL, md5, &crc32, ucon64.rom, 0);
+  ucon64_fread (image, 0, size, ucon64.fname);
+  ucon64_chksum (NULL, md5, &crc32, ucon64.fname, 0);
 
   bsmode = get_game_bsmode_by_crc (crc32);
   if (bsmode == -1)
@@ -402,7 +402,7 @@ atari_init (st_rominfo_t * rominfo)
       // set game_page_count and empty_page[]
       for (i = 0; i < size / 0x100; i++)
         {
-          ucon64_fread (buffer, i * 0x100, 0x100, ucon64.rom);
+          ucon64_fread (buffer, i * 0x100, 0x100, ucon64.fname);
           atari_rominfo.empty_page[i] = 1;
 
           for (j = 0; j < 0x100 - 1; j++)
@@ -422,7 +422,7 @@ atari_init (st_rominfo_t * rominfo)
       // the first two bytes of data indicate the beginning address of the code
       if (atari_rominfo.bsm != BSM_3F)
         {
-          ucon64_fread (buffer, get_bsmode_by_id (atari_rominfo.bsm)->start_page * 0x100, 0x100, ucon64.rom);
+          ucon64_fread (buffer, get_bsmode_by_id (atari_rominfo.bsm)->start_page * 0x100, 0x100, ucon64.fname);
           atari_rominfo.start_low = buffer[0xfc];
           atari_rominfo.start_hi = buffer[0xfd];
         }

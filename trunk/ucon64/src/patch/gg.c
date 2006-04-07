@@ -125,7 +125,7 @@ const st_getopt2_t gg_usage[] =
   };
 
 
-static st_rominfo_t *gg_rominfo;
+static st_ucon64_nfo_t *gg_rominfo;
 static int CPUaddress;
 
 
@@ -1022,7 +1022,7 @@ const char *gg_argv[128];
 
 
 int
-gg_display (st_rominfo_t *rominfo, const char *code)
+gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 {
   gg_argv[0] = "uggconv";
 
@@ -1066,7 +1066,7 @@ gg_display (st_rominfo_t *rominfo, const char *code)
 
 
 int
-gg_apply (st_rominfo_t *rominfo, const char *code)
+gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
   int size = ucon64.file_size - rominfo->buheader_len, address, value,
       result = -1;
@@ -1120,9 +1120,9 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
       return -1;
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
   fputc ('\n', stdout);
   buf[0] = ucon64_fgetc (dest_name, address + rominfo->buheader_len);

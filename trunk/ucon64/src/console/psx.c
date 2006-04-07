@@ -60,7 +60,7 @@ const st_getopt2_t psx_usage[] =
 
 
 int
-psx_init (st_rominfo_t *rominfo)
+psx_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
 

@@ -32,10 +32,10 @@ extern const st_getopt2_t gd_usage[];
 #ifdef USE_PARALLEL
 extern int gd3_read_rom (const char *filename, unsigned int parport);
 extern int gd3_write_rom (const char *filename, unsigned int parport,
-                          st_rominfo_t *rominfo);
+                          st_ucon64_nfo_t *rominfo);
 extern int gd6_read_rom (const char *filename, unsigned int parport);
 extern int gd6_write_rom (const char *filename, unsigned int parport,
-                          st_rominfo_t *rominfo);
+                          st_ucon64_nfo_t *rominfo);
 extern int gd3_read_sram (const char *filename, unsigned int parport);
 extern int gd3_write_sram (const char *filename, unsigned int parport);
 extern int gd6_read_sram (const char *filename, unsigned int parport);

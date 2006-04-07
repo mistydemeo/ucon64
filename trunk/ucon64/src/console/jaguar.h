@@ -22,6 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define JAGUAR_H
 
 extern const st_getopt2_t jaguar_usage[];
-extern int jaguar_init (st_rominfo_t *rominfo);
+extern int jaguar_init (st_ucon64_nfo_t *rominfo);
 
 #endif

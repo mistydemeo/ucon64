@@ -5891,9 +5891,9 @@ nes_unif (void)
       return -1;
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".unf");
-  strcpy (src_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
@@ -6309,9 +6309,9 @@ nes_ines (void)
   if (type == PASOFAMI)
     return nes_j (NULL);
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".nes");
-  strcpy (src_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
@@ -6369,7 +6369,7 @@ nes_pasofami (void)
 
 
 int
-nes_ffe (st_rominfo_t *rominfo)
+nes_ffe (st_ucon64_nfo_t *rominfo)
 {
   st_smc_header_t smc_header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -6382,7 +6382,7 @@ nes_ffe (st_rominfo_t *rominfo)
       return -1;
     }
 
-  ucon64_fread (&ines_header, 0, INES_HEADER_LEN, ucon64.rom);
+  ucon64_fread (&ines_header, 0, INES_HEADER_LEN, ucon64.fname);
 
   mapper = ines_header.ctrl1 >> 4 | (ines_header.ctrl2 & 0xf0);
   prg_size = ines_header.prg_size << 14;
@@ -6485,8 +6485,8 @@ nes_ffe (st_rominfo_t *rominfo)
   smc_header.type = 0;
 #endif
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".ffe");
   ucon64_file_handler (dest_name, src_name, 0);
 
@@ -6537,7 +6537,7 @@ nes_ffe (st_rominfo_t *rominfo)
 
 
 int
-nes_ineshd (st_rominfo_t *rominfo)
+nes_ineshd (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
@@ -6547,10 +6547,10 @@ nes_ineshd (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".hdr");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
+  fcopy (ucon64.fname, rominfo->buheader_start, 16, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -6570,9 +6570,9 @@ nes_dint (void)
       return -1;
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".nes");
-  strcpy (src_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
@@ -6685,7 +6685,7 @@ nes_j (unsigned char **mem_image)
   if (mem_image == NULL)
     write_file = 1;
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".nes");
   if (write_file)
     ucon64_file_handler (dest_name, NULL, 0);
@@ -6694,7 +6694,7 @@ nes_j (unsigned char **mem_image)
   memset (&ines_header, 0, INES_HEADER_LEN);
   memcpy (&ines_header.signature, INES_SIG_S, 4);
 
-  strcpy (src_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
   set_suffix (src_name, ".prm");
   if (access (src_name, F_OK) == 0)
     {
@@ -6726,7 +6726,7 @@ nes_j (unsigned char **mem_image)
         printf ("WARNING: Invalid mirroring type specified, using \"0\"\n");
     }
 
-  strcpy (src_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
   set_suffix (src_name, ".700");
   if (access (src_name, F_OK) == 0 && fsizeof (src_name) >= 512)
     {
@@ -6891,9 +6891,9 @@ nes_s (void)
       return -1;
     }
 
-  if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+  if ((srcfile = fopen (ucon64.fname, "rb")) == NULL)
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
       return -1;
     }
 
@@ -6904,7 +6904,7 @@ nes_s (void)
       if (read_block (&trainer_data, 512, srcfile,
                       "ERROR: Not enough memory for trainer buffer (%d bytes)\n", 512) != 512)
         {
-          fprintf (stderr, "ERROR: %s is not a valid iNES file", ucon64.rom);
+          fprintf (stderr, "ERROR: %s is not a valid iNES file", ucon64.fname);
           exit (1);
         }
     }
@@ -6925,7 +6925,7 @@ nes_s (void)
         printf ("WARNING: Pasofami can only store mapper numbers 0, 2 or 4; using old value\n");
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".prm");
   ucon64_output_fname (dest_name, 0);
   write_prm (&ines_header, dest_name);
@@ -6950,7 +6950,7 @@ nes_s (void)
         printf (ucon64_msg[WROTE], dest_name);
     }
   else
-    printf ("WARNING: No PRG data in %s\n", ucon64.rom);
+    printf ("WARNING: No PRG data in %s\n", ucon64.fname);
 
   if (chr_size > 0)
     {
@@ -6989,7 +6989,7 @@ nes_n (const char *name)
 
 
 int
-nes_init (st_rominfo_t *rominfo)
+nes_init (st_ucon64_nfo_t *rominfo)
 {
   unsigned char magic[15], *rom_buffer;
   int result = -1, size, x, y, n, crc = 0;
@@ -7002,7 +7002,7 @@ nes_init (st_rominfo_t *rominfo)
   internal_name = NULL;                         // reset this var, see nes_n()
   type = PASOFAMI;                              // reset type, see below
 
-  ucon64_fread (magic, 0, 15, ucon64.rom);
+  ucon64_fread (magic, 0, 15, ucon64.fname);
   if (memcmp (magic, "NES", 3) == 0)
     /*
       Check for "NES" and not for INES_SIG_S ("NES\x1a"), because there are two
@@ -7027,7 +7027,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->buheader_start = FDS_HEADER_START;
       rominfo->buheader_len = FDS_HEADER_LEN;
       // we use ffe_header to save some space in the exe
-      ucon64_fread (&ffe_header, FDS_HEADER_START, FDS_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ffe_header, FDS_HEADER_START, FDS_HEADER_LEN, ucon64.fname);
       rominfo->buheader = &ffe_header;
     }
   else if (memcmp (magic, "\x01*NINTENDO-HVC*", 15) == 0) // "headerless" FDS/FAM file
@@ -7041,7 +7041,7 @@ nes_init (st_rominfo_t *rominfo)
 
   if (type == PASOFAMI)                         // INES, UNIF, FDS and FAM are much
     {                                           //  more reliable than stricmp()s
-      str = (char *) get_suffix (ucon64.rom);
+      str = (char *) get_suffix (ucon64.fname);
       if (!stricmp (str, ".prm") ||
           !stricmp (str, ".700") ||
           !stricmp (str, ".prg") ||
@@ -7065,7 +7065,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->copier_usage = ines_usage[0].help;
       rominfo->buheader_start = INES_HEADER_START;
       rominfo->buheader_len = INES_HEADER_LEN;
-      ucon64_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.fname);
       rominfo->buheader = &ines_header;
       ucon64.split = 0;                         // iNES files are never split
 
@@ -7120,7 +7120,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->copier_usage = unif_usage[0].help;
       rominfo->buheader_start = UNIF_HEADER_START;
       rominfo->buheader_len = UNIF_HEADER_LEN;
-      ucon64_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.fname);
       rominfo->buheader = &unif_header;
 
       rom_size = ucon64.file_size - UNIF_HEADER_LEN;
@@ -7129,7 +7129,7 @@ nes_init (st_rominfo_t *rominfo)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           return -1; //exit (1); please don't use exit () in init
         }
-      ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.rom);
+      ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.fname);
       ucon64.split = 0;                         // UNIF files are never split
 
       x = me2le_32 (unif_header.revision);      // Don't modify header data
@@ -7369,7 +7369,7 @@ nes_init (st_rominfo_t *rominfo)
       */
       rominfo->copier_usage = pasofami_usage[0].help;
       rominfo->buheader_start = 0;
-      strcpy (buf, ucon64.rom);
+      strcpy (buf, ucon64.fname);
       set_suffix (buf, ".prm");
       if (access (buf, F_OK) == 0)
         {
@@ -7454,7 +7454,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->copier_usage = smc_usage[0].help;
       rominfo->buheader_start = SMC_HEADER_START;
       rominfo->buheader_len = SMC_HEADER_LEN;
-      ucon64_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.fname);
       rominfo->buheader = &ffe_header;
 
       sprintf (buf, "512-byte trainer: %s",
@@ -7476,7 +7476,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = FAM_HEADER_LEN;
 
       // we use ffe_header to save some space
-      ucon64_fread (&ffe_header, rominfo->buheader_start, FAM_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ffe_header, rominfo->buheader_start, FAM_HEADER_LEN, ucon64.fname);
       rominfo->buheader = &ffe_header;
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
@@ -7487,7 +7487,7 @@ nes_init (st_rominfo_t *rominfo)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           return -1;
         }
-      ucon64_fread (rom_buffer, 0, rom_size, ucon64.rom);
+      ucon64_fread (rom_buffer, 0, rom_size, ucon64.fname);
       ucon64.crc32 = crc32 (0, rom_buffer, rom_size);
       free (rom_buffer);
       break;
@@ -7497,7 +7497,7 @@ nes_init (st_rominfo_t *rominfo)
     rominfo->buheader_len = ucon64.buheader_len;
 
   if (ucon64.crc32 == 0)
-    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.rom, rominfo->buheader_len);
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, rominfo->buheader_len);
 
   // additional info
   key.crc32 = ucon64.crc32;
@@ -7550,7 +7550,7 @@ to_func (char *s, int len, int (*func) (int))
 
 
 int
-nes_fdsl (st_rominfo_t *rominfo, char *output_str)
+nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
 /*
   Note that NES people prefer $ to signify hexadecimal numbers (not 0x).
   However we will print only addresses that way.
@@ -7570,9 +7570,9 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
   else
     info = output_str;
 
-  if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+  if ((srcfile = fopen (ucon64.fname, "rb")) == NULL)
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
       return -1;
     }
 
@@ -7691,7 +7691,7 @@ nes_fds (void)
 
   if (type != FAM)
     {
-      fprintf (stderr, "ERROR: %s is not a FAM file\n", ucon64.rom);
+      fprintf (stderr, "ERROR: %s is not a FAM file\n", ucon64.fname);
       return -1;
     }
   if ((buffer = (char *) malloc (65500)) == NULL)
@@ -7700,9 +7700,9 @@ nes_fds (void)
       return -1;
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".fds");
-  strcpy (src_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
 
   for (n = 0; n < 4; n++)
@@ -7713,7 +7713,7 @@ nes_fds (void)
       // check disk image for validity
       if (buffer[0] != 1 || buffer[56] != 2 || buffer[58] != 3)
         {
-          fprintf (stderr, "ERROR: %s is not a valid FAM file\n", ucon64.rom);
+          fprintf (stderr, "ERROR: %s is not a valid FAM file\n", ucon64.fname);
           break;
         }
       // FAM2FDS also does the following:

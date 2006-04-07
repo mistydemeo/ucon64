@@ -35,20 +35,20 @@ typedef struct st_lnx_header
 
 extern int lynxer_main(const char *FileName);
 
-extern int lynx_b0 (st_rominfo_t *rominfo, const char *value);
-extern int lynx_b1 (st_rominfo_t *rominfo, const char *value);
+extern int lynx_b0 (st_ucon64_nfo_t *rominfo, const char *value);
+extern int lynx_b1 (st_ucon64_nfo_t *rominfo, const char *value);
 
-extern int lynx_lnx (st_rominfo_t *rominfo);
+extern int lynx_lnx (st_ucon64_nfo_t *rominfo);
 
-extern int lynx_lyx (st_rominfo_t *rominfo);
+extern int lynx_lyx (st_ucon64_nfo_t *rominfo);
 extern const char *lynx_lyx_desc;
 
-extern int lynx_n (st_rominfo_t *rominfo, const char *name);
-extern int lynx_nrot (st_rominfo_t *rominfo);
-extern int lynx_rotl (st_rominfo_t *rominfo);
-extern int lynx_rotr (st_rominfo_t *rominfo);
+extern int lynx_n (st_ucon64_nfo_t *rominfo, const char *name);
+extern int lynx_nrot (st_ucon64_nfo_t *rominfo);
+extern int lynx_rotl (st_ucon64_nfo_t *rominfo);
+extern int lynx_rotr (st_ucon64_nfo_t *rominfo);
 
-extern int lynx_init (st_rominfo_t *rominfo);
+extern int lynx_init (st_ucon64_nfo_t *rominfo);
 
 extern const st_getopt2_t lynx_usage[];
 #endif // LYNX_H

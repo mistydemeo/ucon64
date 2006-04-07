@@ -197,11 +197,11 @@ typedef struct st_n64_chksum
 } st_n64_chksum_t;
 
 static st_n64_chksum_t n64crc;
-static int n64_chksum (st_rominfo_t *rominfo, const char *filename);
+static int n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename);
 
 
 int
-n64_v64 (st_rominfo_t *rominfo)
+n64_v64 (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
@@ -211,10 +211,10 @@ n64_v64 (st_rominfo_t *rominfo)
       exit (1);
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".v64");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -223,7 +223,7 @@ n64_v64 (st_rominfo_t *rominfo)
 
 
 int
-n64_z64 (st_rominfo_t *rominfo)
+n64_z64 (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
@@ -233,10 +233,10 @@ n64_z64 (st_rominfo_t *rominfo)
       exit (1);
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".z64");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -245,7 +245,7 @@ n64_z64 (st_rominfo_t *rominfo)
 
 
 int
-n64_n (st_rominfo_t *rominfo, const char *name)
+n64_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[N64_NAME_LEN], dest_name[FILENAME_MAX];
 
@@ -255,9 +255,9 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   if (rominfo->interleaved)
     ucon64_bswap16_n (buf, N64_NAME_LEN);
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, rominfo->buheader_len + 32, N64_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -266,7 +266,7 @@ n64_n (st_rominfo_t *rominfo, const char *name)
 
 
 int
-n64_f (st_rominfo_t *rominfo)
+n64_f (st_ucon64_nfo_t *rominfo)
 {
   // TODO: PAL/NTSC fix
   (void) rominfo;                               // warning remover
@@ -276,7 +276,7 @@ n64_f (st_rominfo_t *rominfo)
 
 
 static void
-n64_update_chksum (st_rominfo_t *rominfo, const char *filename, char *buf)
+n64_update_chksum (st_ucon64_nfo_t *rominfo, const char *filename, char *buf)
 {
   uint64_t crc;
   int x;
@@ -295,13 +295,13 @@ n64_update_chksum (st_rominfo_t *rominfo, const char *filename, char *buf)
 
 
 int
-n64_chk (st_rominfo_t *rominfo)
+n64_chk (st_ucon64_nfo_t *rominfo)
 {
   char buf[8], dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   n64_update_chksum (rominfo, dest_name, buf);
   dumper (stdout, buf, 8, rominfo->buheader_len + 16, DUMPER_HEX);
@@ -312,7 +312,7 @@ n64_chk (st_rominfo_t *rominfo)
 
 
 int
-n64_sram (st_rominfo_t *rominfo, const char *sramfile)
+n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
 // Function to insert an SRAM file in LaC's SRAM upload tool (which is an N64
 //  program)
 {
@@ -336,9 +336,9 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
   if (rominfo->interleaved)
     ucon64_bswap16_n (sram, N64_SRAM_SIZE);
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (sram, 0x286c0, N64_SRAM_SIZE, dest_name, "r+b");
   n64_chksum (rominfo, dest_name);              // calculate the checksum of the modified file
   n64_update_chksum (rominfo, dest_name, buf);
@@ -349,20 +349,20 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 
 
 int
-n64_bot (st_rominfo_t *rominfo, const char *bootfile)
+n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
 {
   char buf[N64_BC_SIZE], dest_name[FILENAME_MAX];
 
   if (!access (bootfile, F_OK))
     {
-      strcpy (dest_name, ucon64.rom);
+      strcpy (dest_name, ucon64.fname);
       ucon64_fread (buf, 0, N64_BC_SIZE, bootfile);
 
       if (rominfo->interleaved)
         ucon64_bswap16_n (buf, N64_BC_SIZE);
 
       ucon64_file_handler (dest_name, NULL, 0);
-      fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+      fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
       ucon64_fwrite (buf, rominfo->buheader_len + N64_HEADER_LEN, N64_BC_SIZE,
                      dest_name, "r+b");
     }
@@ -371,7 +371,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       strcpy (dest_name, bootfile);
 //      set_suffix (dest_name, ".bot");
       ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      fcopy (ucon64.rom, rominfo->buheader_len + N64_HEADER_LEN, N64_BC_SIZE,
+      fcopy (ucon64.fname, rominfo->buheader_len + N64_HEADER_LEN, N64_BC_SIZE,
              dest_name, "wb");
 
       if (rominfo->interleaved)
@@ -384,7 +384,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 
 
 int
-n64_usms (st_rominfo_t *rominfo, const char *smsrom)
+n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
 {
   char dest_name[FILENAME_MAX], *usmsbuf;
   int size;
@@ -418,7 +418,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
   // Jos Kwanten's rominserter.exe produces a file named Patched.v64
   strcpy (dest_name, "Patched.v64");
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-  fcopy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (usmsbuf, rominfo->buheader_len + 0x01b410, 4 * MBIT, dest_name, "r+b");
 
   free (usmsbuf);
@@ -429,7 +429,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
 
 
 int
-n64_init (st_rominfo_t *rominfo)
+n64_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x;
   unsigned int value = 0;
@@ -478,7 +478,7 @@ n64_init (st_rominfo_t *rominfo)
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
-  ucon64_fread (&n64_header, rominfo->buheader_len, N64_HEADER_LEN, ucon64.rom);
+  ucon64_fread (&n64_header, rominfo->buheader_len, N64_HEADER_LEN, ucon64.fname);
 
   value = OFFSET (n64_header, 0);
   value += OFFSET (n64_header, 1) << 8;
@@ -533,7 +533,7 @@ n64_init (st_rominfo_t *rominfo)
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 4;
 
-      n64_chksum (rominfo, ucon64.rom);
+      n64_chksum (rominfo, ucon64.fname);
       rominfo->current_internal_crc = n64crc.crc1;
 
       value = 0;
@@ -588,7 +588,7 @@ n64_init (st_rominfo_t *rominfo)
 #define CALC_CRC32                              // see this as a marker, don't disable
 
 int
-n64_chksum (st_rominfo_t *rominfo, const char *filename)
+n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 {
   unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
   unsigned int i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,

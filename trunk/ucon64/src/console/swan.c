@@ -76,13 +76,13 @@ st_swan_header_t swan_header;
 
 
 int
-swan_chk (st_rominfo_t *rominfo)
+swan_chk (st_ucon64_nfo_t *rominfo)
 {
   char buf[3], dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   ucon64_fputc (dest_name, SWAN_HEADER_START + 8, rominfo->current_internal_crc, "r+b"); // low byte
   ucon64_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte
@@ -129,7 +129,7 @@ swan_chk (st_rominfo_t *rominfo)
   10 - ?? (SUN003)
 */
 int
-swan_init (st_rominfo_t *rominfo)
+swan_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
   unsigned char *rom_buffer, buf[MAXBUFSIZE];
@@ -151,7 +151,7 @@ swan_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
   ucon64_fread (&swan_header, SWAN_HEADER_START + rominfo->buheader_len,
-           SWAN_HEADER_LEN, ucon64.rom);
+           SWAN_HEADER_LEN, ucon64.fname);
 
   rominfo->header = &swan_header;
   rominfo->header_start = SWAN_HEADER_START;
@@ -171,7 +171,7 @@ swan_init (st_rominfo_t *rominfo)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], ucon64.file_size);
       return -1;
     }
-  ucon64_fread (rom_buffer, 0, ucon64.file_size, ucon64.rom);
+  ucon64_fread (rom_buffer, 0, ucon64.file_size, ucon64.fname);
 
   rominfo->has_internal_crc = 1;
   rominfo->internal_crc_len = 2;

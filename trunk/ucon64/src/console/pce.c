@@ -683,7 +683,7 @@ swapbits (unsigned char *buffer, int size)
 
 // header format is specified in src/backup/ffe.h
 int
-pce_msg (st_rominfo_t *rominfo)
+pce_msg (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
@@ -704,8 +704,8 @@ pce_msg (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 2;
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".msg");
   ucon64_file_handler (dest_name, src_name, 0);
 
@@ -729,7 +729,7 @@ pce_msg (st_rominfo_t *rominfo)
 
 // see src/backup/mgd.h for the file naming scheme
 int
-pce_mgd (st_rominfo_t *rominfo)
+pce_mgd (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
@@ -742,8 +742,8 @@ pce_mgd (st_rominfo_t *rominfo)
         return -1;
       }
 
-  strcpy (src_name, ucon64.rom);
-  mgd_make_name (ucon64.rom, UCON64_PCE, size, dest_name);
+  strcpy (src_name, ucon64.fname);
+  mgd_make_name (ucon64.fname, UCON64_PCE, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   // bit-swapping images for the MGD2 only makes sense for owners of a TG-16
@@ -767,7 +767,7 @@ pce_mgd (st_rominfo_t *rominfo)
 
 
 int
-pce_swap (st_rominfo_t *rominfo)
+pce_swap (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
@@ -779,8 +779,8 @@ pce_swap (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
 
   if (rominfo->buheader_len)                    // copy header (if present)
@@ -799,7 +799,7 @@ pce_swap (st_rominfo_t *rominfo)
 
 
 int
-pce_f (st_rominfo_t *rominfo)
+pce_f (st_ucon64_nfo_t *rominfo)
 /*
   Region protection codes are found in (American) TurboGrafx-16 games. It
   prevents those games from running on a PC-Engine. One search pattern seems
@@ -812,8 +812,8 @@ pce_f (st_rominfo_t *rominfo)
 
   puts ("Attempting to fix region protection code...");
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
   fcopy (src_name, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
@@ -847,7 +847,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
   fputc (0xff, destfile);                       // 0x0 = 0xff (= valid entry)
 
   memset (name, ' ', 0x1c);
-  p = basename2 (ucon64.rom);
+  p = basename2 (ucon64.fname);
   n = strlen (p);
   if (n > 0x1c)
     n = 0x1c;
@@ -921,35 +921,35 @@ pce_multi (int truncate_size, char *fname)
         }
 
       ucon64.console = UCON64_UNKNOWN;
-      ucon64.rom = ucon64.argv[n];
-      ucon64.file_size = fsizeof (ucon64.rom);
+      ucon64.fname = ucon64.argv[n];
+      ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
+      ucon64.nfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
                                        ucon64.buheader_len : 0;
-      ucon64.rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
-      if (pce_init (ucon64.rominfo) != 0)
-        printf ("WARNING: %s does not appear to be a PC-Engine ROM\n", ucon64.rom);
+      if (pce_init (ucon64.nfo) != 0)
+        printf ("WARNING: %s does not appear to be a PC-Engine ROM\n", ucon64.fname);
 
-      if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+      if ((srcfile = fopen (ucon64.fname, "rb")) == NULL)
         {
-          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
           continue;
         }
-      if (ucon64.rominfo->buheader_len)
-        fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
-      size = ucon64.file_size - ucon64.rominfo->buheader_len;
+      if (ucon64.nfo->buheader_len)
+        fseek (srcfile, ucon64.nfo->buheader_len, SEEK_SET);
+      size = ucon64.file_size - ucon64.nfo->buheader_len;
 
       if (file_no == 0)
         {
-          printf ("Loader: %s\n", ucon64.rom);
+          printf ("Loader: %s\n", ucon64.fname);
           if (size != PCE_PRO_LOADER_SIZE)
-            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
+            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.fname);
         }
       else
         {
-          printf ("ROM%d: %s\n", file_no, ucon64.rom);
+          printf ("ROM%d: %s\n", file_no, ucon64.fname);
           write_game_table_entry (destfile, file_no, totalsize, size);
         }
       file_no++;
@@ -965,7 +965,7 @@ pce_multi (int truncate_size, char *fname)
               done = 1;
               truncated = 1;
               printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
-                      truncate_size / MBIT, ucon64.rom, size - (byteswritten + bytestowrite));
+                      truncate_size / MBIT, ucon64.fname, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
           if (bytestowrite == 0)
@@ -1080,7 +1080,7 @@ pce_check (unsigned char *buf, unsigned int len)
 
 
 int
-pce_init (st_rominfo_t *rominfo)
+pce_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, size, swapped, x;
   unsigned char *rom_buffer;
@@ -1096,7 +1096,7 @@ pce_init (st_rominfo_t *rominfo)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;
     }
-  ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
+  ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.fname);
 
   if (pce_check (rom_buffer, size) == 1)
     result = 0;

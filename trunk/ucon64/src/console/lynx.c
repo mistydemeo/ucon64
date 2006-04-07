@@ -115,7 +115,7 @@ st_lnx_header_t lnx_header;
 
 
 int
-lynx_lyx (st_rominfo_t *rominfo)
+lynx_lyx (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
@@ -125,11 +125,11 @@ lynx_lyx (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".lyx");
 
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -137,7 +137,7 @@ lynx_lyx (st_rominfo_t *rominfo)
 
 
 int
-lynx_lnx (st_rominfo_t *rominfo)
+lynx_lnx (st_ucon64_nfo_t *rominfo)
 {
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
@@ -166,15 +166,15 @@ lynx_lnx (st_rominfo_t *rominfo)
 
   memcpy (header.magic, "LYNX", 4);
   header.rotation = 0;
-  strncpy (header.cartname, basename2 (ucon64.rom), sizeof (header.cartname))[sizeof (header.cartname) - 1] = 0;
+  strncpy (header.cartname, basename2 (ucon64.fname), sizeof (header.cartname))[sizeof (header.cartname) - 1] = 0;
   strcpy (header.manufname, "Atari");
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".lnx");
 
   ucon64_file_handler (dest_name, NULL, 0);
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "wb");
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "ab");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -182,7 +182,7 @@ lynx_lnx (st_rominfo_t *rominfo)
 
 
 static int
-lynx_rot (st_rominfo_t *rominfo, int rotation)
+lynx_rot (st_ucon64_nfo_t *rominfo, int rotation)
 {
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
@@ -193,13 +193,13 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
       return -1;
     }
 
-  ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.rom);
+  ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.fname);
 
   header.rotation = rotation;                   // header.rotation is an 8-bit field
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -208,28 +208,28 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
 
 
 int
-lynx_nrot (st_rominfo_t *rominfo)
+lynx_nrot (st_ucon64_nfo_t *rominfo)
 {
   return lynx_rot (rominfo, 0);                 // no rotation
 }
 
 
 int
-lynx_rotl (st_rominfo_t *rominfo)
+lynx_rotl (st_ucon64_nfo_t *rominfo)
 {
   return lynx_rot (rominfo, 1);                 // rotate left
 }
 
 
 int
-lynx_rotr (st_rominfo_t *rominfo)
+lynx_rotr (st_ucon64_nfo_t *rominfo)
 {
   return lynx_rot (rominfo, 2);                 // rotate right
 }
 
 
 int
-lynx_n (st_rominfo_t *rominfo, const char *name)
+lynx_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
@@ -240,14 +240,14 @@ lynx_n (st_rominfo_t *rominfo, const char *name)
       return -1;
     }
 
-  ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.rom);
+  ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.fname);
 
   memset (header.cartname, 0, sizeof (header.cartname));
   strncpy (header.cartname, name, sizeof (header.cartname));
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -256,7 +256,7 @@ lynx_n (st_rominfo_t *rominfo, const char *name)
 
 
 static int
-lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
+lynx_b (st_ucon64_nfo_t *rominfo, int bank, const char *value)
 {
   st_lnx_header_t header;
   short int *bankvar;
@@ -268,7 +268,7 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
       return -1;
     }
 
-  ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.rom);
+  ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.fname);
 
   bankvar = (bank == 0 ? &header.page_size_bank0 : &header.page_size_bank1);
   if ((atol (value) % 64) != 0 || (atol (value) > 512))
@@ -280,9 +280,9 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
     *bankvar = (short int) atol (value) * 4;
 #endif
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -291,28 +291,28 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
 
 
 int
-lynx_b0 (st_rominfo_t *rominfo, const char *value)
+lynx_b0 (st_ucon64_nfo_t *rominfo, const char *value)
 {
   return lynx_b (rominfo, 0, value);
 }
 
 
 int
-lynx_b1 (st_rominfo_t *rominfo, const char *value)
+lynx_b1 (st_ucon64_nfo_t *rominfo, const char *value)
 {
   return lynx_b (rominfo, 1, value);
 }
 
 
 int
-lynx_init (st_rominfo_t *rominfo)
+lynx_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
 
   rominfo->console_usage = lynx_usage[0].help;
   rominfo->copier_usage = unknown_usage[0].help;
 
-  ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.rom);
+  ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.fname);
   if (!strncmp (lnx_header.magic, "LYNX", 4))
     result = 0;
   else
@@ -328,7 +328,7 @@ lynx_init (st_rominfo_t *rominfo)
       if (UCON64_ISSET (ucon64.buheader_len) && !ucon64.buheader_len)
         return ucon64.console == UCON64_LYNX ? 0 : result;
 
-      ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.fname);
       rominfo->buheader = &lnx_header;
 
       // internal ROM name

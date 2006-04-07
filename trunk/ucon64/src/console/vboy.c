@@ -81,7 +81,7 @@ typedef struct st_vboy_header
 
 
 int
-vboy_init (st_rominfo_t *rominfo)
+vboy_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value = 0;
   static st_vboy_header_t vboy_header;
@@ -92,7 +92,7 @@ vboy_init (st_rominfo_t *rominfo)
   // It's correct to use VBOY_HEADER_START, because the header is located at a
   //  constant offset relative to the end of the file (no need to use
   //  ucon64.buheader_len).
-  ucon64_fread (&vboy_header, VBOY_HEADER_START, VBOY_HEADER_LEN, ucon64.rom);
+  ucon64_fread (&vboy_header, VBOY_HEADER_START, VBOY_HEADER_LEN, ucon64.fname);
 
   if (ucon64.console == UCON64_VBOY)
     {

@@ -178,17 +178,17 @@ typedef struct st_gb_chksum
 } st_gb_chksum_t;
 
 static st_gb_chksum_t checksum;
-static st_gb_chksum_t gb_chksum (st_rominfo_t *rominfo);
+static st_gb_chksum_t gb_chksum (st_ucon64_nfo_t *rominfo);
 
 
 int
-gb_logo (st_rominfo_t *rominfo)
+gb_logo (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite ((unsigned char *)
     ((gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99) ?
       rocket_logodata : gb_logodata),
@@ -201,7 +201,7 @@ gb_logo (st_rominfo_t *rominfo)
 
 
 int
-gb_n2gb (st_rominfo_t *rominfo, const char *nesrom)
+gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
 {
 #define EMULATOR_LEN 0x10000
   st_ines_header_t ines_header;
@@ -211,7 +211,7 @@ gb_n2gb (st_rominfo_t *rominfo, const char *nesrom)
 
   if (ucon64.file_size - rominfo->buheader_len != EMULATOR_LEN)
     {
-      fprintf (stderr, "ERROR: %s does not appear to be KAMI's FC emulator\n", ucon64.rom);
+      fprintf (stderr, "ERROR: %s does not appear to be KAMI's FC emulator\n", ucon64.fname);
       return -1;
     }
 
@@ -234,7 +234,7 @@ gb_n2gb (st_rominfo_t *rominfo, const char *nesrom)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], ucon64.file_size);
       return -1;
     }
-  ucon64_fread (buf, 0, ucon64.file_size, ucon64.rom);
+  ucon64_fread (buf, 0, ucon64.file_size, ucon64.fname);
   ucon64_fread (rominfo->buheader_len + buf + 0x4000, INES_HEADER_LEN,
                 0x4000 + 0x2000, nesrom);       // read PRG & CHR data
 
@@ -248,7 +248,7 @@ gb_n2gb (st_rominfo_t *rominfo, const char *nesrom)
 
   buf[rominfo->buheader_len + GB_HEADER_START + 0x4e] = crc >> 8;
   buf[rominfo->buheader_len + GB_HEADER_START + 0x4f] = crc;
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   ucon64_fwrite (buf, 0, ucon64.file_size, dest_name, "wb");
 
@@ -259,15 +259,15 @@ gb_n2gb (st_rominfo_t *rominfo, const char *nesrom)
 
 
 static int
-gb_convert_data (st_rominfo_t *rominfo, unsigned char *conversion_table,
+gb_convert_data (st_ucon64_nfo_t *rominfo, unsigned char *conversion_table,
                       const char *suffix)
 {
   char dest_name[FILENAME_MAX], src_name[FILENAME_MAX];
   unsigned char buf[MAXBUFSIZE];
   int x, n, n_bytes;
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, suffix);
   ucon64_file_handler (dest_name, src_name, 0);
 
@@ -286,7 +286,7 @@ gb_convert_data (st_rominfo_t *rominfo, unsigned char *conversion_table,
 
 
 int
-gb_gbx (st_rominfo_t *rominfo)
+gb_gbx (st_ucon64_nfo_t *rominfo)
 {
   unsigned char gbx2gbc[] =
     {
@@ -323,14 +323,14 @@ gb_gbx (st_rominfo_t *rominfo)
       0x33, 0x3B, 0x23, 0x2B, 0x13, 0x1B, 0x03, 0x0B,
       0x73, 0x7B, 0x63, 0x6B, 0x53, 0x5B, 0x43, 0x4B
     };
-  const char *old_suffix = get_suffix (ucon64.rom), *new_suffix;
+  const char *old_suffix = get_suffix (ucon64.fname), *new_suffix;
   new_suffix = stricmp (old_suffix, ".GBX") ? ".GB" : ".GBC";
   return gb_convert_data (rominfo, gbx2gbc, new_suffix);
 }
 
 
 int
-gb_sgb (st_rominfo_t *rominfo)
+gb_sgb (st_ucon64_nfo_t *rominfo)
 {
   unsigned char gbc2gbx[] =
     {
@@ -367,14 +367,14 @@ gb_sgb (st_rominfo_t *rominfo)
       0x88, 0xA8, 0xC8, 0xE8, 0x08, 0x28, 0x48, 0x68,
       0x89, 0xA9, 0xC9, 0xE9, 0x09, 0x29, 0x49, 0x69
     };
-  const char *old_suffix = get_suffix (ucon64.rom), *new_suffix;
+  const char *old_suffix = get_suffix (ucon64.fname), *new_suffix;
   new_suffix = stricmp (old_suffix, ".GBC") ? ".GX" : ".GBX";
   return gb_convert_data (rominfo, gbc2gbx, new_suffix);
 }
 
 
 int
-gb_n (st_rominfo_t *rominfo, const char *name)
+gb_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[GB_NAME_LEN + 1], dest_name[FILENAME_MAX];
   int gb_name_len =
@@ -383,9 +383,9 @@ gb_n (st_rominfo_t *rominfo, const char *name)
 
   memset (buf, 0, gb_name_len);
   strncpy (buf, name, gb_name_len);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, rominfo->buheader_len + GB_HEADER_START + 0x34,
                  gb_name_len, dest_name, "r+b");
 
@@ -395,13 +395,13 @@ gb_n (st_rominfo_t *rominfo, const char *name)
 
 
 int
-gb_chk (st_rominfo_t *rominfo)
+gb_chk (st_ucon64_nfo_t *rominfo)
 {
   char buf[4], dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   buf[0] = checksum.header;
   buf[1] = rominfo->current_internal_crc >> 8;
@@ -417,14 +417,14 @@ gb_chk (st_rominfo_t *rominfo)
 
 
 int
-gb_mgd (st_rominfo_t *rominfo)
+gb_mgd (st_ucon64_nfo_t *rominfo)
 // TODO: convert the ROM data
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  strcpy (src_name, ucon64.rom);
-  mgd_make_name (ucon64.rom, UCON64_GB, size, dest_name);
+  strcpy (src_name, ucon64.fname);
+  mgd_make_name (ucon64.fname, UCON64_GB, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   fcopy (src_name, rominfo->buheader_len, size, dest_name, "wb");
@@ -438,7 +438,7 @@ gb_mgd (st_rominfo_t *rominfo)
 
 
 int
-gb_ssc (st_rominfo_t *rominfo)
+gb_ssc (st_ucon64_nfo_t *rominfo)
 // TODO: convert the ROM data
 {
   st_unknown_header_t header;
@@ -456,8 +456,8 @@ gb_ssc (st_rominfo_t *rominfo)
   header.type = 2;
 #endif
 
-  strcpy (src_name, ucon64.rom);
-  p = basename2 (ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  p = basename2 (ucon64.fname);
   // TODO: find out if this is correct (giving the file name a prefix)
   if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
     strcpy (dest_name, p);
@@ -476,7 +476,7 @@ gb_ssc (st_rominfo_t *rominfo)
 
 
 int
-gb_init (st_rominfo_t *rominfo)
+gb_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value, x;
   char buf[MAXBUFSIZE];
@@ -536,7 +536,7 @@ gb_init (st_rominfo_t *rominfo)
     return -1;                                  // Don't continue if it makes no sense
 
   ucon64_fread (&gb_header, rominfo->buheader_len + GB_HEADER_START,
-                GB_HEADER_LEN, ucon64.rom);
+                GB_HEADER_LEN, ucon64.fname);
   if (gb_header.opcode1 == 0x00 && gb_header.opcode2 == 0xc3)
     result = 0;
   else
@@ -545,7 +545,7 @@ gb_init (st_rominfo_t *rominfo)
         ucon64.buheader_len : (int) SSC_HEADER_LEN;
 
       ucon64_fread (&gb_header, rominfo->buheader_len + GB_HEADER_START,
-                    GB_HEADER_LEN, ucon64.rom);
+                    GB_HEADER_LEN, ucon64.fname);
       if (gb_header.opcode1 == 0x00 && gb_header.opcode2 == 0xc3)
         result = 0;
       else
@@ -702,7 +702,7 @@ gb_init (st_rominfo_t *rominfo)
 
 
 st_gb_chksum_t
-gb_chksum (st_rominfo_t *rominfo)
+gb_chksum (st_ucon64_nfo_t *rominfo)
 {
   st_gb_chksum_t sum = { 0, 0 };
   unsigned char *rom_buffer;
@@ -713,7 +713,7 @@ gb_chksum (st_rominfo_t *rominfo)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return sum;
     }
-  ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
+  ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.fname);
 
   for (i = GB_HEADER_START + 0x34; i < GB_HEADER_START + 0x4d; i++)
     sum.header += ~rom_buffer[i];

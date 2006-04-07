@@ -186,7 +186,7 @@ static const st_getopt2_t lf[] =
   //  mgd_usage,
 #endif
     lf,
-    gameboy_usage,
+    gb_usage,
 #ifdef  USE_PARALLEL
     gbx_usage,
     mccl_usage,
@@ -197,7 +197,7 @@ static const st_getopt2_t lf[] =
     lynxit_usage,
 #endif
     lf,
-    pcengine_usage,
+    pce_usage,
 #ifdef  USE_PARALLEL
     msg_usage,
     pcepro_usage,
@@ -251,7 +251,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-//#define TEST 
+#define TEST 
 #ifdef  TEST
 typedef struct
 {
@@ -1468,7 +1468,7 @@ ucon64_probe (st_rominfo_t * rominfo)
     {
       /*
         The order of the init functions is important. snes_init() must be
-        called before nes_init(), but after gameboy_init() and sms_init().
+        called before nes_init(), but after gb_init() and sms_init().
         sms_init() must be called before snes_init(), but after genesis_init().
         There may be more dependencies, so don't change the order unless you
         can verify it won't break anything.
@@ -1477,7 +1477,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_N64, n64_init, AUTO},
       {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
-      {UCON64_GB, gameboy_init, AUTO},
+      {UCON64_GB, gb_init, AUTO},
       {UCON64_SMS, sms_init, AUTO},
       {UCON64_COLECO, coleco_init, AUTO},
       {UCON64_SNES, snes_init, AUTO},
@@ -1488,7 +1488,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_ATA, atari_init, AUTO},
       {UCON64_NDS, nds_init, AUTO},
       {UCON64_VBOY, vboy_init, 0},
-      {UCON64_PCE, pcengine_init, 0}, // AUTO still works with non-PCE files
+      {UCON64_PCE, pce_init, 0}, // AUTO still works with non-PCE files
       {UCON64_NG, neogeo_init, 0},
       {UCON64_SWAN, swan_init, 0},
       {UCON64_DC, dc_init, 0},

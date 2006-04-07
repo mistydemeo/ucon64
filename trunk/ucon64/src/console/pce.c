@@ -46,8 +46,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/pce-pro.h"
 
 
-#define PCENGINE_HEADER_START 0x448
-#define PCENGINE_HEADER_LEN 0x30
+#define PCE_HEADER_START 0x448
+#define PCE_HEADER_LEN 0x30
 
 
 static st_ucon64_obj_t pce_obj[] =
@@ -61,7 +61,7 @@ static st_ucon64_obj_t pce_obj[] =
     {UCON64_PCE, WF_DEFAULT}
   };
 
-const st_getopt2_t pcengine_usage[] =
+const st_getopt2_t pce_usage[] =
   {
     {
       NULL, 0, 0, 0,
@@ -683,7 +683,7 @@ swapbits (unsigned char *buffer, int size)
 
 // header format is specified in src/backup/ffe.h
 int
-pcengine_msg (st_rominfo_t *rominfo)
+pce_msg (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
@@ -729,7 +729,7 @@ pcengine_msg (st_rominfo_t *rominfo)
 
 // see src/backup/mgd.h for the file naming scheme
 int
-pcengine_mgd (st_rominfo_t *rominfo)
+pce_mgd (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
@@ -767,7 +767,7 @@ pcengine_mgd (st_rominfo_t *rominfo)
 
 
 int
-pcengine_swap (st_rominfo_t *rominfo)
+pce_swap (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
@@ -799,7 +799,7 @@ pcengine_swap (st_rominfo_t *rominfo)
 
 
 int
-pcengine_f (st_rominfo_t *rominfo)
+pce_f (st_rominfo_t *rominfo)
 /*
   Region protection codes are found in (American) TurboGrafx-16 games. It
   prevents those games from running on a PC-Engine. One search pattern seems
@@ -869,7 +869,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-pcengine_multi (int truncate_size, char *fname)
+pce_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
@@ -929,7 +929,7 @@ pcengine_multi (int truncate_size, char *fname)
       ucon64.rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
-      if (pcengine_init (ucon64.rominfo) != 0)
+      if (pce_init (ucon64.rominfo) != 0)
         printf ("WARNING: %s does not appear to be a PC-Engine ROM\n", ucon64.rom);
 
       if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
@@ -1013,7 +1013,7 @@ pcengine_multi (int truncate_size, char *fname)
 
 
 static int
-pcengine_check (unsigned char *buf, unsigned int len)
+pce_check (unsigned char *buf, unsigned int len)
 // This function was contributed by Cowering. Comments are his unless stated
 //  otherwise.
 {
@@ -1080,7 +1080,7 @@ pcengine_check (unsigned char *buf, unsigned int len)
 
 
 int
-pcengine_init (st_rominfo_t *rominfo)
+pce_init (st_rominfo_t *rominfo)
 {
   int result = -1, size, swapped, x;
   unsigned char *rom_buffer;
@@ -1098,7 +1098,7 @@ pcengine_init (st_rominfo_t *rominfo)
     }
   ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  if (pcengine_check (rom_buffer, size) == 1)
+  if (pce_check (rom_buffer, size) == 1)
     result = 0;
 
   swapped = -1;
@@ -1130,7 +1130,7 @@ pcengine_init (st_rominfo_t *rominfo)
       if (!UCON64_ISSET (ucon64.do_not_calc_crc) || swapped == 1)
         ucon64.fcrc32 = crc32 (0, rom_buffer, size);
       swapbits (rom_buffer, size);
-      if (pcengine_check (rom_buffer, size) == 1)
+      if (pce_check (rom_buffer, size) == 1)
         {
           swapped = 1;
           result = 0;
@@ -1147,9 +1147,9 @@ pcengine_init (st_rominfo_t *rominfo)
   if (ucon64.console == UCON64_PCE)
     result = 0;
 
-  rominfo->header_start = PCENGINE_HEADER_START;
-  rominfo->header_len = PCENGINE_HEADER_LEN;
-  rominfo->console_usage = pcengine_usage[0].help;
+  rominfo->header_start = PCE_HEADER_START;
+  rominfo->header_len = PCE_HEADER_LEN;
+  rominfo->console_usage = pce_usage[0].help;
   rominfo->copier_usage = rominfo->buheader_len ? msg_usage[0].help : mgd_usage[0].help;
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)

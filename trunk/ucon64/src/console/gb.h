@@ -24,17 +24,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GB_LOGODATA_LEN 48
 #define GB_NAME_LEN 15                          // correct for GBC games, not
                                                 //  for {S}GB games (should be 16)
-extern const st_getopt2_t gameboy_usage[];
+extern const st_getopt2_t gb_usage[];
 extern const unsigned char gb_logodata[], rocket_logodata[];
 
-extern int gameboy_chk (st_rominfo_t *rominfo);
-extern int gameboy_gbx (st_rominfo_t *rominfo);
-extern int gameboy_mgd (st_rominfo_t *rominfo);
-extern int gameboy_n (st_rominfo_t *rominfo, const char *name);
-extern int gameboy_n2gb (st_rominfo_t *rominfo, const char *emu_rom);
-extern int gameboy_sgb (st_rominfo_t *rominfo);
-extern int gameboy_ssc (st_rominfo_t *rominfo);
-extern int gameboy_init (st_rominfo_t *rominfo);
-extern int gameboy_logo (st_rominfo_t *rominfo);
+extern int gb_chk (st_rominfo_t *rominfo);
+extern int gb_gbx (st_rominfo_t *rominfo);
+extern int gb_mgd (st_rominfo_t *rominfo);
+extern int gb_n (st_rominfo_t *rominfo, const char *name);
+extern int gb_n2gb (st_rominfo_t *rominfo, const char *emu_rom);
+extern int gb_sgb (st_rominfo_t *rominfo);
+extern int gb_ssc (st_rominfo_t *rominfo);
+extern int gb_init (st_rominfo_t *rominfo);
+extern int gb_logo (st_rominfo_t *rominfo);
 
 #endif

@@ -45,18 +45,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "gb.h"
 
 
-#define GAMEBOY_HEADER_START 0x100
-#define GAMEBOY_HEADER_LEN (sizeof (st_gameboy_header_t))
+#define GB_HEADER_START 0x100
+#define GB_HEADER_LEN (sizeof (st_gb_header_t))
 
 
-static st_ucon64_obj_t gameboy_obj[] =
+static st_ucon64_obj_t gb_obj[] =
   {
     {0, WF_DEFAULT},
     {UCON64_GB, WF_SWITCH},
     {UCON64_GB, WF_DEFAULT}
   };
 
-const st_getopt2_t gameboy_usage[] =
+const st_getopt2_t gb_usage[] =
   {
     {
       NULL, 0, 0, 0,
@@ -67,49 +67,49 @@ const st_getopt2_t gameboy_usage[] =
     {
       "gb", 0, 0, UCON64_GB,
       NULL, "force recognition",
-      &gameboy_obj[1]
+      &gb_obj[1]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &gameboy_obj[0]
+      &gb_obj[0]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
       NULL, "restore ROM logo character data (offset: 0x104-0x134)",
-      &gameboy_obj[0]
+      &gb_obj[0]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game*/MGD2/RAW",
-      &gameboy_obj[0]
+      &gb_obj[0]
     },
     {
       "ssc", 0, 0, UCON64_SSC,
       NULL, "convert to Super Smart Card/SSC",
-      &gameboy_obj[2]
+      &gb_obj[2]
     },
     {
       "sgb", 0, 0, UCON64_SGB,
       NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX",
-      &gameboy_obj[2]
+      &gb_obj[2]
     },
     {
       "gbx", 0, 0, UCON64_GBX,
       NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC",
-      &gameboy_obj[2]
+      &gb_obj[2]
     },
     {
       "n2gb", 1, 0, UCON64_N2GB,
       "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
       "ROM should be KAMI's FC Emulator ROM image\n"
       "NESROM should contain 16 kB of PRG data and 8 kB of CHR data",
-      &gameboy_obj[2]
+      &gb_obj[2]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
-      &gameboy_obj[0]
+      &gb_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -128,7 +128,7 @@ const st_getopt2_t gameboy_usage[] =
            2 -  64kBit =  8kB = 1 bank
            3 - 256kBit = 32kB = 4 banks
 */
-typedef struct st_gameboy_header
+typedef struct st_gb_header
 {
   unsigned char opcode1;                        // 0x00 usually 0x00, NOP
   unsigned char opcode2;                        // 0x01 usually 0xc3, JP
@@ -149,9 +149,9 @@ typedef struct st_gameboy_header
   unsigned char header_checksum;                // 0x4d
   unsigned char checksum_high;                  // 0x4e
   unsigned char checksum_low;                   // 0x4f
-} st_gameboy_header_t;
+} st_gb_header_t;
 
-static st_gameboy_header_t gameboy_header;
+static st_gb_header_t gb_header;
 const unsigned char gb_logodata[] =             // Note: not a static variable
   {
     0xce, 0xed, 0x66, 0x66, 0xcc, 0x0d, 0x00, 0x0b,
@@ -171,18 +171,18 @@ const unsigned char gb_logodata[] =             // Note: not a static variable
     0x22, 0x47, 0x00, 0x0e, 0x11, 0x22, 0x00, 0x00
   };
 
-typedef struct st_gameboy_chksum
+typedef struct st_gb_chksum
 {
   unsigned short value;
   unsigned char header;
-} st_gameboy_chksum_t;
+} st_gb_chksum_t;
 
-static st_gameboy_chksum_t checksum;
-static st_gameboy_chksum_t gameboy_chksum (st_rominfo_t *rominfo);
+static st_gb_chksum_t checksum;
+static st_gb_chksum_t gb_chksum (st_rominfo_t *rominfo);
 
 
 int
-gameboy_logo (st_rominfo_t *rominfo)
+gb_logo (st_rominfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
@@ -190,9 +190,9 @@ gameboy_logo (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite ((unsigned char *)
-    ((gameboy_header.rom_type >= 0x97 && gameboy_header.rom_type <= 0x99) ?
+    ((gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99) ?
       rocket_logodata : gb_logodata),
-    rominfo->buheader_len + GAMEBOY_HEADER_START + 4, GB_LOGODATA_LEN,
+    rominfo->buheader_len + GB_HEADER_START + 4, GB_LOGODATA_LEN,
     dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -201,7 +201,7 @@ gameboy_logo (st_rominfo_t *rominfo)
 
 
 int
-gameboy_n2gb (st_rominfo_t *rominfo, const char *nesrom)
+gb_n2gb (st_rominfo_t *rominfo, const char *nesrom)
 {
 #define EMULATOR_LEN 0x10000
   st_ines_header_t ines_header;
@@ -240,14 +240,14 @@ gameboy_n2gb (st_rominfo_t *rominfo, const char *nesrom)
 
   for (n = 0; n < ucon64.file_size - rominfo->buheader_len; n++)
     {
-      if ((n == GAMEBOY_HEADER_START + 0x4e) || (n == GAMEBOY_HEADER_START + 0x4f))
+      if ((n == GB_HEADER_START + 0x4e) || (n == GB_HEADER_START + 0x4f))
         continue;
       else
         crc += buf[rominfo->buheader_len + n];
     }
 
-  buf[rominfo->buheader_len + GAMEBOY_HEADER_START + 0x4e] = crc >> 8;
-  buf[rominfo->buheader_len + GAMEBOY_HEADER_START + 0x4f] = crc;
+  buf[rominfo->buheader_len + GB_HEADER_START + 0x4e] = crc >> 8;
+  buf[rominfo->buheader_len + GB_HEADER_START + 0x4f] = crc;
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   ucon64_fwrite (buf, 0, ucon64.file_size, dest_name, "wb");
@@ -259,7 +259,7 @@ gameboy_n2gb (st_rominfo_t *rominfo, const char *nesrom)
 
 
 static int
-gameboy_convert_data (st_rominfo_t *rominfo, unsigned char *conversion_table,
+gb_convert_data (st_rominfo_t *rominfo, unsigned char *conversion_table,
                       const char *suffix)
 {
   char dest_name[FILENAME_MAX], src_name[FILENAME_MAX];
@@ -286,7 +286,7 @@ gameboy_convert_data (st_rominfo_t *rominfo, unsigned char *conversion_table,
 
 
 int
-gameboy_gbx (st_rominfo_t *rominfo)
+gb_gbx (st_rominfo_t *rominfo)
 {
   unsigned char gbx2gbc[] =
     {
@@ -325,12 +325,12 @@ gameboy_gbx (st_rominfo_t *rominfo)
     };
   const char *old_suffix = get_suffix (ucon64.rom), *new_suffix;
   new_suffix = stricmp (old_suffix, ".GBX") ? ".GB" : ".GBC";
-  return gameboy_convert_data (rominfo, gbx2gbc, new_suffix);
+  return gb_convert_data (rominfo, gbx2gbc, new_suffix);
 }
 
 
 int
-gameboy_sgb (st_rominfo_t *rominfo)
+gb_sgb (st_rominfo_t *rominfo)
 {
   unsigned char gbc2gbx[] =
     {
@@ -369,16 +369,16 @@ gameboy_sgb (st_rominfo_t *rominfo)
     };
   const char *old_suffix = get_suffix (ucon64.rom), *new_suffix;
   new_suffix = stricmp (old_suffix, ".GBC") ? ".GX" : ".GBX";
-  return gameboy_convert_data (rominfo, gbc2gbx, new_suffix);
+  return gb_convert_data (rominfo, gbc2gbx, new_suffix);
 }
 
 
 int
-gameboy_n (st_rominfo_t *rominfo, const char *name)
+gb_n (st_rominfo_t *rominfo, const char *name)
 {
   char buf[GB_NAME_LEN + 1], dest_name[FILENAME_MAX];
   int gb_name_len =
-    (gameboy_header.gb_type == 0x80 || gameboy_header.gb_type == 0xc0) ?
+    (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?
       GB_NAME_LEN : GB_NAME_LEN + 1;
 
   memset (buf, 0, gb_name_len);
@@ -386,7 +386,7 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (buf, rominfo->buheader_len + GAMEBOY_HEADER_START + 0x34,
+  ucon64_fwrite (buf, rominfo->buheader_len + GB_HEADER_START + 0x34,
                  gb_name_len, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -395,7 +395,7 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
 
 
 int
-gameboy_chk (st_rominfo_t *rominfo)
+gb_chk (st_rominfo_t *rominfo)
 {
   char buf[4], dest_name[FILENAME_MAX];
 
@@ -406,10 +406,10 @@ gameboy_chk (st_rominfo_t *rominfo)
   buf[0] = checksum.header;
   buf[1] = rominfo->current_internal_crc >> 8;
   buf[2] = rominfo->current_internal_crc;
-  ucon64_fwrite (buf, rominfo->buheader_len + GAMEBOY_HEADER_START + 0x4d, 3,
+  ucon64_fwrite (buf, rominfo->buheader_len + GB_HEADER_START + 0x4d, 3,
                  dest_name, "r+b");
 
-  dumper (stdout, buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, DUMPER_HEX);
+  dumper (stdout, buf, 3, GB_HEADER_START + rominfo->buheader_len + 0x4d, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -417,7 +417,7 @@ gameboy_chk (st_rominfo_t *rominfo)
 
 
 int
-gameboy_mgd (st_rominfo_t *rominfo)
+gb_mgd (st_rominfo_t *rominfo)
 // TODO: convert the ROM data
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -438,7 +438,7 @@ gameboy_mgd (st_rominfo_t *rominfo)
 
 
 int
-gameboy_ssc (st_rominfo_t *rominfo)
+gb_ssc (st_rominfo_t *rominfo)
 // TODO: convert the ROM data
 {
   st_unknown_header_t header;
@@ -476,11 +476,11 @@ gameboy_ssc (st_rominfo_t *rominfo)
 
 
 int
-gameboy_init (st_rominfo_t *rominfo)
+gb_init (st_rominfo_t *rominfo)
 {
   int result = -1, value, x;
   char buf[MAXBUFSIZE];
-  static const char *gameboy_romtype1[0x20] =
+  static const char *gb_romtype1[0x20] =
     {
       "ROM only",
       "ROM + MBC1",
@@ -515,13 +515,13 @@ gameboy_init (st_rominfo_t *rominfo)
       "ROM + MBC5 + SRAM + Battery + Rumble",
       "Nintendo Pocket Camera"
     },
-    *gameboy_romtype2[3] =
+    *gb_romtype2[3] =
     {
       "Rocket Games",
       NULL,
       "Rocket Games 2-in-1"
     },
-    *gameboy_romtype3[3] =
+    *gb_romtype3[3] =
     {
       "Bandai TAMA5",
       "Hudson HuC-3",
@@ -532,21 +532,21 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
   if (ucon64.file_size <
-      (int) (rominfo->buheader_len + GAMEBOY_HEADER_START + GAMEBOY_HEADER_LEN))
+      (int) (rominfo->buheader_len + GB_HEADER_START + GB_HEADER_LEN))
     return -1;                                  // Don't continue if it makes no sense
 
-  ucon64_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
-                GAMEBOY_HEADER_LEN, ucon64.rom);
-  if (gameboy_header.opcode1 == 0x00 && gameboy_header.opcode2 == 0xc3)
+  ucon64_fread (&gb_header, rominfo->buheader_len + GB_HEADER_START,
+                GB_HEADER_LEN, ucon64.rom);
+  if (gb_header.opcode1 == 0x00 && gb_header.opcode2 == 0xc3)
     result = 0;
   else
     {
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
         ucon64.buheader_len : (int) SSC_HEADER_LEN;
 
-      ucon64_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
-                    GAMEBOY_HEADER_LEN, ucon64.rom);
-      if (gameboy_header.opcode1 == 0x00 && gameboy_header.opcode2 == 0xc3)
+      ucon64_fread (&gb_header, rominfo->buheader_len + GB_HEADER_START,
+                    GB_HEADER_LEN, ucon64.rom);
+      if (gb_header.opcode1 == 0x00 && gb_header.opcode2 == 0xc3)
         result = 0;
       else
         result = -1;
@@ -554,27 +554,27 @@ gameboy_init (st_rominfo_t *rominfo)
   if (ucon64.console == UCON64_GB)
     result = 0;
 
-  rominfo->header_start = GAMEBOY_HEADER_START;
-  rominfo->header_len = GAMEBOY_HEADER_LEN;
-  rominfo->header = &gameboy_header;
+  rominfo->header_start = GB_HEADER_START;
+  rominfo->header_len = GB_HEADER_LEN;
+  rominfo->header = &gb_header;
 
   // internal ROM name
-  x = (gameboy_header.gb_type == 0x80 || gameboy_header.gb_type == 0xc0) ?
+  x = (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?
         GB_NAME_LEN : GB_NAME_LEN + 1;
-  strncpy (rominfo->name, (const char *) gameboy_header.name, x);
+  strncpy (rominfo->name, (const char *) gb_header.name, x);
   rominfo->name[x] = 0;                         // terminate string
 
   // ROM maker
-  if (gameboy_header.maker == 0x33)
+  if (gb_header.maker == 0x33)
     {
-      int ih = gameboy_header.maker_high <= '9' ?
-                 gameboy_header.maker_high - '0' : gameboy_header.maker_high - 'A' + 10,
-          il = gameboy_header.maker_low <= '9' ?
-                 gameboy_header.maker_low - '0' : gameboy_header.maker_low - 'A' + 10;
+      int ih = gb_header.maker_high <= '9' ?
+                 gb_header.maker_high - '0' : gb_header.maker_high - 'A' + 10,
+          il = gb_header.maker_low <= '9' ?
+                 gb_header.maker_low - '0' : gb_header.maker_low - 'A' + 10;
       x = ih * 36 + il;
     }
   else
-    x = (gameboy_header.maker >> 4) * 36 + (gameboy_header.maker & 0x0f);
+    x = (gb_header.maker >> 4) * 36 + (gb_header.maker & 0x0f);
 
   /*
     I added the first if statement, because I didn't want to expand
@@ -589,29 +589,29 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
 
   // ROM country
-  rominfo->country = gameboy_header.country == 0 ? "Japan" : "U.S.A. & Europe";
+  rominfo->country = gb_header.country == 0 ? "Japan" : "U.S.A. & Europe";
 
   // misc stuff
-  // Don't move division by 4 to shift parameter (gameboy_header.rom_size can be < 2)
-  sprintf (buf, "Internal size: %.4f Mb\n", (1 << gameboy_header.rom_size) / 4.0f);
+  // Don't move division by 4 to shift parameter (gb_header.rom_size can be < 2)
+  sprintf (buf, "Internal size: %.4f Mb\n", (1 << gb_header.rom_size) / 4.0f);
   strcat (rominfo->misc, buf);
 
-  if (gameboy_header.rom_type <= 0x1f)
-    str = NULL_TO_UNKNOWN_S (gameboy_romtype1[gameboy_header.rom_type]);
-  else if (gameboy_header.rom_type >= 0x97 && gameboy_header.rom_type <= 0x99)
-    str = gameboy_romtype2[gameboy_header.rom_type - 0x97];
-  else if (gameboy_header.rom_type >= 0xfd)
-    str = gameboy_romtype3[gameboy_header.rom_type - 0xfd];
+  if (gb_header.rom_type <= 0x1f)
+    str = NULL_TO_UNKNOWN_S (gb_romtype1[gb_header.rom_type]);
+  else if (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99)
+    str = gb_romtype2[gb_header.rom_type - 0x97];
+  else if (gb_header.rom_type >= 0xfd)
+    str = gb_romtype3[gb_header.rom_type - 0xfd];
   else
     str = "Unknown";
   sprintf (buf, "ROM type: %s\n", str);
   strcat (rominfo->misc, buf);
 
-  if (!gameboy_header.sram_size)
+  if (!gb_header.sram_size)
     sprintf (buf, "Save RAM: No\n");
   else
     {
-      value = (gameboy_header.sram_size & 7) << 1; // 0/1/2/4/5
+      value = (gb_header.sram_size & 7) << 1; // 0/1/2/4/5
       if (value)
         value = 1 << (value - 1);
 
@@ -619,21 +619,21 @@ gameboy_init (st_rominfo_t *rominfo)
     }
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Version: 1.%d\n", gameboy_header.version);
+  sprintf (buf, "Version: 1.%d\n", gb_header.version);
   strcat (rominfo->misc, buf);
 
-  if (gameboy_header.gb_type == 0x80)
+  if (gb_header.gb_type == 0x80)
     {
-      if (gameboy_header.sgb_features == 3)
+      if (gb_header.sgb_features == 3)
         str = "Game Boy/Super Game Boy (SGB features present)/Game Boy Color";
       else
         str = "Game Boy/Super Game Boy/Game Boy Color";
     }
-  else if (gameboy_header.gb_type == 0xc0)
+  else if (gb_header.gb_type == 0xc0)
     str = "Game Boy Color";                     // GBC _only_
   else
     {
-      if (gameboy_header.sgb_features == 3)
+      if (gb_header.sgb_features == 3)
         str = "Game Boy/Super Game Boy (SGB features present)";
       else
         str = "Game Boy/Super Game Boy";
@@ -641,14 +641,14 @@ gameboy_init (st_rominfo_t *rominfo)
   sprintf (buf, "Game type: %s\n", str);
   strcat (rominfo->misc, buf);
 
-  value = gameboy_header.start_high << 8;
-  value += gameboy_header.start_low;
+  value = gb_header.start_high << 8;
+  value += gb_header.start_low;
   sprintf (buf, "Start address: 0x%04x\n", value);
   strcat (rominfo->misc, buf);
 
   strcat (rominfo->misc, "Logo data: ");
-  if (memcmp (gameboy_header.logo,
-              (gameboy_header.rom_type >= 0x97 && gameboy_header.rom_type <= 0x99) ?
+  if (memcmp (gb_header.logo,
+              (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99) ?
                 rocket_logodata : gb_logodata,
               GB_LOGODATA_LEN) == 0)
     {
@@ -673,13 +673,13 @@ gameboy_init (st_rominfo_t *rominfo)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;
-      checksum = gameboy_chksum (rominfo);
+      checksum = gb_chksum (rominfo);
       rominfo->current_internal_crc = checksum.value;
 
-      rominfo->internal_crc = (gameboy_header.checksum_high << 8) +
-                              gameboy_header.checksum_low;
+      rominfo->internal_crc = (gb_header.checksum_high << 8) +
+                              gb_header.checksum_low;
 
-      x = gameboy_header.header_checksum;
+      x = gb_header.header_checksum;
       sprintf (rominfo->internal_crc2,
                "Header checksum: %s, 0x%02x (calculated) %c= 0x%02x (internal)",
 #ifdef  USE_ANSI_COLOR
@@ -694,17 +694,17 @@ gameboy_init (st_rominfo_t *rominfo)
                checksum.header, (checksum.header == x) ? '=' : '!', x);
     }
 
-  rominfo->console_usage = gameboy_usage[0].help;
+  rominfo->console_usage = gb_usage[0].help;
   rominfo->copier_usage = (!rominfo->buheader_len ? mgd_usage[0].help : ssc_usage[0].help);
 
   return result;
 }
 
 
-st_gameboy_chksum_t
-gameboy_chksum (st_rominfo_t *rominfo)
+st_gb_chksum_t
+gb_chksum (st_rominfo_t *rominfo)
 {
-  st_gameboy_chksum_t sum = { 0, 0 };
+  st_gb_chksum_t sum = { 0, 0 };
   unsigned char *rom_buffer;
   int size = ucon64.file_size - rominfo->buheader_len, i;
 
@@ -715,13 +715,13 @@ gameboy_chksum (st_rominfo_t *rominfo)
     }
   ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  for (i = GAMEBOY_HEADER_START + 0x34; i < GAMEBOY_HEADER_START + 0x4d; i++)
+  for (i = GB_HEADER_START + 0x34; i < GB_HEADER_START + 0x4d; i++)
     sum.header += ~rom_buffer[i];
   for (i = 0; i < size; i++)
     sum.value += rom_buffer[i];
-  sum.value -= (rom_buffer[GAMEBOY_HEADER_START + 0x4d] - sum.header) +
-               rom_buffer[GAMEBOY_HEADER_START + 0x4e] +
-               rom_buffer[GAMEBOY_HEADER_START + 0x4f];
+  sum.value -= (rom_buffer[GB_HEADER_START + 0x4d] - sum.header) +
+               rom_buffer[GB_HEADER_START + 0x4e] +
+               rom_buffer[GB_HEADER_START + 0x4f];
 
   free (rom_buffer);
 

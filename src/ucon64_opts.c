@@ -1199,7 +1199,7 @@ ucon64_options (st_ucon64_t *p)
           genesis_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
           break;
         case UCON64_PCE:
-          pcengine_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          pce_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
           break;
         case UCON64_SMS:                        // Sega Master System *and* Game Gear
           sms_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
@@ -1244,7 +1244,7 @@ ucon64_options (st_ucon64_t *p)
       switch (ucon64.console)
         {
         case UCON64_GB:
-          gameboy_chk (ucon64.rominfo);
+          gb_chk (ucon64.rominfo);
           break;
         case UCON64_GBA:
           gba_chk (ucon64.rominfo);
@@ -1294,7 +1294,7 @@ ucon64_options (st_ucon64_t *p)
           nes_dint ();
           break;
         case UCON64_PCE:
-          pcengine_swap (ucon64.rominfo);
+          pce_swap (ucon64.rominfo);
           break;
         case UCON64_SNES:
           snes_dint (ucon64.rominfo);
@@ -1336,7 +1336,7 @@ ucon64_options (st_ucon64_t *p)
           n64_f (ucon64.rominfo);
           break;
         case UCON64_PCE:
-          pcengine_f (ucon64.rominfo);
+          pce_f (ucon64.rominfo);
           break;
         case UCON64_SNES:
           snes_f (ucon64.rominfo);
@@ -1369,7 +1369,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_GBX:
-      gameboy_gbx (ucon64.rominfo);
+      gb_gbx (ucon64.rominfo);
       break;
 
     case UCON64_GD3:
@@ -1465,7 +1465,7 @@ ucon64_options (st_ucon64_t *p)
       switch (ucon64.console)
         {
           case UCON64_GB:
-            gameboy_logo (ucon64.rominfo);
+            gb_logo (ucon64.rominfo);
             break;
           case UCON64_GBA:
             gba_logo (ucon64.rominfo);
@@ -1492,7 +1492,7 @@ ucon64_options (st_ucon64_t *p)
       switch (ucon64.console)
         {
         case UCON64_GB:
-          gameboy_mgd (ucon64.rominfo);
+          gb_mgd (ucon64.rominfo);
           break;
         case UCON64_GEN:
           genesis_mgd (ucon64.rominfo);
@@ -1501,7 +1501,7 @@ ucon64_options (st_ucon64_t *p)
           neogeo_mgd ();
           break;
         case UCON64_PCE:
-          pcengine_mgd (ucon64.rominfo);
+          pce_mgd (ucon64.rominfo);
           break;
         case UCON64_SMS:
           sms_mgd (ucon64.rominfo, UCON64_SMS);
@@ -1521,7 +1521,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MSG:
-      pcengine_msg (ucon64.rominfo);
+      pce_msg (ucon64.rominfo);
       break;
 
     case UCON64_N:
@@ -1530,7 +1530,7 @@ ucon64_options (st_ucon64_t *p)
       switch (ucon64.console)
         {
         case UCON64_GB:
-          gameboy_n (ucon64.rominfo, optarg);
+          gb_n (ucon64.rominfo, optarg);
           break;
         case UCON64_GBA:
           gba_n (ucon64.rominfo, optarg);
@@ -1567,7 +1567,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_N2GB:
-      gameboy_n2gb (ucon64.rominfo, optarg);
+      gb_n2gb (ucon64.rominfo, optarg);
       break;
 
     case UCON64_NROT:
@@ -1646,7 +1646,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_SGB:
-      gameboy_sgb (ucon64.rominfo);
+      gb_sgb (ucon64.rominfo);
       break;
 
     case UCON64_SMC:
@@ -1690,7 +1690,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_SSC:
-      gameboy_ssc (ucon64.rominfo);
+      gb_ssc (ucon64.rominfo);
       break;
 
     case UCON64_SWC:

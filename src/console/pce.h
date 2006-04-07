@@ -20,12 +20,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef PCE_H
 #define PCE_H
-extern const st_getopt2_t pcengine_usage[];
+extern const st_getopt2_t pce_usage[];
 
-extern int pcengine_init (st_rominfo_t *rominfo);
-extern int pcengine_mgd (st_rominfo_t *rominfo);
-extern int pcengine_msg (st_rominfo_t *rominfo);
-extern int pcengine_swap (st_rominfo_t *rominfo);
-extern int pcengine_f (st_rominfo_t *rominfo);
-extern int pcengine_multi (int truncate_size, char *fname);
+extern int pce_init (st_rominfo_t *rominfo);
+extern int pce_mgd (st_rominfo_t *rominfo);
+extern int pce_msg (st_rominfo_t *rominfo);
+extern int pce_swap (st_rominfo_t *rominfo);
+extern int pce_f (st_rominfo_t *rominfo);
+extern int pce_multi (int truncate_size, char *fname);
 #endif

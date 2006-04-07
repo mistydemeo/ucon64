@@ -27,14 +27,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t gb_usage[];
 extern const unsigned char gb_logodata[], rocket_logodata[];
 
-extern int gb_chk (st_rominfo_t *rominfo);
-extern int gb_gbx (st_rominfo_t *rominfo);
-extern int gb_mgd (st_rominfo_t *rominfo);
-extern int gb_n (st_rominfo_t *rominfo, const char *name);
-extern int gb_n2gb (st_rominfo_t *rominfo, const char *emu_rom);
-extern int gb_sgb (st_rominfo_t *rominfo);
-extern int gb_ssc (st_rominfo_t *rominfo);
-extern int gb_init (st_rominfo_t *rominfo);
-extern int gb_logo (st_rominfo_t *rominfo);
+extern int gb_chk (st_ucon64_nfo_t *rominfo);
+extern int gb_gbx (st_ucon64_nfo_t *rominfo);
+extern int gb_mgd (st_ucon64_nfo_t *rominfo);
+extern int gb_n (st_ucon64_nfo_t *rominfo, const char *name);
+extern int gb_n2gb (st_ucon64_nfo_t *rominfo, const char *emu_rom);
+extern int gb_sgb (st_ucon64_nfo_t *rominfo);
+extern int gb_ssc (st_ucon64_nfo_t *rominfo);
+extern int gb_init (st_ucon64_nfo_t *rominfo);
+extern int gb_logo (st_ucon64_nfo_t *rominfo);
 
 #endif

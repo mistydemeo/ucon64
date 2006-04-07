@@ -137,14 +137,14 @@ static int is_gamegear;
 
 // see src/backup/mgd.h for the file naming scheme
 int
-sms_mgd (st_rominfo_t *rominfo, int console)
+sms_mgd (st_ucon64_nfo_t *rominfo, int console)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  strcpy (src_name, ucon64.rom);
-  mgd_make_name (ucon64.rom, console, size, dest_name);
+  strcpy (src_name, ucon64.fname);
+  mgd_make_name (ucon64.fname, console, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if (!(buffer = (unsigned char *) malloc (size)))
@@ -172,7 +172,7 @@ sms_mgd (st_rominfo_t *rominfo, int console)
 
 
 int
-sms_smd (st_rominfo_t *rominfo)
+sms_smd (st_ucon64_nfo_t *rominfo)
 {
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -186,8 +186,8 @@ sms_smd (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 6;
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".smd");
   ucon64_file_handler (dest_name, src_name, 0);
 
@@ -223,8 +223,8 @@ sms_smds (void)
   header.id2 = 0xbb;
   header.type = 7;                              // SRAM file
 
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".sav");
   ucon64_file_handler (dest_name, src_name, 0);
 
@@ -238,7 +238,7 @@ sms_smds (void)
 
 
 int
-sms_chk (st_rominfo_t *rominfo)
+sms_chk (st_ucon64_nfo_t *rominfo)
 {
   char buf[2], dest_name[FILENAME_MAX];
   int offset = rominfo->header_start + 10;
@@ -249,9 +249,9 @@ sms_chk (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   buf[0] = rominfo->current_internal_crc;       // low byte
   buf[1] = rominfo->current_internal_crc >> 8;  // high byte
@@ -286,7 +286,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
   fputc (0xff, destfile);                       // 0x0 = 0xff
 
   memset (name, ' ', 0x0c);
-  p = basename2 (ucon64.rom);
+  p = basename2 (ucon64.fname);
   n = strlen (p);
   if (n > 0x0c)
     n = 0x0c;
@@ -378,35 +378,35 @@ sms_multi (int truncate_size, char *fname)
         }
 
       ucon64.console = UCON64_UNKNOWN;
-      ucon64.rom = ucon64.argv[n];
-      ucon64.file_size = fsizeof (ucon64.rom);
+      ucon64.fname = ucon64.argv[n];
+      ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
+      ucon64.nfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
                                        ucon64.buheader_len : 0;
-      ucon64.rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
-      if (sms_init (ucon64.rominfo) != 0)
-        printf ("WARNING: %s does not appear to be an SMS/GG ROM\n", ucon64.rom);
+      if (sms_init (ucon64.nfo) != 0)
+        printf ("WARNING: %s does not appear to be an SMS/GG ROM\n", ucon64.fname);
 
-      if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+      if ((srcfile = fopen (ucon64.fname, "rb")) == NULL)
         {
-          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
           continue;
         }
-      if (ucon64.rominfo->buheader_len)
-        fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
-      size = ucon64.file_size - ucon64.rominfo->buheader_len;
+      if (ucon64.nfo->buheader_len)
+        fseek (srcfile, ucon64.nfo->buheader_len, SEEK_SET);
+      size = ucon64.file_size - ucon64.nfo->buheader_len;
 
       if (file_no == 0)
         {
-          printf ("Loader: %s\n", ucon64.rom);
+          printf ("Loader: %s\n", ucon64.fname);
           if (size != SMSGG_PRO_LOADER_SIZE)
-            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
+            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.fname);
         }
       else
         {
-          printf ("ROM%d: %s\n", file_no, ucon64.rom);
+          printf ("ROM%d: %s\n", file_no, ucon64.fname);
           write_game_table_entry (destfile, file_no, totalsize, size);
         }
       file_no++;
@@ -416,7 +416,7 @@ sms_multi (int truncate_size, char *fname)
       while (!done)
         {
           bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
-          if (ucon64.rominfo->interleaved)
+          if (ucon64.nfo->interleaved)
             smd_deinterleave (buffer, BUFSIZE);
             // yes, BUFSIZE. bytestowrite might not be n * 16 kB
           if (totalsize + bytestowrite > truncate_size)
@@ -425,7 +425,7 @@ sms_multi (int truncate_size, char *fname)
               done = 1;
               truncated = 1;
               printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
-                      truncate_size / MBIT, ucon64.rom, size - (byteswritten + bytestowrite));
+                      truncate_size / MBIT, ucon64.fname, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
           if (bytestowrite == 0)
@@ -491,12 +491,12 @@ sms_multi (int truncate_size, char *fname)
 
 
 static int
-sms_testinterleaved (st_rominfo_t *rominfo)
+sms_testinterleaved (st_ucon64_nfo_t *rominfo)
 {
   unsigned char buf[0x4000] = { 0 };
 
   ucon64_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
-    0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.rom);
+    0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.fname);
   if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMR ALVS", 8) && // SMS
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SMSC", 8) && // SMS (unofficial)
@@ -541,7 +541,7 @@ sms_header_len (void)
              "TMG SEGA" };
       int n;
 
-      ucon64_fread (buffer, 0, SEARCHBUFSIZE, ucon64.rom);
+      ucon64_fread (buffer, 0, SEARCHBUFSIZE, ucon64.fname);
 
       for (n = 0; n < N_SEARCH_STR; n++)
         {
@@ -581,7 +581,7 @@ sms_header_len (void)
 
 
 int
-sms_init (st_rominfo_t *rominfo)
+sms_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x;
   unsigned char buf[16384] = { 0 }, *rom_buffer;
@@ -600,19 +600,19 @@ sms_init (st_rominfo_t *rominfo)
   if (rominfo->interleaved)
     {
       ucon64_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
-        0x2000 + (SMS_HEADER_START - 0x4000 + SMS_HEADER_LEN) / 2, ucon64.rom);
+        0x2000 + (SMS_HEADER_START - 0x4000 + SMS_HEADER_LEN) / 2, ucon64.fname);
       smd_deinterleave (buf, 0x4000);
       memcpy (&sms_header, buf + SMS_HEADER_START - 0x4000, SMS_HEADER_LEN);
     }
   else
     ucon64_fread (&sms_header, rominfo->buheader_len + SMS_HEADER_START,
-      SMS_HEADER_LEN, ucon64.rom);
+      SMS_HEADER_LEN, ucon64.fname);
 
   rominfo->header_start = SMS_HEADER_START;
   rominfo->header_len = SMS_HEADER_LEN;
   rominfo->header = &sms_header;
 
-  ucon64_fread (buf, 0, 11, ucon64.rom);
+  ucon64_fread (buf, 0, 11, ucon64.fname);
   // Note that the identification bytes are the same as for Genesis SMD files
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0
@@ -656,7 +656,7 @@ sms_init (st_rominfo_t *rominfo)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
           return -1;
         }
-      ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
+      ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.fname);
 
       if (rominfo->interleaved)
         {

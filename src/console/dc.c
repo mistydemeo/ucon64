@@ -284,7 +284,7 @@ static const uint8_t nstrsave_bin[1024] = {
 
 
 int
-dc_init (st_rominfo_t *rominfo)
+dc_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
 
@@ -626,10 +626,10 @@ dc_scramble (void)
 {
   char dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 
-  if (!scramble (ucon64.rom, dest_name))
+  if (!scramble (ucon64.fname, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else
     fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name);
@@ -642,10 +642,10 @@ dc_unscramble (void)
 {
   char dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 
-  if (!descramble (ucon64.rom, dest_name))
+  if (!descramble (ucon64.fname, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else
     fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name);

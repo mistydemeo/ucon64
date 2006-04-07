@@ -229,14 +229,14 @@ typedef struct
 
 
 extern int nes_fds (void);
-extern int nes_fdsl (st_rominfo_t *rominfo, char *output_str);
+extern int nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str);
 extern int nes_n (const char *name);
 extern int nes_s (void);
 extern int nes_pasofami (void);
-extern int nes_ineshd (st_rominfo_t *rominfo);
-extern int nes_ffe (st_rominfo_t *rominfo);
+extern int nes_ineshd (st_ucon64_nfo_t *rominfo);
+extern int nes_ffe (st_ucon64_nfo_t *rominfo);
 extern int nes_ines (void);
-extern int nes_init (st_rominfo_t *rominfo);
+extern int nes_init (st_ucon64_nfo_t *rominfo);
 extern int nes_unif (void);
 extern int nes_j (unsigned char **mem_image);
 extern int nes_dint (void);

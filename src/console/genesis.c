@@ -51,9 +51,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GENESIS_NAME_LEN 48
 
 static int genesis_chksum (unsigned char *rom_buffer);
-static unsigned char *load_rom (st_rominfo_t *rominfo, const char *name,
+static unsigned char *load_rom (st_ucon64_nfo_t *rominfo, const char *name,
                                 unsigned char *rom_buffer);
-static int save_rom (st_rominfo_t *rominfo, const char *name,
+static int save_rom (st_ucon64_nfo_t *rominfo, const char *name,
                      unsigned char **buffer, int size);
 
 
@@ -232,13 +232,13 @@ genesis_get_file_type (void)
 
 
 int
-genesis_smd (st_rominfo_t *rominfo)
+genesis_smd (st_ucon64_nfo_t *rominfo)
 {
   st_smd_header_t header;
   char dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
 
-  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+  if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
   memset (&header, 0, SMD_HEADER_LEN);
@@ -248,7 +248,7 @@ genesis_smd (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 6;
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".smd");
   ucon64_file_handler (dest_name, NULL, 0);
 
@@ -271,13 +271,13 @@ genesis_smds (void)
 
   memset (&header, 0, SMD_HEADER_LEN);
   memset (&buf, 0, 32768);
-  ucon64_fread (buf, 0, ucon64.file_size, ucon64.rom);
+  ucon64_fread (buf, 0, ucon64.file_size, ucon64.fname);
 
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 7;                              // SRAM file
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".sav");
   ucon64_file_handler (dest_name, NULL, 0);
 
@@ -291,15 +291,15 @@ genesis_smds (void)
 
 
 int
-genesis_bin (st_rominfo_t *rominfo)
+genesis_bin (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
 
-  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+  if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".bin");
   ucon64_file_handler (dest_name, NULL, 0);
 
@@ -313,7 +313,7 @@ genesis_bin (st_rominfo_t *rominfo)
 
 // see src/backup/mgd.h for the file naming scheme
 int
-genesis_mgd (st_rominfo_t *rominfo)
+genesis_mgd (st_ucon64_nfo_t *rominfo)
 {
 #define CC (const char)
   unsigned char *rom_buffer = NULL;
@@ -471,10 +471,10 @@ genesis_mgd (st_rominfo_t *rominfo)
   else
     genesis_rom_size = 32 * MBIT;
 
-  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+  if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
-  mgd_make_name (ucon64.rom, UCON64_GEN, genesis_rom_size, dest_name);
+  mgd_make_name (ucon64.fname, UCON64_GEN, genesis_rom_size, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
 
   mgd_interleave (&rom_buffer, genesis_rom_size);
@@ -520,7 +520,7 @@ genesis_mgd (st_rominfo_t *rominfo)
 
 
 int
-genesis_s (st_rominfo_t *rominfo)
+genesis_s (st_ucon64_nfo_t *rominfo)
 {
   st_smd_header_t smd_header;
   char dest_name[FILENAME_MAX], *p;
@@ -559,9 +559,9 @@ genesis_s (st_rominfo_t *rominfo)
 
   if (type == SMD)
     {
-      ucon64_fread (&smd_header, 0, SMD_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&smd_header, 0, SMD_HEADER_LEN, ucon64.fname);
 
-      strcpy (dest_name, ucon64.rom);
+      strcpy (dest_name, ucon64.fname);
       set_suffix (dest_name, ".1");
       ucon64_output_fname (dest_name, 0);
       p = strrchr (dest_name, '.') + 1;
@@ -577,7 +577,7 @@ genesis_s (st_rominfo_t *rominfo)
 
           // don't write backups of parts, because one name is used
           ucon64_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
-          fcopy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
+          fcopy (ucon64.fname, x * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
           (*p)++;
@@ -590,7 +590,7 @@ genesis_s (st_rominfo_t *rominfo)
 
           // don't write backups of parts, because one name is used
           ucon64_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
-          fcopy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
+          fcopy (ucon64.fname, x * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
@@ -602,7 +602,7 @@ genesis_s (st_rominfo_t *rominfo)
       for (n = 0; n < 16; n++)
         names[n] = names_mem[n];
 
-      mgd_make_name (ucon64.rom, UCON64_GEN, genesis_rom_size, dest_name);
+      mgd_make_name (ucon64.fname, UCON64_GEN, genesis_rom_size, dest_name);
       strcpy (suffix, (char *) get_suffix (dest_name));
       if ((p = strchr (dest_name, '.')))
         *p = 0;
@@ -629,9 +629,9 @@ genesis_s (st_rominfo_t *rominfo)
             size = ucon64.file_size / 2 - offset;
           // don't write backups of parts, because one name is used
           // write first half of file
-          fcopy (ucon64.rom, offset, size, dest_name, "wb");
+          fcopy (ucon64.fname, offset, size, dest_name, "wb");
           // write second half of file; don't do: "(nparts / 2) * part_size"!
-          fcopy (ucon64.rom, ucon64.file_size / 2 + offset, size, dest_name, "ab");
+          fcopy (ucon64.fname, ucon64.file_size / 2 + offset, size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
           (*p)++;
@@ -644,7 +644,7 @@ genesis_s (st_rominfo_t *rominfo)
     }
   else // type == BIN
     {
-      strcpy (dest_name, ucon64.rom);
+      strcpy (dest_name, ucon64.fname);
       set_suffix (dest_name, ".r01");
       ucon64_output_fname (dest_name, 0);
       p = strrchr (dest_name, '.') + 3;
@@ -653,7 +653,7 @@ genesis_s (st_rominfo_t *rominfo)
         {
           if (surplus == 0 && x == nparts - 1)
             *p = '0';                           // last file should have suffix ".r00"
-          fcopy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "wb");
+          fcopy (ucon64.fname, x * part_size + rominfo->buheader_len, part_size, dest_name, "wb");
           printf (ucon64_msg[WROTE], dest_name);
           (*p)++;
         }
@@ -661,7 +661,7 @@ genesis_s (st_rominfo_t *rominfo)
       if (surplus != 0)
         {
           *p = '0';
-          fcopy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "wb");
+          fcopy (ucon64.fname, x * part_size + rominfo->buheader_len, surplus, dest_name, "wb");
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
@@ -671,7 +671,7 @@ genesis_s (st_rominfo_t *rominfo)
 
 
 int
-genesis_j (st_rominfo_t *rominfo)
+genesis_j (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p;
   int block_size, total_size = 0;
@@ -680,11 +680,11 @@ genesis_j (st_rominfo_t *rominfo)
     {
       unsigned char buf[3];
 
-      strcpy (dest_name, ucon64.rom);
+      strcpy (dest_name, ucon64.fname);
       set_suffix (dest_name, ".smd");
       ucon64_file_handler (dest_name, NULL, 0);
 
-      strcpy (src_name, ucon64.rom);
+      strcpy (src_name, ucon64.fname);
       p = strrchr (src_name, '.') + 1;
       fcopy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
       block_size = ucon64.file_size - rominfo->buheader_len;
@@ -718,12 +718,12 @@ genesis_j (st_rominfo_t *rominfo)
         joined file
         1/3/5/7/2/4/6/8
       */
-      strcpy (dest_name, ucon64.rom);
+      strcpy (dest_name, ucon64.fname);
       set_suffix (dest_name, ".tmp");           // users should use -mgd to get
       ucon64_file_handler (dest_name, NULL, 0); //  a correct name
       remove (dest_name);
 
-      strcpy (src_name, ucon64.rom);
+      strcpy (src_name, ucon64.fname);
       p = strrchr (src_name, '.') - 1;
       block_size = (ucon64.file_size - rominfo->buheader_len) / 2;
       while (fcopy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
@@ -733,7 +733,7 @@ genesis_j (st_rominfo_t *rominfo)
           block_size = (fsizeof (src_name) - rominfo->buheader_len) / 2;
         }
 
-      strcpy (src_name, ucon64.rom);
+      strcpy (src_name, ucon64.fname);
       p = strrchr (src_name, '.') - 1;
       block_size = (ucon64.file_size - rominfo->buheader_len) / 2;
       while (fcopy (src_name, rominfo->buheader_len + block_size,
@@ -751,12 +751,12 @@ genesis_j (st_rominfo_t *rominfo)
     {
       int tried_r00 = 0;
 
-      strcpy (dest_name, ucon64.rom);
+      strcpy (dest_name, ucon64.fname);
       set_suffix (dest_name, ".bin");
       ucon64_file_handler (dest_name, NULL, 0);
       remove (dest_name);
 
-      strcpy (src_name, ucon64.rom);
+      strcpy (src_name, ucon64.fname);
       p = strrchr (src_name, '.') + 3;
       *(p - 1) = '0';                           // be user friendly and avoid confusion
       *p = '1';                                 //  (.r01 is first file, not .r00)
@@ -783,12 +783,12 @@ genesis_j (st_rominfo_t *rominfo)
 
 
 static int
-genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
+genesis_name (st_ucon64_nfo_t *rominfo, const char *name1, const char *name2)
 {
   unsigned char *rom_buffer = NULL;
   char buf[FILENAME_MAX];
 
-  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+  if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
   if (name1)
@@ -807,7 +807,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       memcpy (&rom_buffer[GENESIS_HEADER_START + 32], buf, GENESIS_NAME_LEN);
     }
 
-  strcpy (buf, ucon64.rom);
+  strcpy (buf, ucon64.fname);
   ucon64_file_handler (buf, NULL, 0);
   save_rom (rominfo, buf, &rom_buffer, genesis_rom_size);
 
@@ -818,33 +818,33 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
 
 
 int
-genesis_n (st_rominfo_t *rominfo, const char *name)
+genesis_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   return genesis_name (rominfo, name, NULL);
 }
 
 
 int
-genesis_n2 (st_rominfo_t *rominfo, const char *name)
+genesis_n2 (st_ucon64_nfo_t *rominfo, const char *name)
 {
   return genesis_name (rominfo, NULL, name);
 }
 
 
 int
-genesis_1991 (st_rominfo_t *rominfo)
+genesis_1991 (st_ucon64_nfo_t *rominfo)
 {
   return genesis_name (rominfo, "(C)SEGA", "(C) SEGA");
 }
 
 
 int
-genesis_chk (st_rominfo_t *rominfo)
+genesis_chk (st_ucon64_nfo_t *rominfo)
 {
   unsigned char *rom_buffer = NULL;
   char dest_name[FILENAME_MAX];
 
-  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+  if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
   rom_buffer[GENESIS_HEADER_START + 143] = rominfo->current_internal_crc;      // low byte of checksum
@@ -852,7 +852,7 @@ genesis_chk (st_rominfo_t *rominfo)
 
   dumper (stdout, &rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e, DUMPER_HEX);
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   save_rom (rominfo, dest_name, &rom_buffer, genesis_rom_size);
 
@@ -863,7 +863,7 @@ genesis_chk (st_rominfo_t *rominfo)
 
 
 static int
-genesis_fix_pal_protection (st_rominfo_t *rominfo)
+genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
 /*
   This function searches for PAL protection codes. If it finds one it will
   fix the code so that the game will run on a Genesis (NTSC).
@@ -885,7 +885,7 @@ genesis_fix_pal_protection (st_rominfo_t *rominfo)
 
   puts ("Attempting to fix PAL protection code...");
 
-  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+  if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
   while ((n2 = ucon64.file_size - offset) > 0)
@@ -905,7 +905,7 @@ genesis_fix_pal_protection (st_rominfo_t *rominfo)
     }
   cleanup_cm_patterns (&patterns, n_extra_patterns);
 
-  strcpy (fname, ucon64.rom);
+  strcpy (fname, ucon64.fname);
   ucon64_file_handler (fname, NULL, 0);
   save_rom (rominfo, fname, &rom_buffer, genesis_rom_size);
 
@@ -917,7 +917,7 @@ genesis_fix_pal_protection (st_rominfo_t *rominfo)
 
 
 static int
-genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
+genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
 /*
   This function searches for NTSC protection codes. If it finds one it will
   fix the code so that the game will run on a Mega Drive (PAL).
@@ -939,7 +939,7 @@ genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
 
   puts ("Attempting to fix NTSC protection code...");
 
-  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+  if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
   while ((n2 = ucon64.file_size - offset) > 0)
@@ -959,7 +959,7 @@ genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
     }
   cleanup_cm_patterns (&patterns, n_extra_patterns);
 
-  strcpy (fname, ucon64.rom);
+  strcpy (fname, ucon64.fname);
   ucon64_file_handler (fname, NULL, 0);
   save_rom (rominfo, fname, &rom_buffer, genesis_rom_size);
 
@@ -971,7 +971,7 @@ genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
 
 
 int
-genesis_f (st_rominfo_t *rominfo)
+genesis_f (st_ucon64_nfo_t *rominfo)
 {
   /*
     In the Philipines the television standard is NTSC, but do games made
@@ -987,7 +987,7 @@ genesis_f (st_rominfo_t *rominfo)
 
 
 unsigned char *
-load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
+load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 {
   FILE *file;
   int bytesread;
@@ -1025,7 +1025,7 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 
 
 int
-save_rom (st_rominfo_t *rominfo, const char *name, unsigned char **buffer, int size)
+save_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char **buffer, int size)
 {
   if (type == SMD)
     {
@@ -1038,7 +1038,7 @@ save_rom (st_rominfo_t *rominfo, const char *name, unsigned char **buffer, int s
         different so that we can use "r+b" when writing the contents of buffer
         to disk.
       */
-      fcopy (ucon64.rom, 0, rominfo->buheader_len, name, "wb");
+      fcopy (ucon64.fname, 0, rominfo->buheader_len, name, "wb");
 
       smd_interleave (*buffer, size);
       n = ucon64_fwrite (*buffer, rominfo->buheader_len, size, name, "r+b");
@@ -1057,7 +1057,7 @@ save_rom (st_rominfo_t *rominfo, const char *name, unsigned char **buffer, int s
 
 
 static void
-write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
+write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
                         int totalsize, int size)
 {
   long int fpos = ftell (destfile);             // save file pointer
@@ -1189,16 +1189,16 @@ genesis_multi (int truncate_size, char *fname)
         }
 
       ucon64.console = UCON64_UNKNOWN;
-      ucon64.rom = ucon64.argv[n];
-      ucon64.file_size = fsizeof (ucon64.rom);
+      ucon64.fname = ucon64.argv[n];
+      ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
+      ucon64.nfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
                                        ucon64.buheader_len : 0;
-      ucon64.rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
-      if (genesis_init (ucon64.rominfo) != 0)
-        printf ("WARNING: %s does not appear to be a Genesis ROM\n", ucon64.rom);
+      if (genesis_init (ucon64.nfo) != 0)
+        printf ("WARNING: %s does not appear to be a Genesis ROM\n", ucon64.fname);
       /*
         NOTE: This is NOT the place to mess with ucon64.console. When this
               function is entered ucon64.console must have been UCON64_GEN. We
@@ -1227,25 +1227,25 @@ genesis_multi (int truncate_size, char *fname)
           // no default case, because we already checked value of ucon64.region
           }
 
-      if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+      if ((srcfile = fopen (ucon64.fname, "rb")) == NULL)
         {
-          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
           continue;
         }
-      if (ucon64.rominfo->buheader_len)
-        fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
-      size = ucon64.file_size - ucon64.rominfo->buheader_len;
+      if (ucon64.nfo->buheader_len)
+        fseek (srcfile, ucon64.nfo->buheader_len, SEEK_SET);
+      size = ucon64.file_size - ucon64.nfo->buheader_len;
 
       if (file_no == 0)
         {
-          printf ("Loader: %s\n", ucon64.rom);
+          printf ("Loader: %s\n", ucon64.fname);
           if (size != MD_PRO_LOADER_SIZE)
-            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
+            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.fname);
         }
       else
         {
-          printf ("ROM%d: %s\n", file_no, ucon64.rom);
-          write_game_table_entry (destfile, file_no, ucon64.rominfo, totalsize,
+          printf ("ROM%d: %s\n", file_no, ucon64.fname);
+          write_game_table_entry (destfile, file_no, ucon64.nfo, totalsize,
                                   size);
         }
       file_no++;
@@ -1254,12 +1254,12 @@ genesis_multi (int truncate_size, char *fname)
       byteswritten = 0;                         // # of bytes written per file
       while (!done)
         {
-          if (ucon64.rominfo->interleaved == 2)
+          if (ucon64.nfo->interleaved == 2)
             bytestowrite = fread_mgd (buffer, 1, BUFSIZE, srcfile);
           else
             {
               bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
-              if (ucon64.rominfo->interleaved)
+              if (ucon64.nfo->interleaved)
                 smd_deinterleave (buffer, BUFSIZE);
                 // yes, BUFSIZE. bytestowrite might not be n * 16 kB
             }
@@ -1269,7 +1269,7 @@ genesis_multi (int truncate_size, char *fname)
               done = 1;
               truncated = 1;
               printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
-                      truncate_size / MBIT, ucon64.rom, size - (byteswritten + bytestowrite));
+                      truncate_size / MBIT, ucon64.fname, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
           if (bytestowrite == 0)
@@ -1315,11 +1315,11 @@ genesis_multi (int truncate_size, char *fname)
 
 
 static int
-genesis_testinterleaved (st_rominfo_t *rominfo)
+genesis_testinterleaved (st_ucon64_nfo_t *rominfo)
 {
   unsigned char buf[16384] = { 0 };
 
-  ucon64_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
+  ucon64_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.fname);
   if (!memcmp (buf + GENESIS_HEADER_START, "SEGA", 4))
     return 0;
 
@@ -1327,7 +1327,7 @@ genesis_testinterleaved (st_rominfo_t *rominfo)
   if (!memcmp (buf + GENESIS_HEADER_START, "SEGA", 4))
     return 1;
 
-  q_fread_mgd (buf, rominfo->buheader_len + GENESIS_HEADER_START, 4, ucon64.rom);
+  q_fread_mgd (buf, rominfo->buheader_len + GENESIS_HEADER_START, 4, ucon64.fname);
   if (!memcmp (buf, "SEGA", 4))
     return 2;
 
@@ -1336,7 +1336,7 @@ genesis_testinterleaved (st_rominfo_t *rominfo)
 
 
 int
-genesis_init (st_rominfo_t *rominfo)
+genesis_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value = 0, x, y;
   unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1],
@@ -1443,7 +1443,7 @@ genesis_init (st_rominfo_t *rominfo)
       NULL, "Paddle Controller", NULL
     };
 
-  ucon64_fread (buf, 0, 11, ucon64.rom);
+  ucon64_fread (buf, 0, 11, ucon64.fname);
   smd_header_split = buf[2];
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 7)
     {
@@ -1487,7 +1487,7 @@ genesis_init (st_rominfo_t *rominfo)
 
       memset (buf, 0, 16384);
       ucon64_fread (buf, rominfo->buheader_len,
-        8192 + (GENESIS_HEADER_START + GENESIS_HEADER_LEN) / 2, ucon64.rom);
+        8192 + (GENESIS_HEADER_START + GENESIS_HEADER_LEN) / 2, ucon64.fname);
       smd_deinterleave (buf, 16384);            // buf will contain the deinterleaved data
       memcpy (&genesis_header, buf + GENESIS_HEADER_START, GENESIS_HEADER_LEN);
     }
@@ -1497,14 +1497,14 @@ genesis_init (st_rominfo_t *rominfo)
       //  should be 0 for MGD_GEN.
       genesis_rom_size = ucon64.file_size - rominfo->buheader_len;
       q_fread_mgd (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
-        GENESIS_HEADER_LEN, ucon64.rom);
+        GENESIS_HEADER_LEN, ucon64.fname);
     }
   else // type == BIN
     {
       // We use rominfo->buheader_len to make it user definable.
       genesis_rom_size = ucon64.file_size - rominfo->buheader_len;
       ucon64_fread (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
-        GENESIS_HEADER_LEN, ucon64.rom);
+        GENESIS_HEADER_LEN, ucon64.fname);
     }
 
   if (!UCON64_ISSET (ucon64.split))
@@ -1514,20 +1514,20 @@ genesis_init (st_rominfo_t *rominfo)
           // This code does not work for the last part of a file
           int split = 0;
           if (smd_header_split & 0x40)
-            split = ucon64_testsplit (ucon64.rom);
+            split = ucon64_testsplit (ucon64.fname);
           ucon64.split = split;                 // force displayed info to be correct
         }                                       //  if not split (see ucon64.c)
       else if (type == BIN)
         {
           // This code isn't fool-proof, but it's not that important
-          const char *ptr = get_suffix (ucon64.rom);
+          const char *ptr = get_suffix (ucon64.fname);
           if (strlen (ptr) == 4 && ptr[1] == 'r' &&
               ptr[2] >= '0' && ptr[2] <= '9' && ptr[3] >= '0' && ptr[3] <= '9')
             {
               int n_parts = 0;
               char fname[FILENAME_MAX], *digits;
 
-              strcpy (fname, ucon64.rom);
+              strcpy (fname, ucon64.fname);
               digits = fname + strlen (fname) - 2;
               do
                 {
@@ -1701,7 +1701,7 @@ genesis_init (st_rominfo_t *rominfo)
   // internal ROM crc
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
-      if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+      if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
         return -1;
 
       rominfo->has_internal_crc = 1;

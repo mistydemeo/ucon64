@@ -162,15 +162,15 @@ const unsigned char nds_logodata[NDS_LOGODATA_LEN] =
 
 
 int
-nds_n (st_rominfo_t *rominfo, const char *name)
+nds_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[NDS_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, 0, NDS_NAME_LEN);
   strncpy (buf, name, NDS_NAME_LEN);
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, NDS_HEADER_START + rominfo->buheader_len, NDS_NAME_LEN,
                  dest_name, "r+b");
 
@@ -180,13 +180,13 @@ nds_n (st_rominfo_t *rominfo, const char *name)
 
 
 int
-nds_logo (st_rominfo_t *rominfo)
+nds_logo (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (nds_logodata, NDS_HEADER_START + rominfo->buheader_len + 192,
                  NDS_LOGODATA_LEN, dest_name, "r+b");
 
@@ -196,14 +196,14 @@ nds_logo (st_rominfo_t *rominfo)
 
 
 int
-nds_chk (st_rominfo_t *rominfo)
+nds_chk (st_ucon64_nfo_t *rominfo)
 {
   unsigned char *p = NULL;
   char dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
+  strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   p = (unsigned char *) &rominfo->current_internal_crc;
   ucon64_fwrite (p, NDS_HEADER_START + rominfo->buheader_len + 0x15e,
@@ -217,7 +217,7 @@ nds_chk (st_rominfo_t *rominfo)
 
 
 int
-nds_init (st_rominfo_t *rominfo)
+nds_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value, pos;
   char buf[144];
@@ -226,7 +226,7 @@ nds_init (st_rominfo_t *rominfo)
     ucon64.buheader_len : 0;
 
   ucon64_fread (&nds_header, NDS_HEADER_START + rominfo->buheader_len,
-                NDS_HEADER_LEN, ucon64.rom);
+                NDS_HEADER_LEN, ucon64.fname);
 
   // identify the ROM by the zero area
   memset (&buf, 0, 144);

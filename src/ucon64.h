@@ -38,10 +38,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
 
 /*
-  st_rominfo_t    this struct contains very specific informations only
+  st_ucon64_nfo_t this struct contains very specific informations only
                     <console>_init() can supply after the correct console
                     type was identified.
-  st_ucon64_t     this struct containes st_rominfo_t and unspecific
+  st_ucon64_t     this struct containes st_ucon64_nfo_t and unspecific
                     informations and some workflow stuff
   st_ucon64_obj_t ucon64 object for use in st_getopt2_t
 */
@@ -74,7 +74,7 @@ typedef struct
   int internal_crc_len;                         // length (in bytes) of internal checksum in ROM header
 
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
-} st_rominfo_t;
+} st_ucon64_nfo_t;
 
 typedef struct
 {
@@ -84,8 +84,7 @@ typedef struct
   int option;                                   // current option (UCON64_HEX, UCON64_FIND, ...)
   const char *optarg;                           // ptr to current options optarg
 
-  // TODO?: rename to fname
-  const char *rom;                              // ROM (cmdline) with path
+  const char *fname;                            // ROM (cmdline) with path
   int recursive;
 
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
@@ -94,7 +93,7 @@ typedef struct
   unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk (NOT console specific)
 
   /*
-    if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
+    if console == UCON64_UNKNOWN or st_ucon64_nfo_t == NULL ucon64_rom_nfo() won't
     be shown
   */
   int console;                                  // the detected console system
@@ -136,16 +135,12 @@ typedef struct
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
   /*
-    These values override values in st_rominfo_t. Use UCON64_ISSET()
+    These values override values in st_ucon64_nfo_t. Use UCON64_ISSET()
     to check them. When adding new ones don't forget to update
     ucon64_execute_options() too.
   */
-#if 1
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
-#else
-  st_rominfo_t *override;                       // overrides values in (st_rominfo_t *) rominfo
-#endif
 
 #if 1
   int id;                                       // generate unique name (currently
@@ -168,15 +163,13 @@ typedef struct
   int tv_standard;                              // NES UNIF
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF
-#else
-  void *console_workflow;                       // ptr to a console specific workflow
 #endif
 
 #ifdef  USE_DISCMAGE
   void *image;                                  // info from libdiscmage (dm_image_t *)
 #endif
   void *dat;                                    // info from DATabase (st_ucon64_dat_t *)
-  st_rominfo_t *rominfo;                        // info from <console>_init() (st_rominfo_t *)
+  st_ucon64_nfo_t *nfo;                         // info from <console>_init() (st_ucon64_nfo_t *)
   const st_getopt2_t *options;                  // all options with help (st_getopt2_t)
 } st_ucon64_t;
 
@@ -189,10 +182,9 @@ typedef struct
 } st_ucon64_obj_t;
 
 /*
-  ucon64_init()         init st_rominfo_t, st_ucon64_dat_t and dm_image_t
-  ucon64_nfo()          display contents of st_rominfo_t, st_ucon64_dat_t and
+  ucon64_init()         init st_ucon64_nfo_t, st_ucon64_dat_t and dm_image_t
+  ucon64_nfo()          display contents of st_ucon64_nfo_t, st_ucon64_dat_t and
                           dm_image_t
-  ucon64_flush_rom()    flush only st_rominfo_t
   ucon64_usage()        print usage
   ucon64_fname_arch()
 
@@ -200,7 +192,6 @@ typedef struct
 */
 extern int ucon64_init (void);
 extern int ucon64_nfo (void);
-extern st_rominfo_t *ucon64_flush_rom (st_rominfo_t *);
 extern void ucon64_usage (int argc, char *argv[]);
 #ifdef  USE_ZLIB
 extern void ucon64_fname_arch (const char *fname);

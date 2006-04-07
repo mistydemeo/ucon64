@@ -115,7 +115,7 @@ typedef struct st_coleco_header
 
 
 int
-coleco_init (st_rominfo_t *rominfo)
+coleco_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
   static st_coleco_header_t coleco_header;
@@ -127,7 +127,7 @@ coleco_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
-  ucon64_fread (&coleco_header, ucon64.buheader_len, COLECO_HEADER_LEN, ucon64.rom);
+  ucon64_fread (&coleco_header, ucon64.buheader_len, COLECO_HEADER_LEN, ucon64.fname);
 
   if (coleco_header.type == 0xaa55 ||  // Coleco
       coleco_header.type == 0x55aa)    // ColecoVision

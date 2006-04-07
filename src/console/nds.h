@@ -23,9 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t nds_usage[];
 
-extern int nds_init (st_rominfo_t *rominfo);
-extern int nds_n (st_rominfo_t *rominfo, const char *name);
-extern int nds_logo (st_rominfo_t *rominfo);
-extern int nds_chk (st_rominfo_t *rominfo);
+extern int nds_init (st_ucon64_nfo_t *rominfo);
+extern int nds_n (st_ucon64_nfo_t *rominfo, const char *name);
+extern int nds_logo (st_ucon64_nfo_t *rominfo);
+extern int nds_chk (st_ucon64_nfo_t *rominfo);
 
 #endif

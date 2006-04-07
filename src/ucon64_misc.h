@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"      // USE_DISCMAGE
 #endif
-#include "ucon64.h"      // st_rominfo_t
+#include "ucon64.h"      // st_ucon64_nfo_t
 
 
 /*
@@ -35,8 +35,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   UCON64_DM_VERSION_STEP  min. version of libdiscmage supported by uCON64
 
   ucon64_load_discmage()  load libdiscmage
-  libdm_usage             usage for libdiscmage
-  libdm_gauge             gauge for libdiscmage
+  discmage_usage          usage for libdiscmage
+  discmage_gauge          gauge wrapper for libdiscmage
 */
 #ifdef  USE_DISCMAGE
 #include "libdiscmage/libdiscmage.h" // dm_image_t
@@ -45,9 +45,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_DM_VERSION_MINOR 0
 #define UCON64_DM_VERSION_STEP 7
 
-extern const st_getopt2_t libdm_usage[];
+extern const st_getopt2_t discmage_usage[];
 extern int ucon64_load_discmage (void);
-extern int libdm_gauge (int pos, int size);
+extern int discmage_gauge (int pos, int size);
 #endif
 
 
@@ -109,7 +109,7 @@ extern int ucon64_testsplit (const char *filename);
 extern int ucon64_configfile ();
 extern int ucon64_rename (int mode);
 extern int ucon64_e (void);
-extern int ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname);
+extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);
 

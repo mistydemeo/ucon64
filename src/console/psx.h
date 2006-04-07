@@ -20,6 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef PSX_H
 #define PSX_H
-extern int psx_init (st_rominfo_t *rominfo);
+extern int psx_init (st_ucon64_nfo_t *rominfo);
 extern const st_getopt2_t psx_usage[];
 #endif

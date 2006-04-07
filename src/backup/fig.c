@@ -287,7 +287,7 @@ fig_read_rom (const char *filename, unsigned int parport)
   int n, size, blocksleft, bytesreceived = 0;
   unsigned short address1, address2;
   time_t starttime;
-  st_rominfo_t rominfo;
+  st_ucon64_nfo_t rominfo;
 
   ffe_init_io (parport);
 
@@ -362,7 +362,7 @@ fig_read_rom (const char *filename, unsigned int parport)
 
   // Create a correct header. We can't obtain the header from the Pro Fighter
   //  unless a (the same) cartridge was just dumped to diskette...
-  ucon64.rom = filename;
+  ucon64.fname = filename;
   ucon64.file_size = size + FIG_HEADER_LEN;
   // override everything we know for sure
   ucon64.console = UCON64_SNES;
@@ -370,7 +370,7 @@ fig_read_rom (const char *filename, unsigned int parport)
   ucon64.split = 0;
   ucon64.snes_hirom = hirom ? SNES_HIROM : 0;
   ucon64.interleaved = 0;
-  memset (&rominfo, 0, sizeof (st_rominfo_t));
+  memset (&rominfo, 0, sizeof (st_ucon64_nfo_t));
 
   fflush (file);
   snes_init (&rominfo);

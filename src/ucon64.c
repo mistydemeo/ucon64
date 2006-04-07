@@ -81,13 +81,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static void ucon64_exit (void);
 static int ucon64_execute_options (void);
-static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
-static st_rominfo_t *ucon64_probe (st_rominfo_t *rominfo);
+static void ucon64_rom_nfo (const st_ucon64_nfo_t *nfo);
+static st_ucon64_nfo_t *ucon64_probe (st_ucon64_nfo_t *nfo);
 static int ucon64_rom_handling (void);
 static int ucon64_process_rom (const char *fname);
 
 
-st_ucon64_t ucon64;                             // containes ptr to image, dat and rominfo
+st_ucon64_t ucon64;                             // containes ptr to image, dat and nfo
 
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2005";
 
@@ -130,7 +130,7 @@ static const st_getopt2_t lf[] =
     gg_usage,
     lf,
 #ifdef  USE_DISCMAGE
-    libdm_usage,
+    discmage_usage,
     lf,
 #endif
     dc_usage,
@@ -237,17 +237,17 @@ static const st_getopt2_t lf[] =
   };
 
 
-static st_rominfo_t *
-ucon64_rom_flush (st_rominfo_t * rominfo)
+static st_ucon64_nfo_t *
+ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
 {
-  if (rominfo)
-    memset (rominfo, 0, sizeof (st_rominfo_t));
+  if (nfo)
+    memset (nfo, 0, sizeof (st_ucon64_nfo_t));
 
-  ucon64.rominfo = NULL;
+  ucon64.nfo = NULL;
   ucon64.crc32 = ucon64.fcrc32 = 0;             // yes, this belongs here
-  rominfo->data_size = UCON64_UNKNOWN;
+  nfo->data_size = UCON64_UNKNOWN;
 
-  return rominfo;
+  return nfo;
 }
 
 
@@ -854,7 +854,7 @@ main (int argc, char **argv)
   ucon64.argc = argc;
   ucon64.argv = argv;                           // must be set prior to calling
                                                 //  ucon64_load_discmage() (for DOS)
-  ucon64.rom =
+  ucon64.fname =
   ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
@@ -1153,7 +1153,7 @@ ucon64_process_rom (const char *fname)
           if (ucon64.fname_arch[0] == 0)
             continue;
 
-          ucon64.rom = fname;
+          ucon64.fname = fname;
 
           ucon64_execute_options();
 
@@ -1169,7 +1169,7 @@ ucon64_process_rom (const char *fname)
   else
 #endif
     {
-      ucon64.rom = fname;
+      ucon64.fname = fname;
 
       ucon64_execute_options();
       if (ucon64.flags & WF_STOP)
@@ -1196,7 +1196,7 @@ ucon64_execute_options (void)
 #ifdef  USE_DISCMAGE
   ucon64.image = NULL;
 #endif
-  ucon64.rominfo = NULL;
+  ucon64.nfo = NULL;
 
   ucon64.split = UCON64_UNKNOWN;
 
@@ -1276,22 +1276,22 @@ int
 ucon64_rom_handling (void)
 {
   int no_rom = 0;
-  static st_rominfo_t rominfo;
+  static st_ucon64_nfo_t nfo;
   struct stat fstate;
 
-  ucon64_rom_flush (&rominfo);
+  ucon64_clear_nfo (&nfo);
 
   // a ROM (file)?
-  if (!ucon64.rom)
+  if (!ucon64.fname)
     no_rom = 1;
-  else if (!ucon64.rom[0])
+  else if (!ucon64.fname[0])
     no_rom = 1;
-  else if (access (ucon64.rom, F_OK | R_OK) == -1 && (!(ucon64.flags & WF_NO_ROM)))
+  else if (access (ucon64.fname, F_OK | R_OK) == -1 && (!(ucon64.flags & WF_NO_ROM)))
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.fname);
       no_rom = 1;
     }
-  else if (stat (ucon64.rom, &fstate) == -1)
+  else if (stat (ucon64.fname, &fstate) == -1)
     no_rom = 1;
   else if (S_ISREG (fstate.st_mode) != TRUE)
     no_rom = 1;
@@ -1313,9 +1313,9 @@ ucon64_rom_handling (void)
 
   // The next statement is important and should be executed as soon as
   //  possible (and sensible) in this function
-  if ((ucon64.file_size = fsizeof (ucon64.rom)) < 0)
+  if ((ucon64.file_size = fsizeof (ucon64.fname)) < 0)
     {
-      fprintf (stderr, "ERROR: Could not determine size of %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Could not determine size of %s\n", ucon64.fname);
       return -1;
     }
   // We have to do this here, because we don't know the file size until now
@@ -1333,26 +1333,26 @@ ucon64_rom_handling (void)
   // Try to find the correct console by analysing the ROM
   if (ucon64.flags & WF_PROBE)
     {
-      if (ucon64.rominfo)
+      if (ucon64.nfo)
         {
           // Restore any overrides from st_ucon64_t
           // We have to do this *before* calling ucon64_probe(), *not* afterwards
           if (UCON64_ISSET (ucon64.buheader_len))
-            rominfo.buheader_len = ucon64.buheader_len;
+            nfo.buheader_len = ucon64.buheader_len;
 
           if (UCON64_ISSET (ucon64.interleaved))
-            rominfo.interleaved = ucon64.interleaved;
+            nfo.interleaved = ucon64.interleaved;
 
-//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
+//          ucon64.nfo = (st_ucon64_nfo_t *) &nfo;
         }
-      ucon64.rominfo = ucon64_probe (&rominfo); // determines console type
+      ucon64.nfo = ucon64_probe (&nfo); // determines console type
 
 #ifdef  USE_DISCMAGE
       // check for disc image only if ucon64_probe() failed or --disc was used
       if (ucon64.discmage_enabled)
-//        if (!ucon64.rominfo || ucon64.force_disc)
+//        if (!ucon64.nfo || ucon64.force_disc)
         if (ucon64.force_disc)
-          ucon64.image = dm_reopen (ucon64.rom, 0, (dm_image_t *) ucon64.image);
+          ucon64.image = dm_reopen (ucon64.fname, 0, (dm_image_t *) ucon64.image);
 #endif
     }
   // end of WF_PROBE
@@ -1365,10 +1365,10 @@ ucon64_rom_handling (void)
     */
     if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
         ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
-      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
+      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.fname))
         {
           fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
-                   basename2 (ucon64.rom));
+                   basename2 (ucon64.fname));
           return -1;
         }
 
@@ -1390,7 +1390,7 @@ ucon64_rom_handling (void)
   if (ucon64.crc32 == 0)
     if (!ucon64.force_disc) // NOT for disc images
       if (!(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
-        ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
+        ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo ? ucon64.nfo->buheader_len : 0);
 
 
   // DATabase
@@ -1401,10 +1401,10 @@ ucon64_rom_handling (void)
       if (ucon64.dat)
         {
           // detected file size must match DAT file size
-          int size = ucon64.rominfo ?
-                       UCON64_ISSET (ucon64.rominfo->data_size) ?
-                         ucon64.rominfo->data_size :
-                         ucon64.file_size - ucon64.rominfo->buheader_len :
+          int size = ucon64.nfo ?
+                       UCON64_ISSET (ucon64.nfo->data_size) ?
+                         ucon64.nfo->data_size :
+                         ucon64.file_size - ucon64.nfo->buheader_len :
                        ucon64.file_size;
           if ((int) (((st_ucon64_dat_t *) ucon64.dat)->fsize) != size)
             ucon64.dat = NULL;
@@ -1424,19 +1424,19 @@ ucon64_rom_handling (void)
           default:
             // Use ucon64.dat instead of ucon64.dat_enabled in case the index
             //  file could not be created/opened -> no segmentation fault
-            if (ucon64.dat && ucon64.rominfo)
+            if (ucon64.dat && ucon64.nfo)
               {
-                if (!ucon64.rominfo->name[0])
-                  strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                if (!ucon64.nfo->name[0])
+                  strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
                 else if (ucon64.console == UCON64_NES)
                   { // override the three-character FDS or FAM name
                     int t = nes_get_file_type ();
                     if (t == FDS || t == FAM)
-                      strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                      strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
                   }
 
-                if (!ucon64.rominfo->country)
-                  ucon64.rominfo->country = NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->country);
+                if (!ucon64.nfo->country)
+                  ucon64.nfo->country = NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->country);
               }
             break;
           }
@@ -1450,13 +1450,13 @@ ucon64_rom_handling (void)
 }
 
 
-st_rominfo_t *
-ucon64_probe (st_rominfo_t * rominfo)
+st_ucon64_nfo_t *
+ucon64_probe (st_ucon64_nfo_t * nfo)
 {
   typedef struct
     {
       int console;
-      int (*init) (st_rominfo_t *);
+      int (*init) (st_ucon64_nfo_t *);
       uint32_t flags;
     } st_probe_t;
 
@@ -1509,11 +1509,11 @@ ucon64_probe (st_rominfo_t * rominfo)
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].console == ucon64.console)
           {
-            ucon64_rom_flush (rominfo);
+            ucon64_clear_nfo (nfo);
 
-            probe[x].init (rominfo);
+            probe[x].init (nfo);
 
-            return rominfo;
+            return nfo;
           }
     }
   else if (ucon64.file_size <= MAXROMSIZE)      // give auto recognition a try
@@ -1521,12 +1521,12 @@ ucon64_probe (st_rominfo_t * rominfo)
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)
           {
-            ucon64_rom_flush (rominfo);
+            ucon64_clear_nfo (nfo);
 
-            if (!probe[x].init (rominfo))
+            if (!probe[x].init (nfo))
               {
                 ucon64.console = probe[x].console;
-                return rominfo;
+                return nfo;
               }
           }
     }
@@ -1538,7 +1538,7 @@ ucon64_probe (st_rominfo_t * rominfo)
 int
 ucon64_nfo (void)
 {
-  puts (ucon64.rom);
+  puts (ucon64.fname);
   if (ucon64.fname_arch[0])
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
@@ -1549,8 +1549,8 @@ ucon64_nfo (void)
 #endif
     fprintf (stderr, "%s\n", ucon64_msg[CONSOLE_ERROR]);
 
-  if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
-    ucon64_rom_nfo (ucon64.rominfo);
+  if (ucon64.nfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
+    ucon64_rom_nfo (ucon64.nfo);
 
 #ifdef  USE_DISCMAGE
   if (ucon64.discmage_enabled)
@@ -1615,57 +1615,57 @@ toprint (int c)
 
 
 void
-ucon64_rom_nfo (const st_rominfo_t *rominfo)
+ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 {
-  unsigned int padded = ucon64_testpad (ucon64.rom),
-               intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
-                         ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
+  unsigned int padded = ucon64_testpad (ucon64.fname),
+               intro = ((ucon64.file_size - nfo->buheader_len) > MBIT) ?
+                         ((ucon64.file_size - nfo->buheader_len) % MBIT) : 0;
   int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
-                   ucon64_testsplit (ucon64.rom);
+                   ucon64_testsplit (ucon64.fname);
   char buf[MAXBUFSIZE];
 
   // backup unit header
-  if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != UNKNOWN_HEADER_LEN)
+  if (nfo->buheader && nfo->buheader_len && nfo->buheader_len != UNKNOWN_HEADER_LEN)
     {
-      dumper (stdout, rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start, DUMPER_HEX);
+      dumper (stdout, nfo->buheader, nfo->buheader_len, nfo->buheader_start, DUMPER_HEX);
       fputc ('\n', stdout);
     }
   else
-    if (rominfo->buheader_len && ucon64.quiet < 0)
+    if (nfo->buheader_len && ucon64.quiet < 0)
       {
-        ucon64_dump (stdout, ucon64.rom, rominfo->buheader_start, rominfo->buheader_len, DUMPER_HEX);
+        ucon64_dump (stdout, ucon64.fname, nfo->buheader_start, nfo->buheader_len, DUMPER_HEX);
         fputc ('\n', stdout);
       }
 
   // backup unit type?
-  if (rominfo->copier_usage != NULL)
+  if (nfo->copier_usage != NULL)
     {
-      puts (rominfo->copier_usage);
+      puts (nfo->copier_usage);
       fputc ('\n', stdout);
     }
 
   // ROM header
-  if (rominfo->header && rominfo->header_len)
+  if (nfo->header && nfo->header_len)
     {
-      dumper (stdout, rominfo->header, rominfo->header_len,
-        rominfo->header_start + rominfo->buheader_len, DUMPER_HEX);
+      dumper (stdout, nfo->header, nfo->header_len,
+        nfo->header_start + nfo->buheader_len, DUMPER_HEX);
       fputc ('\n', stdout);
     }
 
   // console type
-  if (rominfo->console_usage != NULL)
-    puts (rominfo->console_usage);
+  if (nfo->console_usage != NULL)
+    puts (nfo->console_usage);
 
   // name, maker, country and size
-  strcpy (buf, NULL_TO_EMPTY (rominfo->name));
-  x = UCON64_ISSET (rominfo->data_size) ?
-    rominfo->data_size :
-    ucon64.file_size - rominfo->buheader_len;
+  strcpy (buf, NULL_TO_EMPTY (nfo->name));
+  x = UCON64_ISSET (nfo->data_size) ?
+    nfo->data_size :
+    ucon64.file_size - nfo->buheader_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           to_func (buf, strlen (buf), toprint),
-          NULL_TO_EMPTY (rominfo->maker),
-          NULL_TO_EMPTY (rominfo->country),
+          NULL_TO_EMPTY (nfo->maker),
+          NULL_TO_EMPTY (nfo->country),
           x,
           TOMBIT_F (x));
 
@@ -1681,18 +1681,18 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
 
   // interleaved?
-  if (rominfo->interleaved != UCON64_UNKNOWN)
+  if (nfo->interleaved != UCON64_UNKNOWN)
     // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
     //  nonsense for others
     printf ("Interleaved/Swapped: %s\n",
-      rominfo->interleaved ?
-        (rominfo->interleaved > 1 ? "Yes (2)" : "Yes") :
+      nfo->interleaved ?
+        (nfo->interleaved > 1 ? "Yes (2)" : "Yes") :
         "No");
 
   // backup unit header?
-  if (rominfo->buheader_len)
+  if (nfo->buheader_len)
     printf ("Backup unit/emulator header: Yes, %d Bytes\n",
-      rominfo->buheader_len);
+      nfo->buheader_len);
   else
 // for NoisyB: <read only mode ON>
     puts ("Backup unit/emulator header: No");   // printing No is handy for SNES ROMs
@@ -1709,14 +1709,14 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     }
 
   // miscellaneous info
-  if (rominfo->misc[0])
+  if (nfo->misc[0])
     {
-      strcpy (buf, rominfo->misc);
+      strcpy (buf, nfo->misc);
       printf ("%s\n", to_func (buf, strlen (buf), toprint));
     }
 
   // internal checksums?
-  if (rominfo->has_internal_crc)
+  if (nfo->has_internal_crc)
     {
       char *fstr;
 
@@ -1728,27 +1728,27 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
         fstr = "Header checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)\n";
 
       sprintf (buf, fstr,
-        rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
+        nfo->internal_crc_len * 2, nfo->internal_crc_len * 2);
 #ifdef  USE_ANSI_COLOR
       printf (buf,
         ucon64.ansi_color ?
-          ((rominfo->current_internal_crc == rominfo->internal_crc) ?
+          ((nfo->current_internal_crc == nfo->internal_crc) ?
             "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
           :
-          ((rominfo->current_internal_crc == rominfo->internal_crc) ? "Ok" : "Bad"),
-        rominfo->current_internal_crc,
-        (rominfo->current_internal_crc == rominfo->internal_crc) ? '=' : '!',
-        rominfo->internal_crc);
+          ((nfo->current_internal_crc == nfo->internal_crc) ? "Ok" : "Bad"),
+        nfo->current_internal_crc,
+        (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
+        nfo->internal_crc);
 #else
       printf (buf,
-        (rominfo->current_internal_crc == rominfo->internal_crc) ? "Ok" : "Bad",
-        rominfo->current_internal_crc,
-        (rominfo->current_internal_crc == rominfo->internal_crc) ? '=' : '!',
-        rominfo->internal_crc);
+        (nfo->current_internal_crc == nfo->internal_crc) ? "Ok" : "Bad",
+        nfo->current_internal_crc,
+        (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
+        nfo->internal_crc);
 #endif
 
-      if (rominfo->internal_crc2[0])
-        printf ("%s\n", rominfo->internal_crc2);
+      if (nfo->internal_crc2[0])
+        printf ("%s\n", nfo->internal_crc2);
     }
 
   fflush (stdout);

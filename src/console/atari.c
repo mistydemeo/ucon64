@@ -326,7 +326,7 @@ atari_init (st_ucon64_nfo_t * rominfo)
 {
   int i, j, bsmode, size = ucon64.file_size;
   unsigned int crc32;
-  static char copier_usage[80];
+  static char backup_usage[80];
   unsigned char first, image[ATARI_ROM_SIZE], buffer[0x200];
   char md5[32];
 
@@ -429,10 +429,10 @@ atari_init (st_ucon64_nfo_t * rominfo)
 
       rominfo->console_usage = atari_usage[0].help;
       // "Cuttle Card (2)/Starpath) Supercharger/YOKO backup unit"
-      snprintf (copier_usage, 80, "%s/%s/%s", cc2_usage[0].help,
+      snprintf (backup_usage, 80, "%s/%s/%s", cc2_usage[0].help,
                 spsc_usage[0].help, yoko_usage[0].help);
-      copier_usage[80 - 1] = 0;
-      rominfo->copier_usage = copier_usage;
+      backup_usage[80 - 1] = 0;
+      rominfo->backup_usage = backup_usage;
 
       sprintf (rominfo->misc,
                "Bankswitch type: %s\n"

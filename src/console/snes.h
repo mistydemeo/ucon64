@@ -34,7 +34,7 @@ typedef enum { SWC = 1, GD3, UFO, FIG, MGD_SNES, SMC } snes_file_t;
 extern const st_getopt2_t snes_usage[];
 
 extern snes_file_t snes_get_file_type (void);
-extern int snes_buheader_info (st_ucon64_nfo_t *rominfo);
+extern int snes_backup_header_info (st_ucon64_nfo_t *rominfo);
 extern int snes_chk (st_ucon64_nfo_t *rominfo);
 extern int snes_col (const char *color);
 extern int snes_demirror (st_ucon64_nfo_t *rominfo);

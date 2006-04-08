@@ -366,7 +366,7 @@ fig_read_rom (const char *filename, unsigned int parport)
   ucon64.file_size = size + FIG_HEADER_LEN;
   // override everything we know for sure
   ucon64.console = UCON64_SNES;
-  ucon64.buheader_len = FIG_HEADER_LEN;
+  ucon64.backup_header_len = FIG_HEADER_LEN;
   ucon64.split = 0;
   ucon64.snes_hirom = hirom ? SNES_HIROM : 0;
   ucon64.interleaved = 0;

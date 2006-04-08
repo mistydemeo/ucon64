@@ -228,15 +228,15 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_HD:
-      ucon64.buheader_len = UNKNOWN_HEADER_LEN;
+      ucon64.backup_header_len = UNKNOWN_BACKUP_HEADER_LEN;
       break;
 
     case UCON64_HDN:
-      ucon64.buheader_len = strtol (optarg, NULL, 10);
+      ucon64.backup_header_len = strtol (optarg, NULL, 10);
       break;
 
     case UCON64_NHD:
-      ucon64.buheader_len = 0;
+      ucon64.backup_header_len = 0;
       break;
 
     case UCON64_SWP:                            // deprecated
@@ -664,10 +664,10 @@ ucon64_options (st_ucon64_t *p)
   switch (c)
     {
     case UCON64_CRCHD:                          // deprecated
-      value = UNKNOWN_HEADER_LEN;
+      value = UNKNOWN_BACKUP_HEADER_LEN;
     case UCON64_CRC:
       if (!value)
-        value = ucon64.nfo ? ucon64.nfo->buheader_len : ucon64.buheader_len;
+        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (basename2 (ucon64.fname), stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
@@ -680,7 +680,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_SHA1:
       if (!value)
-        value = ucon64.nfo ? ucon64.nfo->buheader_len : ucon64.buheader_len;
+        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (basename2 (ucon64.fname), stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
@@ -692,7 +692,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_MD5:
       if (!value)
-        value = ucon64.nfo ? ucon64.nfo->buheader_len : ucon64.buheader_len;
+        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (basename2 (ucon64.fname), stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
@@ -794,11 +794,11 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_PADHD:                          // deprecated
-      value = UNKNOWN_HEADER_LEN;
+      value = UNKNOWN_BACKUP_HEADER_LEN;
     case UCON64_P:
     case UCON64_PAD:
       if (!value && ucon64.nfo)
-        value = ucon64.nfo->buheader_len;
+        value = ucon64.nfo->backup_header_len;
       ucon64_file_handler (dest_name, src_name, 0);
 
       fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
@@ -817,7 +817,7 @@ ucon64_options (st_ucon64_t *p)
 
       fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
       if (truncate2 (dest_name, strtol (optarg, NULL, 10) +
-            (ucon64.nfo ? ucon64.nfo->buheader_len : 0)) == -1)
+            (ucon64.nfo ? ucon64.nfo->backup_header_len : 0)) == -1)
         {
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
           exit (1);
@@ -1186,7 +1186,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MKDAT:
-      ucon64_create_dat (optarg, ucon64.fname, ucon64.nfo ? ucon64.nfo->buheader_len : 0);
+      ucon64_create_dat (optarg, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
       break;
 
     case UCON64_MULTI:
@@ -1283,7 +1283,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_DBUH:
-      snes_buheader_info (ucon64.nfo);
+      snes_backup_header_info (ucon64.nfo);
       break;
 
     case UCON64_SWAP:
@@ -1888,7 +1888,7 @@ ucon64_options (st_ucon64_t *p)
         fig_read_rom (ucon64.fname, ucon64.parport);
       else
         {
-          if (!ucon64.nfo->buheader_len)
+          if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
@@ -1946,7 +1946,7 @@ ucon64_options (st_ucon64_t *p)
         gd3_read_rom (ucon64.fname, ucon64.parport); // dumping is not yet supported
       else
         {
-          if (!ucon64.nfo->buheader_len)
+          if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
                    stderr);
           else                                  // file exists -> send it to the copier
@@ -1976,7 +1976,7 @@ ucon64_options (st_ucon64_t *p)
         gd6_read_rom (ucon64.fname, ucon64.parport); // dumping is not yet supported
       else
         {
-          if (!ucon64.nfo->buheader_len)
+          if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
                    stderr);
           else
@@ -2006,7 +2006,7 @@ ucon64_options (st_ucon64_t *p)
         smsgg_read_rom (ucon64.fname, ucon64.parport, 32 * MBIT);
       else
         {
-          if (ucon64.nfo->buheader_len)
+          if (ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has a header. Remove it with -stp or -mgd\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
@@ -2061,7 +2061,7 @@ ucon64_options (st_ucon64_t *p)
         md_read_rom (ucon64.fname, ucon64.parport, 64 * MBIT); // reads 32 Mbit if Sharp card
       else                                      // file exists -> send it to the MD-PRO
         {
-          if (ucon64.nfo->buheader_len)     // binary with header is possible
+          if (ucon64.nfo->backup_header_len)     // binary with header is possible
             fputs ("ERROR: This ROM has a header. Remove it with -stp or -bin\n",
                    stderr);
           else if (genesis_get_file_type () != BIN)
@@ -2095,7 +2095,7 @@ ucon64_options (st_ucon64_t *p)
         msg_read_rom (ucon64.fname, ucon64.parport);
       else
         {
-          if (!ucon64.nfo->buheader_len)
+          if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
@@ -2146,7 +2146,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSMC: // we don't use WF_NO_ROM => no need to check for file
-      if (!ucon64.nfo->buheader_len)
+      if (!ucon64.nfo->backup_header_len)
         fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n",
                stderr);
       else
@@ -2167,7 +2167,7 @@ ucon64_options (st_ucon64_t *p)
         smd_read_rom (ucon64.fname, ucon64.parport);
       else                                      // file exists -> send it to the copier
         {
-          if (!ucon64.nfo->buheader_len)
+          if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
                    stderr);
           else if (!ucon64.nfo->interleaved)
@@ -2195,7 +2195,7 @@ ucon64_options (st_ucon64_t *p)
         swc_read_rom (ucon64.fname, ucon64.parport, ucon64.io_mode);
       else
         {
-          if (!ucon64.nfo->buheader_len)
+          if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
@@ -2247,7 +2247,7 @@ ucon64_options (st_ucon64_t *p)
                    "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
                    stderr);
           else
-            doctor64_write (ucon64.fname, ucon64.nfo->buheader_len,
+            doctor64_write (ucon64.fname, ucon64.nfo->backup_header_len,
                             ucon64.file_size, ucon64.parport);
         }
       fputc ('\n', stdout);

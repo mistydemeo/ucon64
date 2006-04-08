@@ -76,11 +76,11 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x, value;
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
   ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
-    rominfo->buheader_len, JAGUAR_HEADER_LEN, ucon64.fname);
+    rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
   value = 0;
   for (x = 0; x < 12; x++)
     value += OFFSET (jaguar_header, x);
@@ -88,11 +88,11 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
     result = 0;
   else
     {
-      rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-        ucon64.buheader_len : (int) UNKNOWN_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+        ucon64.backup_header_len : (int) UNKNOWN_BACKUP_HEADER_LEN;
 
       ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
-          rominfo->buheader_len, JAGUAR_HEADER_LEN, ucon64.fname);
+          rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
       value = 0;
       for (x = 0; x < 12; x++)
         value += OFFSET (jaguar_header, x);
@@ -110,7 +110,7 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
   rominfo->header = &jaguar_header;
 
   rominfo->console_usage = jaguar_usage[0].help;
-  rominfo->copier_usage = unknown_usage[0].help;
+  rominfo->backup_usage = unknown_backup_usage[0].help;
 
   return result;
 }

@@ -42,7 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "console.h"
 #include "gba.h"
-#include "backup/fal.h"
+#include "backup/backup.h"
 
 
 #define GBA_NAME_LEN 12
@@ -277,7 +277,7 @@ gba_n (st_ucon64_nfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, GBA_NAME_LEN,
+  ucon64_fwrite (buf, GBA_HEADER_START + rominfo->backup_header_len + 0xa0, GBA_NAME_LEN,
             dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -293,7 +293,7 @@ gba_logo (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (gba_logodata, GBA_HEADER_START + rominfo->buheader_len + 0x04,
+  ucon64_fwrite (gba_logodata, GBA_HEADER_START + rominfo->backup_header_len + 0x04,
             GBA_LOGODATA_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -311,10 +311,10 @@ gba_chk (st_ucon64_nfo_t *rominfo)
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   buf = rominfo->current_internal_crc;
-  ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->buheader_len + 0xbd,
+  ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->backup_header_len + 0xbd,
     buf, "r+b");
 
-  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->buheader_len + 0xbd, DUMPER_HEX);
+  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->backup_header_len + 0xbd, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -578,10 +578,10 @@ gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (rominfo->buheader_len)                    // copy header (if present)
+  if (rominfo->backup_header_len)                    // copy header (if present)
     {
-      fread (buffer, 1, rominfo->buheader_len, srcfile);
-      fwrite (buffer, 1, rominfo->buheader_len, destfile);
+      fread (buffer, 1, rominfo->backup_header_len, srcfile);
+      fwrite (buffer, 1, rominfo->backup_header_len, destfile);
     }
 
   replace[0] = wait_time;
@@ -612,22 +612,22 @@ gba_init (st_ucon64_nfo_t *rominfo)
   int result = -1, value;
   char buf[MAXBUFSIZE];
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
   ucon64_fread (&gba_header, GBA_HEADER_START +
-           rominfo->buheader_len, GBA_HEADER_LEN, ucon64.fname);
+           rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
   if (/*gba_header.game_id_prefix == 'A' && */ // 'B' in Mario vs. Donkey Kong
       gba_header.start[3] == 0xea && gba_header.pad1 == 0x96 && gba_header.gba_type == 0)
     result = 0;
   else
     {
 #if 0 // AFAIK (dbjh) GBA ROMs never have a header
-      rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-        ucon64.buheader_len : UNKNOWN_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+        ucon64.backup_header_len : UNKNOWN_HEADER_LEN;
 
       ucon64_fread (&gba_header, GBA_HEADER_START +
-               rominfo->buheader_len, GBA_HEADER_LEN, ucon64.fname);
+               rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
       if (gba_header.game_id_prefix == 'A' && gba_header.gba_type == 0)
         result = 0;
       else
@@ -713,7 +713,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
 
   rominfo->console_usage = gba_usage[0].help;
   // We use fal_usage, but we could just as well use f2a_usage
-  rominfo->copier_usage = (!rominfo->buheader_len ? fal_usage[0].help : unknown_usage[0].help);
+  rominfo->backup_usage = (!rominfo->backup_header_len ? fal_usage[0].help : unknown_backup_usage[0].help);
 
   return result;
 }

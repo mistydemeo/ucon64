@@ -48,6 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "ucon64_dat.h"
 #include "console/console.h"
+#include "backup/backup.h"
 
 #define MAX_FIELDS_IN_DAT 32
 #define DAT_FIELD_SEPARATOR (0xac)
@@ -516,7 +517,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
       }
 
   fname_to_console (dat->datfile, dat);
-  dat->copier_usage = unknown_usage[0].help;
+  dat->backup_usage = unknown_backup_usage[0].help;
 
   return dat;
 }
@@ -1010,7 +1011,7 @@ ucon64_close_datfile (void)
 
 int
 ucon64_create_dat (const char *dat_file_name, const char *filename,
-                   int buheader_len)
+                   int backup_header_len)
 {
   static int first_file = 1, console;
   int n, x;
@@ -1259,7 +1260,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            fname,
                            fname,
                            ucon64.crc32,
-                           ucon64.file_size - buheader_len);
+                           ucon64.file_size - backup_header_len);
   ucon64_n_files++;
   return 0;
 }

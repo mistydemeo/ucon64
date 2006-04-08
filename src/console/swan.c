@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console.h"
+#include "backup/backup.h"
 #include "swan.h"
 
 
@@ -148,9 +149,9 @@ swan_init (st_ucon64_nfo_t *rominfo)
       "NMC", NULL, NULL
     };
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
 
-  ucon64_fread (&swan_header, SWAN_HEADER_START + rominfo->buheader_len,
+  ucon64_fread (&swan_header, SWAN_HEADER_START + rominfo->backup_header_len,
            SWAN_HEADER_LEN, ucon64.fname);
 
   rominfo->header = &swan_header;
@@ -190,7 +191,7 @@ swan_init (st_ucon64_nfo_t *rominfo)
     result = 0;
 
   rominfo->console_usage = swan_usage[0].help;
-  rominfo->copier_usage = unknown_usage[0].help;
+  rominfo->backup_usage = unknown_backup_usage[0].help;
 
   free (rom_buffer);
   return result;

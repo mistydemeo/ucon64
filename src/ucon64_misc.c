@@ -1767,9 +1767,9 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (rominfo->buheader_len)                    // copy header (if present)
+  if (rominfo->backup_header_len)                    // copy header (if present)
     {
-      n = rominfo->buheader_len;
+      n = rominfo->backup_header_len;
       while ((bytesread = fread (buffer, 1, MIN (n, PATTERN_BUFSIZE), srcfile)))
         {
           fwrite (buffer, 1, bytesread, destfile);

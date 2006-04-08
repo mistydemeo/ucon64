@@ -251,7 +251,7 @@ ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
 }
 
 
-//#define TEST 
+#define TEST 
 #ifdef  TEST
 typedef struct
 {
@@ -867,7 +867,7 @@ main (int argc, char **argv)
 
   ucon64.battery =
   ucon64.bs_dump =
-  ucon64.buheader_len =
+  ucon64.backup_header_len =
   ucon64.console =
   ucon64.controller =
   ucon64.controller2 =
@@ -1319,11 +1319,11 @@ ucon64_rom_handling (void)
       return -1;
     }
   // We have to do this here, because we don't know the file size until now
-  if (ucon64.buheader_len > ucon64.file_size)
+  if (ucon64.backup_header_len > ucon64.file_size)
     {
       fprintf (stderr,
                "ERROR: A backup unit header length was specified that is larger than the file\n"
-               "       size (%d > %d)\n", ucon64.buheader_len, ucon64.file_size);
+               "       size (%d > %d)\n", ucon64.backup_header_len, ucon64.file_size);
       return -1;
     }
 
@@ -1337,8 +1337,8 @@ ucon64_rom_handling (void)
         {
           // Restore any overrides from st_ucon64_t
           // We have to do this *before* calling ucon64_probe(), *not* afterwards
-          if (UCON64_ISSET (ucon64.buheader_len))
-            nfo.buheader_len = ucon64.buheader_len;
+          if (UCON64_ISSET (ucon64.backup_header_len))
+            nfo.backup_header_len = ucon64.backup_header_len;
 
           if (UCON64_ISSET (ucon64.interleaved))
             nfo.interleaved = ucon64.interleaved;
@@ -1390,7 +1390,7 @@ ucon64_rom_handling (void)
   if (ucon64.crc32 == 0)
     if (!ucon64.force_disc) // NOT for disc images
       if (!(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
-        ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo ? ucon64.nfo->buheader_len : 0);
+        ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
 
 
   // DATabase
@@ -1404,7 +1404,7 @@ ucon64_rom_handling (void)
           int size = ucon64.nfo ?
                        UCON64_ISSET (ucon64.nfo->data_size) ?
                          ucon64.nfo->data_size :
-                         ucon64.file_size - ucon64.nfo->buheader_len :
+                         ucon64.file_size - ucon64.nfo->backup_header_len :
                        ucon64.file_size;
           if ((int) (((st_ucon64_dat_t *) ucon64.dat)->fsize) != size)
             ucon64.dat = NULL;
@@ -1500,7 +1500,7 @@ ucon64_probe (st_ucon64_nfo_t * nfo)
       {UCON64_S16, NULL, 0},
       {UCON64_VEC, NULL, 0},
 #endif
-      {UCON64_UNKNOWN, unknown_init, 0},
+      {UCON64_UNKNOWN, unknown_console_init, 0},
       {0, NULL, 0}
     };
 
@@ -1618,29 +1618,29 @@ void
 ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 {
   unsigned int padded = ucon64_testpad (ucon64.fname),
-               intro = ((ucon64.file_size - nfo->buheader_len) > MBIT) ?
-                         ((ucon64.file_size - nfo->buheader_len) % MBIT) : 0;
+               intro = ((ucon64.file_size - nfo->backup_header_len) > MBIT) ?
+                         ((ucon64.file_size - nfo->backup_header_len) % MBIT) : 0;
   int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
                    ucon64_testsplit (ucon64.fname);
   char buf[MAXBUFSIZE];
 
   // backup unit header
-  if (nfo->buheader && nfo->buheader_len && nfo->buheader_len != UNKNOWN_HEADER_LEN)
+  if (nfo->backup_header && nfo->backup_header_len && nfo->backup_header_len != UNKNOWN_BACKUP_HEADER_LEN)
     {
-      dumper (stdout, nfo->buheader, nfo->buheader_len, nfo->buheader_start, DUMPER_HEX);
+      dumper (stdout, nfo->backup_header, nfo->backup_header_len, nfo->backup_header_start, DUMPER_HEX);
       fputc ('\n', stdout);
     }
   else
-    if (nfo->buheader_len && ucon64.quiet < 0)
+    if (nfo->backup_header_len && ucon64.quiet < 0)
       {
-        ucon64_dump (stdout, ucon64.fname, nfo->buheader_start, nfo->buheader_len, DUMPER_HEX);
+        ucon64_dump (stdout, ucon64.fname, nfo->backup_header_start, nfo->backup_header_len, DUMPER_HEX);
         fputc ('\n', stdout);
       }
 
   // backup unit type?
-  if (nfo->copier_usage != NULL)
+  if (nfo->backup_usage != NULL)
     {
-      puts (nfo->copier_usage);
+      puts (nfo->backup_usage);
       fputc ('\n', stdout);
     }
 
@@ -1648,7 +1648,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   if (nfo->header && nfo->header_len)
     {
       dumper (stdout, nfo->header, nfo->header_len,
-        nfo->header_start + nfo->buheader_len, DUMPER_HEX);
+        nfo->header_start + nfo->backup_header_len, DUMPER_HEX);
       fputc ('\n', stdout);
     }
 
@@ -1660,7 +1660,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   strcpy (buf, NULL_TO_EMPTY (nfo->name));
   x = UCON64_ISSET (nfo->data_size) ?
     nfo->data_size :
-    ucon64.file_size - nfo->buheader_len;
+    ucon64.file_size - nfo->backup_header_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           to_func (buf, strlen (buf), toprint),
@@ -1690,9 +1690,9 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
         "No");
 
   // backup unit header?
-  if (nfo->buheader_len)
+  if (nfo->backup_header_len)
     printf ("Backup unit/emulator header: Yes, %d Bytes\n",
-      nfo->buheader_len);
+      nfo->backup_header_len);
   else
 // for NoisyB: <read only mode ON>
     puts ("Backup unit/emulator header: No");   // printing No is handy for SNES ROMs

@@ -41,12 +41,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "vboy.h"
 
 
-extern const st_getopt2_t unknown_usage[];
-extern int unknown_init (st_ucon64_nfo_t *rominfo);
+/*
+  usage and init function for all unknown consoles
+*/
+extern const st_getopt2_t unknown_console_usage[];
+extern int unknown_console_init (st_ucon64_nfo_t *rominfo);
 
 
 /*
-  usage for consoles not supported, yet
+  usages for unsupported consoles
 */
 extern const st_getopt2_t cd32_usage[];
 extern const st_getopt2_t cdi_usage[];
@@ -65,9 +68,28 @@ extern const st_getopt2_t sat_usage[];
 extern const st_getopt2_t vc4000_usage[];
 extern const st_getopt2_t vectrex_usage[];
 extern const st_getopt2_t xbox_usage[];
+#if 0
+Nintendo Revolution 2006
+XBox 360
+PS3
+Microvision (Handheld)/1979 MB
+Supervision/1991 Hartung
+Pokemon Mini/200X Nintendo http://www.nintendo.com
+N-Gage/2003 Nokia http://www.n-gage.com
+PSP (Playstation Portable)/2005 Sony http://www.playstation.com
+Adv. Vision
+Arcadia
+Astrocade
+Indrema
+Nuon
+RCA Studio 2
+RDI Halcyon
+Telstar
+XE System
+#endif
+
 
 #define NINTENDO_MAKER_LEN 684
-
 extern const char *nintendo_maker[];
 
 

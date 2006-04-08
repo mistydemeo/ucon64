@@ -46,7 +46,7 @@ typedef struct
   char refname[100];                            // ref name
 
   const char *console_usage;                    // console system usage
-  const char *copier_usage;                     // backup unit usage
+  const char *backup_usage;                     // backup unit usage
 } st_ucon64_dat_t;
 
 /*
@@ -64,6 +64,6 @@ extern int ucon64_dat_indexer (void);
 //extern st_ucon64_dat_t *ucon64_dat_flush (st_ucon64_dat_t *dat);
 extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version);
 extern int ucon64_create_dat (const char *dat_file_name, const char *filename,
-                              int buheader_len);
+                              int backup_header_len);
                    
 #endif // UCON64_DAT_H

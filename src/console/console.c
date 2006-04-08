@@ -30,19 +30,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console.h"
 
 
-const st_getopt2_t unknown_usage[] =
+const st_getopt2_t unknown_console_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Unknown backup unit/emulator",
+      NULL, "Unknown console",
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 int
-unknown_init (st_ucon64_nfo_t *rominfo)
-// init routine for all consoles missing in console/.
+unknown_console_init (st_ucon64_nfo_t *rominfo)
 {
   ucon64.nfo = rominfo;
   ucon64.dat = NULL;
@@ -345,26 +344,6 @@ const st_getopt2_t mame_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
-
-#if 0
-Nintendo Revolution 2006
-XBox 360
-PS3
-Microvision (Handheld)/1979 MB
-Supervision/1991 Hartung
-Pokemon Mini/200X Nintendo http://www.nintendo.com
-N-Gage/2003 Nokia http://www.n-gage.com
-PSP (Playstation Portable)/2005 Sony http://www.playstation.com
-Adv. Vision
-Arcadia
-Astrocade
-Indrema
-Nuon
-RCA Studio 2
-RDI Halcyon
-Telstar
-XE System
-#endif
 
 
 // _publisher_ strings for SNES, GB, GBC and GBA games

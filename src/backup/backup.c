@@ -18,3 +18,24 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "misc/itypes.h"
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64_misc.h"
+#include "backup.h"
+
+
+const st_getopt2_t unknown_backup_usage[] =
+  {
+    {
+      NULL, 0, 0, 0,
+      NULL, "Unknown backup unit/emulator",
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };

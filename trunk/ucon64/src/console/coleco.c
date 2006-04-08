@@ -38,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console.h"
+#include "backup/backup.h"
 #include "coleco.h"
 
 
@@ -122,12 +123,12 @@ coleco_init (st_ucon64_nfo_t *rominfo)
 
   coleco_header.type = 0;
   rominfo->console_usage = coleco_usage[0].help;
-  rominfo->copier_usage = unknown_usage[0].help;
+  rominfo->backup_usage = unknown_backup_usage[0].help;
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
-  ucon64_fread (&coleco_header, ucon64.buheader_len, COLECO_HEADER_LEN, ucon64.fname);
+  ucon64_fread (&coleco_header, ucon64.backup_header_len, COLECO_HEADER_LEN, ucon64.fname);
 
   if (coleco_header.type == 0xaa55 ||  // Coleco
       coleco_header.type == 0x55aa)    // ColecoVision

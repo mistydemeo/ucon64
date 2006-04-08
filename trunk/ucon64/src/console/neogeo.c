@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console.h"
+#include "backup/backup.h"
 #include "neogeo.h"
 
 
@@ -144,7 +145,7 @@ neogeo_init (st_ucon64_nfo_t *rominfo)
   int result = -1;
 
   rominfo->console_usage = neogeo_usage[0].help;
-  rominfo->copier_usage = unknown_usage[0].help;
+  rominfo->backup_usage = unknown_backup_usage[0].help;
 
   return result;
 }

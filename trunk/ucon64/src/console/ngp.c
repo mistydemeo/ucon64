@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "console.h"
 #include "ngp.h"
-#include "backup/pl.h"
+#include "backup/backup.h"
 
 
 static st_ucon64_obj_t ngp_obj[] =
@@ -78,9 +78,9 @@ ngp_init (st_ucon64_nfo_t *rominfo)
   char *snk_code = "COPYRIGHT BY SNK CORPORATION",
        *third_code = " LICENSED BY SNK CORPORATION", buf[MAXBUFSIZE];
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
 
-  ucon64_fread (&ngp_header, NGP_HEADER_START + rominfo->buheader_len,
+  ucon64_fread (&ngp_header, NGP_HEADER_START + rominfo->backup_header_len,
     NGP_HEADER_LEN, ucon64.fname);
 
   if (!strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ||
@@ -112,7 +112,7 @@ ngp_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
   rominfo->console_usage = ngp_usage[0].help;
-  rominfo->copier_usage = !rominfo->buheader_len ? pl_usage[0].help : unknown_usage[0].help;
+  rominfo->backup_usage = !rominfo->backup_header_len ? pl_usage[0].help : unknown_backup_usage[0].help;
 
   return result;
 }

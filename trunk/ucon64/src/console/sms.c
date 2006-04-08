@@ -141,7 +141,7 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
-  int size = ucon64.file_size - rominfo->buheader_len;
+  int size = ucon64.file_size - rominfo->backup_header_len;
 
   strcpy (src_name, ucon64.fname);
   mgd_make_name (ucon64.fname, console, size, dest_name);
@@ -152,7 +152,7 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
     }
-  ucon64_fread (buffer, rominfo->buheader_len, size, src_name);
+  ucon64_fread (buffer, rominfo->backup_header_len, size, src_name);
   if (rominfo->interleaved)
     smd_deinterleave (buffer, size);
 
@@ -177,7 +177,7 @@ sms_smd (st_ucon64_nfo_t *rominfo)
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
-  int size = ucon64.file_size - rominfo->buheader_len;
+  int size = ucon64.file_size - rominfo->backup_header_len;
 
   memset (&header, 0, SMD_HEADER_LEN);
   header.size = size / 16384;
@@ -196,14 +196,14 @@ sms_smd (st_ucon64_nfo_t *rominfo)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
     }
-  ucon64_fread (buffer, rominfo->buheader_len, size, src_name);
+  ucon64_fread (buffer, rominfo->backup_header_len, size, src_name);
   // uCON64 1.9.8-2, 1.9.8-3, 1.9.8-4 and 2.0.0 interleave SMS ROMs, but SMS
   //  ROMs should never be interleaved
   if (rominfo->interleaved)
     smd_deinterleave (buffer, size);
 
   ucon64_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
-  ucon64_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
+  ucon64_fwrite (buffer, rominfo->backup_header_len, size, dest_name, "ab");
   free (buffer);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -258,15 +258,15 @@ sms_chk (st_ucon64_nfo_t *rominfo)
   // change checksum
   if (rominfo->interleaved)
     {
-      ucon64_fputc (dest_name, rominfo->buheader_len +
+      ucon64_fputc (dest_name, rominfo->backup_header_len +
         (offset & ~0x3fff) + 0x2000 + (offset & 0x3fff) / 2, buf[0], "r+b");
-      ucon64_fputc (dest_name, rominfo->buheader_len +
+      ucon64_fputc (dest_name, rominfo->backup_header_len +
         (offset & ~0x3fff) + (offset & 0x3fff) / 2, buf[1], "r+b");
     }
   else
-    ucon64_fwrite (buf, rominfo->buheader_len + offset, 2, dest_name, "r+b");
+    ucon64_fwrite (buf, rominfo->backup_header_len + offset, 2, dest_name, "r+b");
 
-  dumper (stdout, buf, 2, rominfo->buheader_len + offset, DUMPER_HEX);
+  dumper (stdout, buf, 2, rominfo->backup_header_len + offset, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -381,8 +381,8 @@ sms_multi (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-                                       ucon64.buheader_len : 0;
+      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+                                       ucon64.backup_header_len : 0;
       ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
@@ -394,9 +394,9 @@ sms_multi (int truncate_size, char *fname)
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
           continue;
         }
-      if (ucon64.nfo->buheader_len)
-        fseek (srcfile, ucon64.nfo->buheader_len, SEEK_SET);
-      size = ucon64.file_size - ucon64.nfo->buheader_len;
+      if (ucon64.nfo->backup_header_len)
+        fseek (srcfile, ucon64.nfo->backup_header_len, SEEK_SET);
+      size = ucon64.file_size - ucon64.nfo->backup_header_len;
 
       if (file_no == 0)
         {
@@ -495,7 +495,7 @@ sms_testinterleaved (st_ucon64_nfo_t *rominfo)
 {
   unsigned char buf[0x4000] = { 0 };
 
-  ucon64_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
+  ucon64_fread (buf, rominfo->backup_header_len + 0x4000, // header in 2nd 16 kB block
     0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.fname);
   if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMR ALVS", 8) && // SMS
@@ -589,23 +589,23 @@ sms_init (st_ucon64_nfo_t *rominfo)
   is_gamegear = 0;
   memset (&sms_header, 0, SMS_HEADER_LEN);
 
-  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
-    rominfo->buheader_len = ucon64.buheader_len;
+  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn option was specified
+    rominfo->backup_header_len = ucon64.backup_header_len;
   else
-    rominfo->buheader_len = sms_header_len ();
+    rominfo->backup_header_len = sms_header_len ();
 
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : sms_testinterleaved (rominfo);
 
   if (rominfo->interleaved)
     {
-      ucon64_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
+      ucon64_fread (buf, rominfo->backup_header_len + 0x4000, // header in 2nd 16 kB block
         0x2000 + (SMS_HEADER_START - 0x4000 + SMS_HEADER_LEN) / 2, ucon64.fname);
       smd_deinterleave (buf, 0x4000);
       memcpy (&sms_header, buf + SMS_HEADER_START - 0x4000, SMS_HEADER_LEN);
     }
   else
-    ucon64_fread (&sms_header, rominfo->buheader_len + SMS_HEADER_START,
+    ucon64_fread (&sms_header, rominfo->backup_header_len + SMS_HEADER_START,
       SMS_HEADER_LEN, ucon64.fname);
 
   rominfo->header_start = SMS_HEADER_START;
@@ -650,13 +650,13 @@ sms_init (st_ucon64_nfo_t *rominfo)
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
-      int size = ucon64.file_size - rominfo->buheader_len;
+      int size = ucon64.file_size - rominfo->backup_header_len;
       if (!(rom_buffer = (unsigned char *) malloc (size)))
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
           return -1;
         }
-      ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.fname);
+      ucon64_fread (rom_buffer, rominfo->backup_header_len, size, ucon64.fname);
 
       if (rominfo->interleaved)
         {
@@ -686,7 +686,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   rominfo->console_usage = sms_usage[0].help;
-  rominfo->copier_usage = !rominfo->buheader_len ? mgd_usage[0].help : smd_usage[0].help;
+  rominfo->backup_usage = !rominfo->backup_header_len ? mgd_usage[0].help : smd_usage[0].help;
 
   return result;
 }

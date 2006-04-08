@@ -48,14 +48,14 @@ typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
 typedef struct
 {
   const char *console_usage;                    // console system of the ROM
-  const char *copier_usage;                     // backup unit of the ROM
+  const char *backup_usage;                     // backup unit of the ROM
 
   int interleaved;                              // ROM is interleaved (swapped)
   int data_size;                                // ROM data size without "red tape"
 
-  const void *buheader;                         // (possible) header of backup unit
-  int buheader_start;                           // start of backup unit header (mostly 0)
-  int buheader_len;                             // length of backup unit header 0 == no bu hdr
+  const void *backup_header;                    // (possible) header of backup unit
+  int backup_header_start;                      // start of backup unit header (mostly 0)
+  int backup_header_len;                        // length of backup unit header 0 == no bu hdr
 
   const void *header;                           // (possible) internal ROM header
   int header_start;                             // start of internal ROM header
@@ -139,7 +139,7 @@ typedef struct
     to check them. When adding new ones don't forget to update
     ucon64_execute_options() too.
   */
-  int buheader_len;                             // length of backup unit header 0 == no bu hdr
+  int backup_header_len;                             // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
 
 #if 1

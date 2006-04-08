@@ -36,7 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/chksum.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
-#include "backup/nfc.h"
+#include "backup/backup.h"
 #include "console.h"
 #include "nds.h"
 
@@ -171,7 +171,7 @@ nds_n (st_ucon64_nfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (buf, NDS_HEADER_START + rominfo->buheader_len, NDS_NAME_LEN,
+  ucon64_fwrite (buf, NDS_HEADER_START + rominfo->backup_header_len, NDS_NAME_LEN,
                  dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -187,7 +187,7 @@ nds_logo (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (nds_logodata, NDS_HEADER_START + rominfo->buheader_len + 192,
+  ucon64_fwrite (nds_logodata, NDS_HEADER_START + rominfo->backup_header_len + 192,
                  NDS_LOGODATA_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -206,10 +206,10 @@ nds_chk (st_ucon64_nfo_t *rominfo)
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   p = (unsigned char *) &rominfo->current_internal_crc;
-  ucon64_fwrite (p, NDS_HEADER_START + rominfo->buheader_len + 0x15e,
+  ucon64_fwrite (p, NDS_HEADER_START + rominfo->backup_header_len + 0x15e,
     2, dest_name, "r+b");
 
-  dumper (stdout, p, 2, NDS_HEADER_START + rominfo->buheader_len + 0x15e, DUMPER_HEX);
+  dumper (stdout, p, 2, NDS_HEADER_START + rominfo->backup_header_len + 0x15e, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -222,10 +222,10 @@ nds_init (st_ucon64_nfo_t *rominfo)
   int result = -1, value, pos;
   char buf[144];
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
-  ucon64_fread (&nds_header, NDS_HEADER_START + rominfo->buheader_len,
+  ucon64_fread (&nds_header, NDS_HEADER_START + rominfo->backup_header_len,
                 NDS_HEADER_LEN, ucon64.fname);
 
   // identify the ROM by the zero area
@@ -303,7 +303,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
     }
 
   rominfo->console_usage = nds_usage[0].help;
-  rominfo->copier_usage = (!rominfo->buheader_len ? nfc_usage[0].help : unknown_usage[0].help);
+  rominfo->backup_usage = (!rominfo->backup_header_len ? nfc_usage[0].help : unknown_backup_usage[0].help);
 
   return result;
 }

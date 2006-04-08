@@ -1068,7 +1068,7 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 int
 gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
-  int size = ucon64.file_size - rominfo->buheader_len, address, value,
+  int size = ucon64.file_size - rominfo->backup_header_len, address, value,
       result = -1;
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
 
@@ -1125,13 +1125,13 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
   fputc ('\n', stdout);
-  buf[0] = ucon64_fgetc (dest_name, address + rominfo->buheader_len);
-  dumper (stdout, buf, 1, address + rominfo->buheader_len, DUMPER_HEX);
+  buf[0] = ucon64_fgetc (dest_name, address + rominfo->backup_header_len);
+  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
 
-  ucon64_fputc (dest_name, address + rominfo->buheader_len, value, "r+b");
+  ucon64_fputc (dest_name, address + rominfo->backup_header_len, value, "r+b");
 
   buf[0] = value;
-  dumper (stdout, buf, 1, address + rominfo->buheader_len, DUMPER_HEX);
+  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
   fputc ('\n', stdout);
 
   printf (ucon64_msg[WROTE], dest_name);

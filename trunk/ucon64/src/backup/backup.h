@@ -45,6 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "md-pro.h"
 #include "mgd.h"
 #include "msg.h"
+#include "nfc.h"
 #include "pce-pro.h"
 #include "pl.h"
 //#include "psxpblib.h"
@@ -64,7 +65,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 /*
-  defines for unknown backup units/emulators
+  usage and init function for all unknown backup units/emulators
+*/
+extern const st_getopt2_t unknown_backup_usage[];
+
+
+/*
+  default header for unknown backup units
 */
 typedef struct // st_unknown_header
 {
@@ -85,10 +92,10 @@ typedef struct // st_unknown_header
   unsigned char id2;
   unsigned char type;
   unsigned char pad2[501];
-} st_unknown_header_t;
+} st_unknown_backup_header_t;
 
-#define UNKNOWN_HEADER_START 0
-#define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
+#define UNKNOWN_BACKUP_HEADER_START 0
+#define UNKNOWN_BACKUP_HEADER_LEN (sizeof (st_unknown_backup_header_t))
 
 
 #endif // BACKUP_H

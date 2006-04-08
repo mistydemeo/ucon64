@@ -45,11 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "n64.h"
 #include "patch/ips.h"
 #include "patch/aps.h"
-#include "backup/doctor64.h"
-#include "backup/doctor64jr.h"
-#include "backup/cd64.h"
-#include "backup/dex.h"
-#include "backup/z64.h"
+#include "backup/backup.h"
 
 
 #define N64_HEADER_LEN (sizeof (st_n64_header_t))
@@ -258,7 +254,7 @@ n64_n (st_ucon64_nfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (buf, rominfo->buheader_len + 32, N64_NAME_LEN, dest_name, "r+b");
+  ucon64_fwrite (buf, rominfo->backup_header_len + 32, N64_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -290,7 +286,7 @@ n64_update_chksum (st_ucon64_nfo_t *rominfo, const char *filename, char *buf)
     }
   if (rominfo->interleaved)
     ucon64_bswap16_n (buf, 8);
-  ucon64_fwrite (buf, rominfo->buheader_len + 16, 8, filename, "r+b");
+  ucon64_fwrite (buf, rominfo->backup_header_len + 16, 8, filename, "r+b");
 }
 
 
@@ -304,7 +300,7 @@ n64_chk (st_ucon64_nfo_t *rominfo)
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   n64_update_chksum (rominfo, dest_name, buf);
-  dumper (stdout, buf, 8, rominfo->buheader_len + 16, DUMPER_HEX);
+  dumper (stdout, buf, 8, rominfo->backup_header_len + 16, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -363,7 +359,7 @@ n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
 
       ucon64_file_handler (dest_name, NULL, 0);
       fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-      ucon64_fwrite (buf, rominfo->buheader_len + N64_HEADER_LEN, N64_BC_SIZE,
+      ucon64_fwrite (buf, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE,
                      dest_name, "r+b");
     }
   else
@@ -371,7 +367,7 @@ n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
       strcpy (dest_name, bootfile);
 //      set_suffix (dest_name, ".bot");
       ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      fcopy (ucon64.fname, rominfo->buheader_len + N64_HEADER_LEN, N64_BC_SIZE,
+      fcopy (ucon64.fname, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE,
              dest_name, "wb");
 
       if (rominfo->interleaved)
@@ -418,8 +414,8 @@ n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
   // Jos Kwanten's rominserter.exe produces a file named Patched.v64
   strcpy (dest_name, "Patched.v64");
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-  fcopy (ucon64.fname, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (usmsbuf, rominfo->buheader_len + 0x01b410, 4 * MBIT, dest_name, "r+b");
+  fcopy (ucon64.fname, rominfo->backup_header_len, ucon64.file_size, dest_name, "wb");
+  ucon64_fwrite (usmsbuf, rominfo->backup_header_len + 0x01b410, 4 * MBIT, dest_name, "r+b");
 
   free (usmsbuf);
   printf (ucon64_msg[WROTE], dest_name);
@@ -476,9 +472,9 @@ n64_init (st_ucon64_nfo_t *rominfo)
       "Australia", NULL, NULL, "France, Germany, The Netherlands", NULL // Holland is an incorrect name for The Netherlands
     };
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
 
-  ucon64_fread (&n64_header, rominfo->buheader_len, N64_HEADER_LEN, ucon64.fname);
+  ucon64_fread (&n64_header, rominfo->backup_header_len, N64_HEADER_LEN, ucon64.fname);
 
   value = OFFSET (n64_header, 0);
   value += OFFSET (n64_header, 1) << 8;
@@ -561,8 +557,8 @@ n64_init (st_ucon64_nfo_t *rominfo)
     }
 
   rominfo->console_usage = n64_usage[0].help;
-  rominfo->copier_usage = (!rominfo->buheader_len ?
-    ((!rominfo->interleaved) ? z64_usage[0].help : doctor64_usage[0].help) : unknown_usage[0].help);
+  rominfo->backup_usage = (!rominfo->backup_header_len ?
+    ((!rominfo->interleaved) ? z64_usage[0].help : doctor64_usage[0].help) : unknown_backup_usage[0].help);
 
   return result;
 }
@@ -592,7 +588,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 {
   unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
   unsigned int i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
-               rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START,
+               rlen = (ucon64.file_size - rominfo->backup_header_len) - CHECKSUM_START,
                n, bootcode; // using ucon64.file_size is ok for n64_init() & n64_sram()
   FILE *file;
 #ifdef  CALC_CRC32
@@ -603,13 +599,13 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   if (rlen < CHECKSUM_START + CHECKSUM_LENGTH)
     {
 #ifdef  CALC_CRC32
-      n = ucon64.file_size - rominfo->buheader_len;
+      n = ucon64.file_size - rominfo->backup_header_len;
       if ((crc32_mem = (unsigned char *) malloc (n)) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], n);
           return -1;
         }
-      ucon64_fread (crc32_mem, rominfo->buheader_len, n, filename);
+      ucon64_fread (crc32_mem, rominfo->backup_header_len, n, filename);
       if (!rominfo->interleaved)
         {
           ucon64.fcrc32 = crc32 (0, crc32_mem, n);
@@ -637,7 +633,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   else
     crc32_mem = chunk;
 
-  fseek (file, rominfo->buheader_len, SEEK_SET);
+  fseek (file, rominfo->backup_header_len, SEEK_SET);
   fread (crc32_mem, 1, CHECKSUM_START, file);
   memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
   if (!rominfo->interleaved)
@@ -649,7 +645,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
   scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
 #else
-  fseek (file, rominfo->buheader_len + N64_HEADER_LEN, SEEK_SET);
+  fseek (file, rominfo->backup_header_len + N64_HEADER_LEN, SEEK_SET);
   fread (bootcode_buf, 1, N64_BC_SIZE, file);
   if (rominfo->interleaved)
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);

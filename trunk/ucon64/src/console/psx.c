@@ -65,7 +65,7 @@ psx_init (st_ucon64_nfo_t *rominfo)
   int result = -1;
 
   rominfo->console_usage = psx_usage[0].help;
-//  rominfo->copier_usage = cdrw_usage[0].help;
+//  rominfo->backup_usage = cdrw_usage[0].help;
 
   return result;
 }

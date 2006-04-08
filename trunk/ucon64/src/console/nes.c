@@ -6373,7 +6373,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
 {
   st_smc_header_t smc_header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  int size = ucon64.file_size - rominfo->buheader_len, mapper,
+  int size = ucon64.file_size - rominfo->backup_header_len, mapper,
       prg_size, chr_size, new_prg_size = -1;
 
   if (type != INES)
@@ -6493,7 +6493,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
   if (new_prg_size == -1)                       // don't resize PRG block
     {
       ucon64_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
-      fcopy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+      fcopy (src_name, rominfo->backup_header_len, size, dest_name, "ab");
     }
   else
     {
@@ -6506,7 +6506,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
           exit (1);
         }
       memset (prg_data, 0, new_prg_size);       // pad with zeroes
-      ucon64_fread (prg_data, rominfo->buheader_len, prg_size, src_name);
+      ucon64_fread (prg_data, rominfo->backup_header_len, prg_size, src_name);
 
       // write header
       ucon64_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
@@ -6514,7 +6514,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
       // copy trainer data if present
       if (ines_header.ctrl1 & INES_TRAINER)
         {
-          fcopy (src_name, rominfo->buheader_len, 512, dest_name, "ab");
+          fcopy (src_name, rominfo->backup_header_len, 512, dest_name, "ab");
           offset = 512;
         }
       else
@@ -6524,7 +6524,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
       ucon64_fwrite (prg_data, SMC_HEADER_LEN + offset, new_prg_size, dest_name, "ab");
 
       // copy CHR block
-      fcopy (src_name, rominfo->buheader_len + offset + prg_size,
+      fcopy (src_name, rominfo->backup_header_len + offset + prg_size,
               size - offset - prg_size, dest_name, "ab");
 
       free (prg_data);
@@ -6550,7 +6550,7 @@ nes_ineshd (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".hdr");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, rominfo->buheader_start, 16, dest_name, "wb");
+  fcopy (ucon64.fname, rominfo->backup_header_start, 16, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -7024,11 +7024,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
       type = FDS;
       result = 0;
 
-      rominfo->buheader_start = FDS_HEADER_START;
-      rominfo->buheader_len = FDS_HEADER_LEN;
+      rominfo->backup_header_start = FDS_HEADER_START;
+      rominfo->backup_header_len = FDS_HEADER_LEN;
       // we use ffe_header to save some space in the exe
       ucon64_fread (&ffe_header, FDS_HEADER_START, FDS_HEADER_LEN, ucon64.fname);
-      rominfo->buheader = &ffe_header;
+      rominfo->backup_header = &ffe_header;
     }
   else if (memcmp (magic, "\x01*NINTENDO-HVC*", 15) == 0) // "headerless" FDS/FAM file
     {
@@ -7062,11 +7062,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
   switch (type)
     {
     case INES:
-      rominfo->copier_usage = ines_usage[0].help;
-      rominfo->buheader_start = INES_HEADER_START;
-      rominfo->buheader_len = INES_HEADER_LEN;
+      rominfo->backup_usage = ines_usage[0].help;
+      rominfo->backup_header_start = INES_HEADER_START;
+      rominfo->backup_header_len = INES_HEADER_LEN;
       ucon64_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.fname);
-      rominfo->buheader = &ines_header;
+      rominfo->backup_header = &ines_header;
       ucon64.split = 0;                         // iNES files are never split
 
       sprintf (buf, "Internal size: %.4f Mb\n",
@@ -7117,11 +7117,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
       strcat (rominfo->misc, buf);
       break;
     case UNIF:
-      rominfo->copier_usage = unif_usage[0].help;
-      rominfo->buheader_start = UNIF_HEADER_START;
-      rominfo->buheader_len = UNIF_HEADER_LEN;
+      rominfo->backup_usage = unif_usage[0].help;
+      rominfo->backup_header_start = UNIF_HEADER_START;
+      rominfo->backup_header_len = UNIF_HEADER_LEN;
       ucon64_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.fname);
-      rominfo->buheader = &unif_header;
+      rominfo->backup_header = &unif_header;
 
       rom_size = ucon64.file_size - UNIF_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
@@ -7367,19 +7367,19 @@ nes_init (st_ucon64_nfo_t *rominfo)
         Either a *.PRM header file, a 512-byte *.700 trainer file, a *.PRG
         ROM data file or a *.CHR VROM data file.
       */
-      rominfo->copier_usage = pasofami_usage[0].help;
-      rominfo->buheader_start = 0;
+      rominfo->backup_usage = pasofami_usage[0].help;
+      rominfo->backup_header_start = 0;
       strcpy (buf, ucon64.fname);
       set_suffix (buf, ".prm");
       if (access (buf, F_OK) == 0)
         {
-          rominfo->buheader_len = fsizeof (buf);
+          rominfo->backup_header_len = fsizeof (buf);
           // we use ffe_header to save some space
-          ucon64_fread (&ffe_header, 0, rominfo->buheader_len, buf);
-          rominfo->buheader = &ffe_header;
+          ucon64_fread (&ffe_header, 0, rominfo->backup_header_len, buf);
+          rominfo->backup_header = &ffe_header;
         }
       else
-        rominfo->buheader_len = 0;
+        rominfo->backup_header_len = 0;
 
       /*
         Build a temporary iNES image in memory from the Pasofami files.
@@ -7429,10 +7429,10 @@ nes_init (st_ucon64_nfo_t *rominfo)
     case FFE:
       if (magic[10] == 1)
         {
-          rominfo->buheader_len = SMC_HEADER_LEN;
+          rominfo->backup_header_len = SMC_HEADER_LEN;
           strcpy (rominfo->name, "Name: N/A");
           rominfo->console_usage = NULL;
-          rominfo->copier_usage = smc_usage[0].help;
+          rominfo->backup_usage = smc_usage[0].help;
           rominfo->maker = "Publisher: You?";
           rominfo->country = "Country: Your country?";
           rominfo->has_internal_crc = 0;
@@ -7451,33 +7451,33 @@ nes_init (st_ucon64_nfo_t *rominfo)
         for Pasofami, because there might be a .PRM file and because there is
         still other information about the image structure.
       */
-      rominfo->copier_usage = smc_usage[0].help;
-      rominfo->buheader_start = SMC_HEADER_START;
-      rominfo->buheader_len = SMC_HEADER_LEN;
+      rominfo->backup_usage = smc_usage[0].help;
+      rominfo->backup_header_start = SMC_HEADER_START;
+      rominfo->backup_header_len = SMC_HEADER_LEN;
       ucon64_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.fname);
-      rominfo->buheader = &ffe_header;
+      rominfo->backup_header = &ffe_header;
 
       sprintf (buf, "512-byte trainer: %s",
         (ffe_header.emulation1 & SMC_TRAINER) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
       break;
     case FDS:
-      rominfo->copier_usage = fds_usage[0].help;
+      rominfo->backup_usage = fds_usage[0].help;
       rominfo->country = "Japan";
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
       break;
     case FAM:
-      rominfo->copier_usage = fds_usage[0].help;
+      rominfo->backup_usage = fds_usage[0].help;
       rominfo->country = "Japan";
 
       // FAM files don't have a header. Instead they seem to have a 192 byte trailer.
-      rominfo->buheader_start = ucon64.file_size - FAM_HEADER_LEN;
-      rominfo->buheader_len = FAM_HEADER_LEN;
+      rominfo->backup_header_start = ucon64.file_size - FAM_HEADER_LEN;
+      rominfo->backup_header_len = FAM_HEADER_LEN;
 
       // we use ffe_header to save some space
-      ucon64_fread (&ffe_header, rominfo->buheader_start, FAM_HEADER_LEN, ucon64.fname);
-      rominfo->buheader = &ffe_header;
+      ucon64_fread (&ffe_header, rominfo->backup_header_start, FAM_HEADER_LEN, ucon64.fname);
+      rominfo->backup_header = &ffe_header;
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
 
@@ -7493,11 +7493,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
       break;
     }
 
-  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn switch was specified
-    rominfo->buheader_len = ucon64.buheader_len;
+  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn switch was specified
+    rominfo->backup_header_len = ucon64.backup_header_len;
 
   if (ucon64.crc32 == 0)
-    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, rominfo->buheader_len);
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, rominfo->backup_header_len);
 
   // additional info
   key.crc32 = ucon64.crc32;
@@ -7576,8 +7576,8 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
       return -1;
     }
 
-  n_disks = (ucon64.file_size - rominfo->buheader_len) / 65500;
-  x = (ucon64.file_size - rominfo->buheader_len) % 65500;
+  n_disks = (ucon64.file_size - rominfo->backup_header_len) / 65500;
+  x = (ucon64.file_size - rominfo->backup_header_len) % 65500;
   if (x)
     {
       sprintf (line, "WARNING: %d excessive bytes\n", x);
@@ -7585,8 +7585,8 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
     }
 
   if (type == FDS)
-    header_len = rominfo->buheader_len;
-  else if (type == FAM)                         // if type == FAM rominfo->buheader_len
+    header_len = rominfo->backup_header_len;
+  else if (type == FAM)                         // if type == FAM rominfo->backup_header_len
     header_len = 0;                             //  contains the length of the trailer
   for (disk = 0; disk < n_disks; disk++)
     {

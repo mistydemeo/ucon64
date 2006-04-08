@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console.h"
+#include "backup/backup.h"
 #include "lynx.h"
 
 
@@ -119,7 +120,7 @@ lynx_lyx (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
-  if (!rominfo->buheader_len)
+  if (!rominfo->backup_header_len)
     {
       fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
@@ -129,7 +130,7 @@ lynx_lyx (st_ucon64_nfo_t *rominfo)
   set_suffix (dest_name, ".lyx");
 
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, rominfo->backup_header_len, ucon64.file_size, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -143,7 +144,7 @@ lynx_lnx (st_ucon64_nfo_t *rominfo)
   char dest_name[FILENAME_MAX];
   int size = ucon64.file_size;
 
-  if (rominfo->buheader_len != 0)
+  if (rominfo->backup_header_len != 0)
     {
       fprintf (stderr, "ERROR: This seems to already be an LNX file\n");
       return -1;
@@ -187,7 +188,7 @@ lynx_rot (st_ucon64_nfo_t *rominfo, int rotation)
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
 
-  if (!rominfo->buheader_len)
+  if (!rominfo->backup_header_len)
     {
       fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
@@ -234,7 +235,7 @@ lynx_n (st_ucon64_nfo_t *rominfo, const char *name)
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
 
-  if (!rominfo->buheader_len)
+  if (!rominfo->backup_header_len)
     {
       fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
@@ -262,7 +263,7 @@ lynx_b (st_ucon64_nfo_t *rominfo, int bank, const char *value)
   short int *bankvar;
   char dest_name[FILENAME_MAX];
 
-  if (!rominfo->buheader_len)
+  if (!rominfo->backup_header_len)
     {
       fprintf (stderr, "ERROR: This is no LNX file\n");
       return -1;
@@ -310,7 +311,7 @@ lynx_init (st_ucon64_nfo_t *rominfo)
   int result = -1;
 
   rominfo->console_usage = lynx_usage[0].help;
-  rominfo->copier_usage = unknown_usage[0].help;
+  rominfo->backup_usage = unknown_backup_usage[0].help;
 
   ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.fname);
   if (!strncmp (lnx_header.magic, "LYNX", 4))
@@ -322,14 +323,14 @@ lynx_init (st_ucon64_nfo_t *rominfo)
 
   if (!strncmp (lnx_header.magic, "LYNX", 4))
     {
-      rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-        ucon64.buheader_len : (int) LNX_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+        ucon64.backup_header_len : (int) LNX_HEADER_LEN;
 
-      if (UCON64_ISSET (ucon64.buheader_len) && !ucon64.buheader_len)
+      if (UCON64_ISSET (ucon64.backup_header_len) && !ucon64.backup_header_len)
         return ucon64.console == UCON64_LYNX ? 0 : result;
 
       ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.fname);
-      rominfo->buheader = &lnx_header;
+      rominfo->backup_header = &lnx_header;
 
       // internal ROM name
       strcpy (rominfo->name, lnx_header.cartname);

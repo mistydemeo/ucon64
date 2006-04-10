@@ -91,10 +91,12 @@ typedef struct
 #define PROPERTY_MODE_GLOBAL_RC(n)  FILE_SEPARATOR_S "etc" FILE_SEPARATOR_S n
 #endif
 
-#if     defined __unix__ || defined __BEOS__
+#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
+#define PROPERTY_MODE_DIR(n) "~" FILE_SEPARATOR_S 
+#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
 #define PROPERTY_MODE_DIR(n) "~" FILE_SEPARATOR_S "." n FILE_SEPARATOR_S
 #else
-#define PROPERTY_MODE_DIR(n) "~"
+#define PROPERTY_MODE_DIR(n) ""
 #endif
 
 

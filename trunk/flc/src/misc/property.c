@@ -71,14 +71,15 @@ property_check (const char *filename, int version, int verbose)
       if (strtol (p ? p : "0", NULL, 10) >= version)
         return 0; // OK
 
+      strcpy (buf, filename);
+      set_suffix (buf, ".old");
+
       if (verbose)
         {
-          fprintf (stderr, "NOTE: updating config: will be renamed to %s...", filename);
+          fprintf (stderr, "NOTE: updating config: will be renamed to %s...", buf);
           fflush (stderr);
         }
 
-      strcpy (buf, filename);
-      set_suffix (buf, ".old");
       rename (filename, buf);
     }
 

@@ -3289,11 +3289,11 @@ snes_init (st_ucon64_nfo_t *rominfo)
           // TODO?: fix this code for last split file
           snes_split = 0;
           if (header.emulation & 0x40 || (type == UFO && header.emulation & 0x10))
-            snes_split = ucon64_testsplit (ucon64.fname);
+            snes_split = ucon64_testsplit (ucon64.fname, NULL);
           ucon64.split = snes_split;            // force displayed info to be correct
         }                                       //  if not split (see ucon64.c)
       else
-        snes_split = ucon64_testsplit (ucon64.fname);
+        snes_split = ucon64_testsplit (ucon64.fname, NULL);
     }
 
   size = ucon64.file_size - rominfo->backup_header_len;

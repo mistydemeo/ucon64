@@ -92,6 +92,8 @@ extern const char *ucon64_msg[];
   ucon64_gauge()        wrapper for misc.c/gauge()
   ucon64_testpad()      test if ROM is padded
   ucon64_testsplit()    test if ROM is split
+                          optionally a callback function can be used for specific
+                          testing
   ucon64_configfile()   configfile handling
   ucon64_rename()       DAT or internal header based rename
   ucon64_e()            emulator "frontend"
@@ -105,13 +107,12 @@ extern void remove_temp_file (void);
 extern char *ucon64_output_fname (char *requested_fname, int flags);
 extern int ucon64_gauge (time_t init_time, int pos, int size);
 extern int ucon64_testpad (const char *filename);
-extern int ucon64_testsplit (const char *filename);
+extern int ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *));
 extern int ucon64_configfile ();
 extern int ucon64_rename (int mode);
 extern int ucon64_e (void);
 extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
-extern char *ucon64_temp_file;
-extern int (*ucon64_testsplit_callback) (const char *filename);
+
 
 /*
   Some general file stuff that MUST NOT and WILL NOT be written again and again

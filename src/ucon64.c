@@ -1365,7 +1365,7 @@ ucon64_rom_handling (void)
     */
     if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
         ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
-      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.fname))
+      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.fname, NULL))
         {
           fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
                    basename2 (ucon64.fname));
@@ -1621,7 +1621,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
                intro = ((ucon64.file_size - nfo->backup_header_len) > MBIT) ?
                          ((ucon64.file_size - nfo->backup_header_len) % MBIT) : 0;
   int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
-                   ucon64_testsplit (ucon64.fname);
+                   ucon64_testsplit (ucon64.fname, NULL);
   char buf[MAXBUFSIZE];
 
   // backup unit header

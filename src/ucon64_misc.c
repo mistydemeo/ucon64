@@ -579,10 +579,6 @@ const st_getopt2_t ucon64_padding_usage[] =
   };
 
 
-char *ucon64_temp_file = NULL;
-int (*ucon64_testsplit_callback) (const char *filename) = NULL;
-
-
 #ifdef  USE_DISCMAGE
 int
 ucon64_load_discmage (void)
@@ -850,8 +846,8 @@ ucon64_file_handler (char *dest, char *src, int flags)
   ucon64_output_fname (dest, flags);            // call this function unconditionally
 
 #if 0
-  // ucon64_temp_file will be reset in remove_temp_file()
-  ucon64_temp_file = NULL;
+  // ucon64.temp_file will be reset in remove_temp_file()
+  ucon64.temp_file = NULL;
 #endif
   if (!access (dest, F_OK))
     {
@@ -877,7 +873,7 @@ ucon64_file_handler (char *dest, char *src, int flags)
           else
             {                                   // case 1b
               strcpy (src, mkbak (dest, BAK_MOVE));
-              ucon64_temp_file = src;
+              ucon64.temp_file = src;
             }
         }
       else
@@ -894,11 +890,11 @@ ucon64_file_handler (char *dest, char *src, int flags)
 void
 remove_temp_file (void)
 {
-  if (ucon64_temp_file)
+  if (ucon64.temp_file)
     {
-      printf ("Removing: %s\n", ucon64_temp_file);
-      remove (ucon64_temp_file);
-      ucon64_temp_file = NULL;
+      printf ("Removing: %s\n", ucon64.temp_file);
+      remove (ucon64.temp_file);
+      ucon64.temp_file = NULL;
     }
 }
 
@@ -1090,7 +1086,7 @@ ucon64_gauge (time_t start_time, int pos, int size)
 
 
 int
-ucon64_testsplit (const char *filename)
+ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
 // test if ROM is split into parts based on the name of files
 {
   int x, parts = 0, l;
@@ -1118,8 +1114,8 @@ ucon64_testsplit (const char *filename)
 
       while (!access (buf, F_OK))               // count split parts
         {
-          if (ucon64_testsplit_callback)
-            ucon64_testsplit_callback (buf);
+          if (testsplit_cb)
+            testsplit_cb (buf);
           (*p)++;
           parts++;
         }

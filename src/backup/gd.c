@@ -607,9 +607,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *romin
     names[i] = names_mem[i];
 
   gd_names = (char **) names;
-  ucon64_testsplit_callback = gd_add_filename;
-  num_units = ucon64.split = ucon64_testsplit (filename); // this will call gd_add_filename()
-  ucon64_testsplit_callback = NULL;
+  num_units = ucon64.split = ucon64_testsplit (filename, gd_add_filename);
   if (!ucon64.split)
     {
       split = 0;

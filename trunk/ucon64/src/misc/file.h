@@ -50,7 +50,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   isfname()   test if char could be used for filenames
   tofname()   replaces char that can not be used for filenames
-  strpath()   a general routine to parse paths
   set_suffix() set/replace suffix of filename with suffix
                 suffix means in this case the suffix INCLUDING the dot '.'
   get_suffix() get suffix of filename
@@ -93,18 +92,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 extern int isfname (int c);
 extern int tofname (int c);
-#if 0
-typedef struct
-{
-  char realpath[FILENAME_MAX];            // absolute path
-  char drive[FILENAME_MAX];               // "/", "C:\\", etc.. (depending on platform)
-  char dirname[FILENAME_MAX];             // (relative) dirname
-  char basename[FILENAME_MAX];            // filename
-  char suffix[FILENAME_MAX];              // suffix, extension (including dot)
-} st_strpath_t;
-
-extern st_strpath_t *strpath (st_strpath_t *path, const char *path_s);
-#endif
 extern char *realpath2 (const char *path, char *full_path);
 extern char *dirname2 (const char *path, char *dir);
 extern const char *basename2 (const char *path);

@@ -64,7 +64,7 @@ const st_getopt2_t nds_usage[] =
       NULL
     },
     {
-      "nds", 0, 0, UCON64_NDS,
+      UCON64_NDS_S, 0, 0, UCON64_NDS,
       NULL, "force recognition",
       &nds_obj[1]
     },

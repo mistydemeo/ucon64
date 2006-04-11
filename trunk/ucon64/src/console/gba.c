@@ -73,7 +73,7 @@ const st_getopt2_t gba_usage[] =
       NULL
     },
     {
-      "gba", 0, 0, UCON64_GBA,
+      UCON64_GBA_S, 0, 0, UCON64_GBA,
       NULL, "force recognition",
       &gba_obj[2]
     },
@@ -743,6 +743,7 @@ gba_multi (int truncate_size, char *multi_fname)
   struct stat fstate;
   FILE *srcfile, *destfile;
   char buffer[BUFSIZE], fname[FILENAME_MAX], *fname_ptr;
+  const char *p = NULL;
 
   if (truncate_size == 0)
     {
@@ -792,7 +793,8 @@ gba_multi (int truncate_size, char *multi_fname)
         {
           if (multi_fname != NULL)              // -xfalmulti
             {
-              get_property_fname (ucon64.configfile, "gbaloader", fname, "loader.bin");
+              p = get_property (ucon64.configfile, "gbaloader", PROPERTY_MODE_FILENAME);
+              strncpy (fname, p ? p : "loader.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
               if (access (fname, F_OK))
                 {
                   fprintf (stderr, "ERROR: Cannot open loader binary (%s)\n", fname);
@@ -1129,6 +1131,7 @@ gba_sc (void)
   uint32_t address = 0, pos = 0;
   char dest_name[FILENAME_MAX], fname[FILENAME_MAX];
   unsigned char *buffer, *ptr = NULL;
+  const char *p = NULL;
   FILE *destfile;
   
   strcpy (dest_name, ucon64.fname);
@@ -1225,7 +1228,8 @@ gba_sc (void)
     0x00, 0x00, 0x00, 0x00,
   */
   // write the menu (the formulas will NOT be optimized)
-  get_property_fname (ucon64.configfile, "gbaloader_sc", fname, "sc_menu.bin");
+  p = get_property (ucon64.configfile, "gbaloader_sc", PROPERTY_MODE_FILENAME);
+  strncpy (fname, p ? p : "sc_menu.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
   if (ucon64_fread (buffer, 0, GBA_MENU_SIZE, fname) <= 0)
     {
       fprintf (stderr, "ERROR: Could not load Super Card loader (%s)\n", fname);

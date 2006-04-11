@@ -51,7 +51,7 @@ const st_getopt2_t ngp_usage[] =
       NULL
     },
     {
-      "ngp", 0, 0, UCON64_NGP,
+      UCON64_NGP_S, 0, 0, UCON64_NGP,
       NULL, "force recognition",
       &ngp_obj[0]
     },

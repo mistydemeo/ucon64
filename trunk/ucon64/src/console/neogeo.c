@@ -54,7 +54,7 @@ const st_getopt2_t neogeo_usage[] =
       NULL
     },
     {
-      "ng", 0, 0, UCON64_NG,
+      UCON64_NG_S, 0, 0, UCON64_NG,
       NULL, "force recognition",
       &neogeo_obj[0]
     },

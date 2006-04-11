@@ -108,7 +108,7 @@ extern char *ucon64_output_fname (char *requested_fname, int flags);
 extern int ucon64_gauge (time_t init_time, int pos, int size);
 extern int ucon64_testpad (const char *filename);
 extern int ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *));
-extern int ucon64_configfile ();
+extern int ucon64_set_property_array (void);
 extern int ucon64_rename (int mode);
 extern int ucon64_e (void);
 extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);

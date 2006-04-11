@@ -68,7 +68,7 @@ const st_getopt2_t nes_usage[] =
       NULL
     },
     {
-      "nes", 0, 0, UCON64_NES,
+      UCON64_NES_S, 0, 0, UCON64_NES,
       NULL, "force recognition",
       &nes_obj[5]
     },

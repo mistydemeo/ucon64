@@ -99,7 +99,7 @@ const st_getopt2_t snes_usage[] =
       NULL
     },
     {
-      "snes", 0, 0, UCON64_SNES,
+      UCON64_SNES_S, 0, 0, UCON64_SNES,
       NULL, "force recognition",
       &snes_obj[6]
     },

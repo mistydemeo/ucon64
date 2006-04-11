@@ -70,8 +70,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 // options (consoles)
-// these defines shall not exceed 0xffff since they share the same integer
-// with the workflow flags (below) in st_getopt2_t
 enum
 {
   UCON64_3DO = UCON64_CONSOLE + 1,
@@ -88,7 +86,7 @@ enum
   UCON64_INTELLI,
   UCON64_JAG,
   UCON64_LYNX,
-  UCON64_MAME,
+  UCON64_ARCADE,
   UCON64_N64,
   UCON64_NDS,
   UCON64_NES,
@@ -109,7 +107,43 @@ enum
   UCON64_XBOX
 };
 
-// options
+
+// option strings (consoles)
+#define UCON64_3DO_S      "3do"
+#define UCON64_ATA_S      "ata"
+#define UCON64_CD32_S     "cd32"
+#define UCON64_CDI_S      "cdi"
+#define UCON64_COLECO_S   "coleco"
+#define UCON64_DC_S       "dc"
+#define UCON64_GB_S       "gb"
+#define UCON64_GBA_S      "gba"
+#define UCON64_GC_S       "gc"
+#define UCON64_GEN_S      "gen"
+#define UCON64_GP32_S     "gp32"
+#define UCON64_INTELLI_S  "intelli"
+#define UCON64_JAG_S      "jag"
+#define UCON64_LYNX_S     "lynx"
+#define UCON64_ARCADE_S   "arcade"
+#define UCON64_N64_S      "n64"
+#define UCON64_NDS_S      "nds"
+#define UCON64_NES_S      "nes"
+#define UCON64_NG_S       "ng"
+#define UCON64_NGP_S      "ngp"
+#define UCON64_PCE_S      "pce"
+#define UCON64_PS2_S      "ps2"
+#define UCON64_PSX_S      "psx"
+#define UCON64_S16_S      "s16"
+#define UCON64_SAT_S      "sat"
+#define UCON64_SMS_S      "sms"
+#define UCON64_GAMEGEAR_S "gg"
+#define UCON64_SNES_S     "snes"
+#define UCON64_SWAN_S     "swan"
+#define UCON64_VBOY_S     "vboy"
+#define UCON64_VEC_S      "vec"
+#define UCON64_XBOX_S     "xbox"
+
+
+// the other options
 enum
 {
   UCON64_1991 = UCON64_OPTION + 1,

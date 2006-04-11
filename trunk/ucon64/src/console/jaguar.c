@@ -53,7 +53,7 @@ const st_getopt2_t jaguar_usage[] =
       NULL
     },
     {
-      "jag", 0, 0, UCON64_JAG,
+      UCON64_JAG_S, 0, 0, UCON64_JAG,
       NULL, "force recognition",
       &jaguar_obj[0]
     },

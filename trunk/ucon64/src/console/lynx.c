@@ -58,7 +58,7 @@ const st_getopt2_t lynx_usage[] =
       NULL
     },
     {
-      "lynx", 0, 0, UCON64_LYNX,
+      UCON64_LYNX_S, 0, 0, UCON64_LYNX,
       NULL, "force recognition",
       &lynx_obj[1]
     },

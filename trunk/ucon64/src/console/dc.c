@@ -55,7 +55,7 @@ const st_getopt2_t dc_usage[] =
       NULL
     },
     {
-      "dc", 0, 0, UCON64_DC,
+      UCON64_DC_S, 0, 0, UCON64_DC,
       NULL, "force recognition",
       &dc_obj[0]
     },
@@ -365,10 +365,13 @@ parse_templ (const char *templ_file, char *ip)
   memset (filled_in, 0, sizeof (filled_in));
   for (i = 0; templ[i].name; i++)
     {
-      char *p = buf;
-      get_property (templ_file, templ[i].name, p, templ[i].def);
+      char *p = NULL;
+      p = (char *) get_property (templ_file, templ[i].name, PROPERTY_MODE_TEXT);
+      if (!p)
+        p = templ[i].def;
 
-      strtriml (strtrimr (p));
+      strncpy (buf, p, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
+      p = strtriml (strtrimr (buf));
 
       if (!(*p))
         continue;

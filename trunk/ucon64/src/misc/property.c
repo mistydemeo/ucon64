@@ -41,11 +41,78 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 
 
-char *
-get_property_from_string (char *str, const char *propname, const char prop_sep,
-                          char *value_s, const char comment_sep)
+int
+property_check (const char *filename, int version, int verbose)
 {
-  char str_end[6], *p = NULL, buf[MAXBUFSIZE];
+  char buf[MAXBUFSIZE];
+  const char *p = NULL;
+  int result = 0;
+
+  if (access (filename, F_OK) != 0)
+    {
+      FILE *fh = NULL;
+
+      if (verbose) 
+        {
+          fprintf (stderr, "NOTE: %s not found: creating...", filename);
+          fflush (stderr);
+        }
+
+      if (!(fh = fopen (filename, "w"))) // opening the file in text mode
+        {                                         //  avoids trouble under DOS
+          printf ("FAILED\n\n");
+          return -1;
+        }
+      fclose (fh);                              // we'll use set_property() from now
+    }
+  else
+    {
+      p = get_property (filename, "version", PROPERTY_MODE_TEXT);
+      if (strtol (p ? p : "0", NULL, 10) >= version)
+        return 0; // OK
+
+      strcpy (buf, filename);
+      set_suffix (buf, ".old");
+
+      if (verbose)
+        {
+          fprintf (stderr, "NOTE: updating config: will be renamed to %s...", buf);
+          fflush (stderr);
+        }
+
+      rename (filename, buf);
+    }
+
+  // store new version
+  sprintf (buf, "%d", version);
+  result = set_property (filename, "version", buf, "configfile version (do NOT edit)");
+
+  if (result > 0)
+    {
+      if (verbose)
+        fprintf (stderr, "OK\n\n");
+    }
+  else
+    {
+      if (verbose)
+        fprintf (stderr, "FAILED\n\n");
+
+      // remove the crap
+      remove (filename);
+    }
+
+  if (verbose)
+    fflush (stderr);
+
+  return 1;
+}
+
+
+const char *
+get_property_from_string (char *str, const char *propname, const char prop_sep, const char comment_sep)
+{
+  static char value_s[MAXBUFSIZE];
+  char str_end[8], *p = NULL, buf[MAXBUFSIZE];
   int len = strlen (str);
 
   if (len >= MAXBUFSIZE)
@@ -75,32 +142,31 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
       //  (present or not present)
       if (p)
         {
-          strcpy (value_s, p);
+          strncpy (value_s, p, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
           strtriml (strtrimr (value_s));
         }
       else
         strcpy (value_s, "1");
     }
   else
-    value_s = NULL;
+    return NULL;
 
   return value_s;
 }
 
 
-char *
-get_property (const char *filename, const char *propname,
-              char *value_s, const char *def)
+const char *
+get_property (const char *filename, const char *propname, int mode)
 {
   char line[MAXBUFSIZE], *p = NULL;
   FILE *fh;
-  int prop_found = 0;
+  const char *value_s = NULL;
 
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
     {                                           //  avoids trouble under DOS
       while (fgets (line, sizeof line, fh) != NULL)
-        if (get_property_from_string (line, propname, PROPERTY_SEPARATOR, value_s, PROPERTY_COMMENT))
-          prop_found = 1;
+        if ((value_s = get_property_from_string (line, propname, PROPERTY_SEPARATOR, PROPERTY_COMMENT)))
+          break;
 
       fclose (fh);
     }
@@ -108,16 +174,25 @@ get_property (const char *filename, const char *propname,
   p = getenv2 (propname);
   if (*p == 0)                                  // getenv2() never returns NULL
     {
-      if (!prop_found)
-        {
-          if (def)
-            strcpy (value_s, def);
-          else
-            value_s = NULL;                     // value_s won't be changed
-        }                                       //  after this func (=ok)
+      if (!value_s)
+        value_s = NULL;                         // value_s won't be changed
+                                                  //  after this func (=ok)
     }
   else
-    strcpy (value_s, p);
+    value_s = p;
+
+  if (value_s)
+    if (mode == PROPERTY_MODE_FILENAME)
+      {
+        static char tmp[FILENAME_MAX];
+
+#ifdef  __CYGWIN__
+        fix_character_set (value_s);
+#endif
+        realpath2 (value_s, tmp);
+
+        value_s = tmp;
+    }
 
   return value_s;
 }
@@ -126,37 +201,24 @@ get_property (const char *filename, const char *propname,
 int
 get_property_int (const char *filename, const char *propname)
 {
-  char value_s[MAXBUFSIZE];                     // MAXBUFSIZE is enough for a *very* large number
+  const char *value_s = NULL;                   // MAXBUFSIZE is enough for a *very* large number
   int value = 0;                                //  and people who might not get the idea that
                                                 //  get_property_int() is ONLY about numbers
-  get_property (filename, propname, value_s, NULL);
+  value_s = get_property (filename, propname, PROPERTY_MODE_TEXT);
+
+  if (!value_s)
+    value_s = "0";
 
   if (*value_s)
     switch (tolower (*value_s))
       {
-      case '0':                                 // 0
-      case 'n':                                 // [Nn]o
-        return 0;
+        case '0':                                 // 0
+        case 'n':                                 // [Nn]o
+          return 0;
       }
 
-  value = strtol (value_s, NULL, 10);
   return value ? value : 1;                     // if value_s was only text like 'Yes'
 }                                               //  we'll return at least 1
-
-
-char *
-get_property_fname (const char *filename, const char *propname,
-                    char *value_s, const char *def)
-// get a filename from file with name filename, expand it and fix characters
-{
-  char tmp[FILENAME_MAX];
-
-  get_property (filename, propname, tmp, def);
-#ifdef  __CYGWIN__
-  fix_character_set (tmp);
-#endif
-  return realpath2 (tmp, value_s);
-}
 
 
 int

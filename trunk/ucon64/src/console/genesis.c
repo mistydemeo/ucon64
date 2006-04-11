@@ -77,7 +77,7 @@ const st_getopt2_t genesis_usage[] =
       NULL
     },
     {
-      "gen", 0, 0, UCON64_GEN,
+      UCON64_GEN_S, 0, 0, UCON64_GEN,
       NULL, "force recognition",
       &genesis_obj[5]
     },

@@ -283,22 +283,38 @@ get_next_file (char *fname)
 static st_ucon64_dat_t *
 get_dat_header (char *fname, st_ucon64_dat_t *dat)
 {
-  char buf[50 * 80];                            // should be enough
+  const char *p = NULL;
+  int x = 0;
 
-  get_property (fname, "author", buf, "Unknown");
-  strncpy (dat->author, buf, sizeof (dat->author))[sizeof (dat->author) - 1] = 0;
+  p = get_property (fname, "author", PROPERTY_MODE_TEXT);
+  x = sizeof (dat->author);
+  strncpy (dat->author, p ? p : "Unknown", x)[x - 1] = 0;
 
-  get_property (fname, "version", buf, "?");
-  strncpy (dat->version, buf, sizeof (dat->version))[sizeof (dat->version) - 1] = 0;
+  p = get_property (fname, "version", PROPERTY_MODE_TEXT);
+  x = sizeof (dat->version);
+  strncpy (dat->version, p ? p : "?", x)[x - 1] = 0;
 
-  get_property (fname, "refname", buf, "");
-  strncpy (dat->refname, buf, sizeof (dat->refname))[sizeof (dat->refname) - 1] = 0;
+  p = get_property (fname, "refname", PROPERTY_MODE_TEXT);
+  if (p)
+    {
+      x = sizeof (dat->refname);
+      strncpy (dat->refname, p, x)[x - 1] = 0;
+    }
+  else
+    *(dat->refname) = 0;
 
-  get_property (fname, "comment", buf, "");
-  strncpy (dat->comment, buf, sizeof (dat->comment))[sizeof (dat->comment) - 1] = 0;
+  p = get_property (fname, "comment", PROPERTY_MODE_TEXT);
+  if (p)
+    {
+      x = sizeof (dat->comment);
+      strncpy (dat->comment, p, x)[x - 1] = 0;
+    }
+  else
+    *(dat->comment) = 0;
 
-  get_property (fname, "date", buf, "?");
-  strncpy (dat->date, buf, sizeof (dat->date))[sizeof (dat->date) - 1] = 0;
+  p = get_property (fname, "date", PROPERTY_MODE_TEXT);
+  x = sizeof (dat->date);
+  strncpy (dat->date, p ? p : "?", x)[x - 1] = 0;
 
   return dat;
 }
@@ -355,7 +371,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
       {"VBOY", custom_strnicmp, UCON64_VBOY, vboy_usage},
       
       {"Neo-Geo", custom_strnicmp, UCON64_NG, neogeo_usage},
-      {"MAME", custom_stristr, UCON64_MAME, mame_usage},
+      {"MAME", custom_stristr, UCON64_ARCADE, arcade_usage},
       {"Dreamcast", custom_stristr, UCON64_DC, dc_usage},
       {"Saturn", custom_stristr, UCON64_SAT, sat_usage},
       {"3do", custom_stristr, UCON64_3DO, real3do_usage},
@@ -1068,7 +1084,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
           case UCON64_LYNX:
             console_name = "Lynx";
             break;
-          case UCON64_MAME:
+          case UCON64_ARCADE:
             console_name = "M.A.M.E.";
             plugin = "arcade.dll";
             break;

@@ -31,7 +31,6 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 */
 #ifndef MISC_CHKSUM_H
 #define MISC_CHKSUM_H
-
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
@@ -100,5 +99,4 @@ extern unsigned int crc32 (unsigned int crc, const void *buffer, unsigned int si
 #ifdef  __cplusplus
 }
 #endif
-
 #endif // MISC_CHKSUM_H

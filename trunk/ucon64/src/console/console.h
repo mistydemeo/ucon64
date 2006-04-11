@@ -58,7 +58,7 @@ extern const st_getopt2_t gamecom_usage[];
 extern const st_getopt2_t gc_usage[];
 extern const st_getopt2_t gp32_usage[];
 extern const st_getopt2_t intelli_usage[];
-extern const st_getopt2_t mame_usage[];
+extern const st_getopt2_t arcade_usage[];
 extern const st_getopt2_t odyssey2_usage[];
 extern const st_getopt2_t odyssey_usage[];
 extern const st_getopt2_t ps2_usage[];

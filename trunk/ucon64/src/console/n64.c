@@ -73,7 +73,7 @@ const st_getopt2_t n64_usage[] =
       NULL
     },
     {
-      "n64", 0, 0, UCON64_N64,
+      UCON64_N64_S, 0, 0, UCON64_N64,
       NULL, "force recognition",
       &n64_obj[3]
     },

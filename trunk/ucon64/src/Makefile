@@ -93,7 +93,7 @@ endif
 
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         misc/chksum.o misc/file.o misc/getopt.o misc/getopt2.o \
-        misc/misc.o misc/parallel.o misc/property.o misc/string.o \
+        misc/misc.o misc/parallel.o misc/property.o misc/string.o misc/term.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o \
         console/atari.o console/coleco.o console/console.o console/dc.o console/gb.o \
         console/gba.o console/genesis.o console/jaguar.o console/lynx.o \
@@ -105,7 +105,7 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/ffe.o backup/fig.o backup/gbx.o backup/gd.o \
         backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
         backup/md-pro.o backup/mgd.o backup/msg.o backup/nfc.o \
-        backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/sflash.o \
+        backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/sc.o backup/sflash.o \
         backup/smc.o backup/smd.o backup/smsgg-pro.o backup/spsc.o \
         backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o backup/yoko.o \
         backup/z64.o

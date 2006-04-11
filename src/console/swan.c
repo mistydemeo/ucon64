@@ -53,7 +53,7 @@ const st_getopt2_t swan_usage[] =
       NULL
     },
     {
-      "swan", 0, 0, UCON64_SWAN,
+      UCON64_SWAN_S, 0, 0, UCON64_SWAN,
       NULL, "force recognition",
       &swan_obj[1]
     },

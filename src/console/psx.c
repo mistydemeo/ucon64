@@ -51,7 +51,7 @@ const st_getopt2_t psx_usage[] =
       NULL
     },
     {
-      "psx", 0, 0, UCON64_PSX,
+      UCON64_PSX_S, 0, 0, UCON64_PSX,
       NULL, "force recognition",
       &psx_obj[0]
     },

@@ -53,7 +53,7 @@ const st_getopt2_t vboy_usage[] =
       NULL
     },
     {
-      "vboy", 0, 0, UCON64_VBOY,
+      UCON64_VBOY_S, 0, 0, UCON64_VBOY,
       NULL, "force recognition",
       &vboy_obj[0]
     },

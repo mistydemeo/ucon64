@@ -65,7 +65,7 @@ const st_getopt2_t gb_usage[] =
       NULL
     },
     {
-      "gb", 0, 0, UCON64_GB,
+      UCON64_GB_S, 0, 0, UCON64_GB,
       NULL, "force recognition",
       &gb_obj[1]
     },

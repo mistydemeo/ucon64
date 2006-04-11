@@ -49,6 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "pce-pro.h"
 #include "pl.h"
 //#include "psxpblib.h"
+#include "sc.h"
 #include "sflash.h"
 #include "smc.h"
 #include "smd.h"

@@ -39,7 +39,7 @@ const st_getopt2_t interceptor_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Mega Disk/Super Disk (Interceptor),"/*"19XX Taiwan Sang Ting Co. Ltd."*/,
+      NULL, "Mega Disk/Super Disk (Interceptor)"/*"19XX Taiwan Sang Ting Co. Ltd."*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}

@@ -45,6 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/archive.h"
 #endif
 #include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/term.h"
 #include "ucon64.h"
 #include "ucon64_opts.h"
 #include "ucon64_misc.h"
@@ -253,15 +254,24 @@ const st_getopt2_t ucon64_options_usage[] =
 #endif
         " PORT={"
 #ifdef  USE_USB
-        "USB0, USB1, "
+        "USB0, USB1, ..."
 #endif
 #ifdef  USE_PARALLEL
-        "3bc, 378, 278, "
+        "3bc, 378, 278"
 #endif
-        "...}",
+        "} (default: auto)\n"
+        "In order to connect a copier to a PC's parallel port\n"
+        "you need a standard bidirectional parallel cable",
       &ucon64_option_obj[0]
     },
 #endif // defined USE_PARALLEL || defined USE_USB
+#ifdef  USE_PARALLEL
+    {
+      "xreset", 0, 0, UCON64_XRESET,
+      NULL, "reset parallel port",
+      &ucon64_option_obj[3]             // it's NOT a stop option
+    },
+#endif
     {
       "hdn", 1, 0, UCON64_HDN,
       "N", "force ROM has backup unit/emulator header with size of N Bytes",
@@ -285,20 +295,12 @@ const st_getopt2_t ucon64_options_usage[] =
     },
     {
       "e", 0, 0, UCON64_E,
-#ifdef  __MSDOS__
-      NULL, "emulate/run ROM (check ucon64.cfg for all Emulator settings)",
-#else
-      NULL, "emulate/run ROM (check .ucon64rc for all Emulator settings)",
-#endif
+      NULL, "emulate/run ROM (check " PROPERTY_HOME_RC("ucon64") " for all Emulator settings)",
       &ucon64_option_obj[1]
     },
     {
       "crc", 0, 0, UCON64_CRC,
       NULL, "show CRC32 value of ROM",
-#if 0
-      "; this will also force calculation for\n"
-      "files bigger than %d Bytes (%.4f Mb)"
-#endif
       &ucon64_option_obj[9]
     },
     {
@@ -323,39 +325,23 @@ const st_getopt2_t ucon64_options_usage[] =
     },
     {
       "hex", 2, 0, UCON64_HEX,
-#ifdef  __MSDOS__
-      "ST", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|more\""
-#else
-      "ST", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|less\"" // less is more ;-)
-#endif
-      "\nST is the optional start value in bytes",
+      "ST", "show ROM as hexdump\n"
+      "ST is the optional start value in bytes",
       NULL
     },
     {
       "dual", 2, 0, UCON64_DUAL,                // TODO: Think of a decent name - dbjh
-#ifdef  __MSDOS__
-      "ST", "show ROM as dualdump; use \"ucon64 " OPTION_LONG_S "dual ...|more\"",
-#else
-      "ST", "show ROM as dualdump; use \"ucon64 " OPTION_LONG_S "dual ...|less\"",
-#endif
+      "ST", "show ROM as dualdump",
       NULL
     },
     {
       "code", 2, 0, UCON64_CODE,
-#ifdef  __MSDOS__
-      "ST", "show ROM as code; use \"ucon64 " OPTION_LONG_S "code ...|more\"",
-#else
-      "ST", "show ROM as code; use \"ucon64 " OPTION_LONG_S "code ...|less\"",
-#endif
+      "ST", "show ROM as code",
       NULL
     },
     {
       "print", 2, 0, UCON64_PRINT,
-#ifdef  __MSDOS__
-      "ST", "show ROM in printable characters; use \"ucon64 " OPTION_LONG_S "print ...|more\"",
-#else
-      "ST", "show ROM in printable characters; use \"ucon64 " OPTION_LONG_S "print ...|less\"",
-#endif
+      "ST", "show ROM in printable characters",
       NULL
     },
     {
@@ -409,8 +395,17 @@ const st_getopt2_t ucon64_options_usage[] =
       NULL
     },
     {
-      "help", 0, 0, UCON64_HELP,
-      NULL, "display this help and exit",
+      "help", 2, 0, UCON64_HELP,
+      "WHAT", "display help and exit\n"
+              "WHAT=\"long\"   show long help (default)\n"
+              "WHAT=\"pad\"    show help for padding ROMs\n"
+              "WHAT=\"dat\"    show help for DAT support\n"
+              "WHAT=\"patch\"  show help for patching ROMs\n"
+              "WHAT=\"backup\" show help for backup units\n"
+#ifdef  USE_DISCMAGE
+              "WHAT=\"disc\"   show help for DISC image support\n"
+#endif
+              OPTION_LONG_S "help " OPTION_LONG_S "snes would show only SNES related help",
       &ucon64_option_obj[2]
     },
     {
@@ -435,13 +430,6 @@ const st_getopt2_t ucon64_options_usage[] =
       NULL, "be more verbose (show backup unit headers also)",
       &ucon64_option_obj[0]
     },
-#ifdef  USE_PARALLEL
-    {
-      "xreset", 0, 0, UCON64_XRESET,
-      NULL, "reset parallel port",
-      &ucon64_option_obj[3]             // it's NOT a stop option
-    },
-#endif
     // hidden options
     {
       "crchd", 0, 0, UCON64_CRCHD,              // backward compat.
@@ -585,7 +573,13 @@ ucon64_load_discmage (void)
 {
   uint32_t version;
 #ifdef  DLOPEN
-  get_property_fname (ucon64.configfile, "discmage_path", ucon64.discmage_path, "");
+  const char *p = NULL;
+
+  p = get_property (ucon64.configfile, "discmage_path", PROPERTY_MODE_FILENAME);
+  if (p)
+    strcpy (ucon64.discmage_path, p);
+  else
+    *(ucon64.discmage_path) = 0;
 
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
@@ -1128,36 +1122,9 @@ ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
 }
 
 
-// configfile handling
-static int
-ucon64_configfile_update (void)
+int
+ucon64_set_property_array (void)
 {
-  char buf[16];
-
-  // update the config version
-  sprintf (buf, "%d", UCON64_CONFIG_VERSION);
-  set_property (ucon64.configfile, "version", buf, "uCON64 configuration");
-
-  // new properties since the last release
-  set_property (ucon64.configfile, "gbaloader_sc", "sc_menu.bin",
-                "path to GBA multi-game loader (Super Card)");
-
-  return 0;
-}
-
-
-typedef struct
-{
-  int id;
-  const char *command;
-} st_command_t;
-
-
-static int
-ucon64_configfile_create (void)
-{
-  char buf[16];
-  const st_getopt2_t *options = ucon64.options;
   const st_property_t props[] =
     {
       {
@@ -1189,43 +1156,31 @@ ucon64_configfile_create (void)
         "parallel port"
       },
 #endif
+#ifdef  USE_USB
+#endif
       {
         "discmage_path",
 #if     defined __MSDOS__
-        "~\\discmage.dxe",                      // realpath2() expands the tilde
-#elif   defined __CYGWIN__
-        "~/discmage.dll",
-#elif   defined _WIN32
-        "~\\discmage.dll",
+        PROPERTY_MODE_DIR ("ucon64") "discmage.dxe",
+#elif   defined __CYGWIN__ || defined _WIN32
+        PROPERTY_MODE_DIR ("ucon64") "discmage.dll",
 #elif   defined __APPLE__                       // Mac OS X actually
-        "~/.ucon64/discmage.dylib",
+        PROPERTY_MODE_DIR ("ucon64") "discmage.dylib",
 #elif   defined __unix__ || defined __BEOS__
-        "~/.ucon64/discmage.so",
+        PROPERTY_MODE_DIR ("ucon64") "discmage.so",
 #else
         "",
 #endif
-        "complete path to the discmage library for CD image support"
+        "complete path to the discmage library for DISC image support"
       },
       {
         "ucon64_configdir",
-#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
-        "~",                                    // realpath2() expands the tilde
-#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
-        "~/.ucon64",
-#else
-        "",
-#endif
+        PROPERTY_MODE_DIR ("ucon64"),
         "directory with additional config files"
       },
       {
         "ucon64_datdir",
-#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
-        "~",                                    // realpath2() expands the tilde
-#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
-        "~/.ucon64/dat",
-#else
-        "",
-#endif
+        PROPERTY_MODE_DIR ("ucon64/dat"),
         "directory with DAT files"
       },
       {
@@ -1253,128 +1208,46 @@ ucon64_configfile_create (void)
         "gbaloader_sc", "sc_menu.bin",
         "path to GBA multi-game loader (Super Card)"
       },
+      {
+        "emulate_" UCON64_3DO_S,      "",
+        "emulate_<console shortcut>=<emulator with options>\n\n"
+        "You can also use CRC32 values for ROM specific emulation options:\n\n"
+        "emulate_0x<crc32>=<emulator with options>\n"
+        "emulate_<crc32>=<emulator with options>"
+      },
+      {"emulate_" UCON64_ATA_S,      "", NULL},
+      {"emulate_" UCON64_CD32_S,     "", NULL},
+      {"emulate_" UCON64_CDI_S,      "", NULL},
+      {"emulate_" UCON64_COLECO_S,   "", NULL},
+      {"emulate_" UCON64_DC_S,       "", NULL},
+      {"emulate_" UCON64_GB_S,       "vgb -sound -sync 50 -sgb -scale 2", NULL},
+      {"emulate_" UCON64_GBA_S,      "vgba -scale 2 -uperiod 6", NULL},
+      {"emulate_" UCON64_GC_S,       "", NULL},
+      {"emulate_" UCON64_GEN_S,      "dgen -f -S 2", NULL},
+      {"emulate_" UCON64_INTELLI_S,  "", NULL},
+      {"emulate_" UCON64_JAG_S,      "", NULL},
+      {"emulate_" UCON64_LYNX_S,     "", NULL},
+      {"emulate_" UCON64_ARCADE_S,   "", NULL},
+      {"emulate_" UCON64_N64_S,      "", NULL},
+      {"emulate_" UCON64_NES_S,      "tuxnes -E2 -rx11 -v -s/dev/dsp -R44100", NULL},
+      {"emulate_" UCON64_NG_S,       "", NULL},
+      {"emulate_" UCON64_NGP_S,      "", NULL},
+      {"emulate_" UCON64_PCE_S,      "", NULL},
+      {"emulate_" UCON64_PS2_S,      "", NULL},
+      {"emulate_" UCON64_PSX_S,      "pcsx", NULL},
+      {"emulate_" UCON64_S16_S,      "", NULL},
+      {"emulate_" UCON64_SAT_S,      "", NULL},
+      {"emulate_" UCON64_SMS_S,      "", NULL},
+      {"emulate_" UCON64_GAMEGEAR_S, "", NULL},
+      {"emulate_" UCON64_SNES_S,     "snes9x -tr -sc -hires -dfr -r 7 -is -joymap1 2 3 5 0 4 7 6 1", NULL},
+      {"emulate_" UCON64_SWAN_S,     "", NULL},
+      {"emulate_" UCON64_VBOY_S,     "", NULL},
+      {"emulate_" UCON64_VEC_S,      "", NULL},
+      {"emulate_" UCON64_XBOX_S,     "", NULL},
       {NULL, NULL, NULL}
     };
 
-  st_command_t emulate[] =
-    {
-      {UCON64_3DO,      ""},
-      {UCON64_ATA,      ""},
-      {UCON64_CD32,     ""},
-      {UCON64_CDI,      ""},
-      {UCON64_COLECO,   ""},
-      {UCON64_DC,       ""},
-      {UCON64_GB,       "vgb -sound -sync 50 -sgb -scale 2"},
-      {UCON64_GBA,      "vgba -scale 2 -uperiod 6"},
-      {UCON64_GC,       ""},
-      {UCON64_GEN,      "dgen -f -S 2"},
-      {UCON64_INTELLI,  ""},
-      {UCON64_JAG,      ""},
-      {UCON64_LYNX,     ""},
-      {UCON64_MAME,     ""},
-      {UCON64_N64,      ""},
-      {UCON64_NES,      "tuxnes -E2 -rx11 -v -s/dev/dsp -R44100"},
-      {UCON64_NG,       ""},
-      {UCON64_NGP,      ""},
-      {UCON64_PCE,      ""},
-      {UCON64_PS2,      ""},
-      {UCON64_PSX,      "pcsx"},
-      {UCON64_S16,      ""},
-      {UCON64_SAT,      ""},
-      {UCON64_SMS,      ""},
-      {UCON64_GAMEGEAR, ""},
-      {UCON64_SNES,     "snes9x -tr -sc -hires -dfr -r 7 -is -joymap1 2 3 5 0 4 7 6 1"},
-      {UCON64_SWAN,     ""},
-      {UCON64_VBOY,     ""},
-      {UCON64_VEC,      ""},
-      {UCON64_XBOX,     ""},
-      {0, NULL}
-    };
-  int x = 0, y = 0;
-
-  sprintf (buf, "%d", UCON64_CONFIG_VERSION);
-  set_property (ucon64.configfile, "version", buf, "uCON64 configuration");
-  set_property_array (ucon64.configfile, props);
-
-  for (x = 0; emulate[x].command; x++)
-    for (y = 0; options[y].name || options[y].help; y++)
-      if (emulate[x].id == options[y].val)
-        {
-          char buf[MAXBUFSIZE];
-
-          sprintf (buf, "emulate_%s", options[y].name);
-
-          set_property (ucon64.configfile, buf, emulate[x].command, !x ?
-            "emulate_<console shortcut>=<emulator with options>\n\n"
-            "You can also use CRC32 values for ROM specific emulation options:\n\n"
-            "emulate_0x<crc32>=<emulator with options>\n"
-            "emulate_<crc32>=<emulator with options>" : NULL);
-
-          break;
-        }
-
-  return 0;
-}
-
-int
-ucon64_configfile (void)
-{
-  char buf[MAXBUFSIZE], *dirname;
-  int result = -1;
-
-  dirname = getenv2 ("UCON64_HOME");
-  if (!dirname[0])
-    dirname = getenv2 ("HOME");
-  sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
-#ifdef  __MSDOS__
-    "ucon64.cfg"
-#else
-    ".ucon64rc"
-#endif
-    , dirname);
-
-//  if (!access (ucon64.configfile, F_OK))
-//    fprintf (stderr, ucon64_msg[READ_CONFIG_FILE], ucon64.configfile);
-
-  if (access (ucon64.configfile, F_OK) != 0)
-    {
-      FILE *fh;
-
-      printf ("WARNING: %s not found: creating...", ucon64.configfile);
-
-      if (!(fh = fopen (ucon64.configfile, "w"))) // opening the file in text mode
-        {                                         //  avoids trouble under DOS
-          printf ("FAILED\n\n");
-          return -1;
-        }
-      fclose (fh);                              // we'll use set_property() from now
-
-      result = ucon64_configfile_create ();
-
-      if (!result)
-        printf ("OK\n\n");
-      else
-        printf ("FAILED\n\n");
-    }
-  else if (get_property_int (ucon64.configfile, "version") < UCON64_CONFIG_VERSION)
-    {
-      strcpy (buf, ucon64.configfile);
-      set_suffix (buf, ".old");
-
-      printf ("NOTE: Updating config, old version will be renamed to %s...", buf);
-
-      fcopy (ucon64.configfile, 0, fsizeof (ucon64.configfile), buf, "wb"); // "wb" is correct for copying
-
-      // update the old configfile
-      result = ucon64_configfile_update ();
-
-      if (!result)
-        printf ("OK\n\n");
-      else
-        printf ("FAILED\n\n");
-    }
-
-  return result;
+  return set_property_array (ucon64.configfile, props);
 }
 
 
@@ -1393,13 +1266,14 @@ to_func (char *s, int len, int (*func) (int))
 int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80];
+#define SUFFIX_MAX 80
+  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[SUFFIX_MAX];
   const char *p, *p2;
   unsigned int crc = 0;
   int good_name;
 
   *buf = 0;
-  strncpy (suffix, get_suffix (ucon64.fname), sizeof (suffix))[sizeof (suffix) - 1] = 0; // in case suffix is >= 80 chars
+  strncpy (suffix, get_suffix (ucon64.fname), SUFFIX_MAX)[SUFFIX_MAX - 1] = 0; // in case suffix is >= SUFFIX_MAX chars
 
   switch (mode)
     {
@@ -1614,10 +1488,49 @@ ucon64_rename (int mode)
 int
 ucon64_e (void)
 {
-  int result = 0;
-  char buf[MAXBUFSIZE], value[MAXBUFSIZE], name[MAXBUFSIZE];
+  int result = 0, x = 0;
+  char buf[MAXBUFSIZE], name[MAXBUFSIZE];
   const char *value_p = NULL;
-  const st_getopt2_t *p = NULL, *options = ucon64.options;
+  typedef struct
+  {
+    int id;
+    const char *s;
+  } st_strings_t;
+  st_strings_t s[] = {
+    {UCON64_3DO,      "emulate_" UCON64_3DO_S},
+    {UCON64_ATA,      "emulate_" UCON64_ATA_S},
+    {UCON64_CD32,     "emulate_" UCON64_CD32_S},
+    {UCON64_CDI,      "emulate_" UCON64_CDI_S},
+    {UCON64_COLECO,   "emulate_" UCON64_COLECO_S},
+    {UCON64_DC,       "emulate_" UCON64_DC_S},
+    {UCON64_GB,       "emulate_" UCON64_GB_S},
+    {UCON64_GBA,      "emulate_" UCON64_GBA_S},
+    {UCON64_GC,       "emulate_" UCON64_GC_S},
+    {UCON64_GEN,      "emulate_" UCON64_GEN_S},
+    {UCON64_GP32,     "emulate_" UCON64_GP32_S},
+    {UCON64_INTELLI,  "emulate_" UCON64_INTELLI_S},
+    {UCON64_JAG,      "emulate_" UCON64_JAG_S},
+    {UCON64_LYNX,     "emulate_" UCON64_LYNX_S},
+    {UCON64_ARCADE,   "emulate_" UCON64_ARCADE_S},
+    {UCON64_N64,      "emulate_" UCON64_N64_S},
+    {UCON64_NDS,      "emulate_" UCON64_NDS_S},
+    {UCON64_NES,      "emulate_" UCON64_NES_S},
+    {UCON64_NG,       "emulate_" UCON64_NG_S},
+    {UCON64_NGP,      "emulate_" UCON64_NGP_S},
+    {UCON64_PCE,      "emulate_" UCON64_PCE_S},
+    {UCON64_PS2,      "emulate_" UCON64_PS2_S},
+    {UCON64_PSX,      "emulate_" UCON64_PSX_S},
+    {UCON64_S16,      "emulate_" UCON64_S16_S},
+    {UCON64_SAT,      "emulate_" UCON64_SAT_S},
+    {UCON64_SMS,      "emulate_" UCON64_SMS_S},
+    {UCON64_GAMEGEAR, "emulate_" UCON64_GAMEGEAR_S},
+    {UCON64_SNES,     "emulate_" UCON64_SNES_S},
+    {UCON64_SWAN,     "emulate_" UCON64_SWAN_S},
+    {UCON64_VBOY,     "emulate_" UCON64_VBOY_S},
+    {UCON64_VEC,      "emulate_" UCON64_VEC_S},
+    {UCON64_XBOX,     "emulate_" UCON64_XBOX_S},
+    {0,               NULL}
+  };
 
   if (access (ucon64.configfile, F_OK) != 0)
     {
@@ -1626,20 +1539,21 @@ ucon64_e (void)
     }
 
   sprintf (name, "emulate_%08x", ucon64.crc32); // look for emulate_<crc32>
-  value_p = get_property (ucon64.configfile, name, value, NULL);
+  value_p = get_property (ucon64.configfile, name, PROPERTY_MODE_TEXT);
 
   if (value_p == NULL)
     {
       sprintf (name, "emulate_0x%08x", ucon64.crc32); // look for emulate_0x<crc32>
-      value_p = get_property (ucon64.configfile, name, value, NULL);
+      value_p = get_property (ucon64.configfile, name, PROPERTY_MODE_TEXT);
     }
 
   if (value_p == NULL)
-    if ((p = getopt2_get_index_by_val (options, ucon64.console)))
-      {
-        sprintf (name, "emulate_%s", p->name);  // look for emulate_<console>
-        value_p = get_property (ucon64.configfile, name, value, NULL);
-      }
+    for (x = 0; s[x].s; x++)
+      if (s[x].id == ucon64.console)
+        {
+          value_p = get_property (ucon64.configfile, s[x].s, PROPERTY_MODE_TEXT);
+          break;
+        }
 
   if (value_p == NULL)
     {

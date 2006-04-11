@@ -69,9 +69,7 @@ strtol2 (const char *str, char **tail)
 int
 ucon64_switches (st_ucon64_t *p)
 {
-#ifdef  USE_DISCMAGE
   int x = 0;
-#endif
   int c = p->option;
   const char *optarg = p->optarg;
 
@@ -89,7 +87,21 @@ ucon64_switches (st_ucon64_t *p)
       same (compare with GNU tools).
     */
     case UCON64_HELP:
-      ucon64_usage (ucon64.argc, ucon64.argv);
+      x = USAGE_VIEW_LONG;
+      if (optarg)
+        {
+          if (!strcmp (optarg, "pad"))
+            x = USAGE_VIEW_PAD;
+          else if (!strcmp (optarg, "dat"))
+            x = USAGE_VIEW_DAT;
+          else if (!strcmp (optarg, "patch"))
+            x = USAGE_VIEW_PATCH;
+          else if (!strcmp (optarg, "backup"))
+            x = USAGE_VIEW_BACKUP;
+          else if (!strcmp (optarg, "disc"))
+            x = USAGE_VIEW_DISC;
+        }
+      ucon64_usage (ucon64.argc, ucon64.argv, x);
       exit (0);
 
     /*

@@ -70,7 +70,7 @@ const st_getopt2_t sms_usage[] =
       NULL
     },
     {
-      "sms", 0, 0, UCON64_SMS,
+      UCON64_SMS_S, 0, 0, UCON64_SMS,
       NULL, "force recognition",
       &sms_obj[4]
     },

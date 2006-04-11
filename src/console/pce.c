@@ -70,7 +70,7 @@ const st_getopt2_t pce_usage[] =
       NULL
     },
     {
-      "pce", 0, 0, UCON64_PCE,
+      UCON64_PCE_S, 0, 0, UCON64_PCE,
       NULL, "force recognition",
       &pce_obj[5]
     },

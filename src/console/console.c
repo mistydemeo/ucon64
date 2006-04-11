@@ -67,7 +67,7 @@ const st_getopt2_t gc_usage[] =
       NULL
     },
     {
-      "gc", 0, 0, UCON64_GC,
+      UCON64_GC_S, 0, 0, UCON64_GC,
       NULL, "force recognition",
       &gc_obj[0]
     },
@@ -89,7 +89,7 @@ const st_getopt2_t s16_usage[] =
       NULL
     },
     {
-      "s16", 0, 0, UCON64_S16,
+      UCON64_S16_S, 0, 0, UCON64_S16,
       NULL, "force recognition",
       &s16_obj[0]
     },
@@ -110,7 +110,7 @@ const st_getopt2_t vectrex_usage[] =
       NULL
     },
     {
-      "vec", 0, 0, UCON64_VEC,
+      UCON64_VEC_S, 0, 0, UCON64_VEC,
       NULL, "force recognition",
       &vectrex_obj[0]
     },
@@ -131,7 +131,7 @@ const st_getopt2_t intelli_usage[] =
       NULL
     },
     {
-      "intelli", 0, 0, UCON64_INTELLI,
+      UCON64_INTELLI_S, 0, 0, UCON64_INTELLI,
       NULL, "force recognition",
       &intelli_obj[0]
     },
@@ -152,7 +152,7 @@ const st_getopt2_t gp32_usage[] =
       NULL
     },
     {
-      "gp32", 0, 0, UCON64_GP32,
+      UCON64_GP32_S, 0, 0, UCON64_GP32,
       NULL, "force recognition",
       &gp32_obj[0]
     },
@@ -173,7 +173,7 @@ const st_getopt2_t ps2_usage[] =
       NULL
     },
     {
-      "ps2", 0, 0, UCON64_PS2,
+      UCON64_PS2_S, 0, 0, UCON64_PS2,
       NULL, "force recognition",
       &ps2_obj[0]
     },
@@ -194,7 +194,7 @@ const st_getopt2_t xbox_usage[] =
       NULL
     },
     {
-      "xbox", 0, 0, UCON64_XBOX,
+      UCON64_XBOX_S, 0, 0, UCON64_XBOX,
       NULL, "force recognition",
       &xbox_obj[0]
     },
@@ -215,7 +215,7 @@ const st_getopt2_t sat_usage[] =
       NULL
     },
     {
-      "sat", 0, 0, UCON64_SAT,
+      UCON64_SAT_S, 0, 0, UCON64_SAT,
       NULL, "force recognition",
       &sat_obj[0]
     },
@@ -236,7 +236,7 @@ const st_getopt2_t real3do_usage[] =
       NULL
     },
     {
-      "3do", 0, 0, UCON64_3DO,
+      UCON64_3DO_S, 0, 0, UCON64_3DO,
       NULL, "force recognition",
       &real3do_obj[0]
     },
@@ -257,7 +257,7 @@ const st_getopt2_t cd32_usage[] =
       NULL
     },
     {
-      "cd32", 0, 0, UCON64_CD32,
+      UCON64_CD32_S, 0, 0, UCON64_CD32,
       NULL, "force recognition",
       &cd32_obj[0]
     },
@@ -278,7 +278,7 @@ const st_getopt2_t cdi_usage[] =
       NULL
     },
     {
-      "cdi", 0, 0, UCON64_CDI,
+      UCON64_CDI_S, 0, 0, UCON64_CDI,
       NULL, "force recognition",
       &cdi_obj[0]
     },
@@ -335,11 +335,11 @@ const st_getopt2_t gamecom_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_getopt2_t mame_usage[] =
+const st_getopt2_t arcade_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "M.A.M.E. (Multiple Arcade Machine Emulator)",
+      NULL, "Arcade Machines/M.A.M.E. (Multiple Arcade Machine Emulator)",
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}

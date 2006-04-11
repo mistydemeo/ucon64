@@ -109,9 +109,9 @@ typedef struct
 #ifdef  USE_DISCMAGE
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 #endif
-#if     defined USE_PPDEV || defined AMIGA
+//#if     defined USE_PPDEV || defined AMIGA
   char parport_dev[80];                         // parallel port device (e.g.
-#endif                                          //  /dev/parport0 or parallel.device)
+//#endif                                          //  /dev/parport0 or parallel.device)
   int parport_needed;
   int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
@@ -172,7 +172,6 @@ typedef struct
 #endif
   void *dat;                                    // info from DATabase (st_ucon64_dat_t *)
   st_ucon64_nfo_t *nfo;                         // info from <console>_init() (st_ucon64_nfo_t *)
-  const st_getopt2_t *options;                  // all options with help (st_getopt2_t)
 } st_ucon64_t;
 
 typedef struct
@@ -194,7 +193,16 @@ typedef struct
 */
 extern int ucon64_init (void);
 extern int ucon64_nfo (void);
-extern void ucon64_usage (int argc, char *argv[]);
+enum {
+  USAGE_VIEW_SHORT = 0,
+  USAGE_VIEW_LONG,
+  USAGE_VIEW_PAD,
+  USAGE_VIEW_DAT,
+  USAGE_VIEW_PATCH,
+  USAGE_VIEW_BACKUP,
+  USAGE_VIEW_DISC
+};
+extern void ucon64_usage (int argc, char *argv[], int view);
 #ifdef  USE_ZLIB
 extern void ucon64_fname_arch (const char *fname);
 #endif

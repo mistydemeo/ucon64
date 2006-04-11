@@ -66,7 +66,7 @@ const st_getopt2_t atari_usage[] =
       NULL
     },
     {
-      "ata", 0, 0, UCON64_ATA,
+      UCON64_ATA_S, 0, 0, UCON64_ATA,
       NULL, "force recognition",
       &atari_obj[0]
     },

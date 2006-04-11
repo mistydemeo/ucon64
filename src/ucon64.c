@@ -70,6 +70,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc/getopt2.h"
 #include "misc/string.h"
+#include "misc/term.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
@@ -822,12 +823,9 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
+  int result = 0;
   int x = 0, y = 0, c = 0;
-#if (FILENAME_MAX < MAXBUFSIZE)
-  static char buf[MAXBUFSIZE];
-#else
-  static char buf[FILENAME_MAX];
-#endif
+  const char *p = NULL;
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
 
@@ -895,19 +893,25 @@ main (int argc, char **argv)
           memcpy (&options[c], &option[x][y], sizeof (st_getopt2_t));
           c++;
         }
-  ucon64.options = options;
 
 #ifdef  DEBUG
   ucon64_runtime_debug (); // check (st_getopt2_t *) options consistency
 #endif
 
+  // configfile handling
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
   //  still running in root mode. Maybe 0 is even better (in case root did
   //  `chmod +s').
   umask (002);
 #endif
-  ucon64_configfile ();
+  realpath2 (PROPERTY_HOME_RC ("ucon64"), ucon64.configfile);
+
+  result = property_check (ucon64.configfile, UCON64_CONFIG_VERSION, 1);
+  if (result == 1) // update needed
+    result = ucon64_set_property_array ();
+  if (result == -1) // property_check() or update failed
+    return -1;
 
 #ifdef  USE_ANSI_COLOR
   // ANSI colors?
@@ -917,24 +921,47 @@ main (int argc, char **argv)
 #endif
 
   // parallel port?
+#if     defined USE_PPDEV || defined AMIGA
+  p = get_property (ucon64.configfile, "parport_dev", PROPERTY_MODE_FILENAME);
+  x = sizeof (ucon64.parport_dev);
 #ifdef  USE_PPDEV
-  get_property (ucon64.configfile, "parport_dev", ucon64.parport_dev, "/dev/parport0");
+  strncpy (ucon64.parport_dev, p ? p : "/dev/parport0", x)[x - 1] = 0;
 #elif   defined AMIGA
-  get_property (ucon64.configfile, "parport_dev", ucon64.parport_dev, "parallel.device");
+  strncpy (ucon64.parport_dev, p ? p : "parallel.device", x)[x - 1] = 0;
 #endif
-  // use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
-  //  a parport line
-  sscanf (get_property (ucon64.configfile, "parport", buf, "-1"), "%x", &ucon64.parport);
+#endif
+
+  p = get_property (ucon64.configfile, "parport", PROPERTY_MODE_TEXT);
+  if (p)
+    sscanf (p, "%x", &ucon64.parport);
+  else
+    // use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
+    //  a parport line
+    ucon64.parport = -1;
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups");
 
   // $HOME/.ucon64/ ?
-  get_property_fname (ucon64.configfile, "ucon64_configdir", ucon64.configdir, "");
+  p = get_property (ucon64.configfile, "ucon64_configdir", PROPERTY_MODE_FILENAME);
+  if (p)
+    {
+      x = sizeof (ucon64.configdir);
+      strncpy (ucon64.configdir, p, x)[x - 1] = 0;
+    }
+  else
+    *ucon64.configdir = 0;
 
   // DAT file handling
   ucon64.dat_enabled = 0;
-  get_property_fname (ucon64.configfile, "ucon64_datdir", ucon64.datdir, "");
+  p = get_property (ucon64.configfile, "ucon64_datdir", PROPERTY_MODE_FILENAME);
+  if (p)
+    {
+      x = sizeof (ucon64.datdir);
+      strncpy (ucon64.datdir, p, x)[x - 1] = 0;
+    }
+  else
+    *ucon64.datdir = 0;
 
   // we use ucon64.datdir as path to the dats
   if (!access (ucon64.datdir,
@@ -963,10 +990,9 @@ main (int argc, char **argv)
 
   if (argc < 2)
     {
-      ucon64_usage (argc, argv);
+      ucon64_usage (argc, argv, USAGE_VIEW_SHORT);
       return 0;
     }
-
 
   // turn st_getopt2_t into struct option
   getopt2_long_only (long_options, options, UCON64_MAX_ARGS);
@@ -1779,7 +1805,7 @@ ucon64_fname_arch (const char *fname)
 
 
 void
-ucon64_usage (int argc, char *argv[])
+ucon64_usage (int argc, char *argv[], int view)
 {
   int x = 0, y = 0, c = 0, single = 0;
   const char *name_exe = basename2 (argv[0]);
@@ -1808,7 +1834,73 @@ ucon64_usage (int argc, char *argv[])
               }
 
   if (!single)
-    getopt2_usage (options);
+    switch (view)
+      {
+        case USAGE_VIEW_LONG:
+          getopt2_usage (options);
+
+        case USAGE_VIEW_PAD:
+          getopt2_usage (ucon64_padding_usage);
+          break;
+
+        case USAGE_VIEW_DAT:
+          getopt2_usage (ucon64_dat_usage);
+          break;
+
+        case USAGE_VIEW_PATCH:
+          getopt2_usage (patch_usage);
+          getopt2_usage (bsl_usage);
+          getopt2_usage (ips_usage);
+          getopt2_usage (aps_usage);
+          getopt2_usage (ppf_usage);
+          getopt2_usage (gg_usage);
+          break;
+
+        case USAGE_VIEW_BACKUP:
+//          getopt2_usage (cc2_usage);
+//          getopt2_usage (cd64_usage);
+          getopt2_usage (cmc_usage);
+          getopt2_usage (dex_usage);
+          getopt2_usage (doctor64_usage);
+          getopt2_usage (doctor64jr_usage);
+          getopt2_usage (f2a_usage);
+          getopt2_usage (fal_usage);
+          getopt2_usage (fig_usage);
+          getopt2_usage (gbx_usage);
+          getopt2_usage (gd_usage);
+//          getopt2_usage (interceptor_usage);
+          getopt2_usage (lynxit_usage);
+          getopt2_usage (mccl_usage);
+          getopt2_usage (mcd_usage);
+          getopt2_usage (mdpro_usage);
+//          getopt2_usage (mgd_usage);
+          getopt2_usage (msg_usage);
+//          getopt2_usage (nfc_usage);
+          getopt2_usage (pcepro_usage);
+          getopt2_usage (pl_usage);
+//          getopt2_usage (sc_usage);
+          getopt2_usage (sflash_usage);
+          getopt2_usage (smc_usage);
+          getopt2_usage (smd_usage);
+          getopt2_usage (smsggpro_usage);
+//          getopt2_usage (spsc_usage);
+//          getopt2_usage (ssc_usage);
+          getopt2_usage (swc_usage);
+//          getopt2_usage (ufo_usage);
+//          getopt2_usage (yoko_usage);
+//          getopt2_usage (z64_usage);
+          break;
+
+#ifdef  USE_DISCMAGE
+        case USAGE_VIEW_DISC:
+          getopt2_usage (discmage_usage);
+          break;
+#endif
+
+        case USAGE_VIEW_SHORT:
+        default:
+          getopt2_usage (ucon64_options_usage);
+      }
 
   fputc ('\n', stdout);
 
@@ -1840,24 +1932,6 @@ ucon64_usage (int argc, char *argv[])
     }
 #endif
 
-#ifdef  USE_PARALLEL
-  puts ("NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
-        "      parallel port. If that is the case give a hardware address. For example:\n"
-        "        ucon64 " OPTION_LONG_S "xswc \"rom.swc\" " OPTION_LONG_S "port=0x378\n"
-        "      In order to connect a copier to a PC's parallel port you need a standard\n"
-        "      bidirectional parallel cable\n");
-#endif
-
-  printf ("TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n", name_exe);
-
-#if     defined __MSDOS__ || defined _WIN32
-  printf ("     %s " OPTION_LONG_S "help|more (to see everything in more)\n", name_exe);
-#else
-  printf ("     %s " OPTION_LONG_S "help|less (to see everything in less)\n", name_exe); // less is more ;-)
-#endif
-
-  puts ("     Give the force recognition switch a try if something went wrong\n"
-        "\n"
-        "Please report problems, fixes or ideas to ucon64-main@lists.sf.net or visit\n"
+  puts ("Please report problems, fixes or ideas to ucon64-main@lists.sf.net or visit\n"
         "http://ucon64.sourceforge.net\n");
 }

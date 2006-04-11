@@ -55,7 +55,7 @@ const st_getopt2_t coleco_usage[] =
       NULL
     },
     {
-      "coleco", 0, 0, UCON64_COLECO,
+      UCON64_COLECO_S, 0, 0, UCON64_COLECO,
       NULL, "force recognition",
       &coleco_obj[0]
     },

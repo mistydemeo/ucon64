@@ -72,7 +72,6 @@ system2 (const char *cmdline)
       >> 8                                      // the exit code is coded in bits 8-15
 #endif                                          //  (that is, under non-DOS)
       ;
-  sync ();                                      // ???
 
   return result;
 }

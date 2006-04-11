@@ -83,6 +83,8 @@ typedef struct
 
   int option;                                   // current option (UCON64_HEX, UCON64_FIND, ...)
   const char *optarg;                           // ptr to current options optarg
+  char *temp_file;                              // global temp_file
+
 
   const char *fname;                            // ROM (cmdline) with path
   int recursive;

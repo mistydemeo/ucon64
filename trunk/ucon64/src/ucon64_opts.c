@@ -1838,7 +1838,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XFALMULTI:
       tmpnam2 (src_name);
-      ucon64_temp_file = src_name;
+      ucon64.temp_file = src_name;
       register_func (remove_temp_file);
       // gba_multi() calls ucon64_file_handler() so the directory part will be
       //  stripped from src_name. The directory should be used though.

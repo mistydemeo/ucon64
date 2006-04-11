@@ -1514,7 +1514,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
           // This code does not work for the last part of a file
           int split = 0;
           if (smd_header_split & 0x40)
-            split = ucon64_testsplit (ucon64.fname);
+            split = ucon64_testsplit (ucon64.fname, NULL);
           ucon64.split = split;                 // force displayed info to be correct
         }                                       //  if not split (see ucon64.c)
       else if (type == BIN)

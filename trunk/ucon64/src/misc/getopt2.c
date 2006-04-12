@@ -54,8 +54,38 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 
 
+const st_getopt2_t *
+getopt2_get_index_by_val (const st_getopt2_t *option, int val)
+{
+  int i = 0;
+
+  for (; option[i].name || option[i].help; i++)
+    if (option[i].name && // it IS an option
+        option[i].val == val)
+      return &option[i];
+
+  return NULL;
+}
+
+
 #ifdef  DEBUG
-static void
+void
+getopt2_sanity_check_output (st_getopt2_t *p)
+{
+  printf ("{\"%s\", %d, 0, %d, \"%s\", \"%s\", %d}, // console: %d workflow: %d\n",
+    p->name,
+    p->has_arg,
+    p->val,
+    p->arg_name,
+    p->help ? "usage" : p->help, // i (nb) mean it
+//    p->help,
+    0,
+    p->object ? ((st_ucon64_obj_t *) p->object)->console : 0,
+    p->object ? ((st_ucon64_obj_t *) p->object)->flags : 0);
+}
+
+
+void
 getopt2_sanity_check (const st_getopt2_t *option)
 {
   int x, y = 0;
@@ -149,38 +179,9 @@ getopt2_parse_usage (const char *usage_output)
       fputc ('\n', stdout);
     }
 }
-#endif // DEBUG
 
 
-#ifdef  DEBUG
-static inline char *
-string_code (char *d, const char *s)
-{
-  char *p = d;
-
-  *p = 0;
-  for (; *s; s++)
-    switch (*s)
-      {
-      case '\n':
-        strcat (p, "\\n\"\n  \"");
-        break;
-
-      case '\"':
-        strcat (p, "\\\"");
-        break;
-
-      default:
-        p = strchr (p, 0);
-        *p = *s;
-        *(++p) = 0;
-      }
-
-  return d;
-}
-
-
-static void
+void
 getopt2_usage_code (const st_getopt2_t *usage)
 {
   int i = 0;
@@ -214,9 +215,6 @@ getopt2_usage_code (const st_getopt2_t *usage)
 void
 getopt2_usage (const st_getopt2_t *usage)
 {
-#ifdef  DEBUG
-  getopt2_usage_code (usage);
-#else
   int i = 0;
   char buf[MAXBUFSIZE];
 
@@ -262,7 +260,6 @@ getopt2_usage (const st_getopt2_t *usage)
             fputc ('\n', stdout);
           }
       }
-#endif // DEBUG
 }
 
 
@@ -360,20 +357,6 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
 #endif
 
   return (int) strlen (short_option) + 3 < n ? (int) strlen (short_option) : 0;
-}
-
-
-const st_getopt2_t *
-getopt2_get_index_by_val (const st_getopt2_t *option, int val)
-{
-  int i = 0;
-
-  for (; option[i].name || option[i].help; i++)
-    if (option[i].name && // it IS an option
-        option[i].val == val)
-      return &option[i];
-
-  return NULL;
 }
 
 

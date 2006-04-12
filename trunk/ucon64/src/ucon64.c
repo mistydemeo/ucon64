@@ -90,8 +90,6 @@ static int ucon64_process_rom (const char *fname);
 
 st_ucon64_t ucon64;                             // containes ptr to image, dat and nfo
 
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2005";
-
 #ifdef  AMIGA
 unsigned long __stacksize = 102400;             // doesn't work on PPC? is StormC specific?
 //unsigned long __stack = 102400;               // for SAS/C, DICE, GCC etc.?
@@ -252,7 +250,7 @@ ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
 }
 
 
-//#define TEST 
+#define TEST 
 #ifdef  TEST
 typedef struct
 {
@@ -277,24 +275,24 @@ ucon64_test (void)
     {
       {UCON64_1991,	"ucon64 -1991 /tmp/test/test.smd;"
                         "ucon64 -gen test.smd;"
-                        "rm test.smd", 0x281dac7d},
+                        "rm test.smd", 0xadc940f4},
       {UCON64_A,	"ucon64 -a", TEST_TODO},
-      {UCON64_ATA,	"ucon64 -ata /tmp/test/test.64k", 0x4f1780bc},
+      {UCON64_ATA,	"ucon64 -ata /tmp/test/test.64k", 0x4b3a37d0},
       {UCON64_B,	"ucon64 -b", TEST_TODO},
       {UCON64_B0,	"ucon64 -b0 64 /tmp/test/test.lnx;"
                         "ucon64 test.lnx;"
-                        "rm test.lnx", 0xf2ad1bda},
+                        "rm test.lnx", 0xde32e069},
       {UCON64_B1,	"ucon64 -b1 64 /tmp/test/test.lnx;"
                         "ucon64 test.lnx;"
-                        "rm test.lnx", 0x19330453},
+                        "rm test.lnx", 0x6b648320},
       {UCON64_BAT,	"ucon64 -bat /tmp/test/test.nes", TEST_BUG},
       {UCON64_BIN,	"ucon64 -bin", TEST_TODO},
       {UCON64_BIOS,	"ucon64 -bios", TEST_TODO},
       {UCON64_BOT,	"ucon64 -bot=test.bot /tmp/test/test.v64;"
                         "ucon64 -crc test.bot;"
-                        "rm test.bot", 0x63a6cb68},
-      {UCON64_BS,	"ucon64 -bs /tmp/test/test.smc", 0x2e2842a4},
-      {UCON64_C,	"ucon64 -c /tmp/test/test.txt /tmp/test/12345678.abc", 0x7dfdb3bc},
+                        "rm test.bot", 1},
+      {UCON64_BS,	"ucon64 -bs /tmp/test/test.smc", 0x18910ac6},
+      {UCON64_C,	"ucon64 -c /tmp/test/test.txt /tmp/test/12345678.abc", 0x2284888d},
 #if 0
       {UCON64_CC2,      "ucon64 -cc2 /tmp/test/test.16k;"
                         "ucon64 -crc test.wav;" // crc should be 0xc5cdd20f
@@ -302,26 +300,26 @@ ucon64_test (void)
 #endif
       {UCON64_CHK,	"ucon64 -chk /tmp/test/test.smc;"
                         "ucon64 test.smc;"
-                        "rm test.smc", 0x0b463647},
+                        "rm test.smc", 0x3fa1e89a},
       {UCON64_CMNT,	"ucon64 -cmnt", TEST_TODO},
       {UCON64_CODE,	"ucon64 -code /tmp/test/test.txt", TEST_BUG},
-      {UCON64_COL,	"ucon64 -col 0xff00", 0x18de1571},
-      {UCON64_COLECO,	"ucon64 -coleco /tmp/test/test.1mb", 0xc83d8173},
-      {UCON64_CRC,	"ucon64 -crc /tmp/test/test.2kb", 0xa0bc9d78},
+      {UCON64_COL,	"ucon64 -col 0xff00", 0xd4f45031},
+      {UCON64_COLECO,	"ucon64 -coleco /tmp/test/test.1mb", 0x2fb8741c},
+      {UCON64_CRC,	"ucon64 -crc /tmp/test/test.2kb", 0xd17fda4a},
       {UCON64_CRP,	"ucon64 -crp", TEST_TODO},
-      {UCON64_CS,	"ucon64 -cs /tmp/test/test.txt /tmp/test/12345678.abc", 0x20292e03},
+      {UCON64_CS,	"ucon64 -cs /tmp/test/test.txt /tmp/test/12345678.abc", 0xd6e61833},
       {UCON64_CTRL,	"ucon64 -ctrl", TEST_TODO},
       {UCON64_CTRL2,	"ucon64 -ctrl2", TEST_TODO},
       {UCON64_DB,	"ucon64 -db", TEST_TODO},
       {UCON64_DBS,	"ucon64 -dbs", TEST_TODO},
       {UCON64_DBUH,	"ucon64 -dbuh", TEST_TODO},
       {UCON64_DBV,	"ucon64 -dbv", TEST_TODO},
-      {UCON64_DC,	"ucon64 -dc /tmp/test/test.1mb", 0xf68b4bed},
-      {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" /tmp/test/test.txt", 0x644db1ce},
-      {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" /tmp/test/test.txt", 0xc2ea61a1},
+      {UCON64_DC,	"ucon64 -dc /tmp/test/test.1mb", 0x14c9d369},
+      {UCON64_DFIND,	"ucon64 -dfind \"97 98 99 100\" /tmp/test/test.txt", 0xd7aed3fd},
+      {UCON64_DFINDR,	"ucon64 -dfindr \"1 2 3 4\" /tmp/test/test.txt", 0x88a6f737},
       {UCON64_DINT,	"ucon64 -dint /tmp/test/test.txt;"
                         "ucon64 -crc test.txt;"
-                        "rm test.txt", 0xb8162c4f},
+                        "rm test.txt", 0xe60a7df5},
       {UCON64_DMIRR,	"ucon64 -dmirr", TEST_TODO},
       {UCON64_DNSRT,	"ucon64 -dnsrt", TEST_TODO},
       {UCON64_DUAL,	"ucon64 -dual", TEST_TODO},
@@ -334,24 +332,24 @@ ucon64_test (void)
       {UCON64_FFE,	"ucon64 -ffe", TEST_TODO},
       {UCON64_FIG,	"ucon64 -fig", TEST_TODO},
       {UCON64_FIGS,	"ucon64 -figs", TEST_TODO},
-      {UCON64_FIND,	"ucon64 -find \"abcd\" /tmp/test/test.txt", 0x644db1ce},
-      {UCON64_FINDI,	"ucon64 -findi \"ABcD\" /tmp/test/test.txt", 0x8d601a86},
-      {UCON64_FINDR,	"ucon64 -findr \"1234\" /tmp/test/test.txt", 0x515e124e},
-      {UCON64_GB,	"ucon64 -gb /tmp/test/test.1mb", 0x28a35286},
-      {UCON64_GBA,	"ucon64 -gba /tmp/test/test.1mb", 0x5d21dc4f},
+      {UCON64_FIND,	"ucon64 -find \"abcd\" /tmp/test/test.txt", 0xd7aed3fd},
+      {UCON64_FINDI,	"ucon64 -findi \"ABcD\" /tmp/test/test.txt", 0x10e913cd},
+      {UCON64_FINDR,	"ucon64 -findr \"1234\" /tmp/test/test.txt", 0x1b1284d8},
+      {UCON64_GB,	"ucon64 -gb /tmp/test/test.1mb", 0xf050caa1},
+      {UCON64_GBA,	"ucon64 -gba /tmp/test/test.1mb", 0x5253861d},
       {UCON64_GBX,	"ucon64 -gbx", TEST_TODO},
       {UCON64_GD3,	"ucon64 -gd3", TEST_TODO},
       {UCON64_GD3S,	"ucon64 -gd3s", TEST_TODO},
-      {UCON64_GEN,	"ucon64 -gen /tmp/test/test.1mb", 0x3d3e74ba},
+      {UCON64_GEN,	"ucon64 -gen /tmp/test/test.1mb", 0xaa1f503c},
       {UCON64_GG,	"ucon64 -gg", TEST_TODO},
       {UCON64_GGD,	"ucon64 -ggd", TEST_TODO},
       {UCON64_GGE,	"ucon64 -gge", TEST_TODO},
-      {UCON64_HD,	"ucon64 -snes -hd /tmp/test/test.1mb", 0xf4c33bd3},
-      {UCON64_HDN,	"ucon64 -snes -hdn=1024 /tmp/test/test.1mb", 0x15e95bfc},
-      {UCON64_HEX,	"ucon64 -hex /tmp/test/test.txt", 0x9732f50c},
-      {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" /tmp/test/test.txt", 0x6c43021b},
-      {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0xc2ea61a1},
-      {UCON64_HI,	"ucon64 -snes -hi /tmp/test/test.1mb", 0xf4878fb5},
+      {UCON64_HD,	"ucon64 -snes -hd /tmp/test/test.1mb", 0x9ea45865},
+      {UCON64_HDN,	"ucon64 -snes -hdn=1024 /tmp/test/test.1mb", 0x37812a26},
+      {UCON64_HEX,	"ucon64 -hex /tmp/test/test.txt", 0x90d0b764},
+      {UCON64_HFIND,	"ucon64 -hfind \"? 68 ?? 6a\" /tmp/test/test.txt", 0xdfa06028},
+      {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0x88a6f737},
+      {UCON64_HI,	"ucon64 -snes -hi /tmp/test/test.1mb", 0x086266b1},
       {UCON64_I,	"ucon64 -i", TEST_TODO},
       {UCON64_IDNUM,	"ucon64 -idnum", TEST_TODO},
       {UCON64_IDPPF,	"ucon64 -idppf", TEST_TODO},
@@ -359,15 +357,15 @@ ucon64_test (void)
       {UCON64_INESHD,	"ucon64 -ineshd", TEST_TODO},
       {UCON64_INS,      "ucon64 -ins /tmp/test/test.txt;"
                         "ucon64 -crc test.txt 2>&1;"
-                        "rm test.txt", 0x546f6150},
+                        "rm test.txt", 0xa87abae3},
       {UCON64_INSN,     "ucon64 -insn=512 /tmp/test/test.txt;"
                         "ucon64 -crc test.txt 2>&1;"
-                        "rm test.txt", 0x546f6150},
-      {UCON64_INT,	"ucon64 -int /tmp/test/test.z64", 0x1a10b01a},
-      {UCON64_INT2,	"ucon64 -int2 /tmp/test/test.v64", 0xcc6fc2b3},
-      {UCON64_ISPAD,	"ucon64 -ispad /tmp/test/test.2kb", 0xd420c88f},
+                        "rm test.txt", 0xa87abae3},
+      {UCON64_INT,	"ucon64 -int /tmp/test/test.z64", 0x1d23f41c},
+      {UCON64_INT2,	"ucon64 -int2 /tmp/test/test.v64", 1},
+      {UCON64_ISPAD,	"ucon64 -ispad /tmp/test/test.2kb", 0xa5e38fbd},
       {UCON64_J,	"ucon64 -j", TEST_TODO},
-      {UCON64_JAG,	"ucon64 -jag /tmp/test/test.1mb", 0xda1ced1d},
+      {UCON64_JAG,	"ucon64 -jag /tmp/test/test.1mb", 0x2d1f3594},
       {UCON64_K,	"ucon64 -k", TEST_TODO},
       {UCON64_L,	"ucon64 -l", TEST_TODO},
       {UCON64_LNX,	"ucon64 -lnx", TEST_TODO},
@@ -376,7 +374,7 @@ ucon64_test (void)
       {UCON64_LSD,	"ucon64 -lsd /tmp/test/*", TEST_BUG}, 
       {UCON64_LSRAM,	"ucon64 -lsram", TEST_TODO},
       {UCON64_LSV,	"ucon64 -lsv", TEST_TODO},
-      {UCON64_LYNX,	"ucon64 -lynx /tmp/test/test.1mb", 0xe87e6403},
+      {UCON64_LYNX,	"ucon64 -lynx /tmp/test/test.1mb", 0x78e02858},
       {UCON64_LYX,	"ucon64 -lyx", TEST_TODO},
       {UCON64_MAPR,	"ucon64 -mapr", TEST_TODO},
       {UCON64_MD5,	"ucon64 -md5", TEST_TODO},
@@ -387,7 +385,7 @@ ucon64_test (void)
       {UCON64_MKDAT,	"ucon64 -mkdat", TEST_TODO},
       {UCON64_MKI,	"ucon64 -mki=/tmp/test/test.txt /tmp/test/test2.txt;"
                         "ucon64 -crc test2.ips;"
-                        "rm test2.ips", 0x1d64288e},
+                        "rm test2.ips", 0xe2b26d35},
       {UCON64_MKIP,	"ucon64 -mkip", TEST_TODO},
       {UCON64_MKPPF,	"ucon64 -mkppf", TEST_TODO},
       {UCON64_MSG,	"ucon64 -msg", TEST_TODO},
@@ -395,17 +393,17 @@ ucon64_test (void)
       {UCON64_N,	"ucon64 -n", TEST_TODO},
       {UCON64_N2,	"ucon64 -n2", TEST_TODO},
       {UCON64_N2GB,	"ucon64 -n2gb", TEST_TODO},
-      {UCON64_N64,	"ucon64 -n64 /tmp/test/test.1mb", 0x63be7ef1},
+      {UCON64_N64,	"ucon64 -n64 /tmp/test/test.1mb", 0x5eedaf08},
       {UCON64_NA,	"ucon64 -na", TEST_TODO},
       {UCON64_NBAT,	"ucon64 -nbat", TEST_TODO},
       {UCON64_NBS,	"ucon64 -nbs", TEST_TODO},
-      {UCON64_NCOL,	"ucon64 -ncol -snes /tmp/test/test.1mb", 0xaf686a6a},
+      {UCON64_NCOL,	"ucon64 -ncol -snes /tmp/test/test.1mb", 0xf3091231},
       {UCON64_NDS,	"ucon64 -nds", TEST_TODO},
       {UCON64_NES,	"ucon64 -nes", TEST_TODO},
       {UCON64_NG,	"ucon64 -ng", TEST_TODO},
       {UCON64_NGP,	"ucon64 -ngp", TEST_TODO},
-      {UCON64_NHD,	"ucon64 -nhd /tmp/test/test.smc", 0xc1637acf},
-      {UCON64_NHI,	"ucon64 -snes -nhi /tmp/test/test.1mb", 0xaf686a6a},
+      {UCON64_NHD,	"ucon64 -nhd /tmp/test/test.smc", 0x1a5cc5d4},
+      {UCON64_NHI,	"ucon64 -snes -nhi /tmp/test/test.1mb", 0xf3091231},
       {UCON64_NINT,	"ucon64 -nint", TEST_TODO},
       {UCON64_NPPF,	"ucon64 -nppf", TEST_TODO},
       {UCON64_NROT,	"ucon64 -nrot", TEST_TODO},
@@ -423,61 +421,61 @@ ucon64_test (void)
       {UCON64_PCE,	"ucon64 -pce", TEST_TODO},
       {UCON64_POKE,	"ucon64 -poke", TEST_TODO},
       {UCON64_PPF,	"ucon64 -ppf", TEST_TODO},
-      {UCON64_PRINT,	"ucon64 -print /tmp/test/test.txt", 0x59823cd3},
-      {UCON64_PSX,	"ucon64 -psx /tmp/test/test.1mb", 0x6261c2e3},
+      {UCON64_PRINT,	"ucon64 -print /tmp/test/test.txt", 0x5c4acd52},
+      {UCON64_PSX,	"ucon64 -psx /tmp/test/test.1mb", 0x79b34e40},
       {UCON64_R83,      "cp /tmp/test/1234567890.abcd .;"
                         "ucon64 -r83 1234567890.abcd;"
-                        "rm 12345eeb.abc", 0x8dd379f0},
+                        "rm 12345eeb.abc", 0x1f791880},
       {UCON64_RDAT,	"ucon64 -rdat", TEST_TODO},
       {UCON64_REGION,	"ucon64 -region", TEST_TODO},
       {UCON64_RJOLIET,  "cp /tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd .;"
                         "ucon64 -rjoliet 1234567890123456789012345678901234567890123456789012345678901234567890.abcd;"
-                        "rm 123456789012345678901234567890123456789012345678901234566f5.abcd", 0x37f31d74},
+                        "rm 123456789012345678901234567890123456789012345678901234566f5.abcd", 0xd5cfab05},
       {UCON64_RL,       "cp /tmp/test/12345678.ABC .;"
                         "ucon64 -rl 12345678.ABC;"
-                        "rm 12345678.abc", 0xd2293641},
+                        "rm 12345678.abc", 0x48934d06},
       {UCON64_ROTL,	"ucon64 -rotl", TEST_TODO},
       {UCON64_ROTR,	"ucon64 -rotr", TEST_TODO},
       {UCON64_RROM,	"cp /tmp/test/test.smc .;"
                         "ucon64 -rrom test.smc;"
-                        "rm \"Mode 7 interactive de.smc\"", 0xd996d275},
+                        "rm \"Mode 7 interactive de.smc\"", 0xaaa714b6},
       {UCON64_RU,       "cp /tmp/test/12345678.abc .;"
                         "ucon64 -ru 12345678.abc;"
-                        "rm 12345678.ABC", 0x96254b18},
+                        "rm 12345678.ABC", 0x0c9f305f},
       {UCON64_S,	"ucon64 -s", TEST_TODO},
       {UCON64_SAM,	"ucon64 -sam", TEST_TODO},
       {UCON64_SC,	"ucon64 -sc", TEST_TODO},
       {UCON64_SCAN,	"ucon64 -scan", TEST_TODO},
       {UCON64_SCR,	"ucon64 -scr", TEST_TODO},
       {UCON64_SGB,	"ucon64 -sgb", TEST_TODO},
-      {UCON64_SHA1,	"ucon64 -sha1 /tmp/test/test.txt", 0x434f7e9f},
+      {UCON64_SHA1,	"ucon64 -sha1 /tmp/test/test.txt", 0x65608105},
       {UCON64_SMC,	"ucon64 -smc", TEST_TODO},
       {UCON64_SMD,	"ucon64 -smd", TEST_TODO},
       {UCON64_SMDS,	"ucon64 -smds", TEST_TODO},
-      {UCON64_SMS,	"ucon64 -sms /tmp/test/test.1mb", 0xca84ee44},
-      {UCON64_SNES,	"ucon64 -snes /tmp/test/test.1mb", 0xaf686a6a},
+      {UCON64_SMS,	"ucon64 -sms /tmp/test/test.1mb", 0x73996f1d},
+      {UCON64_SNES,	"ucon64 -snes /tmp/test/test.1mb", 0xf3091231},
       {UCON64_SRAM,	"ucon64 -sram", TEST_TODO},
       {UCON64_SSC,	"ucon64 -ssc", TEST_TODO},
       {UCON64_SSIZE,	"ucon64 -ssize", TEST_TODO},
       {UCON64_STP,	"ucon64 -stp /tmp/test/test.64k;"
                         "ucon64 -crc test.64k;"
-                        "rm test.64k", 0xf288f5a8},
+                        "rm test.64k", 0xe1a4cd85},
       {UCON64_STPN,	"ucon64 -stpn=512 /tmp/test/test.64k;"
                         "ucon64 -crc test.64k;"
-                        "rm test.64k", 0xf288f5a8},
+                        "rm test.64k", 0xe1a4cd85},
       {UCON64_STRIP,	"ucon64 -strip=512 /tmp/test/test.64k;"
                         "ucon64 -crc test.64k;"
-                        "rm test.64k", 0xf288f5a8},
-      {UCON64_SWAN,	"ucon64 -swan /tmp/test/test.1mb", 0xcab92ee3},
+                        "rm test.64k", 0xe1a4cd85},
+      {UCON64_SWAN,	"ucon64 -swan /tmp/test/test.1mb", 0x8e07f287},
       {UCON64_SWAP,	"ucon64 -swap /tmp/test/test.txt;"
                         "ucon64 -crc test.txt;"
-                        "rm test.txt", 0xb8162c4f},
+                        "rm test.txt", 0xe60a7df5},
       {UCON64_SWAP2,	"ucon64 -swap2 /tmp/test/test.txt;"
                         "ucon64 -crc test.txt;"
-                        "rm test.txt", 0x8be86737},
+                        "rm test.txt", 0xd5f4368d},
       {UCON64_SWC,	"ucon64 -swc /tmp/test/test.1mb;"
                         "ucon64 test.swc;"
-                        "rm test.swc", 0xf77967d6},
+                        "rm test.swc", 0xa9c3730f},
       {UCON64_SWCS,	"ucon64 -swcs", TEST_TODO},
       {UCON64_UFO,	"ucon64 -ufo", TEST_TODO},
       {UCON64_UFOS,	"ucon64 -ufos", TEST_TODO},
@@ -486,12 +484,12 @@ ucon64_test (void)
       {UCON64_USMS,	"ucon64 -usms", TEST_TODO},
       {UCON64_V64,	"ucon64 -v64 /tmp/test/test.z64;"
                         "ucon64 test.v64;"
-                        "rm test.v64", 0x99fbd0bf},
-      {UCON64_VBOY,	"ucon64 -vboy /tmp/test/test.1mb", 0xaf39c73d},
+                        "rm test.v64", 1},
+      {UCON64_VBOY,	"ucon64 -vboy /tmp/test/test.1mb", 0x87661ae8},
       {UCON64_VRAM,	"ucon64 -vram", TEST_TODO},
       {UCON64_Z64,	"ucon64 -z64 /tmp/test/test.v64;"
                         "ucon64 test.z64;"
-                        "rm test.z64", 0xd0d878f6},
+                        "rm test.z64", 1},
 TEST_BREAK
       {UCON64_VER,	"ucon64 -version", 0},  // NO TEST: changes always
       {UCON64_V,	"ucon64 -v", 0},        // NO TEST: verbose switch
@@ -832,12 +830,11 @@ main (int argc, char **argv)
 #ifdef  TEST
   if (argc == 1)
     ucon64_test ();
-#endif
-
-  printf ("%s\n"
+#else
+  printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2005\n"
     "Uses code from various people. See 'developers.html' for more!\n"
-    "This may be freely redistributed under the terms of the GNU Public License\n\n",
-    ucon64_title);
+    "This may be freely redistributed under the terms of the GNU Public License\n\n");
+#endif
 
   if (atexit (ucon64_exit) == -1)
     {
@@ -1266,12 +1263,6 @@ ucon64_execute_options (void)
             return -1;
           }
 
-#if 0
-        // WF_NFO_AFTER?!
-        if (!result && (ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
-          ucon64_rom_handling ();
-#endif
-
         /*
           "stop" options:
           - -multi (and -xfalmulti) takes more than one file as argument, but
@@ -1469,7 +1460,7 @@ ucon64_rom_handling (void)
     }
 
   // display info
-  if ((ucon64.flags & WF_NFO || ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
+  if ((ucon64.flags & WF_NFO) && ucon64.quiet < 1)
     ucon64_nfo ();
 
   return 0;
@@ -1921,7 +1912,7 @@ ucon64_usage (int argc, char *argv[], int view)
 #elif   defined __unix__ || defined __BEOS__
     "libdiscmage.so";
 #else
-    "unknown";
+    "library";
 #endif
 #endif
 

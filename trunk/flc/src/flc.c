@@ -142,7 +142,7 @@ main (int argc, char *argv[])
   };
   const st_getopt2_t options[] = {
     {NULL,      0, 0, 0, NULL,
-      "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2004 by NoisyB\n"
+      "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2006 by NoisyB\n"
       "This may be freely redistributed under the terms of the GNU Public License\n\n"
       "Usage: flc [OPTION]... [FILE]...\n", NULL},
     {"t",       0, 0, 't', NULL,   "sort by modification time", (void *) (FLC_SORT|FLC_DATE)},

@@ -267,7 +267,7 @@ const st_filter_t id3_filter = {
   FLC_ID3,
   "id3 tags (mp3)",
   ".mp3",
-  4,
+  -1,
   NULL,
   (int (*) (void *)) &id3_open,
   NULL,

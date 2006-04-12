@@ -193,7 +193,6 @@ wait2 (int nmillis)
 void
 dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
         unsigned int flags)
-// Do NOT use DUMPER_PRINT in uCON64 code - dbjh
 {
 #define DUMPER_REPLACER ('.')
   size_t pos;

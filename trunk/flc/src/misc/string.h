@@ -39,6 +39,8 @@ extern "C" {
                   return, formfeed, vertical tab = 0x09 - 0x0D + 0x20)
                   You can combine: strtriml (strtrimr ()) or
                   strtrimr (strtriml ())
+  string_code() turn a string into code
+                  replaces '"' with '\\"' etc...
   strarg()      break a string into (max_args) tokens
                   replaces strtok[_r](), strsep(), etc...
   strupr()      strupr() clone
@@ -66,6 +68,7 @@ extern "C" {
 */
 extern char *strtriml (char *str);
 extern char *strtrimr (char *str);
+extern char *string_code (char *d, const char *str);
 extern int strarg (char **argv, char *str, const char *separator_s, int max_args);
 extern char *strlwr (char *str);
 extern char *strupr (char *str);

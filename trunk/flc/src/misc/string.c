@@ -119,6 +119,60 @@ strtriml (char *str)
 }
 
 
+#if 0
+QString PrepforShell (QString Selected)
+{
+ if (!Selected) Selected = " ";
+ Selected.replace(" ", "\\ ");
+ Selected.replace("~", "\\~");
+ Selected.replace("%", "\\%");
+ Selected.replace("|", "\\|");
+ Selected.replace("'", "\\'");
+ Selected.replace("&", "\\&");
+ Selected.replace(";", "\\;");
+ Selected.replace("?", "\\?");
+ Selected.replace("!", "\\!");
+ Selected.replace("*", "\\*");
+ Selected.replace("[", "\\[");
+ Selected.replace("]", "\\]");
+ Selected.replace("{", "\\{");
+ Selected.replace("}", "\\}");
+ Selected.replace("(", "\\(");
+ Selected.replace(")", "\\)");
+ Selected.replace("<", "\\<");
+ Selected.replace(">", "\\>");
+ return Selected;
+}
+#endif
+
+
+char *
+string_code (char *d, const char *s)
+{
+  char *p = d;
+
+  *p = 0;
+  for (; *s; s++)
+    switch (*s)
+      {
+      case '\n':
+        strcat (p, "\\n\"\n  \"");
+        break;
+
+      case '\"':
+        strcat (p, "\\\"");
+        break;
+
+      default:
+        p = strchr (p, 0);
+        *p = *s;
+        *(++p) = 0;
+      }
+
+  return d;
+}
+
+
 #ifdef  DEBUG
 static int
 strarg_debug (int argc, char **argv)

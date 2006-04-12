@@ -405,7 +405,6 @@ enum
                       w/o this flag WF_NFO and WF_NFO_AFTER
                       will be ignored
   WF_NFO            show info output before processing rom
-  WF_NFO_AFTER      show info output AFTER processing rom
   WF_NO_ROM         for this option no ROM is required
   WF_NO_CRC32       no CRC32 calculation necessary for this option; this
                       overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
@@ -426,19 +425,18 @@ enum
                     a ROM is required and info will be shown before and
                     after it has been processed
 */
-#define WF_DEFAULT    (WF_PROBE | WF_INIT | WF_NFO)
 #define WF_PROBE      (1)
 #define WF_INIT       (1 << 1)
 #define WF_NFO        (1 << 2)
 #define WF_STOP       (1 << 3)
-#define WF_NFO_AFTER  (1 << 4)
 #define WF_NO_ROM     (1 << 5)
-#define WF_PAR        (1 << 6)
-#define WF_USB        (1 << 7)
-#define WF_SERIAL     (1 << 8)
+//#define WF_PAR        (1 << 6)
+//#define WF_USB        (1 << 7)
+//#define WF_SERIAL     (1 << 8)
 #define WF_NO_CRC32   (1 << 9)
 #define WF_NO_SPLIT   (1 << 10)
 #define WF_SWITCH     (1 << 11)
 #define WF_NO_ARCHIVE (1 << 12)
+#define WF_DEFAULT    (WF_PROBE | WF_INIT | WF_NFO)
 
 #endif // UCON64_DEFINES_H

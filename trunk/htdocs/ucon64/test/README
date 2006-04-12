@@ -10,6 +10,6 @@
 
    in ucon64.c
 3) run "./configure --without-zlib && make && make install"
-4) copy test/ to /tmp
+4) copy test/ to /tmp "cp test /tmp -RL"
 5) copy test/test.dat to ~/.ucon64/dat/
 6) run "./ucon64"

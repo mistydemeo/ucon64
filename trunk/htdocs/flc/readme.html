@@ -1,23 +1,25 @@
 <html><head><title>flc - ReadME</title></head><body bgcolor="#ffffff"><tt><pre>
-
-flc 1.2.0 Unix (Linux) 1999-2004 by NoisyB (ucon64-main@lists.sf.net)
+flc 1.2.1 Unix (Linux) 1999-2004 by NoisyB
 This may be freely redistributed under the terms of the GNU Public License
 
 Usage: flc [OPTION]... [FILE]...
 
-  -c            also test every possible archive in DIRECTORY for errors
-                  return flags: N=not checked (default), P=passed, F=failed
-  --html        output as HTML document with links to the files
-  --bbs         output as BBS style filelisting (default)
-  -t            sort by modification time
-  -X            sort alphabetical
-  -S            sort by byte size
+   -t           sort by modification time
+   -X           sort alphabetical
+   -S           sort by byte size
   --fr          sort reverse
-  -k            show sizes in kilobytes
-  --help        display this help and exit
+   -k           show sizes in kilobytes
+  --bbs         output as BBS style filelisting (default)
+  --html        output as HTML document with links to the files
+   -o=FILE      write output into FILE
+   -c           also test every possible archive for errors
+                  return flags: N=not checked (default), P=passed, F=failed
+  --cache=CACHE get a default file_id.diz from CACHE filelisting
+                  (searches for filename)
+   -R           scan subdirectories recursively
   --version     output version information and exit
+  --help        display this help and exit
 
 Amiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST
 Report problems to ucon64-main@lists.sf.net or go to http://ucon64.sf.net
-
 </pre></tt></body></html>

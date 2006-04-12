@@ -177,7 +177,7 @@ endif                                   # DJGPP
 endif                                   # GCC_WIN
 
 
-DISTCLEAN_CMD=rm -f Makefile config.log config.status config.cache config.h; \
+DISTCLEAN_CMD=rm -f config.mak config.log config.status config.cache config.h; \
 cd libdiscmage && $(MAKE) distclean; \
 cd ../backup/libcd64 && $(MAKE) clean
 # libcd64 Makefile has no distclean target
@@ -187,7 +187,7 @@ ifeq ($(GCC_WIN),1)
 	$(DISTCLEAN_CMD)
 else
 ifdef DJGPP
-	del Makefile
+	del config.mak
 	del config.log
 	del config.status
 	del config.cache

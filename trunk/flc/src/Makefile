@@ -16,7 +16,7 @@ clean:
 	rm -f $(OBJECTS) DEADJOE $(TARGET) *~ */*~ */*/*~ *.core 
 
 distclean: clean
-	rm -f Makefile config.log config.status config.cache config.h
+	rm -f config.mak config.log config.status config.cache config.h
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@

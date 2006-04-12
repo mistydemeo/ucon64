@@ -106,7 +106,8 @@ const st_getopt2_t vectrex_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Vectrex"/*"1982"*/,
+      NULL, "Vectrex"
+      /*"1982"*/,
       NULL
     },
     {
@@ -127,7 +128,8 @@ const st_getopt2_t intelli_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Intellivision"/*"1979 Mattel"*/,
+      NULL, "Intellivision"
+      /*"1979 Mattel"*/,
       NULL
     },
     {
@@ -148,7 +150,8 @@ const st_getopt2_t gp32_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "GP32 Game System/GPX2 - F100"/*"2001 Gamepark http://www.gamepark.co.kr"*/,
+      NULL, "GP32 Game System/GPX2 - F100"
+      /*"2001 Gamepark http://www.gamepark.co.kr"*/,
       NULL
     },
     {
@@ -169,7 +172,8 @@ const st_getopt2_t ps2_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Playstation 2"/*"2000 Sony http://www.playstation.com"*/,
+      NULL, "Playstation 2"
+      /*"2000 Sony http://www.playstation.com"*/,
       NULL
     },
     {
@@ -190,7 +194,8 @@ const st_getopt2_t xbox_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "XBox"/*"2001 Microsoft http://www.xbox.com"*/,
+      NULL, "XBox"
+      /*"2001 Microsoft http://www.xbox.com"*/,
       NULL
     },
     {
@@ -211,7 +216,8 @@ const st_getopt2_t sat_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Saturn"/*"1994 SEGA http://www.sega.com"*/,
+      NULL, "Saturn"
+      /*"1994 SEGA http://www.sega.com"*/,
       NULL
     },
     {
@@ -232,7 +238,8 @@ const st_getopt2_t real3do_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Real3DO"/*"1993 Panasonic/Goldstar/Philips"*/,
+      NULL, "Real3DO"
+      /*"1993 Panasonic/Goldstar/Philips"*/,
       NULL
     },
     {
@@ -253,7 +260,8 @@ const st_getopt2_t cd32_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "CD32"/*"1993 Commodore"*/,
+      NULL, "CD32"
+      /*"1993 Commodore"*/,
       NULL
     },
     {
@@ -274,7 +282,8 @@ const st_getopt2_t cdi_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "CD-i"/*"1991 Philips"*/,
+      NULL, "CD-i"
+      /*"1991 Philips"*/,
       NULL
     },
     {
@@ -289,7 +298,8 @@ const st_getopt2_t vc4000_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Interton VC4000"/*"~1980"*/,
+      NULL, "Interton VC4000"
+      /*"~1980"*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -299,7 +309,8 @@ const st_getopt2_t odyssey2_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "G7400+/Odyssey2"/*"1978"*/,
+      NULL, "G7400+/Odyssey2"
+      /*"1978"*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -309,7 +320,8 @@ const st_getopt2_t channelf_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "FC Channel F"/*"1976"*/,
+      NULL, "FC Channel F"
+      /*"1976"*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -319,7 +331,8 @@ const st_getopt2_t odyssey_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Magnavox Odyssey"/*"1972 Ralph Baer (USA)"*/,
+      NULL, "Magnavox Odyssey"
+      /*"1972 Ralph Baer (USA)"*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -329,7 +342,8 @@ const st_getopt2_t gamecom_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game.com"/*"1997 Tiger Electronics"*/,
+      NULL, "Game.com"
+      /*"1997 Tiger Electronics"*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -344,6 +358,25 @@ const st_getopt2_t arcade_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+#if 0
+Nintendo Revolution 2006
+XBox 360
+PS3
+Microvision (Handheld)/1979 MB
+Supervision/1991 Hartung
+Pokemon Mini/200X Nintendo http://www.nintendo.com
+N-Gage/2003 Nokia http://www.n-gage.com
+PSP (Playstation Portable)/2005 Sony http://www.playstation.com
+Adv. Vision
+Arcadia
+Astrocade
+Indrema
+Nuon
+RCA Studio 2
+RDI Halcyon
+Telstar
+XE System
+#endif
 
 
 // _publisher_ strings for SNES, GB, GBC and GBA games
@@ -444,7 +477,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     "Infogrames Hudson", NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL,                                       // AZ
-    "Acclaim Japan", "ASCII Co./Nexoft" /*/Activision*/, "Bandai", NULL, "Enix",
+    "Acclaim Japan", "ASCII Co./Nexoft" /* Activision */, "Bandai", NULL, "Enix",
     NULL, "HAL Laboratory/Halken", "SNK", NULL, "Pony Canyon Hanbai",
     "Culture Brain", "Sunsoft", "Toshiba EMI", "Sony Imagesoft", NULL,
     "Sammy", "Magical", "Visco", NULL, "Compile",

@@ -250,7 +250,7 @@ ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
 }
 
 
-#define TEST 
+//#define TEST 
 #ifdef  TEST
 typedef struct
 {

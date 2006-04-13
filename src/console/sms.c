@@ -164,6 +164,10 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
 
   mgd_write_index_file ((char *) basename2 (dest_name), 1);
 
+  /*
+    Not sure if this is correct (taken from a mgd converter script):
+    1MBIT: .040, 2MBIT: .040, 4MBIT: .058, 8MBIT: .058
+  */
   if (size <= 4 * MBIT)
     printf ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
             "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.\n");

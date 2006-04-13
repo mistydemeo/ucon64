@@ -371,7 +371,7 @@ ucon64_test (void)
       {UCON64_LNX,	"ucon64 -lnx", TEST_TODO},
       {UCON64_LOGO,	"ucon64 -logo /tmp/test/test.gba", TEST_TODO},
       {UCON64_LS,	"ucon64 -ls /tmp/test/*", TEST_BUG},
-      {UCON64_LSD,	"ucon64 -lsd /tmp/test/*", TEST_BUG}, 
+      {UCON64_LSD,	"ucon64 -lsd /tmp/test/*", TEST_BUG},
       {UCON64_LSRAM,	"ucon64 -lsram", TEST_TODO},
       {UCON64_LSV,	"ucon64 -lsv", TEST_TODO},
       {UCON64_LYNX,	"ucon64 -lynx /tmp/test/test.1mb", 0x78e02858},

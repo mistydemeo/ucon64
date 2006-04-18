@@ -153,7 +153,7 @@ main (int argc, char *argv[])
     {"bbs",     0, 0, 4,   NULL,   "output as BBS style filelisting (default)", (void *) FLC_BBS},
     {"html",    0, 0, 3,   NULL,   "output as HTML document with links to the files", (void *) FLC_HTML},
     {"o",       1, 0, 'o', "FILE", "write output into FILE", NULL},
-    {"c",       0, 0, 'c', NULL,   "also test every possible archive for errors\n"
+    {"c",       0, 0, 'c', NULL,   "also check every archive for errors\n"
                                    "return flags: N=not checked (default), P=passed, F=failed",
                                    (void *) FLC_CHECK},
     {"cache",   1, 0, 'C', "CACHE", "get a default file_id.diz from CACHE filelisting\n"

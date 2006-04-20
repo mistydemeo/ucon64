@@ -1829,9 +1829,10 @@ ucon64_usage (int argc, char *argv[], int view)
       {
         case USAGE_VIEW_LONG:
           getopt2_usage (options);
+          break;
 
         case USAGE_VIEW_PAD:
-//          getopt2_usage (ucon64_padding_usage);
+          getopt2_usage (ucon64_padding_usage);
           break;
 
         case USAGE_VIEW_DAT:

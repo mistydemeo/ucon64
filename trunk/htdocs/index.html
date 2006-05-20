@@ -77,37 +77,34 @@
 <img src="images/black.png" height="10" width="560">
 </center><tt>
 <img src="images/logo.png" height="50"><br>
-uCON64 is a tool to backup all kinds of video game media (cartridges and CDs).
-It can operate as an intelligent frontend for every available emulator. uCON64
-uses code from various people. See
-'<a href="ucon64/developers.html">developers.html</a>' for more
-information.<br>
-uCON64 may be freely redistributed under the terms of the GNU Public License.<br>
-Its main features are:<pre><tt>- It is Free/Open Source Software
-- (Therefore) support for MANY platforms like: Unix, Win32, MSDOS, etc...
-- Support for 14+ different cartridge and disc-based video game console systems
-- Support for ALL common patch file formats like: IPS (with RLE compression),
-  APS, BSL, PPF and Game Genie
-- Support for use and creation of RomCenter Data files (DAT)
-- Support for <a href="ucon64/hardware.html">more than 20 different backup units</a> to backup/restore ROM(s),
-  disc(s) and SRAM(s) like: Flash Advance Linker, Flash 2 Advance, Doctor V64
-  (Junior), Super Wild Card, Game Doctor, Dexdrive, Super Magic Drive, Game Boy
-  Xchanger, Mad Catz Camera Link, Lynxit, MD-PRO, SMS-PRO, PCE-PRO, GG-PRO,
-  Super Flash and more.
-- Finally 150+(!) different options/features for every kind of ROM
-  handling/management known to man; including: <!-- 120 options, 62 switches last time I counted them -->
-  VERY verbose ROM information for ALL systems, detection of bad dumps using
-  internal checksums or DAT files, CRC32, SHA1 and MD5 calculation, ROM
-  comparison, modification (strip, pad, etc...), SRAM conversion (emulator
-  &#60;-&#62; backup unit), DiscJuggler and Nero image conversions, complete
-  gzip and zip support for all file-related functions, etc...
-- Still in development with support for new backup units and stuff like UNIF
-  (NES), NSRT (SNES), etc...
-</pre><tt>
-<center><img src="images/feature_chart.png"></center><br><tt>
-Have a look at <a href="#ucon64misc">uCON64misc</a> for support files like
-parport drivers, etc.<br>
-or <a href="#ucon64dat">uCON64dat</a> for DAT files generated with/for uCON64<br>
+uCON64 is the backup tool and wonderful emulator's Swiss Army knife program<br>
+It may be freely redistributed under the terms of the GNU Public License<br>
+<br>
+Unlike similar tools, uCON64 is completely Open Source Software and has been ported to <a href="#download">many platforms</a>
+using code from <a href="ucon64/developers.html">various people</a><br>
+<br>
+Support for almost every video game console system is continuously added and updated<br>
+<br>
+Support for <a href="ucon64/hardware.html">many different backup units</a> to backup/restore ROM(s), and SRAM(s)<br>
+is also continuously added and updated (if their manufacturers cooperate)<br>
+<br>
+Support for use and creation of <a href="http://www.romcenter.com">RomCenter</a> Data files (DAT)<br>
+<br>
+Supports all common patch file formats like IPS (with RLE compression), APS,<br>
+BSL (Baseline Patch format), PPF (Playstation Patch File), and Game Genie<br>
+<br>
+(Too) many different options for every kind of ROM or SRAM handling<br>
+Very verbose ROM information<br>
+Secure detection of bad dumps using internal checksums or DAT files<br>
+CRC32, SHA1 and MD5 calculation,<br>
+ROM comparison, modification (strip, pad, etc...)<br>
+SRAM conversion (between emulator and backup unit)<br>
+Operate as an frontend for every available emulator<br>
+Supports gzip and zip<br>
+...(to be continued)<br>
+<br>
+Have a look at <a href="#ucon64misc">uCON64misc</a> for support files like parport drivers<br>
+or at <a href="#ucon64dat">uCON64dat</a> for DAT files generated with/for uCON64<br>
 <br>
 <a href="ucon64/SWC-compatibility.txt">SWC-compatibility.txt</a>
 A Super Wild Card compatibility list<br>
@@ -115,18 +112,19 @@ A Super Wild Card compatibility list<br>
 <!-- keep them in one line or they'll look fucked up in mozilla -->
 Screenshots: <a href="images/ucon64.png">1</a>|<a href="images/ucon642.png">2</a>|<a href="images/ucon643.png">3</a>|<a href="images/ucon644.png">4</a>|<a href="images/ucon645.png">5</a>
 <br>
-<br>
-STILL IN DEVELOPMENT/*NO* IT IS NOT AN EMULATOR/IT IS A BACKUP TOOL<br>
 <center>
 <img src="images/black.png" height="10" width="560">
 </center>
 <a name="download"></a>
 <img src="images/download.png"><br>
-<img src="images/all_small.png"><br><tt>
+<b>CVS</b><br>
+To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3">this</a><br>
+<br>
+<b>Sources</b><br><tt>
 <a href="http://prdownloads.sourceforge.net/ucon64/ucon64-2.0.0-src.tar.gz?download">ucon64-2.0.0-src.tar.gz</a><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/ucon64-2.0.0-src.zip?download">ucon64-2.0.0-src.zip</a><br>
 <br>
-<img src="images/binaries.png"><tt>
+<b>Binaries</b><br><tt>
 <br><img src="images/linux.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/ucon64-2.0.0-linux-bin.tar.gz?download">ucon64-2.0.0-linux-bin.tar.gz</a><br>
 <br><img src="images/win32.png"> (MinGW)<br>
@@ -175,7 +173,6 @@ Completely new, tested and working DAT files for all known ROMs generated with u
 You may read the <a href="ucon64/faq.html">FAQ</a> or just put them into ~/.ucon64/dat/ (might depend on which platform you use)<br>
 They should also work with other ROM checking tools<br>
 <br>
-THESE ARE ONLY DAT FILES - YOU STILL NEED uCON64 ITSELF<br>
 <center>
 <img src="images/black.png" height="10" width="560">
 </center>
@@ -217,20 +214,20 @@ For more DAT files see <a href="http://emulationrealm.net/rcdat.php#Cowering_Goo
 <img src="images/logo_gui.png" border="0" height="50"><br>
 You hate the commandline for being a commandline? No problem! Here are some
 frontends for your favourite console tool and different platforms.<br>
-Currently there exist frontends for Linux (Unix), Windows, BeOS and Java.<br>
+Currently there exist FRONTENDS for Linux (Unix), Windows, BeOS and Java.<br>
 <!-- keep them in one line or they'll look fucked up in mozilla -->
+<br>
 Screenshots: <a href="images/screenshot1.jpg">1</a>|<a href="images/screenshot2.jpg">2</a>|<a href="images/screenshot3.jpg">3</a>|<a href="images/screenshot4.jpg">4</a>|<a href="images/screenshot5.jpg">5</a>|<a href="images/screenshot6.jpg">6</a><br>
 <br>
-THESE ARE ONLY FRONTENDS - YOU STILL NEED uCON64 ITSELF<br>
 <center>
 <img src="images/black.png" height="10" width="560">
 </center>
 <img src="images/download.png"><br>
-<img src="images/all_small.png"><br><tt>
+<b>Sources</b><br><tt>
 <a href="http://prdownloads.sourceforge.net/ucon64/uf-FOX-1.1-src.tgz?download">uf-FOX-1.1-src.tgz</a><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/SeeUCONv1.0-src.zip?download">SeeUCONv1.0-src.zip</a> (does NOT work correctly with uCON64 2.0.0)<br>
 <br>
-<img src="images/binaries.png"><br><tt>
+<b>Binaries</b><br><tt>
 <img src="images/linux.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/uf-FOX-1.1-linux-bin.zip?download">uf-FOX-1.1-linux-bin.zip</a><br>
 <br>
@@ -267,7 +264,6 @@ CXA1645P/M is an RGB encoder used in many consoles and other video hardware<br>
 These specifications were made for you if your console lacks S-Video or RGB
 and IF you have some knowledge about electronics<br>
 <br>
-<img src="images/mods_small.png"> and <img src="images/misc_small.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/faqs.zip?download">faqs.zip</a> (~1.1 MB)<br>
 A loose collection of FAQ's about Hardware, modifications like PAL/NTSC
 switches, or backup unit manuals<br>
@@ -429,15 +425,14 @@ flc creates BBS-style file lists with FILE_ID.DIZ found in archives and files.<b
 Might be useful for some people.<br>
 Screenshots: <a href="images/flc2.png">1</a><br>
 <br>
-MUST HAVE<br>
 <center>
 <img src="images/black.png" height="10" width="560">
 </center>
 <img src="images/download.png"><br>
-<img src="images/all_small.png"><br><tt>
+<b>Sources</b><br><tt>
 <a href="http://prdownloads.sourceforge.net/ucon64/flc-1.4.0-src.tar.gz?download">flc-1.4.0-src.tar.gz</a><br>
 <br>
-<img src="images/binaries.png"><tt>
+<b>Binaries</b><br><tt>
 <br><img src="images/linux.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/flc-1.4.0-linux-bin.tar.gz?download">flc-1.4.0-linux-bin.tar.gz</a><br>
 <!--br><img src="images/solaris.png"-->
@@ -506,12 +501,10 @@ If you are using uCON64 you may also consider visiting one of these cool sites<b
 <table border="0" bgcolor="#ffffff" width="580">
   <tr>
     <td valign="top"><tt>
-Old DOORS for a Commodore Amiga Bulletin Board System <img src="images/old.png" border="0"><br>
+Some <img src="images/old.png" border="0"> DOORS for a Commodore Amiga Bulletin Board System<br>
 <!-- keep them in one line or they'll look fucked up in mozilla -->
 Screenshots: <a href="images/belchblabla.png">1</a>|<a href="images/belchcheck.png">2</a>|<a href="images/belcheditor.png">3</a>|<a href="images/belcheditor2.png">4</a>|<a href="images/belchview.png">5</a>|<a href="images/belchwho.png">6</a>|<a href="images/belchwho2.png">7</a>|<a href="images/belchwho3.png">8</a>|<a href="images/dlcount2.png">9</a>|<a href="images/olm2.png">10</a>|<a href="images/quicknew.png">11</a>
 <br>
-<br>
-DISCONTINUED/HISTORY<br>
     </td>
   </tr>
 </table>

@@ -5,12 +5,10 @@
 # "http://news.google.com/news?hl=en&ned=us&q=wii,+nintendo,+playstation,+ps3,+xbox&ie=UTF-8&output=rss" \
 # --template=index.template -r >index.htm
 rsstool --template=index.template -r \
-"http://www.youtube.com/rss/tag/snes.rss" \
-"http://www.youtube.com/rss/tag/gameboy.rss" \
-"http://www.youtube.com/rss/tag/nintendo.rss" \
-"http://www.youtube.com/rss/tag/genesis.rss" \
-"http://www.youtube.com/rss/tag/nes.rss" \
-"http://www.youtube.com/rss/tag/c64.rss" \
+"http://www.youtube.com/rss/tag/nintendo+emulation.rss" \
+"http://www.youtube.com/rss/tag/gp2x+emulation.rss" \
+"http://www.youtube.com/rss/tag/sega+emulation.rss" \
+"http://www.youtube.com/rss/tag/sony+emulation.rss" \
 >index.htm
 ln -sf index.htm index.html
 ln -sf index.htm index2.htm

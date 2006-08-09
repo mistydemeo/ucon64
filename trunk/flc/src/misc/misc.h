@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MISC_H
 #define MISC_H
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // USE_ZLIB, USE_ANSI_COLOR support
+#include "config.h"                             // USE_ANSI_COLOR support
 #endif
 #ifdef  __cplusplus
 extern "C" {
@@ -31,91 +31,45 @@ extern "C" {
 #include <string.h>
 #include <time.h>                               // bytes_per_second() requires time()
 #include <stdio.h>
+#include "defines.h"
 
-
-#ifdef __sun
-#ifdef __SVR4
-#define __solaris__
-#endif
-#endif
-
-#ifdef  WORDS_BIGENDIAN
-#undef WORDS_BIGENDIAN
-#endif
-
-#if     defined _LIBC || defined __GLIBC__
-  #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
-    #define WORDS_BIGENDIAN 1
-  #endif
-#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
-        defined __APPLE__
-  #define WORDS_BIGENDIAN 1
-#endif
-
-#ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__,
-  #define CURRENT_OS_S "MSDOS"                  //  because DJGPP defines both
-#elif   defined __unix__
-  #ifdef  __CYGWIN__
-    #define CURRENT_OS_S "Win32 (Cygwin)"
-  #elif   defined __FreeBSD__
-    #define CURRENT_OS_S "Unix (FreeBSD)"
-  #elif   defined __OpenBSD__
-    #define CURRENT_OS_S "Unix (OpenBSD)"
-  #elif   defined __linux__
-    #define CURRENT_OS_S "Unix (Linux)"
-  #elif   defined __solaris__
-    #ifdef __sparc__
-      #define CURRENT_OS_S "Unix (Solaris/Sparc)"
-    #else
-      #define CURRENT_OS_S "Unix (Solaris/i386)"
-    #endif
-  #else
-    #define CURRENT_OS_S "Unix"
-  #endif
-#elif   defined _WIN32
-  #ifdef  __MINGW32__
-    #define CURRENT_OS_S "Win32 (MinGW)"
-  #else
-    #define CURRENT_OS_S "Win32 (Visual C++)"
-  #endif
-#elif   defined __APPLE__
-  #if   defined __POWERPC__ || defined __ppc__
-    #define CURRENT_OS_S "Apple (PPC)"
-  #else
-    #define CURRENT_OS_S "Apple"
-  #endif
-#elif   defined __BEOS__
-  #define CURRENT_OS_S "BeOS"
-#elif   defined AMIGA
-  #if defined __PPC__
-    #define CURRENT_OS_S "Amiga (PPC)"
-  #else
-    #define CURRENT_OS_S "Amiga (68K)"
-  #endif
-#else
-  #define CURRENT_OS_S "?"
-#endif
 
 /*
-  dumper()    dump n bytes of buffer
-                you can use here a virtual_start for the displayed counter
-                DUMPER_HEX
-                dump in hex (base: 16) (default)
-                DUMPER_DUAL
-                dump in dual (base: 2)
-                DUMPER_CODE
-                dump as C code
-                DUMPER_PRINT
-                printf() buffer after chars passed isprint() and isspace()
-                other chars will be printed as dots '.'
-                do NOT use DUMPER_PRINT in uCON64 code - dbjh
-                DUMPER_HEX_COUNT
-                show position as hex value (default)
-                DUMPER_DEC_COUNT
-                show position as decimal value
-                DUMPER_HEX_UPPER
-                show hex values in uppercase (default: lowercase)
+  dumper()        dump n bytes of buffer
+                    you can use here a virtual_start for the displayed counter
+                    DUMPER_HEX
+                    dump in hex (base: 16) (default)
+                    DUMPER_DUAL
+                    dump in dual (base: 2)
+                    DUMPER_CODE
+                    dump as C code
+                    DUMPER_PRINT
+                    printf() buffer after chars passed isprint() and isspace()
+                    other chars will be printed as dots '.'
+                    do NOT use DUMPER_PRINT in uCON64 code - dbjh
+                    DUMPER_HEX_COUNT
+                    show position as hex value (default)
+                    DUMPER_DEC_COUNT
+                    show position as decimal value
+                    DUMPER_HEX_UPPER
+                    show hex values in uppercase (default: lowercase)
+  change_mem{2}() see header of implementation for usage
+  build_cm_patterns() helper function for change_mem2() to read search patterns
+                    from a file
+  cleanup_cm_patterns() helper function for build_cm_patterns() to free all
+                    memory allocated for a (list of) st_pattern_t structure(s)
+  bytes_per_second() returns bytes per second (useful in combination with
+                    gauge())
+  misc_percent()  returns percentage of progress (useful in combination with
+                    gauge())
+  drop_privileges() switch to the real user and group id (leave "root mode")
+  register_func() atexit() replacement
+                    returns -1 if it fails, 0 if it was successful
+  unregister_func() unregisters a previously registered function
+                    returns -1 if it fails, 0 if it was successful
+  handle_registered_funcs() calls all the registered functions
+  wait2()         wait (sleep) a specified number of milliseconds
+  getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
 */
 #define DUMPER_HEX       (0)
 #define DUMPER_HEX_COUNT (0)
@@ -129,27 +83,6 @@ extern "C" {
 extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
                     int virtual_start, unsigned int flags);
 
-/*
-  Misc stuff
-
-  change_mem{2}() see header of implementation for usage
-  build_cm_patterns() helper function for change_mem2() to read search patterns
-                  from a file
-  cleanup_cm_patterns() helper function for build_cm_patterns() to free all
-                  memory allocated for a (list of) st_pattern_t structure(s)
-  bytes_per_second() returns bytes per second (useful in combination with
-                  gauge())
-  misc_percent()  returns percentage of progress (useful in combination with
-                  gauge())
-  drop_privileges() switch to the real user and group id (leave "root mode")
-  register_func() atexit() replacement
-                  returns -1 if it fails, 0 if it was successful
-  unregister_func() unregisters a previously registered function
-                  returns -1 if it fails, 0 if it was successful
-  handle_registered_funcs() calls all the registered functions
-  wait2()         wait (sleep) a specified number of milliseconds
-  getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
-*/
 typedef struct st_cm_set
 {
   char *data;
@@ -172,7 +105,7 @@ extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, 
 extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 
 extern int bytes_per_second (time_t start_time, int nbytes);
-extern int misc_percent (int pos, int len);
+extern int misc_percent (unsigned long pos, unsigned long len);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif
@@ -189,7 +122,6 @@ extern int misc_digits (unsigned long value);
 
   fix_character_set()  fixes some Cygwin problems with filenames
   truncate()
-  sync()
   popen()
   pclose()
 */
@@ -203,7 +135,6 @@ extern char *fix_character_set (char *str);
 #include <sys/types.h>
 
 extern int truncate (const char *path, off_t size);
-extern int sync (void);
 
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.

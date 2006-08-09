@@ -26,6 +26,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef  HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#include "itypes.h"
+#endif
 #include "misc/misc.h"
 #include "misc/file.h"
 #include "misc/filter.h"
@@ -268,13 +273,5 @@ const st_filter_t id3_filter = {
   "id3 tags (mp3)",
   ".mp3",
   -1,
-  NULL,
-  (int (*) (void *)) &id3_open,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  .open = (int (*) (void *)) &id3_open
 };

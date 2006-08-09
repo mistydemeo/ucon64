@@ -42,7 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define F_OK 00
 #endif
 #endif
-#include "file.h"
 #include "getopt.h"                             // struct option
 #include "getopt2.h"
 #include "string.h"
@@ -54,8 +53,38 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 
 
+const st_getopt2_t *
+getopt2_get_index_by_val (const st_getopt2_t *option, int val)
+{
+  int i = 0;
+
+  for (; option[i].name || option[i].help; i++)
+    if (option[i].name && // it IS an option
+        option[i].val == val)
+      return &option[i];
+
+  return NULL;
+}
+
+
 #ifdef  DEBUG
-static void
+void
+getopt2_sanity_check_output (st_getopt2_t *p)
+{
+  printf ("{\"%s\", %d, 0, %d, \"%s\", \"%s\", %d}, // console: %d workflow: %d\n",
+    p->name,
+    p->has_arg,
+    p->val,
+    p->arg_name,
+    p->help ? "usage" : p->help, // i (nb) mean it
+//    p->help,
+    0,
+    p->object ? ((st_ucon64_obj_t *) p->object)->console : 0,
+    p->object ? ((st_ucon64_obj_t *) p->object)->flags : 0);
+}
+
+
+void
 getopt2_sanity_check (const st_getopt2_t *option)
 {
   int x, y = 0;
@@ -149,38 +178,9 @@ getopt2_parse_usage (const char *usage_output)
       fputc ('\n', stdout);
     }
 }
-#endif // DEBUG
 
 
-#ifdef  DEBUG
-static inline char *
-string_code (char *d, const char *s)
-{
-  char *p = d;
-
-  *p = 0;
-  for (; *s; s++)
-    switch (*s)
-      {
-      case '\n':
-        strcat (p, "\\n\"\n  \"");
-        break;
-
-      case '\"':
-        strcat (p, "\\\"");
-        break;
-
-      default:
-        p = strchr (p, 0);
-        *p = *s;
-        *(++p) = 0;
-      }
-
-  return d;
-}
-
-
-static void
+void
 getopt2_usage_code (const st_getopt2_t *usage)
 {
   int i = 0;
@@ -214,9 +214,6 @@ getopt2_usage_code (const st_getopt2_t *usage)
 void
 getopt2_usage (const st_getopt2_t *usage)
 {
-#ifdef  DEBUG
-  getopt2_usage_code (usage);
-#else
   int i = 0;
   char buf[MAXBUFSIZE];
 
@@ -262,7 +259,6 @@ getopt2_usage (const st_getopt2_t *usage)
             fputc ('\n', stdout);
           }
       }
-#endif // DEBUG
 }
 
 
@@ -360,155 +356,6 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
 #endif
 
   return (int) strlen (short_option) + 3 < n ? (int) strlen (short_option) : 0;
-}
-
-
-const st_getopt2_t *
-getopt2_get_index_by_val (const st_getopt2_t *option, int val)
-{
-  int i = 0;
-
-  for (; option[i].name || option[i].help; i++)
-    if (option[i].name && // it IS an option
-        option[i].val == val)
-      return &option[i];
-
-  return NULL;
-}
-
-
-static int
-getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
-                        int *calls, int flags)
-{
-  char path[FILENAME_MAX];
-  struct stat fstate;
-
-  if (strlen (fname) >= FILENAME_MAX - 2)
-    return 0;
-
-  realpath2 (fname, path);
-
-  /*
-    Try to get file status information only if the file with name fname exists.
-    If the file does not exist I set st_mode to 0 instead of __S_IFREG, because I
-    don't know if the latter is portable. - dbjh
-  */
-  if (access (path, F_OK) == 0)
-    {
-      if (stat (path, &fstate) != 0)
-        return 0;
-    }
-  else
-    fstate.st_mode = 0;
-
-  /*
-    We test whether fname is a directory, because we handle directories
-    differently. The callback function should test whether its argument is a
-    regular file, a character special file, a block special file, a FIFO
-    special file, a symbolic link or a socket. If the flags
-    GETOPT2_FILE_FILES_ONLY, GETOPT2_FILE_RECURSIVE and
-    GETOPT2_FILE_RECURSIVE_ONCE were not used by the calling function, it may
-    also have to test whether the argument is a directory.
-  */
-  if (S_ISDIR (fstate.st_mode) ?
-        !(flags & (GETOPT2_FILE_FILES_ONLY |
-                   GETOPT2_FILE_RECURSIVE |
-                   GETOPT2_FILE_RECURSIVE_ONCE)) :
-        1)                                      // everything else: call callback
-    {
-      int result = 0; 
-
-#ifdef  DEBUG
-      printf ("callback_func() == %s\n", path);
-      fflush (stdout);
-#endif
-
-      result = callback_func (path);
-
-      if (!result)
-        (*calls)++;
-
-      return result;
-    }
-
-  if (S_ISDIR (fstate.st_mode) &&
-      (flags & (GETOPT2_FILE_RECURSIVE | GETOPT2_FILE_RECURSIVE_ONCE)))
-    {
-      int result = 0; 
-#ifndef _WIN32
-      struct dirent *ep;
-      DIR *dp;
-#else
-      char search_pattern[FILENAME_MAX];
-      WIN32_FIND_DATA find_data;
-      HANDLE dp;
-#endif
-      char buf[FILENAME_MAX], *p;
-
-#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
-      char c = toupper (path[0]);
-      if (path[strlen (path) - 1] == FILE_SEPARATOR ||
-          (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == 0))
-#else
-      if (path[strlen (path) - 1] == FILE_SEPARATOR)
-#endif
-        p = "";
-      else
-        p = FILE_SEPARATOR_S;
-
-#ifndef _WIN32
-      if ((dp = opendir (path)))
-        {
-          while ((ep = readdir (dp)))
-            if (strcmp (ep->d_name, ".") != 0 &&
-                strcmp (ep->d_name, "..") != 0)
-              {
-                sprintf (buf, "%s%s%s", path, p, ep->d_name);
-                result = getopt2_file_recursion (buf, callback_func, calls,
-                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
-                if (result != 0)
-                  break;
-              }
-          closedir (dp);
-        }
-#else
-      sprintf (search_pattern, "%s%s*", path, p);
-      if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
-        {
-          do
-            if (strcmp (find_data.cFileName, ".") != 0 &&
-                strcmp (find_data.cFileName, "..") != 0)
-              {
-                sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
-                result = getopt2_file_recursion (buf, callback_func, calls,
-                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
-                if (result != 0)
-                  break;
-              }
-          while (FindNextFile (dp, &find_data));
-          FindClose (dp);
-        }
-#endif
-    }
-
-  return 0;
-}
-
-
-int
-getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int flags)
-{
-  int x = optind, calls = 0, result = 0;
-
-  for (; x < argc; x++)
-    {
-      result = getopt2_file_recursion (argv[x], callback_func, &calls, flags);
-      if (result != 0)
-        break;
-    }
-
-  return calls;
 }
 
 

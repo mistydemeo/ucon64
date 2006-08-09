@@ -32,6 +32,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef  HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#include "itypes.h"
+#endif
 #include "misc/getopt.h"
 #include "misc/getopt2.h"
 #include "misc/property.h"
@@ -41,7 +46,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "flc.h"
 #include "flc_defines.h"
 #include "flc_misc.h"
-#include "misc/rmdir2.h"  
 
 static void flc_exit (void);
 
@@ -245,8 +249,8 @@ main (int argc, char *argv[])
 
   flc.files = 0;
 
-  if (!getopt2_file (argc, argv, flc_file_handler, (GETOPT2_FILE_FILES_ONLY | // extract works only for files
-                   (flc.flags & FLC_RECURSIVE ? GETOPT2_FILE_RECURSIVE : 0)))) // recursively?
+  if (!getfile (argc, argv, flc_file_handler, (GETFILE_FILES_ONLY | // extract works only for files
+                   (flc.flags & FLC_RECURSIVE ? GETFILE_RECURSIVE : 0)))) // recursively?
     {
       getopt2_usage (options);
       exit (-1);

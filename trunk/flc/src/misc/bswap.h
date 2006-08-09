@@ -46,17 +46,13 @@ extern "C" {
   wswap_64()        12345678 78563412
 */
 
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
 
 #ifdef HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else
 
 
-static inline uint16_t
+static uint16_t
 bswap_16 (uint16_t x)
 {
 #if 1
@@ -72,7 +68,7 @@ bswap_16 (uint16_t x)
 }
 
 
-static inline uint32_t
+static uint32_t
 bswap_32 (uint32_t x)
 {
 #if 1
@@ -93,7 +89,7 @@ bswap_32 (uint32_t x)
 }
 
 
-static inline uint64_t
+static uint64_t
 bswap_64 (uint64_t x)
 {
 #if 1
@@ -162,7 +158,7 @@ bswap_64 (uint64_t x)
 #define le2me_64 me2le_64
 
 
-static inline uint32_t
+static uint32_t
 wswap_32 (uint32_t x)
 {
 #if 0
@@ -179,7 +175,7 @@ wswap_32 (uint32_t x)
 
 
 #if 0
-static inline uint64_t
+static uint64_t
 wswap_64 (uint64_t x)
 {
 #if 1

@@ -549,7 +549,11 @@ filter_get_id (const st_filter_chain_t *fc, int pos)
 const char *
 filter_get_id_s (const st_filter_chain_t *fc, int pos)
 {
-  return filter_get_filter_by_id (fc, fc->set[pos])->id_s;
+  const st_filter_t *p = filter_get_filter_by_id (fc, fc->set[pos]);
+
+  if (p)
+    return p->id_s;
+  return NULL;
 }
 
 

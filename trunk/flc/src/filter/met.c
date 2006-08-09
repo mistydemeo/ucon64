@@ -279,13 +279,5 @@ const st_filter_t met_filter = {
   "met (eDonkey)",
   ".met",
   -1,
-  NULL,
-  (int (*) (void *)) &met_open,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  .open = (int (*) (void *)) &met_open
 };

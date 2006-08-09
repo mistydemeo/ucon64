@@ -1,14 +1,14 @@
 .PHONY: all clean distclean install flc uninstall
 
 CFLAGS=-I. -Wall -W -O3
-LDFLAGS=-s #-pg
+LDFLAGS=#-s #-pg
 
 include config.mak
 
 TARGET=flc
 OBJECTS=flc.o flc_misc.o filter/id3.o filter/met.o filter/txt.o \
 	misc/file.o misc/filter.o misc/getopt.o misc/getopt2.o \
-	misc/misc.o misc/property.o misc/rmdir2.o misc/string.o
+	misc/misc.o misc/property.o misc/string.o
 
 all: $(TARGET)
 

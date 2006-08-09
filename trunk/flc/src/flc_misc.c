@@ -32,6 +32,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <ctype.h>
+#ifdef  HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#include "itypes.h"
+#endif
 #include "misc/misc.h"
 #include "misc/file.h"
 #include "misc/filter.h"
@@ -53,7 +58,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-#define MIN(a,b) ((a)<(b)?(a):(b))
+#ifndef MAX
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 
 const st_filter_t *filter[] = {

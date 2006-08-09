@@ -82,13 +82,5 @@ const st_filter_t txt_filter = {
   "txt, nfo",
   ".txt.nfo",
   -1,
-  NULL,
-  (int (*) (void *)) &txt_open,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  .open = (int (*) (void *)) &txt_open
 };

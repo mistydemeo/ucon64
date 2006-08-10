@@ -57,7 +57,7 @@
 <img src="images/black.png" height="10" width="590">
 <br>
 <br>
-<center><img src="images/rss.png" border="0" width="200"></center>
+<center><img src="images/rss.png" border="0" width="200"><br>Bookmarks</center>
 <br>
 <br>
 <!--RSS NEWS-->
@@ -81,6 +81,16 @@
 <rsstool:start item=17><rsstool:date item=17> <a href="<rsstool:url item=17>"><rsstool:title item=17></a><br><rsstool:end item=17>
 <rsstool:start item=18><rsstool:date item=18> <a href="<rsstool:url item=18>"><rsstool:title item=18></a><br><rsstool:end item=18>
 <rsstool:start item=19><rsstool:date item=19> <a href="<rsstool:url item=19>"><rsstool:title item=19></a><br><rsstool:end item=19>
+<rsstool:start item=20><rsstool:date item=20> <a href="<rsstool:url item=20>"><rsstool:title item=20></a><br><rsstool:end item=20>
+<rsstool:start item=21><rsstool:date item=21> <a href="<rsstool:url item=21>"><rsstool:title item=21></a><br><rsstool:end item=21>
+<rsstool:start item=22><rsstool:date item=22> <a href="<rsstool:url item=22>"><rsstool:title item=22></a><br><rsstool:end item=22>
+<rsstool:start item=23><rsstool:date item=23> <a href="<rsstool:url item=23>"><rsstool:title item=23></a><br><rsstool:end item=23>
+<rsstool:start item=24><rsstool:date item=24> <a href="<rsstool:url item=24>"><rsstool:title item=24></a><br><rsstool:end item=24>
+<rsstool:start item=25><rsstool:date item=25> <a href="<rsstool:url item=25>"><rsstool:title item=25></a><br><rsstool:end item=25>
+<rsstool:start item=26><rsstool:date item=26> <a href="<rsstool:url item=26>"><rsstool:title item=26></a><br><rsstool:end item=26>
+<rsstool:start item=27><rsstool:date item=27> <a href="<rsstool:url item=27>"><rsstool:title item=27></a><br><rsstool:end item=27>
+<rsstool:start item=28><rsstool:date item=28> <a href="<rsstool:url item=28>"><rsstool:title item=28></a><br><rsstool:end item=28>
+<rsstool:start item=29><rsstool:date item=29> <a href="<rsstool:url item=29>"><rsstool:title item=29></a><br><rsstool:end item=29>
 <br>
 <rsstool:updated>
     </td>

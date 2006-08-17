@@ -43,10 +43,8 @@ extern "C" {
                     dump in dual (base: 2)
                     DUMPER_CODE
                     dump as C code
-                    DUMPER_PRINT
-                    printf() buffer after chars passed isprint() and isspace()
-                    other chars will be printed as dots '.'
-                    do NOT use DUMPER_PRINT in uCON64 code - dbjh
+                    DUMPER_TEXT
+                    printf() only isalnum() chars
                     DUMPER_HEX_COUNT
                     show position as hex value (default)
                     DUMPER_DEC_COUNT
@@ -75,7 +73,7 @@ extern "C" {
 #define DUMPER_HEX_COUNT (0)
 #define DUMPER_DUAL      (1)
 #define DUMPER_CODE      (1 << 1)
-#define DUMPER_PRINT     (1 << 2)
+#define DUMPER_TEXT      (1 << 2)
 #define DUMPER_DEC       (1 << 3)
 #define DUMPER_DEC_COUNT (1 << 4)
 #define DUMPER_DEFAULT   (DUMPER_HEX_COUNT|DUMPER_HEX)

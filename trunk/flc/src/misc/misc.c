@@ -179,24 +179,20 @@ wait2 (int nmillis)
 void
 dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
         unsigned int flags)
-// Do NOT use DUMPER_PRINT in uCON64 code - dbjh
+#define DUMPER_REPLACER '.'
 {
-#define DUMPER_REPLACER ('.')
   size_t pos;
   char buf[17];
   const unsigned char *p = (const unsigned char *) buffer;
 
   memset (buf, 0, sizeof (buf));
   for (pos = 0; pos < bufferlen; pos++, p++)
-    if (flags & DUMPER_PRINT)
+    if (flags & DUMPER_TEXT)
       {
-//        fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
-//          (int) (pos + virtual_start));
-        fprintf (output, "%c", isprint (*p) ||
-#ifdef USE_ANSI_COLOR
-                               *p == 0x1b || // ESC
-#endif
-                               isspace (*p) ? *p : DUMPER_REPLACER);
+        fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
+          (int) (pos + virtual_start));
+        if (isalnum (*p))
+          fputc (*p, output);
       }
     else if (flags & DUMPER_DUAL)
       {
@@ -241,7 +237,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
           fprintf (output, "%s\n", buf);
       }
 
-  if (flags & DUMPER_PRINT)
+  if (flags & DUMPER_TEXT)
     return;
   else if (flags & DUMPER_DUAL)
     {

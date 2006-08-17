@@ -41,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 
 
-#warning make update of configfiles more intelligent
+// TODO: make update of configfiles more intelligent
 
 
 int

@@ -56,11 +56,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   quick_io_func()
               malloc()s a buffer as large as possible and starts reading
               from fname into the buffer and passes chunks of it to func
-              func()      func(buffer, buffer_len, object)
-              func_maxlen max. size of those chunks the func can process at once
-              object      a freely defineavble object the will also passed to func
-              start       seeks to start pos of fname
-              len         a vector from start
+                func()      func(buffer, buffer_len, object)
+                func_maxlen max. size of those chunks the func can process at once
+                object      a freely defineavble object the will also passed to func
+                start       seeks to start pos of fname
+                len         a vector from start
 
   getfile()           runs callback_func with the realpath() of file/dir as string
                         flags:

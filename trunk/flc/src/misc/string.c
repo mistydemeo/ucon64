@@ -205,29 +205,31 @@ strcode (char *str)
 {
  char *p = strdup (str);
 
- if (p)
-   for (; *p; p++)
-     switch (*p)
-       {
-         case ' ':
-         case '~':
-         case '%':
-         case '|':
-         case '\\':
-         case '&':
-         case ';':
-         case '?':
-         case '!':
-         case '*':
-         case '[':
-         case ']':
-         case '{':
-         case '}':
-         case '(':
-         case ')':
-         case '<':
-         case '>':
-       }
+ if (!p)
+   return NULL;
+
+ for (; *p; p++)
+   switch (*p)
+     {
+       case ' ':
+       case '~':
+       case '%':
+       case '|':
+       case '\\':
+       case '&':
+       case ';':
+       case '?':
+       case '!':
+       case '*':
+       case '[':
+       case ']':
+       case '{':
+       case '}':
+       case '(':
+       case ')':
+       case '<':
+       case '>':
+     }
  if (!Selected) Selected = " ";
  Selected.replace(" ", "\\ ");
  Selected.replace("~", "\\~");

@@ -184,15 +184,19 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
   size_t pos;
   char buf[17];
   const unsigned char *p = (const unsigned char *) buffer;
+//  static int found = 0;
 
   memset (buf, 0, sizeof (buf));
   for (pos = 0; pos < bufferlen; pos++, p++)
     if (flags & DUMPER_TEXT)
       {
-        fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
-          (int) (pos + virtual_start));
-        if (isalnum (*p))
-          fputc (*p, output);
+        if (isalnum (*p) || *p == ' ')
+          {
+//            if (found > 1) // at least 2 chars
+              fputc (*p, output);
+//            found++;
+          }
+//        else found = 0;
       }
     else if (flags & DUMPER_DUAL)
       {

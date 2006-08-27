@@ -87,12 +87,77 @@ strlwr (char *s)
 
 
 char *
+strmove (char *to, char *from)
+{
+  return memmove (to, from, strlen (from) + 1); // + 1 because of termination
+}
+
+
+char *
+strins (char *dest, const char *ins)
+{
+  strmove (dest + strlen (ins), dest);
+  memcpy (dest, ins, strlen (ins));
+
+  return dest;
+}
+
+
+char *
 strcasestr2 (const char *str, const char *search)
 {
   if (!(*search))
     return (char *) str;
 
   return (char *) memmem2 (str, strlen (str), search, strlen (search), MEMMEM2_CASE);
+}
+
+
+char *
+strrstr (char *str, const char *search)
+{
+  unsigned int search_len = strlen (search);
+  char *p = NULL;
+
+  if (strlen (str) < search_len)
+    return NULL;
+
+  p = strchr (str, 0) - search_len;
+
+  for (;; p--)
+    {
+      if (!strncmp (p, search, search_len))
+        return p;
+
+      if (p == str)
+        return NULL;
+    }
+
+  return NULL;
+}
+
+
+char *
+strristr (char *str, const char *search)
+{
+  unsigned int search_len = strlen (search);
+  char *p = NULL;
+
+  if (strlen (str) < search_len)
+    return NULL;
+
+  p = strchr (str, 0) - search_len;
+
+  for (;; p--)
+    {
+      if (!strnicmp (p, search, search_len))
+        return p;
+
+      if (p == str)
+        return NULL;
+    }
+
+  return NULL;
 }
 
 
@@ -107,12 +172,7 @@ strtrim (char *str, int (*left) (int), int (*right) (int))
         p++;
 
       if (p - str)
-        {
-          char *s = str;
-          while (*p)
-            *s++ = *p++;
-          *s = 0;
-        }
+        strmove (str, p);
     }
 
   if (right)
@@ -143,36 +203,25 @@ strtrimr (char *str)
 }
 
 
-#define STRTRIM_S(f)  if (left) \
-    { \
-      char *p = f (str, left); \
- \
-      if (p) \
-        { \
-          char *s = str; \
-          p = p + strlen (left); \
-          while (*p) \
-            *s++ = *p++; \
-          *s = 0; \
-        } \
-    } \
- \
-  if (right) \
-    if (strlen (str) >= strlen (right)) \
-      { \
-        char *p = strchr (str, 0) - strlen (right); \
- \
-        while (p - str  >= 0 && !f (p, right)) \
-          p--; \
- \
-        *p = 0; \
-      }
-
-
 char *
 strtrim_s (char *str, const char *left, const char *right)
 {
-  STRTRIM_S(strstr)
+  if (left)
+    {
+      char *p = strstr (str, left);
+
+      if (p)
+        strmove (str, p + strlen (left));
+    }
+
+  if (right)
+    {
+      char *p = strrstr (str, right);
+
+      if (p)
+        *p = 0;
+    }
+
   return str;
 }
 
@@ -180,108 +229,77 @@ strtrim_s (char *str, const char *left, const char *right)
 char *
 stritrim_s (char *str, const char *left, const char *right)
 {
-  STRTRIM_S(stristr)
+  if (left)
+    {
+      char *p = stristr (str, left);
+
+      if (p)
+        strmove (str, p + strlen (left));
+    }
+
+  if (right)
+    {
+      char *p = strristr (str, right);
+
+      if (p)
+        *p = 0;
+    }
+
   return str;
 }
 
 
 char *
-strins (char *dest, int dest_replace_len, const char *ins)
+strrep (char *str, const char *orig, const char *rep)
 {
-  char *bak = strdup (dest + dest_replace_len);
+  int o_len = strlen (orig);
+  int r_len = strlen (rep);
+  char *p = str;
 
-  strcpy (dest, ins);
-  strcat (dest, bak);
+  if (r_len)
+    while ((p = strstr (p, orig)))
+      {
+        strmove (p + r_len, p + o_len);
+        memcpy (p, rep, r_len);
+        p += r_len;
+      }
 
-  free (bak);
-
-  return dest;
+  return str;
 }
 
 
-#if 0
 char *
 strcode (char *str)
 {
- char *p = strdup (str);
-
- if (!p)
-   return NULL;
-
- for (; *p; p++)
-   switch (*p)
-     {
-       case ' ':
-       case '~':
-       case '%':
-       case '|':
-       case '\\':
-       case '&':
-       case ';':
-       case '?':
-       case '!':
-       case '*':
-       case '[':
-       case ']':
-       case '{':
-       case '}':
-       case '(':
-       case ')':
-       case '<':
-       case '>':
-     }
- if (!Selected) Selected = " ";
- Selected.replace(" ", "\\ ");
- Selected.replace("~", "\\~");
- Selected.replace("%", "\\%");
- Selected.replace("|", "\\|");
- Selected.replace("'", "\\'");
- Selected.replace("&", "\\&");
- Selected.replace(";", "\\;");
- Selected.replace("?", "\\?");
- Selected.replace("!", "\\!");
- Selected.replace("*", "\\*");
- Selected.replace("[", "\\[");
- Selected.replace("]", "\\]");
- Selected.replace("{", "\\{");
- Selected.replace("}", "\\}");
- Selected.replace("(", "\\(");
- Selected.replace(")", "\\)");
- Selected.replace("<", "\\<");
- Selected.replace(">", "\\>");
- return Selected;
-
-  free (p);
+  strrep (str, "~", "\\~");
+  strrep (str, "%", "\\%");
+  strrep (str, "|", "\\|");
+  strrep (str, "'", "\\'");
+  strrep (str, "&", "\\&");
+  strrep (str, ";", "\\;");
+  strrep (str, "?", "\\?");
+  strrep (str, "!", "\\!");
+  strrep (str, "*", "\\*");
+  strrep (str, "[", "\\[");
+  strrep (str, "]", "\\]");
+  strrep (str, "{", "\\{");
+  strrep (str, "}", "\\}");
+  strrep (str, "(", "\\(");
+  strrep (str, ")", "\\)");
+  strrep (str, "<", "\\<");
+  strrep (str, ">", "\\>");
 
   return str;
 }
-#endif
 
 
 char *
-string_code (char *d, const char *s)
+strhtml (char *str)
 {
-  char *p = d;
+  strrep (str, "<", "&lt;");
+  strrep (str, ">", "&gt;");
 
-  *p = 0;
-  for (; *s; s++)
-    switch (*s)
-      {
-      case '\n':
-        strcat (p, "\\n\"\n  \"");
-        break;
-
-      case '\"':
-        strcat (p, "\\\"");
-        break;
-
-      default:
-        p = strchr (p, 0);
-        *p = *s;
-        *(++p) = 0;
-      }
-
-  return d;
+  return str;
 }
 
 
@@ -323,19 +341,14 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
 int
 memcmp2 (const void *buffer, const void *search, size_t searchlen, unsigned int flags)
 {
-#define SINGLE_WC(f)  (f & 0xff)
-#define MULTI_WC(f) ((f >> 8) & 0xff)
+#define WILDCARD(f)  (f & 0xff)
   size_t i = 0, j = 0;
   const unsigned char *b = (const unsigned char *) buffer,
                       *s = (const unsigned char *) search;
 
-
 #ifdef  DEBUG
-  if (flags & MEMMEM2_WCARD (0, 0))
-    {
-      printf ("single_wc: %c\n", SINGLE_WC (flags));
-      printf ("multi_wc: %c\n", MULTI_WC (flags));
-    }
+  if (flags & MEMMEM2_WCARD (0))
+    printf ("wildcard: %c\n", WILDCARD (flags));
 #endif
 
   if (!flags)
@@ -350,20 +363,10 @@ memcmp2 (const void *buffer, const void *search, size_t searchlen, unsigned int 
 
   for (i = j = 0; i < searchlen; i++, j++)
     {
-#if 0
-      if (flags & MEMMEM2_WCARD (0, 0))
-#else
       if (flags & MEMMEM2_WCARD (0))
-#endif
         {
-          if (*(s + i) == SINGLE_WC (flags))
+          if (*(s + i) == WILDCARD (flags))
             continue;
-#if 0
-          if (*(s + i) == MULTI_WC (flags))
-            for (; j < strlen ((char *) b); j++)
-              if (*(s + i + 1) == *(b + j))
-                break;
-#endif
         }
 
       if (flags & MEMMEM2_REL)
@@ -410,6 +413,7 @@ main (int argc, char **argv)
 {
 #define MAXBUFSIZE 32768
   char buf[MAXBUFSIZE];
+#if 0
   const char *b = "123(123.32.21.44)214";
   const char *s = "(xxx.xx.xx.xx)";
 
@@ -420,7 +424,11 @@ main (int argc, char **argv)
   strcpy (buf, "1234567890");
   strins (buf + 2, 6, "abc");
   printf ("%s\n", buf);
-  
+#else
+  strcpy (buf, "12434akjgkjh56453fdsg");
+  stritrim_s (buf, "sg", "xx");
+  printf (buf);
+#endif  
   return 0;
 }
 #endif

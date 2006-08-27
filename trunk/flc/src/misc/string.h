@@ -30,6 +30,9 @@ extern "C" {
 /*
   String manipulation
 
+  strupr()      strupr() clone
+  strlwr()      strlwr() clone
+
   strtrim()     strtrim (str, isspace, isspace) is the same as
                   strtriml (strtrimr (str))
   strtriml()    removes all leading blanks from a string
@@ -41,15 +44,20 @@ extern "C" {
   strtrim_s()   same as strtrim() but compares strings instead of chars
                   strtrim_s("123bla456", "23", "45) == "bla"
   stritrim_s()  same as strtrim_s() but case-insensitive
+
+  strmove()     copy/move (overlapping) strings
+  strins()      insert string in front of string
+  strrep()      replace string(s) inside a string
+
   strcode()     turn a string into code
-                  replaces '"' with '\\"' etc...
-  strcode()     turn a string into html
-                  replaces '>' with &62;
+  strhtml()     turn a string into html
+
+  strrstr()     like strstr() but reverse
+  strristr()    like strrstr() but case-insensitive
+
   strarg()      break a string into (max_args) tokens
                   replaces strtok[_r](), strsep(), etc...
-  strupr()      strupr() clone
-  strlwr()      strlwr() clone
-  strins()      insert ins at dest and optionally overwrite dest_replace_len
+
   memcmp2()     memcmp() replacement with flags for wildcard and
                   relative/shifted similarities support
                   MEMCMP2_WCARD(SINGLE_WC, MULTI_WC)
@@ -73,22 +81,28 @@ extern "C" {
   strnicmp()    same as strncasecmp()
   strcasestr2() strcasestr() clone for non-GNU platforms
 */
+extern char *strlwr (char *str);
+extern char *strupr (char *str);
+
 extern char *strtrim (char *str, int (*left) (int), int (*right) (int));
 extern char *strtriml (char *str);
 extern char *strtrimr (char *str);
 extern char *strtrim_s (char *str, const char *left, const char *right);
 extern char *stritrim_s (char *str, const char *left, const char *right);
-extern char *strcode (char *d, const char *str);
-extern char *strhtml (char *d, const char *str);
+
+extern char *strmove (char *to, char *from);
+extern char *strins (char *str, const char *ins);
+extern char *strrep (char *str, const char *orig, const char *rep);
+
+extern char *strcode (char *str);
+extern char *strhtml (char *str);
+
+extern char *strrstr (char *str, const char *search);
+extern char *strristr (char *str, const char *search);
+
 extern int strarg (char **argv, char *str, const char *separator_s, int max_args);
-extern char *strlwr (char *str);
-extern char *strupr (char *str);
-extern char *strins (char *dest, int dest_replace_len, const char *ins);
-#if 0
-#define MEMCMP2_WCARD(MULTI_WC,SINGLE_WC) ((1 << 17) | (((MULTI_WC) & 0xff) << 8) | ((SINGLE_WC) & 0xff))
-#else
+
 #define MEMCMP2_WCARD(WC)                 ((1 << 17) | ((WC) & 0xff))
-#endif
 #define MEMCMP2_REL                       (1 << 18)
 #define MEMCMP2_CASE                      (1 << 19)
 extern int memcmp2 (const void *buffer,
@@ -98,6 +112,7 @@ extern int memcmp2 (const void *buffer,
 #define MEMMEM2_CASE      MEMCMP2_CASE
 extern const void *memmem2 (const void *buffer, size_t bufferlen,
                             const void *search, size_t searchlen, unsigned int flags);
+
 extern char *strcasestr2 (const char *str, const char *search);
 #define stristr strcasestr2
 #ifndef _WIN32

@@ -817,7 +817,6 @@ int
 quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *o,
                size_t start, size_t len, const char *filename)
 {
-#warning more cleanup - TEST
   void *buffer = NULL;
   int buffer_size = 0, buffer_len = 0, buffer_pos = 0;
   size_t pos = 0;

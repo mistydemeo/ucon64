@@ -41,7 +41,7 @@ filter/txt.o: filter/txt.h $(FLC_STD_H)
 filter/met.o: filter/met.h $(FLC_STD_H)
 filter/id3.o: filter/id3.h $(FLC_STD_H)
 misc/cache.o: misc/cache.h
-misc/file.o: misc/misc.h
+misc/file.o: misc/file.h
 misc/getopt.o: misc/getopt.h
 misc/getopt2.o: misc/getopt2.h
 misc/misc.o: misc/misc.h

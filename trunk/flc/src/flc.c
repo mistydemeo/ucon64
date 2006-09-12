@@ -99,6 +99,7 @@ main (int argc, char *argv[])
   FILE *fh = NULL;
   int option_index = 0;
   int result = 0;
+  const st_getopt2_t *p = NULL;
   st_property_t props[] = {
     {
       "lha_test", "lha t \"%s\"",
@@ -201,9 +202,13 @@ main (int argc, char *argv[])
         case 3:
         case 'c':
         case 'R':
-          flags = (uint32_t *) &getopt2_get_index_by_val (options, c)->object;
-          if (flags)
-            flc.flags |= *flags;
+          p = getopt2_get_index_by_val (options, c);
+          if (p)
+            {
+              flags = p->object;
+              if (flags)
+                flc.flags |= *flags;
+            }
           break;
 
         case 'C':

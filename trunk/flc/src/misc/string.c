@@ -256,7 +256,7 @@ strrep (char *str, const char *orig, const char *rep)
   int r_len = strlen (rep);
   char *p = str;
 
-  if (r_len)
+//  if (r_len)
     while ((p = strstr (p, orig)))
       {
         strmove (p + r_len, p + o_len);

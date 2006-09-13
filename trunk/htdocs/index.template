@@ -349,17 +349,6 @@ Needed by the uCON64 Cygwin port to work<br>
 I/O port driver from <a href="http://www.infernal.currantbun.com/">Caz</a><br>
 Only necessary to access the parallel port<br>
 <br>
-<img src="images/solaris.png">(i386)<br>
-<a href="http://prdownloads.sourceforge.net/ucon64/lxrun-0.9.5.tar.gz?download">lxrun-0.9.5.tar.gz</a><br>
-Lxrun is a user-space program that allows users of SCO(r) OpenServer(tm),
-UnixWare(tm), and Sun(r) Solaris(tm) x86 operating systems to run ELF and
-a.out format Linux binaries<br>
-<br>
-<img src="images/cd.png" width="30"><br>
-<a href="http://prdownloads.sourceforge.net/ucon64/cdrecord-hack.zip?download">cdrecord-hack.zip</a><br>
-cdrecord pads an additional two sectors onto every audio track. In order to
-get a 300 sector track, you must burn a track with 298 sectors (298+2=300, QED)<br>
-<br>
 <img src="images/fal.png" width="60"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/preboot32.zip?download">preboot32.zip</a><br>
 Loader for Flash Advance Linker (uCON64 options: --multi, --xfalmulti, --xfal)<br>

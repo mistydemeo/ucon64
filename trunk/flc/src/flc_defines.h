@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define FLC_MAX_FILES 32768
 #define FLC_MAX_FILES 2048
 #define FLC_ID_NAMES "*_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]"
-#define FLC_VERSION_S "1.4.0"
+#define FLC_VERSION_S "1.4.1"
 //#define FLC_VERSION 121
 #define FLC_CONFIG_VERSION 121
 

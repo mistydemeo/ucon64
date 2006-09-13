@@ -31,12 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <ctype.h>
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else
-#include "itypes.h"
+#ifdef  HAVE_DIRENT_H
+#include <dirent.h>
 #endif
+#include <ctype.h>
+#include "misc/itypes.h"
 #include "misc/file.h"
 #include "misc/filter.h"
 #include "misc/property.h"

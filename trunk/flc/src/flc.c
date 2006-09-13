@@ -32,11 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else
-#include "itypes.h"
-#endif
+#include "misc/itypes.h"
 #include "misc/getopt.h"
 #include "misc/getopt2.h"
 #include "misc/property.h"

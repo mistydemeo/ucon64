@@ -1,7 +1,7 @@
 .PHONY: all clean distclean install flc uninstall
 
-CFLAGS=-I. -Wall -W -O3
-LDFLAGS=#-s #-pg
+CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H
+LDFLAGS=-s
 
 include config.mak
 
@@ -24,7 +24,7 @@ distclean: clean
 $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
-install:
+install: all
 	cp $(TARGET) $(prefix)/bin
 
 uninstall:

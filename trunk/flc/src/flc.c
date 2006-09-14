@@ -90,7 +90,7 @@ main (int argc, char *argv[])
 #endif
   char short_options[ARGS_MAX];
   struct option long_only_options[ARGS_MAX];
-  uint32_t *flags = NULL;
+  uint32_t flags = 0;
   int x = 0, c;
   FILE *fh = NULL;
   int option_index = 0;
@@ -185,7 +185,7 @@ main (int argc, char *argv[])
                       
   getopt2_short (short_options, options, ARGS_MAX);
   getopt2_long_only (long_only_options, options, ARGS_MAX);
-  
+
   while ((c = getopt_long_only (argc, argv, short_options, long_only_options, &option_index)) != -1)
     switch (c)
       {
@@ -200,11 +200,12 @@ main (int argc, char *argv[])
         case 'R':
           p = getopt2_get_index_by_val (options, c);
           if (p)
-            {
-              flags = p->object;
-              if (flags)
-                flc.flags |= *flags;
-            }
+            if (p->object)
+              {
+                flags = (uint32_t) p->object;
+                if (flags)
+                  flc.flags |= flags;
+              }
           break;
 
         case 'C':

@@ -158,8 +158,8 @@ bswap_64 (uint64_t x)
 #define le2me_64 me2le_64
 
 
-#if 0
-static uint32_t
+#if 1
+uint32_t
 wswap_32 (uint32_t x)
 {
 #if 0

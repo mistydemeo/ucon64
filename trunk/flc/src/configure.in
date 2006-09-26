@@ -22,6 +22,57 @@ st_configure_in_t configure_in[] = {
   {
     {NULL},
     {NULL},
+    {NULL},
+#ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__,
+    "MSDOS=1\n",                                 //  because DJGPP defines both
+#elif   defined __unix__
+#ifdef  __CYGWIN__
+    "CYGWIN=1\n",
+#elif   defined __FreeBSD__
+    "FREEBSD=1\n",
+#elif   defined __OpenBSD__
+    "OPENBSD=1\n",
+#elif   defined __linux__
+    "LINUX=1\n",
+#elif   defined __solaris__
+#ifdef __sparc__
+    "SOLARIS_SPARC=1\n",
+#else
+    "SOLARIS_I386=1\n",
+#endif
+#else
+    "GENERIC_UNIX=1\n",
+#endif
+#elif   defined _WIN32
+#ifdef  __MINGW32__
+    "MINGW=1\n",
+#else
+    "WIN32=1\n",
+#endif
+#elif   defined __APPLE__
+#if   defined __POWERPC__ || defined __ppc__
+    "APPLE_PPC=1\n",
+#else
+    "APPLE=1\n",
+#endif
+#elif   defined __BEOS__
+    "BEOS=1\n",
+#elif   defined AMIGA
+#if defined __PPC__
+    "AMIGA_PPC=1\n",
+#else
+    "AMIGA_68K=1\n",
+#endif
+#else
+    "\n",
+#endif
+    NULL,
+    NULL,
+    NULL
+  },
+  {
+    {NULL},
+    {NULL},
     {"gcc", NULL},
     "CC=gcc\n",
     NULL,

@@ -2,29 +2,6 @@
 
 
 function
-get_country_by_ip ($ip)
-{
-include ("misc/geoip/geoip.inc");
-  geoip_load_shared_mem ("php/geoip/GeoIP.dat");
-
-  $gi = geoip_open ("php/geoip/GeoIP.dat", GEOIP_SHARED_MEMORY);
-
-  $country = geoip_country_name_by_addr ($gi, $ip);
-
-  geoip_close ($gi);
-
-  return $country;
-}
-
-
-function
-get_country ()
-{
-  return get_country_by_ip ($_SERVER['REMOTE_ADDR']);
-}
-
-
-function
 traffic ($db, $table_name)
 {
   $p = sprintf ("INSERT INTO `%s` (`time`,`ip`)", $table_name);

@@ -40,7 +40,7 @@ include ("misc/misc.php");
 <br>
 <br>
 <br>
-<center><img src="images/logo_large.png" width="418" height="121" border="0"></center><br>
+<center><img src="images/logo.png" width="418" height="121" border="0"></center><br>
 <br>
 <br>
 <font size="-1">
@@ -99,8 +99,7 @@ include ("index_ucon64gui.html");
 <br>
 <br>
 <br>
-<center>
-<a name="ucon64misc"></a>
+<a name="ucon64misc"></a><center>
 <?php
 
 include ("index_ucon64misc.html");

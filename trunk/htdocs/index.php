@@ -44,7 +44,7 @@ include ("misc/misc.php");
 <br>
 <br>
 <font size="-1">
-<center><img src="images/figures1.png" border="0" width="100%"></center>
+<center><img src="images/figures1.png" border="0"></center>
 <br>
 <br>
 <center>
@@ -134,7 +134,7 @@ include ("index_bbs.html");
 </center>
 <br>
 <br>
-<center><img src="images/figures2.png" border="0" width="100%"></center>
+<center><img src="images/figures2.png" border="0"></center>
 <font size="-1"><br>
 <br>
 <a href="http://sourceforge.net"><IMG src="http://sourceforge.net/sflogo.php?group_id=12381" width="88" height="31" border="0" alt="SourceForge Logo"></a><br>

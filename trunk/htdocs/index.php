@@ -1,7 +1,7 @@
 <?php
 //phpinfo();
-include ("config.php");
-include ("misc/misc.php");
+require_once ("config.php");
+require_once ("misc/misc.php");
 
   if ($use_gzip)
     ob_start ("ob_gzhandler"); // enable gzip
@@ -50,7 +50,7 @@ include ("misc/misc.php");
 <center>
 <?php
 
-include ("index_news.html");
+require_once ("index_news.html");
 
 ?>
 </center>
@@ -63,7 +63,7 @@ include ("index_news.html");
 <a name="ucon64"></a><center>
 <?php
 
-include ("index_ucon64.html");
+require_once ("index_ucon64.html");
 
 ?>
 </center>
@@ -76,7 +76,7 @@ include ("index_ucon64.html");
 <a name="ucon64dat"></a><center>
 <?php
 
-include ("index_ucon64dat.html");
+require_once ("index_ucon64dat.html");
 
 ?>
 </center>
@@ -89,7 +89,7 @@ include ("index_ucon64dat.html");
 <a name="ucon64gui"></a><center>
 <?php
 
-include ("index_ucon64gui.html");
+require_once ("index_ucon64gui.html");
 
 ?>
 </center>
@@ -102,7 +102,7 @@ include ("index_ucon64gui.html");
 <a name="ucon64misc"></a><center>
 <?php
 
-include ("index_ucon64misc.html");
+require_once ("index_ucon64misc.html");
 
 ?>
 </center>
@@ -115,7 +115,7 @@ include ("index_ucon64misc.html");
 <a name="links"></a><center>
 <?php
 
-include ("index_links.html");
+require_once ("index_links.html");
 
 ?>
 </center>
@@ -128,7 +128,7 @@ include ("index_links.html");
 <center>
 <?php
 
-include ("index_bbs.html");
+require_once ("index_bbs.html");
 
 ?>
 </center>

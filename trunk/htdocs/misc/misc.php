@@ -14,16 +14,20 @@ traffic ($db, $table_name)
 function
 traffic_stats ($db, $table_name)
 {
-  $p = "SELECT `time`,`ip`";
-  $p .= sprintf (" FROM `%s`", $table_name);
-  $p .= sprintf (" WHERE time > 0", $category);
-  $p .= " ORDER BY `time` DESC";
+  $p = "SELECT `time`,`ip`"
+      ." FROM `"
+      .$table_name
+      ."`"
+      ." WHERE time > 0"
+      ." ORDER BY `time` DESC";
 
   $stats = sql_query ($db, $p, 0);
 
   if ($stats)
-    for ($i = 0; $stats[$i]; $i++)
-      printf ("%ld %s %s<br>", $stats[$i][0], $stats[$i][1], get_country_by_ip ($stats[$i][1]));
+    for ($p = "", $i = 0; $stats[$i]; $i++)
+      $p .= sprintf ("%ld %s %s<br>", $stats[$i][0], $stats[$i][1], get_country_by_ip ($stats[$i][1]));
+
+  echo $p;
 }
 
 
@@ -62,24 +66,31 @@ function
 html_head_tags ($icon, $title, $refresh, $charset,
                 $use_dc, $dc_desc, $dc_keywords, $dc_identifier, $dc_lang, $dc_author)
 {
+  $p = "";
+
   if ($icon)
-    printf ("<link rel=\"icon\" href=\"%s\" type=\"image/png\">\n", $icon);
+    $p .= sprintf ("<link rel=\"icon\" href=\"%s\" type=\"image/png\">\n", $icon);
 
   if ($title)
-    printf ("<title>%s</title>\n", $title);
+    $p .= "<title>"
+          .$title
+          ."</title>\n";
 
   if ($refresh > 0)
-    printf("<meta http-equiv=\"refresh\" content=\"%d; URL=%s\">\n", $refresh, $_SERVER['REQUEST_URI']);
+    $p .= sprintf ("<meta http-equiv=\"refresh\" content=\"%d; URL=%s\">\n", $refresh, $_SERVER['REQUEST_URI']);
 
   if ($charset)
-    printf ("<meta http-equiv=\"content-type\" content=\"text/html; charset=%s\">\n", $charset);
+    $p .= sprintf ("<meta http-equiv=\"content-type\" content=\"text/html; charset=%s\">\n", $charset);
   else
-    printf ("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
+    $p .= "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n";
 
   if (!$use_dc)
-    return;
+    {
+      echo $p;
+      return;
+    }
 
-  printf (
+  $p = sprintf (
     "<meta name=\"description\" content=\"%s\">\n"
    ."<meta name=\"author\" content=\"%s\">\n"
    ."<meta name=\"keywords\" content=\"%s\">\n"
@@ -111,6 +122,8 @@ html_head_tags ($icon, $title, $refresh, $charset,
       $dc_identifier ? $dc_identifier : "localhost",
       $dc_lang ? $dc_lang : "en"
   );
+
+  echo $p;
 }
 
 

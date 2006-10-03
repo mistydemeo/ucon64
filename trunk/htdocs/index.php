@@ -139,16 +139,8 @@ require_once ("index_bbs.html");
 <br>
 <a href="http://sourceforge.net"><IMG src="http://sourceforge.net/sflogo.php?group_id=12381" width="88" height="31" border="0" alt="SourceForge Logo"></a><br>
 <br>
-</tt>
 <br>
-<!-- Begin Nedstat Basic code -->
-<!-- Title: ucon64 -->
-<!-- URL: http://ucon64.sourceforge.net -->
-<script language="JavaScript" src="http://m1.nedstatbasic.net/basic.js">
-</script>
-<a href="http://v1.nedstatbasic.net/stats?ABBs4gySsMTAK/lKMvQ/sjqFe/tg">
-<img src="http://m1.nedstatbasic.net/n?id=ABBs4gySsMTAK/lKMvQ/sjqFe/tg&p=1&w=1024" border=0 width=18 height=18>
-</a>
+<a href="http://v1.nedstatbasic.net/stats?ABBs4gySsMTAK/lKMvQ/sjqFe/tg"><img src="http://m1.nedstatbasic.net/n?id=ABBs4gySsMTAK/lKMvQ/sjqFe/tg&p=1&w=1024" border=0 width=18 height=18></a>
 </span>
 </body>
 </html>

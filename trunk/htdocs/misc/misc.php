@@ -4,8 +4,14 @@
 function
 traffic ($db, $table_name)
 {
-  $p = sprintf ("INSERT INTO `%s` (`time`,`ip`)", $table_name);
-  $p .= sprintf (" VALUES ('%ld','%s');", time(0), $_SERVER['REMOTE_ADDR']);
+  $p = "INSERT INTO `"
+      .$table_name
+      ."` (`time`,`ip`)"
+      ." VALUES ('"
+      .time(0)
+      ."','"
+      .$_SERVER['REMOTE_ADDR']
+      ."');";
 
   sql_set ($db, $p, 0);
 }
@@ -18,14 +24,22 @@ traffic_stats ($db, $table_name)
       ." FROM `"
       .$table_name
       ."`"
-      ." WHERE time > 0"
+      ." WHERE time > "
+      .(time (0) - 86400)
       ." ORDER BY `time` DESC";
 
   $stats = sql_query ($db, $p, 0);
 
+  $p = "";
+
   if ($stats)
     for ($p = "", $i = 0; $stats[$i]; $i++)
-      $p .= sprintf ("%ld %s %s<br>", $stats[$i][0], $stats[$i][1], get_country_by_ip ($stats[$i][1]));
+      $p .= $stats[$i][0]
+           ." "
+           .$stats[$i][1]
+           . " "
+           .get_country_by_ip ($stats[$i][1])
+           ."<br>";
 
   echo $p;
 }
@@ -69,7 +83,9 @@ html_head_tags ($icon, $title, $refresh, $charset,
   $p = "";
 
   if ($icon)
-    $p .= sprintf ("<link rel=\"icon\" href=\"%s\" type=\"image/png\">\n", $icon);
+    $p .= "<link rel=\"icon\" href=\""
+         .$icon
+         ."\" type=\"image/png\">\n";
 
   if ($title)
     $p .= "<title>"
@@ -77,10 +93,16 @@ html_head_tags ($icon, $title, $refresh, $charset,
           ."</title>\n";
 
   if ($refresh > 0)
-    $p .= sprintf ("<meta http-equiv=\"refresh\" content=\"%d; URL=%s\">\n", $refresh, $_SERVER['REQUEST_URI']);
+    $p .= "<meta http-equiv=\"refresh\" content=\""
+         .$refresh
+         ."; URL="
+         .$_SERVER['REQUEST_URI']
+         ."\">\n";
 
   if ($charset)
-    $p .= sprintf ("<meta http-equiv=\"content-type\" content=\"text/html; charset=%s\">\n", $charset);
+    $p .= "<meta http-equiv=\"content-type\" content=\"text/html; charset="
+         .$charset
+         ."\">\n";
   else
     $p .= "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n";
 
@@ -90,38 +112,67 @@ html_head_tags ($icon, $title, $refresh, $charset,
       return;
     }
 
-  $p = sprintf (
-    "<meta name=\"description\" content=\"%s\">\n"
-   ."<meta name=\"author\" content=\"%s\">\n"
-   ."<meta name=\"keywords\" content=\"%s\">\n"
-   ."<meta name=\"robots\" content=\"follow\">\n"
-   ."<meta name=\"title\" content=\"%s\">\n"
-   ."<meta name=\"creator\" content=\"%s\">\n"
-   ."<meta name=\"subject\" content=\"%s\">\n"
-   ."<meta name=\"description\" content=\"%s\">\n"
-   ."<meta name=\"publisher\" content=\"%s\">\n"
-//   ."<meta name=\"contributor\" content=\"%s\">\n"
-//   ."<meta name=\"date\" content=\"%s\">\n"
-//   ."<meta name=\"type\" content=\"Software\">\n"
-   ."<meta name=\"format\" content=\"text/html\">\n"
-   ."<meta name=\"identifier\" content=\"%s\">\n"
-//   ."<meta name=\"source\" content=\"%s\">\n"
-   ."<meta name=\"language\" content=\"%s\">\n"
-//   ."<meta name=\"relation\" content=\"%s\">\n"
-//   ."<meta name=\"coverage\" content=\"%s\">\n"
-//   ."<meta name=\"rights\" content=\"GPL\">\n"
-,
-      $dc_desc ? $dc_desc : $title,
-      $dc_author ? $dc_author : "Admin",
-      $dc_keywords ? $dc_keywords : "html, php",
-      $dc_desc ? $dc_desc : $title,
-      $dc_author ? $dc_author : "Admin",
-      $dc_desc ? $dc_desc : $title,
-      $dc_desc ? $dc_desc : $title,
-      $dc_author ? $dc_author : "Admin",
-      $dc_identifier ? $dc_identifier : "localhost",
-      $dc_lang ? $dc_lang : "en"
-  );
+  $p .= "<meta name=\"description\" content=\""
+       .($dc_desc ? $dc_desc : $title)
+       ."\">\n"
+
+       ."<meta name=\"author\" content=\""
+       .($dc_author ? $dc_author : "Admin")
+       ."\">\n"
+
+       ."<meta name=\"keywords\" content=\""
+       .($dc_keywords ? $dc_keywords : "html, php")
+       ."\">\n"
+
+       ."<meta name=\"robots\" content=\"follow\">\n"
+
+       ."<meta name=\"title\" content=\""
+       .($dc_desc ? $dc_desc : $title)
+       ."\">\n"
+
+       ."<meta name=\"creator\" content=\""
+       .($dc_author ? $dc_author : "Admin")
+       ."\">\n"
+
+       ."<meta name=\"subject\" content=\""
+       .($dc_desc ? $dc_desc : $title)
+       ."\">\n"
+
+       ."<meta name=\"description\" content=\""
+       .($dc_desc ? $dc_desc : $title)
+       ."\">\n"
+
+       ."<meta name=\"publisher\" content=\""
+       .($dc_author ? $dc_author : "Admin")
+       ."\">\n"
+
+//       ."<meta name=\"contributor\" content=\""
+//       ."\">\n"
+
+//       ."<meta name=\"date\" content=\""
+//       ."\">\n"
+
+       ."<meta name=\"type\" content=\"Software\">\n"
+
+       ."<meta name=\"format\" content=\"text/html\">\n"
+
+       ."<meta name=\"identifier\" content=\""
+       .($dc_identifier ? $dc_identifier : "localhost")
+       ."\">\n"
+
+//       ."<meta name=\"source\" content=\""
+//       ."\">\n"
+
+       ."<meta name=\"language\" content=\""
+       .($dc_lang ? $dc_lang : "en")
+       ."\">\n"
+
+//       ."<meta name=\"relation\" content=\""
+//       ."\">\n"
+//       ."<meta name=\"coverage\" content=\""
+//       ."\">\n"
+//       ."<meta name=\"rights\" content=\"GPL\">\n"
+    ;
 
   echo $p;
 }

@@ -11,26 +11,26 @@ require_once ("misc/misc.php");
 <head>
 <?php
 
-  html_head_tags ("images/icon.png",    // icon
-                  "uCON64 - The backup tool and wonderful emulator's Swiss Army knife program",
-                  "0",   // refresh
-                  "utf-8", // charset
-                  1,       // use dublin core
-                  NULL,    // default dc-desc
-                  "snes, magicom, magic drive, bung, game doctor, multi game hunter, wild card, dx2, pro fighter, "
-                  ."smart bros, multi game doctor, dragon boy, gamestation, game master, game doctor, mini doctor, "
-                  ."magic card, magic griffin, super magic drive, hacker, super disk, "
-                  ."interceptor, mega disk interceptor, super disk, z64, v64, doctor v64, super "
-                  ."twin, e-merger, v64jr, magic drive plus, super ufo, cd64, supercom partner, "
-                  ."yoko, super charger, unimex duplikator, game station, Professor, saturn, "
-                  ."neo-classic, neo, classic, gaming, java, games, online, n64, jaguar, atari, "
-                  ."mp3, midi, music, files, mp3s, midis, nes, famicom, clone, multi-carts, "
-                  ."multi carts, multi cart, mega drive, master system, snes cd, unit, history, "
-                  ."story, saturn mod, modded, cart list, game list, full, hardware, connectors, "
-                  ."modifications, pal, ntsc",
-                  "http://ucon64.sourceforge.net",
-                  "en",
-                  "NoisyB");
+  echo html_head_tags ("images/icon.png",    // icon
+                       "uCON64 - The backup tool and wonderful emulator's Swiss Army knife program",
+                       "0",   // refresh
+                       "utf-8", // charset
+                       1,       // use dublin core
+                       NULL,    // default dc-desc
+                       "snes, magicom, magic drive, bung, game doctor, multi game hunter, wild card, dx2, pro fighter, "
+                      ."smart bros, multi game doctor, dragon boy, gamestation, game master, game doctor, mini doctor, "
+                      ."magic card, magic griffin, super magic drive, hacker, super disk, "
+                      ."interceptor, mega disk interceptor, super disk, z64, v64, doctor v64, super "
+                      ."twin, e-merger, v64jr, magic drive plus, super ufo, cd64, supercom partner, "
+                      ."yoko, super charger, unimex duplikator, game station, Professor, saturn, "
+                      ."neo-classic, neo, classic, gaming, java, games, online, n64, jaguar, atari, "
+                      ."mp3, midi, music, files, mp3s, midis, nes, famicom, clone, multi-carts, "
+                      ."multi carts, multi cart, mega drive, master system, snes cd, unit, history, "
+                      ."story, saturn mod, modded, cart list, game list, full, hardware, connectors, "
+                      ."modifications, pal, ntsc",
+                       "http://ucon64.sourceforge.net",
+                       "en",
+                       "NoisyB");
 
 ?>
 <link rel="stylesheet" media="all" href="index.css">

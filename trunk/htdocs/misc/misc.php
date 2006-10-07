@@ -13,7 +13,7 @@ traffic ($db, $table_name)
       .$_SERVER['REMOTE_ADDR']
       ."');";
 
-  sql_set ($db, $p, 0);
+  sql_write ($db, $p, 0);
 }
 
 
@@ -28,7 +28,7 @@ traffic_stats ($db, $table_name)
       .(time (0) - 86400)
       ." ORDER BY `time` DESC";
 
-  $stats = sql_query ($db, $p, 0);
+  $stats = sql_read ($db, $p, 0);
 
   $p = "";
 
@@ -41,7 +41,7 @@ traffic_stats ($db, $table_name)
            .get_country_by_ip ($stats[$i][1])
            ."<br>";
 
-  echo $p;
+  return $p;
 }
 
 
@@ -174,7 +174,60 @@ html_head_tags ($icon, $title, $refresh, $charset,
 //       ."<meta name=\"rights\" content=\"GPL\">\n"
     ;
 
-  echo $p;
+  return $p;
+}
+
+
+function
+multi_widget ($url, //$css_id,
+              $image, //$image_w, $image_h,
+              $text, //$text_font_face, $text_font_size,
+              $tooltip)//, $tooltip_font_face, $tooltip_font_size)
+{
+  $p = "";
+
+  if ($url)
+    {
+      $p .= "<a";
+
+      if ($image)
+        $p .= " id=\"im\"";
+      else if ($tooltip)
+        $p .= " id=\"tt\"";
+      else
+        $p .= " id=\"aa\"";
+
+      $p .= " href=\""
+           .$url
+           ."\">";
+    }
+
+  if ($image)
+    {
+      $p .= "<img src=\""
+           .$image
+           ."\" border=\"0\"";
+
+      if ($tooltip)
+        $p .= " alt=\""
+           .$tooltip
+           ."\"";
+
+      $p .= ">";
+    }
+
+  if ($tooltip)
+    $p .= "<span>"
+         .$tooltip
+         ."</span>";
+
+  if ($text)
+    $p .= $text;
+
+  if ($url)
+    $p .= "</a>";
+
+  return $p;
 }
 
 

@@ -46,6 +46,22 @@ traffic_stats ($db, $table_name)
 
 
 function
+set_server_uriroot ($uriroot)
+{
+  $l = strlen ($uriroot);
+  $GLOBALS['misc_uriroot'] = ($uriroot[0] != '/' ? "/" : "")
+                       .($uriroot[$l - 1] == '/' ? substr ($uriroot, 0, $l - 1) : $uriroot);
+}
+
+
+function
+get_server_uriroot ()
+{
+  return $GLOBALS['misc_uriroot'];
+}
+
+
+function
 set_request_method_to_get ()
 {
   $GLOBALS['misc_method'] = "GET";
@@ -69,10 +85,9 @@ get_request_method ()
 function
 get_request_value ($name)
 {
-  if ($GLOBALS['misc_method'] == "GET")
-    return $_GET[$name];
-  else 
+  if ($GLOBALS['misc_method'] == "POST")
     return $_POST[$name];
+  return $_GET[$name]; // default
 }
 
 
@@ -81,6 +96,20 @@ html_head_tags ($icon, $title, $refresh, $charset,
                 $use_dc, $dc_desc, $dc_keywords, $dc_identifier, $dc_lang, $dc_author)
 {
   $p = "";
+
+  if ($charset)
+    $p .= "<meta http-equiv=\"content-type\" content=\"text/html; charset="
+         .$charset
+         ."\">\n";
+  else
+    $p .= "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n";
+
+  if ($refresh > 0)
+    $p .= "<meta http-equiv=\"refresh\" content=\""
+         .$refresh
+         ."; URL="
+         .$_SERVER['REQUEST_URI']
+         ."\">\n";
 
   if ($icon)
     $p .= "<link rel=\"icon\" href=\""
@@ -91,20 +120,6 @@ html_head_tags ($icon, $title, $refresh, $charset,
     $p .= "<title>"
           .$title
           ."</title>\n";
-
-  if ($refresh > 0)
-    $p .= "<meta http-equiv=\"refresh\" content=\""
-         .$refresh
-         ."; URL="
-         .$_SERVER['REQUEST_URI']
-         ."\">\n";
-
-  if ($charset)
-    $p .= "<meta http-equiv=\"content-type\" content=\"text/html; charset="
-         .$charset
-         ."\">\n";
-  else
-    $p .= "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n";
 
   if (!$use_dc)
     {
@@ -126,106 +141,54 @@ html_head_tags ($icon, $title, $refresh, $charset,
 
        ."<meta name=\"robots\" content=\"follow\">\n"
 
-       ."<meta name=\"title\" content=\""
+       ."<!-- Dublin Core -->\n"
+       ."<meta name=\"DC.Title\" content=\""
        .($dc_desc ? $dc_desc : $title)
        ."\">\n"
 
-       ."<meta name=\"creator\" content=\""
+       ."<meta name=\"DC.Creator\" content=\""
        .($dc_author ? $dc_author : "Admin")
        ."\">\n"
 
-       ."<meta name=\"subject\" content=\""
+       ."<meta name=\"DC.Subject\" content=\""
        .($dc_desc ? $dc_desc : $title)
        ."\">\n"
 
-       ."<meta name=\"description\" content=\""
+       ."<meta name=\"DC.Description\" content=\""
        .($dc_desc ? $dc_desc : $title)
        ."\">\n"
 
-       ."<meta name=\"publisher\" content=\""
+       ."<meta name=\"DC.Publisher\" content=\""
        .($dc_author ? $dc_author : "Admin")
        ."\">\n"
 
-//       ."<meta name=\"contributor\" content=\""
+//       ."<meta name=\"DC.Contributor\" content=\""
 //       ."\">\n"
 
-//       ."<meta name=\"date\" content=\""
+//       ."<meta name=\"DC.Date\" content=\""
 //       ."\">\n"
 
-       ."<meta name=\"type\" content=\"Software\">\n"
+       ."<meta name=\"DC.Type\" content=\"Software\">\n"
 
-       ."<meta name=\"format\" content=\"text/html\">\n"
+       ."<meta name=\"DC.Format\" content=\"text/html\">\n"
 
-       ."<meta name=\"identifier\" content=\""
+       ."<meta name=\"DC.Identifier\" content=\""
        .($dc_identifier ? $dc_identifier : "localhost")
        ."\">\n"
 
-//       ."<meta name=\"source\" content=\""
+//       ."<meta name=\"DC.Source\" content=\""
 //       ."\">\n"
 
-       ."<meta name=\"language\" content=\""
+       ."<meta name=\"DC.Language\" content=\""
        .($dc_lang ? $dc_lang : "en")
        ."\">\n"
 
-//       ."<meta name=\"relation\" content=\""
+//       ."<meta name=\"DC.Relation\" content=\""
 //       ."\">\n"
-//       ."<meta name=\"coverage\" content=\""
+//       ."<meta name=\"DC.Coverage\" content=\""
 //       ."\">\n"
-//       ."<meta name=\"rights\" content=\"GPL\">\n"
+//       ."<meta name=\"DC.Rights\" content=\"GPL\">\n"
     ;
-
-  return $p;
-}
-
-
-function
-multi_widget ($url, //$css_id,
-              $image, //$image_w, $image_h,
-              $text, //$text_font_face, $text_font_size,
-              $tooltip)//, $tooltip_font_face, $tooltip_font_size)
-{
-  $p = "";
-
-  if ($url)
-    {
-      $p .= "<a";
-
-      if ($image)
-        $p .= " id=\"im\"";
-      else if ($tooltip)
-        $p .= " id=\"tt\"";
-      else
-        $p .= " id=\"aa\"";
-
-      $p .= " href=\""
-           .$url
-           ."\">";
-    }
-
-  if ($image)
-    {
-      $p .= "<img src=\""
-           .$image
-           ."\" border=\"0\"";
-
-      if ($tooltip)
-        $p .= " alt=\""
-           .$tooltip
-           ."\"";
-
-      $p .= ">";
-    }
-
-  if ($tooltip)
-    $p .= "<span>"
-         .$tooltip
-         ."</span>";
-
-  if ($text)
-    $p .= $text;
-
-  if ($url)
-    $p .= "</a>";
 
   return $p;
 }

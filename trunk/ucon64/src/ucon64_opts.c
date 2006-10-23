@@ -161,39 +161,6 @@ ucon64_switches (st_ucon64_t *p)
               access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ",
               ucon64.configfile);
 
-#ifdef  USE_DISCMAGE
-      printf ("discmage DLL:                      ");
-
-#ifdef  DLOPEN
-      puts (ucon64.discmage_path);
-#else
-#if     defined __MSDOS__
-      printf ("discmage.dxe");
-#elif   defined __CYGWIN__ || defined _WIN32
-      printf ("discmage.dll");
-#elif   defined __APPLE__                       // Mac OS X actually
-      printf ("libdiscmage.dylib");
-#elif   defined __unix__ || defined __BEOS__
-      printf ("libdiscmage.so");
-#else
-      printf ("unknown");
-#endif
-      puts (", dynamically linked");
-#endif // DLOPEN
-
-      printf ("discmage enabled:                  %s\n",
-              ucon64.discmage_enabled ? "yes" : "no");
-
-      if (ucon64.discmage_enabled)
-        {
-          x = dm_get_version ();
-          printf ("discmage version:                  %d.%d.%d (%s)\n",
-                  x >> 16, x >> 8, x, dm_get_version_s ());
-        }
-      else
-        puts ("discmage version:                  not available");
-#endif // USE_DISCMAGE
-
       printf ("configuration directory:           %s\n"
               "DAT file directory:                %s\n"
               "entries in DATabase:               %d\n"
@@ -1052,100 +1019,6 @@ ucon64_options (st_ucon64_t *p)
       ucon64.fname = (const char *) rename_buf;
       break;
 
-#ifdef  USE_DISCMAGE
-    case UCON64_BIN2ISO:
-    case UCON64_ISOFIX:
-    case UCON64_RIP:
-    case UCON64_CDMAGE:
-      if (ucon64.discmage_enabled)
-        {
-          uint32_t flags = 0;
-
-          switch (c)
-            {
-              case UCON64_BIN2ISO:
-                flags |= DM_2048; // DM_2048 read sectors and convert to 2048 Bytes
-                break;
-
-              case UCON64_ISOFIX:
-                flags |= DM_FIX; // DM_FIX read sectors and fix (if needed/possible)
-                break;
-
-              case UCON64_CDMAGE:
-//                flags |= DM_CDMAGE;
-                break;
-            }
-
-          ucon64.image = dm_reopen (ucon64.fname, 0, (dm_image_t *) ucon64.image);
-          if (ucon64.image)
-            {
-              int track = strtol (optarg, NULL, 10);
-              if (track < 1)
-                track = 1;
-              track--; // decrement for dm_rip()
-
-              printf ("Writing track: %d\n\n", track + 1);
-
-              dm_set_gauge ((void (*)(int, int)) &discmage_gauge);
-              dm_rip ((dm_image_t *) ucon64.image, track, flags);
-              fputc ('\n', stdout);
-            }
-        }
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-
-    case UCON64_MKTOC:
-    case UCON64_MKCUE:
-    case UCON64_MKSHEET:
-      if (ucon64.discmage_enabled)
-        {
-          if (ucon64.image)
-            {
-              char buf[FILENAME_MAX];
-              strcpy (buf, ((dm_image_t *) ucon64.image)->fname);
-
-              if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
-                {
-                  set_suffix (buf, ".toc");
-                  ucon64_file_handler (buf, NULL, 0);
-
-                  if (!dm_toc_write ((dm_image_t *) ucon64.image))
-                    printf (ucon64_msg[WROTE], basename2 (buf));
-                  else
-                    fputs ("ERROR: Could not generate toc sheet\n", stderr);
-                }
-
-              if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
-                {
-                  set_suffix (buf, ".cue");
-                  ucon64_file_handler (buf, NULL, 0);
-
-                  if (!dm_cue_write ((dm_image_t *) ucon64.image))
-                    printf (ucon64_msg[WROTE], basename2 (buf));
-                  else
-                    fputs ("ERROR: Could not generate cue sheet\n", stderr);
-                }
-            }
-        }
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-
-    case UCON64_XCDRW:
-      if (ucon64.discmage_enabled)
-        {
-//          dm_set_gauge ((void *) &discmage_gauge);
-          if (!access (ucon64.fname, F_OK))
-            dm_disc_write ((dm_image_t *) ucon64.image);
-          else
-            dm_disc_read ((dm_image_t *) ucon64.image);
-        }
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-#endif // USE_DISCMAGE
-
     case UCON64_DB:
       if (ucon64.quiet > -1)
         {
@@ -1242,10 +1115,6 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_BIN:
       genesis_bin (ucon64.nfo);
-      break;
-
-    case UCON64_BIOS:
-      neogeo_bios (optarg);
       break;
 
     case UCON64_BOT:
@@ -1509,9 +1378,6 @@ ucon64_options (st_ucon64_t *p)
         case UCON64_GEN:
           genesis_mgd (ucon64.nfo);
           break;
-        case UCON64_NG:
-          neogeo_mgd ();
-          break;
         case UCON64_PCE:
           pce_mgd (ucon64.nfo);
           break;
@@ -1636,9 +1502,6 @@ ucon64_options (st_ucon64_t *p)
         case UCON64_NES:
           nes_s ();
           break;
-        case UCON64_NG:
-          neogeo_s ();
-          break;
         case UCON64_SNES:
           snes_s (ucon64.nfo);
           break;
@@ -1647,10 +1510,6 @@ ucon64_options (st_ucon64_t *p)
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
-      break;
-
-    case UCON64_SAM:
-      neogeo_sam (optarg);
       break;
 
     case UCON64_SCR:
@@ -1818,6 +1677,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XDEX:
+      printf (ucon64_msg[UNTESTED]);
       if (access (ucon64.fname, F_OK) != 0)
         dex_read_block (ucon64.fname, strtol (optarg, NULL, 10), ucon64.parport);
       else
@@ -2055,6 +1915,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XMCCL:
+      printf (ucon64_msg[UNTESTED]);
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
         printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
       mccl_read (ucon64.fname, ucon64.parport);

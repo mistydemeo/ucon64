@@ -24,31 +24,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_MISC_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"      // USE_DISCMAGE
+#include "config.h"
 #endif
 #include "ucon64.h"      // st_ucon64_nfo_t
-
-
-/*
-  UCON64_DM_VERSION_MAJOR
-  UCON64_DM_VERSION_MINOR
-  UCON64_DM_VERSION_STEP  min. version of libdiscmage supported by uCON64
-
-  ucon64_load_discmage()  load libdiscmage
-  discmage_usage          usage for libdiscmage
-  discmage_gauge          gauge wrapper for libdiscmage
-*/
-#ifdef  USE_DISCMAGE
-#include "libdiscmage/libdiscmage.h" // dm_image_t
-
-#define UCON64_DM_VERSION_MAJOR 0
-#define UCON64_DM_VERSION_MINOR 0
-#define UCON64_DM_VERSION_STEP 7
-
-extern const st_getopt2_t discmage_usage[];
-extern int ucon64_load_discmage (void);
-extern int discmage_gauge (int pos, int size);
-#endif
 
 
 /*
@@ -78,7 +56,7 @@ enum
   DAT_NOT_FOUND,
   DAT_NOT_ENABLED,
   READ_CONFIG_FILE,
-  NO_LIB
+  UNTESTED
 };
 
 extern const char *ucon64_msg[];

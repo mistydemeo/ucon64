@@ -89,7 +89,7 @@ $(TARGET): $(OBJECTS)
 	link.exe $(OBJECTS) $(LDFLAGS) /OUT:$@
 
 
-install:
+install: all
 
 
 uninstall:

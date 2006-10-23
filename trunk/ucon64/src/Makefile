@@ -188,7 +188,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 
-install:
+install: all
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP

@@ -507,14 +507,6 @@ TEST_BREAK
       {UCON64_VEC,	"ucon64 -vec", 0},      // NO TEST: hidden option or deprecated
       {UCON64_XBOX,	"ucon64 -xbox", 0},     // NO TEST: hidden option or deprecated
 
-      {UCON64_BIN2ISO,	"ucon64 -bin2iso", 0},  // NO TEST: discmage
-      {UCON64_DISC,	"ucon64 -disc", 0},     // NO TEST: discmage
-      {UCON64_ISOFIX,	"ucon64 -isofix", 0},   // NO TEST: discmage
-      {UCON64_MKCUE,	"ucon64 -mkcue", 0},    // NO TEST: discmage
-      {UCON64_MKSHEET,	"ucon64 -mksheet", 0},  // NO TEST: discmage
-      {UCON64_MKTOC,	"ucon64 -mktoc", 0},    // NO TEST: discmage
-      {UCON64_RIP,	"ucon64 -rip", 0},      // NO TEST: discmage
-
       {UCON64_PORT,     "ucon64 -port", 0},     // NO TEST: transfer code
       {UCON64_XCMC,	"ucon64 -xcmc", 0},     // NO TEST: transfer code
       {UCON64_XCMCM,	"ucon64 -xcmcm", 0},    // NO TEST: transfer code

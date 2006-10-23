@@ -40,14 +40,12 @@ const st_getopt2_t unknown_console_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
+
 int
 unknown_console_init (st_ucon64_nfo_t *rominfo)
 {
   ucon64.nfo = rominfo;
   ucon64.dat = NULL;
-#ifdef  USE_DISCMAGE
-  ucon64.image = NULL;
-#endif
 
   return 0;
 }
@@ -290,6 +288,48 @@ const st_getopt2_t cdi_usage[] =
       UCON64_CDI_S, 0, 0, UCON64_CDI,
       NULL, "force recognition",
       &cdi_obj[0]
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };
+
+
+static st_ucon64_obj_t psx_obj[] =
+  {
+    {UCON64_PSX, WF_SWITCH}
+  };
+
+const st_getopt2_t psx_usage[] =
+  {
+    {
+      NULL, 0, 0, 0,
+      NULL, "Playstation (One)"/*"1994/(2000) Sony http://www.playstation.com"*/,
+      NULL
+    },
+    {
+      UCON64_PSX_S, 0, 0, UCON64_PSX,
+      NULL, "force recognition",
+      &psx_obj[0]
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+};
+
+
+static st_ucon64_obj_t neogeo_obj[] =
+  {
+    {UCON64_NG, WF_SWITCH},
+  };
+
+const st_getopt2_t neogeo_usage[] =
+  {
+    {
+      NULL, 0, 0, 0,
+      NULL, "Neo Geo/Neo Geo CD(Z)/MVS"/*"1990/1994 SNK http://www.neogeo.co.jp"*/,
+      NULL
+    },
+    {
+      UCON64_NG_S, 0, 0, UCON64_NG,
+      NULL, "force recognition",
+      &neogeo_obj[0]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

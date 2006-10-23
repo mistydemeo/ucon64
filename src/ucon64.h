@@ -106,9 +106,6 @@ typedef struct
   char configdir[FILENAME_MAX];                 // directory for config
   char datdir[FILENAME_MAX];                    // directory for DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
-#ifdef  USE_DISCMAGE
-  char discmage_path[FILENAME_MAX];             // path to the discmage DLL
-#endif
 //#if     defined USE_PPDEV || defined AMIGA
   char parport_dev[80];                         // parallel port device (e.g.
 //#endif                                          //  /dev/parport0 or parallel.device)
@@ -125,9 +122,6 @@ typedef struct
 #endif
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
-#ifdef  USE_DISCMAGE
-  int discmage_enabled;                         // flag if discmage DLL is loaded
-#endif
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
 
@@ -167,9 +161,6 @@ typedef struct
   int vram;                                     // NES UNIF
 #endif
 
-#ifdef  USE_DISCMAGE
-  void *image;                                  // info from libdiscmage (dm_image_t *)
-#endif
   void *dat;                                    // info from DATabase (st_ucon64_dat_t *)
   st_ucon64_nfo_t *nfo;                         // info from <console>_init() (st_ucon64_nfo_t *)
 } st_ucon64_t;

@@ -128,17 +128,6 @@ static const st_getopt2_t lf[] =
     ppf_usage,
     gg_usage,
     lf,
-#ifdef  USE_DISCMAGE
-    discmage_usage,
-    lf,
-#endif
-    dc_usage,
-    lf,
-    psx_usage,
-#ifdef  USE_PARALLEL
-    dex_usage,
-#endif
-    lf,
     gba_usage,
 #if     defined USE_PARALLEL || defined USE_USB
     // f2a_usage has to come before fal_usage in case only USE_USB is defined
@@ -173,8 +162,6 @@ static const st_getopt2_t lf[] =
     sflash_usage,
   //  mgd_usage,
 #endif
-    lf,
-    neogeo_usage,
     lf,
     genesis_usage,
 #ifdef  USE_PARALLEL
@@ -211,6 +198,12 @@ static const st_getopt2_t lf[] =
     sms_usage,
 #ifdef  USE_PARALLEL
     smsggpro_usage,
+#endif
+    lf,
+    dc_usage,
+    lf,
+#ifdef  USE_PARALLEL
+    dex_usage,
 #endif
     lf,
     swan_usage,
@@ -807,12 +800,6 @@ ucon64_runtime_debug (void)
 void
 ucon64_exit (void)
 {
-#ifdef  USE_DISCMAGE
-  if (ucon64.discmage_enabled)
-    if (ucon64.image)
-      dm_close ((dm_image_t *) ucon64.image);
-#endif
-
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -1039,11 +1026,6 @@ main (int argc, char **argv)
 #endif
 
 
-#ifdef  USE_DISCMAGE
-  // load libdiscmage (should be done before handling the switches (--ver))
-  ucon64.discmage_enabled = ucon64_load_discmage ();
-#endif
-
   // switches
   for (x = 0; arg[x].val; x++)
     {
@@ -1216,9 +1198,6 @@ ucon64_execute_options (void)
 
   // these members of ucon64 can change per file
   ucon64.dat = NULL;
-#ifdef  USE_DISCMAGE
-  ucon64.image = NULL;
-#endif
   ucon64.nfo = NULL;
 
   ucon64.split = UCON64_UNKNOWN;
@@ -1363,14 +1342,6 @@ ucon64_rom_handling (void)
 //          ucon64.nfo = (st_ucon64_nfo_t *) &nfo;
         }
       ucon64.nfo = ucon64_probe (&nfo); // determines console type
-
-#ifdef  USE_DISCMAGE
-      // check for disc image only if ucon64_probe() failed or --disc was used
-      if (ucon64.discmage_enabled)
-//        if (!ucon64.nfo || ucon64.force_disc)
-        if (ucon64.force_disc)
-          ucon64.image = dm_reopen (ucon64.fname, 0, (dm_image_t *) ucon64.image);
-#endif
     }
   // end of WF_PROBE
 
@@ -1506,10 +1477,8 @@ ucon64_probe (st_ucon64_nfo_t * nfo)
       {UCON64_NDS, nds_init, AUTO},
       {UCON64_VBOY, vboy_init, 0},
       {UCON64_PCE, pce_init, 0}, // AUTO still works with non-PCE files
-      {UCON64_NG, neogeo_init, 0},
       {UCON64_SWAN, swan_init, 0},
       {UCON64_DC, dc_init, 0},
-      {UCON64_PSX, psx_init, 0},
 #if 0
       {UCON64_GC, NULL, 0},
       {UCON64_GP32, NULL, 0},
@@ -1559,30 +1528,12 @@ ucon64_nfo (void)
   if (ucon64.fname_arch[0])
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
-#ifdef  USE_DISCMAGE
-  if (ucon64.console == UCON64_UNKNOWN && !ucon64.image)
-#else
   if (ucon64.console == UCON64_UNKNOWN)
-#endif
     fprintf (stderr, "%s\n", ucon64_msg[CONSOLE_ERROR]);
 
   if (ucon64.nfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.nfo);
 
-#ifdef  USE_DISCMAGE
-  if (ucon64.discmage_enabled)
-    if (ucon64.image)
-      {
-        dm_nfo ((dm_image_t *) ucon64.image, ucon64.quiet < 0 ? 1 : 0,
-#ifdef  USE_ANSI_COLOR
-                ucon64.ansi_color ? 1 :
-#endif
-                                    0);
-        fputc ('\n', stdout);
-
-        return 0; // no crc calc. for disc images and therefore no DAT entry either
-      }
-#endif
   // Use ucon64.fcrc32 for SNES, Genesis & SMS interleaved/N64 non-interleaved
   if (ucon64.fcrc32 && ucon64.crc32)
     printf ("Search checksum (CRC32): 0x%08x\n"
@@ -1798,12 +1749,9 @@ ucon64_fname_arch (const char *fname)
 void
 ucon64_usage (int argc, char *argv[], int view)
 {
+  (void) argc;                                  // warning remover
   int x = 0, y = 0, c = 0, single = 0;
   const char *name_exe = basename2 (argv[0]);
-#ifdef  USE_DISCMAGE
-  char *name_discmage;
-#endif
-  (void) argc;                                  // warning remover
 
 #ifdef  USE_ZLIB
   printf ("Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR|ARCHIVE]...\n\n", name_exe);
@@ -1883,12 +1831,6 @@ ucon64_usage (int argc, char *argv[], int view)
 //          getopt2_usage (z64_usage);
           break;
 
-#ifdef  USE_DISCMAGE
-        case USAGE_VIEW_DISC:
-          getopt2_usage (discmage_usage);
-          break;
-#endif
-
         case USAGE_VIEW_SHORT:
         default:
           getopt2_usage (ucon64_options_usage);
@@ -1898,31 +1840,6 @@ ucon64_usage (int argc, char *argv[], int view)
 
   printf ("DATabase: %d known ROMs (DAT files: %s)\n\n",
           ucon64_dat_total_entries (), ucon64.datdir);
-
-#ifdef  USE_DISCMAGE
-  name_discmage =
-#ifdef  DLOPEN
-    ucon64.discmage_path;
-#else
-#if     defined __MSDOS__
-    "discmage.dxe";
-#elif   defined __CYGWIN__ || defined _WIN32
-    "discmage.dll";
-#elif   defined __APPLE__                       // Mac OS X actually
-    "libdiscmage.dylib";
-#elif   defined __unix__ || defined __BEOS__
-    "libdiscmage.so";
-#else
-    "library";
-#endif
-#endif
-
-  if (!ucon64.discmage_enabled)
-    {
-      printf (ucon64_msg[NO_LIB], name_discmage);
-      fputc ('\n', stdout);
-    }
-#endif
 
   puts ("Please report problems, fixes or ideas to ucon64-main@lists.sf.net or visit\n"
         "http://ucon64.sourceforge.net\n");

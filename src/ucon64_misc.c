@@ -44,6 +44,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_ZLIB
 #include "misc/archive.h"
 #endif
+#ifdef  DLOPEN
+#include "misc/dlopen.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"
@@ -53,107 +56,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/console.h"
 #include "backup/backup.h"
 #include "patch/patch.h"
-
-
-#ifdef  USE_DISCMAGE
-#ifdef  DLOPEN
-#include "misc/dlopen.h"
-
-static void *libdm;
-static uint32_t (*dm_get_version_ptr) (void) = NULL;
-static const char *(*dm_get_version_s_ptr) (void) = NULL;
-static void (*dm_set_gauge_ptr) (void (*) (int, int)) = NULL;
-static void (*dm_nfo_ptr) (const dm_image_t *, int, int) = NULL;
-
-static FILE *(*dm_fdopen_ptr) (dm_image_t *, int, const char *) = NULL;
-static dm_image_t *(*dm_open_ptr) (const char *, uint32_t) = NULL;
-static dm_image_t *(*dm_reopen_ptr) (const char *, uint32_t, dm_image_t *) = NULL;
-static int (*dm_close_ptr) (dm_image_t *) = NULL;
-
-static int (*dm_disc_read_ptr) (const dm_image_t *) = NULL;
-static int (*dm_disc_write_ptr) (const dm_image_t *) = NULL;
-
-static int (*dm_read_ptr) (char *, int, int, const dm_image_t *) = NULL;
-static int (*dm_write_ptr) (const char *, int, int, const dm_image_t *) = NULL;
-
-static dm_image_t *(*dm_toc_read_ptr) (dm_image_t *, const char *) = NULL;
-static int (*dm_toc_write_ptr) (const dm_image_t *) = NULL;
-
-static dm_image_t *(*dm_cue_read_ptr) (dm_image_t *, const char *) = NULL;
-static int (*dm_cue_write_ptr) (const dm_image_t *) = NULL;
-
-static int (*dm_rip_ptr) (const dm_image_t *, int, uint32_t) = NULL;
-#endif // DLOPEN
-
-
-static st_ucon64_obj_t discmage_obj[] =
-  {
-    {0, WF_SWITCH},
-    {0, WF_DEFAULT}
-  };
-
-const st_getopt2_t discmage_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "All disc-based consoles",
-      NULL
-    },
-    {
-      "disc", 0, 0, UCON64_DISC,
-      NULL, "force recognition",
-      &discmage_obj[0]
-    },
-    {
-      "rip", 1, 0, UCON64_RIP,
-      "N", "rip/dump track N from IMAGE",
-      &discmage_obj[1]
-    },
-#if 0
-    {
-      "filerip", 1, 0, UCON64_FILERIP,
-      "N", "rip/dump files from a track N in IMAGE",
-      NULL
-    },
-    {
-      "cdmage", 1, 0, UCON64_CDMAGE,
-      "N", "like " OPTION_LONG_S "rip but writes always (padded) sectors with 2352 Bytes;\n"
-      "this is what CDmage would do",
-      &discmage_obj[1]
-    },
-#endif
-    {
-      "bin2iso", 1, 0, UCON64_BIN2ISO,
-      "N", "convert track N to ISO (if possible) by resizing\n"
-      "sectors to 2048 Bytes",
-      &discmage_obj[1]
-    },
-    {
-      "isofix", 1, 0, UCON64_ISOFIX,
-      "N", "fix corrupted track N (if possible)\n"
-      "if PVD points to a bad DR offset it will add padding data\n"
-      "so actual DR gets located in right absolute address",
-      &discmage_obj[1]
-    },
-    {
-      "mkcue", 0, 0, UCON64_MKCUE,
-      NULL, "generate CUE sheet for IMAGE or existing TOC sheet",
-      &discmage_obj[1]
-    },
-    {
-      "mktoc", 0, 0, UCON64_MKTOC,
-      NULL, "generate TOC sheet for IMAGE or existing CUE sheet",
-      &discmage_obj[1]
-    },
-    {
-      // hidden option
-      "mksheet", 0, 0, UCON64_MKSHEET,
-      NULL, /* "same as " OPTION_LONG_S "mktoc and " OPTION_LONG_S "mkcue" */ NULL,
-      &discmage_obj[1]
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  };
-#endif // USE_DISCMAGE
 
 
 /*
@@ -190,7 +92,10 @@ const char *ucon64_msg[] =
     "         in the configuration file or the environment) points to an incorrect\n"
     "         directory. Read the FAQ for more information.\n",
     "Reading config file %s\n",                                         // READ_CONFIG_FILE
-    "NOTE: %s not found or too old, support for discmage disabled\n",   // NO_LIB
+    "*** IF YOU OWN SUCH A DEVICE OR EXPERIENCE ANY PROBLEMS\n"
+    "*** PLEASE CONTACT: ucon64-main@lists.sf.net\n"
+    "***\n"
+    "***                                          THANK YOU!\n\n",        // UNTESTED
     NULL
   };
 
@@ -402,9 +307,6 @@ const st_getopt2_t ucon64_options_usage[] =
               "WHAT=\"dat\"    show help for DAT support\n"
               "WHAT=\"patch\"  show help for patching ROMs\n"
               "WHAT=\"backup\" show help for backup units\n"
-#ifdef  USE_DISCMAGE
-              "WHAT=\"disc\"   show help for DISC image support\n"
-#endif
               OPTION_LONG_S "help " OPTION_LONG_S "snes would show only SNES related help",
       &ucon64_option_obj[2]
     },
@@ -565,251 +467,6 @@ const st_getopt2_t ucon64_padding_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
-
-
-#ifdef  USE_DISCMAGE
-int
-ucon64_load_discmage (void)
-{
-  uint32_t version;
-#ifdef  DLOPEN
-  const char *p = NULL;
-
-  p = get_property (ucon64.configfile, "discmage_path", PROPERTY_MODE_FILENAME);
-  if (p)
-    strcpy (ucon64.discmage_path, p);
-  else
-    *(ucon64.discmage_path) = 0;
-
-  // if ucon64.discmage_path points to an existing file then load it
-  if (!access (ucon64.discmage_path, F_OK))
-    {
-      libdm = open_module (ucon64.discmage_path);
-
-      dm_get_version_ptr = (uint32_t (*) (void)) get_symbol (libdm, "dm_get_version");
-      version = dm_get_version_ptr ();
-      if (version < LIB_VERSION (UCON64_DM_VERSION_MAJOR,
-                                 UCON64_DM_VERSION_MINOR,
-                                 UCON64_DM_VERSION_STEP))
-        {
-          printf ("WARNING: Your libdiscmage is too old (%u.%u.%u)\n"
-                  "         You need at least version %u.%u.%u\n\n",
-                  (unsigned int) version >> 16,
-                  (unsigned int) ((version >> 8) & 0xff),
-                  (unsigned int) (version & 0xff),
-                  UCON64_DM_VERSION_MAJOR,
-                  UCON64_DM_VERSION_MINOR,
-                  UCON64_DM_VERSION_STEP);
-          return 0;
-        }
-      else
-        {
-          dm_get_version_s_ptr = (const char *(*) (void)) get_symbol (libdm, "dm_get_version_s");
-          dm_set_gauge_ptr = (void (*) (void (*) (int, int))) get_symbol (libdm, "dm_set_gauge");
-
-          dm_open_ptr = (dm_image_t *(*) (const char *, uint32_t)) get_symbol (libdm, "dm_open");
-          dm_reopen_ptr = (dm_image_t *(*) (const char *, uint32_t, dm_image_t *))
-                      get_symbol (libdm, "dm_reopen");
-          dm_fdopen_ptr = (FILE *(*) (dm_image_t *, int, const char *))
-                      get_symbol (libdm, "dm_fdopen");
-          dm_close_ptr = (int (*) (dm_image_t *)) get_symbol (libdm, "dm_close");
-          dm_nfo_ptr = (void (*) (const dm_image_t *, int, int)) get_symbol (libdm, "dm_nfo");
-
-          dm_read_ptr = (int (*) (char *, int, int, const dm_image_t *)) get_symbol (libdm, "dm_read");
-          dm_write_ptr = (int (*) (const char *, int, int, const dm_image_t *)) get_symbol (libdm, "dm_write");
-
-          dm_disc_read_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_disc_read");
-          dm_disc_write_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_disc_write");
-
-          dm_toc_read_ptr = (dm_image_t *(*) (dm_image_t *, const char *)) get_symbol (libdm, "dm_toc_read");
-          dm_toc_write_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_toc_write");
-
-          dm_cue_read_ptr = (dm_image_t *(*) (dm_image_t *, const char *)) get_symbol (libdm, "dm_cue_read");
-          dm_cue_write_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_cue_write");
-
-          dm_rip_ptr = (int (*) (const dm_image_t *, int, uint32_t)) get_symbol (libdm, "dm_rip");
-
-          return 1;
-        }
-    }
-  else
-    return 0;
-#else // !defined DLOPEN
-#ifdef  DJGPP
-  {
-    /*
-      The following piece of code makes the DLL "search" behaviour a bit like
-      the search behaviour for Windows programs. A bit, because the import
-      library just opens the file with the name that is stored in
-      djimport_path. It won't search for the DXE in the Windows system
-      directory, nor will it search the directories of the PATH environment
-      variable.
-    */
-    extern char djimport_path[FILENAME_MAX];
-    char dir[FILENAME_MAX];
-    int n, l;
-
-    dirname2 (ucon64.argv[0], dir);
-    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", dir, "discmage.dxe");
-    // this is specific to DJGPP - not necessary, but prevents confusion
-    l = strlen (djimport_path);
-    for (n = 0; n < l; n++)
-      if (djimport_path[n] == '/')
-        djimport_path[n] = '\\';
-  }
-#endif // DJGPP
-  version = dm_get_version ();
-  if (version < LIB_VERSION (UCON64_DM_VERSION_MAJOR,
-                             UCON64_DM_VERSION_MINOR,
-                             UCON64_DM_VERSION_STEP))
-    {
-      printf ("WARNING: Your libdiscmage is too old (%u.%u.%u)\n"
-              "         You need at least version %u.%u.%u\n\n",
-              (unsigned int) version >> 16,
-              (unsigned int) ((version >> 8) & 0xff),
-              (unsigned int) (version & 0xff),
-              UCON64_DM_VERSION_MAJOR,
-              UCON64_DM_VERSION_MINOR,
-              UCON64_DM_VERSION_STEP);
-      return 0;
-    }
-  return 1;                                     // discmage could be "loaded"
-#endif // !defined DLOPEN
-}
-
-
-int
-discmage_gauge (int pos, int size)
-{
-  static time_t init_time = 0;
-
-  if (!init_time || !pos /* || !size */)
-    init_time = time (0);
-
-  return ucon64_gauge (init_time, pos, size);
-}
-
-
-#ifdef  DLOPEN
-uint32_t
-dm_get_version (void)
-{
-  return dm_get_version_ptr ();
-}
-
-
-const char *
-dm_get_version_s (void)
-{
-  return dm_get_version_s_ptr ();
-}
-
-
-void
-dm_set_gauge (void (*a) (int, int))
-{
-  dm_set_gauge_ptr (a);
-}
-
-
-FILE *
-dm_fdopen (dm_image_t *a, int b, const char *c)
-{
-  return dm_fdopen_ptr (a, b, c);
-}
-
-
-dm_image_t *
-dm_open (const char *a, uint32_t b)
-{
-  return dm_open_ptr (a, b);
-}
-
-
-dm_image_t *
-dm_reopen (const char *a, uint32_t b, dm_image_t *c)
-{
-  return dm_reopen_ptr (a, b, c);
-}
-
-
-int
-dm_close (dm_image_t *a)
-{
-  return dm_close_ptr (a);
-}
-
-
-void
-dm_nfo (const dm_image_t *a, int b, int c)
-{
-  dm_nfo_ptr (a, b, c);
-}
-
-
-int
-dm_disc_read (const dm_image_t *a)
-{
-  return dm_disc_read_ptr (a);
-}
-
-
-int
-dm_disc_write (const dm_image_t *a)
-{
-  return dm_disc_write_ptr (a);
-}
-
-
-int
-dm_read (char *a, int b, int c, const dm_image_t *d)
-{
-  return dm_read_ptr (a, b, c, d);
-}
-
-
-int
-dm_write (const char *a, int b, int c, const dm_image_t *d)
-{
-  return dm_write_ptr (a, b, c, d);
-}
-
-
-dm_image_t *
-dm_toc_read (dm_image_t *a, const char *b)
-{
-  return dm_toc_read_ptr (a, b);
-}
-
-
-int
-dm_toc_write (const dm_image_t *a)
-{
-  return dm_toc_write_ptr (a);
-}
-
-
-dm_image_t *
-dm_cue_read (dm_image_t *a, const char *b)
-{
-  return dm_cue_read_ptr (a, b);
-}
-
-
-int
-dm_cue_write (const dm_image_t *a)
-{
-  return dm_cue_write_ptr (a);
-}
-
-
-int
-dm_rip (const dm_image_t *a, int b, uint32_t c)
-{
-  return dm_rip_ptr (a, b, c);
-}
-#endif // DLOPEN
-#endif // USE_DISCMAGE
 
 
 int

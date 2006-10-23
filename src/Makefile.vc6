@@ -9,20 +9,6 @@ CFLAGS=/nologo /I. /W3 /O2 /DHAVE_CONFIG_H
 LDFLAGS=/NOLOGO setargv.obj
 TARGETS=
 
-!ifdef USE_DISCMAGE
-LIBNAME_DM=discmage
-!endif
-
-!ifdef USE_DISCMAGE
-FULLLIBNAME_DM=$(LIBNAME_DM).dll
-!ifndef DLOPEN
-LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
-!endif
-!endif
-
-TARGETS=$(TARGETS) libdiscmage/$(FULLLIBNAME_DM)
-
-
 !ifdef USE_LIBCD64
 LDFLAGS=$(LDFLAGS) backup/libcd64/cd64.lib
 TARGETS=$(TARGETS) backup/libcd64/cd64.lib
@@ -36,8 +22,8 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/patch.obj patch/ppf.obj \
         console/atari.obj console/coleco.obj console/console.obj console/dc.obj console/gb.obj \
         console/gba.obj console/genesis.obj console/jaguar.obj console/lynx.obj \
-        console/n64.obj console/nds.obj console/neogeo.obj console/nes.obj \
-        console/ngp.obj console/pce.obj console/psx.obj console/sms.obj \
+        console/n64.obj console/nds.obj console/nes.obj \
+        console/ngp.obj console/pce.obj console/sms.obj \
         console/snes.obj console/swan.obj console/vboy.obj \
         backup/backup.obj backup/cc2.obj backup/cd64.obj backup/cmc.obj backup/dex.obj \
         backup/doctor64.obj backup/doctor64jr.obj backup/f2a.obj backup/fal.obj \
@@ -71,18 +57,14 @@ clean:
 	del backup\*.obj
 	del misc\*.obj
 	del $(TARGET)
-	cd libdiscmage
-	$(MAKE) /NOLOGO /f Makefile.vc6 clean
-	cd ..\backup\libcd64
+	cd backup\libcd64
 	$(MAKE) /NOLOGO /f Makefile.vc6 clean
 	cd ..\..
 
 
 distclean: clean
 	del config.h
-	cd libdiscmage
-	$(MAKE) /NOLOGO /f Makefile.vc6 distclean
-	cd ..\backup\libcd64
+	cd backup\libcd64
 # libcd64 Makefile has no distclean target
 	$(MAKE) /NOLOGO /f Makefile.vc6 clean
 	cd ..\..
@@ -94,13 +76,6 @@ distclean: clean
 backup/cd64.obj:
 	$(CC) $(CFLAGS) /Ibackup/libcd64 /c $*.c /Fo$@
 
-
-!ifdef USE_DISCMAGE
-libdiscmage/$(FULLLIBNAME_DM):
-	cd libdiscmage
-	$(MAKE) /NOLOGO /f Makefile.vc6
-	cd ..
-!endif
 
 !ifdef USE_LIBCD64
 backup/libcd64/cd64.lib:
@@ -115,15 +90,9 @@ $(TARGET): $(OBJECTS)
 
 
 install:
-	cd libdiscmage
-	$(MAKE) /NOLOGO /f Makefile.vc6 install
-	cd ..
 
 
 uninstall:
-	cd libdiscmage
-	$(MAKE) /NOLOGO /f Makefile.vc6 uninstall
-	cd ..
 
 
 # Dependencies
@@ -142,8 +111,8 @@ misc/usb.obj: misc/usb.h config.h
 misc/unzip.obj: misc/unzip.h config.h
 ucon64.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
             console/dc.h console/gb.h console/gba.h console/genesis.h \
-            console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
-            console/nes.h console/ngp.h console/pce.h console/psx.h \
+            console/jaguar.h console/lynx.h console/n64.h \
+            console/nes.h console/ngp.h console/pce.h \
             console/sms.h console/snes.h console/swan.h \
             backup/cd64.h backup/dex.h backup/doctor64.h backup/doctor64jr.h \
             backup/f2a.h backup/fal.h backup/ffe.h backup/fig.h backup/gbx.h \
@@ -159,8 +128,8 @@ ucon64_misc.obj: misc/dlopen.h $(UCON64_STD_H)
 ucon64_opts.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                  console/dc.h console/gb.h console/gba.h console/genesis.h \
                  console/jaguar.h console/lynx.h console/n64.h \
-                 console/neogeo.h console/nes.h console/ngp.h console/pce.h \
-                 console/psx.h console/sms.h console/snes.h console/swan.h \
+                 console/nes.h console/ngp.h console/pce.h \
+                 console/sms.h console/snes.h console/swan.h \
                  backup/cd64.h backup/dex.h backup/doctor64.h \
                  backup/doctor64jr.h backup/f2a.h backup/fal.h backup/ffe.h \
                  backup/fig.h backup/gbx.h backup/gd.h backup/interceptor.h \
@@ -183,11 +152,9 @@ console/jaguar.obj: console/jaguar.h $(UCON64_STD_H)
 console/lynx.obj: console/lynx.h $(UCON64_STD_H)
 console/n64.obj: console/n64.h $(UCON64_STD_H)
 console/nds.obj: console/nds.h $(UCON64_STD_H)
-console/neogeo.obj: console/neogeo.h $(UCON64_STD_H)
 console/nes.obj: console/nes.h $(UCON64_STD_H)
 console/ngp.obj: console/ngp.h $(UCON64_STD_H)
 console/pce.obj: console/pce.h backup/mgd.h backup/pce-pro.h $(UCON64_STD_H)
-console/psx.obj: console/psx.h $(UCON64_STD_H)
 console/sms.obj: console/sms.h backup/smd.h backup/mgd.h backup/smsgg-pro.h \
                  $(UCON64_STD_H)
 console/snes.obj: console/snes.h backup/mgd.h $(UCON64_STD_H)

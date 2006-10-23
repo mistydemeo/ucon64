@@ -37,6 +37,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cd64.h"
 
 
+static st_ucon64_obj_t cd64_obj[] =
+  {
+    {UCON64_N64, WF_PROBE | WF_INIT | WF_NFO | WF_STOP | WF_NO_ROM},
+    {UCON64_N64, WF_STOP | WF_NO_ROM},
+    {UCON64_N64, WF_PROBE | WF_INIT | WF_NFO | WF_STOP},
+    {UCON64_N64, WF_SWITCH},
+    {UCON64_N64, WF_STOP}
+  };
+
 const st_getopt2_t cd64_usage[] =
   {
     {
@@ -49,42 +58,42 @@ const st_getopt2_t cd64_usage[] =
       "xcd64", 0, 0, UCON64_XCD64,
       NULL, "send/receive ROM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically (64 Mbits) when ROM does not exist",
-      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP_NO_ROM]
+      &cd64_obj[0]
     },
     {
       "xcd64c", 1, 0, UCON64_XCD64C,
       "N", "receive N Mbits of ROM from CD64; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
+      &cd64_obj[4]
     },
     {
       "xcd64b", 0, 0, UCON64_XCD64B,
       NULL, "send boot emu to CD64; " OPTION_LONG_S "port=PORT",
-      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP]
+      &cd64_obj[2]
     },
     {
       "xcd64s", 0, 0, UCON64_XCD64S,
       NULL, "send/receive SRAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM file does not exist",
-      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
+      &cd64_obj[1]
     },
     {
       "xcd64f", 0, 0, UCON64_XCD64F,
       NULL, "send/receive flash RAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when flash RAM file does not exist",
-      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
+      &cd64_obj[1]
     },
     {
       "xcd64e", 0, 0, UCON64_XCD64E,
       NULL, "send/receive EEPROM data to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when EEPROM file does not exist",
-      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
+      &cd64_obj[1]
     },
     {
       "xcd64m", 1, 0, UCON64_XCD64M,
       "INDEX", "send/receive memory pack data to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "INDEX is ignored for CD64 BIOS protocol\n"
       "receives automatically when memory pack file does not exist",
-      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
+      &cd64_obj[1]
     },
     {
       "xcd64p", 1, 0, UCON64_XCD64P,
@@ -92,11 +101,12 @@ const st_getopt2_t cd64_usage[] =
       "PROT=0 CD64 BIOS\n"
       "PROT=1 Ghemor\n"
       "PROT=2 UltraLink",
-      &ucon64_wf[WF_OBJ_N64_SWITCH]
+      &cd64_obj[3]
     },
 #endif // USE_PARALLEL && USE_LIBCD64
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
 
 
 #if     defined USE_PARALLEL && defined USE_LIBCD64

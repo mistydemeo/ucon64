@@ -1,7 +1,7 @@
 .PHONY: all clean distclean install uninstall
 
 CC=gcc
-CFLAGS=-I. -Wall -W -O3
+CFLAGS=-I. -Wall -O3 -DHAVE_CONFIG_H
 LDFLAGS=-s
 TARGETS=
 

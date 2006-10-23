@@ -9,10 +9,6 @@ TARGETS=
 include config.mak
 
 
-ifdef USE_DISCMAGE
-LIBNAME_DM=discmage
-endif
-
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
 # installed both GCC (and friends) ports.
@@ -29,22 +25,9 @@ endif
 
 ifeq ($(GCC_WIN),1)
 
-ifdef USE_DISCMAGE
-FULLLIBNAME_DM=$(LIBNAME_DM).dll
-ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
-endif
-endif
 
 else
 ifdef DJGPP
-
-ifdef USE_DISCMAGE
-FULLLIBNAME_DM=$(LIBNAME_DM).dxe
-ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
-endif
-endif
 
 else                                    # Unix, BeOS or Mac OS X (Darwin)
 
@@ -53,16 +36,7 @@ ifeq ($(findstring openbsd,$(OSTYPE)),openbsd) # for example "openbsd3.4"
 LDFLAGS+=$(LIBI386)
 endif
 
-ifdef USE_DISCMAGE
-ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
-FULLLIBNAME_DM=$(LIBNAME_DM).dylib
-else
-FULLLIBNAME_DM=$(LIBNAME_DM).so
-endif
-endif
-
 ifdef DLOPEN
-
 ifneq ($(OSTYPE),beos)
 ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
 ifeq ($(findstring openbsd,$(OSTYPE)),) # false if OSTYPE contains "openbsd"
@@ -70,19 +44,10 @@ LDFLAGS+=-ldl
 endif
 endif
 endif
-
-else                                    # DLOPEN
-ifdef USE_DISCMAGE                      # GNU specific: "simply expanded variable"
-FULLLIBNAME_DM:=$(addprefix lib,$(FULLLIBNAME_DM))
-LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
-endif
-
-endif
+endif                                   # DLOPEN
 
 endif                                   # DJGPP
 endif                                   # GCC_WIN
-
-TARGETS+=libdiscmage/$(FULLLIBNAME_DM)
 
 
 ifdef USE_LIBCD64
@@ -97,8 +62,8 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o \
         console/atari.o console/coleco.o console/console.o console/dc.o console/gb.o \
         console/gba.o console/genesis.o console/jaguar.o console/lynx.o \
-        console/n64.o console/nds.o console/neogeo.o console/nes.o \
-        console/ngp.o console/pce.o console/psx.o console/sms.o \
+        console/n64.o console/nds.o console/nes.o \
+        console/ngp.o console/pce.o console/sms.o \
         console/snes.o console/swan.o console/vboy.o \
         backup/backup.o backup/cc2.o backup/cd64.o backup/cmc.o backup/dex.o \
         backup/doctor64.o backup/doctor64jr.o backup/f2a.o backup/fal.o \
@@ -152,8 +117,7 @@ all: $(TARGETS)
 
 
 CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
-cd libdiscmage && $(MAKE) clean; \
-cd ../backup/libcd64 && $(MAKE) clean
+cd backup/libcd64 && $(MAKE) clean
 
 clean:
 ifeq ($(GCC_WIN),1)
@@ -166,9 +130,7 @@ ifdef DJGPP
 	del backup\*.o
 	del misc\*.o
 	del $(TARGET)
-	cd libdiscmage
-	$(MAKE) clean
-	cd ../backup/libcd64
+	cd backup/libcd64
 	$(MAKE) clean
 	cd ../..
 else                                    # Unix, BeOS or Mac OS X (Darwin)
@@ -178,8 +140,7 @@ endif                                   # GCC_WIN
 
 
 DISTCLEAN_CMD=rm -f config.mak config.log config.status config.cache config.h; \
-cd libdiscmage && $(MAKE) distclean; \
-cd ../backup/libcd64 && $(MAKE) clean
+cd backup/libcd64 && $(MAKE) clean
 # libcd64 Makefile has no distclean target
 
 distclean: clean
@@ -192,9 +153,7 @@ ifdef DJGPP
 	del config.status
 	del config.cache
 	del config.h
-	cd libdiscmage
-	$(MAKE) distclean
-	cd ../backup/libcd64
+	cd backup/libcd64
 	$(MAKE) clean
 	cd ../..
 else
@@ -209,21 +168,6 @@ endif                                   # GCC_WIN
 backup/cd64.o: backup/cd64.c
 	$(CC) $(CFLAGS) -Ibackup/libcd64 -c $< -o $@
 
-
-ifdef USE_DISCMAGE
-libdiscmage/$(FULLLIBNAME_DM):
-ifeq ($(GCC_WIN),1)
-	cd libdiscmage && $(MAKE)
-else
-ifdef DJGPP
-	cd libdiscmage
-	$(MAKE)
-	cd ..
-else
-	cd libdiscmage && $(MAKE)
-endif                                   # DJGPP
-endif                                   # GCC_WIN
-endif                                   # USE_DISCMAGE
 
 ifdef USE_LIBCD64
 backup/libcd64/libcd64.a:
@@ -259,9 +203,6 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
-ifndef DLOPEN
-	cd libdiscmage && $(MAKE) install
-endif
 
 
 uninstall:
@@ -279,9 +220,6 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
-ifndef DLOPEN
-	cd libdiscmage && $(MAKE) uninstall
-endif
 
 
 # Dependencies
@@ -300,8 +238,8 @@ misc/usb.o: misc/usb.h config.h
 misc/unzip.o: misc/unzip.h config.h
 ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
           console/dc.h console/gb.h console/gba.h console/genesis.h \
-          console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
-          console/nes.h console/ngp.h console/pce.h console/psx.h \
+          console/jaguar.h console/lynx.h console/n64.h \
+          console/nes.h console/ngp.h console/pce.h \
           console/sms.h console/snes.h console/swan.h \
           backup/cd64.h backup/dex.h backup/doctor64.h backup/doctor64jr.h \
           backup/f2a.h backup/fal.h backup/ffe.h backup/fig.h backup/gbx.h \
@@ -316,8 +254,8 @@ ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
 ucon64_misc.o: misc/dlopen.h $(UCON64_STD_H)
 ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                console/dc.h console/gb.h console/gba.h console/genesis.h \
-               console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
-               console/nes.h console/ngp.h console/pce.h console/psx.h \
+               console/jaguar.h console/lynx.h console/n64.h \
+               console/nes.h console/ngp.h console/pce.h \
                console/sms.h console/snes.h console/swan.h \
                backup/cd64.h backup/dex.h backup/doctor64.h \
                backup/doctor64jr.h backup/f2a.h backup/fal.h backup/ffe.h \
@@ -341,11 +279,9 @@ console/jaguar.o: console/jaguar.h $(UCON64_STD_H)
 console/lynx.o: console/lynx.h $(UCON64_STD_H)
 console/n64.o: console/n64.h $(UCON64_STD_H)
 console/nds.o: console/nds.h $(UCON64_STD_H)
-console/neogeo.o: console/neogeo.h $(UCON64_STD_H)
 console/nes.o: console/nes.h $(UCON64_STD_H)
 console/ngp.o: console/ngp.h $(UCON64_STD_H)
 console/pce.o: console/pce.h backup/mgd.h backup/pce-pro.h $(UCON64_STD_H)
-console/psx.o: console/psx.h $(UCON64_STD_H)
 console/sms.o: console/sms.h backup/smd.h backup/mgd.h backup/smsgg-pro.h \
                $(UCON64_STD_H)
 console/snes.o: console/snes.h backup/mgd.h $(UCON64_STD_H)

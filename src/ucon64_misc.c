@@ -311,6 +311,16 @@ const st_getopt2_t ucon64_options_usage[] =
       &ucon64_option_obj[2]
     },
     {
+      "h", 2, 0, UCON64_HELP,
+      "WHAT", "same as " OPTION_LONG_S "help",
+      &ucon64_option_obj[2]
+    },
+    {
+      "?", 2, 0, UCON64_HELP,
+      "WHAT", "same as " OPTION_LONG_S "help",
+      &ucon64_option_obj[2]
+    },
+    {
       "version", 0, 0, UCON64_VER,
       NULL, "output version information and exit",
       &ucon64_option_obj[2]
@@ -349,16 +359,6 @@ const st_getopt2_t ucon64_options_usage[] =
       &ucon64_option_obj[0]
     },
     {
-      "?", 0, 0, UCON64_HELP,                   // same as --help
-      NULL, NULL,
-      &ucon64_option_obj[2]
-    },
-    {
-      "h", 0, 0, UCON64_HELP,                   // same as --help
-      NULL, NULL,
-      &ucon64_option_obj[2]
-    },
-    {
       "id", 0, 0, UCON64_ID,                    // currently only used in snes.c
       NULL, NULL,
       &ucon64_option_obj[0]
@@ -388,18 +388,6 @@ const st_getopt2_t ucon64_options_usage[] =
       NULL, NULL,
       &ucon64_option_obj[5]
     },
-#if 0
-    {
-      "xcdrw", 0, 0, UCON64_XCDRW, // obsolete
-      NULL, NULL,
-      &ucon64_option_obj[4]
-    },
-    {
-      "cdmage", 1, 0, UCON64_CDMAGE, // obsolete
-      NULL, NULL,
-      &ucon64_option_obj[1]
-    },
-#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
@@ -779,7 +767,7 @@ ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
 }
 
 
-static inline char *
+static char *
 to_func (char *s, int len, int (*func) (int))
 {
   char *p = s;
@@ -1275,7 +1263,7 @@ ucon64_bswap16_n (void *buffer, int n)
 }
 
 
-static inline int
+static int
 ucon64_fbswap16_func (void *buffer, int n, void *object)
 // bswap16() n bytes of buffer
 {
@@ -1284,7 +1272,7 @@ ucon64_fbswap16_func (void *buffer, int n, void *object)
 }
 
 
-static inline int
+static int
 ucon64_fwswap32_func (void *buffer, int n, void *object)
 // wswap32() n/2 words of buffer
 {
@@ -1322,7 +1310,7 @@ typedef struct
 } st_ucon64_dump_t;
 
 
-static inline int
+static int
 ucon64_dump_func (void *buffer, int n, void *object)
 {
   st_ucon64_dump_t *o = (st_ucon64_dump_t *) object;
@@ -1354,7 +1342,7 @@ typedef struct
 } st_ucon64_find_t;
 
 
-static inline int
+static int
 ucon64_find_func (void *buffer, int n, void *object)
 {
   st_ucon64_find_t *o = (st_ucon64_find_t *) object;
@@ -1494,7 +1482,7 @@ typedef struct
 } st_ucon64_chksum_t;
 
 
-static inline int
+static int
 ucon64_chksum_func (void *buffer, int n, void *object)
 {
   st_ucon64_chksum_t *o = (st_ucon64_chksum_t *) object;
@@ -1584,7 +1572,7 @@ typedef struct
 } st_ucon64_filefile_t;
 
 
-static inline int
+static int
 ucon64_filefile_func (void *buffer, int n, void *object)
 {
   st_ucon64_filefile_t *o = (st_ucon64_filefile_t *) object;

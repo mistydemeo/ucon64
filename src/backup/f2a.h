@@ -31,4 +31,16 @@ extern int f2a_read_sram (const char *filename, int bank);
 extern int f2a_write_sram (const char *filename, int bank);
 #endif
 
+#define F2A_ICLIENTU_SIZE 17408
+#define LOGO_SIZE         76800
+#define BOOT_SIZE         18432
+#define LOADER_SIZE       32768
+#define F2A_FIRM_SIZE     23053
+
+extern const unsigned char f2a_bin_firmware[F2A_FIRM_SIZE],
+                           f2a_bin_iclientu[F2A_ICLIENTU_SIZE],
+                           f2a_bin_iclientp[BOOT_SIZE],
+                           f2a_bin_ilogo[LOGO_SIZE],
+                           f2a_bin_loader[LOADER_SIZE];
+
 #endif

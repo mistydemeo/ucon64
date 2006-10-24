@@ -190,18 +190,6 @@ ucon64_switches (st_ucon64_t *p)
       break;
 #endif
 
-    case UCON64_RIP:
-    case UCON64_MKTOC:
-    case UCON64_MKCUE:
-    case UCON64_MKSHEET:
-    case UCON64_BIN2ISO:
-    case UCON64_ISOFIX:
-    case UCON64_XCDRW:
-    case UCON64_DISC:
-    case UCON64_CDMAGE:
-      ucon64.force_disc = 1;
-      break;
-
     case UCON64_NS:
       ucon64.split = 0;
       break;

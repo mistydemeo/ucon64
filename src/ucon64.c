@@ -243,7 +243,7 @@ ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
 }
 
 
-//#define TEST 
+#define TEST 
 #ifdef  TEST
 typedef struct
 {
@@ -1368,9 +1368,8 @@ ucon64_rom_handling (void)
     in ucon64.fcrc32.
   */
   if (ucon64.crc32 == 0)
-    if (!ucon64.force_disc) // NOT for disc images
-      if (!(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
-        ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
+    if (!(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
+      ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
 
 
   // DATabase
@@ -1523,7 +1522,7 @@ ucon64_nfo (void)
   if (ucon64.console == UCON64_UNKNOWN)
     fprintf (stderr, "%s\n", ucon64_msg[CONSOLE_ERROR]);
 
-  if (ucon64.nfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
+  if (ucon64.nfo && ucon64.console != UCON64_UNKNOWN)
     ucon64_rom_nfo (ucon64.nfo);
 
   // Use ucon64.fcrc32 for SNES, Genesis & SMS interleaved/N64 non-interleaved

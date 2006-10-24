@@ -839,21 +839,6 @@ main (int argc, char **argv)
 #ifdef  USE_USB
 #endif
       {
-        "discmage_path",
-#if     defined __MSDOS__
-        PROPERTY_MODE_DIR ("ucon64") "discmage.dxe",
-#elif   defined __CYGWIN__ || defined _WIN32
-        PROPERTY_MODE_DIR ("ucon64") "discmage.dll",
-#elif   defined __APPLE__                       // Mac OS X actually
-        PROPERTY_MODE_DIR ("ucon64") "discmage.dylib",
-#elif   defined __unix__ || defined __BEOS__
-        PROPERTY_MODE_DIR ("ucon64") "discmage.so",
-#else
-        "",
-#endif
-        "complete path to the discmage library for DISC image support"
-      },
-      {
         "ucon64_configdir",
         PROPERTY_MODE_DIR ("ucon64"),
         "directory with additional config files"
@@ -947,8 +932,8 @@ main (int argc, char **argv)
 
   // these members of ucon64 (except rom and fname_arch) don't change per file
   ucon64.argc = argc;
-  ucon64.argv = argv;                           // must be set prior to calling
-                                                //  ucon64_load_discmage() (for DOS)
+  ucon64.argv = argv;
+
   ucon64.fname =
   ucon64.file =
   ucon64.mapr =

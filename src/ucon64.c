@@ -805,6 +805,127 @@ main (int argc, char **argv)
   const char *p = NULL;
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
+  const st_property_t props[] =
+    {
+      {
+        "backups", "1",
+        "create backups of files? (1=yes; 0=no)\n"
+        "before processing a ROM uCON64 will make a backup of it"
+      },
+      {
+        "ansi_color", "1",
+        "use ANSI colors in output? (1=yes; 0=no)"
+      },
+#ifdef  USE_PPDEV
+      {
+        "parport_dev", "/dev/parport0",
+        "parallel port"
+      },
+#elif   defined AMIGA
+      {
+        "parport_dev", "parallel.device",
+        "parallel port"
+      },
+      {
+        "parport", "0",
+        NULL
+      },
+#else
+      {
+        "parport", "378",
+        "parallel port"
+      },
+#endif
+#ifdef  USE_USB
+#endif
+      {
+        "discmage_path",
+#if     defined __MSDOS__
+        PROPERTY_MODE_DIR ("ucon64") "discmage.dxe",
+#elif   defined __CYGWIN__ || defined _WIN32
+        PROPERTY_MODE_DIR ("ucon64") "discmage.dll",
+#elif   defined __APPLE__                       // Mac OS X actually
+        PROPERTY_MODE_DIR ("ucon64") "discmage.dylib",
+#elif   defined __unix__ || defined __BEOS__
+        PROPERTY_MODE_DIR ("ucon64") "discmage.so",
+#else
+        "",
+#endif
+        "complete path to the discmage library for DISC image support"
+      },
+      {
+        "ucon64_configdir",
+        PROPERTY_MODE_DIR ("ucon64"),
+        "directory with additional config files"
+      },
+      {
+        "ucon64_datdir",
+        PROPERTY_MODE_DIR ("ucon64/dat"),
+        "directory with DAT files"
+      },
+      {
+        "f2afirmware", "f2afirm.hex",
+        "F2A support files\n"
+        "path to F2A USB firmware"
+      },
+      {
+        "iclientu", "iclientu.bin",
+        "path to GBA client binary (for USB code)"
+      },
+      {
+        "iclientp", "iclientp.bin",
+        "path to GBA client binary (for parallel port code)"
+      },
+      {
+        "ilogo", "ilogo.bin",
+        "path to iLinker logo file"
+      },
+      {
+        "gbaloader", "loader.bin",
+        "path to GBA multi-game loader"
+      },
+      {
+        "gbaloader_sc", "sc_menu.bin",
+        "path to GBA multi-game loader (Super Card)"
+      },
+      {
+        "emulate_" UCON64_3DO_S,      "",
+        "emulate_<console shortcut>=<emulator with options>\n\n"
+        "You can also use CRC32 values for ROM specific emulation options:\n\n"
+        "emulate_0x<crc32>=<emulator with options>\n"
+        "emulate_<crc32>=<emulator with options>"
+      },
+      {"emulate_" UCON64_ATA_S,      "", NULL},
+      {"emulate_" UCON64_CD32_S,     "", NULL},
+      {"emulate_" UCON64_CDI_S,      "", NULL},
+      {"emulate_" UCON64_COLECO_S,   "", NULL},
+      {"emulate_" UCON64_DC_S,       "", NULL},
+      {"emulate_" UCON64_GB_S,       "vgb -sound -sync 50 -sgb -scale 2", NULL},
+      {"emulate_" UCON64_GBA_S,      "vgba -scale 2 -uperiod 6", NULL},
+      {"emulate_" UCON64_GC_S,       "", NULL},
+      {"emulate_" UCON64_GEN_S,      "dgen -f -S 2", NULL},
+      {"emulate_" UCON64_INTELLI_S,  "", NULL},
+      {"emulate_" UCON64_JAG_S,      "", NULL},
+      {"emulate_" UCON64_LYNX_S,     "", NULL},
+      {"emulate_" UCON64_ARCADE_S,   "", NULL},
+      {"emulate_" UCON64_N64_S,      "", NULL},
+      {"emulate_" UCON64_NES_S,      "tuxnes -E2 -rx11 -v -s/dev/dsp -R44100", NULL},
+      {"emulate_" UCON64_NG_S,       "", NULL},
+      {"emulate_" UCON64_NGP_S,      "", NULL},
+      {"emulate_" UCON64_PCE_S,      "", NULL},
+      {"emulate_" UCON64_PS2_S,      "", NULL},
+      {"emulate_" UCON64_PSX_S,      "pcsx", NULL},
+      {"emulate_" UCON64_S16_S,      "", NULL},
+      {"emulate_" UCON64_SAT_S,      "", NULL},
+      {"emulate_" UCON64_SMS_S,      "", NULL},
+      {"emulate_" UCON64_GAMEGEAR_S, "", NULL},
+      {"emulate_" UCON64_SNES_S,     "snes9x -tr -sc -hires -dfr -r 7 -is -joymap1 2 3 5 0 4 7 6 1", NULL},
+      {"emulate_" UCON64_SWAN_S,     "", NULL},
+      {"emulate_" UCON64_VBOY_S,     "", NULL},
+      {"emulate_" UCON64_VEC_S,      "", NULL},
+      {"emulate_" UCON64_XBOX_S,     "", NULL},
+      {NULL, NULL, NULL}
+    };
 
 #ifdef  TEST
   if (argc == 1)
@@ -885,7 +1006,7 @@ main (int argc, char **argv)
 
   result = property_check (ucon64.configfile, UCON64_CONFIG_VERSION, 1);
   if (result == 1) // update needed
-    result = ucon64_set_property_array ();
+    result = set_property_array (ucon64.configfile, props);
   if (result == -1) // property_check() or update failed
     return -1;
 

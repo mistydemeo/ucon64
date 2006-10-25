@@ -36,6 +36,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cc2.h"
 
 
+#if 0
+static st_ucon64_obj_t cc2_obj[] =
+  {
+    {UCON64_ATA, WF_STOP | WF_NO_ROM}
+  };
+#endif
+
 const st_getopt2_t cc2_usage[] =
   {
     {
@@ -49,7 +56,7 @@ const st_getopt2_t cc2_usage[] =
       NULL, "send/receive ROM to/from Cuttle Card (2)\n"
       "actually Cuttle Card (2) backup units use audio\n"
       "input/output to transfer ROMs",
-      &ucon64_wf[WF_OBJ_ATA_STOP_NO_ROM]
+      &cc2_obj[0]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}

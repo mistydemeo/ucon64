@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "nes.h"
 #include "backup/smc.h"
+#include "backup/sc.h"
 
 
 #define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
@@ -7743,40 +7744,8 @@ nes_fds (void)
 }
 
 
-#warning
 int
 nes_sc (void)
 {
-  unsigned char *buffer;
-  char dest_name[FILENAME_MAX];
-  FILE *destfile;
-
-  strcpy (dest_name, ucon64.fname);
-
-#define NES_SAV_TEMPLATE_SIZE 65536
-  // write SAV template
-  set_suffix (dest_name, ".sav");
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
-
-  if (!(buffer = (unsigned char *) malloc (NES_SAV_TEMPLATE_SIZE)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], NES_SAV_TEMPLATE_SIZE);
-      fclose (destfile);
-      exit (1);
-    }
-
-  memset (buffer, 0, NES_SAV_TEMPLATE_SIZE);
-
-  fwrite (buffer, 1, NES_SAV_TEMPLATE_SIZE, destfile);
-
-  free (buffer);
-  fclose (destfile);
-
-  printf (ucon64_msg[WROTE], dest_name);
-
-  return 0;
+  return sc_sram (ucon64.fname);
 }

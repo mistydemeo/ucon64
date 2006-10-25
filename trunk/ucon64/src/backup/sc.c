@@ -31,7 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/archive.h"
 #endif
 #include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/file.h"
 #include "ucon64.h"
+#include "ucon64_misc.h"
 #include "sc.h"
 
 
@@ -45,6 +47,46 @@ const st_getopt2_t sc_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
+
+#define SC_SAV_TEMPLATE_SIZE 65536
+
+
+int
+sc_sram (const char *fname)
+{
+  unsigned char *buffer;
+  char dest_name[FILENAME_MAX];
+  FILE *destfile;
+
+  strcpy (dest_name, fname);
+
+  // write SAV template
+  set_suffix (dest_name, ".sav");
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+
+  if (!(buffer = (unsigned char *) malloc (SC_SAV_TEMPLATE_SIZE)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], SC_SAV_TEMPLATE_SIZE);
+      fclose (destfile);
+      exit (1);
+    }
+
+  memset (buffer, 0, SC_SAV_TEMPLATE_SIZE);
+
+  fwrite (buffer, 1, SC_SAV_TEMPLATE_SIZE, destfile);
+
+  free (buffer);
+  fclose (destfile);
+
+  printf (ucon64_msg[WROTE], dest_name);
+
+  return 0;
+}
 
 
 const unsigned char sc_menu_bin[GBA_MENU_SIZE] = {

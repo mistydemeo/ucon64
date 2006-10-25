@@ -44,6 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "sms.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
+#include "backup/sc.h"
 #include "backup/smsgg-pro.h"
 
 
@@ -746,36 +747,5 @@ sms_chksum (unsigned char *rom_buffer, int rom_size)
 int
 sms_sc (void)
 {
-  unsigned char *buffer;
-  char dest_name[FILENAME_MAX];
-  FILE *destfile;
-
-  strcpy (dest_name, ucon64.fname);
-
-#define SMS_SAV_TEMPLATE_SIZE 65536
-  // write SAV template
-  set_suffix (dest_name, ".sav");
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
-
-  if (!(buffer = (unsigned char *) malloc (SMS_SAV_TEMPLATE_SIZE)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], SMS_SAV_TEMPLATE_SIZE);
-      fclose (destfile);
-      exit (1);
-    }
-
-  memset (buffer, 0, SMS_SAV_TEMPLATE_SIZE);
-
-  fwrite (buffer, 1, SMS_SAV_TEMPLATE_SIZE, destfile);
-
-  free (buffer);
-  fclose (destfile);
-
-  printf (ucon64_msg[WROTE], dest_name);
-
-  return 0;
+  return sc_sram (ucon64.fname);
 }

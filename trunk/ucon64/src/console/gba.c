@@ -48,7 +48,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GBA_NAME_LEN 12
 #define GBA_HEADER_START 0
 #define GBA_HEADER_LEN (sizeof (st_gba_header_t))
-#define GBA_MENU_SIZE 20916
 #define GBA_BLANK_SIZE 52232
 #define GBA_SAV_TEMPLATE_SIZE 65536
 #define GBA_SCI_TEMPLATE_SIZE 458752
@@ -1129,9 +1128,10 @@ gba_sc (void)
   int x = 0;
   unsigned int fsize = ucon64.file_size, padded = 0;
   uint32_t address = 0, pos = 0;
-  char dest_name[FILENAME_MAX], fname[FILENAME_MAX];
+  char dest_name[FILENAME_MAX];
   unsigned char *buffer, *ptr = NULL;
-  const char *p = NULL;
+  const unsigned char *gba_menu_sc = NULL;
+  int gba_menu_sc_len = 0;
   FILE *destfile;
   
   strcpy (dest_name, ucon64.fname);
@@ -1228,19 +1228,13 @@ gba_sc (void)
     0x00, 0x00, 0x00, 0x00,
   */
   // write the menu (the formulas will NOT be optimized)
-  p = get_property (ucon64.configfile, "gbaloader_sc", PROPERTY_MODE_FILENAME);
-  strncpy (fname, p ? p : "sc_menu.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
-  if (ucon64_fread (buffer, 0, GBA_MENU_SIZE, fname) <= 0)
-    {
-      fprintf (stderr, "ERROR: Could not load Super Card loader (%s)\n", fname);
-      exit (1);                                 // fatal
-    }
-  fwrite (buffer, 1, GBA_MENU_SIZE, destfile);
+  gba_menu_sc_len = ucon64_get_binary (gba_menu_sc, "gbaloader_sc");
+  fwrite (gba_menu_sc, 1, gba_menu_sc_len, destfile);
   pos = ftell (destfile);                       // truncate() this later
 
   // calculate and write new start address
-  printf ("New start address: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 0x8000000));
-  address = ((pos - GBA_MENU_SIZE - 8) >> 2) & 0xffffff;
+  printf ("New start address: 0x%08x\n", (int) (pos - gba_menu_sc_len + 0x8000000));
+  address = ((pos - gba_menu_sc_len - 8) >> 2) & 0xffffff;
   fseek (destfile, 0, SEEK_SET);
 #ifdef  WORDS_BIGENDIAN
   address = bswap_32 (address);
@@ -1248,9 +1242,9 @@ gba_sc (void)
   fwrite (&address, 1, 3, destfile);
 
   // calculate and write new address at offset 0x60
-  printf ("New offset 0x60 address: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 846));
-  address = (pos - GBA_MENU_SIZE + 846 - 2) & 0xffffff;
-  if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
+  printf ("New offset 0x60 address: 0x%08x\n", (int) (pos - gba_menu_sc_len + 846));
+  address = (pos - gba_menu_sc_len + 846 - 2) & 0xffffff;
+  if ((pos - gba_menu_sc_len) > 128 * MBIT)
     address |= 0x09000000;                      // 0x09 == "large" jmp?
   else
     address |= 0x08000000;
@@ -1261,13 +1255,13 @@ gba_sc (void)
   fwrite (&address, 1, 4, destfile);
 
   // calculate and write new address in menu
-  printf ("New address in menu: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 846 - 53076));
-  address = (pos - GBA_MENU_SIZE + 846 - 53076 - 2) & 0xffffff;
-  if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
+  printf ("New address in menu: 0x%08x\n", (int) (pos - gba_menu_sc_len + 846 - 53076));
+  address = (pos - gba_menu_sc_len + 846 - 53076 - 2) & 0xffffff;
+  if ((pos - gba_menu_sc_len) > 128 * MBIT)
     address |= 0x09000000;                      // 0x09 == "large" jmp?
   else
     address |= 0x08000000;
-  fseek (destfile, pos - GBA_MENU_SIZE + 784, SEEK_SET);
+  fseek (destfile, pos - gba_menu_sc_len + 784, SEEK_SET);
 #ifdef  WORDS_BIGENDIAN
   address = bswap_32 (address);
 #endif

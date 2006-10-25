@@ -46,6 +46,7 @@ static st_ucon64_obj_t cd64_obj[] =
     {UCON64_N64, WF_STOP}
   };
 
+
 const st_getopt2_t cd64_usage[] =
   {
     {

@@ -76,6 +76,7 @@ extern const char *ucon64_msg[];
   ucon64_rename()       DAT or internal header based rename
   ucon64_e()            emulator "frontend"
   ucon64_pattern()      change file based on patterns specified in pattern_fname
+  ucon64_get_binary()   choose to load external or internal binaries
 */
 #define OF_FORCE_BASENAME 1
 #define OF_FORCE_SUFFIX   2
@@ -91,6 +92,7 @@ extern int ucon64_e (void);
 extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
 typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
 extern char *mkbak (const char *filename, backup_t type);
+extern int ucon64_get_binary (const unsigned char *data, char *id);
 
 
 /*

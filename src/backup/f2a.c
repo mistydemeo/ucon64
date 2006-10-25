@@ -327,6 +327,7 @@ f2a_init_usb (void)
     {
       const char *p = NULL;
 
+#warning
       p = get_property (ucon64.configfile, "iclientu", PROPERTY_MODE_FILENAME);
       strncpy (iclientu_fname, p ? p : "iclientu.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
@@ -351,6 +352,7 @@ f2a_connect_usb (void)
   struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
 
+#warning
   p = get_property_fname (ucon64.configfile, "f2afirmware", PROPERTY_MODE_FILENAME);
   strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
@@ -642,6 +644,7 @@ f2a_write_usb (int n_files, char **files, int address)
     {
       printf ("Uploading multiloader\n");
 
+#warning
       p = get_property (ucon64.configfile, "gbaloader", PROPERTY_MODE_FILENAME);
       strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
@@ -740,9 +743,11 @@ f2a_init_par (int parport, int parport_delay)
       exit (1);                                 // fatal
     }
 
+#warning
   p = get_property (ucon64.configfile, "iclientp", PROPERTY_MODE_FILENAME);
   strncpy (iclientp_fname, p ? p : "iclientp.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
+#warning
   p = get_property (ucon64.configfile, "ilogo", PROPERTY_MODE_FILENAME);
   if (p)
     strncpy (ilogo_fname, p, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
@@ -992,6 +997,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
     {
       printf ("Uploading multiloader\n");
 
+#warning
       p = get_property (ucon64.configfile, "gbaloader", PROPERTY_MODE_FILENAME);
       strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 

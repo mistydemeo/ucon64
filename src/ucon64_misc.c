@@ -458,6 +458,82 @@ const st_getopt2_t ucon64_padding_usage[] =
 
 
 int
+ucon64_get_binary (const unsigned char *data, char *id)
+{
+  static unsigned char *buf = NULL;
+  const char *p = NULL;
+
+  p = get_property (ucon64.configfile, id, PROPERTY_MODE_FILENAME);
+
+  if (p)
+    if (!access (p, R_OK))
+      {
+        int len = fsizeof (p);
+
+        if (buf)
+          {
+            free (buf);
+            buf = NULL;
+          }
+
+        buf = malloc (len + 1);
+        if (buf)
+          {
+            FILE *fh = fopen (p, "rb");
+            if (fh)
+              {
+                fread (&buf, len, 1, fh);
+                fclose (fh);
+
+                data = buf;
+                return len;
+              }
+            free (buf);
+            buf = NULL;
+          }
+      }
+
+  if (!strcmp (id, "f2afirmware"))
+    {
+      data = f2a_bin_firmware;
+      return F2A_FIRM_SIZE;
+    }
+
+  if (!strcmp (id, "iclientu"))
+    {
+      data = f2a_bin_iclientu;
+      return F2A_ICLIENTU_SIZE;
+    }
+
+  if (!strcmp (id, "iclientp"))
+    {
+      data = f2a_bin_iclientp;
+      return BOOT_SIZE;
+    }
+
+  if (!strcmp (id, "ilogo"))
+    {
+      data = f2a_bin_ilogo;
+      return LOGO_SIZE;
+    }
+
+  if (!strcmp (id, "gbaloader"))
+    {
+      data = f2a_bin_loader;
+      return LOADER_SIZE;
+    }
+
+  if (!strcmp (id, "gbaloader_sc"))
+    {
+      data = sc_menu_bin;
+      return GBA_MENU_SIZE;
+    }
+
+  return -1;
+}
+
+
+int
 ucon64_file_handler (char *dest, char *src, int flags)
 /*
   We have to handle the following cases (for example -swc and rom.swc exists):
@@ -1488,7 +1564,7 @@ ucon64_chksum_func (void *buffer, int n, void *object)
 int
 ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *filename, size_t start)
 {
-  int i = 0, result;
+  int result = 0;
   st_hash_t *h = NULL;
   int flags = 0;
 

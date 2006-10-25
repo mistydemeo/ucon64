@@ -1,5 +1,5 @@
 /*
-sc.h - support for Super Card
+sc.h - support for SuperCard
 
 Copyright (c) 2004 NoisyB
 
@@ -23,8 +23,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t sc_usage[];
 
+
 #define GBA_MENU_SIZE 20916
 
+/*
+  sc_sram()  write SuperCard SAV/SRAM template
+*/
 extern const unsigned char sc_menu_bin[GBA_MENU_SIZE];
+extern int sc_sram (const char *fname);
 
 #endif

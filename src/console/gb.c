@@ -736,40 +736,8 @@ gb_chksum (st_ucon64_nfo_t *rominfo)
 }
 
 
-#warning
 int
 gb_sc (void)
 {
-  unsigned char *buffer;
-  char dest_name[FILENAME_MAX];
-  FILE *destfile;
-
-  strcpy (dest_name, ucon64.fname);
-
-#define GB_SAV_TEMPLATE_SIZE 65536
-  // write SAV template
-  set_suffix (dest_name, ".sav");
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
-
-  if (!(buffer = (unsigned char *) malloc (GB_SAV_TEMPLATE_SIZE)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], GB_SAV_TEMPLATE_SIZE);
-      fclose (destfile);
-      exit (1);
-    }
-
-  memset (buffer, 0, GB_SAV_TEMPLATE_SIZE);
-
-  fwrite (buffer, 1, GB_SAV_TEMPLATE_SIZE, destfile);
-
-  free (buffer);
-  fclose (destfile);
-
-  printf (ucon64_msg[WROTE], dest_name);
-
-  return 0;
+  return sc_sram (ucon64.fname);
 }

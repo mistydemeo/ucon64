@@ -65,6 +65,7 @@ Data Read Procedure:
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
 #ifdef  USE_ZLIB

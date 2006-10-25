@@ -60,10 +60,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_PARALLEL
 #include "misc/parallel.h"
 #endif
+#include "misc/itypes.h"
 #include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/property.h"
-#include "misc/chksum.h"
+#include "misc/hash.h"
 #include "misc/file.h"
 #ifdef  USE_ZLIB
 #include "misc/archive.h"
@@ -1183,14 +1184,14 @@ main (int argc, char **argv)
     ucon64_execute_options();
   else
     {
-      int flags = GETOPT2_FILE_FILES_ONLY;
+      int flags = GETFILE_FILES_ONLY;
       if (ucon64.recursive)
-        flags |= GETOPT2_FILE_RECURSIVE;
+        flags |= GETFILE_RECURSIVE;
       else 
         {
           /*
             Check if one of the parameters is a directory and if so, set the
-            flag GETOPT2_FILE_RECURSIVE_ONCE. This flag makes uCON64 behave
+            flag GETFILE_RECURSIVE_ONCE. This flag makes uCON64 behave
             like version 2.0.0, i.e., specifying a directory is equivalent to
             specifying all files in that directory. In commands:
               ucon64 file dir1 dir2
@@ -1207,11 +1208,11 @@ main (int argc, char **argv)
             if (!stat (argv[i], &fstate))
               if (S_ISDIR (fstate.st_mode))
                 {
-                  flags |= GETOPT2_FILE_RECURSIVE_ONCE;
+                  flags |= GETFILE_RECURSIVE_ONCE;
                   break;
                 }
         }
-      getopt2_file (argc, argv, ucon64_process_rom, flags);
+      getfile (argc, argv, ucon64_process_rom, flags);
     }
 
   return 0;

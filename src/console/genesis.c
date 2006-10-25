@@ -31,8 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
+#include "misc/itypes.h"
 #include "misc/misc.h"
-#include "misc/chksum.h"
+#include "misc/hash.h"
 #include "misc/file.h"
 #ifdef  USE_ZLIB
 #include "misc/archive.h"

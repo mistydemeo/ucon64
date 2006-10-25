@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/string.h"
 #include "misc/property.h"
 #include "misc/bswap.h"
-#include "misc/chksum.h"
+#include "misc/hash.h"
 #include "misc/file.h"
 #ifdef  USE_ZLIB
 #include "misc/archive.h"
@@ -502,7 +502,7 @@ ucon64_file_handler (char *dest, char *src, int flags)
           return 1;
         }
 
-      if (one_file (src, dest))
+      if (same_file (src, dest))
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
@@ -963,7 +963,7 @@ ucon64_rename (int mode)
   p = basename2 (ucon64.fname);
   p2 = basename2 (buf2);
 
-  if (one_file (ucon64.fname, buf2) && !strcmp (p, p2))
+  if (same_file (ucon64.fname, buf2) && !strcmp (p, p2))
     {                                           // skip only if the letter case
       printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
       return 0;
@@ -1291,14 +1291,16 @@ ucon64_fwswap32_func (void *buffer, int n, void *object)
 void
 ucon64_fbswap16 (const char *fname, size_t start, size_t len)
 {
-  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
+#warning "r+b"!!
+  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname);
 }
 
 
 void
 ucon64_fwswap32 (const char *fname, size_t start, size_t len)
 {
-  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
+#warning "r+b"!!
+  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname);
 }
 
 
@@ -1328,7 +1330,7 @@ ucon64_dump (FILE *output, const char *filename, size_t start, size_t len,
 {
   st_ucon64_dump_t o = {output, start, flags};
 
-  quick_io_func (ucon64_dump_func, MAXBUFSIZE, &o, start, len, filename, "rb");
+  quick_io_func (ucon64_dump_func, MAXBUFSIZE, &o, start, len, filename);
 }
 
 
@@ -1467,89 +1469,55 @@ ucon64_find (const char *filename, size_t start, size_t len,
     }
 
   result = quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len,
-                          filename, "rb");
+                          filename);
 
   return o.found;                               // return last occurrence or -1
 }
 
 
-typedef struct
-{
-  s_sha1_ctx_t *m_sha1;
-  s_md5_ctx_t *m_md5;
-//  uint16_t *crc16;
-  unsigned int *crc32;
-} st_ucon64_chksum_t;
-
-
 static int
 ucon64_chksum_func (void *buffer, int n, void *object)
 {
-  st_ucon64_chksum_t *o = (st_ucon64_chksum_t *) object;
+  st_hash_t *h = (st_hash_t *) object;
 
-  if (o->m_sha1)
-    sha1 (o->m_sha1, (const unsigned char *) buffer, n);
-
-  if (o->m_md5)
-    md5_update (o->m_md5, (unsigned char *) buffer, n);
-
-//  if (o->crc16)
-//    *(o->crc16) = crc16 (*(o->crc16), (const unsigned char *) buffer, n);
-
-  if (o->crc32)
-    *(o->crc32) = crc32 (*(o->crc32), (const unsigned char *) buffer, n);
+  h = hash_update (h, buffer, n);
 
   return n;
 }
 
 
 int
-ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *crc16_i,
-               const char *filename, size_t start)
+ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *filename, size_t start)
 {
   int i = 0, result;
-  s_sha1_ctx_t m_sha1;
-  s_md5_ctx_t m_md5;
-  st_ucon64_chksum_t o;
-
-  memset (&o, 0, sizeof (st_ucon64_chksum_t));
+  st_hash_t *h = NULL;
+  int flags = 0;
 
   if (sha1_s)
-    sha1_begin (o.m_sha1 = &m_sha1);
+    flags |= HASH_SHA1;
+  if (md5_s)
+    flags |= HASH_MD5;
+  if (crc32_i)
+    flags |= HASH_CRC32;
+
+  h = hash_open (flags);
+
+  if (!h)
+    return -1;
+
+  result = quick_io_func (ucon64_chksum_func, MAXBUFSIZE, &h, start,
+                          fsizeof (filename) - start, filename);
+
+  if (sha1_s)
+    strcpy (sha1_s, hash_get_s (h, HASH_SHA1));
 
   if (md5_s)
-    md5_init (o.m_md5 = &m_md5, 0);
-
-//  if (crc16_i)
-//    o.crc16 = crc16_i;
+    strcpy (md5_s, hash_get_s (h, HASH_MD5));
 
   if (crc32_i)
-    o.crc32 = crc32_i;
+    *(crc32_i) = hash_get_crc32 (h);
 
-  result = quick_io_func (ucon64_chksum_func, MAXBUFSIZE, &o, start,
-                          fsizeof (filename) - start, filename, "rb");
-
-  if (sha1_s)
-    {
-      unsigned char buf[MAXBUFSIZE];
-
-      sha1_end (buf, &m_sha1);
-      for (*sha1_s = i = 0; i < 20; i++, sha1_s = strchr (sha1_s, 0))
-        sprintf (sha1_s, "%02x", buf[i] & 0xff);
-    }
-
-  if (md5_s)
-    {
-      md5_final (&m_md5);
-      for (*md5_s = i = 0; i < 16; i++, md5_s = strchr (md5_s, 0))
-        sprintf (md5_s, "%02x", m_md5.digest[i]);
-    }
-
-//  if (crc16_i)
-//    *(crc16_i) = *(o.crc16);
-
-//  if (crc32_i)
-//    *(crc32_i) = *(o.crc32);
+  hash_close (h);
 
   return result;
 }
@@ -1619,7 +1587,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
     printf (" (%s)", basename2 (ucon64.fname_arch));
   printf (" with %s\n", filename1);
 
-  if (one_file (filename1, filename2))
+  if (same_file (filename1, filename2))
     {
       printf ("%s and %s refer to one file\n", filename1, filename2);
       return;
@@ -1645,7 +1613,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
   o.found = 0;
 
   quick_io_func (ucon64_filefile_func, FILEFILE_LARGE_BUF, &o, start1,
-                 fsizeof (filename1), filename1, "rb");
+                 fsizeof (filename1), filename1);
 
   if (o.found)
     printf ("Found %d %s\n",
@@ -1677,7 +1645,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
     printf (" (%s)", basename2 (ucon64.fname_arch));
   printf (" with %s\n", filename1);
 
-  if (one_file (filename1, filename2))
+  if (same_file (filename1, filename2))
     {
       printf ("%s and %s refer to one file\n\n", filename1, filename2);
       return;
@@ -1794,3 +1762,60 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
   return;
 }
 #endif
+
+
+char *
+mkbak (const char *filename, backup_t type)
+{
+  static char buf[FILENAME_MAX];
+
+  if (access (filename, R_OK) != 0)
+    return (char *) filename;
+
+  strcpy (buf, filename);
+  set_suffix (buf, ".bak");
+  if (strcmp (filename, buf) != 0)
+    {
+      remove (buf);                             // *try* to remove or rename() will fail
+      if (rename (filename, buf))               // keep file attributes like date, etc.
+        {
+          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
+          exit (1);
+        }
+    }
+  else // handle the case where filename has the suffix ".bak".
+    {
+      char buf2[FILENAME_MAX];
+
+      if (!dirname2 (filename, buf))
+        {
+          fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
+          exit (1);
+        }
+      if (buf[0] != 0)
+        if (buf[strlen (buf) - 1] != FILE_SEPARATOR)
+          strcat (buf, FILE_SEPARATOR_S);
+
+      strcat (buf, basename2 (tmpnam2 (buf2)));
+      if (rename (filename, buf))
+        {
+          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
+          exit (1);
+        }
+    }
+
+  switch (type)
+    {
+    case BAK_MOVE:
+      return buf;
+
+    case BAK_DUPE:
+    default:
+      if (fcopy (buf, 0, fsizeof (buf), filename, "wb"))
+        {
+          fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
+          exit (1);
+        }
+      return buf;
+    }
+}

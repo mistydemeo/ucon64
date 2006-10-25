@@ -63,13 +63,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #elif   defined _WIN32                          // AMIGA
 #include <windows.h>
 #include <conio.h>                              // inp{w}() & outp{w}()
+#include "dlopen.h"
 #elif   defined __CYGWIN__                      // _WIN32
 #include <windows.h>                            // definition of WINAPI
 #undef  _WIN32
 #include <exceptions.h>
 #include <sys/cygwin.h>
-#endif
 #include "dlopen.h"
+#endif
 #include "misc.h"
 #include "file.h"
 #include "itypes.h"

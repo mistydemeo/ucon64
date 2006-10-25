@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/string.h"
-#include "misc/chksum.h"
+#include "misc/hash.h"
 #include "misc/file.h"
 #ifdef  USE_ZLIB
 #include "misc/archive.h"

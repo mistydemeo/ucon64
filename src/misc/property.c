@@ -41,6 +41,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 
 
+// TODO: make update of configfiles more intelligent
+
+
 int
 property_check (const char *filename, int version, int verbose)
 {
@@ -198,16 +201,23 @@ get_property (const char *filename, const char *propname, int mode)
 }
 
 
-int
+unsigned long
 get_property_int (const char *filename, const char *propname)
+/*
+  get_property_int()   like get_property() but returns an integer which is 0
+                         if the value of propname was 0, [Nn] or [Nn][Oo]
+                         and an integer or at least 1 for every other case
+*/
 {
-  const char *value_s = NULL;                   // MAXBUFSIZE is enough for a *very* large number
-  int value = 0;                                //  and people who might not get the idea that
-                                                //  get_property_int() is ONLY about numbers
+  const char *value_s = NULL;
+  int value = 0;
   value_s = get_property (filename, propname, PROPERTY_MODE_TEXT);
 
   if (!value_s)
     value_s = "0";
+
+  if (!(*value_s))
+    return 0;
 
   if (*value_s)
     switch (tolower (*value_s))
@@ -217,8 +227,9 @@ get_property_int (const char *filename, const char *propname)
           return 0;
       }
 
-  return value ? value : 1;                     // if value_s was only text like 'Yes'
-}                                               //  we'll return at least 1
+  value = strtol (value_s, NULL, 10);
+  return MAX (1, value);     //  we'll return at least 1
+}
 
 
 int
@@ -319,4 +330,14 @@ set_property_array (const char *filename, const st_property_t *prop)
     }
 
   return result;
+}
+
+
+int
+set_property_int (const char *filename, const char *propname,
+                  unsigned long value, const char *comment)
+{
+  char buf[64];
+  sprintf (buf, "%ld", value);
+  return set_property (filename, propname, buf, comment);
 }

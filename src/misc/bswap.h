@@ -1,5 +1,5 @@
 /*
-bswap.h - bswap functions
+bswap.h - bswap (and wswap) functions
 
 Copyright (c) 1999 - 2004 NoisyB
 Copyright (c) 2001 - 2004 dbjh
@@ -41,22 +41,16 @@ extern "C" {
   bswap_16()        12             21
   bswap_32()        1234         4321
   bswap_64()        12345678 87654321
-
-  wswap_32()        1234         3412
-  wswap_64()        12345678 78563412
 */
 
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
 
 #ifdef HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else
 
 
-static inline uint16_t
+#if 1
+static uint16_t
 bswap_16 (uint16_t x)
 {
 #if 1
@@ -70,9 +64,14 @@ bswap_16 (uint16_t x)
           (((x) & 0x00ff) << 8));
 #endif
 }
+#else
+#define bswap_16(x) ((((x) & 0xff00) >> 8) | \
+                     (((x) & 0x00ff) << 8))
+#endif
 
 
-static inline uint32_t
+#if 1
+static uint32_t
 bswap_32 (uint32_t x)
 {
 #if 1
@@ -91,9 +90,16 @@ bswap_32 (uint32_t x)
           (((x) & 0x000000ff) << 24));
 #endif
 }
+#else
+#define bswap_32(x) ((((x) & 0xff000000) >> 24) | \
+                     (((x) & 0x00ff0000) >>  8) | \
+                     (((x) & 0x0000ff00) <<  8) | \
+                     (((x) & 0x000000ff) << 24))
+#endif
 
 
-static inline uint64_t
+#if 1
+static uint64_t
 bswap_64 (uint64_t x)
 {
 #if 1
@@ -122,6 +128,16 @@ bswap_64 (uint64_t x)
           (((x) & 0x00000000000000ffull) << 56));
 #endif
 }
+#else
+#define bswap_64(x) ((((x) & 0xff00000000000000ull) >> 56) | \
+                     (((x) & 0x00ff000000000000ull) >> 40) | \
+                     (((x) & 0x0000ff0000000000ull) >> 24) | \
+                     (((x) & 0x000000ff00000000ull) >>  8) | \
+                     (((x) & 0x00000000ff000000ull) <<  8) | \
+                     (((x) & 0x0000000000ff0000ull) << 24) | \
+                     (((x) & 0x000000000000ff00ull) << 40) | \
+                     (((x) & 0x00000000000000ffull) << 56))
+#endif
 #endif // HAVE_BYTESWAP_H
 
 
@@ -162,7 +178,14 @@ bswap_64 (uint64_t x)
 #define le2me_64 me2le_64
 
 
-static inline uint32_t
+/*
+  wswap_32()        1234         3412
+  wswap_64()        12345678 78563412
+*/
+
+
+#if 0
+static uint32_t
 wswap_32 (uint32_t x)
 {
 #if 0
@@ -176,10 +199,14 @@ wswap_32 (uint32_t x)
           (((x) & 0x0000ffff) << 16));
 #endif
 }
+#else
+#define wswap_32(x) ((((x) & 0xffff0000) >> 16) | \
+                     (((x) & 0x0000ffff) << 16))
+#endif
 
 
 #if 0
-static inline uint64_t
+static uint64_t
 wswap_64 (uint64_t x)
 {
 #if 1
@@ -198,6 +225,11 @@ wswap_64 (uint64_t x)
           (((x) & 0x000000000000ffffull) << 48));
 #endif
 }
+#else
+#define wswap_64(x) ((((x) & 0xffff000000000000ull) >> 48) | \
+                     (((x) & 0x0000ffff00000000ull) >> 16) | \
+                     (((x) & 0x00000000ffff0000ull) << 16) | \
+                     (((x) & 0x000000000000ffffull) << 48))
 #endif
 
 

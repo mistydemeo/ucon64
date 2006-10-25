@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/archive.h"
 #endif
 #include "misc/getopt2.h"                       // st_getopt2_t
-#include "misc/chksum.h"
+#include "misc/hash.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/backup.h"
@@ -319,7 +319,19 @@ int
 nds_chksum (void)
 // Note that this function only calculates the checksum of the internal header
 {
-  return (~chksum_crc16 (0, &nds_header, 0x15e)) & 0xffff;
+  int crc16 = 0;
+  st_hash_t *h = hash_open (HASH_CRC16);
+
+  if (!h)
+    return -1;
+
+  h = hash_update (h, (unsigned char *) &nds_header, 0x15e);
+
+  crc16 = hash_get_crc16 (h);
+
+  hash_close (h);
+
+  return (~crc16) & 0xffff;
 }
 
 

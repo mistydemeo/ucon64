@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _WIN32
 #include <windows.h>
 #endif
+#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/getopt2.h"
 #include "misc/property.h"

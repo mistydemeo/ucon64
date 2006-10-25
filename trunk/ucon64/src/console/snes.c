@@ -2465,7 +2465,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   if (size < 64 * 1024)                         // snes_deinterleave() reads blocks of 32 kB
     return 0;                                   // file cannot be interleaved
 
-  crc = crc32 (0, rom_buffer, 512);
+  crc = ucon64_crc32 (0, rom_buffer, 512);
   /*
     Special case hell
 
@@ -3334,7 +3334,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
   calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
   // we want the CRC32 of the "raw" data (too)
   if (calc_checksums)
-    ucon64.fcrc32 = crc32 (0, rom_buffer, size);
+    ucon64.fcrc32 = ucon64_crc32 (0, rom_buffer, size);
 
   // bs_dump has to be set before calling snes_chksum(), but snes_check_bs()
   //  needs snes_header to be filled with the correct data
@@ -3400,12 +3400,12 @@ snes_init (st_ucon64_nfo_t *rominfo)
           */
           *bs_date_ptr = me2le_16 (0x0042);
           get_nsrt_info (rom_buffer, rominfo->header_start, (unsigned char *) &header);
-          ucon64.crc32 = crc32 (0, rom_buffer, size);
+          ucon64.crc32 = ucon64_crc32 (0, rom_buffer, size);
         }
       else if (rominfo->interleaved || nsrt_header)
         {
           get_nsrt_info (rom_buffer, rominfo->header_start, (unsigned char *) &header);
-          ucon64.crc32 = crc32 (0, rom_buffer, size);
+          ucon64.crc32 = ucon64_crc32 (0, rom_buffer, size);
         }
       else
         {

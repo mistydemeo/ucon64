@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#ifdef  USE_LIB_MATH
+#ifdef  HAVE_MATH_H
 #include <math.h>                               // sin(), floor()
 #endif
 #include "misc/itypes.h"
@@ -54,7 +54,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static st_ucon64_obj_t atari_obj[] =
   {
-    {UCON64_ATA, WF_SWITCH}
+    {UCON64_ATA, WF_SWITCH},
+    {UCON64_ATA, WF_PROBE | WF_INIT | WF_NFO},
+    {UCON64_ATA, WF_PROBE | WF_INIT | WF_NFO | WF_NO_SPLIT}
   };
 
 const st_getopt2_t atari_usage[] =
@@ -70,6 +72,41 @@ const st_getopt2_t atari_usage[] =
       NULL, "force recognition",
       &atari_obj[0]
     },
+#ifdef  HAVE_MATH_H
+#if 0
+    {
+      "cc2", 2, 0, UCON64_CC2,
+      "BSM", "convert BIN to Cuttle Card (2)/(Starpath) Supercharger/WAV"
+      "\n"
+      "BSM=0 auto  BSM=10 FA\n"
+      "BSM=1 2K    BSM=11 F6SC\n"
+      "BSM=2 CV    BSM=12 F6\n"
+      "BSM=3 4K    BSM=13 E7\n"
+      "BSM=4 F8SC  BSM=14 E7NR\n"
+      "BSM=5 F8    BSM=15 F4SC\n"
+      "BSM=6 FE    BSM=16 F4\n"
+      "BSM=7 3F    BSM=17 MB\n"
+      "BSM=8 E0\n"
+      "BSM=9 FANR",
+      &atari_obj[1]
+    },
+#else
+    {
+      "cc2", 0,
+      0, UCON64_CC2,
+      NULL,
+      "convert BIN to Cuttle Card (2)/(Starpath) Supercharger/WAV",
+      &atari_obj[1]
+    },
+#endif
+#endif
+#if 0
+    {
+      "bin", 0, 0, UCON64_BIN,
+      NULL, "convert Cuttle Card (2)/(Starpath) Supercharger/WAV to BIN",
+      &atari_obj[2]
+    },
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
@@ -456,3 +493,292 @@ atari_init (st_ucon64_nfo_t * rominfo)
 
   return -1;
 }
+
+
+#ifdef  HAVE_MATH_H
+static void
+wav_generator (unsigned char *bit, int bit_length, float volume, int type)
+{
+#define TYPE_SQUARE_WAVE 0
+#define TYPE_SINE_WAVE 1
+  int i;
+
+  if (type == TYPE_SQUARE_WAVE)
+    {
+      int half_bit_length = (int) (floor ((float) bit_length) / 2.0);
+      int odd = (int) (ceil ((float) bit_length / 2.0) - half_bit_length);
+
+      for (i = 0; i < half_bit_length; i++)
+        bit[i] = (unsigned char) floor (0xfc * volume);
+
+      if (odd)
+        bit[i++] = 0x80;
+
+      for (; i < bit_length; i++)
+        bit[i] = (unsigned char) floor (0x06 * volume);
+    }
+  else // SINE_WAV
+    for (i = 0; i < bit_length; i++)
+      bit[i] = (unsigned char) floor (((
+        sin
+        ((((double) 2 * (double) M_PI) / (double) bit_length) * (double) i) * volume + 1) * 128));
+}
+
+
+// Set header tone length in seconds (default = 1.0)
+#define WAV_HEADER_SECONDS ((float)1.0)
+// Set clearing tone length in seconds (default = 0.1)
+#define WAV_CLEARING_SECONDS ((float)0.1)
+#define WAV_CLEARINGTONE_LEN 51
+// Set volume level of .wav file (0.10-10 Default=0.98)
+#define WAV_VOLUME ((float)0.98)
+// Set the # of bytes for a zero bit
+#define WAV_ZEROBIT_LEN 6
+// Set the # of bytes for a bit
+#define WAV_ONEBIT_LEN 10
+
+
+typedef struct
+{
+  uint8_t magic[4];       // 'RIFF'
+  uint32_t total_length;  // length of file minus the 8 byte riff header
+
+  uint8_t type[4];        // 'WAVE'
+
+  uint8_t fmt[4];         // 'fmt '
+  uint32_t header_length; // length of format chunk minus 8 byte header
+  uint16_t format;        // identifies WAVE_FORMAT_PCM
+  uint16_t channels;
+  uint32_t freq;          // samples per second per channel
+  uint32_t bytespersecond;
+  uint16_t blockalign;    // basic block size
+  uint16_t bitspersample;
+
+  // PCM formats then go straight to the data chunk
+  uint8_t data[4];        // 'data'
+  uint32_t data_length;   // length of data chunk minus 8 byte header
+} st_audio_wav_t;
+
+
+static void
+write_byte_as_wav (FILE *wav_file, unsigned char b, int times)
+{
+  int i = 0, p = 0, len = 0;
+  static unsigned char zerobit[0x100], onebit[0x100];
+  static int generated = 0;
+
+  if (!generated)
+    {
+      wav_generator (zerobit, WAV_ZEROBIT_LEN, WAV_VOLUME, TYPE_SQUARE_WAVE);
+      wav_generator (onebit, WAV_ONEBIT_LEN, WAV_VOLUME, TYPE_SQUARE_WAVE);
+      generated = 1;
+    }
+
+  for (; i < times; i++)
+    for (p = 7; p >= 0; p--)
+      len += (b >> p) & 1 ?
+        fwrite (onebit, 1, WAV_ONEBIT_LEN, wav_file) :
+        fwrite (zerobit, 1, WAV_ZEROBIT_LEN, wav_file);
+}
+
+
+int
+atari_cc2 (const char *fname, int bsmode)
+{
+  (void) bsmode; // TODO: bsmode override
+  unsigned char buffer[0x200];
+  int i, j, page;
+  int force_empty = 0, init_bank;
+//  int multi = 0;
+  unsigned char in_byte;
+  char pg_bank_byte;
+#if     FILENAME_MAX > MAXBUFSIZE
+  char dest_name[FILENAME_MAX];
+#else
+  char dest_name[MAXBUFSIZE];
+#endif
+  const char *source_fname = NULL;
+  FILE *wav_file = NULL;
+  FILE *bin_file = NULL;
+  time_t start_time = time (0);
+  st_audio_wav_t wav_header;
+
+  wav_generator (buffer, WAV_CLEARINGTONE_LEN, WAV_VOLUME, TYPE_SINE_WAVE);
+
+  strcpy (dest_name, fname);
+  set_suffix (dest_name, ".wav");
+  if (!(wav_file = fopen (dest_name, "wb")))
+    {
+      fprintf (stderr, "ERROR: unable to create WAV file %s\n", dest_name);
+      return -1;
+    }
+
+  // write low frequency clearing tone
+  for (i = 0; i < (int) (WAV_CLEARING_SECONDS * (44100 / WAV_CLEARINGTONE_LEN)); i++)
+    fwrite (buffer, 1, WAV_CLEARINGTONE_LEN, wav_file);
+
+  // write empty wav header
+  memset (&wav_header, 0, sizeof (st_audio_wav_t));
+  fwrite (&wav_header, 1, sizeof (st_audio_wav_t), wav_file);
+  fseek (wav_file, 0, SEEK_END);
+
+  // TODO: multiple ROMs in a single wav
+#if 1
+  source_fname = fname;
+#else
+  while (source_fname) // multiple files
+#endif
+    {
+      if (!(bin_file = fopen (ucon64.fname, "rb")))
+        {
+          printf ("ERROR: unable to open BIN file %s\n", ucon64.fname);
+
+          fclose (wav_file);
+
+          return -1;
+        }
+
+#if 0
+      // TODO: custom bsmode and re-init if multiple files
+      if (bsmode != 0 && bsmode != atari_rominfo.bsm)
+        {
+        }
+      else
+        {
+          ucon64.fname ...
+          atari_open ()
+        }
+
+      // multiple ROMs in a single wav
+      atari_rominfo.multi_byte = multi;
+#endif
+
+      init_bank = 0;
+      if (atari_rominfo.bsm == BSM_3F)
+        {
+          if (ucon64.file_size == 0x800)
+            init_bank = 2;
+          else if (ucon64.file_size == 0x1000)
+            init_bank = 1;
+        }
+      else if (atari_rominfo.bsm == BSM_MB)
+        {
+          printf ("Forcing blank pages to be transferred for bankswitch mode MB\n");
+          force_empty = 1;
+        }
+  
+        // write game header tone, just a series of alternating zero and one bits
+      write_byte_as_wav (wav_file, 0x55,
+        ((int) (WAV_HEADER_SECONDS * ((int) (44100 / (WAV_ONEBIT_LEN + WAV_ZEROBIT_LEN)) / 4))) - 1);
+
+      // two zero bits in a row indicate the beginning of the data
+      write_byte_as_wav (wav_file, 0x54, 1);
+
+      write_byte_as_wav (wav_file, atari_rominfo.start_low, 1);
+      write_byte_as_wav (wav_file, atari_rominfo.start_hi, 1);
+      write_byte_as_wav (wav_file, atari_rominfo.ctrl_byte, 1);
+      // # of pages to load
+      write_byte_as_wav (wav_file, (unsigned char) (atari_rominfo.game_page_count), 1);
+      // game header checksum -- first 8 bytes must add up to 0x55
+      write_byte_as_wav (wav_file, (unsigned char) (0x55 -
+                                                    atari_rominfo.start_low -
+                                                    atari_rominfo.start_hi -
+                                                    atari_rominfo.multi_byte -
+                                                    atari_rominfo.ctrl_byte -
+                                                    atari_rominfo.game_page_count -
+                                                    atari_rominfo.speed_low -
+                                                    atari_rominfo.speed_hi), 1);
+      write_byte_as_wav (wav_file, atari_rominfo.multi_byte, 1);
+      write_byte_as_wav (wav_file, atari_rominfo.speed_low, 1);
+      write_byte_as_wav (wav_file, atari_rominfo.speed_hi, 1);
+
+      printf ("Converting to (44100 Hz, 1 ch, 8 bit) WAV format with a %0.2f second header tone\n\n",
+              WAV_HEADER_SECONDS);
+
+      for (page = 0; page < ucon64.file_size / 0x100; page++)
+        if (!atari_rominfo.empty_page[page] || force_empty)
+          {
+            ucon64_fread (buffer, page * 0x100, 0x100, ucon64.fname);
+            ucon64_gauge (start_time, page * 0x100, atari_rominfo.game_page_count * 0x100);
+  
+            // If we just got the page, put the page header which consists of two bytes. The first byte
+            // is a counter that begins at zero for the first page and is incremented by 4 for each     
+            // subsequent page.  If the value is greater than 0x1f, then 0x1f is subtracted from it.    
+            if (atari_rominfo.bsm == BSM_3F)
+              pg_bank_byte = atari_rominfo.page_list[page];
+            else
+              pg_bank_byte =
+                (page % 8) * 4 + init_bank +
+                (int) ((page - (int) (page / 32) * 32) / 8) +
+                (int) (page / 32) * 32;
+  
+            // Get the sum of all 256 bytes of the current page
+            for (i = j = 0; i < 0x100; i++)
+              j += (char) buffer[i];
+  
+            // The second byte of the page header is 0x55 - the first byte - the sum of the 256 bytes of 
+            // program data.
+            in_byte = (unsigned char) (0x55 - pg_bank_byte - j);
+  
+#ifdef  DEBUG
+            fprintf (stderr, "bank %2.2d\n"
+                             "page %2.2d\n"
+                             "page&bank byte %2.2x\n"
+                             "checksum %2.2x\n",
+                             (int) (pg_bank_byte & 0x3) +
+                             (int) (pg_bank_byte & 0xE0) / 8,
+                             (int) ((pg_bank_byte & 0x1c) / 4),
+                             (unsigned char) pg_bank_byte,
+                             (unsigned char) in_byte);
+#endif
+            write_byte_as_wav (wav_file, pg_bank_byte, 1);
+            write_byte_as_wav (wav_file, in_byte, 1);
+            for (i = 0; i < 0x100; i++)
+              write_byte_as_wav (wav_file, buffer[i], 1);
+          }
+
+      fclose (bin_file);
+
+      ucon64_gauge (start_time, atari_rominfo.game_page_count * 0x100, atari_rominfo.game_page_count * 0x100);
+
+      // put a tone at the end of the game (not really necessary)
+#if 0
+      // TODO: multiple ROMs in a single wav
+      if (multi) // multiple files are separated by a new header
+        write_byte_as_wav (wav_file, 0x55,
+          WAV_HEADER_SECONDS * ((int) (44100 / (WAV_ONEBIT_LEN + WAV_ZEROBIT_LEN)) / 4) * 2 - 1);
+      else
+#endif
+        write_byte_as_wav (wav_file, 0x55,
+          ((int) (44100 / (WAV_ONEBIT_LEN + WAV_ZEROBIT_LEN)) / 4) / 2 - 1);
+    }
+              
+
+  // rewrite wav header with real data length
+  fseek (wav_file, 0, SEEK_SET);
+#warning
+#if 0
+  ucon64_write_wavheader (wav_file,
+                          1,
+                          44100,
+                          8,
+                          fsizeof (dest_name) - sizeof (st_audio_wav_t));
+#endif
+  fclose (wav_file);
+
+  puts ("\n");
+  printf (ucon64_msg[WROTE], dest_name);
+
+  return 0;
+}
+
+
+int
+atari_bin (const char *fname)
+{
+  // TODO: turn wav back to bin
+  (void) fname;
+  return 0;
+}
+#endif  // HAVE_MATH_H
+

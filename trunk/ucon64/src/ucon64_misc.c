@@ -493,6 +493,10 @@ ucon64_get_binary (const unsigned char *data, char *id)
           }
       }
 
+#if 0
+  printf ("%s not found; using internal binary instead\n", p);
+#endif
+
   if (!strcmp (id, "f2afirmware"))
     {
       data = f2a_bin_firmware;
@@ -530,6 +534,21 @@ ucon64_get_binary (const unsigned char *data, char *id)
     }
 
   return -1;
+}
+
+
+unsigned int
+ucon64_crc32 (unsigned int crc, const void *buffer, unsigned int size)
+{
+  st_hash_t *h = NULL;
+
+  h = hash_open (HASH_CRC32);
+  h->crc32 = crc;
+  h = hash_update (h, buffer, size);
+  crc = hash_get_crc32 (h);
+  hash_close (h);
+
+  return crc;
 }
 
 
@@ -930,7 +949,7 @@ ucon64_rename (int mode)
             return 0;
           }
         strcpy (buf, p);
-        crc = crc32 (0, (unsigned char *) buf, len);
+        crc = ucon64_crc32 (0, (unsigned char *) buf, len);
         len2 = strlen (suffix);
         len -= len2;
         if (len2 <= 16)                 // len > 48
@@ -969,7 +988,7 @@ ucon64_rename (int mode)
         p = basename2 (ucon64.fname);
         len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
         strcpy (buf, p);
-        crc = crc32 (0, (unsigned char *) buf, len);
+        crc = ucon64_crc32 (0, (unsigned char *) buf, len);
         len2 = strlen (suffix);
         len -= len2;
         if (len <= 8 && len2 <= 4)      // FAT maximum file name length is 8 + 4 chars

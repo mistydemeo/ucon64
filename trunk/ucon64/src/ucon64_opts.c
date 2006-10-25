@@ -1202,9 +1202,6 @@ ucon64_options (st_ucon64_t *p)
         case UCON64_GEN:
           genesis_f (ucon64.nfo);
           break;
-        case UCON64_N64:
-          n64_f (ucon64.nfo);
-          break;
         case UCON64_PCE:
           pce_f (ucon64.nfo);
           break;
@@ -1508,6 +1505,13 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_SGB:
       gb_sgb (ucon64.nfo);
       break;
+
+#ifdef  HAVE_MATH_H
+    case UCON64_CC2:
+      printf (ucon64_msg[UNTESTED]);
+      atari_cc2 (ucon64.fname, optarg ? strtol (optarg, NULL, 10) : 0);
+      break;
+#endif
 
     case UCON64_SMC:
       snes_smc (ucon64.nfo);

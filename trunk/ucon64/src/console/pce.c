@@ -1129,7 +1129,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
   if ((result == -1 && swapped != 0) || swapped == 1)
     {                                   // don't swap the bits if -nint is specified
       if (!UCON64_ISSET (ucon64.do_not_calc_crc) || swapped == 1)
-        ucon64.fcrc32 = crc32 (0, rom_buffer, size);
+        ucon64.fcrc32 = ucon64_crc32 (0, rom_buffer, size);
       swapbits (rom_buffer, size);
       if (pce_check (rom_buffer, size) == 1)
         {
@@ -1156,7 +1156,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       if (!ucon64.crc32)
-        ucon64.crc32 = crc32 (0, rom_buffer, size);
+        ucon64.crc32 = ucon64_crc32 (0, rom_buffer, size);
       // additional info
       key.crc32 = ucon64.crc32;
       info = (st_pce_data_t *) bsearch (&key, pce_data,

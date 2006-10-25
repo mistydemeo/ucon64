@@ -672,10 +672,10 @@ sms_init (st_ucon64_nfo_t *rominfo)
 
       if (rominfo->interleaved)
         {
-          ucon64.fcrc32 = crc32 (0, rom_buffer, size);
+          ucon64.fcrc32 = ucon64_crc32 (0, rom_buffer, size);
           smd_deinterleave (rom_buffer, size);
         }
-      ucon64.crc32 = crc32 (0, rom_buffer, size);
+      ucon64.crc32 = ucon64_crc32 (0, rom_buffer, size);
 
       if (!is_gamegear)
         {

@@ -298,7 +298,7 @@ const st_getopt2_t snes_usage[] =
 #endif
     {
       "k", 0, 0, UCON64_K,
-      NULL, "remove protection (crack)",
+      NULL, "remove protection",
       &snes_obj[7]
     },
     {
@@ -1912,7 +1912,7 @@ when it has been patched with -f.
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
-  puts ("Attempting crack...");
+  puts ("Attempting protection fix...");
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);

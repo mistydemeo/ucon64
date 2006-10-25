@@ -262,14 +262,14 @@ n64_n (st_ucon64_nfo_t *rominfo, const char *name)
 }
 
 
+#if 0
 int
 n64_f (st_ucon64_nfo_t *rominfo)
 {
-  // TODO: PAL/NTSC fix
-  (void) rominfo;                               // warning remover
-  fputs ("ERROR: The function for cracking N64 region protections is not yet implemented\n", stderr);
+  (void) rominfo;
   return 0;
 }
+#endif
 
 
 static void

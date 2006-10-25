@@ -804,7 +804,7 @@ pce_f (st_ucon64_nfo_t *rominfo)
 /*
   Region protection codes are found in (American) TurboGrafx-16 games. It
   prevents those games from running on a PC-Engine. One search pattern seems
-  sufficient to fix/crack all TG-16 games. In addition to that, the protection
+  sufficient to fix/unprotect all TG-16 games. In addition to that, the protection
   code appears to be always somewhere in the first 32 kB.
 */
 {

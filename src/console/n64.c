@@ -609,10 +609,10 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
       ucon64_fread (crc32_mem, rominfo->backup_header_len, n, filename);
       if (!rominfo->interleaved)
         {
-          ucon64.fcrc32 = crc32 (0, crc32_mem, n);
+          ucon64.fcrc32 = ucon64_crc32 (0, crc32_mem, n);
           ucon64_bswap16_n (crc32_mem, n);
         }
-      ucon64.crc32 = crc32 (0, crc32_mem, n);
+      ucon64.crc32 = ucon64_crc32 (0, crc32_mem, n);
       free (crc32_mem);
 #endif
       return -1;                                // ROM is too small
@@ -639,19 +639,19 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
   if (!rominfo->interleaved)
     {
-      fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
+      fcrc32 = ucon64_crc32 (0, crc32_mem, CHECKSUM_START);
       ucon64_bswap16_n (crc32_mem, CHECKSUM_START);
     }
   else
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
-  scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
+  scrc32 = ucon64_crc32 (0, crc32_mem, CHECKSUM_START);
 #else
   fseek (file, rominfo->backup_header_len + N64_HEADER_LEN, SEEK_SET);
   fread (bootcode_buf, 1, N64_BC_SIZE, file);
   if (rominfo->interleaved)
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
 #endif
-  n = crc32 (0, bootcode_buf, N64_BC_SIZE);
+  n = ucon64_crc32 (0, bootcode_buf, N64_BC_SIZE);
   if (n == 0x0b050ee0)
     {
       bootcode = 6103;
@@ -690,10 +690,10 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
               if (!rominfo->interleaved)
                 {
                   memcpy (crc32_mem, chunk, n);
-                  fcrc32 = crc32 (fcrc32, crc32_mem, n);
+                  fcrc32 = ucon64_crc32 (fcrc32, crc32_mem, n);
                   ucon64_bswap16_n (crc32_mem, n);
                 }
-              scrc32 = crc32 (scrc32, crc32_mem, n);
+              scrc32 = ucon64_crc32 (scrc32, crc32_mem, n);
 #endif
             }
         }
@@ -763,10 +763,10 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     {
       if (!rominfo->interleaved)
         {
-          fcrc32 = crc32 (fcrc32, crc32_mem, n);
+          fcrc32 = ucon64_crc32 (fcrc32, crc32_mem, n);
           ucon64_bswap16_n (crc32_mem, n);
         }
-      scrc32 = crc32 (scrc32, crc32_mem, n);
+      scrc32 = ucon64_crc32 (scrc32, crc32_mem, n);
     }
 
   ucon64.crc32 = scrc32;

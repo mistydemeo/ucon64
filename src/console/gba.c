@@ -878,6 +878,49 @@ gba_multi (int truncate_size, char *multi_fname)
 }
 
 
+/*
+SONICPINBALL
+
+o:
+00060430  ff f7 88 fd  00 04 03 0c  03 4a 01 24  07 e0 00 00  .........J.$....
+r:
+00060430  1b 23 1b 02  32 20 03 43  03 4a 01 24  07 e0 00 00  .#..2 .C.J.$....
+
+o:
+0006053c  70 b5 90 b0  15 4d 29 88  15 4e 31 40  15 48 00 68  p....M)..N1@.H.h
+r:
+0006053c  00 b5 00 20  02 bc 08 47  15 4e 31 40  15 48 00 68  ... ...G.N1@.H.h
+
+o:
+000605ac  e8 89 03 02  70 b5 46 46  40 b4 90 b0  00 04 03 0c  ....p.FF@.......
+r:
+000605ac  e8 89 03 02  00 b5 00 20  02 bc 08 47  00 04 03 0c  ....... ...G....
+
+YU-GI-OH DDM
+/windows/test_supercard3/new/rs-yugi.gba
+Comparing rs-yugi.gba with ucon64/rs-yugi.gba
+ucon64/rs-yugi.gba:
+00058b74  ff f7 aa ff  00 04 ......
+/windows/test_supercard3/new/rs-yugi.gba:
+00058b74  1b 23 1b 02  32 20 .#..2
+
+ucon64/rs-yugi.gba:
+00058b7b  0c .
+/windows/test_supercard3/new/rs-yugi.gba:
+00058b7b  43 C
+
+ucon64/rs-yugi.gba:
+0005904c  70 b5 90 b0  p...
+/windows/test_supercard3/new/rs-yugi.gba:
+0005904c  00 20 70 47  . pG
+
+ucon64/rs-yugi.gba:
+000590c0  70 b5 46 46  p.FF
+/windows/test_supercard3/new/rs-yugi.gba:
+000590c0  00 20 70 47  . pG
+*/
+
+
 static int
 gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
 {

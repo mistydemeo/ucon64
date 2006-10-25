@@ -631,7 +631,7 @@ TEST_BREAK
       
           while ((fgets (buf, MAXBUFSIZE, in)))
             {
-              crc = crc32 (crc, (const void *) &buf, strlen (buf));
+              crc = ucon64_crc32 (crc, (const void *) &buf, strlen (buf));
               fputs (buf, out);
             }
         }

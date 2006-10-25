@@ -1009,7 +1009,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
   if (type != BIN)
     {
       if (ucon64.fcrc32 == 0)
-        ucon64.fcrc32 = crc32 (ucon64.fcrc32, rom_buffer, genesis_rom_size);
+        ucon64.fcrc32 = ucon64_crc32 (ucon64.fcrc32, rom_buffer, genesis_rom_size);
 
       if (type == SMD)
         smd_deinterleave (rom_buffer, bytesread);
@@ -1018,7 +1018,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
     }
 
   if (ucon64.crc32 == 0)                        // calculate the CRC32 only once
-    ucon64.crc32 = crc32 (0, rom_buffer, bytesread);
+    ucon64.crc32 = ucon64_crc32 (0, rom_buffer, bytesread);
 
   fclose (file);
   return rom_buffer;

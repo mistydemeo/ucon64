@@ -86,6 +86,9 @@ ifdef USE_USB
 LDFLAGS+=-lusb
 OBJECTS+=misc/usb.o
 endif
+ifdef USE_MATH
+LDFLAGS+=-lm
+endif
 
 ifdef DLOPEN
 OBJECTS+=misc/dlopen.o

@@ -99,7 +99,7 @@ const st_getopt2_t gba_usage[] =
     },
     {
       "sc", 0, 0, UCON64_SC,
-      NULL, "convert to Super Card (CF to GBA Adapter)\n"
+      NULL, "convert to SuperCard\n"
 #if 0
             "enables \"Saver patch\", \"restart to Menu\" and\n"
             "\"Real Time Save\""

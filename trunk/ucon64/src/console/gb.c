@@ -90,6 +90,12 @@ const st_getopt2_t gb_usage[] =
       &gb_obj[2]
     },
     {
+      "sc", 0, 0, UCON64_SC,
+      NULL, "convert to SuperCard\n"
+            "(creates: SAV template)",
+      &gb_obj[0]
+    },
+    {
       "sgb", 0, 0, UCON64_SGB,
       NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX",
       &gb_obj[2]
@@ -726,4 +732,43 @@ gb_chksum (st_ucon64_nfo_t *rominfo)
   free (rom_buffer);
 
   return sum;
+}
+
+
+#warning
+int
+gb_sc (void)
+{
+  unsigned char *buffer;
+  char dest_name[FILENAME_MAX];
+  FILE *destfile;
+
+  strcpy (dest_name, ucon64.fname);
+
+#define GB_SAV_TEMPLATE_SIZE 65536
+  // write SAV template
+  set_suffix (dest_name, ".sav");
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+
+  if (!(buffer = (unsigned char *) malloc (GB_SAV_TEMPLATE_SIZE)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], GB_SAV_TEMPLATE_SIZE);
+      fclose (destfile);
+      exit (1);
+    }
+
+  memset (buffer, 0, GB_SAV_TEMPLATE_SIZE);
+
+  fwrite (buffer, 1, GB_SAV_TEMPLATE_SIZE, destfile);
+
+  free (buffer);
+  fclose (destfile);
+
+  printf (ucon64_msg[WROTE], dest_name);
+
+  return 0;
 }

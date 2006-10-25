@@ -105,6 +105,12 @@ const st_getopt2_t sms_usage[] =
       NULL
     },
     {
+      "sc", 0, 0, UCON64_SC,
+      NULL, "convert to SuperCard\n"
+            "(creates: SAV template)",
+      &sms_obj[1]
+    },
+    {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum (SMS only)",
       &sms_obj[1]
@@ -733,4 +739,42 @@ sms_chksum (unsigned char *rom_buffer, int rom_size)
       sum -= rom_buffer[i];
 
   return sum;
+}
+
+
+int
+sms_sc (void)
+{
+  unsigned char *buffer;
+  char dest_name[FILENAME_MAX];
+  FILE *destfile;
+
+  strcpy (dest_name, ucon64.fname);
+
+#define SMS_SAV_TEMPLATE_SIZE 65536
+  // write SAV template
+  set_suffix (dest_name, ".sav");
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+
+  if (!(buffer = (unsigned char *) malloc (SMS_SAV_TEMPLATE_SIZE)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], SMS_SAV_TEMPLATE_SIZE);
+      fclose (destfile);
+      exit (1);
+    }
+
+  memset (buffer, 0, SMS_SAV_TEMPLATE_SIZE);
+
+  fwrite (buffer, 1, SMS_SAV_TEMPLATE_SIZE, destfile);
+
+  free (buffer);
+  fclose (destfile);
+
+  printf (ucon64_msg[WROTE], dest_name);
+
+  return 0;
 }

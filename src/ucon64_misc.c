@@ -1291,16 +1291,16 @@ ucon64_fwswap32_func (void *buffer, int n, void *object)
 void
 ucon64_fbswap16 (const char *fname, size_t start, size_t len)
 {
-#warning "r+b"!!
-  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname);
+#warning
+//  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
 }
 
 
 void
 ucon64_fwswap32 (const char *fname, size_t start, size_t len)
 {
-#warning "r+b"!!
-  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname);
+#warning
+//  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
 }
 
 
@@ -1468,8 +1468,7 @@ ucon64_find (const char *filename, size_t start, size_t len,
       }
     }
 
-  result = quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len,
-                          filename);
+  result = quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len, filename);
 
   return o.found;                               // return last occurrence or -1
 }

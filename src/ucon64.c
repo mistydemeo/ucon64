@@ -244,7 +244,6 @@ ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
 }
 
 
-#define TEST 
 #ifdef  TEST
 typedef struct
 {
@@ -316,7 +315,7 @@ ucon64_test (void)
                         "rm test.txt", 0xe60a7df5},
       {UCON64_DMIRR,	"ucon64 -dmirr", TEST_TODO},
       {UCON64_DNSRT,	"ucon64 -dnsrt", TEST_TODO},
-      {UCON64_DUAL,	"ucon64 -dual", TEST_TODO},
+      {UCON64_BIT,	"ucon64 -bit", TEST_TODO},
       {UCON64_DUMPINFO,	"ucon64 -dumpinfo", TEST_TODO},
       {UCON64_E,	"ucon64 -e", TEST_TODO},
       {UCON64_EROM,	"ucon64 -erom", TEST_TODO},

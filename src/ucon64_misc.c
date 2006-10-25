@@ -235,8 +235,8 @@ const st_getopt2_t ucon64_options_usage[] =
       NULL
     },
     {
-      "dual", 2, 0, UCON64_DUAL,                // TODO: Think of a decent name - dbjh
-      "ST", "show ROM as dualdump",
+      "bit", 2, 0, UCON64_BIT,
+      "ST", "show ROM as bitdump",
       NULL
     },
     {
@@ -343,6 +343,11 @@ const st_getopt2_t ucon64_options_usage[] =
       &ucon64_option_obj[0]
     },
     // hidden options
+    {
+      "dual", 2, 0, UCON64_BIT,              // dual was renamed to binary
+      NULL, NULL,
+      NULL
+    },
     {
       "crchd", 0, 0, UCON64_CRCHD,              // backward compat.
       NULL, NULL,

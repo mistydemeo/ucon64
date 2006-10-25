@@ -53,7 +53,8 @@ static int nds_chksum (void);
 static st_ucon64_obj_t nds_obj[] =
   {
     {0, WF_DEFAULT},
-    {UCON64_NDS, WF_SWITCH}
+    {UCON64_NDS, WF_SWITCH},
+    {UCON64_NDS, WF_DEFAULT} 
   };
 
 const st_getopt2_t nds_usage[] =
@@ -82,6 +83,11 @@ const st_getopt2_t nds_usage[] =
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM header checksum",
       &nds_obj[0]
+    },
+    {
+      "sc", 0, 0, UCON64_SC,
+      NULL, "convert to SuperCard\n",
+      &nds_obj[2]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -314,4 +320,12 @@ nds_chksum (void)
 // Note that this function only calculates the checksum of the internal header
 {
   return (~chksum_crc16 (0, &nds_header, 0x15e)) & 0xffff;
+}
+
+
+#warning
+int
+nds_sc (void)
+{
+  return 0;
 }

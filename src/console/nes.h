@@ -241,5 +241,6 @@ extern int nes_unif (void);
 extern int nes_j (unsigned char **mem_image);
 extern int nes_dint (void);
 extern nes_file_t nes_get_file_type (void);
+extern int nes_sc (void);
 
 #endif // NES_H

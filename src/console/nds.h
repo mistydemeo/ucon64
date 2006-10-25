@@ -27,5 +27,6 @@ extern int nds_init (st_ucon64_nfo_t *rominfo);
 extern int nds_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int nds_logo (st_ucon64_nfo_t *rominfo);
 extern int nds_chk (st_ucon64_nfo_t *rominfo);
+extern int nds_sc (void);
 
 #endif

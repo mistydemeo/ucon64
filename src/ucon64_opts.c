@@ -1545,7 +1545,26 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_SC:
-      gba_sc ();
+      switch (ucon64.console)
+        {
+        case UCON64_SMS:
+          sms_sc ();
+          break;
+        case UCON64_GB:
+          gb_sc ();
+          break;
+        case UCON64_GBA:
+          gba_sc ();
+          break;
+        case UCON64_NES:
+          nes_sc ();
+          break;
+        case UCON64_NDS:
+          nds_sc ();
+          break;
+        default:
+          return -1;
+        }
       break;
 
     case UCON64_SSC:

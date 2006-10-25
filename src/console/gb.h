@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t gb_usage[];
 extern const unsigned char gb_logodata[], rocket_logodata[];
 
+extern int gb_sc (void);
 extern int gb_chk (st_ucon64_nfo_t *rominfo);
 extern int gb_gbx (st_ucon64_nfo_t *rominfo);
 extern int gb_mgd (st_ucon64_nfo_t *rominfo);

@@ -113,6 +113,12 @@ const st_getopt2_t nes_usage[] =
       &nes_obj[6]
     },
     {
+      "sc", 0, 0, UCON64_SC,
+      NULL, "convert to SuperCard\n"
+            "(creates: SAV template)",
+      &nes_obj[1]
+    },
+    {
       "mapr", 1, 0, UCON64_MAPR,
       "MAPR", "specify board name or mapper number for conversion options\n"
       "MAPR must be a board name for UNIF or a number for Pasofami\n"
@@ -7733,5 +7739,44 @@ nes_fds (void)
   free (buffer);
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
+  return 0;
+}
+
+
+#warning
+int
+nes_sc (void)
+{
+  unsigned char *buffer;
+  char dest_name[FILENAME_MAX];
+  FILE *destfile;
+
+  strcpy (dest_name, ucon64.fname);
+
+#define NES_SAV_TEMPLATE_SIZE 65536
+  // write SAV template
+  set_suffix (dest_name, ".sav");
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+
+  if (!(buffer = (unsigned char *) malloc (NES_SAV_TEMPLATE_SIZE)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], NES_SAV_TEMPLATE_SIZE);
+      fclose (destfile);
+      exit (1);
+    }
+
+  memset (buffer, 0, NES_SAV_TEMPLATE_SIZE);
+
+  fwrite (buffer, 1, NES_SAV_TEMPLATE_SIZE, destfile);
+
+  free (buffer);
+  fclose (destfile);
+
+  printf (ucon64_msg[WROTE], dest_name);
+
   return 0;
 }

@@ -33,4 +33,6 @@ extern int sms_smd (st_ucon64_nfo_t *rominfo);
 extern int sms_smds (void);
 extern int sms_chk (st_ucon64_nfo_t *rominfo);
 extern int sms_multi (int truncate_size, char *fname);
+extern int sms_sc (void);
+
 #endif

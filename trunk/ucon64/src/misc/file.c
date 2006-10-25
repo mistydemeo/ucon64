@@ -21,7 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // USE_ZLIB
+#include "config.h"
 #endif
 #include <stddef.h>
 #include <stdlib.h>
@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
 #include <sys/stat.h>                           // for S_IFLNK
-
+#include <sys/time.h>
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
 #elif   defined __unix__
@@ -55,14 +55,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
-
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32 (VC++)
-#include "itypes.h"
+#ifdef  HAVE_DIRENT_H
+#include <dirent.h>
 #endif
-#ifdef  USE_ZLIB
-#include "archive.h"
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef  _WIN32
+#include <windows.h>
+#ifndef __MINGW32__
+#include <io.h>
+#define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
+#define F_OK 00
+#endif
 #endif
 #include "file.h"
 #include "misc.h"                               // getenv2()
@@ -78,20 +83,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 #endif // MAXBUFSIZE
 
-#ifndef MAX
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef MIN
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
-
-
+// needed by realpath()
 extern int errno;
+
+
+static unsigned long
+time_ms (unsigned long *ms)
+// returns milliseconds since midnight
+{
+  unsigned long t = 0;
+  struct timeval tv;
+
+  if (!gettimeofday (&tv, NULL))
+    {
+      t = (unsigned long) (tv.tv_usec / 1000);
+      t += (unsigned long) ((tv.tv_sec % 86400) * 1000);
+    }
+
+  return ms ? *ms = t : t;
+}
 
 
 int
@@ -461,7 +472,7 @@ set_suffix (char *filename, const char *suffix)
 
 
 int
-one_file (const char *filename1, const char *filename2)
+same_file (const char *filename1, const char *filename2)
 // returns 1 if filename1 and filename2 refer to one file, 0 if not (or error)
 {
 #ifndef _WIN32
@@ -510,7 +521,7 @@ one_file (const char *filename1, const char *filename2)
 
 
 int
-one_filesystem (const char *filename1, const char *filename2)
+same_filesystem (const char *filename1, const char *filename2)
 // returns 1 if filename1 and filename2 reside on one file system, 0 if not
 //  (or an error occurred)
 {
@@ -591,9 +602,9 @@ rename2 (const char *oldname, const char *newname)
   dirname2 (newname, dir2);
 
   // We should use dirname{2}() in case oldname or newname doesn't exist yet
-  if (one_filesystem (dir1, dir2))
+  if (same_filesystem (dir1, dir2))
     {
-      if (access (newname, F_OK) == 0 && !one_file (oldname, newname))
+      if (access (newname, F_OK) == 0 && !same_file (oldname, newname))
         {
           stat (newname, &fstate);
           chmod (newname, fstate.st_mode | S_IWUSR);
@@ -603,7 +614,7 @@ rename2 (const char *oldname, const char *newname)
     }
   else
     {
-      retval = fcopy_raw (oldname, newname);
+      retval = fcopy (oldname, 0, fsizeof (oldname), newname, "wb");
       // don't remove unless the file can be copied
       if (retval == 0)
         {
@@ -618,9 +629,9 @@ rename2 (const char *oldname, const char *newname)
 
 
 int
-truncate2 (const char *filename, off_t new_size)
+truncate2 (const char *filename, unsigned long new_size)
 {
-  int size = fsizeof (filename);
+  unsigned long size = fsizeof (filename);
   struct stat fstate;
 
   stat (filename, &fstate);
@@ -660,7 +671,7 @@ tmpnam2 (char *temp)
 {
   char *p = getenv2 ("TEMP");
 
-  srand (time (0));
+  srand (time_ms (0));
 
   *temp = 0;
   while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs
@@ -670,7 +681,59 @@ tmpnam2 (char *temp)
 }
 
 
-static inline int
+#if 0
+// TODO: like tmpnam2() but create the file or directory so that no other process can take them
+const char *
+mktmpdir (char *path, int mode)
+{
+  (void) path;
+  (void) mode;
+//  path + dirname
+  return "";
+}
+
+
+const char *
+mktmpfile (char *path)
+{
+  (void) path;
+//  path + filename
+  return "";
+}
+#endif
+
+
+int
+fsizeof (const char *filename)
+{
+  struct stat fstate;
+
+  if (!stat (filename, &fstate))
+    return fstate.st_size;
+
+  return -1;
+}
+
+
+char *
+baknam (char *fname)
+{
+  char suffix[8];
+  int i = 1;
+
+  set_suffix (fname, ".bak");
+  while (!access (fname, F_OK))
+    {
+      sprintf (suffix, ".b%02d", i);
+      set_suffix (fname, suffix);
+      i++;
+    }
+
+  return fname;
+}
+
+
+static int
 fcopy_func (void *buffer, int n, void *object)
 {
   return fwrite (buffer, 1, n, (FILE *) object);
@@ -683,115 +746,24 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
   FILE *output;
   int result = 0;
 
-  if (one_file (dest, src))                     // other code depends on this
+#ifdef  DEBUG
+  if (!strchr ("aw", *mode))
+    fprintf (stderr, "ERROR: fcopy() (logically) supports only write or append as mode\n\n");
+#endif
+
+  if (same_file (dest, src))                     // other code depends on this
     return -1;                                  //  behaviour!
 
   if (!(output = fopen (dest, mode)))
-    {
-      errno = ENOENT;
-      return -1;
-    }
+    return -1;
 
   fseek (output, 0, SEEK_END);
 
-  result = quick_io_func (fcopy_func, MAXBUFSIZE, output, start, len, src, "rb");
+  result = quick_io_func (fcopy_func, MAXBUFSIZE, output, start, len, src);
 
-//  fsync (output);
   fclose (output);
 
   return result == -1 ? result : 0;
-}
-
-
-int
-fcopy_raw (const char *src, const char *dest)
-// Raw file copy function. Raw, because it will copy the file data as it is,
-//  unlike fcopy(). Don't merge fcopy_raw() with fcopy(). They have both their
-//  uses.
-{
-#ifdef  USE_ZLIB
-#undef  fopen
-#undef  fread
-#undef  fwrite
-#undef  fclose
-#endif
-  FILE *fh, *fh2;
-  int seg_len;
-  char buf[MAXBUFSIZE];
-
-  if (one_file (dest, src))
-    return -1;
-
-  if (!(fh = fopen (src, "rb")))
-    return -1;
-  if (!(fh2 = fopen (dest, "wb")))
-    {
-      fclose (fh);
-      return -1;
-    }
-  while ((seg_len = fread (buf, 1, MAXBUFSIZE, fh)))
-    fwrite (buf, 1, seg_len, fh2);
-
-  fclose (fh);
-  fclose (fh2);
-  return 0;
-#ifdef  USE_ZLIB
-#define fopen   fopen2
-#define fread   fread2
-#define fwrite  fwrite2
-#define fclose  fclose2
-#endif
-}
-
-
-#ifndef USE_ZLIB
-int
-fsizeof (const char *filename)
-{
-  struct stat fstate;
-
-  if (!stat (filename, &fstate))
-    return fstate.st_size;
-
-  errno = ENOENT;
-  return -1;
-}
-#endif
-
-
-static FILE *
-quick_io_open (const char *filename, const char *mode)
-{
-  FILE *fh = NULL;
-
-  if (*mode == 'w' || *mode == 'a' || mode[1] == '+') // will we write to it?
-    if (!access (filename, F_OK))               // exists?
-      {
-        struct stat fstate;
-        // First (try to) change the file mode or we won't be able to write to
-        //  it if it's a read-only file.
-        stat (filename, &fstate);
-        if (chmod (filename, fstate.st_mode | S_IWUSR))
-          {
-            errno = EACCES;
-            return NULL;
-          }
-      }
-
-  if ((fh = fopen (filename, (const char *) mode)) == NULL)
-    {
-#ifdef  DEBUG
-      fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
-                       "CAUSE: %s\n", filename, mode, strerror (errno));
-#endif
-      return NULL;
-    }
-
-#ifdef  DEBUG
-  fprintf (stderr, "\"%s\": \"%s\"\n", filename, (char *) mode);
-#endif
-
-  return fh;
 }
 
 
@@ -801,7 +773,7 @@ quick_io_c (int value, size_t pos, const char *filename, const char *mode)
   int result;
   FILE *fh;
 
-  if (!(fh = quick_io_open (filename, (const char *) mode)))
+  if (!(fh = fopen (filename, (const char *) mode)))
     return -1;
 
   fseek (fh, pos, SEEK_SET);
@@ -823,7 +795,7 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
   int result;
   FILE *fh;
 
-  if (!(fh = quick_io_open (filename, (const char *) mode)))
+  if (!(fh = fopen (filename, (const char *) mode)))
     return -1;
 
   fseek (fh, start, SEEK_SET);
@@ -841,146 +813,278 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
 }
 
 
-static inline int
-quick_io_func_inline (int (*func) (void *, int, void *), int func_maxlen,
-                      void *object, void *buffer, int buffer_len)
-{
-  // TODO: Clean this mess up. It hurts my brain. Code like this needs a
-  //       thorough explanation. - dbjh
-  int i = 0, func_size = MIN (func_maxlen, buffer_len), func_result = 0;
-
-  while (i < buffer_len)
-    {
-      func_size = MIN (func_size, buffer_len - i);
-      func_result = func ((char *) buffer + i, func_size, object);
-      i += func_result;
-      if (func_result < func_size)
-        break;
-    }
-
-  return i;
-}
-
-
 int
-quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
-               size_t start, size_t len, const char *filename, const char *mode)
-// func() takes buffer, length and object (optional), func_maxlen is maximum
-//  length passed to func()
+quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *o,
+               size_t start, size_t len, const char *filename)
 {
-  // TODO: Clean this mess up. It's truly awful. - dbjh  
   void *buffer = NULL;
-  int buffer_maxlen = 0, buffer_len = 0, func_len = 0;
-  size_t len_done = 0;
+  int buffer_size = 0, buffer_len = 0, buffer_pos = 0;
+  size_t pos = 0;
   FILE *fh = NULL;
+  int result = 0;
 
-  if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
-    if ((buffer = malloc (len)))                //  in their entirety
-      buffer_maxlen = len;
-  if (!buffer)
-    {
-      if ((buffer = malloc (func_maxlen)))
-        buffer_maxlen = func_maxlen;
-      else
-        return -1;
-    }
-
-  if (!(fh = quick_io_open (filename, (const char *) mode)))
+  if (!(fh = fopen (filename, "rb")))
     {
       free (buffer);
       return -1;
     }
 
+  if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
+    if ((buffer = malloc (len)))                //  in their entirety
+      buffer_size = len;
+
+  if (!buffer)                                  // default to func_maxlen
+    if ((buffer = malloc (func_maxlen)))
+      buffer_size = func_maxlen;
+
+  if (!buffer)
+    return -1;
+
   fseek (fh, start, SEEK_SET);
 
-  for (len_done = 0; len_done < len; len_done += buffer_len)
+  for (pos = 0; pos < len; pos += buffer_len)
     {
-      if (len_done + buffer_maxlen > len)
-        buffer_maxlen = len - len_done;
-      
-      if (!(buffer_len = fread (buffer, 1, buffer_maxlen, fh)))
-        break;
+      buffer_len = fread (buffer, 1, buffer_size, fh);
 
-      func_len = quick_io_func_inline (func, func_maxlen, object, buffer, buffer_len);
-
-      if (func_len < buffer_len) // less than buffer_len? this must be the end
-        break;                   //  or a problem (if write mode)
-
-      if (*mode == 'w' || *mode == 'a' || mode[1] == '+')
+      while (buffer_pos < buffer_len)
         {
-          fseek (fh, -buffer_len, SEEK_CUR);
-          fwrite (buffer, 1, buffer_len, fh);
-          /*
-            This appears to be a bug in DJGPP and Solaris (for ecample, when
-            called from ucon64_fbswap16()). Without an extra call to fseek() a
-            part of the file won't be written (DJGPP: after 8 MB, Solaris: after
-            12 MB).
-          */
-          fseek (fh, 0, SEEK_CUR);
+          int func_size = MIN (MIN (func_maxlen, buffer_len), buffer_len - buffer_pos);
+
+          result = func ((char *) buffer + buffer_pos, func_size, o);
+          buffer_pos += result;
+
+          if (result < func_size)  // this must be EOF or a problem (if in overwrite mode)
+            {
+              fclose (fh);
+              free (buffer);
+
+              // returns total bytes processed or if (func() < 0) it returns that error value
+              return buffer_pos < 0 ? buffer_pos : ((int) pos + buffer_pos);
+            }
         }
     }
 
-//  fsync (fh);
   fclose (fh);
   free (buffer);
 
   // returns total bytes processed or if (func() < 0) it returns that error value
-  return func_len < 0 ? func_len : ((int) len_done + func_len);
+  return pos;
 }
 
 
-char *
-mkbak (const char *filename, backup_t type)
+static int
+getfile_recursion (const char *fname, int (*callback_func) (const char *),
+                        int *calls, int flags)
 {
-  static char buf[FILENAME_MAX];
+  char path[FILENAME_MAX];
+  struct stat fstate;
 
-  if (access (filename, R_OK) != 0)
-    return (char *) filename;
+  if (strlen (fname) >= FILENAME_MAX - 2)
+    return 0;
 
-  strcpy (buf, filename);
-  set_suffix (buf, ".bak");
-  if (strcmp (filename, buf) != 0)
+  realpath2 (fname, path);
+
+  /*
+    Try to get file status information only if the file with name fname exists.
+    If the file does not exist I set st_mode to 0 instead of __S_IFREG, because I
+    don't know if the latter is portable. - dbjh
+  */
+  if (access (path, F_OK) == 0)
     {
-      remove (buf);                             // *try* to remove or rename() will fail
-      if (rename (filename, buf))               // keep file attributes like date, etc.
+      if (stat (path, &fstate) != 0)
+        return 0;
+    }
+  else
+    fstate.st_mode = 0;
+
+  /*
+    We test whether fname is a directory, because we handle directories
+    differently. The callback function should test whether its argument is a
+    regular file, a character special file, a block special file, a FIFO
+    special file, a symbolic link or a socket. If the flags
+    GETFILE_FILES_ONLY, GETFILE_RECURSIVE and
+    GETFILE_RECURSIVE_ONCE were not used by the calling function, it may
+    also have to test whether the argument is a directory.
+  */
+  if (S_ISDIR (fstate.st_mode) ?
+        !(flags & (GETFILE_FILES_ONLY |
+                   GETFILE_RECURSIVE |
+                   GETFILE_RECURSIVE_ONCE)) :
+        1)                                      // everything else: call callback
+    {
+      int result = 0; 
+
+#ifdef  DEBUG
+      printf ("callback_func() == %s\n", path);
+      fflush (stdout);
+#endif
+
+      result = callback_func (path);
+
+      if (!result)
+        (*calls)++;
+
+      return result;
+    }
+
+  if (S_ISDIR (fstate.st_mode) &&
+      (flags & (GETFILE_RECURSIVE | GETFILE_RECURSIVE_ONCE)))
+    {
+      int result = 0; 
+#ifndef _WIN32
+      struct dirent *ep;
+      DIR *dp;
+#else
+      char search_pattern[FILENAME_MAX];
+      WIN32_FIND_DATA find_data;
+      HANDLE dp;
+#endif
+      char buf[FILENAME_MAX], *p;
+
+#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
+      char c = toupper (path[0]);
+      if (path[strlen (path) - 1] == FILE_SEPARATOR ||
+          (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == 0))
+#else
+      if (path[strlen (path) - 1] == FILE_SEPARATOR)
+#endif
+        p = "";
+      else
+        p = FILE_SEPARATOR_S;
+
+#ifndef _WIN32
+      if ((dp = opendir (path)))
         {
-          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
-          exit (1);
+          while ((ep = readdir (dp)))
+            if (strcmp (ep->d_name, ".") != 0 &&
+                strcmp (ep->d_name, "..") != 0)
+              {
+                sprintf (buf, "%s%s%s", path, p, ep->d_name);
+                result = getfile_recursion (buf, callback_func, calls,
+                           flags & ~GETFILE_RECURSIVE_ONCE);
+                if (result != 0)
+                  break;
+              }
+          closedir (dp);
+        }
+#else
+      sprintf (search_pattern, "%s%s*", path, p);
+      if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
+        {
+          do
+            if (strcmp (find_data.cFileName, ".") != 0 &&
+                strcmp (find_data.cFileName, "..") != 0)
+              {
+                sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
+                result = getfile_recursion (buf, callback_func, calls,
+                           flags & ~GETFILE_RECURSIVE_ONCE);
+                if (result != 0)
+                  break;
+              }
+          while (FindNextFile (dp, &find_data));
+          FindClose (dp);
+        }
+#endif
+    }
+
+  return 0;
+}
+
+
+int
+getfile (int argc, char **argv, int (*callback_func) (const char *), int flags)
+{
+  int x = optind, calls = 0, result = 0;
+
+  for (; x < argc; x++)
+    {
+      result = getfile_recursion (argv[x], callback_func, &calls, flags);
+      if (result != 0)
+        break;
+    }
+
+  return calls;
+}
+
+
+int
+mkdir2 (const char *name)
+// create a directory and check its permissions
+{
+  struct stat *st = NULL;
+
+  if (stat (name, st) == -1)
+    {
+      if (errno != ENOENT)
+        {
+          fprintf (stderr, "stat %s", name);
+          return -1;
+        }
+      if (mkdir (name, 0700) == -1)
+        {
+          fprintf (stderr, "mkdir %s", name);
+          return -1;
+        }
+      if (stat (name, st) == -1)
+        {
+          fprintf (stderr, "stat %s", name);
+          return -1;
         }
     }
-  else // handle the case where filename has the suffix ".bak".
+
+  if (!S_ISDIR (st->st_mode))
     {
-      char buf2[FILENAME_MAX];
-
-      if (!dirname2 (filename, buf))
-        {
-          fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
-          exit (1);
-        }
-      if (buf[0] != 0)
-        if (buf[strlen (buf) - 1] != FILE_SEPARATOR)
-          strcat (buf, FILE_SEPARATOR_S);
-
-      strcat (buf, basename2 (tmpnam2 (buf2)));
-      if (rename (filename, buf))
-        {
-          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
-          exit (1);
-        }
+      fprintf (stderr, "%s is not a directory\n", name);
+      return -1;
+    }
+  if (st->st_uid != getuid ())
+    {
+      fprintf (stderr, "%s is not owned by you\n", name);
+      return -1;
+    }
+  if (st->st_mode & 077)
+    {
+      fprintf (stderr, "%s must not be accessible by other users\n", name);
+      return -1;
     }
 
-  switch (type)
-    {
-    case BAK_MOVE:
-      return buf;
+  return 0;
+}
 
-    case BAK_DUPE:
-    default:
-      if (fcopy (buf, 0, fsizeof (buf), filename, "wb"))
+
+int
+rmdir2 (const char *path)
+{
+#if 0
+  char cwd[FILENAME_MAX];
+  struct dirent *ep;
+  struct stat fstate;
+  DIR *dp;
+
+  if (!(dp = opendir (path)))
+    return -1;
+
+  getcwd (cwd, FILENAME_MAX);
+  chdir (path);
+
+  while ((ep = readdir (dp)) != NULL)
+    {
+      if (stat (ep->d_name, &fstate) == -1)
+        return -1;
+
+      if (S_ISDIR (fstate.st_mode))
         {
-          fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
-          exit (1);
+          if (strcmp (ep->d_name, "..") != 0 &&
+              strcmp (ep->d_name, ".") != 0)
+            rmdir2 (ep->d_name);
         }
-      return buf;
+      else
+        remove (ep->d_name);
     }
+
+  closedir (dp);
+  chdir (cwd);
+
+#endif
+  return rmdir (path);
 }

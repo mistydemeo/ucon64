@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/getopt2.h"
 #include "misc/file.h"
@@ -45,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
-#include "misc/chksum.h"
+#include "misc/hash.h"
 #ifdef  USE_PARALLEL
 #include "misc/parallel.h"
 #endif
@@ -690,7 +691,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_PRINT:
       ucon64_dump (stdout, ucon64.fname,
                    optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
-                   ucon64.file_size, DUMPER_PRINT);
+                   ucon64.file_size, DUMPER_TEXT);
       break;
 
     case UCON64_C:

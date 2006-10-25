@@ -1,11 +1,8 @@
 /*
-chksum.h - miscellaneous checksum functions
-           SHA1, MD5, CRC16 and CRC32
+hash_md5.h - miscellaneous hash (and checksum) functions
 
 Copyright (c) 1999 - 2004 NoisyB
 Copyright (c) 2001 - 2004 dbjh
-
-sha1 - Copyright (c) 2002, Dr Brian Gladman <brg@gladman.me.uk>, Worcester, UK.
 
 
 This program is free software; you can redistribute it and/or modify
@@ -29,11 +26,8 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
        Digest Algorithm" in all material mentioning or referencing this
        software or this function.
 */
-#ifndef MISC_CHKSUM_H
-#define MISC_CHKSUM_H
-#ifdef  HAVE_CONFIG_H
-#include "config.h"                             // USE_ZLIB
-#endif
+#ifndef MISC_HASH_MD5_H
+#define MISC_HASH_MD5_H
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -45,35 +39,11 @@ extern "C" {
 
 
 /*
-  s_sha1_ctx_t
-  sha1_begin() start sha1
-  sha1()       process data
-  sha1_end()   stop sha1
-
   s_md5_ctx_t
   md5_init()   start md5
   md5_update() process data
   md5_final()  stop md5
-
-  chksum_crc16()
-
-  crc32()      a crc32() clone (if no ZLIB is used)
-                 use zlib's crc32() if USE_ZLIB is defined...
-                 ... but make it possible to link against a library
-                 that uses zlib while this code does not use it
 */
-typedef struct
-{
-  uint32_t count[2];
-  uint32_t hash[5];
-  uint32_t wbuf[16];
-} s_sha1_ctx_t;
-
-extern void sha1_begin (s_sha1_ctx_t ctx[1]);
-extern void sha1 (s_sha1_ctx_t ctx[1], const unsigned char data[], unsigned int len);
-extern void sha1_end (unsigned char hval[], s_sha1_ctx_t ctx[1]);
-
-
 // data structure for MD5 (Message Digest) computation
 typedef struct
 {
@@ -88,15 +58,7 @@ extern void md5_update (s_md5_ctx_t *mdContext, unsigned char *inBuf, unsigned i
 extern void md5_final (s_md5_ctx_t *mdContext);
 
 
-extern unsigned short chksum_crc16 (unsigned short crc, const void *buffer, unsigned int size);
-
-
-#ifndef  USE_ZLIB
-extern unsigned int crc32 (unsigned int crc, const void *buffer, unsigned int size);
-#endif
-
-
 #ifdef  __cplusplus
 }
 #endif
-#endif // MISC_CHKSUM_H
+#endif // MISC_HASH_MD5_H

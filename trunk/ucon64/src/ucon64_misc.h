@@ -89,6 +89,8 @@ extern int ucon64_testsplit (const char *filename, int (*testsplit_cb) (const ch
 extern int ucon64_rename (int mode);
 extern int ucon64_e (void);
 extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
+typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
+extern char *mkbak (const char *filename, backup_t type);
 
 
 /*

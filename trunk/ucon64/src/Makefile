@@ -57,7 +57,8 @@ endif
 
 
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
-        misc/chksum.o misc/file.o misc/getopt.o misc/getopt2.o \
+        misc/file.o misc/getopt.o misc/getopt2.o \
+        misc/hash.o misc/hash_crc.o misc/hash_md5.o misc/hash_sha1.o \
         misc/misc.o misc/parallel.o misc/property.o misc/string.o misc/term.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o \
         console/atari.o console/coleco.o console/console.o console/dc.o console/gb.o \
@@ -228,9 +229,12 @@ endif                                   # cygwin
 UCON64_STD_H=ucon64.h ucon64_misc.h misc/misc.h config.h ucon64_defines.h
 
 misc/archive.o: misc/archive.h misc/map.h config.h
-misc/chksum.o: misc/chksum.h config.h
 misc/dlopen.o: misc/dlopen.h misc/dxedll_pub.h config.h
 misc/getopt.o: misc/getopt.h
+misc/hash.o: misc/hash.h config.h
+misc/hash_crc.o: misc/hash_crc.h config.h
+misc/hash_md5.o: misc/hash_md5.h config.h
+misc/hash_sha1.o: misc/hash_sha1.h config.h
 misc/map.o: misc/map.h config.h
 misc/misc.o: misc/misc.h misc/archive.h config.h
 misc/parallel.o: misc/parallel.h config.h

@@ -56,6 +56,7 @@ Portions copyright (c) 2002        dbjh
 #include <ctype.h>
 #include "misc/file.h"
 #include "misc/misc.h"
+#include "misc/itypes.h"
 #ifdef  USE_ZLIB
 #include "misc/archive.h"
 #endif

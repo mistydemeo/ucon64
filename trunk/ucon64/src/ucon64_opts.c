@@ -676,10 +676,10 @@ ucon64_options (st_ucon64_t *p)
                    ucon64.file_size, DUMPER_HEX);
       break;
 
-    case UCON64_DUAL:
+    case UCON64_BIT:
       ucon64_dump (stdout, ucon64.fname,
                    optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
-                   ucon64.file_size, DUMPER_DUAL);
+                   ucon64.file_size, DUMPER_BIT);
       break;
 
     case UCON64_CODE:

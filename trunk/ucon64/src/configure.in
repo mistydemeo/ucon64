@@ -179,17 +179,24 @@ st_configure_in_t configure_in[] = {
     NULL,
     NULL
   },
-#if 0
   {
     {NULL},
     {NULL},
     {NULL},
     NULL,
-    "#define DEBUG\n",
+    "//#define DEBUG\n",
     NULL,
     NULL
   },
-#endif
+  {
+    {NULL},
+    {NULL},
+    {NULL},
+    NULL,
+    "//#define TEST\n",
+    NULL,
+    NULL
+  },
   {
     {NULL},
     {NULL},

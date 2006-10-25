@@ -39,8 +39,8 @@ extern "C" {
                     you can use here a virtual_start for the displayed counter
                     DUMPER_HEX
                     dump in hex (base: 16) (default)
-                    DUMPER_DUAL
-                    dump in dual (base: 2)
+                    DUMPER_BIT
+                    dump in bits (base: 2)
                     DUMPER_CODE
                     dump as C code
                     DUMPER_TEXT
@@ -71,7 +71,7 @@ extern "C" {
 */
 #define DUMPER_HEX       (0)
 #define DUMPER_HEX_COUNT (0)
-#define DUMPER_DUAL      (1)
+#define DUMPER_BIT       (1)
 #define DUMPER_CODE      (1 << 1)
 #define DUMPER_TEXT      (1 << 2)
 #define DUMPER_DEC       (1 << 3)

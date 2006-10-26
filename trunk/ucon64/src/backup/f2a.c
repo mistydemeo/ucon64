@@ -341,13 +341,13 @@ static int
 f2a_connect_usb (void)
 {
   int fp, result, firmware_loaded = 0;
-  unsigned char *f2afirmware = NULL;
+  const unsigned char *f2afirmware = NULL;
   int f2afirmware_len = 0;
   const char *p = NULL;
   struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
 
-  f2afirmware_len = ucon64_get_binary (f2afirmware "f2afirmware");
+  f2afirmware_len = ucon64_get_binary (&f2afirmware "f2afirmware");
 
   usb_init ();
   usb_find_busses ();
@@ -617,7 +617,7 @@ f2a_write_usb (int n_files, char **files, int address)
   f2a_sendmsg_t sm;
   int i, j, fsize, size, n, is_sram_data = address >= 0xe000000 ? 1 : 0;
   char buffer[1024];
-  unsigned char *loader = NULL;
+  const unsigned char *loader = NULL;
   const char *p = NULL;
   FILE *file;
 
@@ -631,7 +631,7 @@ f2a_write_usb (int n_files, char **files, int address)
     {
       printf ("Uploading multiloader\n");
 
-      loader_len = ucon64_get_binary (loader, "gbaloader");
+      loader_len = ucon64_get_binary (&loader, "gbaloader");
 
 #if 0 // just use a correct loader file - dbjh
       ((int *) loader)[0] = me2be_32 (0x2e0000ea); // start address
@@ -908,9 +908,9 @@ int
 f2a_boot_par (void)
 {
   unsigned char recv[4];
-  unsigned char *iclientp = NULL;
+  const unsigned char *iclientp = NULL;
   int iclientp_len = 0;
-  unsigned char *ilogo = NULL;
+  const unsigned char *ilogo = NULL;
   int ilogo_len = 0;
 
   printf ("Booting GBA\n"
@@ -921,8 +921,8 @@ f2a_boot_par (void)
   if (f2a_receive_raw_par (recv, 4))
     return -1;
 
-  iclientp_len = ucon64_get_binary (iclientp, "iclientp");
-  ilogo_len = ucon64_get_binary (ilogo, "ilogo");
+  iclientp_len = ucon64_get_binary (&iclientp, "iclientp");
+  ilogo_len = ucon64_get_binary (&ilogo, "ilogo");
 
   if (f2a_send_buffer_par (CMD_WRITEDATA, LOGO_ADDR, ilogo_len, ilogo,
                            0, 0, 0, 0))
@@ -946,13 +946,13 @@ int
 f2a_write_par (int n_files, char **files, unsigned int address)
 {
   int j, fsize, size, is_sram_data = address >= 0xe000000 ? 1 : 0;
-  unsigned char *loader = NULL;
+  const unsigned char *loader = NULL;
 
   if (n_files > 1 && !is_sram_data)
     {
       printf ("Uploading multiloader\n");
 
-      loader_len = ucon64_get_binary (loader, "gbaloader");
+      loader_len = ucon64_get_binary (&loader, "gbaloader");
 
 #if 0 // just use a correct loader file - dbjh
       ((int *) loader)[0] = me2le_32 (0x2e0000ea); // start address

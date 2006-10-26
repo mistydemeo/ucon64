@@ -93,7 +93,7 @@ extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
 typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
 extern char *mkbak (const char *filename, backup_t type);
 extern unsigned int ucon64_crc32 (unsigned int crc, const void *buffer, unsigned int size);
-extern int ucon64_get_binary (const unsigned char *data, char *id);
+extern int ucon64_get_binary (const unsigned char **data, char *id);
 
 
 /*

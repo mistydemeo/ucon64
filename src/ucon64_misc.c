@@ -471,38 +471,42 @@ ucon64_get_binary (const unsigned char **data, char *id)
   p = get_property (ucon64.configfile, id, PROPERTY_MODE_FILENAME);
 
   if (p)
-    if (!access (p, R_OK))
-      {
-        int len = fsizeof (p);
+    {
+      if (!access (p, R_OK))
+        {
+          int len = fsizeof (p);
 
-        if (buf)
-          {
-            free (buf);
-            buf = NULL;
-          }
+          if (buf)
+            {
+              free (buf);
+              buf = NULL;
+            }
 
-        buf = malloc (len + 1);
-        if (buf)
-          {
-            FILE *fh = fopen (p, "rb");
-            if (fh)
-              {
-                fread (&buf, len, 1, fh);
-                fclose (fh);
+          buf = malloc (len + 1);
+          if (buf)
+            {
+              FILE *fh = fopen (p, "rb");
+              if (fh)
+                {
+                  fread (&buf, len, 1, fh);
+                  fclose (fh);
 
-                *data = buf;
-                return len;
-              }
-            free (buf);
-            buf = NULL;
-          }
-      }
-
-#if 0
-  // TODO: show after TEST code is finished
-  printf ("%s not found; using internal binary instead\n", p);
-  fflush (stdout);
+                  *data = buf;
+                  return len;
+                }
+              free (buf);
+              buf = NULL;
+            }
+        }
+#if 1
+      else
+        {
+          // TODO: show after TEST code is finished
+          printf ("%s not found; using internal binary instead\n", p);
+          fflush (stdout);
+        }
 #endif
+    }
 
   if (!strcmp (id, "f2afirmware"))
     {

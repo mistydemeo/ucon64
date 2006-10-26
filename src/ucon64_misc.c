@@ -463,7 +463,7 @@ const st_getopt2_t ucon64_padding_usage[] =
 
 
 int
-ucon64_get_binary (const unsigned char *data, char *id)
+ucon64_get_binary (const unsigned char **data, char *id)
 {
   static unsigned char *buf = NULL;
   const char *p = NULL;
@@ -490,7 +490,7 @@ ucon64_get_binary (const unsigned char *data, char *id)
                 fread (&buf, len, 1, fh);
                 fclose (fh);
 
-                data = buf;
+                *data = buf;
                 return len;
               }
             free (buf);
@@ -499,42 +499,44 @@ ucon64_get_binary (const unsigned char *data, char *id)
       }
 
 #if 0
+  // TODO: show after TEST code is finished
   printf ("%s not found; using internal binary instead\n", p);
+  fflush (stdout);
 #endif
 
   if (!strcmp (id, "f2afirmware"))
     {
-      data = f2a_bin_firmware;
+      *data = f2a_bin_firmware;
       return F2A_FIRM_SIZE;
     }
 
   if (!strcmp (id, "iclientu"))
     {
-      data = f2a_bin_iclientu;
+      *data = f2a_bin_iclientu;
       return F2A_ICLIENTU_SIZE;
     }
 
   if (!strcmp (id, "iclientp"))
     {
-      data = f2a_bin_iclientp;
+      *data = f2a_bin_iclientp;
       return BOOT_SIZE;
     }
 
   if (!strcmp (id, "ilogo"))
     {
-      data = f2a_bin_ilogo;
+      *data = f2a_bin_ilogo;
       return LOGO_SIZE;
     }
 
   if (!strcmp (id, "gbaloader"))
     {
-      data = f2a_bin_loader;
+      *data = f2a_bin_loader;
       return LOADER_SIZE;
     }
 
   if (!strcmp (id, "gbaloader_sc"))
     {
-      data = sc_menu_bin;
+      *data = sc_menu_bin;
       return GBA_MENU_SIZE;
     }
 

@@ -232,8 +232,8 @@ st_configure_in_t configure_in[] = {
     {NULL},
     "DLOPEN=1",
     "#define DLOPEN\n",
-    NULL,
-    NULL
+    "dlopen............................   yes",
+    "dlopen............................   no"
   },
 #endif
   {
@@ -320,8 +320,8 @@ st_configure_in_t configure_in[] = {
     "USE_ZLIB=1\n"
     "LDFLAGS+=-lz\n",
     "#define USE_ZLIB 1\n",
-    NULL,
-    NULL
+    "zlib support......................   yes",
+    "zlib support......................   no"
   },
 #endif
   {
@@ -371,8 +371,8 @@ st_configure_in_t configure_in[] = {
     {NULL},
     "USE_SERIAL=1\n",
     "#define USE_SERIAL 1\n",
-    "SERIAL port support...............   yes",
-    "SERIAL port support...............   no"
+    "serial port support...............   yes",
+    "serial port support...............   no"
   },
 #endif
   {

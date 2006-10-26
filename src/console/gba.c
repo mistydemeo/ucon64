@@ -1271,8 +1271,8 @@ gba_sc (void)
     0x00, 0x00, 0x00, 0x00,
   */
   // write the menu (the formulas will NOT be optimized)
-  gba_menu_sc_len = ucon64_get_binary (gba_menu_sc, "gbaloader_sc");
-  fwrite (gba_menu_sc, 1, gba_menu_sc_len, destfile);
+  gba_menu_sc_len = ucon64_get_binary (&gba_menu_sc, "gbaloader_sc");
+  fwrite (&gba_menu_sc, 1, gba_menu_sc_len, destfile);
   pos = ftell (destfile);                       // truncate() this later
 
   // calculate and write new start address

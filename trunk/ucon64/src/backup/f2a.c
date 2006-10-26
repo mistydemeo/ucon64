@@ -946,9 +946,7 @@ int
 f2a_write_par (int n_files, char **files, unsigned int address)
 {
   int j, fsize, size, is_sram_data = address >= 0xe000000 ? 1 : 0;
-  char loader_fname[FILENAME_MAX];
   unsigned char *loader = NULL;
-  const char *p = NULL;
 
   if (n_files > 1 && !is_sram_data)
     {

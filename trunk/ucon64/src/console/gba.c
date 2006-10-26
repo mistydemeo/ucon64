@@ -1346,5 +1346,6 @@ gba_sc (void)
   printf (ucon64_msg[WROTE], dest_name);
 
   free (buffer);
+
   return 0;
 }

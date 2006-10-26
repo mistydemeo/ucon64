@@ -198,7 +198,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
           }
 //        else found = 0;
       }
-    else if (flags & DUMPER_BIT)
+    else if (flags & DUMPER_BITS)
       {
         if (!(pos & 3))
           fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
@@ -243,7 +243,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
 
   if (flags & DUMPER_TEXT)
     return;
-  else if (flags & DUMPER_BIT)
+  else if (flags & DUMPER_BITS)
     {
       if (pos & 3)
         {

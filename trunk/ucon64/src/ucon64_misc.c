@@ -235,7 +235,7 @@ const st_getopt2_t ucon64_options_usage[] =
       NULL
     },
     {
-      "bit", 2, 0, UCON64_BIT,
+      "bits", 2, 0, UCON64_BITS,
       "ST", "show ROM as bitdump",
       NULL
     },
@@ -344,7 +344,7 @@ const st_getopt2_t ucon64_options_usage[] =
     },
     // hidden options
     {
-      "dual", 2, 0, UCON64_BIT,              // dual was renamed to binary
+      "dual", 2, 0, UCON64_BITS,                // dual was renamed to binary
       NULL, NULL,
       NULL
     },

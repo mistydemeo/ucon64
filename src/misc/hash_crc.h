@@ -38,7 +38,9 @@ extern "C" {
              that uses zlib while this code does not use it
 */
 extern unsigned short crc16 (unsigned short crc, const void *buffer, unsigned int size);
-#ifndef  USE_ZLIB
+#ifdef  USE_ZLIB
+#include <zlib.h>    // crc32()
+#else
 extern unsigned int crc32 (unsigned int crc, const void *buffer, unsigned int size);
 #endif
 

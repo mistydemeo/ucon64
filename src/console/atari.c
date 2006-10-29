@@ -557,6 +557,31 @@ typedef struct
 } st_audio_wav_t;
 
 
+#warning
+static int
+ucon64_write_wavheader (FILE *fh, int channels, int freq, int bitspersample, int data_length)
+{
+  st_audio_wav_t wav_header;
+  memset (&wav_header, 0, sizeof (st_audio_wav_t));
+
+  strncpy ((char *) wav_header.magic, "RIFF", 4);
+  wav_header.total_length =           me2le_32 (data_length + sizeof (st_audio_wav_t) - 8);
+  strncpy ((char *) wav_header.type,  "WAVE", 4);
+  strncpy ((char *) wav_header.fmt,   "fmt ", 4);
+  wav_header.header_length =          me2le_32 (16); // always 16
+  wav_header.format =                 me2le_16 (1); // WAVE_FORMAT_PCM == default
+  wav_header.channels =               me2le_16 (channels);
+  wav_header.freq =                   me2le_32 (freq);
+  wav_header.bytespersecond =         me2le_32 (freq * channels * bitspersample / 8);
+  wav_header.blockalign =             me2le_16 (channels * bitspersample / 8);
+  wav_header.bitspersample =          me2le_16 (bitspersample);
+  strncpy ((char *) wav_header.data,  "data", 4);
+  wav_header.data_length =            me2le_32 (data_length);
+
+  return fwrite (&wav_header, 1, sizeof (st_audio_wav_t), fh);
+}
+
+
 static void
 write_byte_as_wav (FILE *wav_file, unsigned char b, int times)
 {

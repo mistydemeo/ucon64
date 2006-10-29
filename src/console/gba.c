@@ -1075,6 +1075,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
 
 int
 gba_sc (void)
+#warning
 /*
   reverse engineered from SuperCard.exe
   

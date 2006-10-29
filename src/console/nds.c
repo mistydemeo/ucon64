@@ -335,5 +335,6 @@ nds_chksum (void)
 int
 nds_sc (void)
 {
+#warning
   return 0;
 }

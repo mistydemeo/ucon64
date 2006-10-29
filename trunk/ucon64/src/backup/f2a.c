@@ -147,7 +147,7 @@ typedef struct
 static int f2a_init_usb (void);
 static int f2a_connect_usb (void);
 static int f2a_info (f2a_recvmsg_t *rm);
-static int f2a_boot_usb (const char *ilclient_fname);
+static int f2a_boot_usb (void);
 static int f2a_read_usb (int address, int size, const char *filename);
 static int f2a_write_usb (int n_files, char **files, int address);
 
@@ -344,7 +344,7 @@ f2a_connect_usb (void)
   struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
 
-  f2afirmware_len = ucon64_get_binary (&f2afirmware "f2afirmware");
+  f2afirmware_len = ucon64_get_binary (&f2afirmware, "f2afirmware");
 
   usb_init ();
   usb_find_busses ();
@@ -516,21 +516,18 @@ f2a_info (f2a_recvmsg_t *rm)
 
 
 static int
-f2a_boot_usb (const char *ilclient_fname)
+f2a_boot_usb (void)
 {
   f2a_sendmsg_t sm;
   unsigned int ack[16], i;
-  char ilclient[16 * 1024];
+  unsigned char *iclient = NULL;
+  int iclient_len = 0;
 
   printf ("Booting GBA\n"
           "Uploading iLinker client\n"
           "Please turn OFF, then ON your GBA with SELECT and START held down\n");
 
-  if (ucon64_fread (ilclient, 0, 16 * 1024, ilclient_fname) <= 0)
-    {
-      fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", ilclient_fname);
-      return -1;
-    }
+  iclient_len = ucon64_get_binary (&iclient, "iclientu");
 
   // boot the GBA
   memset (&sm, 0, sizeof (f2a_sendmsg_t));
@@ -541,7 +538,7 @@ f2a_boot_usb (const char *ilclient_fname)
   usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE);
 
   // send the multiboot image
-  if (usbport_write (f2a_handle, ilclient, 16 * 1024) == -1)
+  if (usbport_write (f2a_handle, iclient, 16 * 1024) == -1)
     {
       fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
       return -1;

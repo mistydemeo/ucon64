@@ -557,9 +557,8 @@ typedef struct
 } st_audio_wav_t;
 
 
-#warning
 static int
-ucon64_write_wavheader (FILE *fh, int channels, int freq, int bitspersample, int data_length)
+write_wavheader (FILE *fh, int channels, int freq, int bitspersample, int data_length)
 {
   st_audio_wav_t wav_header;
   memset (&wav_header, 0, sizeof (st_audio_wav_t));
@@ -778,14 +777,11 @@ atari_cc2 (const char *fname, int bsmode)
 
   // rewrite wav header with real data length
   fseek (wav_file, 0, SEEK_SET);
-#warning
-#if 0
-  ucon64_write_wavheader (wav_file,
-                          1,
-                          44100,
-                          8,
-                          fsizeof (dest_name) - sizeof (st_audio_wav_t));
-#endif
+  write_wavheader (wav_file,
+                   1,
+                   44100,
+                   8,
+                   fsizeof (dest_name) - sizeof (st_audio_wav_t));
   fclose (wav_file);
 
   puts ("\n");

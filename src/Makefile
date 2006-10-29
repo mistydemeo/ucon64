@@ -80,7 +80,7 @@ OBJECTS+=misc/snprintf.o
 endif
 ifdef USE_ZLIB
 LDFLAGS+=-lz
-OBJECTS+=misc/archive.o misc/map.o misc/unzip.o
+OBJECTS+=misc/codec.o misc/codec_zip.o misc/unzip.o
 endif
 ifdef USE_USB
 LDFLAGS+=-lusb
@@ -231,7 +231,6 @@ endif                                   # cygwin
 # Most source files include these
 UCON64_STD_H=ucon64.h ucon64_misc.h misc/misc.h config.h ucon64_defines.h
 
-misc/archive.o: misc/archive.h misc/map.h config.h
 misc/dlopen.o: misc/dlopen.h misc/dxedll_pub.h config.h
 misc/getopt.o: misc/getopt.h
 misc/hash.o: misc/hash.h config.h
@@ -239,7 +238,7 @@ misc/hash_crc.o: misc/hash_crc.h config.h
 misc/hash_md5.o: misc/hash_md5.h config.h
 misc/hash_sha1.o: misc/hash_sha1.h config.h
 misc/map.o: misc/map.h config.h
-misc/misc.o: misc/misc.h misc/archive.h config.h
+misc/misc.o: misc/misc.h config.h
 misc/parallel.o: misc/parallel.h config.h
 misc/usb.o: misc/usb.h config.h
 misc/unzip.o: misc/unzip.h config.h

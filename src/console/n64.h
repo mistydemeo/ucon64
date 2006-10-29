@@ -33,5 +33,7 @@ extern int n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile);
 extern int n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom);
 extern int n64_v64 (st_ucon64_nfo_t *rominfo);
 extern int n64_z64 (st_ucon64_nfo_t *rominfo);
+extern int n64_swap (st_ucon64_nfo_t *rominfo);
+extern int n64_swap2 (st_ucon64_nfo_t *rominfo);
 
 #endif

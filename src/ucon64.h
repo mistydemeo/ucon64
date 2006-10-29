@@ -177,8 +177,6 @@ typedef struct
   ucon64_nfo()          display contents of st_ucon64_nfo_t, st_ucon64_dat_t and
                           dm_image_t
   ucon64_usage()        print usage
-  ucon64_fname_arch()
-
   ucon64                global (st_ucon64_t *)
 */
 extern int ucon64_init (void);
@@ -193,9 +191,6 @@ enum {
   USAGE_VIEW_DISC
 };
 extern void ucon64_usage (int argc, char *argv[], int view);
-#ifdef  USE_ZLIB
-extern void ucon64_fname_arch (const char *fname);
-#endif
 
 extern st_ucon64_t ucon64;
 #endif // UCON64_H

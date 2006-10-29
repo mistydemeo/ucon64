@@ -65,9 +65,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ctype.h>
 #include "misc/misc.h"
 #include "misc/itypes.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/parallel.h"
 #include "misc/file.h"

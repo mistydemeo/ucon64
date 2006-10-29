@@ -105,9 +105,9 @@ extern int ucon64_get_binary (const unsigned char **data, char *id);
   ucon64_fgetc()    same as fgetc but takes filename instead of FILE and a pos
   ucon64_fputc()    same as fputc but takes filename instead of FILE and a pos
                       buf,s,bs,b,f,m == buffer,start,blksize,blks,filename,mode
-  ucon64_bswap16_n() bswap16() n bytes of buffer
-  ucon64_fbswap16() bswap16() len bytes of file from start
-  ucon64_fwswap32() wswap32() len bytes of file from start
+//  ucon64_bswap16_n() bswap16() n bytes of buffer
+//  ucon64_fbswap16() bswap16() len bytes of file from start
+//  ucon64_fwswap32() wswap32() len bytes of file from start
   ucon64_dump()     file oriented wrapper for memdump() (uses the same flags)
   ucon64_find()     file oriented wrapper for memsearch() (uses the same flags)
   ucon64_chksum()   file oriented wrapper for chksum()
@@ -119,15 +119,13 @@ extern int ucon64_get_binary (const unsigned char **data, char *id);
 #define ucon64_fread(b, s, l, f)     (quick_io(b, s, l, f, "rb"))
 #define ucon64_fwrite(b, s, l, f, m) (quick_io((void *) b, s, l, f, m))
 
-extern int ucon64_bswap16_n (void *buffer, int n);
-extern void ucon64_fbswap16 (const char *fname, size_t start, size_t len);
-extern void ucon64_fwswap32 (const char *fname, size_t start, size_t len);
+extern int bswap16_n (void *buffer, int n);
 extern void ucon64_dump (FILE *output, const char *filename, size_t start,
                          size_t len, uint32_t flags);
 // Be sure the following constant doesn't conflict with the MEMCMP2_* constants
 #define UCON64_FIND_QUIET (1 << 31)
 extern int ucon64_find (const char *filename, size_t start, size_t len,
-                        const char *search, int searchlen, uint32_t flags);
+                        const char *search, int searchlen, uint32_t flags, int flag2);
 extern int ucon64_chksum (char *sha1, char *md5, unsigned int *crc32, // uint16_t *crc16,
                           const char *filename, size_t start);
 extern void ucon64_filefile (const char *filename1, int start1,

@@ -42,9 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/property.h"
 #include "misc/string.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ucon64_dat.h"
@@ -1010,19 +1007,19 @@ ucon64_close_datfile (void)
 {
   int n;
 
-  if (ucon64_datfile)
-    {
-      fclose (ucon64_datfile);
-      printf (ucon64_msg[WROTE], ucon64_dat_fname);
-      ucon64_datfile = NULL;
+  if (!ucon64_datfile)
+    return;
 
-      for (n = 0; n < ucon64_n_files; n++)
-        {
-          free (ucon64_mkdat_entries[n].fname);
-          ucon64_mkdat_entries[n].fname = NULL;
-        }
-      ucon64_n_files = 0;
+  fclose (ucon64_datfile);
+  printf (ucon64_msg[WROTE], ucon64_dat_fname);
+  ucon64_datfile = NULL;
+
+  for (n = 0; n < ucon64_n_files; n++)
+    {
+      free (ucon64_mkdat_entries[n].fname);
+      ucon64_mkdat_entries[n].fname = NULL;
     }
+  ucon64_n_files = 0;
 }
 
 

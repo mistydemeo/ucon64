@@ -25,12 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "misc/bswap.h"
 #include "misc/parallel.h"
 #include "misc/itypes.h"
 #include "misc/misc.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
 #include "ucon64.h"
@@ -197,7 +195,7 @@ sf_read_rom (const char *filename, unsigned int parport, int size)
     {
       read_block (address, buffer);             // 0x100 bytes read
       if (read_block == ttt_read_rom_b)
-        ucon64_bswap16_n (buffer, 0x100);
+        bswap16_n (buffer, 0x100);
       fwrite (buffer, 1, 0x100, file);
       address += 0x100;
       if ((address & 0x3fff) == 0)

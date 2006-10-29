@@ -30,9 +30,6 @@
 #endif
 #include "misc/misc.h"
 #include "misc/itypes.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"

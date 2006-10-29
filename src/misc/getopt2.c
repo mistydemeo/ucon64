@@ -87,7 +87,7 @@ getopt2_sanity_check_output (st_getopt2_t *p)
 void
 getopt2_sanity_check (const st_getopt2_t *option)
 {
-  int x, y = 0;
+  int x = 0, y = 0, c = 0;
 
   for (x = 0; option[x].name || option[x].help; x++)
     if (option[x].name)
@@ -100,9 +100,103 @@ getopt2_sanity_check (const st_getopt2_t *option)
                 fprintf (stderr, "ERROR: getopt2_sanity_check(): found dupe %s%s with different has_arg, or val\n",
                   option[x].name[1] ? OPTION_LONG_S : OPTION_S, option[x].name);
               }
+
+#if 0
+  // how many options (incl. dupes) do we have?
+  for (x = y = 0; options[x].name || options[x].help; x++)
+    if (options[x].name)
+      y++;
+  printf ("DEBUG: Total options (with dupes): %d\n", y);
+  printf ("DEBUG: UCON64_MAX_ARGS == %d, %s\n", UCON64_MAX_ARGS,
+    (y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options"));
+#endif
+
+#if 0
+  // list all options as a single st_getopt2_t array
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name)
+      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+#endif
+
+#if 0
+  // how many consoles does uCON64 support?
+  for (x = y = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && options[x].object)
+      if (options[x].val == ((st_ucon64_obj_t *) options[x].object)->console)
+        getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+#endif
+
+#if 0
+  // find options without an object (allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !options[x].object)
+      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+#endif
+
+#if 0
+  // find options without a console (allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !((st_ucon64_obj_t *) options[x].object)->console)
+      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+#endif
+
+#if 0
+  // find options without a workflow (allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !((st_ucon64_obj_t *) options[x].object)->flags)
+      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+#endif
+
+#if 0
+  // find options without a val (NOT allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !options[x].val)
+      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+#endif
+
+#if 0
+  // find options with has_arg but without arg_name AND/OR usage
+  // hidden options without arg_name AND usage are allowed
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name &&
+        ((!options[x].has_arg && options[x].arg_name) ||
+         (options[x].has_arg && !options[x].arg_name) ||
+         !options[x].help))
+      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+#endif
+
+#if 0
+  // find dupe (NOT a problem) options that have different values for val,
+  // flag, and/or object (NOT allowed)
+  // getopt1() will always use the 1st option in the array
+  // (st_getopt2_t *)->arg_name and (st_getopt2_t *)->help can be as
+  // different as you like
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name)
+      for (y = 0; options[y].name || options[y].help; y++)
+        if (options[y].name && x != y) // IS option
+          if (!strcmp (options[y].name, options[x].name))
+            if (options[y].has_arg != options[x].has_arg || // (NOT allowed)
+                options[y].flag != options[x].flag || // (NOT allowed)
+                options[y].val != options[x].val || // (NOT allowed)
+//                options[y].arg_name != options[x].arg_name || // (allowed)
+//                options[y].help != options[x].help || // (allowed)
+                ((st_ucon64_obj_t *) options[y].object)->console != ((st_ucon64_obj_t *) options[x].object)->console // (NOT allowed)
+                ((st_ucon64_obj_t *) options[x].object)->flags != ((st_ucon64_obj_t *) options[x].object)->flags) // (NOT allowed)
+              {
+                fputs ("ERROR: different dupe options found\n  ", stdout);
+                getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
+                fputs ("  ", stdout);
+                getopt2_sanity_check_output ((st_getopt2_t *) &options[y]);
+                fputs ("\n\n", stdout);
+              }
+#endif
+  fflush (stdout);
 }
+#endif  // DEBUG
 
 
+#if 0
 void
 getopt2_parse_usage (const char *usage_output)
 // parse usage output into st_getopt2_t array (for development)
@@ -208,7 +302,7 @@ getopt2_usage_code (const st_getopt2_t *usage)
         (int) usage[i].object);
     }
 }
-#endif // DEBUG
+#endif // #if 0
 
 
 void

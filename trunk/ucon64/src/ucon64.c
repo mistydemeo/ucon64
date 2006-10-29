@@ -675,6 +675,7 @@ main (int argc, char **argv)
 }
 
 
+#warning
 #ifdef  USE_ZLIB
 void
 ucon64_fname_arch (const char *fname)

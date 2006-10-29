@@ -844,8 +844,11 @@ register_func (void (*func) (void))
 {
   st_func_node_t *func_node = &func_list, *new_node;
 
-  while (func_node->next != NULL)
-    func_node = func_node->next;
+  for (; func_node->next != NULL; func_node = func_node->next)
+    {
+//      if (func_node->func == func) // already registered
+//        return -1;
+    }
 
   if ((new_node = (st_func_node_t *) malloc (sizeof (st_func_node_t))) == NULL)
     return -1;
@@ -867,6 +870,7 @@ unregister_func (void (*func) (void))
       prev_node = func_node;
       func_node = func_node->next;
     }
+
   if (func_node->func != func)
     return -1;
 

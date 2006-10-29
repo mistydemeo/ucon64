@@ -33,9 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/misc.h"
 #include "misc/file.h"
 #include "misc/string.h"                        // MEMMEM2_CASE
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -490,7 +487,7 @@ ppf_set_fid (const char *ppf, const char *fidname)
 
   ppfsize = fsizeof (ppfname);
   pos = ucon64_find (ppfname, 0, ppfsize, "@BEGIN_FILE_ID.DIZ", 18,
-    MEMCMP2_CASE | UCON64_FIND_QUIET);
+    MEMCMP2_CASE | UCON64_FIND_QUIET, 0);
   if (pos == -1)
     pos = ppfsize;
   truncate (ppfname, pos);

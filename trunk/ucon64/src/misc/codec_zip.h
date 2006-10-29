@@ -1,7 +1,7 @@
 /*
-interceptor.c - Mega Disk/Super Disk Interceptor support for uCON64
+codec_zip.h - g(un)zip and unzip support
 
-Copyright (c) 1999 - 2001 NoisyB
+Copyright (c) 2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,26 +18,31 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef MISC_ARCHIVE_H
+#define MISC_ARCHIVE_H
 #ifdef  HAVE_CONFIG_H
-#include "config.h"
+#include "config.h"                             // USE_ZLIB
 #endif
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+#ifdef  USE_ZLIB
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
-#include "interceptor.h"
+#include <zlib.h>
+#include "unzip.h"
+// Returns the number of files in the "central dir of this disk" or -1 if
+//  filename is not a ZIP file or an error occured.
+extern int unzip_get_number_entries (const char *filename);
+extern int unzip_goto_file (unzFile file, int file_index);
+extern int unzip_current_file_nr;
 
+extern int unzip_inflate (FILE *source, FILE *dest);
 
-const st_getopt2_t interceptor_usage[] =
-  {
-    {
-      NULL, 0, 0, 0,
-      NULL, "Mega Disk/Super Disk (Interceptor)"/*"19XX Taiwan Sang Ting Co. Ltd."*/,
-      NULL
-    },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  };
+#endif // USE_ZLIB
+
+#ifdef  __cplusplus
+}
+#endif
+#endif // MISC_ARCHIVE_H

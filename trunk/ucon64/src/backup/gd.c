@@ -31,9 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/string.h"
 #include "misc/misc.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"
@@ -227,13 +224,13 @@ gd_checkabort (int status)
 static void
 remove_destfile (void)
 {
-  if (gd_destfname)
-    {
-      printf ("Removing: %s\n", gd_destfname);
-      fclose (gd_destfile);
-      remove (gd_destfname);
-      gd_destfname = NULL;
-    }
+  if (!gd_destfname)
+    return;
+
+  printf ("Removing: %s\n", gd_destfname);
+  fclose (gd_destfile);
+  remove (gd_destfname);
+  gd_destfname = NULL;
 }
 
 

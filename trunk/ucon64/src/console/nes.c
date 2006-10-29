@@ -35,9 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/string.h"
 #include "misc/hash.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -5167,13 +5164,13 @@ nes_get_file_type (void)
 static void
 remove_destfile (void)
 {
-  if (nes_destfname)
-    {
-      printf ("Removing: %s\n", nes_destfname);
-      fclose (nes_destfile);                    // necessary under DOS/Win9x for DJGPP port
-      remove (nes_destfname);
-      nes_destfname = NULL;
-    }
+  if (!nes_destfname)
+    return;
+
+  printf ("Removing: %s\n", nes_destfname);
+  fclose (nes_destfile);                    // necessary under DOS/Win9x for DJGPP port
+  remove (nes_destfname);
+  nes_destfname = NULL;
 }
 
 

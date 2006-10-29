@@ -130,9 +130,6 @@ respective owners.
 #include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/parallel.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"

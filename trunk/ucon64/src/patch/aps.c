@@ -33,9 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/bswap.h"
 #include "misc/file.h"
 #include "misc/misc.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -177,7 +174,7 @@ readN64header (void)
   fread (buffer, 1, 8, n64aps_modfile);
   fread (APSbuffer, 1, 8, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
-    ucon64_bswap16_n (buffer, 8);
+    bswap16_n (buffer, 8);
   if (memcmp (APSbuffer, buffer, 8))
     {
       printf ("WARNING: Incorrect image\n");
@@ -377,7 +374,7 @@ writeN64header (void)
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
   fread (buffer, 1, 8, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
-    ucon64_bswap16_n (buffer, 8);
+    bswap16_n (buffer, 8);
 
   fwrite (buffer, 1, 8, n64aps_apsfile);
   memset (buffer, 0, 5);

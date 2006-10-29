@@ -41,9 +41,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/bswap.h"
 #include "misc/hash.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #ifdef  DLOPEN
 #include "misc/dlopen.h"
 #endif
@@ -548,6 +545,20 @@ ucon64_get_binary (const unsigned char **data, char *id)
 }
 
 
+int
+bswap16_n (void *buffer, int n)
+// bswap16() n bytes of buffer
+{
+  int i = n;
+  uint16_t *w = (uint16_t *) buffer;
+
+  for (; i > 1; i -= 2, w++)
+    *w = bswap_16 (*w);
+
+  return n;                                     // return # of bytes swapped
+}
+
+
 unsigned int
 ucon64_crc32 (unsigned int crc, const void *buffer, unsigned int size)
 {
@@ -590,10 +601,6 @@ ucon64_file_handler (char *dest, char *src, int flags)
 
   ucon64_output_fname (dest, flags);            // call this function unconditionally
 
-#if 0
-  // ucon64.temp_file will be reset in remove_temp_file()
-  ucon64.temp_file = NULL;
-#endif
   if (!access (dest, F_OK))
     {
       stat (dest, &dest_info);
@@ -635,12 +642,12 @@ ucon64_file_handler (char *dest, char *src, int flags)
 void
 remove_temp_file (void)
 {
-  if (ucon64.temp_file)
-    {
-      printf ("Removing: %s\n", ucon64.temp_file);
-      remove (ucon64.temp_file);
-      ucon64.temp_file = NULL;
-    }
+  if (!ucon64.temp_file)
+    return;
+
+  printf ("Removing: %s\n", ucon64.temp_file);
+  remove (ucon64.temp_file);
+  ucon64.temp_file = NULL;
 }
 
 
@@ -1100,9 +1107,7 @@ ucon64_rename (int mode)
       return -1;
     }
 #endif
-#ifdef  USE_ZLIB
-  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack
-#endif
+
   return 0;
 }
 
@@ -1355,61 +1360,6 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
 #undef PATTERN_BUFSIZE
 
 
-int
-ucon64_bswap16_n (void *buffer, int n)
-// bswap16() n bytes of buffer
-{
-  int i = n;
-  uint16_t *w = (uint16_t *) buffer;
-
-  for (; i > 1; i -= 2, w++)
-    *w = bswap_16 (*w);
-
-  return n;                                     // return # of bytes swapped
-}
-
-
-static int
-ucon64_fbswap16_func (void *buffer, int n, void *object)
-// bswap16() n bytes of buffer
-{
-  (void) object;
-  return ucon64_bswap16_n (buffer, n);
-}
-
-
-static int
-ucon64_fwswap32_func (void *buffer, int n, void *object)
-// wswap32() n/2 words of buffer
-{
-  int i = n;
-  uint32_t *l = (uint32_t *) buffer;
-  (void) object;
-
-  i >>= 1;                                      // # words = # bytes / 2
-  for (; i > 1; i -= 2, l++)
-    *l = wswap_32 (*l);
-
-  return n;                                     // return # of bytes swapped
-}
-
-
-void
-ucon64_fbswap16 (const char *fname, size_t start, size_t len)
-{
-#warning
-//  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
-}
-
-
-void
-ucon64_fwswap32 (const char *fname, size_t start, size_t len)
-{
-#warning
-//  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
-}
-
-
 typedef struct
 {
   FILE *output;
@@ -1527,11 +1477,25 @@ ucon64_find_func (void *buffer, int n, void *object)
 
 int
 ucon64_find (const char *filename, size_t start, size_t len,
-             const char *search, int searchlen, uint32_t flags)
+             const char *search, int searchlen, uint32_t flags, int flag2)
 {
   int result = 0;
   st_ucon64_find_t o = { search, flags, searchlen, start, -2 };
   // o.found == -2 signifies a new find operation (usually for a new file)
+  char buf[MAXBUFSIZE], *values[UCON64_MAX_ARGS];
+
+  strncpy (buf, search, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
+
+  if (flag2)
+    {
+      int x = 0;
+
+      searchlen = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (; x < searchlen; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
+          buf[x] = '?';
+      buf[x] = 0;
+    }
 
   if (searchlen < 1)
     {
@@ -1598,6 +1562,15 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
   st_hash_t *h = NULL;
   int flags = 0;
 
+  if (!start)
+    start = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+
+  fputs (basename2 (ucon64.fname), stdout);
+  if (ucon64.fname_arch[0])
+    printf (" (%s)\n", basename2 (ucon64.fname_arch));
+  else
+    fputc ('\n', stdout);
+
   if (sha1_s)
     flags |= HASH_SHA1;
   if (md5_s)
@@ -1614,13 +1587,21 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
                           fsizeof (filename) - start, filename);
 
   if (sha1_s)
-    strcpy (sha1_s, hash_get_s (h, HASH_SHA1));
+    {
+      strcpy (sha1_s, hash_get_s (h, HASH_SHA1));
+      printf ("Checksum (SHA1): 0x%s\n\n", sha1_s);
+    }
 
   if (md5_s)
-    strcpy (md5_s, hash_get_s (h, HASH_MD5));
+    {
+      strcpy (md5_s, hash_get_s (h, HASH_MD5));
+      printf ("Checksum (MD5): 0x%s\n\n", md5_s);
+    }
 
   if (crc32_i)
-    *(crc32_i) = hash_get_crc32 (h);
+    {
+      printf ("Checksum (CRC32): 0x%08x\n\n", hash_get_crc32 (h));
+    }
 
   hash_close (h);
 

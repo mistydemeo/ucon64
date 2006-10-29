@@ -37,9 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"
 #include "misc/file.h"
 #include "misc/string.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ucon64_dat.h"
@@ -615,7 +612,7 @@ ucon64_options (st_ucon64_t *p)
   int value = 0, x = 0, padded, c = p->option;
   unsigned int checksum;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
-       *ptr = NULL, *values[UCON64_MAX_ARGS];
+       *ptr = NULL;
 #ifdef  AMIGA
   char tmpbuf[FILENAME_MAX];
 #endif
@@ -634,40 +631,16 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_CRCHD:                          // deprecated
       value = UNKNOWN_BACKUP_HEADER_LEN;
     case UCON64_CRC:
-      if (!value)
-        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
-      fputs (basename2 (ucon64.fname), stdout);
-      if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
-      else
-        fputc ('\n', stdout);
       checksum = 0;
       ucon64_chksum (NULL, NULL, &checksum, ucon64.fname, value);
-      printf ("Checksum (CRC32): 0x%08x\n\n", checksum);
       break;
 
     case UCON64_SHA1:
-      if (!value)
-        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
-      fputs (basename2 (ucon64.fname), stdout);
-      if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
-      else
-        fputc ('\n', stdout);
       ucon64_chksum (buf, NULL, NULL, ucon64.fname, value);
-      printf ("Checksum (SHA1): 0x%s\n\n", buf);
       break;
 
     case UCON64_MD5:
-      if (!value)
-        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
-      fputs (basename2 (ucon64.fname), stdout);
-      if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
-      else
-        fputc ('\n', stdout);
       ucon64_chksum (NULL, buf, NULL, ucon64.fname, value);
-      printf ("Checksum (MD5): 0x%s\n\n", buf);
       break;
 
     case UCON64_HEX:
@@ -704,61 +677,37 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_FIND:
       ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
-                   strlen (optarg), MEMCMP2_WCARD ('?'));
+                   strlen (optarg), MEMCMP2_WCARD ('?'), 0);
       break;
 
     case UCON64_FINDR:
       ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
-                   strlen (optarg), MEMCMP2_REL);
+                   strlen (optarg), MEMCMP2_REL, 0);
       break;
 
     case UCON64_FINDI:
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg, strlen (optarg),
-                   MEMCMP2_WCARD ('?') | MEMCMP2_CASE);
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_WCARD ('?') | MEMCMP2_CASE, 0);
       break;
 
     case UCON64_HFIND:
-      strcpy (buf, optarg);
-      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
-      for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
-          buf[x] = '?';
-      buf[x] = 0;
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_WCARD ('?'));
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_WCARD ('?'), 1);
       break;
 
     case UCON64_HFINDR:
-      strcpy (buf, optarg);
-      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
-      for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
-          buf[x] = '?';
-      buf[x] = 0;
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_REL);
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_REL, 1);
       break;
 
     case UCON64_DFIND:
-      strcpy (buf, optarg);
-      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
-      for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
-          buf[x] = '?';
-      buf[x] = 0;
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_WCARD ('?'));
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_WCARD ('?'), 1);
       break;
 
     case UCON64_DFINDR:
-      strcpy (buf, optarg);
-      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
-      for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
-          buf[x] = '?';
-      buf[x] = 0;
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_REL);
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_REL, 1);
       break;
 
     case UCON64_PADHD:                          // deprecated
@@ -1169,23 +1118,17 @@ ucon64_options (st_ucon64_t *p)
         case UCON64_SNES:
           snes_dint (ucon64.nfo);
           break;
-        default:                                // Nintendo 64
-          puts ("Converting file...");
-          ucon64_file_handler (dest_name, NULL, 0);
-          fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-          ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
-          printf (ucon64_msg[WROTE], dest_name);
+        case UCON64_N64:
+          n64_swap (ucon64.nfo);
           break;
+        default:
+          return -1;
         }
       break;
 
     case UCON64_SWAP2:
       // --swap2 is currently used only for Nintendo 64
-      puts ("Converting file...");
-      ucon64_file_handler (dest_name, NULL, 0);
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-      ucon64_fwswap32 (dest_name, 0, ucon64.file_size);
-      printf (ucon64_msg[WROTE], dest_name);
+      n64_swap2 (ucon64.nfo);
       break;
 
     case UCON64_DMIRR:

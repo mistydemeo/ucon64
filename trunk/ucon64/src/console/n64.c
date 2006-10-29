@@ -33,12 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include "misc/itypes.h"
+#include "misc/bswap.h"
 #include "misc/hash.h"
 #include "misc/file.h"
 #include "misc/misc.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -197,6 +195,47 @@ static st_n64_chksum_t n64crc;
 static int n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename);
 
 
+static int
+ucon64_fbswap16_func (void *buffer, int n, void *object)
+// bswap16() n bytes of buffer
+{
+  (void) object;
+  return bswap16_n (buffer, n);
+}
+
+
+static void
+ucon64_fbswap16 (const char *fname, size_t start, size_t len)
+{
+#warning
+  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname);
+}
+
+
+static int
+ucon64_fwswap32_func (void *buffer, int n, void *object)
+// wswap32() n/2 words of buffer
+{
+  int i = n;
+  uint32_t *l = (uint32_t *) buffer;
+  (void) object;
+
+  i >>= 1;                                      // # words = # bytes / 2
+  for (; i > 1; i -= 2, l++)
+    *l = wswap_32 (*l);
+
+  return n;                                     // return # of bytes swapped
+}
+
+
+static void
+ucon64_fwswap32 (const char *fname, size_t start, size_t len)
+{
+#warning
+  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname);
+}
+
+
 int
 n64_v64 (st_ucon64_nfo_t *rominfo)
 {
@@ -250,7 +289,7 @@ n64_n (st_ucon64_nfo_t *rominfo, const char *name)
   strncpy (buf, name, strlen (name) > N64_NAME_LEN ? N64_NAME_LEN : strlen (name));
 
   if (rominfo->interleaved)
-    ucon64_bswap16_n (buf, N64_NAME_LEN);
+    bswap16_n (buf, N64_NAME_LEN);
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -286,7 +325,7 @@ n64_update_chksum (st_ucon64_nfo_t *rominfo, const char *filename, char *buf)
       crc <<= 8;
     }
   if (rominfo->interleaved)
-    ucon64_bswap16_n (buf, 8);
+    bswap16_n (buf, 8);
   ucon64_fwrite (buf, rominfo->backup_header_len + 16, 8, filename, "r+b");
 }
 
@@ -331,7 +370,7 @@ n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
   ucon64_fread (sram, 0, N64_SRAM_SIZE, sramfile);
 
   if (rominfo->interleaved)
-    ucon64_bswap16_n (sram, N64_SRAM_SIZE);
+    bswap16_n (sram, N64_SRAM_SIZE);
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -356,7 +395,7 @@ n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
       ucon64_fread (buf, 0, N64_BC_SIZE, bootfile);
 
       if (rominfo->interleaved)
-        ucon64_bswap16_n (buf, N64_BC_SIZE);
+        bswap16_n (buf, N64_BC_SIZE);
 
       ucon64_file_handler (dest_name, NULL, 0);
       fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
@@ -410,7 +449,7 @@ n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
   ucon64_fread (usmsbuf, 0, size, smsrom);
 
   if (rominfo->interleaved)
-    ucon64_bswap16_n (usmsbuf, size);
+    bswap16_n (usmsbuf, size);
 
   // Jos Kwanten's rominserter.exe produces a file named Patched.v64
   strcpy (dest_name, "Patched.v64");
@@ -513,7 +552,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
   // internal ROM name
   strncpy (rominfo->name, (char *) &OFFSET (n64_header, 32), N64_NAME_LEN);
   if (rominfo->interleaved)
-    ucon64_bswap16_n (rominfo->name, N64_NAME_LEN);
+    bswap16_n (rominfo->name, N64_NAME_LEN);
   rominfo->name[N64_NAME_LEN] = 0;
 
   // ROM maker
@@ -610,7 +649,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
       if (!rominfo->interleaved)
         {
           ucon64.fcrc32 = ucon64_crc32 (0, crc32_mem, n);
-          ucon64_bswap16_n (crc32_mem, n);
+          bswap16_n (crc32_mem, n);
         }
       ucon64.crc32 = ucon64_crc32 (0, crc32_mem, n);
       free (crc32_mem);
@@ -640,16 +679,16 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   if (!rominfo->interleaved)
     {
       fcrc32 = ucon64_crc32 (0, crc32_mem, CHECKSUM_START);
-      ucon64_bswap16_n (crc32_mem, CHECKSUM_START);
+      bswap16_n (crc32_mem, CHECKSUM_START);
     }
   else
-    ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
+    bswap16_n (bootcode_buf, N64_BC_SIZE);
   scrc32 = ucon64_crc32 (0, crc32_mem, CHECKSUM_START);
 #else
   fseek (file, rominfo->backup_header_len + N64_HEADER_LEN, SEEK_SET);
   fread (bootcode_buf, 1, N64_BC_SIZE, file);
   if (rominfo->interleaved)
-    ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
+    bswap16_n (bootcode_buf, N64_BC_SIZE);
 #endif
   n = ucon64_crc32 (0, bootcode_buf, N64_BC_SIZE);
   if (n == 0x0b050ee0)
@@ -691,7 +730,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
                 {
                   memcpy (crc32_mem, chunk, n);
                   fcrc32 = ucon64_crc32 (fcrc32, crc32_mem, n);
-                  ucon64_bswap16_n (crc32_mem, n);
+                  bswap16_n (crc32_mem, n);
                 }
               scrc32 = ucon64_crc32 (scrc32, crc32_mem, n);
 #endif
@@ -764,7 +803,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
       if (!rominfo->interleaved)
         {
           fcrc32 = ucon64_crc32 (fcrc32, crc32_mem, n);
-          ucon64_bswap16_n (crc32_mem, n);
+          bswap16_n (crc32_mem, n);
         }
       scrc32 = ucon64_crc32 (scrc32, crc32_mem, n);
     }
@@ -775,5 +814,43 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 #endif
 
   fclose (file);
+  return 0;
+}
+
+
+int
+n64_swap (st_ucon64_nfo_t *rominfo)
+{
+#warning
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
+
+  puts ("Converting file...");
+  ucon64_file_handler (dest_name, NULL, 0);
+  fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+  printf (ucon64_msg[WROTE], dest_name);
+
+  return 0;
+}
+
+
+int
+n64_swap2 (st_ucon64_nfo_t *rominfo)
+{
+#warning
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
+
+  puts ("Converting file...");
+  ucon64_file_handler (dest_name, NULL, 0);
+  fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_fwswap32 (dest_name, 0, ucon64.file_size);
+  printf (ucon64_msg[WROTE], dest_name);
+
   return 0;
 }

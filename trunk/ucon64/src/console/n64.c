@@ -195,22 +195,6 @@ static st_n64_chksum_t n64crc;
 static int n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename);
 
 
-static int
-fwswap32_n (void *buffer, int n)
-// wswap32() n/2 words of buffer
-{
-  int i = n;
-  uint32_t *l = (uint32_t *) buffer;
-
-  i >>= 1;                                      // # words = # bytes / 2
-  for (; i > 1; i -= 2, l++)
-    *l = wswap_32 (*l);
-
-  return n;                                     // return # of bytes swapped
-}
-
-
-
 int
 n64_v64 (st_ucon64_nfo_t *rominfo)
 {
@@ -225,8 +209,7 @@ n64_v64 (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".v64");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+  ucon64_fbswap16 (ucon64.fname, 0, ucon64.file_size, dest_name);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -247,8 +230,7 @@ n64_z64 (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".z64");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+  ucon64_fbswap16 (ucon64.fname, 0, ucon64.file_size, dest_name);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -274,16 +256,6 @@ n64_n (st_ucon64_nfo_t *rominfo, const char *name)
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
-
-
-#if 0
-int
-n64_f (st_ucon64_nfo_t *rominfo)
-{
-  (void) rominfo;
-  return 0;
-}
-#endif
 
 
 static void
@@ -382,11 +354,14 @@ n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
       strcpy (dest_name, bootfile);
 //      set_suffix (dest_name, ".bot");
       ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      fcopy (ucon64.fname, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE,
-             dest_name, "wb");
 
       if (rominfo->interleaved)
-        ucon64_fbswap16 (dest_name, 0, fsizeof (dest_name));
+        ucon64_fbswap16 (ucon64.fname, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE,
+          dest_name);
+      else
+        fcopy (ucon64.fname, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE,
+          dest_name, "wb");
+
     }
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -793,47 +768,17 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 }
 
 
-static int
-ucon64_fbswap16_func (void *buffer, int n, void *object)
-// bswap16() n bytes of buffer
-{
-  (void) object;
-  return bswap16_n (buffer, n);
-}
-
-
 int
 n64_swap (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char buf[MAXBUFSIZE];
-  FILE *srcfile = NULL, *destfile = NULL;
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);
 
   puts ("Converting file...");
-  ucon64_file_handler (dest_name, src_name, 0);
-  if ((srcfile = fopen (src_name, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
-      return -1;
-    }
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
-
-  while ((len = fread (buf, MAXBUFSIZE, 1, srcfile)))
-    {
-      bswap16_n (buf, len);
-      fwrite (buf, len, 1, destfile);
-    }
-
-  fclose (srcfile);
-  fclose (destfile);
-
+  ucon64_file_handler (dest_name, NULL, 0);
+  ucon64_fbswap16 (src_name, 0, ucon64.file_size, dest_name);
   printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
@@ -844,34 +789,13 @@ int
 n64_swap2 (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char buf[MAXBUFSIZE];
-  FILE *srcfile = NULL, *dstfile = NULL;
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);
 
   puts ("Converting file...");
-  ucon64_file_handler (dest_name, src_name, 0);
-  if ((srcfile = fopen (src_name, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
-      return -1;
-    }
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
-
-  while ((len = fread (buf, MAXBUFSIZE, 1, srcfile)))
-    {
-      fwswap32_n (buf, len);
-      fwrite (buf, len, 1, destfile);
-    }
-
-  fclose (srcfile);
-  fclose (destfile);
-
+  ucon64_file_handler (dest_name, NULL, 0);
+  ucon64_fwswap32 (src_name, 0, ucon64.file_size, dest_name);
   printf (ucon64_msg[WROTE], dest_name);
 
   return 0;

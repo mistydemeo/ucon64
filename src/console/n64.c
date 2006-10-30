@@ -196,29 +196,11 @@ static int n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename);
 
 
 static int
-ucon64_fbswap16_func (void *buffer, int n, void *object)
-// bswap16() n bytes of buffer
-{
-  (void) object;
-  return bswap16_n (buffer, n);
-}
-
-
-static void
-ucon64_fbswap16 (const char *fname, size_t start, size_t len)
-{
-#warning
-  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname);
-}
-
-
-static int
-ucon64_fwswap32_func (void *buffer, int n, void *object)
+fwswap32_n (void *buffer, int n)
 // wswap32() n/2 words of buffer
 {
   int i = n;
   uint32_t *l = (uint32_t *) buffer;
-  (void) object;
 
   i >>= 1;                                      // # words = # bytes / 2
   for (; i > 1; i -= 2, l++)
@@ -227,13 +209,6 @@ ucon64_fwswap32_func (void *buffer, int n, void *object)
   return n;                                     // return # of bytes swapped
 }
 
-
-static void
-ucon64_fwswap32 (const char *fname, size_t start, size_t len)
-{
-#warning
-  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname);
-}
 
 
 int
@@ -818,19 +793,47 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 }
 
 
+static int
+ucon64_fbswap16_func (void *buffer, int n, void *object)
+// bswap16() n bytes of buffer
+{
+  (void) object;
+  return bswap16_n (buffer, n);
+}
+
+
 int
 n64_swap (st_ucon64_nfo_t *rominfo)
 {
-#warning
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char buf[MAXBUFSIZE];
+  FILE *srcfile = NULL, *destfile = NULL;
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);
 
   puts ("Converting file...");
-  ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+
+  while ((len = fread (buf, MAXBUFSIZE, 1, srcfile)))
+    {
+      bswap16_n (buf, len);
+      fwrite (buf, len, 1, destfile);
+    }
+
+  fclose (srcfile);
+  fclose (destfile);
+
   printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
@@ -840,16 +843,35 @@ n64_swap (st_ucon64_nfo_t *rominfo)
 int
 n64_swap2 (st_ucon64_nfo_t *rominfo)
 {
-#warning
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char buf[MAXBUFSIZE];
+  FILE *srcfile = NULL, *dstfile = NULL;
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);
 
   puts ("Converting file...");
-  ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwswap32 (dest_name, 0, ucon64.file_size);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+
+  while ((len = fread (buf, MAXBUFSIZE, 1, srcfile)))
+    {
+      fwswap32_n (buf, len);
+      fwrite (buf, len, 1, destfile);
+    }
+
+  fclose (srcfile);
+  fclose (destfile);
+
   printf (ucon64_msg[WROTE], dest_name);
 
   return 0;

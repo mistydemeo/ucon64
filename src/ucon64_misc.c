@@ -459,10 +459,23 @@ const st_getopt2_t ucon64_padding_usage[] =
   };
 
 
+static unsigned char *binbuf = NULL;
+
+
+void
+ucon64_free_binary (void)
+{
+  if (!binbuf)
+    return;
+
+  free (binbuf);
+  binbuf = NULL;
+}
+
+
 int
 ucon64_get_binary (const unsigned char **data, char *id)
 {
-  static unsigned char *buf = NULL;
   const char *p = NULL;
 
   p = get_property (ucon64.configfile, id, PROPERTY_MODE_FILENAME);
@@ -473,26 +486,29 @@ ucon64_get_binary (const unsigned char **data, char *id)
         {
           int len = fsizeof (p);
 
-          if (buf)
+          if (binbuf)
             {
-              free (buf);
-              buf = NULL;
+              free (binbuf);
+              binbuf = NULL;
             }
 
-          buf = malloc (len + 1);
-          if (buf)
+          binbuf = malloc (len + 1);
+          if (binbuf)
             {
               FILE *fh = fopen (p, "rb");
               if (fh)
                 {
-                  fread (&buf, len, 1, fh);
+                  fread (&binbuf, len, 1, fh);
                   fclose (fh);
 
-                  *data = buf;
+                  *data = binbuf;
+
+                  register_func (ucon64_free_binary);
+
                   return len;
                 }
-              free (buf);
-              buf = NULL;
+              free (binbuf);
+              binbuf = NULL;
             }
         }
 #if 1

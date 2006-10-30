@@ -575,6 +575,21 @@ bswap16_n (void *buffer, int n)
 }
 
 
+int
+wswap32_n (void *buffer, int n)
+// wswap32() n/2 words of buffer
+{
+  int i = n;
+  uint32_t *l = (uint32_t *) buffer;
+
+  i >>= 1;                                      // # words = # bytes / 2
+  for (; i > 1; i -= 2, l++)
+    *l = wswap_32 (*l);
+
+  return n;                                     // return # of bytes swapped
+}
+
+
 unsigned int
 ucon64_crc32 (unsigned int crc, const void *buffer, unsigned int size)
 {
@@ -1622,6 +1637,61 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
   hash_close (h);
 
   return result;
+}
+
+
+#warning
+typedef struct
+{
+  FILE *dest_file;
+} st_ucon64_swap_t;
+
+
+static inline int
+ucon64_fbswap16_func (void *buffer, int n, void *object)
+{
+  st_ucon64_swap_t *o = (st_ucon64_swap_t *) object;
+
+  bswap16_n (buffer, n);
+  return fwrite (buffer, n, 1, o->dest_file);
+}
+
+
+static inline int
+ucon64_fwswap32_func (void *buffer, int n, void *object)
+{
+  st_ucon64_swap_t *o = (st_ucon64_swap_t *) object;
+
+  wswap32_n (buffer, n);
+  return fwrite (buffer, n, 1, o->dest_file);
+}
+
+
+void
+ucon64_fbswap16 (const char *src_fname, size_t start, size_t len, const char *dest_fname)
+{
+  st_ucon64_swap_t o;
+
+  o.dest_file = fopen (dest_fname, "wb");
+
+  if (o.dest_file)
+    quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, &o, start, len, src_fname);
+
+  fclose (o.dest_file);
+}
+
+
+void
+ucon64_fwswap32 (const char *src_fname, size_t start, size_t len, const char *dest_fname)
+{
+  st_ucon64_swap_t o;
+
+  o.dest_file = fopen (dest_fname, "wb");
+
+  if (o.dest_file)
+    quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, &o, start, len, src_fname);
+
+  fclose (o.dest_file);
 }
 
 

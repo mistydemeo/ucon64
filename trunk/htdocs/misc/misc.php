@@ -2,6 +2,13 @@
 
 
 function
+get_firefox ()
+{
+  //check user-agent and redirect ie users to http://www.mozilla.org/firefox
+}
+
+
+function
 traffic ($db, $table_name)
 {
   $p = "INSERT INTO `"

@@ -789,10 +789,28 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (all) -r process subdirectories recursively (by NoisyB and dbjh)<br>
 - updated (SNES) improved reliability of --xgd3 (should reduce the frequency of
   "File Size Error !") (by dbjh)<br>
-- added (NES) --sc convert to Super Card (CF to GBA Adapter)/SCZ (creates: SAV
-  template) (by NoisyB)<br>
-- added (ATARI) --cc2[=BSM]  convert BIN to Cuttle Card (2)/(Starpath)
-  Supercharger/WAV; (by NoisyB)<br>
+- added --help[=WHAT] WHAT=long,pad,dat,patch,backup,snes,etc. ; help output<br>
+  is now smaller (by NoisyB)<br>
+- replaced autoconf with faster and less complicated alternative (by NoisyB)<br>
+- completely dropped support for CD and DVD based consoles (libdiscmage development<br>
+  seems to be stalled) (by NoisyB)<br>
+- made "support binaries" internal; this makes installation and use much easier;<br>
+  but if external binaries for f2a and/or SuperCard are present they will be used<br>
+  instead (by NoisyB)<br>
+- added (ATARI) --cc2 convert BIN to Cuttle Card (2)/(Starpath) Supercharger/WAV;<br>
+  (by NoisyB)<br>
+- added (NES) --sc convert to SuperCard (by NoisyB)<br>
+- added (GB) --sc convert to SuperCard (by NoisyB)<br>
+- added (SMS) --sc convert to SuperCard (by NoisyB)<br>
+- --dual is deprecated; --bits show ROM as bitdump is the replacement (by NoisyB)<br>
+<!--
+- added (NDS) --sc convert to SuperCard (by NoisyB)<br>
+- added ppf3 support (by NoisyB)<br>
+- added DreamSNES ROMS.LST like output (by NoisyB)<br>
+- added -c2 show differencies in ANSI (1 char = 512 bytes) (by NoisyB)<br>
+- added support for other dat file formats (by NoisyB)<br>
+- added cloned functionalities of ckmame (by NoisyB)<br>
+-->
 <br>
 <br>
 <br>

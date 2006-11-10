@@ -6,6 +6,8 @@
 <center><img src="images/new.png" border="0" width="200"></center>
 <br>
 <!--NEWS-->
+20061110 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">The uCON64 CVS version is currently broken due to heavy<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;development</a><br>
 <a name="flc">20060923 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://flc.berlios.de">flc has been moved to its own site</a><br>
 20060914 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">flc 1.4.1 has been released</a><br>
 20060412 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">flc 1.4.0 has been released</a><br>
@@ -24,8 +26,18 @@
 <br>
 <br>
 <!--RSS NEWS-->
+20061009 04:33 <a href="http://youtube.com/?v=S-oWbORk44A">gp2x odessey2 emulator</a><br>
+20061007 21:25 <a href="http://youtube.com/?v=IPwTOmMliMc">Rolo to the Rescue GEN pres. by SpeedRuns.net</a><br>
+20061007 21:23 <a href="http://youtube.com/?v=6A_hOYR6BII">Emulator CM2</a><br>
+20061007 07:22 <a href="http://youtube.com/?v=6nEbh-kT8ug">Atari Lynx emulator on GP2X</a><br>
+20061006 22:28 <a href="http://youtube.com/?v=6aCRZyZnHe0">2_04_5-5</a><br>
+20061006 19:02 <a href="http://youtube.com/?v=FLTxkqmt2dU">ULTAMATE MARIO</a><br>
+20061004 20:05 <a href="http://youtube.com/?v=1SEfghfnMEc">Ace Combat on psx4all on GP2X</a><br>
+20061004 20:00 <a href="http://youtube.com/?v=480krfxM1hk">RR4 on psx4all on GP2X</a><br>
+20061004 19:56 <a href="http://youtube.com/?v=vEHIaDZ9H8k">Rapid Reload on psx4all on GP2X</a><br>
+20061004 19:50 <a href="http://youtube.com/?v=RG1JhBPZAbI">FF7 on psx4all on GP2X</a><br>
+20061003 10:49 <a href="http://youtube.com/?v=OV8hqTd-RtA">sonic 2 capital city zone with shadow</a><br>
 20060926 21:31 <a href="http://youtube.com/?v=SO6JJxGhAAo">Metal Slug X on the psp</a><br>
-20060925 15:51 <a href="http://youtube.com/?v=P2zvbCeGEhE">Gens- Sonic the Hedgehog 1</a><br>
 20060924 15:13 <a href="http://youtube.com/?v=m_CSEE_mQ1c">operation moon gate</a><br>
 20060924 14:44 <a href="http://youtube.com/?v=roh-Azn31qU">PS1 EMULATOR ON  PSP</a><br>
 20060915 21:51 <a href="http://youtube.com/?v=sQ9vewU1aag">snes on psp</a><br>
@@ -44,18 +56,8 @@
 20060826 06:16 <a href="http://youtube.com/?v=h6UBCrKMDuk">Sony VGN-U50: N64 emulator</a><br>
 20060824 15:46 <a href="http://youtube.com/?v=nxdMRCb7rMY">gp2xtr.com Intro Video - Part I</a><br>
 20060822 23:17 <a href="http://youtube.com/?v=t_GYAdwd9I8">sega emul on my xbox</a><br>
-20060821 21:31 <a href="http://youtube.com/?v=L2CZN_0ngqI">SNES Emulation on GP2x</a><br>
-20060819 22:47 <a href="http://youtube.com/?v=z7EANPjm5Nw">gpSP- the new Gameboy Advance Emulator for PSP</a><br>
-20060819 13:51 <a href="http://youtube.com/?v=ni_yF1Zjk1I">PS2 playing Sega games !!!SWeeT!!!</a><br>
-20060819 13:44 <a href="http://youtube.com/?v=jBsx98oVUZc">PS2 playing Nintendo !!!</a><br>
-20060814 20:59 <a href="http://youtube.com/?v=d9-X5XA0aYY">emuladores</a><br>
-20060814 05:08 <a href="http://youtube.com/?v=l9N2slYuO6M">N64 Emulator</a><br>
-20060812 21:47 <a href="http://youtube.com/?v=nH86jzjWL2E">Soul Calibur: Taki (chankast emulation)</a><br>
-20060812 21:06 <a href="http://youtube.com/?v=zowJxRsfPS4">DoA 2 Opening (chankast emulation)</a><br>
-20060812 12:05 <a href="http://youtube.com/?v=_-BH1XdgVPQ">Doom on Nintendo DS</a><br>
-20060812 11:02 <a href="http://youtube.com/?v=jITaknk35wg">gp2x - Sony Playstation / PSX emulation via psx4gp2x beta2</a><br>
 <br>
-updated with RSStool 0.9.4 20061003 11:19:54
+updated with RSStool 0.9.4 20061011 20:37:39
     </td>
   </tr>
 </table>

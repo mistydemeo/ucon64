@@ -4,7 +4,8 @@
     <td><font size="-1">
 <img src="images/ucon64misc.png" border="0" height="50"><font size="-1"><br>
 <br>
-<a href="http://prdownloads.sourceforge.net/ucon64/conn.pdf?download">conn.pdf</a><br>
+<a href="ucon64misc/conn.html">conn.html</a> (html)<br>
+<a href="http://prdownloads.sourceforge.net/ucon64/conn.pdf?download">conn.pdf</a> (pdf)<br>
 Quick guide to the most Video Game Connectors and Cables<br>
 <br>
 <a href="http://prdownloads.sourceforge.net/ucon64/cxa1645.pdf?download">cxa1645.pdf</a><br>

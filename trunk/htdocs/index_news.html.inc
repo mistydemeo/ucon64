@@ -7,7 +7,7 @@
 <br>
 <!--NEWS-->
 20061110 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">The uCON64 CVS version is currently broken due to heavy<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;development</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;development</a><br>
 <a name="flc">20060923 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://flc.berlios.de">flc has been moved to its own site</a><br>
 20060914 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">flc 1.4.1 has been released</a><br>
 20060412 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">flc 1.4.0 has been released</a><br>
@@ -57,7 +57,7 @@
 20061003 10:49 <a href="http://youtube.com/?v=OV8hqTd-RtA">sonic 2 capital city zone with shadow</a><br>
 20060926 21:31 <a href="http://youtube.com/?v=SO6JJxGhAAo">Metal Slug X on the psp</a><br>
 <br>
-updated with RSStool 0.9.9 20061110 15:20:19
+updated with RSStool 0.9.9 20061110 23:35:36
     </td>
   </tr>
 </table>

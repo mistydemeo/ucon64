@@ -932,10 +932,10 @@ GetFileSize2 (FILE *fp)
       if (FileHeader[0xbd] != Complement)
         puts ("NOTE: Fixing complement check");
 
-      rewind (fp);
+      fseek (fp, 0, SEEK_SET);
     }
   else
-    rewind (fp);
+    fseek (fp, 0, SEEK_SET);
 
   return ucon64.file_size;
 }

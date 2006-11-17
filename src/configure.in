@@ -158,6 +158,35 @@ st_configure_in_t configure_in[] = {
   {
     {NULL},
     {NULL},
+    {NULL},
+    "DESTDIR=\n",
+    NULL,
+    NULL,
+    NULL
+  },
+  {
+    {NULL},
+    {NULL},
+    {"/usr/local/bin", NULL},
+    "BINDIR=/usr/local/bin\n",
+    NULL,
+    NULL,
+    NULL
+  },
+  {
+    {NULL},
+    {NULL},
+    {"/usr/bin", NULL},
+    "ifndef BINDIR\n"
+    "BINDIR=/usr/bin\n"
+    "endif\n",
+    NULL,
+    NULL,
+    NULL
+  },
+  {
+    {NULL},
+    {NULL},
     {"/usr/bin/install", NULL},
     "INSTALL=/usr/bin/install -c\n"
     "INSTALL_PROGRAM=${INSTALL}\n"
@@ -194,6 +223,16 @@ st_configure_in_t configure_in[] = {
     {NULL},
     NULL,
     "//#define TEST\n",
+    NULL,
+    NULL
+  },
+  {
+    {NULL},
+    {NULL},
+    {NULL},
+    "#TEST_CMDLINE=1\n"
+    "#CFLAGS+=-DTEST_CMDLINE\n",
+    NULL,
     NULL,
     NULL
   },
@@ -312,7 +351,7 @@ st_configure_in_t configure_in[] = {
     NULL
   },
 #endif
-#if 1
+#if 0
   {
     {NULL},
     {"zlib.h", NULL},

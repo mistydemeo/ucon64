@@ -1088,3 +1088,31 @@ rmdir2 (const char *path)
 #endif
   return rmdir (path);
 }
+
+
+unsigned char *
+fopenmallocread (const char *filename, int maxlength)
+{
+  FILE *fh = NULL;
+  unsigned char *p = NULL;
+  int len = fsizeof (filename);
+
+  if (len > maxlength)
+    return NULL;
+
+  if (!(fh = fopen (filename, "rb")))
+    return NULL;
+
+  if (!(p = (unsigned char *) malloc (len + 1)))
+    {
+      fclose (fh);
+      return NULL;
+    }
+
+  fread (p, len, 1, fh);
+
+  fclose (fh);
+
+  return p;
+}
+

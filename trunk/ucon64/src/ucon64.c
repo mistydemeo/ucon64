@@ -77,6 +77,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
+#ifdef  TEST_CMDLINE
+#include "misc/test.h"
+#endif  // TEST_CMDLINE
 
 
 static void ucon64_exit (void);
@@ -85,10 +88,6 @@ static void ucon64_rom_nfo (const st_ucon64_nfo_t *nfo);
 static st_ucon64_nfo_t *ucon64_probe (st_ucon64_nfo_t *nfo);
 static int ucon64_rom_handling (void);
 static int ucon64_process_rom (const char *fname);
-//#define TEST
-#ifdef  TEST
-static void ucon64_test (void);
-#endif  // TEST
 
 
 st_ucon64_t ucon64;                             // containes ptr to image, dat and nfo
@@ -369,11 +368,11 @@ main (int argc, char **argv)
       {NULL, NULL, NULL}
     };
 
-#ifdef  TEST
+#ifdef  TEST_CMDLINE
   if (argc == 1)
     ucon64_test ();
 #else
-  printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2005\n"
+  printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2006\n"
     "Uses code from various people. See 'developers.html' for more!\n"
     "This may be freely redistributed under the terms of the GNU Public License\n\n");
 #endif
@@ -1401,27 +1400,11 @@ ucon64_usage (int argc, char *argv[], int view)
 }
 
 
-#ifdef  TEST
-typedef struct
-{
-  int val;
-
-  const char *cmdline;
-  uint32_t crc32;    // crc32 of cmdline's output
-} st_ucon64_test_t;
-
-
+#ifdef  TEST_CMDLINE
 void
 ucon64_test (void)
 {
-// default prepare and cleanup macros
-#define TEST_START ""
-#define TEST_END   ""
-#define TEST_BREAK {0, NULL, 0},
-#define TEST_BUG 1
-#define TEST_TODO 2
-
-  st_ucon64_test_t test[] =
+  st_test_t t[] =
     {
       {UCON64_1991,	"ucon64 -1991 /tmp/test/test.smd;"
                         "ucon64 -gen test.smd;"
@@ -1725,9 +1708,9 @@ TEST_BREAK
 
       {0, NULL, 0}
     };
-  int x = 0;
-  unsigned int crc = 0;
-  char buf[MAXBUFSIZE], fname[FILENAME_MAX];
+//  int x = 0;
+//  unsigned int crc = 0;
+//  char buf[MAXBUFSIZE], fname[FILENAME_MAX];
 
 #ifdef  DEBUG
 //#if 1
@@ -1763,63 +1746,6 @@ TEST_BREAK
   }              
 #endif
 
-  for (x = 0; test[x].val; x++)
-    {
-      FILE *in = NULL, *out = NULL;
-      const char *state = NULL;
-
-      // NO testing?
-      if (!test[x].cmdline || !test[x].crc32)
-        continue;
-        
-      crc = 0;
-      if (test[x].crc32 != TEST_BUG && test[x].crc32 != TEST_TODO)
-        {
-          sprintf (buf, "%s", test[x].cmdline);
-          if (!(in = popen (buf, "r")))
-            {
-              fprintf (stderr, "ERROR: cmdline \"%s\"\n", test[x].cmdline);
-              continue;
-            }
-
-          sprintf (fname, "%d-output.txt", test[x].val);
-          out = fopen (fname, "w");
-      
-          while ((fgets (buf, MAXBUFSIZE, in)))
-            {
-              crc = ucon64_crc32 (crc, (const void *) &buf, strlen (buf));
-              fputs (buf, out);
-            }
-        }
-
-      sprintf (buf, "option: %4d crc: 0x%08x calc: 0x%08x status: ",
-        test[x].val,
-        test[x].crc32,
-        crc);
-
-      if (test[x].crc32 == TEST_BUG)
-        state = "BUG!";
-      else if (test[x].crc32 == TEST_TODO)
-        state = "TODO ";
-      else  if (test[x].crc32 == crc)
-        state = "OK ";
-      else
-        state = "BUG?";
-
-      sprintf (strchr (buf, 0), "%5s (%s)\n", state, test[x].cmdline);
-
-      printf (buf); 
-      fflush (stdout);
-
-      if (test[x].crc32 != TEST_BUG && test[x].crc32 != TEST_TODO)
-        {
-          fputs ("^^^ ", out);
-          fputs (buf, out);
-      
-          fclose (in);
-          fclose (out);
-        }
-    }
-  exit (0);
+  test (t);
 }
 #endif

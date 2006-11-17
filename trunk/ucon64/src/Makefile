@@ -75,6 +75,9 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/smc.o backup/smd.o backup/smsgg-pro.o backup/spsc.o \
         backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o backup/yoko.o \
         backup/z64.o
+ifdef TEST_CMDLINE
+OBJECTS+=misc/test.o
+endif
 ifdef DJGPP
 OBJECTS+=misc/snprintf.o
 endif
@@ -219,7 +222,7 @@ else
 ifeq ($(OSTYPE),beos)
 	rm -f $(HOME)/config/bin/$(TARGET)
 else
-	rm -f /usr/local/bin/$(TARGET)
+	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
 endif                                   # beos
 endif                                   # DJGPP
 endif                                   # msys

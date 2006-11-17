@@ -108,4 +108,7 @@ extern int quick_io_func (int (*func) (void *, int, void *),
 extern int getfile (int argc, char **argv, int (*callback_func) (const char *), int flags);
 
 
+extern unsigned char *fopenmallocread (const char *filename, int maxlength);
+
+
 #endif // MISC_FILE_H

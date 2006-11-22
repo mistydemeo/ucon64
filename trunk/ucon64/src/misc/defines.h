@@ -106,4 +106,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
+#if     (!defined TRUE || !defined FALSE)
+#define FALSE 0
+#define TRUE (!FALSE)
+#endif
+
+
 #endif  // DEFINES_H

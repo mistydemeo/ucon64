@@ -872,6 +872,7 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
+#warning
   strcpy (fname, "genpal.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
@@ -926,6 +927,7 @@ genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
+#warning
   strcpy (fname, "mdntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)

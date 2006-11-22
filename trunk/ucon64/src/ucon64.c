@@ -57,6 +57,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma message ("DEBUG active")
 #endif
 #endif
+#include "misc/defines.h"
 #ifdef  USE_PARALLEL
 #include "misc/parallel.h"
 #endif
@@ -82,6 +83,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif  // TEST_CMDLINE
 
 
+
+#ifdef  TEST_CMDLINE
+static void ucon64_test (void);
+#endif
 static void ucon64_exit (void);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_ucon64_nfo_t *nfo);
@@ -330,8 +335,33 @@ main (int argc, char **argv)
         "path to GBA multi-game loader (Super Card)"
       },
       {
+        "genpal_txt", "genpal.txt",
+        "path to textfile with Genesis PAL protection search-and-defeat \"codes\" (patterns)"
+      },
+      {
+        "mdntsc_txt", "mdntsc.txt",
+        "path to textfile with Mega Drive NTSC protection search-and-defeat \"codes\" (patterns)"
+      },
+      {
+        "snescopy_txt", "snescopy.txt",
+        "path to textfile with SNES protection search-and-defeat \"codes\" (patterns)"
+      },
+      {
+        "snesntsc_txt", "snesntsc.txt",
+        "path to textfile with SNES NTSC protection search-and-defeat \"codes\" (patterns)"
+      },
+      {
+        "snespal_txt", "snespal.txt",
+        "path to textfile with SNES PAL protection search-and-defeat \"codes\" (patterns)"
+      },
+      {
+        "snesslow_txt", "snesslow.txt",
+        "path to textfile with SNES SLOWROM protection search-and-defeat \"codes\" (patterns)"
+      },
+      {
         "emulate_" UCON64_3DO_S,      "",
         "emulate_<console shortcut>=<emulator with options>\n\n"
+        "Example: \"emulate_snes=snes9x -fs\"\n\n"
         "You can also use CRC32 values for ROM specific emulation options:\n\n"
         "emulate_0x<crc32>=<emulator with options>\n"
         "emulate_<crc32>=<emulator with options>"
@@ -992,16 +1022,24 @@ ucon64_rom_handling (void)
             if (ucon64.dat && ucon64.nfo)
               {
                 if (!ucon64.nfo->name[0])
-                  strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                  strcpy (ucon64.nfo->name,
+                          (((st_ucon64_dat_t *) ucon64.dat)->name ?
+                           ((st_ucon64_dat_t *) ucon64.dat)->name :
+                           ""));
                 else if (ucon64.console == UCON64_NES)
                   { // override the three-character FDS or FAM name
                     int t = nes_get_file_type ();
                     if (t == FDS || t == FAM)
-                      strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                      strcpy (ucon64.nfo->name,
+                              (((st_ucon64_dat_t *) ucon64.dat)->name ?
+                               ((st_ucon64_dat_t *) ucon64.dat)->name :
+                               ""));
                   }
 
                 if (!ucon64.nfo->country)
-                  ucon64.nfo->country = NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->country);
+                  ucon64.nfo->country = (((st_ucon64_dat_t *) ucon64.dat)->country ?
+                                         ((st_ucon64_dat_t *) ucon64.dat)->country :
+                                         "");
               }
             break;
           }
@@ -1202,15 +1240,15 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
     puts (nfo->console_usage);
 
   // name, maker, country and size
-  strcpy (buf, NULL_TO_EMPTY (nfo->name));
+  strcpy (buf, (nfo->name ? nfo->name : ""));
   x = UCON64_ISSET (nfo->data_size) ?
     nfo->data_size :
     ucon64.file_size - nfo->backup_header_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           to_func (buf, strlen (buf), toprint),
-          NULL_TO_EMPTY (nfo->maker),
-          NULL_TO_EMPTY (nfo->country),
+          (nfo->maker ? nfo->maker : ""),
+          (nfo->country ? nfo->country : ""),
           x,
           TOMBIT_F (x));
 
@@ -1404,7 +1442,7 @@ ucon64_usage (int argc, char *argv[], int view)
 void
 ucon64_test (void)
 {
-  st_test_t t[] =
+  st_test_cmdline_t t[] =
     {
       {UCON64_1991,	"ucon64 -1991 /tmp/test/test.smd;"
                         "ucon64 -gen test.smd;"
@@ -1746,6 +1784,6 @@ TEST_BREAK
   }              
 #endif
 
-  test (t);
+  test_cmdline (t);
 }
 #endif

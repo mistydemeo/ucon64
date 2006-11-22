@@ -22,21 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_DEFINES_H
 #define UCON64_DEFINES_H
 
-// Please make sure that NO definition except FALSE has 0 as value!
-#if     (!defined TRUE || !defined FALSE)
-#define FALSE 0
-#define TRUE (!FALSE)
-#endif
-
-#if     (!defined MIN || !defined MAX)
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
-
-#ifndef LIB_VERSION
-#define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
-#endif
-#define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 //#define RANDOM(min, max) ((rand () % (max - min)) + min)
 #define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])
 
@@ -50,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define UCON64_VERSION 201
 
 /* version of config file layout */
-#define UCON64_CONFIG_VERSION 208
+#define UCON64_CONFIG_VERSION 209
 
 #define MBIT 131072
 #define TOMBIT(x) ((int)(x) / MBIT)

@@ -1900,6 +1900,7 @@ when it has been patched with -f.
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
+#warning
   strcpy (src_name, "snescopy.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2056,6 +2057,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
+#warning
   strcpy (src_name, "snespal.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2165,6 +2167,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
+#warning
   strcpy (src_name, "snesntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2302,6 +2305,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
+#warning
   strcpy (src_name, "snesslow.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)

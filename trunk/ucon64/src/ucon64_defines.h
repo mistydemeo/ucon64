@@ -386,14 +386,16 @@ enum
                     - stop after sending one ROM to a copier ("multizip")
                     - stop after applying a patch so that the patch file won't
                       be interpreted as ROM
-  WF_PAR            this option requires a parallel port
-  WF_USB            this option requires a USB port
-  WF_SERIAL         this option requires a serial port
-  WF_NO_SPLIT       this option does not work with split ROMs
+  WF_PAR            option requires a parallel port
+  WF_USB            option requires a USB port
+  WF_SERIAL         option requires a serial port
+  WF_NO_SPLIT       option does not work with split ROMs
+  WF_RO             option will read only (no backup required, etc.)
+  WF_RW             option will read and write
   WF_DEFAULT        same as WF_INIT | WF_PROBE | WF_NFO
 
   example:
-  WF_NFO | WF_MFO_AFTER
+  WF_NFO | WF_NFO_AFTER
                     a ROM is required and info will be shown before and
                     after it has been processed
 */
@@ -409,6 +411,8 @@ enum
 #define WF_NO_SPLIT   (1 << 10)
 #define WF_SWITCH     (1 << 11)
 #define WF_NO_ARCHIVE (1 << 12)
+#define WF_RO         (1 << 13)
+#define WF_RW         (1 << 14)
 #define WF_DEFAULT    (WF_PROBE | WF_INIT | WF_NFO)
 
 #endif // UCON64_DEFINES_H

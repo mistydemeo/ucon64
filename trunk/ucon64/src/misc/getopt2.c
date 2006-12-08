@@ -320,10 +320,10 @@ getopt2_usage (const st_getopt2_t *usage)
               // long or short name?
               (usage[i].name[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
               usage[i].name,
-              usage[i].has_arg == 2 ? "[" : "", // == 2 arg is optional
+              (usage[i].arg_name && usage[i].has_arg == 2) ? "[" : "", // == 2 arg is optional
               usage[i].arg_name ? OPTARG_S : "",
               usage[i].arg_name ? usage[i].arg_name : "",
-              usage[i].has_arg == 2 ? "]" : ""); // == 2 arg is optional
+              (usage[i].arg_name && usage[i].has_arg == 2) ? "]" : ""); // == 2 arg is optional
 
             if (strlen (buf) < 16)
               {

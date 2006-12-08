@@ -296,6 +296,13 @@ const st_getopt2_t ucon64_options_usage[] =
       "FILE", "compare FILE with ROM for similarities",
       NULL
     },
+#if 0
+    {
+      "c2", 1, 0, UCON64_C2,
+      "FILE", "like " OPTION_S "c but shows differences as graphic",
+      NULL
+    },
+#endif
     {
       "help", 2, 0, UCON64_HELP,
       "WHAT", "display help and exit\n"
@@ -339,6 +346,11 @@ const st_getopt2_t ucon64_options_usage[] =
       NULL, "be more verbose (show backup unit headers also)",
       &ucon64_option_obj[0]
     },
+    {
+      "frontend", 0, 0, UCON64_FRONTEND,
+      NULL, "switch behaviour for frontends",
+      &ucon64_option_obj[0]
+    },
     // hidden options
     {
       "dual", 2, 0, UCON64_BITS,                // dual was renamed to binary
@@ -352,11 +364,6 @@ const st_getopt2_t ucon64_options_usage[] =
     },
     {
       "file", 1, 0, UCON64_FILE,                // obsolete?
-      NULL, NULL,
-      &ucon64_option_obj[0]
-    },
-    {
-      "frontend", 0, 0, UCON64_FRONTEND,        // no usage?
       NULL, NULL,
       &ucon64_option_obj[0]
     },

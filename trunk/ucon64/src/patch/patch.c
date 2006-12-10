@@ -26,6 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "misc/itypes.h"
 #include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/file.h"
+#include "misc/misc.h"
 #include "ucon64_misc.h"
 #include "patch.h"
 
@@ -62,3 +64,44 @@ const st_getopt2_t patch_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
+
+#warning TEST
+int
+patch_poke (st_ucon64_t *p)
+{
+  int value = 0, x = 0;
+  char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  const char *optarg = p->optarg;
+
+  if (ucon64.fname)
+    {
+      strcpy (src_name, ucon64.fname);
+      strcpy (dest_name, ucon64.fname);
+    }
+
+  ucon64_file_handler (dest_name, src_name, 0);
+  fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+
+  sscanf (optarg, "%x:%x", &x, &value);
+  if (x >= ucon64.file_size)
+    {
+      fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
+      remove (dest_name);
+      return -1;
+    }
+  fputc ('\n', stdout);
+  buf[0] = ucon64_fgetc (dest_name, x);
+  dumper (stdout, buf, 1, x, DUMPER_HEX);
+
+  ucon64_fputc (dest_name, x, value, "r+b");
+
+  buf[0] = value;
+  dumper (stdout, buf, 1, x, DUMPER_HEX);
+  fputc ('\n', stdout);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+
+  return 0;
+}

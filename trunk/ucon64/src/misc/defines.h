@@ -106,6 +106,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
+//#ifndef LIB_VERSION
+//#define LIB_VERSION(major, minor, step) (((major) << 16) | ((minor) << 8) | (step))
+//#endif
+
+
 #if     (!defined TRUE || !defined FALSE)
 #define FALSE 0
 #define TRUE (!FALSE)

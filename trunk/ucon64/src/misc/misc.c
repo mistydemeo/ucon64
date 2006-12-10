@@ -198,7 +198,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
           }
 //        else found = 0;
       }
-    else if (flags & DUMPER_BITS)
+    else if (flags & DUMPER_BIT)
       {
         if (!(pos & 3))
           fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
@@ -243,7 +243,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
 
   if (flags & DUMPER_TEXT)
     return;
-  else if (flags & DUMPER_BITS)
+  else if (flags & DUMPER_BIT)
     {
       if (pos & 3)
         {
@@ -844,11 +844,8 @@ register_func (void (*func) (void))
 {
   st_func_node_t *func_node = &func_list, *new_node;
 
-  for (; func_node->next != NULL; func_node = func_node->next)
-    {
-//      if (func_node->func == func) // already registered
-//        return -1;
-    }
+  while (func_node->next != NULL)
+    func_node = func_node->next;
 
   if ((new_node = (st_func_node_t *) malloc (sizeof (st_func_node_t))) == NULL)
     return -1;
@@ -870,7 +867,6 @@ unregister_func (void (*func) (void))
       prev_node = func_node;
       func_node = func_node->next;
     }
-
   if (func_node->func != func)
     return -1;
 

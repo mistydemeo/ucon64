@@ -112,6 +112,12 @@ const st_getopt2_t ucon64_dat_usage[] =
       NULL, "like " OPTION_LONG_S "db but more verbose",
       &ucon64_dat_obj[0]
     },
+#warning
+    {
+      "dbsql", 0, 0, UCON64_DBSQL,
+      NULL, "turn all DAT files into a ANSI SQL script",
+      &ucon64_dat_obj[0]
+    },
     {
       "dbs", 1, 0, UCON64_DBS,
       "CRC32", "search ROM with CRC32 in DATabase",

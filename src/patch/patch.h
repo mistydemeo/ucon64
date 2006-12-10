@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 extern const st_getopt2_t patch_usage[];
+extern int patch_poke (st_ucon64_t *p);
 
 
 #endif

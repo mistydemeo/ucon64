@@ -50,18 +50,40 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
-
-
 static long int
 strtol2 (const char *str, char **tail)
 {
   long int i;
 #warning make more intelligent (hex)
   return (i = strtol (str, tail, 10)) ? i : strtol (str, tail, 16);
+}
+
+
+static char *
+to_func (char *s, int len, int (*func) (int))
+{
+  char *p = s;
+
+  for (; len > 0; p++, len--)
+    *p = func (*p);
+
+  return s;
+}
+
+
+static int
+toprint (int c)
+{
+  if (isprint (c))
+    return c;
+
+  // characters that also work with printf()
+#ifdef  USE_ANSI_COLOR
+  if (c == '\x1b')
+    return ucon64.ansi_color ? c : '.';
+#endif
+
+  return strchr ("\t\n\r", c) ? c : '.';
 }
 
 
@@ -574,34 +596,7 @@ ucon64_switches (st_ucon64_t *p)
 }
 
 
-static inline char *
-to_func (char *s, int len, int (*func) (int))
-{
-  char *p = s;
-
-  for (; len > 0; p++, len--)
-    *p = func (*p);
-
-  return s;
-}
-
-
-static inline int
-toprint (int c)
-{
-  if (isprint (c))
-    return c;
-
-  // characters that also work with printf()
-#ifdef  USE_ANSI_COLOR
-  if (c == '\x1b')
-    return ucon64.ansi_color ? c : '.';
-#endif
-
-  return strchr ("\t\n\r", c) ? c : '.';
-}
-
-
+#warning merge these funcs as much as possible with the funcs they call
 static int
 ucon64_opt_crc (st_ucon64_t *p)
 {

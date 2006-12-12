@@ -794,24 +794,6 @@ ucon64_process_rom (const char *fname)
 }
 
 
-
-static int
-ucon64_options (st_ucon64_t *p)
-#warning merge
-{
-  int i = 0;
-
-  for (; ucon64_opts[i].option; i++)
-    if (ucon64_opts[i].option == p->option)
-      {
-        ucon64_opts[i].func (p);
-        return 0;
-      }
-
-  return -1;
-}
-
-
 int
 ucon64_execute_options (void)
 /*
@@ -821,7 +803,7 @@ ucon64_execute_options (void)
   ucon64_rom_handling().
 */
 {
-  int c = 0, result = 0, x = 0, opts = 0;
+  int i = 0, c = 0, result = 0, x = 0, opts = 0;
 
   // these members of ucon64 can change per file
   ucon64.dat = NULL;
@@ -850,7 +832,15 @@ ucon64_execute_options (void)
         if (result == -1) // no rom, but WF_NO_ROM
           return -1;
 
-        if (ucon64_options (&ucon64) == -1)
+        result = -1;
+        for (i = 0; ucon64_opts[i].option; i++)
+          if (ucon64_opts[i].option == ucon64.option)
+            {
+              result = ucon64_opts[i].func (&ucon64);
+              break;
+            }
+
+        if (result == -1)
           {
             const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
             const char *opt = p ? p->name : NULL;

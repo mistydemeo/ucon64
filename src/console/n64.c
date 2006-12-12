@@ -506,12 +506,14 @@ n64_init (st_ucon64_nfo_t *rominfo)
   rominfo->name[N64_NAME_LEN] = 0;
 
   // ROM maker
-  rominfo->maker = NULL_TO_UNKNOWN_S (n64_maker[MIN (OFFSET
-    (n64_header, 59 ^ rominfo->interleaved), N64_MAKER_MAX - 1)]);
+  rominfo->maker = n64_maker[MIN (OFFSET (n64_header, 59 ^ rominfo->interleaved), N64_MAKER_MAX - 1)] ?
+                   n64_maker[MIN (OFFSET (n64_header, 59 ^ rominfo->interleaved), N64_MAKER_MAX - 1)] :
+                   ucon64_msg[UNKNOWN_MSG];
 
   // ROM country
-  rominfo->country = NULL_TO_UNKNOWN_S (n64_country[MIN (OFFSET
-    (n64_header, 63 ^ (!rominfo->interleaved)), N64_COUNTRY_MAX - 1)]);
+  rominfo->country = n64_country[MIN (OFFSET (n64_header, 63 ^ (!rominfo->interleaved)), N64_COUNTRY_MAX - 1)] ?
+                     n64_country[MIN (OFFSET (n64_header, 63 ^ (!rominfo->interleaved)), N64_COUNTRY_MAX - 1)] :
+                     ucon64_msg[UNKNOWN_MSG];
 
   // CRC stuff
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)

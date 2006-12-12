@@ -7510,9 +7510,13 @@ nes_init (st_ucon64_nfo_t *rominfo)
   if (info)
     {
       if (info->maker)
-        rominfo->maker = NULL_TO_UNKNOWN_S (nes_maker[MIN (info->maker, NES_MAKER_MAX - 1)]);
+        rominfo->maker = nes_maker[MIN (info->maker, NES_MAKER_MAX - 1)] ?
+                         nes_maker[MIN (info->maker, NES_MAKER_MAX - 1)] :
+                         ucon64_msg[UNKNOWN_MSG];
 
-      rominfo->country = NULL_TO_UNKNOWN_S (nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)]);
+      rominfo->country = nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)] ?
+                         nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)] :
+                         ucon64_msg[UNKNOWN_MSG];
 
       if (info->date)
         {

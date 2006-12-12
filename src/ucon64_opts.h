@@ -22,5 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_OPTS_H
 #define UCON64_OPTS_H
 extern int ucon64_switches (st_ucon64_t *p);
-extern int ucon64_options (st_ucon64_t *p);
+
+
+typedef struct
+{
+  int option;
+  int console;
+  int flags;
+  int (*func) (st_ucon64_t *);
+} st_ucon64_opts_t;
+
+
+extern st_ucon64_opts_t ucon64_opts[];
 #endif // UCON64_OPTS_H

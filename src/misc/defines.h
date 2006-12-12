@@ -111,6 +111,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#endif
 
 
+//#define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])
+
+
 #if     (!defined TRUE || !defined FALSE)
 #define FALSE 0
 #define TRUE (!FALSE)

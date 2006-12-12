@@ -155,6 +155,5 @@ coleco_init (st_ucon64_nfo_t *rominfo)
         coleco_header.start,
         coleco_header.type == 0xaa55 ? "Coleco" : "ColecoVision");
     }
-
   return result;
 }

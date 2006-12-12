@@ -590,7 +590,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
     x = 2;                                      // Rocket Games
   else if (x < 0 || x >= NINTENDO_MAKER_LEN)
     x = 0;
-  rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
+  rominfo->maker = nintendo_maker[x] ? nintendo_maker[x] : ucon64_msg[UNKNOWN_MSG];
 
   // ROM country
   rominfo->country = gb_header.country == 0 ? "Japan" : "U.S.A. & Europe";
@@ -601,7 +601,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
   if (gb_header.rom_type <= 0x1f)
-    str = NULL_TO_UNKNOWN_S (gb_romtype1[gb_header.rom_type]);
+    str = gb_romtype1[gb_header.rom_type] ? gb_romtype1[gb_header.rom_type] : ucon64_msg[UNKNOWN_MSG];
   else if (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99)
     str = gb_romtype2[gb_header.rom_type - 0x97];
   else if (gb_header.rom_type >= 0xfd)

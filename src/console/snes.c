@@ -1900,7 +1900,7 @@ when it has been patched with -f.
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning
+#warning fix snescopy.txt access
   strcpy (src_name, "snescopy.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2057,7 +2057,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning
+#warning fix snespal.txt access
   strcpy (src_name, "snespal.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2167,7 +2167,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning
+#warning fix snesntsc.txt access
   strcpy (src_name, "snesntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2305,7 +2305,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning
+#warning fix snesslow.txt access
   strcpy (src_name, "snesslow.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -3455,12 +3455,14 @@ snes_init (st_ucon64_nfo_t *rominfo)
   if (x < 0 || x >= NINTENDO_MAKER_LEN)
     x = 0;
   rominfo->maker = snes_header.maker == 0 ? "Demo or Beta ROM?" :
-    NULL_TO_UNKNOWN_S (nintendo_maker[x]);
+    (nintendo_maker[x] ? nintendo_maker[x] : ucon64_msg[UNKNOWN_MSG]);
 
   if (!bs_dump)
     {
       // ROM country
-      rominfo->country = NULL_TO_UNKNOWN_S (snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)]);
+      rominfo->country = snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)] ?
+                         snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)] :
+                         ucon64_msg[UNKNOWN_MSG];
 
       // misc stuff
       pos += sprintf (rominfo->misc + pos, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
@@ -4415,7 +4417,9 @@ handle_nsrt_header (st_ucon64_nfo_t *rominfo, unsigned char *header,
            "  Port 1 controller type: %s\n"
            "  Port 2 controller type: %s\n"
            "  Header version: %.1f",
-           NULL_TO_UNKNOWN_S (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)]),
+           (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)] ?
+            snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)] :
+            ucon64_msg[UNKNOWN_MSG]),
            name,
            header[0x1e6] + (header[0x1e7] << 8),
            str_list[ctrl1],

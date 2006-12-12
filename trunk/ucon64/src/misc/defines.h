@@ -111,6 +111,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#endif
 
 
+//#define RANDOM(min, max) ((rand () % (max - min)) + min)
 //#define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])
 
 

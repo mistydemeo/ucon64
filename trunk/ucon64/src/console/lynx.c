@@ -320,10 +320,11 @@ lynx_init (st_ucon64_nfo_t *rominfo)
 
   if (!strncmp (lnx_header.magic, "LYNX", 4))
     {
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-        ucon64.backup_header_len : (int) LNX_HEADER_LEN;
+      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                                   ucon64.backup_header_len :
+                                   (int) LNX_HEADER_LEN;
 
-      if (UCON64_ISSET (ucon64.backup_header_len) && !ucon64.backup_header_len)
+      if (ucon64.backup_header_len != UCON64_UNKNOWN && !ucon64.backup_header_len)
         return ucon64.console == UCON64_LYNX ? 0 : result;
 
       ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.fname);

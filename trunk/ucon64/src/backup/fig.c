@@ -110,7 +110,7 @@ receive_rom_info (unsigned char *buffer)
 
   ffe_send_command0 (0xe00c, 0);
 
-  if (UCON64_ISSET (ucon64.snes_hirom))
+  if (ucon64.snes_hirom != UCON64_UNKNOWN)
     hirom = ucon64.snes_hirom ? 1 : 0;
   else
     {

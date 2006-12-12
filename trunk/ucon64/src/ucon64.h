@@ -32,11 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"                     // MAXBUFSIZE, etc..
 
 
-#define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
-
-
-typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
-
 /*
   st_ucon64_nfo_t this struct contains very specific informations only
                     <console>_init() can supply after the correct console
@@ -130,7 +125,7 @@ typedef struct
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
   /*
-    These values override values in st_ucon64_nfo_t. Use UCON64_ISSET()
+    These values override values in st_ucon64_nfo_t. Use (val != UCON64_UNKNOWN)
     to check them. When adding new ones don't forget to update
     ucon64_execute_options() too.
   */
@@ -181,6 +176,8 @@ typedef struct
 */
 extern int ucon64_init (void);
 extern int ucon64_nfo (void);
+
+
 enum {
   USAGE_VIEW_SHORT = 0,
   USAGE_VIEW_LONG,

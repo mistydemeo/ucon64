@@ -22,17 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_DEFINES_H
 #define UCON64_DEFINES_H
 
-//#define RANDOM(min, max) ((rand () % (max - min)) + min)
 #define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])
 
 #define UCON64_UNKNOWN (-1)
 
 #define UCON64_VERSION_S "2.0.1"
 
-/* program version counter */
-//#define UCON64_VERSION 201
-
-/* version of config file layout */
+// version of config file layout
 #define UCON64_CONFIG_VERSION 209
 
 #define MBIT 131072
@@ -367,6 +363,16 @@ enum
   UCON64_XV64,
   UCON64_Z64
 };
+
+
+// parallel port modes
+typedef enum
+{
+  UCON64_SPP,
+  UCON64_EPP,
+  UCON64_ECP
+} parport_mode_t;
+
 
 /*
   uCON64 workflow flags

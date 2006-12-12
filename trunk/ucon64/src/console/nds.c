@@ -225,8 +225,9 @@ nds_init (st_ucon64_nfo_t *rominfo)
   int result = -1, value, pos;
   char buf[144];
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-    ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                               ucon64.backup_header_len :
+                               0;
 
   ucon64_fread (&nds_header, NDS_HEADER_START + rominfo->backup_header_len,
                 NDS_HEADER_LEN, ucon64.fname);
@@ -295,7 +296,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
     }
 
   // internal ROM crc
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 1;

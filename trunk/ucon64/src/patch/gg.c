@@ -859,7 +859,7 @@ gameGenieDecodeSNES (const char *in, char *out)
   decodeSNES (11, 6);
 
   // if a ROM was specified snes.c will handle ucon64.snes_hirom
-  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi option was specified
+  if (ucon64.snes_hirom != UCON64_UNKNOWN)         // -hi or -nhi option was specified
     hirom = ucon64.snes_hirom;
   // if only a ROM was specified (not -hi or -nhi) the next if will fail for a
   //  handful of ROMs, namely Sufami Turbo ROMs and Extended ROMs

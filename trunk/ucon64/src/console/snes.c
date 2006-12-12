@@ -914,7 +914,7 @@ make_gd_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
 
   strcpy (dest_name, filename);
 
-  if (UCON64_ISSET (ucon64.id))
+  if (ucon64.id != UCON64_UNKNOWN)
     {
       if (ucon64.id >= 0)
         // code for -idnum=NUM
@@ -1473,7 +1473,7 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
           fprintf (stderr, "ERROR: HiROM > 32 Mbit -- conversion not yet implemented\n");
           return;
         }
-      if (UCON64_ISSET (ucon64.part_size))
+      if (ucon64.part_size != UCON64_UNKNOWN)
         printf ("WARNING: Splitting Super UFO HiROM, ignoring switch "OPTION_LONG_S"ssize\n");
     }
 
@@ -1646,7 +1646,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
 {
   int size = ucon64.file_size - rominfo->backup_header_len, part_size;
 
-  if (UCON64_ISSET (ucon64.part_size) && !(type == GD3 || type == UFO))
+  if (ucon64.part_size != UCON64_UNKNOWN && !(type == GD3 || type == UFO))
     {
       part_size = ucon64.part_size;
       /*
@@ -1696,7 +1696,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
 
   if (!rominfo->backup_header_len || type == GD3)    // GD3 format
     {
-      if (UCON64_ISSET (ucon64.part_size))
+      if (ucon64.part_size != UCON64_UNKNOWN)
         printf ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize\n");
       snes_split_gd3 (rominfo, size);
     }
@@ -3071,7 +3071,7 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
             rominfo->backup_header_len = SWC_HEADER_LEN;
         }
     }
-  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn switch was specified
+  if (ucon64.backup_header_len != UCON64_UNKNOWN)       // -hd, -nhd or -hdn switch was specified
     {
       rominfo->backup_header_len = ucon64.backup_header_len;
       if (type == MGD_SNES && rominfo->backup_header_len)
@@ -3136,7 +3136,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
   */
 
   // step 3.
-  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
+  if (ucon64.snes_hirom != UCON64_UNKNOWN)         // -hi or -nhi switch was specified
     {
       snes_hirom = ucon64.snes_hirom;
       // keep snes_deinterleave() from changing snes_hirom
@@ -3145,7 +3145,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
         snes_hirom = 0;
     }
 
-  if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
+  if (ucon64.snes_header_base != UCON64_UNKNOWN)   // -erom switch was specified
     {
       snes_header_base = ucon64.snes_header_base;
       if (snes_header_base &&
@@ -3169,7 +3169,7 @@ snes_set_bs_dump (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, int size)
     causes the code to be skipped for Sufami Turbo dumps.
   */
   if (bs_dump &&
-      snes_header_base == SNES_EROM && !UCON64_ISSET (ucon64.snes_header_base))
+      snes_header_base == SNES_EROM && (ucon64.snes_header_base == UCON64_UNKNOWN))
     {
       bs_dump = 0;
       snes_header_base = 0;
@@ -3177,7 +3177,7 @@ snes_set_bs_dump (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, int size)
       rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
       memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
     }
-  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs switch was specified
+  if (ucon64.bs_dump != UCON64_UNKNOWN)            // -bs or -nbs switch was specified
     {
       bs_dump = ucon64.bs_dump;
       if (bs_dump && snes_header_base == SNES_EROM)
@@ -3281,7 +3281,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
 
   snes_handle_backup_header (rominfo, &header);      // step 1. & first part of step 2.
 
-  if (UCON64_ISSET (ucon64.split))
+  if (ucon64.split != UCON64_UNKNOWN)
     snes_split = ucon64.split;
   else
     {
@@ -3301,12 +3301,12 @@ snes_init (st_ucon64_nfo_t *rominfo)
   if (size < (int) (SNES_HEADER_START + SNES_HEADER_LEN))
     {
       snes_hirom = 0;
-      if (UCON64_ISSET (ucon64.snes_hirom))     // see snes_set_hirom()
+      if (ucon64.snes_hirom != UCON64_UNKNOWN)     // see snes_set_hirom()
         snes_hirom = ucon64.snes_hirom;
       snes_hirom_ok = 1;
 
       rominfo->interleaved = 0;
-      if (UCON64_ISSET (ucon64.interleaved))
+      if (ucon64.interleaved != UCON64_UNKNOWN)
         rominfo->interleaved = ucon64.interleaved;
       return -1;                                // don't continue (seg faults!)
     }
@@ -3329,10 +3329,10 @@ snes_init (st_ucon64_nfo_t *rominfo)
   rominfo->header = &snes_header;
 
   // step 4.
-  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+  rominfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
     ucon64.interleaved : snes_testinterleaved (rom_buffer, size, x);
 
-  calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
+  calc_checksums = (ucon64.do_not_calc_crc == UCON64_UNKNOWN) && result == 0;
   // we want the CRC32 of the "raw" data (too)
   if (calc_checksums)
     ucon64.fcrc32 = ucon64_crc32 (0, rom_buffer, size);
@@ -4101,9 +4101,9 @@ snes_multi (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
                                        ucon64.backup_header_len : 0;
-      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (snes_init (ucon64.nfo) != 0)
@@ -4289,7 +4289,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
 {
   int x;
 
-  if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+  if (((ucon64.controller != UCON64_UNKNOWN) || (ucon64.controller2 != UCON64_UNKNOWN))
       && !nsrt_header)                          // don't overwrite these values
     {
       if (rominfo->current_internal_crc != rominfo->internal_crc)
@@ -4314,7 +4314,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
       header[0x1ec] = NSRT_HEADER_VERSION;
     }
 
-  if (UCON64_ISSET (ucon64.controller))
+  if (ucon64.controller != UCON64_UNKNOWN)
     {
       for (x = 0; x < 8; x++)
         if ((ucon64.controller >> x) & 1)
@@ -4326,7 +4326,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
         }
       header[0x1ed] = x << 4;
     }
-  if (UCON64_ISSET (ucon64.controller2))
+  if (ucon64.controller2 != UCON64_UNKNOWN)
     {
       for (x = 0; x < 8; x++)
         if ((ucon64.controller2 >> x) & 1)
@@ -4340,7 +4340,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
     }
 
   // set the checksum bytes
-  if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+  if (ucon64.controller != UCON64_UNKNOWN || ucon64.controller2 != UCON64_UNKNOWN)
     set_nsrt_checksum (header);
 }
 

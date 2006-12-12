@@ -922,9 +922,9 @@ pce_multi (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
                                        ucon64.backup_header_len : 0;
-      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (pce_init (ucon64.nfo) != 0)
@@ -1085,7 +1085,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
   st_pce_data_t *info, key;
 
   x = ucon64.file_size % (16 * 1024);
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
     ucon64.backup_header_len : (ucon64.file_size > x ? x : 0);
 
   size = ucon64.file_size - rominfo->backup_header_len;
@@ -1120,12 +1120,12 @@ pce_init (st_ucon64_nfo_t *rominfo)
        memmem2 (rom_buffer, x, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 26, 0) == 0 &&
        memcmp (rom_buffer, "HESM", 4))
     swapped = 1;
-  if (UCON64_ISSET (ucon64.interleaved))
+  if (ucon64.interleaved != UCON64_UNKNOWN)
     swapped = ucon64.interleaved;
 
   if ((result == -1 && swapped != 0) || swapped == 1)
     {                                   // don't swap the bits if -nint is specified
-      if (!UCON64_ISSET (ucon64.do_not_calc_crc) || swapped == 1)
+      if (ucon64.do_not_calc_crc == UCON64_UNKNOWN || swapped == 1)
         ucon64.fcrc32 = ucon64_crc32 (0, rom_buffer, size);
       swapbits (rom_buffer, size);
       if (pce_check (rom_buffer, size) == 1)
@@ -1150,7 +1150,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
   rominfo->console_usage = pce_usage[0].help;
   rominfo->backup_usage = rominfo->backup_header_len ? msg_usage[0].help : mgd_usage[0].help;
 
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
     {
       if (!ucon64.crc32)
         ucon64.crc32 = ucon64_crc32 (0, rom_buffer, size);

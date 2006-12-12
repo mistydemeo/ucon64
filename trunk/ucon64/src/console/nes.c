@@ -5441,7 +5441,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   write_chunk (&unif_chunk, destfile);
 #endif
 
-  if (UCON64_ISSET (ucon64.tv_standard))
+  if (ucon64.tv_standard != UCON64_UNKNOWN)
     b = ucon64.tv_standard;                     // necessary for big endian machines
   else
     b = ines_header.ctrl3 & INES_TVID;
@@ -5450,7 +5450,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   unif_chunk.data = &b;
   write_chunk (&unif_chunk, destfile);
 
-  if (UCON64_ISSET (ucon64.use_dump_info))
+  if (ucon64.use_dump_info != UCON64_UNKNOWN)
     {
       st_dumper_info_t info;
       if (ucon64.dump_info != NULL && strlen (ucon64.dump_info) > 0)
@@ -5474,7 +5474,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
         printf ("WARNING: No dumper info file was specified, chunk won't be written\n");
     }
 
-  if (UCON64_ISSET (ucon64.controller))
+  if (ucon64.controller != UCON64_UNKNOWN)
     {
       unif_chunk.id = CTRL_ID;
       unif_chunk.length = 1;
@@ -5518,7 +5518,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   unif_chunk.id = BATR_ID;
   unif_chunk.length = 1;
   unif_chunk.data = &b;
-  if (UCON64_ISSET (ucon64.battery))
+  if (ucon64.battery != UCON64_UNKNOWN)
     {
       if (ucon64.battery)
         write_chunk (&unif_chunk, destfile);
@@ -5526,7 +5526,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   else if (ines_header.ctrl1 & INES_SRAM)
     write_chunk (&unif_chunk, destfile);
 
-  if (UCON64_ISSET (ucon64.vram))
+  if (ucon64.vram != UCON64_UNKNOWN)
     if (ucon64.vram)
       {
         b = 0;                                  // this is a dummy
@@ -5538,7 +5538,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
 
   unif_chunk.id = MIRR_ID;
   unif_chunk.length = 1;
-  if (UCON64_ISSET (ucon64.mirror))
+  if (ucon64.mirror != UCON64_UNKNOWN)
     {
       if (ucon64.mirror > 5)
         {
@@ -5689,7 +5689,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       free (unif_chunk1);
     }
 
-  if (UCON64_ISSET (ucon64.tv_standard))
+  if (ucon64.tv_standard != UCON64_UNKNOWN)
     {
       unif_chunk2.id = TVCI_ID;
       unif_chunk2.length = 1;
@@ -5703,7 +5703,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       free (unif_chunk1);
     }
 
-  if (UCON64_ISSET (ucon64.use_dump_info))
+  if (ucon64.use_dump_info != UCON64_UNKNOWN)
     {
       st_dumper_info_t info;
       if (ucon64.dump_info != NULL && strlen (ucon64.dump_info) > 0)
@@ -5741,7 +5741,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       free (unif_chunk1);
     }
 
-  if (UCON64_ISSET (ucon64.controller))
+  if (ucon64.controller != UCON64_UNKNOWN)
     {
       unif_chunk2.id = CTRL_ID;
       unif_chunk2.length = 1;
@@ -5819,7 +5819,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         free (unif_chunk1);
       }
 
-  if (UCON64_ISSET (ucon64.battery))
+  if (ucon64.battery != UCON64_UNKNOWN)
     {
       if (ucon64.battery)
         {
@@ -5836,7 +5836,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       free (unif_chunk1);
     }
 
-  if (UCON64_ISSET (ucon64.vram))
+  if (ucon64.vram != UCON64_UNKNOWN)
     {
       if (ucon64.vram)
         {
@@ -5853,7 +5853,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       free (unif_chunk1);
     }
 
-  if (UCON64_ISSET (ucon64.mirror))
+  if (ucon64.mirror != UCON64_UNKNOWN)
     {
       if (ucon64.mirror > 5)
         {
@@ -6055,7 +6055,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
   ines_header.chr_size = chr_size >> 13;
 
   ines_header.ctrl3 &= INES_TVID;               // clear undefined bits
-  if (UCON64_ISSET (ucon64.tv_standard))
+  if (ucon64.tv_standard != UCON64_UNKNOWN)
     {
       if (ucon64.tv_standard == 1)              // value can be 0, 1 or 2
         ines_header.ctrl3 |= INES_TVID;
@@ -6063,7 +6063,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
         ines_header.ctrl3 &= ~INES_TVID;
     }
 
-  if (UCON64_ISSET (ucon64.battery))
+  if (ucon64.battery != UCON64_UNKNOWN)
     {
       if (ucon64.battery)
         ines_header.ctrl1 |= INES_SRAM;
@@ -6071,7 +6071,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
         ines_header.ctrl1 &= ~INES_SRAM;
     }
 
-  if (UCON64_ISSET (ucon64.mirror))
+  if (ucon64.mirror != UCON64_UNKNOWN)
     {
       ines_header.ctrl1 &= ~(INES_MIRROR | INES_4SCREEN); // clear bits
       if (ucon64.mirror == 0)
@@ -6187,7 +6187,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   else                                          // mapper specified
     set_mapper (&ines_header, strtol (ucon64.mapr, NULL, 10));
 
-  if (UCON64_ISSET (ucon64.tv_standard))
+  if (ucon64.tv_standard != UCON64_UNKNOWN)
     {
       if (ucon64.tv_standard == 1)              // value can be 0, 1 or 2
         ines_header.ctrl3 |= INES_TVID;
@@ -6199,7 +6199,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
       free (unif_chunk);
     }
 
-  if (UCON64_ISSET (ucon64.battery))
+  if (ucon64.battery != UCON64_UNKNOWN)
     {
       if (ucon64.battery)
         ines_header.ctrl1 |= INES_SRAM;
@@ -6212,7 +6212,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
       free (unif_chunk);
     }
 
-  if (UCON64_ISSET (ucon64.mirror))
+  if (ucon64.mirror != UCON64_UNKNOWN)
     {
       if (ucon64.mirror == 0)
         ;                                       // default value in ctrl1 (0) is ok
@@ -6709,7 +6709,7 @@ nes_j (unsigned char **mem_image)
     printf ("WARNING: No %s, using default values\n", src_name);
 
   // Don't do this in parse_prm(), because there might be no .PRM file available
-  if (UCON64_ISSET (ucon64.battery))
+  if (ucon64.battery != UCON64_UNKNOWN)
     {
       if (ucon64.battery)
         ines_header.ctrl1 |= INES_SRAM;
@@ -6717,7 +6717,7 @@ nes_j (unsigned char **mem_image)
         ines_header.ctrl1 &= ~INES_SRAM;
     }
 
-  if (UCON64_ISSET (ucon64.mirror))
+  if (ucon64.mirror != UCON64_UNKNOWN)
     {
       ines_header.ctrl1 &= ~(INES_MIRROR | INES_4SCREEN); // clear bits
       if (ucon64.mirror == 0)
@@ -6808,7 +6808,7 @@ nes_j (unsigned char **mem_image)
   else
     *mem_image = buffer;
 
-  if (!UCON64_ISSET (ucon64.split))
+  if (ucon64.split == UCON64_UNKNOWN)
     ucon64.split = nparts;
 
   return 0;
@@ -6823,7 +6823,7 @@ write_prm (st_ines_header_t *header, const char *fname)
     "1234567890123456789012345678901234\r\n\x1a";
   int mapper;
 
-  if (UCON64_ISSET (ucon64.mirror))
+  if (ucon64.mirror != UCON64_UNKNOWN)
     {
       header->ctrl1 &= ~(INES_MIRROR | INES_4SCREEN); // clear bits
       if (ucon64.mirror == 0)
@@ -6855,7 +6855,7 @@ write_prm (st_ines_header_t *header, const char *fname)
       prm[4] = 'N';
     }
 
-  if (UCON64_ISSET (ucon64.battery))
+  if (ucon64.battery != UCON64_UNKNOWN)
     {
       if (ucon64.battery)
         header->ctrl1 |= INES_SRAM;
@@ -7497,7 +7497,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       break;
     }
 
-  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn switch was specified
+  if (ucon64.backup_header_len != UCON64_UNKNOWN)       // -hd, -nhd or -hdn switch was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
 
   if (ucon64.crc32 == 0)

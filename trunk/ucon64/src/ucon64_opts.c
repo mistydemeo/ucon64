@@ -493,28 +493,28 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_CTRL:
-      if (UCON64_ISSET (ucon64.controller))
+      if (ucon64.controller != UCON64_UNKNOWN)
         ucon64.controller |= 1 << strtol (p->optarg, NULL, 10);
       else
         ucon64.controller = 1 << strtol (p->optarg, NULL, 10);
       break;
 
     case UCON64_CTRL2:
-      if (UCON64_ISSET (ucon64.controller2))
+      if (ucon64.controller2 != UCON64_UNKNOWN)
         ucon64.controller2 |= 1 << strtol (p->optarg, NULL, 10);
       else
         ucon64.controller2 = 1 << strtol (p->optarg, NULL, 10);
       break;
 
     case UCON64_NTSC:
-      if (!UCON64_ISSET (ucon64.tv_standard))
+      if (ucon64.tv_standard == UCON64_UNKNOWN)
         ucon64.tv_standard = 0;
       else if (ucon64.tv_standard == 1)
         ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
       break;
 
     case UCON64_PAL:
-      if (!UCON64_ISSET (ucon64.tv_standard))
+      if (ucon64.tv_standard == UCON64_UNKNOWN)
         ucon64.tv_standard = 1;
       else if (ucon64.tv_standard == 0)
         ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)

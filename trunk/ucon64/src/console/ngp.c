@@ -76,7 +76,7 @@ ngp_init (st_ucon64_nfo_t *rominfo)
   char *snk_code = "COPYRIGHT BY SNK CORPORATION",
        *third_code = " LICENSED BY SNK CORPORATION", buf[MAXBUFSIZE];
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ? ucon64.backup_header_len : 0;
 
   ucon64_fread (&ngp_header, NGP_HEADER_START + rominfo->backup_header_len,
     NGP_HEADER_LEN, ucon64.fname);

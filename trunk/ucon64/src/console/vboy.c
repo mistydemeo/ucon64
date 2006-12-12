@@ -97,7 +97,7 @@ vboy_init (st_ucon64_nfo_t *rominfo)
     {
       result = 0;
 
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
         ucon64.backup_header_len : 0;
 
       rominfo->header_start = VBOY_HEADER_START - rominfo->backup_header_len;

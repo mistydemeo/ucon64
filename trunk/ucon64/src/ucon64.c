@@ -932,13 +932,14 @@ ucon64_rom_handling (void)
       return -1;
     }
   // We have to do this here, because we don't know the file size until now
-  if (ucon64.backup_header_len > ucon64.file_size)
-    {
-      fprintf (stderr,
-               "ERROR: A backup unit header length was specified that is larger than the file\n"
-               "       size (%d > %d)\n", ucon64.backup_header_len, ucon64.file_size);
-      return -1;
-    }
+  if (ucon64.backup_header_len != UCON64_UNKNOWN)
+    if (ucon64.backup_header_len > ucon64.file_size)
+      {
+        fprintf (stderr,
+                 "ERROR: A backup unit header length was specified that is larger than the file\n"
+                 "       size (%d > %d)\n", ucon64.backup_header_len, ucon64.file_size);
+        return -1;
+      }
 
   if (!(ucon64.flags & WF_INIT))
     return 0;
@@ -950,10 +951,10 @@ ucon64_rom_handling (void)
         {
           // Restore any overrides from st_ucon64_t
           // We have to do this *before* calling ucon64_probe(), *not* afterwards
-          if (UCON64_ISSET (ucon64.backup_header_len))
+          if (ucon64.backup_header_len != UCON64_UNKNOWN)
             nfo.backup_header_len = ucon64.backup_header_len;
 
-          if (UCON64_ISSET (ucon64.interleaved))
+          if (ucon64.interleaved != UCON64_UNKNOWN)
             nfo.interleaved = ucon64.interleaved;
 
 //          ucon64.nfo = (st_ucon64_nfo_t *) &nfo;
@@ -970,7 +971,7 @@ ucon64_rom_handling (void)
     */
     if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
         ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
-      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.fname, NULL))
+      if ((ucon64.split != UCON64_UNKNOWN) ? ucon64.split : ucon64_testsplit (ucon64.fname, NULL))
         {
           fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
                    basename2 (ucon64.fname));
@@ -1006,7 +1007,7 @@ ucon64_rom_handling (void)
         {
           // detected file size must match DAT file size
           int size = ucon64.nfo ?
-                       UCON64_ISSET (ucon64.nfo->data_size) ?
+                       (ucon64.nfo->data_size != UCON64_UNKNOWN) ?
                          ucon64.nfo->data_size :
                          ucon64.file_size - ucon64.nfo->backup_header_len :
                        ucon64.file_size;
@@ -1212,8 +1213,9 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   unsigned int padded = ucon64_testpad (ucon64.fname),
                intro = ((ucon64.file_size - nfo->backup_header_len) > MBIT) ?
                          ((ucon64.file_size - nfo->backup_header_len) % MBIT) : 0;
-  int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
-                   ucon64_testsplit (ucon64.fname, NULL);
+  int x, split = (ucon64.split != UCON64_UNKNOWN) ?
+                 ucon64.split :
+                 ucon64_testsplit (ucon64.fname, NULL);
   char buf[MAXBUFSIZE];
 
   // backup unit header
@@ -1250,9 +1252,10 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 
   // name, maker, country and size
   strcpy (buf, (nfo->name ? nfo->name : ""));
-  x = UCON64_ISSET (nfo->data_size) ?
-    nfo->data_size :
-    ucon64.file_size - nfo->backup_header_len;
+  x = (nfo->data_size != UCON64_UNKNOWN) ?
+      nfo->data_size :
+      ucon64.file_size - nfo->backup_header_len;
+
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           to_func (buf, strlen (buf), toprint),

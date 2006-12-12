@@ -431,9 +431,8 @@ main (int argc, char **argv)
   ucon64.parport_needed =
   ucon64.io_mode = 0;
 
-#warning 0 instead of UCON64_UNKNOWN
-  ucon64.backup_header_len = 0;
-
+#warning ucon64.backup_header_len can be (-1) (UCON64_UNKNOWN)
+  ucon64.backup_header_len =
   ucon64.battery =
   ucon64.bs_dump =
   ucon64.console =

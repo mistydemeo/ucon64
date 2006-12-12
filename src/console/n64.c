@@ -462,7 +462,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
       "Australia", NULL, NULL, "France, Germany, The Netherlands", NULL // Holland is an incorrect name for The Netherlands
     };
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ? ucon64.backup_header_len : 0;
 
   ucon64_fread (&n64_header, rominfo->backup_header_len, N64_HEADER_LEN, ucon64.fname);
 
@@ -489,7 +489,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
   else
     result = -1;
 
-  if (UCON64_ISSET (ucon64.interleaved))
+  if (ucon64.interleaved != UCON64_UNKNOWN)
     rominfo->interleaved = ucon64.interleaved;
   if (ucon64.console == UCON64_N64)
     result = 0;
@@ -516,7 +516,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
                      ucon64_msg[UNKNOWN_MSG];
 
   // CRC stuff
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 4;

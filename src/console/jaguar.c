@@ -74,8 +74,9 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x, value;
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-    ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                               ucon64.backup_header_len :
+                               0;
 
   ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
     rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
@@ -86,8 +87,9 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
     result = 0;
   else
     {
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-        ucon64.backup_header_len : (int) UNKNOWN_BACKUP_HEADER_LEN;
+      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                                   ucon64.backup_header_len :
+                                   (int) UNKNOWN_BACKUP_HEADER_LEN;
 
       ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
           rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);

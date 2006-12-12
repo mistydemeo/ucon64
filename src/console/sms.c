@@ -390,10 +390,11 @@ sms_multi (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-                                       ucon64.backup_header_len : 0;
-      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-                                       ucon64.interleaved : 0;
+      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                                      ucon64.backup_header_len :
+                                      0;
+      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
+                                ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (sms_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be an SMS/GG ROM\n", ucon64.fname);
@@ -598,12 +599,12 @@ sms_init (st_ucon64_nfo_t *rominfo)
   is_gamegear = 0;
   memset (&sms_header, 0, SMS_HEADER_LEN);
 
-  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn option was specified
+  if (ucon64.backup_header_len != UCON64_UNKNOWN)       // -hd, -nhd or -hdn option was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
   else
     rominfo->backup_header_len = sms_header_len ();
 
-  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+  rominfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
     ucon64.interleaved : sms_testinterleaved (rominfo);
 
   if (rominfo->interleaved)
@@ -657,7 +658,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
       break;
     }
 
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
     {
       int size = ucon64.file_size - rominfo->backup_header_len;
       if (!(rom_buffer = (unsigned char *) malloc (size)))

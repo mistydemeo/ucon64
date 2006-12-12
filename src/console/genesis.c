@@ -525,7 +525,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
   int x, nparts, surplus, size = ucon64.file_size - rominfo->backup_header_len,
       part_size;
 
-  if (UCON64_ISSET (ucon64.part_size))
+  if (ucon64.part_size != UCON64_UNKNOWN)
     {
       part_size = ucon64.part_size;
       // Don't allow too small part sizes, see src/console/snes.c (snes_s())
@@ -1108,7 +1108,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
     it's running on another type of console. For example, a Japanese game
     running on a (European) Mega Drive should have the P and E bit set to 0.
   */
-  if (UCON64_ISSET (ucon64.region))
+  if (ucon64.region != UCON64_UNKNOWN)
     {
       if (!genesis_japanese)
         flags |= 0x20;                          // set E(urope)
@@ -1159,7 +1159,7 @@ genesis_multi (int truncate_size, char *fname)
     }
 
   // do this check here, because one error message is enough (not for every game)
-  if (UCON64_ISSET (ucon64.region))
+  if (ucon64.region != UCON64_UNKNOWN)
     switch (ucon64.region)
       {
       case 0:                                   // NTSC/Japan
@@ -1192,10 +1192,12 @@ genesis_multi (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-                                       ucon64.backup_header_len : 0;
-      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-                                       ucon64.interleaved : 0;
+      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                                      ucon64.backup_header_len :
+                                      0;
+      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
+                                ucon64.interleaved :
+                                0;
       ucon64.do_not_calc_crc = 1;
       if (genesis_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be a Genesis ROM\n", ucon64.fname);
@@ -1205,7 +1207,7 @@ genesis_multi (int truncate_size, char *fname)
               modify ucon64.console temporarily only to be able to help detect
               problems with incorrect files.
       */
-      if (UCON64_ISSET (ucon64.region))
+      if (ucon64.region != UCON64_UNKNOWN)
         switch (ucon64.region)
           {
           case 0:                               // NTSC/Japan
@@ -1466,10 +1468,10 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       rominfo->backup_header_len = SMD_HEADER_LEN;
     }
 
-  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn option was specified
+  if (ucon64.backup_header_len != UCON64_UNKNOWN)       // -hd, -nhd or -hdn option was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
 
-  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+  rominfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
     ucon64.interleaved : genesis_testinterleaved (rominfo);
 
   if (rominfo->interleaved == 0)
@@ -1507,7 +1509,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
         GENESIS_HEADER_LEN, ucon64.fname);
     }
 
-  if (!UCON64_ISSET (ucon64.split))
+  if (ucon64.split == UCON64_UNKNOWN)
     {
       if (type == SMD)
         {
@@ -1702,7 +1704,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   // internal ROM crc
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
     {
       if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
         return -1;

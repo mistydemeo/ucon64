@@ -123,8 +123,9 @@ coleco_init (st_ucon64_nfo_t *rominfo)
   rominfo->console_usage = coleco_usage[0].help;
   rominfo->backup_usage = unknown_backup_usage[0].help;
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-    ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                               ucon64.backup_header_len :
+                               0;
 
   ucon64_fread (&coleco_header, ucon64.backup_header_len, COLECO_HEADER_LEN, ucon64.fname);
 

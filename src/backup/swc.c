@@ -223,7 +223,7 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 
   ffe_send_command0 (0xe00c, 0);
 
-  if (UCON64_ISSET (ucon64.snes_hirom))
+  if (ucon64.snes_hirom != UCON64_UNKNOWN)
     hirom = ucon64.snes_hirom ? 1 : 0;
   else
     {
@@ -241,7 +241,7 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 
   if (io_mode & SWC_IO_FORCE_32MBIT)
     {
-      if (!UCON64_ISSET (ucon64.snes_hirom))
+      if (ucon64.snes_hirom == UCON64_UNKNOWN)
         hirom = 1;                              // default to super HiROM dump
       size = 32;                                // dump 32 Mbit
     }

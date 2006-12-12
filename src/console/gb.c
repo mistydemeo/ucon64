@@ -533,7 +533,9 @@ gb_init (st_ucon64_nfo_t *rominfo)
     },
     *str;
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                               ucon64.backup_header_len :
+                               0;
 
   if (ucon64.file_size <
       (int) (rominfo->backup_header_len + GB_HEADER_START + GB_HEADER_LEN))
@@ -545,8 +547,9 @@ gb_init (st_ucon64_nfo_t *rominfo)
     result = 0;
   else
     {
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-        ucon64.backup_header_len : (int) SSC_HEADER_LEN;
+      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+                                   ucon64.backup_header_len :
+                                   (int) SSC_HEADER_LEN;
 
       ucon64_fread (&gb_header, rominfo->backup_header_len + GB_HEADER_START,
                     GB_HEADER_LEN, ucon64.fname);
@@ -673,7 +676,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
         strcat (rominfo->misc, "Bad");
     }
 
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;

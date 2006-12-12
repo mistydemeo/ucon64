@@ -872,7 +872,7 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning
+#warning fix genpal.txt access
   strcpy (fname, "genpal.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
@@ -927,7 +927,7 @@ genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning
+#warning fix mdntsc.txt access
   strcpy (fname, "mdntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
@@ -1564,7 +1564,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   if (maker[3] == 'T' && maker[4] == '-')
     {
       sscanf (&maker[5], "%03d", &value);
-      rominfo->maker = NULL_TO_UNKNOWN_S (genesis_maker[value & 0xff]);
+      rominfo->maker = genesis_maker[value & 0xff] ? genesis_maker[value & 0xff] : ucon64_msg[UNKNOWN_MSG];
     }
   else
     {
@@ -1604,8 +1604,9 @@ genesis_init (st_ucon64_nfo_t *rominfo)
         genesis_japanese = 1;
       if (genesis_japanese || country_code == 'U' || country_code == '4')
         genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil ('4') use NTSC
-      strcat (country, NULL_TO_UNKNOWN_S
-               (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
+      strcat (country, genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)] ?
+                       genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)] :
+                       ucon64_msg[UNKNOWN_MSG]);
       strcat (country, ", ");
     }
   x = strlen (country);
@@ -1674,7 +1675,9 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   sprintf ((char *) buf, "I/O device(s): %s",
-    NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)]));
+    genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)] ?
+    genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)] :
+    ucon64_msg[UNKNOWN_MSG]);
   for (x = 0; x < 3; x++)
     {
       const char *io_device = genesis_io[MIN (OFFSET (genesis_header, 145 + x), GENESIS_IO_MAX - 1)];

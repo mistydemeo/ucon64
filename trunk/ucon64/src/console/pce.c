@@ -1162,8 +1162,9 @@ pce_init (st_ucon64_nfo_t *rominfo)
       if (info)
         {
           if (info->maker)
-            rominfo->maker = NULL_TO_UNKNOWN_S (pce_maker[MIN (info->maker,
-                                                               PCE_MAKER_MAX - 1)]);
+            rominfo->maker = pce_maker[MIN (info->maker, PCE_MAKER_MAX - 1)] ?
+                             pce_maker[MIN (info->maker, PCE_MAKER_MAX - 1)] :
+                             ucon64_msg[UNKNOWN_MSG];
 
           if (info->serial)
             if (info->serial[0])

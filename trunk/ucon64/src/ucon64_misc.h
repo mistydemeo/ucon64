@@ -56,7 +56,8 @@ enum
   DAT_NOT_FOUND,
   DAT_NOT_ENABLED,
   READ_CONFIG_FILE,
-  UNTESTED
+  UNTESTED,
+  UNKNOWN_MSG
 };
 
 extern const char *ucon64_msg[];

@@ -666,9 +666,41 @@ truncate2 (const char *filename, unsigned long new_size)
 
 
 char *
-tmpnam2 (char *temp)
-// tmpnam() clone
+tmpnam3 (char *temp, int dir)
+// deprecated
 {
+  char *t = NULL, *p = NULL;
+
+  if (!temp)
+    return NULL;
+  
+  t = getenv2 ("TEMP");
+
+  if (!(p = malloc (strlen (t) + strlen (temp) + 10)))
+    return NULL;
+
+  sprintf (p, "%s" FILE_SEPARATOR_S "%sXXXXXX", t, temp);
+  strcpy (temp, p);
+  free (p);
+
+  if (!dir)
+    {
+      if (mkstemp (temp) == -1)
+        return NULL;
+    }
+  else
+    if (mkdtemp (temp) == NULL)
+      return NULL;
+
+  return temp;
+}
+
+
+char *
+tmpnam2 (char *temp)
+// deprecated
+{
+#if 0
   char *p = getenv2 ("TEMP");
 
   srand (time_ms (0));
@@ -678,29 +710,10 @@ tmpnam2 (char *temp)
     sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, rand());
 
   return temp;
-}
-
-
-#if 0
-// TODO: like tmpnam2() but create the file or directory so that no other process can take them
-const char *
-mktmpdir (char *path, int mode)
-{
-  (void) path;
-  (void) mode;
-//  path + dirname
-  return "";
-}
-
-
-const char *
-mktmpfile (char *path)
-{
-  (void) path;
-//  path + filename
-  return "";
-}
+#else
+  return tmpnam3 (temp, 0);
 #endif
+}
 
 
 int
@@ -734,7 +747,7 @@ baknam (char *fname)
 
 
 static int
-fcopy_func (void *buffer, int n, void *object)
+fcopy_func (const unsigned char *buffer, int n, void *object)
 {
   return fwrite (buffer, 1, n, (FILE *) object);
 }
@@ -746,10 +759,11 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
   FILE *output;
   int result = 0;
 
-#ifdef  DEBUG
   if (!strchr ("aw", *mode))
-    fprintf (stderr, "ERROR: fcopy() (logically) supports only write or append as mode\n\n");
-#endif
+    {
+      fprintf (stderr, "ERROR: fcopy() (logically) supports only write or append as mode\n\n");
+      exit (1);
+    }
 
   if (same_file (dest, src))                     // other code depends on this
     return -1;                                  //  behaviour!
@@ -759,7 +773,7 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
 
   fseek (output, 0, SEEK_END);
 
-  result = quick_io_func (fcopy_func, MAXBUFSIZE, output, start, len, src);
+  result = quick_io_func (fcopy_func, output, start, len, src);
 
   fclose (output);
 
@@ -784,6 +798,7 @@ quick_io_c (int value, size_t pos, const char *filename, const char *mode)
     result = fputc (value, fh);
 
   fclose (fh);
+
   return result;
 }
 
@@ -814,9 +829,10 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
 
 
 int
-quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *o,
+quick_io_func (int (*func) (const unsigned char *, int, void *), void *o,
                size_t start, size_t len, const char *filename)
 {
+#warning fix quick_io_func()
   void *buffer = NULL;
   int buffer_size = 0, buffer_len = 0, buffer_pos = 0;
   size_t pos = 0;
@@ -824,50 +840,58 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *o,
   int result = 0;
 
   if (!(fh = fopen (filename, "rb")))
-    {
-      free (buffer);
-      return -1;
-    }
+    return -1;
 
   if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
     if ((buffer = malloc (len)))                //  in their entirety
       buffer_size = len;
 
-  if (!buffer)                                  // default to func_maxlen
-    if ((buffer = malloc (func_maxlen)))
-      buffer_size = func_maxlen;
+  if (!buffer)
+    if ((buffer = malloc (MAXBUFSIZE)))
+      buffer_size = MAXBUFSIZE;
 
   if (!buffer)
-    return -1;
+    {
+      fprintf (stderr, "ERROR: could not allocate %d Bytes of memory.\n", MAXBUFSIZE);
+      return -1;
+    }
+
+//#ifdef  DEBUG
+  printf ("start: %d\n"
+          "len:   %d\n"
+          "buffer_size: %d\n",
+          start,
+          len,
+          buffer_size);
+  fflush (stdout);
+//#endif
 
   fseek (fh, start, SEEK_SET);
 
+#if 0
   for (pos = 0; pos < len; pos += buffer_len)
     {
       buffer_len = fread (buffer, 1, buffer_size, fh);
 
       while (buffer_pos < buffer_len)
         {
-          int func_size = MIN (MIN (func_maxlen, buffer_len), buffer_len - buffer_pos);
+          int func_size = MIN (MIN (func_maxbuflen, buffer_len), buffer_len - buffer_pos);
 
           result = func ((char *) buffer + buffer_pos, func_size, o);
           buffer_pos += result;
 
-          if (result < func_size)  // this must be EOF or a problem (if in overwrite mode)
-            {
-              fclose (fh);
-              free (buffer);
-
-              // returns total bytes processed or if (func() < 0) it returns that error value
-              return buffer_pos < 0 ? buffer_pos : ((int) pos + buffer_pos);
-            }
+          if (result < func_size)
+            break;
         }
     }
-
+#endif
   fclose (fh);
   free (buffer);
 
   // returns total bytes processed or if (func() < 0) it returns that error value
+//  if (result < func_size)
+//    return buffer_pos < 0 ? buffer_pos : ((int) pos + buffer_pos);
+
   return pos;
 }
 

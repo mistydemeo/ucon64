@@ -66,7 +66,7 @@ const st_getopt2_t patch_usage[] =
   };
 
 
-#warning TEST
+#warning test patch_poke()
 int
 patch_poke (st_ucon64_t *p)
 {

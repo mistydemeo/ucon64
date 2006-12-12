@@ -92,7 +92,8 @@ const char *ucon64_msg[] =
     "*** IF YOU OWN SUCH A DEVICE OR EXPERIENCE ANY PROBLEMS\n"
     "*** PLEASE CONTACT: ucon64-main@lists.sf.net\n"
     "***\n"
-    "***                                          THANK YOU!\n\n",        // UNTESTED
+    "***                                          THANK YOU!\n\n",      // UNTESTED
+    "Unknown",                                                          // UNKNOWN_MSG
     NULL
   };
 
@@ -1407,7 +1408,7 @@ typedef struct
 
 
 static int
-ucon64_dump_func (void *buffer, int n, void *object)
+ucon64_dump_func (const unsigned char *buffer, int n, void *object)
 {
   st_ucon64_dump_t *o = (st_ucon64_dump_t *) object;
 
@@ -1424,7 +1425,7 @@ ucon64_dump (FILE *output, const char *filename, size_t start, size_t len,
 {
   st_ucon64_dump_t o = {output, start, flags};
 
-  quick_io_func (ucon64_dump_func, MAXBUFSIZE, &o, start, len, filename);
+  quick_io_func (ucon64_dump_func, &o, start, len, filename);
 }
 
 
@@ -1439,7 +1440,7 @@ typedef struct
 
 
 static int
-ucon64_find_func (void *buffer, int n, void *object)
+ucon64_find_func (const unsigned char *buffer, int n, void *object)
 {
   st_ucon64_find_t *o = (st_ucon64_find_t *) object;
   char *ptr0 = (char *) buffer, *ptr1 = (char *) buffer;
@@ -1576,14 +1577,14 @@ ucon64_find (const char *filename, size_t start, size_t len,
       }
     }
 
-  result = quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len, filename);
+  result = quick_io_func (ucon64_find_func, &o, start, len, filename);
 
   return o.found;                               // return last occurrence or -1
 }
 
 
 static int
-ucon64_chksum_func (void *buffer, int n, void *object)
+ucon64_chksum_func (const unsigned char *buffer, int n, void *object)
 {
   st_hash_t *h = (st_hash_t *) object;
 
@@ -1621,7 +1622,7 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
   if (!h)
     return -1;
 
-  result = quick_io_func (ucon64_chksum_func, MAXBUFSIZE, &h, start,
+  result = quick_io_func (ucon64_chksum_func, &h, start,
                           fsizeof (filename) - start, filename);
 
   if (sha1_s)
@@ -1647,7 +1648,7 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
 }
 
 
-#warning
+#warning fix ucon64_fbswap16 and ucon64_fwswap32
 typedef struct
 {
   FILE *dest_file;
@@ -1655,21 +1656,21 @@ typedef struct
 
 
 static inline int
-ucon64_fbswap16_func (void *buffer, int n, void *object)
+ucon64_fbswap16_func (const unsigned char *buffer, int n, void *object)
 {
   st_ucon64_swap_t *o = (st_ucon64_swap_t *) object;
 
-  bswap16_n (buffer, n);
+  bswap16_n ((void *) buffer, n);
   return fwrite (buffer, n, 1, o->dest_file);
 }
 
 
 static inline int
-ucon64_fwswap32_func (void *buffer, int n, void *object)
+ucon64_fwswap32_func (const unsigned char *buffer, int n, void *object)
 {
   st_ucon64_swap_t *o = (st_ucon64_swap_t *) object;
 
-  wswap32_n (buffer, n);
+  wswap32_n ((void *) buffer, n);
   return fwrite (buffer, n, 1, o->dest_file);
 }
 
@@ -1682,7 +1683,7 @@ ucon64_fbswap16 (const char *src_fname, size_t start, size_t len, const char *de
   o.dest_file = fopen (dest_fname, "wb");
 
   if (o.dest_file)
-    quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, &o, start, len, src_fname);
+    quick_io_func (ucon64_fbswap16_func, &o, start, len, src_fname);
 
   fclose (o.dest_file);
 }
@@ -1696,111 +1697,12 @@ ucon64_fwswap32 (const char *src_fname, size_t start, size_t len, const char *de
   o.dest_file = fopen (dest_fname, "wb");
 
   if (o.dest_file)
-    quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, &o, start, len, src_fname);
+    quick_io_func (ucon64_fwswap32_func, &o, start, len, src_fname);
 
   fclose (o.dest_file);
 }
 
 
-#if 0
-#define FILEFILE_LARGE_BUF (1024 * 1024)
-
-
-typedef struct
-{
-  FILE *output;
-  int pos0;
-  int pos;
-  int similar;
-  unsigned char *buffer;
-  const char *fname0;
-  const char *fname;
-  int found;
-} st_ucon64_filefile_t;
-
-
-static int
-ucon64_filefile_func (void *buffer, int n, void *object)
-{
-  st_ucon64_filefile_t *o = (st_ucon64_filefile_t *) object;
-  int i = 0, j = 0, len = MIN (FILEFILE_LARGE_BUF, fsizeof (o->fname) - o->pos);
-  char *b = (char *) buffer;
-
-  ucon64_fread (o->buffer, o->pos, len, o->fname);
-
-  for (; i < n; i++)
-    if (o->similar == TRUE ?                    // find start
-        *(b + i) == *(o->buffer + i) :
-        *(b + i) != *(o->buffer + i))
-      {
-        for (j = 0; i + j < n; j++)
-          if (o->similar == TRUE ?              // find end (len)
-              *(b + i + j) != *(o->buffer + i + j) :
-              *(b + i + j) == *(o->buffer + i + j))
-            break;
-
-        fprintf (o->output, "%s:\n", o->fname0);
-        dumper (o->output, &b[i], j, o->pos0 + i, DUMPER_HEX);
-
-        fprintf (o->output, "%s:\n", o->fname);
-        dumper (o->output, &o->buffer[i], j, o->pos + i, DUMPER_HEX);
-
-        fputc ('\n', o->output);
-
-        i += j;
-        o->found++;
-      }
-
-  return n;
-}
-
-
-void
-ucon64_filefile (const char *filename1, int start1, const char *filename2,
-                 int start2, int similar)
-{
-  st_ucon64_filefile_t o;
-
-  printf ("Comparing %s", basename2 (ucon64.fname));
-  if (ucon64.fname_arch[0])
-    printf (" (%s)", basename2 (ucon64.fname_arch));
-  printf (" with %s\n", filename1);
-
-  if (same_file (filename1, filename2))
-    {
-      printf ("%s and %s refer to one file\n", filename1, filename2);
-      return;
-    }
-
-  if (fsizeof (filename1) < start1 || fsizeof (filename2) < start2)
-    return;
-
-  if (!(o.buffer = (unsigned char *) malloc (FILEFILE_LARGE_BUF)))
-    {
-      fputs ("ERROR: File not found/out of memory\n", stderr);
-      return;                            // it's logical to stop for this file
-    }
-
-  o.fname0 = filename1;
-  o.pos0 = start1;
-
-  o.fname = filename2;
-  o.pos = start2;
-  o.output = stdout;
-  o.similar = similar;
-
-  o.found = 0;
-
-  quick_io_func (ucon64_filefile_func, FILEFILE_LARGE_BUF, &o, start1,
-                 fsizeof (filename1), filename1);
-
-  if (o.found)
-    printf ("Found %d %s\n",
-      o.found,
-      similar ? (o.found == 1 ? "similarity" : "similarities") :
-                (o.found == 1 ? "difference" : "differences"));
-}
-#else
 #define FILEFILE_LARGE_BUF
 // When verifying if the code produces the same output when FILEFILE_LARGE_BUF
 //  is defined as when it's not, be sure to use the same buffer size
@@ -1940,7 +1842,6 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 
   return;
 }
-#endif
 
 
 char *
@@ -1975,7 +1876,7 @@ mkbak (const char *filename, backup_t type)
         if (buf[strlen (buf) - 1] != FILE_SEPARATOR)
           strcat (buf, FILE_SEPARATOR_S);
 
-      strcat (buf, basename2 (tmpnam2 (buf2)));
+      strcat (buf, basename2 (tmpnam3 (buf2, 0)));
       if (rename (filename, buf))
         {
           fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);

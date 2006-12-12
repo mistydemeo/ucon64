@@ -26,8 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])
 
 #define UCON64_UNKNOWN (-1)
-#define UCON64_UNKNOWN_S "Unknown"
-#define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
 #define UCON64_VERSION_S "2.0.1"
 

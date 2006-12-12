@@ -358,6 +358,8 @@ is_probably_3f (const unsigned char *image, unsigned int size)
 int
 atari_init (st_ucon64_nfo_t * rominfo)
 {
+#warning fix atari_init()
+#if 0
   int i, j, bsmode, size = ucon64.file_size;
   unsigned int crc32;
   static char backup_usage[80];
@@ -487,7 +489,7 @@ atari_init (st_ucon64_nfo_t * rominfo)
                get_bsmode_by_id (atari_rominfo.bsm)->start_page);
       return 0;
     }
-
+#endif
   return -1;
 }
 

@@ -651,7 +651,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
   }
   if (value < 0 || value >= NINTENDO_MAKER_LEN)
     value = 0;
-  rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[value]);
+  rominfo->maker = nintendo_maker[value] ? nintendo_maker[value] : ucon64_msg[UNKNOWN_MSG];
 
   // ROM country
   rominfo->country =
@@ -1075,7 +1075,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
 
 int
 gba_sc (void)
-#warning
+#warning fix gba_sc()
 /*
   reverse engineered from SuperCard.exe
   

@@ -157,8 +157,9 @@ swan_init (st_ucon64_nfo_t *rominfo)
   rominfo->header_len = SWAN_HEADER_LEN;
 
   // ROM maker
-  rominfo->maker = NULL_TO_UNKNOWN_S (swan_maker[MIN (OFFSET (swan_header, 0),
-                                      SWAN_MAKER_MAX - 1)]);
+  rominfo->maker = swan_maker[MIN (OFFSET (swan_header, 0), SWAN_MAKER_MAX - 1)] ?
+                   swan_maker[MIN (OFFSET (swan_header, 0), SWAN_MAKER_MAX - 1)] :
+                   ucon64_msg[UNKNOWN_MSG];
 
   // misc stuff
   sprintf ((char *) buf, "Minimum supported system: %s",

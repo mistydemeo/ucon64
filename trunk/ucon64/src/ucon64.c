@@ -431,9 +431,11 @@ main (int argc, char **argv)
   ucon64.parport_needed =
   ucon64.io_mode = 0;
 
+#warning 0 instead of UCON64_UNKNOWN
+  ucon64.backup_header_len = 0;
+
   ucon64.battery =
   ucon64.bs_dump =
-  ucon64.backup_header_len =
   ucon64.console =
   ucon64.controller =
   ucon64.controller2 =
@@ -704,7 +706,7 @@ main (int argc, char **argv)
 }
 
 
-#warning
+#warning re-enable zlib support
 #ifdef  USE_ZLIB
 void
 ucon64_fname_arch (const char *fname)
@@ -790,6 +792,24 @@ ucon64_process_rom (const char *fname)
     }
 
   return 0;
+}
+
+
+
+static int
+ucon64_options (st_ucon64_t *p)
+#warning merge
+{
+  int i = 0;
+
+  for (; ucon64_opts[i].option; i++)
+    if (ucon64_opts[i].option == p->option)
+      {
+        ucon64_opts[i].func (p);
+        return 0;
+      }
+
+  return -1;
 }
 
 

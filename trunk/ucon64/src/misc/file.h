@@ -44,7 +44,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                 on one file system
   truncate2() don't use truncate() to enlarge files, because the result is
                 undefined (by POSIX) use truncate2() instead which does both
-  tmpnam2()   replacement for tmpnam() temp must have the size of FILENAME_MAX
+  tmpnam2()   deprecated
+  tmpnam3()   replacement for tmpnam() temp must have the size of FILENAME_MAX
   baknam()    produces a backup name for a filename
                 bla.txt would return bla.bak or bla.b01 if bla.bak already exists
   fcopy()     copy src from start for len to dest with mode
@@ -54,10 +55,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   quick_io_c() returns byte read or fputc()'s status
 
   quick_io_func()
-              malloc()s a buffer as large as possible and starts reading
-              from fname into the buffer and passes chunks of it to func
+              malloc()s reads from fname into a buffer and passes it to func
                 func()      func(buffer, buffer_len, object)
-                func_maxlen max. size of those chunks the func can process at once
                 object      a freely defineavble object the will also passed to func
                 start       seeks to start pos of fname
                 len         a vector from start
@@ -88,7 +87,7 @@ extern int same_file (const char *filename1, const char *filename2);
 extern int same_filesystem (const char *filename1, const char *filename2);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, unsigned long size);
-extern char *tmpnam2 (char *temp);
+extern char *tmpnam3 (char *temp, int dir);
 extern char *baknam (char *fname);
 extern int fsizeof (const char *filename);
 extern int fcopy (const char *src, size_t start, size_t len, const char *dest,
@@ -98,8 +97,8 @@ extern int quick_io (void *buffer, size_t start, size_t len, const char *fname,
                      const char *mode);
 extern int quick_io_c (int value, size_t pos, const char *fname, const char *mode);
 
-extern int quick_io_func (int (*func) (void *, int, void *),
-                          int func_maxlen, void *object, size_t start,
+extern int quick_io_func (int (*func) (const unsigned char *, int, void *),
+                          void *object, size_t start,
                           size_t len, const char *fname);
 
 #define GETFILE_FILES_ONLY     1

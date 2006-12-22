@@ -49,34 +49,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 
-static st_ucon64_obj_t ppf_obj[] =
-  {
-    {0, WF_STOP}
-  };
-
 const st_getopt2_t ppf_usage[] =
   {
     {
       "ppf", 0, 0, UCON64_PPF,
-      NULL, "apply PPF PATCH to IMAGE (PPF<=v2.0); ROM should be an IMAGE",
-      &ppf_obj[0]
+      NULL, "apply PPF PATCH to IMAGE (PPF<=v2.0); ROM should be an IMAGE"
     },
     {
       "mkppf", 1, 0, UCON64_MKPPF,
-      "ORG_IMG", "create PPF patch; ROM should be the modified IMAGE",
-      &ppf_obj[0]
+      "ORG_IMG", "create PPF patch; ROM should be the modified IMAGE"
     },
     {
       "nppf", 1, 0, UCON64_NPPF,
-      "DESC", "change PPF single line DESCRIPTION",
-      NULL
+      "DESC", "change PPF single line DESCRIPTION"
     },
     {
       "idppf", 1, 0, UCON64_IDPPF,
-      "FILE_ID.DIZ", "change FILE_ID.DIZ of PPF PATCH (PPF v2.0)",
-      NULL
+      "FILE_ID.DIZ", "change FILE_ID.DIZ of PPF PATCH (PPF v2.0)"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 /*

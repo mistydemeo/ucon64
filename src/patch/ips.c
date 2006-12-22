@@ -47,24 +47,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define DEBUG_IPS
 
 
-static st_ucon64_obj_t ips_obj[] =
-  {
-    {0, WF_STOP}
-  };
-
 const st_getopt2_t ips_usage[] =
   {
     {
       "i", 0, 0, UCON64_I,
-      NULL, "apply IPS PATCH to ROM (IPS<=v1.2)",
-      &ips_obj[0]
+      NULL, "apply IPS PATCH to ROM (IPS<=v1.2)"
     },
     {
       "mki", 1, 0, UCON64_MKI,
-      "ORG_ROM", "create IPS patch; ROM should be the modified ROM",
-      &ips_obj[0]
+      "ORG_ROM", "create IPS patch; ROM should be the modified ROM"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 static FILE *orgfile, *modfile, *ipsfile, *destfile;

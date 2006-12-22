@@ -44,29 +44,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define N64APS_MAGICLENGTH 5
 
 
-static st_ucon64_obj_t aps_obj[] =
-  {
-    {0, WF_STOP}
-  };
-
 const st_getopt2_t aps_usage[] =
   {
     {
       "a", 0, 0, UCON64_A,
-      NULL, "apply APS PATCH to ROM (APS<=v1.2)",
-      &aps_obj[0]
+      NULL, "apply APS PATCH to ROM (APS<=v1.2)"
     },
     {
       "mka", 1, 0, UCON64_MKA,
-      "ORG_ROM", "create APS patch; ROM should be the modified ROM",
-      &aps_obj[0]
+      "ORG_ROM", "create APS patch; ROM should be the modified ROM"
     },
     {
       "na", 1, 0, UCON64_NA,
-      "DESC", "change APS single line DESCRIPTION",
-      NULL
+      "DESC", "change APS single line DESCRIPTION"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 char n64aps_magic[] = "APS10";

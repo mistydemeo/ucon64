@@ -35,19 +35,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "bsl.h"
 
 
-static st_ucon64_obj_t bsl_obj[] =
-  {
-    {0, WF_STOP}
-  };
-
 const st_getopt2_t bsl_usage[] =
   {
     {
       "b", 0, 0, UCON64_B,
-      NULL, "apply Baseline/BSL PATCH to ROM",
-      &bsl_obj[0]
+      NULL, "apply Baseline/BSL PATCH to ROM"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

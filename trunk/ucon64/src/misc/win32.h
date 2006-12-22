@@ -1,29 +1,29 @@
 /*
+win32.c - win32 compat. stuff
 
-    Declaration of POSIX directory browsing functions and types for Win32.
+Copyright (c) 2006 NoisyB
 
-    Kevlin Henney (mailto:kevlin@acm.org), March 1997.
 
-    Copyright Kevlin Henney, 1997. All rights reserved.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-    Permission to use, copy, modify, and distribute this software and its
-    documentation for any purpose is hereby granted without fee, provided
-    that this copyright and permissions notice appear in all copies and
-    derivatives, and that no charge may be made for the software and its
-    documentation except to cover cost of distribution.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#ifndef DIRENT_INCLUDED
-#define DIRENT_INCLUDED
-
-
+#ifndef MISC_WIN32_H
+#define MISC_WIN32_H
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-
 
 
 typedef struct DIR DIR;
@@ -39,10 +39,7 @@ struct dirent *readdir (DIR *);
 void rewinddir (DIR *);
 
 
-
 #ifdef __cplusplus
 }
 #endif
-
-
 #endif

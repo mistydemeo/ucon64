@@ -71,12 +71,6 @@ Portions copyright (c) 2002        dbjh
 #define GAME_GENIE_MAX_STRLEN 12
 
 
-static st_ucon64_obj_t gg_obj[] =
-  {
-    {0, WF_INIT | WF_PROBE},
-    {0, WF_INIT | WF_PROBE | WF_NO_ROM}
-  };
-
 const st_getopt2_t gg_usage[] =
   {
     {
@@ -90,8 +84,7 @@ const st_getopt2_t gg_usage[] =
       OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "nes\n"
       "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
       OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "snes\n"
-      "CODE" OPTARG_S "'AAAAAA:VV'",
-      &gg_obj[1]
+      "CODE" OPTARG_S "'AAAAAA:VV'"
     },
     {
       "ggd", 1, 0, UCON64_GGD,
@@ -104,8 +97,7 @@ const st_getopt2_t gg_usage[] =
       OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "nes\n"
       "GG_CODE" OPTARG_S "'XXXXXX' or GG_CODE" OPTARG_S "'XXXXXXXX'\n"
       OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "snes\n"
-      "GG_CODE" OPTARG_S "'XXXX-XXXX'",
-      &gg_obj[1]
+      "GG_CODE" OPTARG_S "'XXXX-XXXX'"
     },
     {
       "gg", 1, 0, UCON64_GG,
@@ -116,10 +108,9 @@ const st_getopt2_t gg_usage[] =
       "Sega Master System(II/III)/Game Gear (Handheld),\n"
       "Genesis/Sega Mega Drive/Sega CD/32X/Nomad,\n"
       "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),\n"
-      "Super Nintendo Entertainment System/SNES/Super Famicom",
-      &gg_obj[0]
+      "Super Nintendo Entertainment System/SNES/Super Famicom"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 
@@ -1124,12 +1115,12 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 
   fputc ('\n', stdout);
   buf[0] = ucon64_fgetc (dest_name, address + rominfo->backup_header_len);
-  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
+  dumper (stdout, buf, 1, address + rominfo->backup_header_len, 0);
 
   ucon64_fputc (dest_name, address + rominfo->backup_header_len, value, "r+b");
 
   buf[0] = value;
-  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
+  dumper (stdout, buf, 1, address + rominfo->backup_header_len, 0);
   fputc ('\n', stdout);
 
   printf (ucon64_msg[WROTE], dest_name);

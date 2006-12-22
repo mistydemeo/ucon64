@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <zlib.h>
 #include "unzip.h"
 #endif
+#include "hash.h"
 #include "hash_crc.h"
 #include "defines.h"
 
@@ -104,3 +105,19 @@ crc32 (unsigned int crc, const void *buffer, unsigned int size)
   return ~crc;
 }
 #endif
+
+
+unsigned int
+crc32_wrap (unsigned int crc, const void *buffer, unsigned int size)
+{
+  st_hash_t *h = NULL;
+
+  h = hash_open (HASH_CRC32);
+  h->crc32 = crc;
+  h = hash_update (h, buffer, size);
+  crc = hash_get_crc32 (h);
+  hash_close (h);
+
+  return crc;
+}
+

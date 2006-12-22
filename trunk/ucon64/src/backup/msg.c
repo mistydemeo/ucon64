@@ -35,27 +35,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "msg.h"
 
 
-static st_ucon64_obj_t msg_obj[] =
-  {
-    {UCON64_PCE, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}
-  };
-
 const st_getopt2_t msg_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Magic Super Griffin/MSG"/*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/,
-      NULL
+      NULL, "Magic Super Griffin/MSG"/*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xmsg", 0, 0, UCON64_XMSG,
       NULL, "send/receive ROM to/from Magic Super Griffin/MSG; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist",
-      &msg_obj[0]
+      "receives automatically when ROM does not exist"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

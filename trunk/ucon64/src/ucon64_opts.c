@@ -87,25 +87,18 @@ toprint (int c)
 }
 
 
-int
-ucon64_switches (st_ucon64_t *p)
+#warning merge all *_tmp_* funcs into the funcs they wrap
+static int
+ucon64_tmp_help (st_ucon64_t *p)
 {
-  int x = 0;
+printf ("SHIT");
+fflush (stdout);
 
-  /*
-    Handle options or switches that cause other _options_ to be ignored except
-    other options of the same class (so the order in which they were specified
-    matters).
-    We have to do this here (not in ucon64_options()) or else other options
-    might be executed before these.
-  */
-  switch (p->option)
-    {
+  int x = 0;
     /*
       Many tools ignore other options if --help has been specified. We do the
       same (compare with GNU tools).
     */
-    case UCON64_HELP:
       x = USAGE_VIEW_LONG;
       if (p->optarg)
         {
@@ -117,18 +110,21 @@ ucon64_switches (st_ucon64_t *p)
             x = USAGE_VIEW_PATCH;
           else if (!strcmp (p->optarg, "backup"))
             x = USAGE_VIEW_BACKUP;
-          else if (!strcmp (p->optarg, "disc"))
-            x = USAGE_VIEW_DISC;
         }
       ucon64_usage (ucon64.argc, ucon64.argv, x);
-      exit (0);
 
+  return 0;
+}
+
+
+static int
+ucon64_tmp_ver (st_ucon64_t *p)
+{
     /*
       It's also common to exit after displaying version information.
       On some configurations printf is a macro (Red Hat Linux 6.2 + GCC 3.2),
       so we can't use preprocessor directives in the argument list.
     */
-    case UCON64_VER:
       printf ("version:                           %s (%s)\n"
               "platform:                          %s\n",
               UCON64_VERSION_S, __DATE__,
@@ -188,417 +184,12 @@ ucon64_switches (st_ucon64_t *p)
               ucon64.datdir,
               ucon64_dat_total_entries (),
               ucon64.dat_enabled ? "yes" : "no");
-      exit (0);
-      break;
-
-    case UCON64_FRONTEND:
-      ucon64.frontend = 1;                      // used by (for example) ucon64_gauge()
-      break;
-
-    case UCON64_NBAK:
-      ucon64.backup = 0;
-      break;
-
-    case UCON64_R:
-      ucon64.recursive = 1;
-      break;
-
-#ifdef  USE_ANSI_COLOR
-    case UCON64_NCOL:
-      ucon64.ansi_color = 0;
-      break;
-#endif
-
-    case UCON64_NS:
-      ucon64.split = 0;
-      break;
-
-    case UCON64_HD:
-      ucon64.backup_header_len = UNKNOWN_BACKUP_HEADER_LEN;
-      break;
-
-    case UCON64_HDN:
-      ucon64.backup_header_len = strtol (p->optarg, NULL, 10);
-      break;
-
-    case UCON64_NHD:
-      ucon64.backup_header_len = 0;
-      break;
-
-    case UCON64_SWP:                            // deprecated
-    case UCON64_INT:
-      ucon64.interleaved = 1;
-      break;
-
-    case UCON64_INT2:
-      ucon64.interleaved = 2;
-      break;
-
-    case UCON64_NSWP:                           // deprecated
-    case UCON64_NINT:
-      ucon64.interleaved = 0;
-      break;
-
-    case UCON64_PORT:
-#ifdef  USE_USB
-      if (!strnicmp (p->optarg, "usb", 3))
-        {
-          if (strlen (p->optarg) >= 4)
-            ucon64.usbport = strtol (p->optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
-          else                                  // we automatically detect the
-            ucon64.usbport = 1;                 //  USB port in the F2A code
-
-          /*
-            We don't want to make uCON64 behave different if --port=USB{n} is
-            specified *after* a transfer option (instead of before one), so we
-            have to reset ucon64.parport_needed here.
-          */
-          ucon64.parport_needed = 0;
-        }
-      else
-#endif
-        ucon64.parport = strtol (p->optarg, NULL, 16);
-      break;
-
-#ifdef  USE_PARALLEL
-    /*
-      We detect the presence of these options here so that we can drop
-      privileges ASAP.
-      Note that the libcd64 options are not listed here. We cannot drop
-      privileges before libcd64 is initialised (after cd64_t.devopen() has been
-      called).
-    */
-    case UCON64_XCMC:
-    case UCON64_XCMCT:
-    case UCON64_XDEX:
-    case UCON64_XDJR:
-    case UCON64_XF2A:                           // could be for USB version
-    case UCON64_XF2AMULTI:                      // idem
-    case UCON64_XF2AC:                          // idem
-    case UCON64_XF2AS:                          // idem
-    case UCON64_XF2AB:                          // idem
-    case UCON64_XFAL:
-    case UCON64_XFALMULTI:
-    case UCON64_XFALC:
-    case UCON64_XFALS:
-    case UCON64_XFALB:
-    case UCON64_XFIG:
-    case UCON64_XFIGS:
-    case UCON64_XFIGC:
-    case UCON64_XGBX:
-    case UCON64_XGBXS:
-    case UCON64_XGBXB:
-    case UCON64_XGD3:
-    case UCON64_XGD3R:
-    case UCON64_XGD3S:
-    case UCON64_XGD6:
-    case UCON64_XGD6R:
-    case UCON64_XGD6S:
-    case UCON64_XGG:
-    case UCON64_XGGS:
-    case UCON64_XGGB:
-    case UCON64_XLIT:
-    case UCON64_XMCCL:
-    case UCON64_XMCD:
-    case UCON64_XMD:
-    case UCON64_XMDS:
-    case UCON64_XMDB:
-    case UCON64_XMSG:
-    case UCON64_XPCE:
-    case UCON64_XPL:
-    case UCON64_XPLI:
-    case UCON64_XRESET:
-    case UCON64_XSF:
-    case UCON64_XSFS:
-    case UCON64_XSMC:
-    case UCON64_XSMCR:
-    case UCON64_XSMD:
-    case UCON64_XSMDS:
-    case UCON64_XSWC:
-    case UCON64_XSWC2:
-    case UCON64_XSWCR:
-    case UCON64_XSWCS:
-    case UCON64_XSWCC:
-    case UCON64_XV64:
-#ifdef  USE_USB
-      if (!ucon64.usbport)                      // no pport I/O if F2A option and USB F2A
-#endif
-      ucon64.parport_needed = 1;
-      /*
-        We want to make this possible:
-          1.) ucon64 <transfer option> <rom>
-          2.) ucon64 <transfer option> <rom> --port=<parallel port address>
-        The above works "automatically". The following type of command used to
-        be possible, but has been deprecated:
-          3.) ucon64 <transfer option> <rom> <parallel port address>
-        It has been removed, because it caused problems when specifying additional
-        switches without specifying the parallel port address. For example:
-          ucon64 -xfal -xfalm <rom>
-        This would be interpreted as:
-          ucon64 -xfal -xfalm <rom as file> <rom as parallel port address>
-        If <rom> has a name that starts with a number an I/O port associated
-        with that number will be accessed which might well have unwanted
-        results. We cannot check for valid I/O port numbers, because the I/O
-        port of the parallel port can be mapped to almost any 16-bit number.
-      */
-#if 0
-      if (ucon64.parport == UCON64_UNKNOWN)
-        if (ucon64.argc >= 4)
-          if (access (ucon64.argv[ucon64.argc - 1], F_OK))
-            // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
-            //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
-            ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
-#endif
-      break;
-
-#ifdef  USE_LIBCD64
-    case UCON64_XCD64:
-    case UCON64_XCD64B:
-    case UCON64_XCD64C:
-    case UCON64_XCD64E:
-    case UCON64_XCD64F:
-    case UCON64_XCD64M:
-    case UCON64_XCD64S:
-      // We don't really need the parallel port. We just have to make sure that
-      //  privileges aren't dropped.
-      ucon64.parport_needed = 2;
-      break;
-
-    case UCON64_XCD64P:
-      ucon64.io_mode = strtol (p->optarg, NULL, 10);
-      break;
-#endif
-
-    case UCON64_XCMCM:
-      ucon64.io_mode = strtol (p->optarg, NULL, 10);
-      break;
-
-    case UCON64_XFALM:
-    case UCON64_XGBXM:
-    case UCON64_XPLM:
-      ucon64.parport_mode = UCON64_EPP;
-      break;
-
-    case UCON64_XSWC_IO:
-      ucon64.io_mode = strtol (p->optarg, NULL, 16);
-
-      if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
-        puts ("WARNING: I/O mode not yet implemented");
-#if 0 // all these constants are defined by default
-      if (ucon64.io_mode & (SWC_IO_SPC7110 | SWC_IO_SDD1 | SWC_IO_SA1 | SWC_IO_MMX2))
-        puts ("WARNING: Be sure to compile swc.c with the appropriate constants defined");
-#endif
-
-      if (ucon64.io_mode > SWC_IO_MAX)
-        {
-          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.io_mode);
-          ucon64.io_mode = 0;
-        }
-      else
-        {
-          printf ("I/O mode: 0x%03x", ucon64.io_mode);
-          if (ucon64.io_mode)
-            {
-              char flagstr[100];
-
-              flagstr[0] = 0;
-              if (ucon64.io_mode & SWC_IO_FORCE_32MBIT)
-                strcat (flagstr, "force 32 Mbit dump, ");
-              if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
-                strcat (flagstr, "alternative ROM size method, ");
-              if (ucon64.io_mode & SWC_IO_SUPER_FX)
-                strcat (flagstr, "Super FX, ");
-              if (ucon64.io_mode & SWC_IO_SDD1)
-                strcat (flagstr, "S-DD1, ");
-              if (ucon64.io_mode & SWC_IO_SA1)
-                strcat (flagstr, "SA-1, ");
-              if (ucon64.io_mode & SWC_IO_SPC7110)
-                strcat (flagstr, "SPC7110, ");
-              if (ucon64.io_mode & SWC_IO_DX2_TRICK)
-                strcat (flagstr, "DX2 trick, ");
-              if (ucon64.io_mode & SWC_IO_MMX2)
-                strcat (flagstr, "Mega Man X 2, ");
-              if (ucon64.io_mode & SWC_IO_DUMP_BIOS)
-                strcat (flagstr, "dump BIOS, ");
-
-              if (flagstr[0])
-                flagstr[strlen (flagstr) - 2] = 0;
-              printf (" (%s)", flagstr);
-            }
-          fputc ('\n', stdout);
-        }
-      break;
-#endif // USE_PARALLEL
-
-    case UCON64_PATCH: // --patch and --file are the same
-    case UCON64_FILE:
-      ucon64.file = p->optarg;
-      break;
-
-    case UCON64_I:
-    case UCON64_B:
-    case UCON64_A:
-    case UCON64_NA:
-    case UCON64_PPF:
-    case UCON64_NPPF:
-    case UCON64_IDPPF:
-      if (!ucon64.file || !ucon64.file[0])
-        ucon64.file = ucon64.argv[ucon64.argc - 1];
-      break;
-
-#if 0
-    case UCON64_ROM:
-      if (p->optarg)
-        ucon64.fname = p->optarg;
-      break;
-#endif
-
-    case UCON64_O:
-      {
-        struct stat fstate;
-        int dir = 0;
-
-        if (!stat (p->optarg, &fstate))
-          if (S_ISDIR (fstate.st_mode))
-            {
-              strcpy (ucon64.output_path, p->optarg);
-              if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
-                strcat (ucon64.output_path, FILE_SEPARATOR_S);
-              dir = 1;
-            }
-
-        if (!dir)
-          puts ("WARNING: Argument for -o must be a directory. Using current directory instead");
-      }
-      break;
-
-    case UCON64_NHI:
-      ucon64.snes_hirom = 0;
-      break;
-
-    case UCON64_HI:
-      ucon64.snes_hirom = SNES_HIROM;
-      break;
-
-    case UCON64_EROM:
-      ucon64.snes_header_base = SNES_EROM;
-      break;
-
-    case UCON64_BS:
-      ucon64.bs_dump = 1;
-      break;
-
-    case UCON64_NBS:
-      ucon64.bs_dump = 0;
-      break;
-
-    case UCON64_CTRL:
-      if (ucon64.controller != UCON64_UNKNOWN)
-        ucon64.controller |= 1 << strtol (p->optarg, NULL, 10);
-      else
-        ucon64.controller = 1 << strtol (p->optarg, NULL, 10);
-      break;
-
-    case UCON64_CTRL2:
-      if (ucon64.controller2 != UCON64_UNKNOWN)
-        ucon64.controller2 |= 1 << strtol (p->optarg, NULL, 10);
-      else
-        ucon64.controller2 = 1 << strtol (p->optarg, NULL, 10);
-      break;
-
-    case UCON64_NTSC:
-      if (ucon64.tv_standard == UCON64_UNKNOWN)
-        ucon64.tv_standard = 0;
-      else if (ucon64.tv_standard == 1)
-        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
-      break;
-
-    case UCON64_PAL:
-      if (ucon64.tv_standard == UCON64_UNKNOWN)
-        ucon64.tv_standard = 1;
-      else if (ucon64.tv_standard == 0)
-        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
-      break;
-
-    case UCON64_BAT:
-      ucon64.battery = 1;
-      break;
-
-    case UCON64_NBAT:
-      ucon64.battery = 0;
-      break;
-
-    case UCON64_VRAM:
-      ucon64.vram = 1;
-      break;
-
-    case UCON64_NVRAM:
-      ucon64.vram = 0;
-      break;
-
-    case UCON64_MIRR:
-      ucon64.mirror = strtol (p->optarg, NULL, 10);
-      break;
-
-    case UCON64_MAPR:
-      ucon64.mapr = p->optarg;                     // pass the _string_, it can be a
-      break;                                    //  board name
-
-    case UCON64_CMNT:
-      ucon64.comment = p->optarg;
-      break;
-
-    case UCON64_DUMPINFO:
-      ucon64.use_dump_info = 1;
-      ucon64.dump_info = p->optarg;
-      break;
-
-    case UCON64_Q:
-    case UCON64_QQ:                             // for now -qq is equivalent to -q
-      ucon64.quiet = 1;
-      break;
-
-    case UCON64_V:
-      ucon64.quiet = -1;
-      break;
-
-    case UCON64_SSIZE:
-      ucon64.part_size = strtol (p->optarg, NULL, 10) * MBIT;
-      break;
-
-    case UCON64_ID:
-      ucon64.id = -2;                           // just a value other than
-      break;                                    //  UCON64_UNKNOWN and smaller than 0
-
-    case UCON64_IDNUM:
-      ucon64.id = strtol (p->optarg, NULL, 10);
-      if (ucon64.id < 0)
-        ucon64.id = 0;
-      else if (ucon64.id > 999)
-        {
-          fprintf (stderr, "ERROR: NUM must be smaller than 999\n");
-          exit (1);
-        }
-      break;
-
-    case UCON64_REGION:
-      if (p->optarg[1] == 0 && toupper (p->optarg[0]) == 'X') // be insensitive to case
-        ucon64.region = 256;
-      else
-        ucon64.region = strtol (p->optarg, NULL, 10);
-      break;
-
-    default:
-      break;
-    }
-
   return 0;
 }
 
 
-#warning merge these funcs as much as possible with the funcs they call
 static int
-ucon64_opt_crc (st_ucon64_t *p)
+ucon64_tmp_crc (st_ucon64_t *p)
 {
   unsigned int checksum = 0;
   ucon64_chksum (NULL, NULL, &checksum, p->fname, 0);
@@ -607,7 +198,7 @@ ucon64_opt_crc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_crchd (st_ucon64_t *p)                          // deprecated
+ucon64_tmp_crchd (st_ucon64_t *p)                          // deprecated
 {
   unsigned int checksum = 0;
   ucon64_chksum (NULL, NULL, &checksum, p->fname, UNKNOWN_BACKUP_HEADER_LEN);
@@ -616,7 +207,7 @@ ucon64_opt_crchd (st_ucon64_t *p)                          // deprecated
 
 
 static int
-ucon64_opt_sha1 (st_ucon64_t *p)
+ucon64_tmp_sha1 (st_ucon64_t *p)
 {
   char buf[MAXBUFSIZE];
 
@@ -627,7 +218,7 @@ ucon64_opt_sha1 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_md5 (st_ucon64_t *p)
+ucon64_tmp_md5 (st_ucon64_t *p)
 {
   char buf[MAXBUFSIZE];
 
@@ -638,47 +229,47 @@ ucon64_opt_md5 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_hex (st_ucon64_t *p)
+ucon64_tmp_hex (st_ucon64_t *p)
 {
   ucon64_dump (stdout, p->fname,
                p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               p->file_size, DUMPER_HEX);
+               fsizeof (p->fname), 0);
   return 0;
 }
 
 
 static int
-ucon64_opt_bits (st_ucon64_t *p)
+ucon64_tmp_bits (st_ucon64_t *p)
 {
   ucon64_dump (stdout, p->fname,
                p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               p->file_size, DUMPER_BIT);
+               fsizeof (p->fname), DUMPER_BIT);
   return 0;
 }
 
 
 static int
-ucon64_opt_code (st_ucon64_t *p)
+ucon64_tmp_code (st_ucon64_t *p)
 {
   ucon64_dump (stdout, p->fname,
                p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               p->file_size, DUMPER_CODE);
+               fsizeof (p->fname), DUMPER_CODE);
   return 0;
 }
 
 
 static int
-ucon64_opt_print (st_ucon64_t *p)
+ucon64_tmp_print (st_ucon64_t *p)
 {
   ucon64_dump (stdout, p->fname,
                p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               p->file_size, DUMPER_TEXT);
+               fsizeof (p->fname), DUMPER_TEXT);
   return 0;
 }
 
 
 static int
-ucon64_opt_c (st_ucon64_t *p)
+ucon64_tmp_c (st_ucon64_t *p)
 {
   ucon64_filefile (p->optarg, 0, p->fname, 0, FALSE);
   return 0;
@@ -686,7 +277,7 @@ ucon64_opt_c (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_cs (st_ucon64_t *p)
+ucon64_tmp_cs (st_ucon64_t *p)
 {
   ucon64_filefile (p->optarg, 0, p->fname, 0, TRUE);
   return 0;
@@ -694,70 +285,70 @@ ucon64_opt_cs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_find (st_ucon64_t *p)
+ucon64_tmp_find (st_ucon64_t *p)
 {
-  ucon64_find (p->fname, 0, p->file_size, p->optarg,
+  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
                strlen (p->optarg), MEMCMP2_WCARD ('?'), 0);
   return 0;
 }
 
 
 static int
-ucon64_opt_findr (st_ucon64_t *p)
+ucon64_tmp_findr (st_ucon64_t *p)
 {
-  ucon64_find (p->fname, 0, p->file_size, p->optarg,
+  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
                strlen (p->optarg), MEMCMP2_REL, 0);
   return 0;
 }
 
 
 static int
-ucon64_opt_findi (st_ucon64_t *p)
+ucon64_tmp_findi (st_ucon64_t *p)
 {
-  ucon64_find (p->fname, 0, p->file_size, p->optarg,
+  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
                strlen (p->optarg), MEMCMP2_WCARD ('?') | MEMCMP2_CASE, 0);
   return 0;
 }
 
 
 static int
-ucon64_opt_hfind (st_ucon64_t *p)
+ucon64_tmp_hfind (st_ucon64_t *p)
 {
-  ucon64_find (p->fname, 0, p->file_size, p->optarg,
+  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
                strlen (p->optarg), MEMCMP2_WCARD ('?'), 1);
   return 0;
 }
 
 
 static int
-ucon64_opt_hfindr (st_ucon64_t *p)
+ucon64_tmp_hfindr (st_ucon64_t *p)
 {
-  ucon64_find (p->fname, 0, p->file_size, p->optarg,
+  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
                strlen (p->optarg), MEMCMP2_REL, 1);
   return 0;
 }
 
 
 static int
-ucon64_opt_dfind (st_ucon64_t *p)
+ucon64_tmp_dfind (st_ucon64_t *p)
 {
-  ucon64_find (p->fname, 0, p->file_size, p->optarg,
+  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
                strlen (p->optarg), MEMCMP2_WCARD ('?'), 1);
   return 0;
 }
 
 
 static int
-ucon64_opt_dfindr (st_ucon64_t *p)
+ucon64_tmp_dfindr (st_ucon64_t *p)
 {
-  ucon64_find (p->fname, 0, p->file_size, p->optarg,
+  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
                strlen (p->optarg), MEMCMP2_REL, 1);
   return 0;
 }
 
 
 static int
-ucon64_opt_pad (st_ucon64_t *p)
+ucon64_tmp_pad (st_ucon64_t *p)
 {
   int value = 0;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -772,8 +363,8 @@ ucon64_opt_pad (st_ucon64_t *p)
     value = p->nfo->backup_header_len;
   ucon64_file_handler (dest_name, src_name, 0);
 
-  fcopy (src_name, 0, p->file_size, dest_name, "wb");
-  if (truncate2 (dest_name, p->file_size + (MBIT - ((p->file_size - value) % MBIT))) == -1)
+  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "wb");
+  if (truncate2 (dest_name, fsizeof (p->fname) + (MBIT - ((fsizeof (p->fname) - value) % MBIT))) == -1)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
       exit (1);
@@ -787,7 +378,7 @@ ucon64_opt_pad (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_padhd (st_ucon64_t *p)                         // deprecated
+ucon64_tmp_padhd (st_ucon64_t *p)                         // deprecated
 {
   int value = UNKNOWN_BACKUP_HEADER_LEN;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -802,8 +393,8 @@ ucon64_opt_padhd (st_ucon64_t *p)                         // deprecated
     value = p->nfo->backup_header_len;
   ucon64_file_handler (dest_name, src_name, 0);
 
-  fcopy (src_name, 0, p->file_size, dest_name, "wb");
-  if (truncate2 (dest_name, p->file_size + (MBIT - ((p->file_size - value) % MBIT))) == -1)
+  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "wb");
+  if (truncate2 (dest_name, fsizeof (p->fname) + (MBIT - ((fsizeof (p->fname) - value) % MBIT))) == -1)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
       exit (1);
@@ -817,15 +408,15 @@ ucon64_opt_padhd (st_ucon64_t *p)                         // deprecated
 
 
 static int
-ucon64_opt_p (st_ucon64_t *p)
+ucon64_tmp_p (st_ucon64_t *p)
 {
-  ucon64_opt_pad (p);
+  ucon64_tmp_pad (p);
   return 0;
 }
 
 
 static int
-ucon64_opt_padn (st_ucon64_t *p)
+ucon64_tmp_padn (st_ucon64_t *p)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
@@ -837,7 +428,7 @@ ucon64_opt_padn (st_ucon64_t *p)
 
   ucon64_file_handler (dest_name, src_name, 0);
 
-  fcopy (src_name, 0, p->file_size, dest_name, "wb");
+  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "wb");
   if (truncate2 (dest_name, strtol (p->optarg, NULL, 10) +
         (p->nfo ? p->nfo->backup_header_len : 0)) == -1)
     {
@@ -852,7 +443,7 @@ ucon64_opt_padn (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ispad (st_ucon64_t *p)
+ucon64_tmp_ispad (st_ucon64_t *p)
 {
   int padded = 0;
 
@@ -869,7 +460,7 @@ ucon64_opt_ispad (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_strip (st_ucon64_t *p)
+ucon64_tmp_strip (st_ucon64_t *p)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
@@ -880,7 +471,7 @@ ucon64_opt_strip (st_ucon64_t *p)
     }
 
   ucon64_file_handler (dest_name, src_name, 0);
-  fcopy (src_name, 0, p->file_size - strtol (p->optarg, NULL, 10),
+  fcopy (src_name, 0, fsizeof (p->fname) - strtol (p->optarg, NULL, 10),
     dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -889,7 +480,7 @@ ucon64_opt_strip (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_stp (st_ucon64_t *p)
+ucon64_tmp_stp (st_ucon64_t *p)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
@@ -900,7 +491,7 @@ ucon64_opt_stp (st_ucon64_t *p)
     }
 
   ucon64_file_handler (dest_name, src_name, 0);
-  fcopy (src_name, 512, p->file_size, dest_name, "wb");
+  fcopy (src_name, 512, fsizeof (p->fname), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return 0;
@@ -908,7 +499,7 @@ ucon64_opt_stp (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_stpn (st_ucon64_t *p)
+ucon64_tmp_stpn (st_ucon64_t *p)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
@@ -919,7 +510,7 @@ ucon64_opt_stpn (st_ucon64_t *p)
     }
 
   ucon64_file_handler (dest_name, src_name, 0);
-  fcopy (src_name, strtol (p->optarg, NULL, 10), p->file_size, dest_name, "wb");
+  fcopy (src_name, strtol (p->optarg, NULL, 10), fsizeof (p->fname), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return 0;
@@ -927,7 +518,7 @@ ucon64_opt_stpn (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ins (st_ucon64_t *p)
+ucon64_tmp_ins (st_ucon64_t *p)
 {
   char buf[MAXBUFSIZE];
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -941,7 +532,7 @@ ucon64_opt_ins (st_ucon64_t *p)
   ucon64_file_handler (dest_name, src_name, 0);
   memset (buf, 0, 512);
   ucon64_fwrite (buf, 0, 512, dest_name, "wb");
-  fcopy (src_name, 0, p->file_size, dest_name, "ab");
+  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "ab");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return 0;
@@ -949,7 +540,7 @@ ucon64_opt_ins (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_insn (st_ucon64_t *p)
+ucon64_tmp_insn (st_ucon64_t *p)
 {
   int value = strtol (p->optarg, NULL, 10);
   char buf[MAXBUFSIZE];
@@ -979,7 +570,7 @@ ucon64_opt_insn (st_ucon64_t *p)
           bytesleft -= bytestowrite;           //  the first iteration
         }
     }
-  fcopy (src_name, 0, p->file_size, dest_name, "ab");
+  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "ab");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return 0;
@@ -987,39 +578,39 @@ ucon64_opt_insn (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_a (st_ucon64_t *p)
+ucon64_tmp_a (st_ucon64_t *p)
 {
-  aps_apply (p->fname, p->file);
+  aps_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
   return 0;
 }
 
 
 static int
-ucon64_opt_b (st_ucon64_t *p)
+ucon64_tmp_b (st_ucon64_t *p)
 {
-  bsl_apply (p->fname, p->file);
+  bsl_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
   return 0;
 }
 
 
 static int
-ucon64_opt_i (st_ucon64_t *p)
+ucon64_tmp_i (st_ucon64_t *p)
 {
-  ips_apply (p->fname, p->file);
+  ips_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
   return 0;
 }
 
 
 static int
-ucon64_opt_ppf (st_ucon64_t *p)
+ucon64_tmp_ppf (st_ucon64_t *p)
 {
-  ppf_apply (p->fname, p->file);
+  ppf_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
   return 0;
 }
 
 
 static int
-ucon64_opt_mka (st_ucon64_t *p)
+ucon64_tmp_mka (st_ucon64_t *p)
 {
   aps_create (p->optarg, p->fname);          // original, modified
   return 0;
@@ -1027,7 +618,7 @@ ucon64_opt_mka (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_mki (st_ucon64_t *p)
+ucon64_tmp_mki (st_ucon64_t *p)
 {
   ips_create (p->optarg, p->fname);          // original, modified
   return 0;
@@ -1035,7 +626,7 @@ ucon64_opt_mki (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_mkppf (st_ucon64_t *p)
+ucon64_tmp_mkppf (st_ucon64_t *p)
 {
   ppf_create (p->optarg, p->fname);          // original, modified
   return 0;
@@ -1043,7 +634,7 @@ ucon64_opt_mkppf (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_na (st_ucon64_t *p)
+ucon64_tmp_na (st_ucon64_t *p)
 {
   aps_set_desc (p->fname, p->optarg);
   return 0;
@@ -1051,7 +642,7 @@ ucon64_opt_na (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_nppf (st_ucon64_t *p)
+ucon64_tmp_nppf (st_ucon64_t *p)
 {
   ppf_set_desc (p->fname, p->optarg);
   return 0;
@@ -1059,7 +650,7 @@ ucon64_opt_nppf (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_idppf (st_ucon64_t *p)
+ucon64_tmp_idppf (st_ucon64_t *p)
 {
   ppf_set_fid (p->fname, p->optarg);
   return 0;
@@ -1067,17 +658,14 @@ ucon64_opt_idppf (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_lsd (st_ucon64_t *p)
+ucon64_tmp_lsd (st_ucon64_t *p)
 {
   if (p->dat_enabled)
     {
       if (p->crc32)
         {
           fputs (basename2 (p->fname), stdout);
-          if (p->fname_arch[0])
-            printf (" (%s)\n", basename2 (p->fname_arch));
-          else
-            fputc ('\n', stdout);
+          fputc ('\n', stdout);
           // Use p->fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
           printf ("Checksum (CRC32): 0x%08x\n", p->fcrc32 ?
                   p->fcrc32 : p->crc32);
@@ -1092,24 +680,25 @@ ucon64_opt_lsd (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_scan (st_ucon64_t *p)
+ucon64_tmp_scan (st_ucon64_t *p)
 {
-  ucon64_opt_lsd (p);
+  ucon64_tmp_lsd (p);
   return 0;
 }
 
 
 static int
-ucon64_opt_lsv (st_ucon64_t *p)
+ucon64_tmp_lsv (st_ucon64_t *p)
 {
-  if (p->nfo)
-    ucon64_nfo ();
+#warning huh?
+//  if (p->nfo)
+//    ucon64_nfo ();
   return 0;
 }
 
 
 static int
-ucon64_opt_ls (st_ucon64_t *p)
+ucon64_tmp_ls (st_ucon64_t *p)
 {
   char buf[MAXBUFSIZE];
   struct stat fstate;
@@ -1133,18 +722,15 @@ ucon64_opt_ls (st_ucon64_t *p)
           return 0;
         strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
         printf ("%-31.31s %10d %s %s", to_func (ptr, strlen (ptr), toprint),
-                p->file_size, buf, basename2 (p->fname));
-        if (p->fname_arch[0])
-          printf (" (%s)\n", basename2 (p->fname_arch));
-        else
-          fputc ('\n', stdout);
+                fsizeof (p->fname), buf, basename2 (p->fname));
+        fputc ('\n', stdout);
       }
   return 0;
 }
 
 
 static int
-ucon64_opt_rdat (st_ucon64_t *p)
+ucon64_tmp_rdat (st_ucon64_t *p)
 {
   ucon64_rename (UCON64_RDAT);
   return 0;
@@ -1152,7 +738,7 @@ ucon64_opt_rdat (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_rrom (st_ucon64_t *p)
+ucon64_tmp_rrom (st_ucon64_t *p)
 {
   ucon64_rename (UCON64_RROM);
   return 0;
@@ -1160,7 +746,7 @@ ucon64_opt_rrom (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_r83 (st_ucon64_t *p)
+ucon64_tmp_r83 (st_ucon64_t *p)
 {
   ucon64_rename (UCON64_R83);
   return 0;
@@ -1168,7 +754,7 @@ ucon64_opt_r83 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_rjoliet (st_ucon64_t *p)
+ucon64_tmp_rjoliet (st_ucon64_t *p)
 {
   ucon64_rename (UCON64_RJOLIET);
   return 0;
@@ -1176,7 +762,7 @@ ucon64_opt_rjoliet (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_rl (st_ucon64_t *p)
+ucon64_tmp_rl (st_ucon64_t *p)
 {
   char rename_buf[FILENAME_MAX];
 #ifdef  AMIGA
@@ -1202,7 +788,7 @@ ucon64_opt_rl (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ru (st_ucon64_t *p)
+ucon64_tmp_ru (st_ucon64_t *p)
 {
   char rename_buf[FILENAME_MAX];
 #ifdef  AMIGA
@@ -1228,7 +814,7 @@ ucon64_opt_ru (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_dbv (st_ucon64_t *p)
+ucon64_tmp_dbv (st_ucon64_t *p)
 {
   if (p->dat_enabled)
     {
@@ -1244,7 +830,7 @@ ucon64_opt_dbv (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_db (st_ucon64_t *p)
+ucon64_tmp_db (st_ucon64_t *p)
 {
   if (p->quiet > -1)
     {
@@ -1259,12 +845,12 @@ ucon64_opt_db (st_ucon64_t *p)
         fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
       return 0;
     }
-  else return ucon64_opt_dbv (p);
+  else return ucon64_tmp_dbv (p);
 }
 
 
 static int
-ucon64_opt_dbs (st_ucon64_t *p)
+ucon64_tmp_dbs (st_ucon64_t *p)
 {
   if (p->dat_enabled)
     {
@@ -1292,7 +878,7 @@ ucon64_opt_dbs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_mkdat (st_ucon64_t *p)
+ucon64_tmp_mkdat (st_ucon64_t *p)
 {
   ucon64_create_dat (p->optarg, p->fname, p->nfo ? p->nfo->backup_header_len : 0);
   return 0;
@@ -1300,7 +886,7 @@ ucon64_opt_mkdat (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_multi (st_ucon64_t *p)
+ucon64_tmp_multi (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1325,7 +911,7 @@ ucon64_opt_multi (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_e (st_ucon64_t *p)
+ucon64_tmp_e (st_ucon64_t *p)
 {
   ucon64_e ();
   return 0;
@@ -1333,7 +919,7 @@ ucon64_opt_e (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_1991 (st_ucon64_t *p)
+ucon64_tmp_1991 (st_ucon64_t *p)
 {
   genesis_1991 (p->nfo);
   return 0;
@@ -1341,7 +927,7 @@ ucon64_opt_1991 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_b0 (st_ucon64_t *p)
+ucon64_tmp_b0 (st_ucon64_t *p)
 {
   lynx_b0 (p->nfo, p->optarg);
   return 0;
@@ -1349,7 +935,7 @@ ucon64_opt_b0 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_b1 (st_ucon64_t *p)
+ucon64_tmp_b1 (st_ucon64_t *p)
 {
   lynx_b1 (p->nfo, p->optarg);
   return 0;
@@ -1357,7 +943,7 @@ ucon64_opt_b1 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_bin (st_ucon64_t *p)
+ucon64_tmp_bin (st_ucon64_t *p)
 {
   genesis_bin (p->nfo);
   return 0;
@@ -1365,7 +951,7 @@ ucon64_opt_bin (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_bot (st_ucon64_t *p)
+ucon64_tmp_bot (st_ucon64_t *p)
 {
   n64_bot (p->nfo, p->optarg);
   return 0;
@@ -1373,7 +959,7 @@ ucon64_opt_bot (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_chk (st_ucon64_t *p)
+ucon64_tmp_chk (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1415,7 +1001,7 @@ ucon64_opt_chk (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_col (st_ucon64_t *p)
+ucon64_tmp_col (st_ucon64_t *p)
 {
   snes_col (p->optarg);
   return 0;
@@ -1423,7 +1009,7 @@ ucon64_opt_col (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_crp (st_ucon64_t *p)
+ucon64_tmp_crp (st_ucon64_t *p)
 {
   gba_crp (p->nfo, p->optarg);
   return 0;
@@ -1431,7 +1017,7 @@ ucon64_opt_crp (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_dbuh (st_ucon64_t *p)
+ucon64_tmp_dbuh (st_ucon64_t *p)
 {
   snes_backup_header_info (p->nfo);
   return 0;
@@ -1439,7 +1025,7 @@ ucon64_opt_dbuh (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_dint (st_ucon64_t *p)
+ucon64_tmp_dint (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1465,15 +1051,15 @@ ucon64_opt_dint (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_swap (st_ucon64_t *p)
+ucon64_tmp_swap (st_ucon64_t *p)
 {
-  ucon64_opt_dint (p);
+  ucon64_tmp_dint (p);
   return 0;
 }
 
 
 static int
-ucon64_opt_swap2 (st_ucon64_t *p)
+ucon64_tmp_swap2 (st_ucon64_t *p)
 {
   // --swap2 is currently used only for Nintendo 64
   n64_swap2 (p->nfo);
@@ -1482,7 +1068,7 @@ ucon64_opt_swap2 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_dmirr (st_ucon64_t *p)
+ucon64_tmp_dmirr (st_ucon64_t *p)
 {
   snes_demirror (p->nfo);
   return 0;
@@ -1490,7 +1076,7 @@ ucon64_opt_dmirr (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_dnsrt (st_ucon64_t *p)
+ucon64_tmp_dnsrt (st_ucon64_t *p)
 {
   snes_densrt (p->nfo);
   return 0;
@@ -1498,7 +1084,7 @@ ucon64_opt_dnsrt (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_f (st_ucon64_t *p)
+ucon64_tmp_f (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1519,7 +1105,7 @@ ucon64_opt_f (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_fds (st_ucon64_t *p)
+ucon64_tmp_fds (st_ucon64_t *p)
 {
   nes_fds ();
   return 0;
@@ -1527,7 +1113,7 @@ ucon64_opt_fds (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_fdsl (st_ucon64_t *p)
+ucon64_tmp_fdsl (st_ucon64_t *p)
 {
   nes_fdsl (p->nfo, NULL);
   return 0;
@@ -1535,7 +1121,7 @@ ucon64_opt_fdsl (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ffe (st_ucon64_t *p)
+ucon64_tmp_ffe (st_ucon64_t *p)
 {
   nes_ffe (p->nfo);
   return 0;
@@ -1543,7 +1129,7 @@ ucon64_opt_ffe (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_fig (st_ucon64_t *p)
+ucon64_tmp_fig (st_ucon64_t *p)
 {
   snes_fig (p->nfo);
   return 0;
@@ -1551,7 +1137,7 @@ ucon64_opt_fig (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_figs (st_ucon64_t *p)
+ucon64_tmp_figs (st_ucon64_t *p)
 {
   snes_figs (p->nfo);
   return 0;
@@ -1559,7 +1145,7 @@ ucon64_opt_figs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_gbx (st_ucon64_t *p)
+ucon64_tmp_gbx (st_ucon64_t *p)
 {
   gb_gbx (p->nfo);
   return 0;
@@ -1567,7 +1153,7 @@ ucon64_opt_gbx (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_gd3 (st_ucon64_t *p)
+ucon64_tmp_gd3 (st_ucon64_t *p)
 {
   snes_gd3 (p->nfo);
   return 0;
@@ -1575,7 +1161,7 @@ ucon64_opt_gd3 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_gd3s (st_ucon64_t *p)
+ucon64_tmp_gd3s (st_ucon64_t *p)
 {
   snes_gd3s (p->nfo);
   return 0;
@@ -1583,7 +1169,7 @@ ucon64_opt_gd3s (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_gg (st_ucon64_t *p)
+ucon64_tmp_gg (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1602,7 +1188,7 @@ ucon64_opt_gg (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ggd (st_ucon64_t *p)
+ucon64_tmp_ggd (st_ucon64_t *p)
 {
   gg_display (p->nfo, p->optarg);
   return 0;
@@ -1610,7 +1196,7 @@ ucon64_opt_ggd (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_gge (st_ucon64_t *p)
+ucon64_tmp_gge (st_ucon64_t *p)
 {
   gg_display (p->nfo, p->optarg);
   return 0;
@@ -1618,7 +1204,7 @@ ucon64_opt_gge (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ines (st_ucon64_t *p)
+ucon64_tmp_ines (st_ucon64_t *p)
 {
   nes_ines ();
   return 0;
@@ -1626,7 +1212,7 @@ ucon64_opt_ines (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ineshd (st_ucon64_t *p)
+ucon64_tmp_ineshd (st_ucon64_t *p)
 {
   nes_ineshd (p->nfo);
   return 0;
@@ -1635,7 +1221,14 @@ ucon64_opt_ineshd (st_ucon64_t *p)
 
 #if 0
 static int
-ucon64_opt_ip (st_ucon64_t *p)
+ucon64_tmp_ip (st_ucon64_t *p)
+{
+  return 0;
+}
+
+
+static int
+ucon64_tmp_vms (st_ucon64_t *p)
 {
   return 0;
 }
@@ -1643,14 +1236,7 @@ ucon64_opt_ip (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_vms (st_ucon64_t *p)
-{
-  return 0;
-}
-
-
-static int
-ucon64_opt_parse (st_ucon64_t *p)
+ucon64_tmp_parse (st_ucon64_t *p)
 {
   dc_parse (p->optarg);
   return 0;
@@ -1658,7 +1244,7 @@ ucon64_opt_parse (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_mkip (st_ucon64_t *p)
+ucon64_tmp_mkip (st_ucon64_t *p)
 {
   dc_mkip ();
   return 0;
@@ -1666,7 +1252,7 @@ ucon64_opt_mkip (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_j (st_ucon64_t *p)
+ucon64_tmp_j (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1688,7 +1274,7 @@ ucon64_opt_j (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_k (st_ucon64_t *p)
+ucon64_tmp_k (st_ucon64_t *p)
 {
   snes_k (p->nfo);
   return 0;
@@ -1696,7 +1282,7 @@ ucon64_opt_k (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_l (st_ucon64_t *p)
+ucon64_tmp_l (st_ucon64_t *p)
 {
   snes_l (p->nfo);
   return 0;
@@ -1704,7 +1290,7 @@ ucon64_opt_l (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_lnx (st_ucon64_t *p)
+ucon64_tmp_lnx (st_ucon64_t *p)
 {
   lynx_lnx (p->nfo);
   return 0;
@@ -1712,7 +1298,7 @@ ucon64_opt_lnx (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_logo (st_ucon64_t *p)
+ucon64_tmp_logo (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1734,7 +1320,7 @@ ucon64_opt_logo (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_lsram (st_ucon64_t *p)
+ucon64_tmp_lsram (st_ucon64_t *p)
 {
   n64_sram (p->nfo, p->optarg);
   return 0;
@@ -1742,7 +1328,7 @@ ucon64_opt_lsram (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_lyx (st_ucon64_t *p)
+ucon64_tmp_lyx (st_ucon64_t *p)
 {
   lynx_lyx (p->nfo);
   return 0;
@@ -1750,7 +1336,7 @@ ucon64_opt_lyx (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_mgd (st_ucon64_t *p)
+ucon64_tmp_mgd (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1780,7 +1366,7 @@ ucon64_opt_mgd (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_mgdgg (st_ucon64_t *p)
+ucon64_tmp_mgdgg (st_ucon64_t *p)
 {
   sms_mgd (p->nfo, UCON64_GAMEGEAR);
   return 0;
@@ -1788,7 +1374,7 @@ ucon64_opt_mgdgg (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_msg (st_ucon64_t *p)
+ucon64_tmp_msg (st_ucon64_t *p)
 {
   pce_msg (p->nfo);
   return 0;
@@ -1796,7 +1382,7 @@ ucon64_opt_msg (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_n (st_ucon64_t *p)
+ucon64_tmp_n (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1838,7 +1424,7 @@ ucon64_opt_n (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_n2 (st_ucon64_t *p)
+ucon64_tmp_n2 (st_ucon64_t *p)
 {
   genesis_n2 (p->nfo, p->optarg);
   return 0;
@@ -1846,7 +1432,7 @@ ucon64_opt_n2 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_n2gb (st_ucon64_t *p)
+ucon64_tmp_n2gb (st_ucon64_t *p)
 {
   gb_n2gb (p->nfo, p->optarg);
   return 0;
@@ -1854,7 +1440,7 @@ ucon64_opt_n2gb (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_nrot (st_ucon64_t *p)
+ucon64_tmp_nrot (st_ucon64_t *p)
 {
   lynx_nrot (p->nfo);
   return 0;
@@ -1862,7 +1448,7 @@ ucon64_opt_nrot (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_pasofami (st_ucon64_t *p)
+ucon64_tmp_pasofami (st_ucon64_t *p)
 {
   nes_pasofami ();
   return 0;
@@ -1870,7 +1456,7 @@ ucon64_opt_pasofami (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_pattern (st_ucon64_t *p)
+ucon64_tmp_pattern (st_ucon64_t *p)
 {
   ucon64_pattern (p->nfo, p->optarg);
   return 0;
@@ -1878,7 +1464,7 @@ ucon64_opt_pattern (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_poke (st_ucon64_t *p)
+ucon64_tmp_poke (st_ucon64_t *p)
 {
   patch_poke (&ucon64);
   return 0;
@@ -1886,7 +1472,7 @@ ucon64_opt_poke (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_rotl (st_ucon64_t *p)
+ucon64_tmp_rotl (st_ucon64_t *p)
 {
   lynx_rotl (p->nfo);
   return 0;
@@ -1894,7 +1480,7 @@ ucon64_opt_rotl (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_rotr (st_ucon64_t *p)
+ucon64_tmp_rotr (st_ucon64_t *p)
 {
   lynx_rotr (p->nfo);
   return 0;
@@ -1902,7 +1488,7 @@ ucon64_opt_rotr (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_s (st_ucon64_t *p)
+ucon64_tmp_s (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1924,7 +1510,7 @@ ucon64_opt_s (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_scr (st_ucon64_t *p)
+ucon64_tmp_scr (st_ucon64_t *p)
 {
   dc_scramble ();
   return 0;
@@ -1932,7 +1518,7 @@ ucon64_opt_scr (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_sgb (st_ucon64_t *p)
+ucon64_tmp_sgb (st_ucon64_t *p)
 {
   gb_sgb (p->nfo);
   return 0;
@@ -1941,7 +1527,7 @@ ucon64_opt_sgb (st_ucon64_t *p)
 
 #ifdef  HAVE_MATH_H
 static int
-ucon64_opt_cc2 (st_ucon64_t *p)
+ucon64_tmp_cc2 (st_ucon64_t *p)
 {
   printf (ucon64_msg[UNTESTED]);
   atari_cc2 (p->fname, p->optarg ? strtol (p->optarg, NULL, 10) : 0);
@@ -1951,7 +1537,7 @@ ucon64_opt_cc2 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_smc (st_ucon64_t *p)
+ucon64_tmp_smc (st_ucon64_t *p)
 {
   snes_smc (p->nfo);
   return 0;
@@ -1959,7 +1545,7 @@ ucon64_opt_smc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_smd (st_ucon64_t *p)
+ucon64_tmp_smd (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1977,7 +1563,7 @@ ucon64_opt_smd (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_smds (st_ucon64_t *p)
+ucon64_tmp_smds (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -1995,7 +1581,7 @@ ucon64_opt_smds (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_sram (st_ucon64_t *p)
+ucon64_tmp_sram (st_ucon64_t *p)
 {
   gba_sram ();
   return 0;
@@ -2003,7 +1589,7 @@ ucon64_opt_sram (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_sc (st_ucon64_t *p)
+ucon64_tmp_sc (st_ucon64_t *p)
 {
   switch (p->console)
     {
@@ -2033,7 +1619,7 @@ ucon64_opt_sc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ssc (st_ucon64_t *p)
+ucon64_tmp_ssc (st_ucon64_t *p)
 {
   gb_ssc (p->nfo);
   return 0;
@@ -2041,7 +1627,7 @@ ucon64_opt_ssc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_swc (st_ucon64_t *p)
+ucon64_tmp_swc (st_ucon64_t *p)
 {
   snes_swc (p->nfo);
   return 0;
@@ -2049,7 +1635,7 @@ ucon64_opt_swc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_swcs (st_ucon64_t *p)
+ucon64_tmp_swcs (st_ucon64_t *p)
 {
   snes_swcs (p->nfo);
   return 0;
@@ -2057,7 +1643,7 @@ ucon64_opt_swcs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ufo (st_ucon64_t *p)
+ucon64_tmp_ufo (st_ucon64_t *p)
 {
   snes_ufo (p->nfo);
   return 0;
@@ -2065,7 +1651,7 @@ ucon64_opt_ufo (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_ufos (st_ucon64_t *p)
+ucon64_tmp_ufos (st_ucon64_t *p)
 {
   snes_ufos (p->nfo);
   return 0;
@@ -2073,7 +1659,7 @@ ucon64_opt_ufos (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_unif (st_ucon64_t *p)
+ucon64_tmp_unif (st_ucon64_t *p)
 {
   nes_unif ();
   return 0;
@@ -2081,7 +1667,7 @@ ucon64_opt_unif (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_unscr (st_ucon64_t *p)
+ucon64_tmp_unscr (st_ucon64_t *p)
 {
   dc_unscramble ();
   return 0;
@@ -2089,7 +1675,7 @@ ucon64_opt_unscr (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_usms (st_ucon64_t *p)
+ucon64_tmp_usms (st_ucon64_t *p)
 {
   n64_usms (p->nfo, p->optarg);
   return 0;
@@ -2097,7 +1683,7 @@ ucon64_opt_usms (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_v64 (st_ucon64_t *p)
+ucon64_tmp_v64 (st_ucon64_t *p)
 {
   n64_v64 (p->nfo);
   return 0;
@@ -2111,7 +1697,7 @@ ucon64_opt_v64 (st_ucon64_t *p)
 */
 #ifdef  USE_LIBCD64
 static int
-ucon64_opt_xcd64 (st_ucon64_t *p)
+ucon64_tmp_xcd64 (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     cd64_read_rom (p->fname, 64);
@@ -2123,7 +1709,7 @@ ucon64_opt_xcd64 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcd64c (st_ucon64_t *p)
+ucon64_tmp_xcd64c (st_ucon64_t *p)
 {
   if (!access (p->fname, F_OK) && p->backup)
     printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
@@ -2134,7 +1720,7 @@ ucon64_opt_xcd64c (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcd64b (st_ucon64_t *p)
+ucon64_tmp_xcd64b (st_ucon64_t *p)
 {
   cd64_write_bootemu (p->fname);
   fputc ('\n', stdout);
@@ -2143,7 +1729,7 @@ ucon64_opt_xcd64b (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcd64s (st_ucon64_t *p)
+ucon64_tmp_xcd64s (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     cd64_read_sram (p->fname);
@@ -2155,7 +1741,7 @@ ucon64_opt_xcd64s (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcd64f (st_ucon64_t *p)
+ucon64_tmp_xcd64f (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     cd64_read_flashram (p->fname);
@@ -2167,7 +1753,7 @@ ucon64_opt_xcd64f (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcd64e (st_ucon64_t *p)
+ucon64_tmp_xcd64e (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     cd64_read_eeprom (p->fname);
@@ -2179,7 +1765,7 @@ ucon64_opt_xcd64e (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcd64m (st_ucon64_t *p)
+ucon64_tmp_xcd64m (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     cd64_read_mempack (p->fname, strtol (p->optarg, NULL, 10));
@@ -2192,7 +1778,7 @@ ucon64_opt_xcd64m (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xreset (st_ucon64_t *p)
+ucon64_tmp_xreset (st_ucon64_t *p)
 {
   parport_print_info ();
   fputs ("Resetting parallel port...", stdout);
@@ -2204,7 +1790,7 @@ ucon64_opt_xreset (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcmc (st_ucon64_t *p)
+ucon64_tmp_xcmc (st_ucon64_t *p)
 {
   if (!access (p->fname, F_OK) && p->backup)
     printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
@@ -2215,7 +1801,7 @@ ucon64_opt_xcmc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xcmct (st_ucon64_t *p)
+ucon64_tmp_xcmct (st_ucon64_t *p)
 {
   cmc_test (strtol (p->optarg, NULL, 10), p->parport, p->io_mode);
   fputc ('\n', stdout);
@@ -2224,7 +1810,7 @@ ucon64_opt_xcmct (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xdex (st_ucon64_t *p)
+ucon64_tmp_xdex (st_ucon64_t *p)
 {
   printf (ucon64_msg[UNTESTED]);
   if (access (p->fname, F_OK) != 0)
@@ -2237,7 +1823,7 @@ ucon64_opt_xdex (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xdjr (st_ucon64_t *p)
+ucon64_tmp_xdjr (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     doctor64jr_read (p->fname, p->parport);
@@ -2256,7 +1842,7 @@ ucon64_opt_xdjr (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfal (st_ucon64_t *p)
+ucon64_tmp_xfal (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     fal_read_rom (p->fname, p->parport, 32);
@@ -2268,7 +1854,7 @@ ucon64_opt_xfal (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfalmulti (st_ucon64_t *p)
+ucon64_tmp_xfalmulti (st_ucon64_t *p)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
@@ -2292,7 +1878,6 @@ ucon64_opt_xfalmulti (st_ucon64_t *p)
   if (gba_multi (strtol (p->optarg, NULL, 10) * MBIT, src_name) == 0)
     { // Don't try to start a transfer if there was a problem
       fputc ('\n', stdout);
-      p->file_size = fsizeof (src_name);
       fal_write_rom (src_name, p->parport);
     }
 
@@ -2304,7 +1889,7 @@ ucon64_opt_xfalmulti (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfalc (st_ucon64_t *p)
+ucon64_tmp_xfalc (st_ucon64_t *p)
 {
   if (!access (p->fname, F_OK) && p->backup)
     printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
@@ -2315,7 +1900,7 @@ ucon64_opt_xfalc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfals (st_ucon64_t *p)
+ucon64_tmp_xfals (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     fal_read_sram (p->fname, p->parport, UCON64_UNKNOWN);
@@ -2327,7 +1912,7 @@ ucon64_opt_xfals (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfalb (st_ucon64_t *p)
+ucon64_tmp_xfalb (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     fal_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
@@ -2339,7 +1924,7 @@ ucon64_opt_xfalb (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfig (st_ucon64_t *p)
+ucon64_tmp_xfig (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
     fig_read_rom (p->fname, p->parport);
@@ -2361,7 +1946,7 @@ ucon64_opt_xfig (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfigs (st_ucon64_t *p)
+ucon64_tmp_xfigs (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
     fig_read_sram (p->fname, p->parport);
@@ -2373,7 +1958,7 @@ ucon64_opt_xfigs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xfigc (st_ucon64_t *p)
+ucon64_tmp_xfigc (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cart SRAM contents
     fig_read_cart_sram (p->fname, p->parport);
@@ -2385,7 +1970,7 @@ ucon64_opt_xfigc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgbx (st_ucon64_t *p)
+ucon64_tmp_xgbx (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge/flash card
     gbx_read_rom (p->fname, p->parport);
@@ -2397,7 +1982,7 @@ ucon64_opt_xgbx (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgbxs (st_ucon64_t *p)
+ucon64_tmp_xgbxs (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     gbx_read_sram (p->fname, p->parport, -1);
@@ -2409,7 +1994,7 @@ ucon64_opt_xgbxs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgbxb (st_ucon64_t *p)
+ucon64_tmp_xgbxb (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     gbx_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
@@ -2421,7 +2006,7 @@ ucon64_opt_xgbxb (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgd3 (st_ucon64_t *p)
+ucon64_tmp_xgd3 (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
     gd3_read_rom (p->fname, p->parport); // dumping is not yet supported
@@ -2439,7 +2024,7 @@ ucon64_opt_xgd3 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgd3s (st_ucon64_t *p)
+ucon64_tmp_xgd3s (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
     gd3_read_sram (p->fname, p->parport); // dumping is not yet supported
@@ -2451,7 +2036,7 @@ ucon64_opt_xgd3s (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgd3r (st_ucon64_t *p)
+ucon64_tmp_xgd3r (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     gd3_read_saver (p->fname, p->parport);
@@ -2463,7 +2048,7 @@ ucon64_opt_xgd3r (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgd6 (st_ucon64_t *p)
+ucon64_tmp_xgd6 (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     gd6_read_rom (p->fname, p->parport); // dumping is not yet supported
@@ -2481,7 +2066,7 @@ ucon64_opt_xgd6 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgd6s (st_ucon64_t *p)
+ucon64_tmp_xgd6s (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     gd6_read_sram (p->fname, p->parport);
@@ -2493,7 +2078,7 @@ ucon64_opt_xgd6s (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgd6r (st_ucon64_t *p)
+ucon64_tmp_xgd6r (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     gd6_read_saver (p->fname, p->parport);
@@ -2505,7 +2090,7 @@ ucon64_opt_xgd6r (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xgg (st_ucon64_t *p)
+ucon64_tmp_xgg (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     smsgg_read_rom (p->fname, p->parport, 32 * MBIT);
@@ -2527,7 +2112,7 @@ ucon64_opt_xgg (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xggs (st_ucon64_t *p)
+ucon64_tmp_xggs (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     smsgg_read_sram (p->fname, p->parport, -1);
@@ -2539,7 +2124,7 @@ ucon64_opt_xggs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xggb (st_ucon64_t *p)
+ucon64_tmp_xggb (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     smsgg_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
@@ -2551,7 +2136,7 @@ ucon64_opt_xggb (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xlit (st_ucon64_t *p)
+ucon64_tmp_xlit (st_ucon64_t *p)
 {
   if (!access (p->fname, F_OK) && p->backup)
     printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
@@ -2562,7 +2147,7 @@ ucon64_opt_xlit (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xmccl (st_ucon64_t *p)
+ucon64_tmp_xmccl (st_ucon64_t *p)
 {
   printf (ucon64_msg[UNTESTED]);
   if (!access (p->fname, F_OK) && p->backup)
@@ -2574,7 +2159,7 @@ ucon64_opt_xmccl (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xmcd (st_ucon64_t *p)
+ucon64_tmp_xmcd (st_ucon64_t *p)
 {
   if (!access (p->fname, F_OK) && p->backup)
     printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
@@ -2585,7 +2170,7 @@ ucon64_opt_xmcd (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xmd (st_ucon64_t *p)
+ucon64_tmp_xmd (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump flash card
     md_read_rom (p->fname, p->parport, 64 * MBIT); // reads 32 Mbit if Sharp card
@@ -2607,7 +2192,7 @@ ucon64_opt_xmd (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xmds (st_ucon64_t *p)
+ucon64_tmp_xmds (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
     md_read_sram (p->fname, p->parport, -1);
@@ -2619,7 +2204,7 @@ ucon64_opt_xmds (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xmdb (st_ucon64_t *p)
+ucon64_tmp_xmdb (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     md_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
@@ -2631,7 +2216,7 @@ ucon64_opt_xmdb (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xmsg (st_ucon64_t *p)
+ucon64_tmp_xmsg (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     msg_read_rom (p->fname, p->parport);
@@ -2653,7 +2238,7 @@ ucon64_opt_xmsg (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xpce (st_ucon64_t *p)
+ucon64_tmp_xpce (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     pce_read_rom (p->fname, p->parport, 32 * MBIT);
@@ -2665,7 +2250,7 @@ ucon64_opt_xpce (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xpl (st_ucon64_t *p)
+ucon64_tmp_xpl (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     pl_read_rom (p->fname, p->parport);
@@ -2677,7 +2262,7 @@ ucon64_opt_xpl (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xpli (st_ucon64_t *p)
+ucon64_tmp_xpli (st_ucon64_t *p)
 {
   pl_info (p->parport);
   fputc ('\n', stdout);
@@ -2686,7 +2271,7 @@ ucon64_opt_xpli (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xsf (st_ucon64_t *p)
+ucon64_tmp_xsf (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump flash card
     sf_read_rom (p->fname, p->parport, 64 * MBIT);
@@ -2698,7 +2283,7 @@ ucon64_opt_xsf (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xsfs (st_ucon64_t *p)
+ucon64_tmp_xsfs (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
     sf_read_sram (p->fname, p->parport);
@@ -2710,7 +2295,7 @@ ucon64_opt_xsfs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xsmc (st_ucon64_t *p) // we don't use WF_NO_ROM => no need to check for file
+ucon64_tmp_xsmc (st_ucon64_t *p)
 {
   if (!p->nfo->backup_header_len)
     fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n",
@@ -2723,7 +2308,7 @@ ucon64_opt_xsmc (st_ucon64_t *p) // we don't use WF_NO_ROM => no need to check f
 
 
 static int
-ucon64_opt_xsmcr (st_ucon64_t *p)
+ucon64_tmp_xsmcr (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     smc_read_rts (p->fname, p->parport);
@@ -2735,7 +2320,7 @@ ucon64_opt_xsmcr (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xsmd (st_ucon64_t *p)
+ucon64_tmp_xsmd (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
     smd_read_rom (p->fname, p->parport);
@@ -2757,7 +2342,7 @@ ucon64_opt_xsmd (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xsmds (st_ucon64_t *p)
+ucon64_tmp_xsmds (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
     smd_read_sram (p->fname, p->parport);
@@ -2769,7 +2354,7 @@ ucon64_opt_xsmds (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xswc2 (st_ucon64_t *p)
+ucon64_tmp_xswc2 (st_ucon64_t *p)
 {
   int enableRTS = -1;
 
@@ -2798,7 +2383,7 @@ ucon64_opt_xswc2 (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xswc (st_ucon64_t *p)
+ucon64_tmp_xswc (st_ucon64_t *p)
 {
   int enableRTS = 0;
 
@@ -2827,7 +2412,7 @@ ucon64_opt_xswc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xswcs (st_ucon64_t *p)
+ucon64_tmp_xswcs (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
     swc_read_sram (p->fname, p->parport);
@@ -2839,7 +2424,7 @@ ucon64_opt_xswcs (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xswcc (st_ucon64_t *p)
+ucon64_tmp_xswcc (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
     swc_read_cart_sram (p->fname, p->parport, p->io_mode);
@@ -2851,7 +2436,7 @@ ucon64_opt_xswcc (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xswcr (st_ucon64_t *p)
+ucon64_tmp_xswcr (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     swc_read_rts (p->fname, p->parport);
@@ -2863,7 +2448,7 @@ ucon64_opt_xswcr (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xv64 (st_ucon64_t *p)
+ucon64_tmp_xv64 (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     doctor64_read (p->fname, p->parport);
@@ -2875,7 +2460,7 @@ ucon64_opt_xv64 (st_ucon64_t *p)
                stderr);
       else
         doctor64_write (p->fname, p->nfo->backup_header_len,
-                        p->file_size, p->parport);
+                        fsizeof (p->fname), p->parport);
     }
   fputc ('\n', stdout);
   return 0;
@@ -2885,7 +2470,7 @@ ucon64_opt_xv64 (st_ucon64_t *p)
 
 #if     defined USE_PARALLEL || defined USE_USB
 static int
-ucon64_opt_xf2a (st_ucon64_t *p)
+ucon64_tmp_xf2a (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     f2a_read_rom (p->fname, 32);
@@ -2897,7 +2482,7 @@ ucon64_opt_xf2a (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xf2amulti (st_ucon64_t *p)
+ucon64_tmp_xf2amulti (st_ucon64_t *p)
 {
   f2a_write_rom (NULL, strtol (p->optarg, NULL, 10) * MBIT);
   fputc ('\n', stdout);
@@ -2906,7 +2491,7 @@ ucon64_opt_xf2amulti (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xf2ac (st_ucon64_t *p)
+ucon64_tmp_xf2ac (st_ucon64_t *p)
 {
   if (!access (p->fname, F_OK) && p->backup)
     printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
@@ -2917,7 +2502,7 @@ ucon64_opt_xf2ac (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xf2as (st_ucon64_t *p)
+ucon64_tmp_xf2as (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     f2a_read_sram (p->fname, UCON64_UNKNOWN);
@@ -2929,7 +2514,7 @@ ucon64_opt_xf2as (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_xf2ab (st_ucon64_t *p)
+ucon64_tmp_xf2ab (st_ucon64_t *p)
 {
   if (access (p->fname, F_OK) != 0)
     f2a_read_sram (p->fname, strtol (p->optarg, NULL, 10));
@@ -2942,204 +2527,1214 @@ ucon64_opt_xf2ab (st_ucon64_t *p)
 
 
 static int
-ucon64_opt_z64 (st_ucon64_t *p)
+ucon64_tmp_z64 (st_ucon64_t *p)
 {
   n64_z64 (p->nfo);
   return 0;
 }
 
 
-st_ucon64_opts_t ucon64_opts[] = {
-  {UCON64_PAD, 0, 0, ucon64_opt_pad},
-  {UCON64_CRCHD, 0, 0, ucon64_opt_crchd},
-  {UCON64_CRC, 0, 0, ucon64_opt_crc},
-  {UCON64_SHA1, 0, 0, ucon64_opt_sha1},
-  {UCON64_MD5, 0, 0, ucon64_opt_md5},
-  {UCON64_HEX, 0, 0, ucon64_opt_hex},
-  {UCON64_BITS, 0, 0, ucon64_opt_bits},
-  {UCON64_CODE, 0, 0, ucon64_opt_code},
-  {UCON64_PRINT, 0, 0, ucon64_opt_print},
-  {UCON64_C, 0, 0, ucon64_opt_c},
-  {UCON64_CS, 0, 0, ucon64_opt_cs},
-  {UCON64_FIND, 0, 0, ucon64_opt_find},
-  {UCON64_FINDR, 0, 0, ucon64_opt_findr},
-  {UCON64_FINDI, 0, 0, ucon64_opt_findi},
-  {UCON64_HFIND, 0, 0, ucon64_opt_hfind},
-  {UCON64_HFINDR, 0, 0, ucon64_opt_hfindr},
-  {UCON64_DFIND, 0, 0, ucon64_opt_dfind},
-  {UCON64_DFINDR, 0, 0, ucon64_opt_dfindr},
-  {UCON64_PADHD, 0, 0, ucon64_opt_padhd},
-  {UCON64_P, 0, 0, ucon64_opt_p},
-  {UCON64_PAD, 0, 0, ucon64_opt_pad},
-  {UCON64_PADN, 0, 0, ucon64_opt_padn},
-  {UCON64_ISPAD, 0, 0, ucon64_opt_ispad},
-  {UCON64_STRIP, 0, 0, ucon64_opt_strip},
-  {UCON64_STP, 0, 0, ucon64_opt_stp},
-  {UCON64_STPN, 0, 0, ucon64_opt_stpn},
-  {UCON64_INS, 0, 0, ucon64_opt_ins},
-  {UCON64_INSN, 0, 0, ucon64_opt_insn},
-  {UCON64_A, 0, 0, ucon64_opt_a},
-  {UCON64_B, 0, 0, ucon64_opt_b},
-  {UCON64_I, 0, 0, ucon64_opt_i},
-  {UCON64_PPF, 0, 0, ucon64_opt_ppf},
-  {UCON64_MKA, 0, 0, ucon64_opt_mka},
-  {UCON64_MKI, 0, 0, ucon64_opt_mki},
-  {UCON64_MKPPF, 0, 0, ucon64_opt_mkppf},
-  {UCON64_NA, 0, 0, ucon64_opt_na},
-  {UCON64_NPPF, 0, 0, ucon64_opt_nppf},
-  {UCON64_IDPPF, 0, 0, ucon64_opt_idppf},
-  {UCON64_SCAN, 0, 0, ucon64_opt_scan},
-  {UCON64_LSD, 0, 0, ucon64_opt_lsd},
-  {UCON64_LSV, 0, 0, ucon64_opt_lsv},
-  {UCON64_LS, 0, 0, ucon64_opt_ls},
-  {UCON64_RDAT, 0, 0, ucon64_opt_rdat},
-  {UCON64_RROM, 0, 0, ucon64_opt_rrom},
-  {UCON64_R83, 0, 0, ucon64_opt_r83},
-  {UCON64_RJOLIET, 0, 0, ucon64_opt_rjoliet},
-  {UCON64_RL, 0, 0, ucon64_opt_rl},
-  {UCON64_RU, 0, 0, ucon64_opt_ru},
-  {UCON64_DB, 0, 0, ucon64_opt_db},
-  {UCON64_DBV, 0, 0, ucon64_opt_dbv},
-  {UCON64_DBS, 0, 0, ucon64_opt_dbs},
-  {UCON64_MKDAT, 0, 0, ucon64_opt_mkdat},
-  {UCON64_MULTI, 0, 0, ucon64_opt_multi},
-  {UCON64_E, 0, 0, ucon64_opt_e},
-  {UCON64_1991, 0, 0, ucon64_opt_1991},
-  {UCON64_B0, 0, 0, ucon64_opt_b0},
-  {UCON64_B1, 0, 0, ucon64_opt_b1},
-  {UCON64_BIN, 0, 0, ucon64_opt_bin},
-  {UCON64_BOT, 0, 0, ucon64_opt_bot},
-  {UCON64_CHK, 0, 0, ucon64_opt_chk},
-  {UCON64_COL, 0, 0, ucon64_opt_col},
-  {UCON64_CRP, 0, 0, ucon64_opt_crp},
-  {UCON64_DBUH, 0, 0, ucon64_opt_dbuh},
-  {UCON64_SWAP, 0, 0, ucon64_opt_swap},
-  {UCON64_DINT, 0, 0, ucon64_opt_dint},
-  {UCON64_SWAP2, 0, 0, ucon64_opt_swap2},
-  {UCON64_DMIRR, 0, 0, ucon64_opt_dmirr},
-  {UCON64_DNSRT, 0, 0, ucon64_opt_dnsrt},
-  {UCON64_F, 0, 0, ucon64_opt_f},
-  {UCON64_FDS, 0, 0, ucon64_opt_fds},
-  {UCON64_FDSL, 0, 0, ucon64_opt_fdsl},
-  {UCON64_FFE, 0, 0, ucon64_opt_ffe},
-  {UCON64_FIG, 0, 0, ucon64_opt_fig},
-  {UCON64_FIGS, 0, 0, ucon64_opt_figs},
-  {UCON64_GBX, 0, 0, ucon64_opt_gbx},
-  {UCON64_GD3, 0, 0, ucon64_opt_gd3},
-  {UCON64_GD3S, 0, 0, ucon64_opt_gd3s},
-  {UCON64_GG, 0, 0, ucon64_opt_gg},
-  {UCON64_GGD, 0, 0, ucon64_opt_ggd},
-  {UCON64_GGE, 0, 0, ucon64_opt_gge},
-  {UCON64_INES, 0, 0, ucon64_opt_ines},
-  {UCON64_INESHD, 0, 0, ucon64_opt_ineshd},
-//  {UCON64_IP, 0, 0, ucon64_opt_ip},
-  {UCON64_VMS, 0, 0, ucon64_opt_vms},
-  {UCON64_PARSE, 0, 0, ucon64_opt_parse},
-  {UCON64_MKIP, 0, 0, ucon64_opt_mkip},
-  {UCON64_J, 0, 0, ucon64_opt_j},
-  {UCON64_K, 0, 0, ucon64_opt_k},
-  {UCON64_L, 0, 0, ucon64_opt_l},
-  {UCON64_LNX, 0, 0, ucon64_opt_lnx},
-  {UCON64_LOGO, 0, 0, ucon64_opt_logo},
-  {UCON64_LSRAM, 0, 0, ucon64_opt_lsram},
-  {UCON64_LYX, 0, 0, ucon64_opt_lyx},
-  {UCON64_MGD, 0, 0, ucon64_opt_mgd},
-  {UCON64_MGDGG, 0, 0, ucon64_opt_mgdgg},
-  {UCON64_MSG, 0, 0, ucon64_opt_msg},
-  {UCON64_N, 0, 0, ucon64_opt_n},
-  {UCON64_N2, 0, 0, ucon64_opt_n2},
-  {UCON64_N2GB, 0, 0, ucon64_opt_n2gb},
-  {UCON64_NROT, 0, 0, ucon64_opt_nrot},
-  {UCON64_PASOFAMI, 0, 0, ucon64_opt_pasofami},
-  {UCON64_PATTERN, 0, 0, ucon64_opt_pattern},
-  {UCON64_POKE, 0, 0, ucon64_opt_poke},
-  {UCON64_ROTL, 0, 0, ucon64_opt_rotl},
-  {UCON64_ROTR, 0, 0, ucon64_opt_rotr},
-  {UCON64_S, 0, 0, ucon64_opt_s},
-  {UCON64_SCR, 0, 0, ucon64_opt_scr},
-  {UCON64_SGB, 0, 0, ucon64_opt_sgb},
-#ifdef  HAVE_MATH_H
-  {UCON64_CC2, 0, 0, ucon64_opt_cc2},
+st_ucon64_filter_t ucon64_filter[] = {
+  {
+    UCON64_CRCHD,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
+    ucon64_tmp_crchd
+  },
+  {
+    UCON64_CRC,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
+    ucon64_tmp_crc
+  },
+  {
+    UCON64_SHA1,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
+    ucon64_tmp_sha1
+  },
+  {
+    UCON64_MD5,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
+    ucon64_tmp_md5
+  },
+  {
+    UCON64_HEX,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_hex
+  },
+  {
+    UCON64_BITS,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_bits
+  },
+  {
+    UCON64_CODE,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_code
+  },
+  {
+    UCON64_PRINT,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_print
+  },
+  {
+    UCON64_C,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_c
+  },
+  {
+    UCON64_CS,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_cs
+  },
+  {
+    UCON64_FIND,
+    0,
+    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_find
+  },
+  {
+    UCON64_FINDR,
+    0,
+    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_findr
+  },
+  {
+    UCON64_FINDI,
+    0,
+    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_findi
+  },
+  {
+    UCON64_HFIND,
+    0,
+    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_hfind
+  },
+  {
+    UCON64_HFINDR,
+    0,
+    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_hfindr
+  },
+  {
+    UCON64_DFIND,
+    0,
+    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_dfind
+  },
+  {
+    UCON64_DFINDR,
+    0,
+    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_dfindr
+  },
+  {
+    UCON64_PADHD,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_padhd
+  },
+  {
+    UCON64_P,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_p
+  },
+  {
+    UCON64_PAD,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pad
+  },
+  {
+    UCON64_PADN,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_padn
+  },
+  {
+    UCON64_ISPAD,
+    0,
+    WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ispad
+  },
+  {
+    UCON64_STRIP,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_strip
+  },
+  {
+    UCON64_STP,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_stp
+  },
+  {
+    UCON64_STPN,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_stpn
+  },
+  {
+    UCON64_INS,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_ins
+  },
+  {
+    UCON64_INSN,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_insn
+  },
+  {
+    UCON64_A,
+    0,
+    0,
+    ucon64_tmp_a
+  },
+  {
+    UCON64_B,
+    0,
+    0,
+    ucon64_tmp_b
+  },
+  {
+    UCON64_I,
+    0,
+    0,
+    ucon64_tmp_i
+  },
+  {
+    UCON64_PPF,
+    0,
+    0,
+    ucon64_tmp_ppf
+  },
+  {
+    UCON64_MKA,
+    0,
+    0,
+    ucon64_tmp_mka
+  },
+  {
+    UCON64_MKI,
+    0,
+    0,
+    ucon64_tmp_mki
+  },
+  {
+    UCON64_MKPPF,
+    0,
+    0,
+    ucon64_tmp_mkppf
+  },
+  {
+    UCON64_NA,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_na
+  },
+  {
+    UCON64_NPPF,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_nppf
+  },
+  {
+    UCON64_IDPPF,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_idppf
+  },
+  {
+    UCON64_SCAN,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_scan
+  },
+  {
+    UCON64_LSD,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_lsd
+  },
+  {
+    UCON64_LSV,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_lsv
+  },
+  {
+    UCON64_LS,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ls
+  },
+  {
+    UCON64_RDAT,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_rdat
+  },
+  {
+    UCON64_RROM,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_rrom
+  },
+  {
+    UCON64_R83,
+    0,
+    0,
+    ucon64_tmp_r83
+  },
+  {
+    UCON64_RJOLIET,
+    0,
+    0,
+    ucon64_tmp_rjoliet
+  },
+  {
+    UCON64_RL,
+    0,
+    0,
+    ucon64_tmp_rl
+  },
+  {
+    UCON64_RU,
+    0,
+    0,
+    ucon64_tmp_ru
+  },
+  {
+    UCON64_DB,
+    0,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_db
+  },
+  {
+    UCON64_DBV,
+    0,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_dbv
+  },
+  {
+    UCON64_DBS,
+    0,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_dbs
+  },
+  {
+    UCON64_MKDAT,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_mkdat
+  },
+  {
+    UCON64_MULTI,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_multi
+  },
+  {
+    UCON64_E,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_e
+  },
+  {
+    UCON64_1991,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_1991
+  },
+  {
+    UCON64_B0,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_b0
+  },
+  {
+    UCON64_B1,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_b1
+  },
+  {
+    UCON64_BIN,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_bin
+  },
+  {
+    UCON64_BOT,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_bot
+  },
+  {
+    UCON64_CHK,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_chk
+  },
+  {
+    UCON64_COL,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_col
+  },
+  {
+    UCON64_CRP,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_crp
+  },
+  {
+    UCON64_DBUH,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_dbuh
+  },
+  {
+    UCON64_SWAP,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_swap
+  },
+  {
+    UCON64_DINT,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_dint
+  },
+  {
+    UCON64_SWAP2,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_swap2
+  },
+  {
+    UCON64_DMIRR,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_dmirr
+  },
+  {
+    UCON64_DNSRT,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_dnsrt
+  },
+  {
+    UCON64_F,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_f
+  },
+  {
+    UCON64_FDS,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_fds
+  },
+  {
+    UCON64_FDSL,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_fdsl
+  },
+  {
+    UCON64_FFE,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ffe
+  },
+  {
+    UCON64_FIG,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_fig
+  },
+  {
+    UCON64_FIGS,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_figs
+  },
+  {
+    UCON64_GBX,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gbx
+  },
+  {
+    UCON64_GD3,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gd3
+  },
+  {
+    UCON64_GD3S,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gd3s
+  },
+  {
+    UCON64_GG,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gg
+  },
+  {
+    UCON64_GGD,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_CRC32,
+    ucon64_tmp_ggd
+  },
+  {
+    UCON64_GGE,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_CRC32,
+    ucon64_tmp_gge
+  },
+  {
+    UCON64_INES,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ines
+  },
+  {
+    UCON64_INESHD,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ineshd
+  },
+#if 0
+  {
+    UCON64_IP,
+    0,
+    0,
+    ucon64_tmp_ip
+  },
+  {
+    UCON64_VMS,
+    0,
+    0,
+    ucon64_tmp_vms
+  },
 #endif
-  {UCON64_SMC, 0, 0, ucon64_opt_smc},
-  {UCON64_SMD, 0, 0, ucon64_opt_smd},
-  {UCON64_SMDS, 0, 0, ucon64_opt_smds},
-  {UCON64_SRAM, 0, 0, ucon64_opt_sram},
-  {UCON64_SC, 0, 0, ucon64_opt_sc},
-  {UCON64_SSC, 0, 0, ucon64_opt_ssc},
-  {UCON64_SWC, 0, 0, ucon64_opt_swc},
-  {UCON64_SWCS, 0, 0, ucon64_opt_swcs},
-  {UCON64_UFO, 0, 0, ucon64_opt_ufo},
-  {UCON64_UFOS, 0, 0, ucon64_opt_ufos},
-  {UCON64_UNIF, 0, 0, ucon64_opt_unif},
-  {UCON64_UNSCR, 0, 0, ucon64_opt_unscr},
-  {UCON64_USMS, 0, 0, ucon64_opt_usms},
-  {UCON64_V64, 0, 0, ucon64_opt_v64},
+  {
+    UCON64_PARSE,
+    UCON64_DC,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_parse
+  },
+  {
+    UCON64_MKIP,
+    UCON64_DC,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_mkip
+  },
+  {
+    UCON64_J,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_j
+  },
+  {
+    UCON64_K,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_k
+  },
+  {
+    UCON64_L,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_l
+  },
+  {
+    UCON64_LNX,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_lnx
+  },
+  {
+    UCON64_LOGO,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_logo
+  },
+  {
+    UCON64_LSRAM,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_lsram
+  },
+  {
+    UCON64_LYX,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_lyx
+  },
+  {
+    UCON64_MGD,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_mgd
+  },
+  {
+    UCON64_MGDGG,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_mgdgg
+  },
+  {
+    UCON64_MSG,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_msg
+  },
+  {
+    UCON64_N,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_n
+  },
+  {
+    UCON64_N2,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_n2
+  },
+  {
+    UCON64_N2GB,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_n2gb
+  },
+  {
+    UCON64_NROT,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nrot
+  },
+  {
+    UCON64_PASOFAMI,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pasofami
+  },
+  {
+    UCON64_PATTERN,
+    0,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pattern
+  },
+  {
+    UCON64_POKE,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_poke
+  },
+  {
+    UCON64_ROTL,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_rotl
+  },
+  {
+    UCON64_ROTR,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_rotr
+  },
+  {
+    UCON64_S,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_s
+  },
+  {
+    UCON64_SCR,
+    UCON64_DC,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_scr
+  },
+  {
+    UCON64_SGB,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sgb
+  },
+#ifdef  HAVE_MATH_H
+  {
+    UCON64_CC2,
+    UCON64_ATA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_cc2
+  },
+#endif
+  {
+    UCON64_SMC,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_smc
+  },
+  {
+    UCON64_SMD,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_smd
+  },
+  {
+    UCON64_SMDS,
+    UCON64_UNKNOWN,
+    0,
+    ucon64_tmp_smds
+  },
+  {
+    UCON64_SRAM,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sram
+  },
+  {
+    UCON64_SC,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sc
+  },
+  {
+    UCON64_SSC,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ssc
+  },
+  {
+    UCON64_SWC,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_swc
+  },
+  {
+    UCON64_SWCS,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_swcs
+  },
+  {
+    UCON64_UFO,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ufo
+  },
+  {
+    UCON64_UFOS,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_ufos
+  },
+  {
+    UCON64_UNIF,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_unif
+  },
+  {
+    UCON64_UNSCR,
+    UCON64_DC,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_unscr
+  },
+  {
+    UCON64_USMS,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_usms
+  },
+  {
+    UCON64_V64,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_v64
+  },
 #ifdef  USE_PARALLEL
 #ifdef  USE_LIBCD64
-  {UCON64_XCD64, 0, 0, ucon64_opt_xcd64},
-  {UCON64_XCD64C, 0, 0, ucon64_opt_xcd64c},
-  {UCON64_XCD64B, 0, 0, ucon64_opt_xcd64b},
-  {UCON64_XCD64S, 0, 0, ucon64_opt_xcd64s},
-  {UCON64_XCD64F, 0, 0, ucon64_opt_xcd64f},
-  {UCON64_XCD64E, 0, 0, ucon64_opt_xcd64e},
-  {UCON64_XCD64M, 0, 0, ucon64_opt_xcd64m},
+  {
+    UCON64_XCD64,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xcd64
+  },
+  {
+    UCON64_XCD64C,
+    UCON64_N64,
+    0,
+    ucon64_tmp_xcd64c
+  },
+  {
+    UCON64_XCD64B,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_xcd64b
+  },
+  {
+    UCON64_XCD64S,
+    UCON64_N64,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xcd64s
+  },
+  {
+    UCON64_XCD64F,
+    UCON64_N64,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xcd64f
+  },
+  {
+    UCON64_XCD64E,
+    UCON64_N64,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xcd64e
+  },
+  {
+    UCON64_XCD64M,
+    UCON64_N64,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xcd64m
+  },
 #endif
-  {UCON64_XRESET, 0, 0, ucon64_opt_xreset},
-  {UCON64_XCMC, 0, 0, ucon64_opt_xcmc},
-  {UCON64_XCMCT, 0, 0, ucon64_opt_xcmct},
-  {UCON64_XDEX, 0, 0, ucon64_opt_xdex},
-  {UCON64_XDJR, 0, 0, ucon64_opt_xdjr},
-  {UCON64_XFAL, 0, 0, ucon64_opt_xfal},
-  {UCON64_XFALMULTI, 0, 0, ucon64_opt_xfalmulti},
-  {UCON64_XFALC, 0, 0, ucon64_opt_xfalc},
-  {UCON64_XFALS, 0, 0, ucon64_opt_xfals},
-  {UCON64_XFALB, 0, 0, ucon64_opt_xfalb},
-  {UCON64_XFIG, 0, 0, ucon64_opt_xfig},
-  {UCON64_XFIGS, 0, 0, ucon64_opt_xfigs},
-  {UCON64_XFIGC, 0, 0, ucon64_opt_xfigc},
-  {UCON64_XGBX, 0, 0, ucon64_opt_xgbx},
-  {UCON64_XGBXS, 0, 0, ucon64_opt_xgbxs},
-  {UCON64_XGBXB, 0, 0, ucon64_opt_xgbxb},
-  {UCON64_XGD3, 0, 0, ucon64_opt_xgd3},
-  {UCON64_XGD3S, 0, 0, ucon64_opt_xgd3s},
-  {UCON64_XGD3R, 0, 0, ucon64_opt_xgd3r},
-  {UCON64_XGD6, 0, 0, ucon64_opt_xgd6},
-  {UCON64_XGD6S, 0, 0, ucon64_opt_xgd6s},
-  {UCON64_XGD6R, 0, 0, ucon64_opt_xgd6r},
-  {UCON64_XGG, 0, 0, ucon64_opt_xgg},
-  {UCON64_XGGS, 0, 0, ucon64_opt_xggs},
-  {UCON64_XGGB, 0, 0, ucon64_opt_xggb},
-  {UCON64_XLIT, 0, 0, ucon64_opt_xlit},
-  {UCON64_XMCCL, 0, 0, ucon64_opt_xmccl},
-  {UCON64_XMCD, 0, 0, ucon64_opt_xmcd},
-  {UCON64_XMD, 0, 0, ucon64_opt_xmd},
-  {UCON64_XMDS, 0, 0, ucon64_opt_xmds},
-  {UCON64_XMDB, 0, 0, ucon64_opt_xmdb},
-  {UCON64_XMSG, 0, 0, ucon64_opt_xmsg},
-  {UCON64_XPCE, 0, 0, ucon64_opt_xpce},
-  {UCON64_XPL, 0, 0, ucon64_opt_xpl},
-  {UCON64_XPLI, 0, 0, ucon64_opt_xpli},
-  {UCON64_XSF, 0, 0, ucon64_opt_xsf},
-  {UCON64_XSFS, 0, 0, ucon64_opt_xsfs},
-  {UCON64_XSMC, 0, 0, ucon64_opt_xsmc},
-  {UCON64_XSMCR, 0, 0, ucon64_opt_xsmcr},
-  {UCON64_XSMD, 0, 0, ucon64_opt_xsmd},
-  {UCON64_XSMDS, 0, 0, ucon64_opt_xsmds},
-  {UCON64_XSWC, 0, 0, ucon64_opt_xswc},
-  {UCON64_XSWC2, 0, 0, ucon64_opt_xswc2},
-  {UCON64_XSWCS, 0, 0, ucon64_opt_xswcs},
-  {UCON64_XSWCC, 0, 0, ucon64_opt_xswcc},
-  {UCON64_XSWCR, 0, 0, ucon64_opt_xswcr},
-  {UCON64_XV64, 0, 0, ucon64_opt_xv64},
+  {
+    UCON64_XRESET,
+    0,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xreset
+  },
+  {
+    UCON64_XCMC,
+    UCON64_GEN,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xcmc
+  },
+  {
+    UCON64_XCMCT,
+    UCON64_GEN,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xcmct
+  },
+  {
+    UCON64_XDEX,
+    0,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xdex
+  },
+  {
+    UCON64_XDJR,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xdjr
+  },
+  {
+    UCON64_XFAL,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xfal
+  },
+  {
+    UCON64_XFALMULTI,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_xfalmulti
+  },
+  {
+    UCON64_XFALC,
+    UCON64_GBA,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xfalc
+  },
+  {
+    UCON64_XFALS,
+    UCON64_GBA,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xfals
+  },
+  {
+    UCON64_XFALB,
+    UCON64_GBA,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xfalb
+  },
+  {
+    UCON64_XFIG,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xfig
+  },
+  {
+    UCON64_XFIGS,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xfigs
+  },
+  {
+    UCON64_XFIGC,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xfigc
+  },
+  {
+    UCON64_XGBX,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xgbx
+  },
+  {
+    UCON64_XGBXS,
+    UCON64_GB,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xgbxs
+  },
+  {
+    UCON64_XGBXB,
+    UCON64_GB,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xgbxb
+  },
+  {
+    UCON64_XGD3,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xgd3
+  },
+  {
+    UCON64_XGD3S,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xgd3s
+  },
+  {
+    UCON64_XGD3R,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xgd3r
+  },
+  {
+    UCON64_XGD6,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xgd6
+  },
+  {
+    UCON64_XGD6S,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xgd6s
+  },
+  {
+    UCON64_XGD6R,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xgd6r
+  },
+  {
+    UCON64_XGG,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xgg
+  },
+  {
+    UCON64_XGGS,
+    UCON64_SMS,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xggs
+  },
+  {
+    UCON64_XGGB,
+    UCON64_SMS,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xggb
+  },
+  {
+    UCON64_XLIT,
+    UCON64_LYNX,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xlit
+  },
+  {
+    UCON64_XMCCL,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xmccl
+  },
+  {
+    UCON64_XMCD,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xmcd
+  },
+  {
+    UCON64_XMD,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xmd
+  },
+  {
+    UCON64_XMDS,
+    UCON64_GEN,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xmds
+  },
+  {
+    UCON64_XMDB,
+    UCON64_GEN,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xmdb
+  },
+  {
+    UCON64_XMSG,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xmsg
+  },
+  {
+    UCON64_XPCE,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xpce
+  },
+  {
+    UCON64_XPL,
+    UCON64_NGP,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xpl
+  },
+  {
+    UCON64_XPLI,
+    UCON64_NGP,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xpli
+  },
+  {
+    UCON64_XSF,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xsf
+  },
+  {
+    UCON64_XSFS,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xsfs
+  },
+  {
+    UCON64_XSMC,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_xsmc
+  },
+  {
+    UCON64_XSMCR,
+    UCON64_NES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xsmcr
+  },
+  {
+    UCON64_XSMD,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xsmd
+  },
+  {
+    UCON64_XSMDS,
+    UCON64_GEN,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xsmds
+  },
+  {
+    UCON64_XSWC,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xswc
+  },
+  {
+    UCON64_XSWC2,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xswc2
+  },
+  {
+    UCON64_XSWCS,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xswcs
+  },
+  {
+    UCON64_XSWCC,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xswcc
+  },
+  {
+    UCON64_XSWCR,
+    UCON64_SNES,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xswcr
+  },
+  {
+    UCON64_XV64,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xv64
+  },
 #endif // USE_PARALLEL
 #if     defined USE_PARALLEL || defined USE_USB
-  {UCON64_XF2A, 0, 0, ucon64_opt_xf2a},
-  {UCON64_XF2AMULTI, 0, 0, ucon64_opt_xf2amulti},
-  {UCON64_XF2AC, 0, 0, ucon64_opt_xf2ac},
-  {UCON64_XF2AS, 0, 0, ucon64_opt_xf2as},
-  {UCON64_XF2AB, 0, 0, ucon64_opt_xf2ab},
+  {
+    UCON64_XF2A,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
+    ucon64_tmp_xf2a
+  },
+  {
+    UCON64_XF2AMULTI,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_xf2amulti
+  },
+  {
+    UCON64_XF2AC,
+    UCON64_GBA,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xf2ac
+  },
+  {
+    UCON64_XF2AS,
+    UCON64_GBA,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xf2as
+  },
+  {
+    UCON64_XF2AB,
+    UCON64_GBA,
+    WF_NEEDS_CRC32,
+    ucon64_tmp_xf2ab
+  },
 #endif // USE_PARALLEL || USE_USB
-  {UCON64_Z64, 0, 0, ucon64_opt_z64},
+  {
+    UCON64_Z64,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_z64
+  },
+  {
+    UCON64_HELP,
+    0,
+    WF_EXIT,
+    ucon64_tmp_help
+  },
+  {
+    UCON64_VER,
+    0,
+    WF_EXIT,
+    ucon64_tmp_ver
+  },
+/*
+  switches
+
+  switches are not console specific and have no flags
+  the function is always ucon64_switches()
+*/
+#warning switches are not console specific and have no flags?
+  {UCON64_BAT, 0, 0, NULL},
+  {UCON64_BS, 0, 0, NULL},
+  {UCON64_CMNT, 0, 0, NULL},
+  {UCON64_CTRL2, 0, 0, NULL},
+  {UCON64_CTRL, 0, 0, NULL},
+  {UCON64_DUMPINFO, 0, 0, NULL},
+  {UCON64_EROM, 0, 0, NULL},
+  {UCON64_FILE, 0, 0, NULL},  // deprecated
+  {UCON64_FRONTEND, 0, 0, NULL},
+  {UCON64_HD, 0, 0, NULL},
+  {UCON64_HDN, 0, 0, NULL},
+  {UCON64_HI, 0, 0, NULL},
+  {UCON64_ID, 0, 0, NULL},
+  {UCON64_IDNUM, 0, 0, NULL},
+  {UCON64_INT2, 0, 0, NULL},
+  {UCON64_INT, 0, 0, NULL},
+  {UCON64_MAPR, 0, 0, NULL},
+  {UCON64_MIRR, 0, 0, NULL},
+  {UCON64_NBAK, 0, 0, NULL},
+  {UCON64_NBAT, 0, 0, NULL},
+  {UCON64_NBS, 0, 0, NULL},
+  {UCON64_NCOL, 0, 0, NULL},
+  {UCON64_NHD, 0, 0, NULL},
+  {UCON64_NHI, 0, 0, NULL},
+  {UCON64_NINT, 0, 0, NULL},
+  {UCON64_NS, 0, 0, NULL},
+  {UCON64_NTSC, 0, 0, NULL},
+  {UCON64_NVRAM, 0, 0, NULL},
+  {UCON64_O, 0, 0, NULL},
+  {UCON64_PAL, 0, 0, NULL},
+  {UCON64_PATCH, 0, 0, NULL},
+  {UCON64_PORT, 0, 0, NULL},
+  {UCON64_Q, 0, 0, NULL},
+//  {UCON64_QQ, 0, 0, NULL},   // reserved
+  {UCON64_R, 0, 0, NULL},
+  {UCON64_REGION, 0, 0, NULL},
+  {UCON64_ROM, 0, 0, NULL}, // deprecated
+  {UCON64_SSIZE, 0, 0, NULL},
+//  {UCON64_SWP, 0, 0, NULL},  // deprecated
+  {UCON64_V, 0, 0, NULL},
+  {UCON64_VRAM, 0, 0, NULL},
+  {UCON64_XCD64P, 0, 0, NULL},
+  {UCON64_XCMCM, 0, 0, NULL},
+  {UCON64_XFALM, 0, 0, NULL},
+  {UCON64_XGBXM, 0, 0, NULL},
+  {UCON64_XPLM, 0, 0, NULL},
+  {UCON64_XSWC_IO, 0, 0, NULL},
+
+//  {UCON64_3DO, 0, 0, NULL},
+  {UCON64_ATA, 0, 0, NULL},
+//  {UCON64_CD32, 0, 0, NULL},
+//  {UCON64_CDI, 0, 0, NULL},
+  {UCON64_COLECO, 0, 0, NULL},
+  {UCON64_DC, 0, 0, NULL},
+  {UCON64_GB, 0, 0, NULL},
+  {UCON64_GBA, 0, 0, NULL},
+//  {UCON64_GC, 0, 0, NULL},
+  {UCON64_GEN, 0, 0, NULL},
+//  {UCON64_GP32, 0, 0, NULL},
+//  {UCON64_INTELLI, 0, 0, NULL},
+  {UCON64_JAG, 0, 0, NULL},
+  {UCON64_LYNX, 0, 0, NULL},
+//  {UCON64_ARCADE, 0, 0, NULL},
+  {UCON64_N64, 0, 0, NULL},
+  {UCON64_NDS, 0, 0, NULL},
+  {UCON64_NES, 0, 0, NULL},
+//  {UCON64_NG, 0, 0, NULL},
+  {UCON64_NGP, 0, 0, NULL},
+  {UCON64_PCE, 0, 0, NULL},
+//  {UCON64_PS2, 0, 0, NULL},
+//  {UCON64_PSX, 0, 0, NULL},
+//  {UCON64_S16, 0, 0, NULL},
+//  {UCON64_SAT, 0, 0, NULL},
+  {UCON64_SMS, 0, 0, NULL},
+  {UCON64_GAMEGEAR, 0, 0, NULL},
+  {UCON64_SNES, 0, 0, NULL},
+  {UCON64_SWAN, 0, 0, NULL},
+  {UCON64_VBOY, 0, 0, NULL},
+//  {UCON64_VEC, 0, 0, NULL},
+//  {UCON64_XBOX, 0, 0, NULL},
   {0, 0, 0, NULL}
 };

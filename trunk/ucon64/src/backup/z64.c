@@ -36,8 +36,7 @@ const st_getopt2_t z64_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Mr. Backup Z64",
-      NULL
+      NULL, "Mr. Backup Z64"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };

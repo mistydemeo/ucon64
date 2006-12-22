@@ -49,25 +49,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/spsc.h"
 
 
-static st_ucon64_obj_t atari_obj[] =
-  {
-    {UCON64_ATA, WF_SWITCH},
-    {UCON64_ATA, WF_PROBE | WF_INIT | WF_NFO},
-    {UCON64_ATA, WF_PROBE | WF_INIT | WF_NFO | WF_NO_SPLIT}
-  };
-
 const st_getopt2_t atari_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Atari VCS 2600/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr",
-      /*"1977/1982/1984/1986 Atari"*/
-      NULL
+      NULL, "Atari VCS 2600/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr"
+//      "1977/1982/1984/1986 Atari"
     },
     {
       UCON64_ATA_S, 0, 0, UCON64_ATA,
-      NULL, "force recognition",
-      &atari_obj[0]
+      NULL, "force recognition"
     },
 #ifdef  HAVE_MATH_H
 #if 0
@@ -84,27 +75,24 @@ const st_getopt2_t atari_usage[] =
       "BSM=6 FE    BSM=16 F4\n"
       "BSM=7 3F    BSM=17 MB\n"
       "BSM=8 E0\n"
-      "BSM=9 FANR",
-      &atari_obj[1]
+      "BSM=9 FANR"
     },
 #else
     {
       "cc2", 0,
       0, UCON64_CC2,
       NULL,
-      "convert BIN to Cuttle Card (2)/(Starpath) Supercharger/WAV",
-      &atari_obj[1]
+      "convert BIN to Cuttle Card (2)/(Starpath) Supercharger/WAV"
     },
 #endif
 #endif
 #if 0
     {
       "bin", 0, 0, UCON64_BIN,
-      NULL, "convert Cuttle Card (2)/(Starpath) Supercharger/WAV to BIN",
-      &atari_obj[2]
+      NULL, "convert Cuttle Card (2)/(Starpath) Supercharger/WAV to BIN"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 
@@ -358,8 +346,6 @@ is_probably_3f (const unsigned char *image, unsigned int size)
 int
 atari_init (st_ucon64_nfo_t * rominfo)
 {
-#warning fix atari_init()
-#if 0
   int i, j, bsmode, size = ucon64.file_size;
   unsigned int crc32;
   static char backup_usage[80];
@@ -489,7 +475,7 @@ atari_init (st_ucon64_nfo_t * rominfo)
                get_bsmode_by_id (atari_rominfo.bsm)->start_page);
       return 0;
     }
-#endif
+
   return -1;
 }
 

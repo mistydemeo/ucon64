@@ -75,7 +75,6 @@ typedef struct
                               // "--name=arg_name" if has_arg == 1
                               // "--name[=arg_name]" if has_arg == 2
   const char *help;           // --help, -h, -? output for the current option
-  void *object;               // could be used for workflow objects
 } st_getopt2_t;
 
 extern void getopt2_usage (const st_getopt2_t *option);

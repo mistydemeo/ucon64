@@ -46,87 +46,63 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
 
 
-static st_ucon64_obj_t nes_obj[] =
-  {
-    {0, WF_SWITCH},
-    {0, WF_DEFAULT},
-    {0, WF_DEFAULT | WF_NO_SPLIT},
-    {0, WF_INIT | WF_PROBE},
-    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT},
-    {UCON64_NES, WF_SWITCH},
-    {UCON64_NES, WF_DEFAULT}
-  };
-
 const st_getopt2_t nes_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"
-      /*"1983 Nintendo http://www.nintendo.com"*/,
-      NULL
+      /*"1983 Nintendo http://www.nintendo.com"*/
     },
     {
       UCON64_NES_S, 0, 0, UCON64_NES,
-      NULL, "force recognition",
-      &nes_obj[5]
+      NULL, "force recognition"
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)",
-      &nes_obj[1]
+      "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)"
     },
     {
       "unif", 0, 0, UCON64_UNIF,
-      NULL, "convert to UNIF format/UNF (uses default values)",
-      &nes_obj[6]
+      NULL, "convert to UNIF format/UNF (uses default values)"
     },
     {
       "ines", 0, 0, UCON64_INES,
-      NULL, "convert to iNES format/NES (uses default values)",
-      &nes_obj[6]
+      NULL, "convert to iNES format/NES (uses default values)"
     },
     {
       "ineshd", 0, 0, UCON64_INESHD,
-      NULL, "extract iNES header from ROM (16 Bytes)",
-      &nes_obj[6]
+      NULL, "extract iNES header from ROM (16 Bytes)"
     },
     {
       "j", 0, 0, UCON64_J,
-      NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)",
-      &nes_obj[3]
+      NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)"
     },
     {
       "pasofami", 0, 0, UCON64_PASOFAMI,
-      NULL, "convert to Pasofami/PRM/700/PRG/CHR",
-      &nes_obj[6]
+      NULL, "convert to Pasofami/PRM/700/PRG/CHR"
     },
     {
       "s", 0, 0, UCON64_S,
-      NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)",
-      &nes_obj[2]
+      NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)"
     },
     {
       "ffe", 0, 0, UCON64_FFE,
-      NULL, "convert to FFE format (Super Magic Card)",
-      &nes_obj[6]
+      NULL, "convert to FFE format (Super Magic Card)"
     },
     {
       "sc", 0, 0, UCON64_SC,
       NULL, "convert to SuperCard\n"
-            "(creates: SAV template)",
-      &nes_obj[1]
+            "(creates: SAV template)"
     },
     {
       "mapr", 1, 0, UCON64_MAPR,
       "MAPR", "specify board name or mapper number for conversion options\n"
       "MAPR must be a board name for UNIF or a number for Pasofami\n"
-      "and iNES",
-      &nes_obj[5]
+      "and iNES"
     },
     {
       "dint", 0, 0, UCON64_DINT,
-      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
-      &nes_obj[4]
+      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)"
     },
     {
       "ctrl", 1, 0, UCON64_CTRL,
@@ -136,38 +112,31 @@ const st_getopt2_t nes_usage[] =
       "TYPE=2 R.O.B.\n"
       "TYPE=3 Arkanoid controller\n"
       "TYPE=4 powerpad\n"
-      "TYPE=5 four-score adapter",
-      &nes_obj[0]
+      "TYPE=5 four-score adapter"
     },
     {
       "ntsc", 0, 0, UCON64_NTSC,
-      NULL, "specify TV standard is NTSC (UNIF/iNES only)",
-      &nes_obj[5]
+      NULL, "specify TV standard is NTSC (UNIF/iNES only)"
     },
     {
       "pal", 0, 0, UCON64_PAL,
-      NULL, "specify TV standard is PAL (UNIF/iNES only)",
-      &nes_obj[5]
+      NULL, "specify TV standard is PAL (UNIF/iNES only)"
     },
     {
       "bat", 0, 0, UCON64_BAT,
-      NULL, "specify battery is present",
-      &nes_obj[5]
+      NULL, "specify battery is present"
     },
     {
       "nbat", 0, 0, UCON64_NBAT,
-      NULL, "specify battery is not present",
-      &nes_obj[5]
+      NULL, "specify battery is not present"
     },
     {
       "vram", 0, 0, UCON64_VRAM,
-      NULL, "specify VRAM override (UNIF only)",
-      &nes_obj[5]
+      NULL, "specify VRAM override (UNIF only)"
     },
     {
       "nvram", 0, 0, UCON64_NVRAM,
-      NULL, "specify no VRAM override (UNIF only)",
-      &nes_obj[5]
+      NULL, "specify no VRAM override (UNIF only)"
     },
     {
       "mirr", 1, 0, UCON64_MIRR,
@@ -177,49 +146,41 @@ const st_getopt2_t nes_usage[] =
       "MTYPE=2 mirror all pages from $2000 (UNIF only)\n"
       "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
       "MTYPE=4 four screens of VRAM\n"
-      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)",
-      &nes_obj[5]
+      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)"
     },
 #if     UNIF_REVISION > 7
     {
       "cmnt", 1, 0, UCON64_CMNT,
-      "TEXT", "specify that TEXT should be used as comment (UNIF only)",
-      &nes_obj[5]
+      "TEXT", "specify that TEXT should be used as comment (UNIF only)"
     },
 #endif
     {
       "dumpinfo", 1, 0, UCON64_DUMPINFO,
-      "FILE", "use dumper info from FILE when converting to UNIF",
-      &nes_obj[5]
+      "FILE", "use dumper info from FILE when converting to UNIF"
     },
     {
       "fds", 0, 0, UCON64_FDS,
-      NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS",
-      &nes_obj[6]
+      NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS"
     },
     {
       "fdsl", 0, 0, UCON64_FDSL,
-      NULL, "list Famicom Disk System/FDS (diskimage) contents",
-      &nes_obj[6]
+      NULL, "list Famicom Disk System/FDS (diskimage) contents"
     },
 #if 0
     {
       "fam", 0, 0, UCON64_FAM,
-      NULL, "convert Famicom Disk System file (diskimage) from FDS to FAM",
-      NULL
+      NULL, "convert Famicom Disk System file (diskimage) from FDS to FAM"
     },
     {
       "tr", 0, 0, UCON64_TR,
-      NULL, "truncate doubled PRG/CHR",
-      NULL
+      NULL, "truncate doubled PRG/CHR"
     },
     {
       "nfs", 0, 0, UCON64_NFS,
-      NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE",
-      NULL
+      NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 #if 0
@@ -5079,26 +5040,26 @@ static nes_file_t type;
 
 static const st_getopt2_t ines_usage[] =
   {
-    {NULL, 0, 0, 0, NULL, "iNES header", NULL},
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, "iNES header"},
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 static const st_getopt2_t unif_usage[] =
   {
-    {NULL, 0, 0, 0, NULL, "UNIF header", NULL},
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, "UNIF header"},
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 static const st_getopt2_t pasofami_usage[] =
   {
-    {NULL, 0, 0, 0, NULL, "Pasofami file", NULL},
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, "Pasofami file"},
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 static const st_getopt2_t fds_usage[] =
   {
-    {NULL, 0, 0, 0, NULL, "Famicom Disk System file (diskimage)", NULL},
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, "Famicom Disk System file (diskimage)"},
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 static st_ines_header_t ines_header;
@@ -5483,7 +5444,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
       write_chunk (&unif_chunk, destfile);
     }
 
-  x = ucon64_crc32 (0, prg_data, prg_size);
+  x = crc32_wrap (0, prg_data, prg_size);
   unif_chunk.id = PCK0_ID;
   unif_chunk.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5499,7 +5460,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
 
   if (chr_size > 0)
     {
-      x = ucon64_crc32 (0, chr_data, chr_size);
+      x = crc32_wrap (0, chr_data, chr_size);
       unif_chunk.id = CCK0_ID;
       unif_chunk.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5761,7 +5722,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       {
         if ((unif_chunk3 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
           {
-            x = ucon64_crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            x = crc32_wrap (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
             unif_chunk2.id = unif_pck_ids[n];
             unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5772,7 +5733,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
           }
         else
           {
-            x = ucon64_crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            x = crc32_wrap (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
             x = bswap_32 (x);
 #endif
@@ -5793,7 +5754,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       {
         if ((unif_chunk3 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
           {
-            x = ucon64_crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            x = crc32_wrap (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
             unif_chunk2.id = unif_cck_ids[n];
             unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5804,7 +5765,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
           }
         else
           {
-            x = ucon64_crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            x = crc32_wrap (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
             x = bswap_32 (x);
 #endif
@@ -7212,13 +7173,13 @@ nes_init (st_ucon64_nfo_t *rominfo)
       for (n = 0; n < 16; n++)
         if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
           {
-            crc = ucon64_crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
+            crc = crc32_wrap (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
             size += unif_chunk->length;
             if ((unif_chunk2 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
               str = "not available";
             else
               {
-                x = ucon64_crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
+                x = crc32_wrap (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
 #ifdef  WORDS_BIGENDIAN
                 x = bswap_32 (x);
 #endif
@@ -7244,13 +7205,13 @@ nes_init (st_ucon64_nfo_t *rominfo)
       for (n = 0; n < 16; n++)
         if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
           {
-            crc = ucon64_crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
+            crc = crc32_wrap (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
             size += unif_chunk->length;
             if ((unif_chunk2 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
               str = "not available";
             else
               {
-                x = ucon64_crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
+                x = crc32_wrap (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
 #ifdef  WORDS_BIGENDIAN
                 x = bswap_32 (x);
 #endif
@@ -7399,7 +7360,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
                              ((ines_header.ctrl1 & INES_TRAINER) ? 512 : 0);
       if (x == 0)
         {                                       // use buf only if it could be allocated
-          ucon64.crc32 = ucon64_crc32 (0, rom_buffer, rominfo->data_size);
+          ucon64.crc32 = crc32_wrap (0, rom_buffer, rominfo->data_size);
           free (rom_buffer);
         }
 
@@ -7492,7 +7453,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
           return -1;
         }
       ucon64_fread (rom_buffer, 0, rom_size, ucon64.fname);
-      ucon64.crc32 = ucon64_crc32 (0, rom_buffer, rom_size);
+      ucon64.crc32 = crc32_wrap (0, rom_buffer, rom_size);
       free (rom_buffer);
       break;
     }

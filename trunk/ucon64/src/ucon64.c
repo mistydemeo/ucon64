@@ -49,7 +49,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _WIN32
 #include <windows.h>
 #endif
-
 #ifdef  DEBUG
 #ifdef  __GNUC__
 #warning DEBUG active
@@ -78,47 +77,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
-#ifdef  TEST_CMDLINE
+#ifdef  TEST_UCON64
 #include "misc/test.h"
-#endif  // TEST_CMDLINE
+#endif  // TEST_UCON64
 
 
-
-#ifdef  TEST_CMDLINE
+#ifdef  TEST_UCON64
 static void ucon64_test (void);
 #endif
-static void ucon64_exit (void);
-static int ucon64_execute_options (void);
-static void ucon64_rom_nfo (const st_ucon64_nfo_t *nfo);
-static st_ucon64_nfo_t *ucon64_probe (st_ucon64_nfo_t *nfo);
-static int ucon64_rom_handling (void);
-static int ucon64_process_rom (const char *fname);
+static int ucon64_switches (st_ucon64_t *p);
+static int (*ucon64_func) (st_ucon64_t *) = NULL;
 
 
-st_ucon64_t ucon64;                             // containes ptr to image, dat and nfo
+st_ucon64_t ucon64; 
+
 
 #ifdef  AMIGA
 unsigned long __stacksize = 102400;             // doesn't work on PPC? is StormC specific?
 //unsigned long __stack = 102400;               // for SAS/C, DICE, GCC etc.?
 char vers[] = "$VER: uCON64 "UCON64_VERSION_S" "CURRENT_OS_S" ("__DATE__") ("__TIME__")";
 #endif
-
-typedef struct
-{
-  int val;         // (st_getopt2_t->val)
-//  const
-    char *optarg;  // option argument
-  int console;     // the console (st_getopt2_t->object)
-  int flags;       // workflow flags (st_getopt2_t->object)
-} st_args_t;
-
-static st_args_t arg[UCON64_MAX_ARGS];
-
+static uint32_t ucon64_flags = 0;
+static int ucon64_files = 0;
+static const char *ucon64_fname[UCON64_MAX_ARGS];
 static st_getopt2_t options[UCON64_MAX_ARGS];
 static const st_getopt2_t lf[] =
   {
-    {NULL, 0, 0, 0, NULL, "", NULL},
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, ""},
+    {NULL, 0, 0, 0, NULL, NULL}
   },
   *option[] =
   {
@@ -236,18 +222,40 @@ static const st_getopt2_t lf[] =
   };
 
 
-static st_ucon64_nfo_t *
-ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
+//#ifdef  DEBUG
+static void
+ucon64_sanity_check (void)
 {
-  if (nfo)
-    memset (nfo, 0, sizeof (st_ucon64_nfo_t));
+  // ucon64 sanity check
+  {
+    int i, j, f;
 
-  ucon64.nfo = NULL;
-  ucon64.crc32 = ucon64.fcrc32 = 0;             // yes, this belongs here
-  nfo->data_size = UCON64_UNKNOWN;
+    for (i = 0; ucon64_filter[i].option; i++)
+      {
+         f = 0;
+         for (j = 0; options[j].name || options[j].help; j++)
+          if (options[j].val)
+            if (ucon64_filter[i].option == options[j].val)
+              f++;
 
-  return nfo;
+         if (f != 1)
+           printf ("option: %d was found %d times in options[]\n", ucon64_filter[i].option, f);
+      }
+
+    for (j = 0; options[j].name || options[j].help; j++)
+      if (options[j].val)
+      {
+         f = 0;
+         for (i = 0; ucon64_filter[i].option; i++)
+          if (ucon64_filter[i].option == options[j].val)
+            f++;
+
+         if (f != 1)
+           printf ("option: %d was found %d times in ucon64_filter[]\n", options[j].val, f);
+      }
+  }
 }
+//#endif
 
 
 void
@@ -258,11 +266,63 @@ ucon64_exit (void)
 }
 
 
+static int
+ucon64_set_fname (const char *fname)
+{
+  if (ucon64_files < UCON64_MAX_ARGS)
+    ucon64_fname[ucon64_files++] = fname;
+
+  return 0;
+}
+
+
+static int
+ucon64_opts (int c)
+{
+  static int x = 0;
+  int i = 0;
+
+  if (c == '?') // unknown option
+    {
+      fprintf (stderr, "Try '%s " OPTION_LONG_S "help' for more information.\n", ucon64.argv[0]);
+      exit (1);
+    }
+
+  if (x >= UCON64_MAX_ARGS)
+    return 0;
+
+  for (i = 0; ucon64_filter[i].option; i++)
+    if (ucon64_filter[i].option == c)
+      {
+        ucon64.option = ucon64_filter[i].option;
+        ucon64.optarg = optarg;
+
+        ucon64_switches (&ucon64);
+
+        if (!ucon64_func && ucon64_filter[i].func)
+          {
+//            ucon64.option = ucon64_filter[i].option;
+//            ucon64.optarg = optarg;
+
+            if (ucon64.console == UCON64_UNKNOWN)
+              ucon64.console = ucon64_filter[i].console;
+            ucon64_flags = ucon64_filter[i].flags;
+
+            ucon64_func = ucon64_filter[i].func;
+          }
+      }
+
+  x++;
+
+  return 0;
+}
+
+
 int
 main (int argc, char **argv)
 {
   int result = 0;
-  int x = 0, y = 0, c = 0;
+  int i = 0, x = 0, y = 0, c = 0;
   const char *p = NULL;
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
@@ -398,44 +458,52 @@ main (int argc, char **argv)
       {NULL, NULL, NULL}
     };
 
-#ifdef  TEST_CMDLINE
+#ifdef  TEST_UCON64
   if (argc == 1)
     ucon64_test ();
 #else
+  // turn (st_getopt2_t **) into (st_getopt2_t *)
+  memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
+  for (c = x = 0; option[x]; x++)
+    for (y = 0; option[x][y].name || option[x][y].help; y++)
+      if (c < UCON64_MAX_ARGS)
+        {
+          memcpy (&options[c], &option[x][y], sizeof (st_getopt2_t));
+          c++;
+        }
+
+#ifdef  DEBUG
+  getopt2_sanity_check (option); // check (st_getopt2_t *) options consistency
+#endif
+//#ifdef  DEBUG
+  ucon64_sanity_check ();
+//#endif
+
   printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2006\n"
     "Uses code from various people. See 'developers.html' for more!\n"
     "This may be freely redistributed under the terms of the GNU Public License\n\n");
 #endif
 
-  if (atexit (ucon64_exit) == -1)
-    {
-      fputs ("ERROR: Could not register function with atexit()\n", stderr);
-      exit (1);
-    }
+  atexit (ucon64_exit);
 
-  // flush st_ucon64_t
+  // defaults
+  memset (&ucon64_fname, 0, sizeof (const char *) * UCON64_MAX_ARGS);
   memset (&ucon64, 0, sizeof (st_ucon64_t));
 
-  // these members of ucon64 (except rom and fname_arch) don't change per file
   ucon64.argc = argc;
   ucon64.argv = argv;
 
   ucon64.fname =
-  ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
-
-  ucon64.fname_arch[0] = 0;
-
-  ucon64.recursive =
-  ucon64.parport_needed =
-  ucon64.io_mode = 0;
+  ucon64.patch = ucon64.argv[ucon64.argc - 1];
 
 #warning ucon64.backup_header_len can be (-1) (UCON64_UNKNOWN)
+  ucon64.console = UCON64_UNKNOWN;
+
   ucon64.backup_header_len =
   ucon64.battery =
   ucon64.bs_dump =
-  ucon64.console =
   ucon64.controller =
   ucon64.controller2 =
   ucon64.do_not_calc_crc =
@@ -450,24 +518,7 @@ main (int argc, char **argv)
   ucon64.use_dump_info =
   ucon64.vram = UCON64_UNKNOWN;
 
-  ucon64.flags = WF_DEFAULT;
-
-
-  // convert (st_getopt2_t **) to (st_getopt2_t *)
-  memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
-  for (c = x = 0; option[x]; x++)
-    for (y = 0; option[x][y].name || option[x][y].help; y++)
-      if (c < UCON64_MAX_ARGS)
-        {
-          memcpy (&options[c], &option[x][y], sizeof (st_getopt2_t));
-          c++;
-        }
-
-#ifdef  DEBUG
-  getopt2_sanity_check (option); // check (st_getopt2_t *) options consistency
-#endif
-
-  // configfile handling
+  // read/parse configfile
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
   //  still running in root mode. Maybe 0 is even better (in case root did
@@ -482,80 +533,41 @@ main (int argc, char **argv)
   if (result == -1) // property_check() or update failed
     return -1;
 
-#ifdef  USE_ANSI_COLOR
   // ANSI colors?
+#ifdef  USE_ANSI_COLOR
   ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color");
   // the conditional call to ansi_init() has to be done *after* the check for
   //  the switch --ncol
 #endif
 
   // parallel port?
+#warning default?
 #if     defined USE_PPDEV || defined AMIGA
-  p = get_property (ucon64.configfile, "parport_dev", PROPERTY_MODE_FILENAME);
-  x = sizeof (ucon64.parport_dev);
+  if ((p = get_property (ucon64.configfile, "parport_dev", PROPERTY_MODE_FILENAME)))
 #ifdef  USE_PPDEV
-  strncpy (ucon64.parport_dev, p ? p : "/dev/parport0", x)[x - 1] = 0;
+    strncpy (ucon64.parport_dev, "/dev/parport0", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 #elif   defined AMIGA
-  strncpy (ucon64.parport_dev, p ? p : "parallel.device", x)[x - 1] = 0;
+    strncpy (ucon64.parport_dev, "parallel.device", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 #endif
 #endif
 
-  p = get_property (ucon64.configfile, "parport", PROPERTY_MODE_TEXT);
-  if (p)
+  if ((p = get_property (ucon64.configfile, "parport", PROPERTY_MODE_TEXT)))
     sscanf (p, "%x", &ucon64.parport);
   else
-    // use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
+    // use UCON64_UNKNOWN to force probing if the config file doesn't contain
     //  a parport line
-    ucon64.parport = -1;
+    ucon64.parport = UCON64_UNKNOWN;
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups");
 
   // $HOME/.ucon64/ ?
-  p = get_property (ucon64.configfile, "ucon64_configdir", PROPERTY_MODE_FILENAME);
-  if (p)
-    {
-      x = sizeof (ucon64.configdir);
-      strncpy (ucon64.configdir, p, x)[x - 1] = 0;
-    }
-  else
-    *ucon64.configdir = 0;
+  if ((p = get_property (ucon64.configfile, "ucon64_configdir", PROPERTY_MODE_FILENAME)))
+    strncpy (ucon64.configdir, p, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
   // DAT file handling
-  ucon64.dat_enabled = 0;
-  p = get_property (ucon64.configfile, "ucon64_datdir", PROPERTY_MODE_FILENAME);
-  if (p)
-    {
-      x = sizeof (ucon64.datdir);
-      strncpy (ucon64.datdir, p, x)[x - 1] = 0;
-    }
-  else
-    *ucon64.datdir = 0;
-
-  // we use ucon64.datdir as path to the dats
-  if (!access (ucon64.datdir,
-  // !W_OK doesn't mean that files can't be written to dir for Win32 exe's
-#if     !defined __CYGWIN__ && !defined _WIN32
-                              W_OK |
-#endif
-                              R_OK | X_OK))
-    if (!stat (ucon64.datdir, &fstate))
-      if (S_ISDIR (fstate.st_mode))
-        ucon64.dat_enabled = 1;
-
-  if (!ucon64.dat_enabled)
-    if (!access (ucon64.configdir,
-#if     !defined __CYGWIN__ && !defined _WIN32
-                                   W_OK |
-#endif
-                                   R_OK | X_OK))
-      if (!stat (ucon64.configdir, &fstate))
-        if (S_ISDIR (fstate.st_mode))
-          {
-//            fprintf (stderr, "Please move your DAT files from %s to %s\n\n", ucon64.configdir, ucon64.datdir);
-            strcpy (ucon64.datdir, ucon64.configdir); // use .ucon64/ instead of .ucon64/dat/
-            ucon64.dat_enabled = 1;
-          }
+  if ((p = get_property (ucon64.configfile, "ucon64_datdir", PROPERTY_MODE_FILENAME)))
+    strncpy (ucon64.datdir, p, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
   if (argc < 2)
     {
@@ -568,63 +580,9 @@ main (int argc, char **argv)
 
   // getopt() is utilized to make uCON64 handle/parse cmdlines in a sane
   //  and expected way
-  x = optind = 0;
-  memset (&arg, 0, sizeof (st_args_t) * UCON64_MAX_ARGS);
+//  optind = 0;
   while ((c = getopt_long_only (argc, argv, "", long_options, NULL)) != -1)
-    {
-      if (c == '?') // getopt() returns 0x3f ('?') when an unknown option was given
-        {
-          fprintf (stderr,
-               "Try '%s " OPTION_LONG_S "help' for more information.\n",
-               argv[0]);
-          exit (1);
-        }
-
-      if (x < UCON64_MAX_ARGS)
-        {
-          const st_ucon64_obj_t *p = (st_ucon64_obj_t *) getopt2_get_index_by_val (options, c)->object;
-
-          arg[x].console = UCON64_UNKNOWN; // default
-
-          if (p)
-            {
-              arg[x].flags = p->flags;
-              if (p->console)
-                arg[x].console = p->console;
-            }
-
-          arg[x].val = c;
-          arg[x++].optarg = (optarg ? optarg : NULL);
-        }
-      else
-        // this shouldn't happen
-        exit (1);
-    }
-
-#ifdef  DEBUG
-  for (x = 0; arg[x].val; x++)
-    printf ("%d %s %d %d\n\n",
-      arg[x].val,
-      arg[x].optarg ? arg[x].optarg : "(null)",
-      arg[x].flags,
-      arg[x].console);
-#endif
-
-
-  // switches
-  for (x = 0; arg[x].val; x++)
-    {
-      if (arg[x].console != UCON64_UNKNOWN)
-        ucon64.console = arg[x].console;
-      if (arg[x].flags)
-        ucon64.flags = arg[x].flags;
-      if (arg[x].val)
-        ucon64.option = arg[x].val;
-      ucon64.optarg = arg[x].optarg;
-
-//      if (ucon64.flags & WF_SWITCH)
-        ucon64_switches (&ucon64);
-    }
+    ucon64_opts (c);
 
 #ifdef  USE_ANSI_COLOR
   if (ucon64.ansi_color)
@@ -642,7 +600,7 @@ main (int argc, char **argv)
 #ifdef  USE_PARALLEL
   /*
     The copier options need root privileges for parport_open(). We can't use
-    ucon64.flags & WF_PAR to detect whether a (parallel port) copier option has
+    ucon64_flags & WF_PAR to detect whether a (parallel port) copier option has
     been specified, because another switch might've been specified after -port.
   */
   if (ucon64.parport_needed == 1)
@@ -666,11 +624,10 @@ main (int argc, char **argv)
     drop_privileges ();
 #endif // __unix__ && !__MSDOS__
 
-  if (optind == argc)                   // no file was specified (e.g. --db)
-    ucon64_execute_options();
-  else
+  if (optind != argc)                   // files were specified
     {
       int flags = GETFILE_FILES_ONLY;
+
       if (ucon64.recursive)
         flags |= GETFILE_RECURSIVE;
       else 
@@ -685,7 +642,7 @@ main (int argc, char **argv)
               ucon64 file dir1\* dir2\*
             Once the flag is set it is not necessary to check the remaining
             parameters.
-
+    
             TODO: Find a solution for the fact that the stat() implementation
                   of MinGW and VC++ don't accept a path with an ending slash.
           */
@@ -698,655 +655,516 @@ main (int argc, char **argv)
                   break;
                 }
         }
-      getfile (argc, argv, ucon64_process_rom, flags);
+
+      getfile (argc, argv, ucon64_set_fname, flags);
     }
 
-  return 0;
-}
-
-
-#warning re-enable zlib support
-#ifdef  USE_ZLIB
-void
-ucon64_fname_arch (const char *fname)
-{
-  char name[FILENAME_MAX];
-
-  unzFile file = unzOpen (fname);
-  unzip_goto_file (file, unzip_current_file_nr);
-  unzGetCurrentFileInfo (file, NULL, name, FILENAME_MAX, NULL, 0, NULL, 0);
-  unzClose (file);
-#if     defined _WIN32 || defined __MSDOS__
-  {
-    int n, l = strlen (name);
-    for (n = 0; n < l; n++)
-      if (name[n] == '/')
-        name[n] = FILE_SEPARATOR;
-  }
-#endif
-  strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX)[FILENAME_MAX - 1] = 0;
-}
-#endif
-
-
-int
-ucon64_process_rom (const char *fname)
-{
-#ifdef  USE_ZLIB
-  int n_entries;
-#endif
-
-  // Try to get file status information only if the file exists. We have to
-  //  accept non-existing files for the dump options.
-  if (access (fname, F_OK) == 0)
+  if (!ucon64_files)
     {
-      struct stat fstate;
-      if (stat (fname, &fstate) == -1)
-        return 0;
-      if (!S_ISREG (fstate.st_mode))
-        return 0;
-    }
-
-#ifdef  USE_ZLIB
-  n_entries = unzip_get_number_entries (fname);
-  if (n_entries != -1)                          // it's a zip file
-    {
-      for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
-           unzip_current_file_nr++)
-        {
-          ucon64_fname_arch (fname);
-          /*
-            There seems to be no other way to detect directories in ZIP files
-            than by looking at the file name. Paths in ZIP files should contain
-            forward slashes. ucon64_fname_arch() changes forward slashes into
-            backslashes (FILE_SEPARATORs) when uCON64 is compiled with Visual
-            C++ or MinGW so that basename2() always produces a correct base
-            name. So, if the entry in the ZIP file is a directory
-            ucon64.fname_arch will be an empty string.
-          */
-          if (ucon64.fname_arch[0] == 0)
-            continue;
-
-          ucon64.fname = fname;
-
-          ucon64_execute_options();
-
-          if (ucon64.flags & WF_STOP)
-            break;
-        }
-      unzip_current_file_nr = 0;
-      ucon64.fname_arch[0] = 0;
-
-      if (ucon64.flags & WF_STOP)
-        return 1;
-    }
-  else
-#endif
-    {
-      ucon64.fname = fname;
-
-      ucon64_execute_options();
-      if (ucon64.flags & WF_STOP)
-        return 1;
-    }
-
-  return 0;
-}
-
-
-int
-ucon64_execute_options (void)
-/*
-  Execute all options for a single file.
-  Please, if you experience problems then try your luck with the flags in
-  ucon64_misc.c/ucon64_wf[] before changing things here or in
-  ucon64_rom_handling().
-*/
-{
-  int i = 0, c = 0, result = 0, x = 0, opts = 0;
-
-  // these members of ucon64 can change per file
-  ucon64.dat = NULL;
-  ucon64.nfo = NULL;
-
-  ucon64.split = UCON64_UNKNOWN;
-
-  ucon64.file_size =
-  ucon64.crc32 =
-  ucon64.fcrc32 = 0;
-
-  for (x = 0; arg[x].val; x++)
-    if (!(arg[x].flags & WF_SWITCH))
-      {
-        if (ucon64.console == UCON64_UNKNOWN)
-          ucon64.console = arg[x].console;
-        ucon64.flags = arg[x].flags;
-        ucon64.option = arg[x].val;
-        ucon64.optarg = arg[x].optarg;
-
-        opts++;
-
-        // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
-        result = ucon64_rom_handling ();
-
-        if (result == -1) // no rom, but WF_NO_ROM
-          return -1;
-
-        result = -1;
-        for (i = 0; ucon64_opts[i].option; i++)
-          if (ucon64_opts[i].option == ucon64.option)
-            {
-              result = ucon64_opts[i].func (&ucon64);
-              break;
-            }
-
-        if (result == -1)
-          {
-            const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
-            const char *opt = p ? p->name : NULL;
-
-            fprintf (stderr, "ERROR: %s%s encountered a problem\n",
-                             opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
-                             opt ? opt : "uCON64");
-
-//            if (p)
-//              getopt2_usage (p);
-
-            fputs ("       Is the option you used available for the current console system?\n"
-                   "       Please report bugs to ucon64-main@lists.sf.net or http://ucon64.sf.net\n\n",
-                   stderr);
-
-            return -1;
-          }
-
-        /*
-          "stop" options:
-          - -multi (and -xfalmulti) takes more than one file as argument, but
-            should be executed only once.
-          - stop after sending one ROM to a copier ("multizip")
-          - stop after applying a patch so that the patch file won't be
-            interpreted as ROM
-        */
-        if (ucon64.flags & WF_STOP)
-          break;
-      }
-
-  if (!opts) // no options => just display ROM info
-    {
-      ucon64.flags = WF_DEFAULT;
-      // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
-      if (ucon64_rom_handling () == -1)
-        return -1; // no rom, but WF_NO_ROM
-    }
-
-  fflush (stdout);
-
-  return 0;
-}
-
-
-int
-ucon64_rom_handling (void)
-{
-  int no_rom = 0;
-  static st_ucon64_nfo_t nfo;
-  struct stat fstate;
-
-  ucon64_clear_nfo (&nfo);
-
-  // a ROM (file)?
-  if (!ucon64.fname)
-    no_rom = 1;
-  else if (!ucon64.fname[0])
-    no_rom = 1;
-  else if (access (ucon64.fname, F_OK | R_OK) == -1 && (!(ucon64.flags & WF_NO_ROM)))
-    {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.fname);
-      no_rom = 1;
-    }
-  else if (stat (ucon64.fname, &fstate) == -1)
-    no_rom = 1;
-  else if (S_ISREG (fstate.st_mode) != TRUE)
-    no_rom = 1;
-#if 0
-  // printing the no_rom error message for files of 0 bytes only confuses people
-  else if (!fstate.st_size)
-    no_rom = 1;
-#endif
-
-  if (no_rom)
-    {
-      if (!(ucon64.flags & WF_NO_ROM))
-        {
-          fputs ("ERROR: This option requires a file argument (ROM/image/SRAM file/directory)\n", stderr);
-          return -1;
-        }
+      if (ucon64_func)
+        return ucon64_func (&ucon64);
       return 0;
     }
 
-  // The next statement is important and should be executed as soon as
-  //  possible (and sensible) in this function
-  if ((ucon64.file_size = fsizeof (ucon64.fname)) < 0)
+  for (i = 0; ucon64_fname[i]; i++)
     {
-      fprintf (stderr, "ERROR: Could not determine size of %s\n", ucon64.fname);
-      return -1;
-    }
-  // We have to do this here, because we don't know the file size until now
-  if (ucon64.backup_header_len != UCON64_UNKNOWN)
-    if (ucon64.backup_header_len > ucon64.file_size)
-      {
-        fprintf (stderr,
-                 "ERROR: A backup unit header length was specified that is larger than the file\n"
-                 "       size (%d > %d)\n", ucon64.backup_header_len, ucon64.file_size);
-        return -1;
-      }
+      ucon64.fname = ucon64_fname[i];
+      ucon64.split = UCON64_UNKNOWN;
+      ucon64.crc32 = ucon64.fcrc32 = 0;
+      ucon64_flags = WF_DEMUX|WF_OPEN|WF_NFO;
 
-  if (!(ucon64.flags & WF_INIT))
-    return 0;
+#warning TODO: unzip into a temp dir
 
-  // Try to find the correct console by analysing the ROM
-  if (ucon64.flags & WF_PROBE)
-    {
-      if (ucon64.nfo)
-        {
-          // Restore any overrides from st_ucon64_t
-          // We have to do this *before* calling ucon64_probe(), *not* afterwards
-          if (ucon64.backup_header_len != UCON64_UNKNOWN)
-            nfo.backup_header_len = ucon64.backup_header_len;
+      if (ucon64.console == UCON64_UNKNOWN)
+        if (ucon64_flags & WF_DEMUX)
+          ucon64.console = ucon64_console_demux (ucon64.fname);
 
-          if (ucon64.interleaved != UCON64_UNKNOWN)
-            nfo.interleaved = ucon64.interleaved;
-
-//          ucon64.nfo = (st_ucon64_nfo_t *) &nfo;
-        }
-      ucon64.nfo = ucon64_probe (&nfo); // determines console type
-    }
-  // end of WF_PROBE
-
-  // Does the option allow split ROMs?
-  if (ucon64.flags & WF_NO_SPLIT)
-    /*
-      Test for split files only if the console type knows about split files at
-      all. However we only know the console type after probing.
-    */
-    if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
-        ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
-      if ((ucon64.split != UCON64_UNKNOWN) ? ucon64.split : ucon64_testsplit (ucon64.fname, NULL))
-        {
-          fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
-                   basename2 (ucon64.fname));
-          return -1;
-        }
-
-
-  /*
-    CRC32
-
-    Calculating the CRC32 checksum for the ROM data of a UNIF file (NES)
-    shouldn't be done with ucon64_fcrc32(). nes_init() uses crc32().
-    The CRC32 checksum is used to search in the DAT files, but at the time
-    of this writing (Februari the 7th 2003) all DAT files contain checksums
-    of files in only one format. This matters for SNES and Genesis ROMs in
-    interleaved format and Nintendo 64 ROMs in non-interleaved format. The
-    corresponding initialization functions calculate the CRC32 checksum of
-    the data in the format of which the checksum is stored in the DAT
-    files. For these "problematic" files, their "real" checksum is stored
-    in ucon64.fcrc32.
-  */
-  if (ucon64.crc32 == 0)
-    if (!(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
-      ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
-
-
-  // DATabase
-  ucon64.dat = NULL;
-  if (ucon64.crc32 != 0 && ucon64.dat_enabled)
-    {
-      ucon64.dat = ucon64_dat_search (ucon64.crc32, NULL);
-      if (ucon64.dat)
-        {
-          // detected file size must match DAT file size
-          int size = ucon64.nfo ?
-                       (ucon64.nfo->data_size != UCON64_UNKNOWN) ?
-                         ucon64.nfo->data_size :
-                         ucon64.file_size - ucon64.nfo->backup_header_len :
-                       ucon64.file_size;
-          if ((int) (((st_ucon64_dat_t *) ucon64.dat)->fsize) != size)
-            ucon64.dat = NULL;
-        }
-
-      if (ucon64.dat)
+      if (ucon64_flags & WF_OPEN)
+        ucon64.nfo = ucon64_console_open (ucon64.fname, ucon64.console);
+    
+      if (!ucon64.nfo)
+        if (ucon64_flags & WF_NEEDS_ROM)
+          {
+            fputs ("ERROR: This option requires a file argument (ROM/image/SRAM file/directory)\n", stderr);
+            return -1;
+          }
+    
+      // Does the option allow split ROMs?
+      if (ucon64_flags & WF_NO_SPLIT)
         switch (ucon64.console)
           {
-          case UCON64_SNES:
-          case UCON64_GEN:
-          case UCON64_GB:
-          case UCON64_GBA:
-          case UCON64_N64:
-            // These ROMs have internal headers with name, country, maker, etc.
-            break;
-
-          default:
-            // Use ucon64.dat instead of ucon64.dat_enabled in case the index
-            //  file could not be created/opened -> no segmentation fault
-            if (ucon64.dat && ucon64.nfo)
-              {
-                if (!ucon64.nfo->name[0])
-                  strcpy (ucon64.nfo->name,
-                          (((st_ucon64_dat_t *) ucon64.dat)->name ?
-                           ((st_ucon64_dat_t *) ucon64.dat)->name :
-                           ""));
-                else if (ucon64.console == UCON64_NES)
-                  { // override the three-character FDS or FAM name
-                    int t = nes_get_file_type ();
-                    if (t == FDS || t == FAM)
-                      strcpy (ucon64.nfo->name,
-                              (((st_ucon64_dat_t *) ucon64.dat)->name ?
-                               ((st_ucon64_dat_t *) ucon64.dat)->name :
-                               ""));
-                  }
-
-                if (!ucon64.nfo->country)
-                  ucon64.nfo->country = (((st_ucon64_dat_t *) ucon64.dat)->country ?
-                                         ((st_ucon64_dat_t *) ucon64.dat)->country :
-                                         "");
-              }
-            break;
+            /*
+              Test for split files only if the console type knows about split files at
+              all. However we only know the console type after probing.
+            */
+            case UCON64_NES:
+            case UCON64_SNES:
+            case UCON64_GEN:
+            case UCON64_NG:
+              if (ucon64.split == UCON64_UNKNOWN)
+                ucon64.split = ucon64_testsplit (ucon64.fname, NULL);
+              if (ucon64.split)
+                {
+                  fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
+                           basename2 (ucon64.fname));
+                  return -1;
+                }
+              break;
           }
-    }
+    
+      // CRC32 calculation
+      if (ucon64_flags & WF_NEEDS_CRC32)
+        {
+#warning fcrc32 == raw_crc32?
+          ucon64_chksum (NULL, NULL, &ucon64.fcrc32, ucon64.fname, 0);
+          ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo->backup_header_len);
+        }
+    
+      // DATabase
+      if (ucon64.dat_enabled)
+        if (ucon64.crc32)
+          ucon64.dat = ucon64_dat_search (ucon64.crc32, NULL);
+    
+      // display info
+      if ((ucon64_flags & WF_NFO) && ucon64.quiet < 1)
+        {
+          printf ("%s\n", ucon64.fname);
+        
+          if (ucon64.nfo)
+            {
+              ucon64_rom_nfo (ucon64.nfo);
+        
+              if (ucon64.crc32)
+                printf ("ROM checksum (CRC32): 0x%08x\n", ucon64.crc32);
+        
+              if (ucon64.dat)
+                ucon64_dat_nfo (ucon64.dat, 1);
+            }
+          else
+            fprintf (stderr, "%s\n", ucon64_msg[CONSOLE_ERROR]);
 
-  // display info
-  if ((ucon64.flags & WF_NFO) && ucon64.quiet < 1)
-    ucon64_nfo ();
+          printf ("File checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
+
+          fputc ('\n', stdout);
+        }
+        
+      if (ucon64_func)
+        if (ucon64_func (&ucon64) == -1)
+          {
+            const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
+            const char *opt = p ? p->name : NULL;
+        
+            fprintf (stderr, "ERROR: %s%s encountered a problem\n"
+                             "       Is the option you used available for the current console system?\n"
+                             "       Please report bugs to ucon64-main@lists.sf.net or http://ucon64.sf.net\n\n",
+                             opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
+                             opt ? opt : "uCON64");
+        
+            return -1;
+          }
+
+#warning TODO
+//      if (ucon64.dat)
+//        ucon64_dat_close (ucon64.dat);
+
+      ucon64_console_close (ucon64.nfo);
+
+      if (ucon64_flags & WF_EXIT)
+        return 0; // do not process any other ROMs
+    }
 
   return 0;
-}
-
-
-st_ucon64_nfo_t *
-ucon64_probe (st_ucon64_nfo_t * nfo)
-{
-  typedef struct
-    {
-      int console;
-      int (*init) (st_ucon64_nfo_t *);
-      uint32_t flags;
-    } st_probe_t;
-
-// auto recognition
-#define AUTO 1
-
-  int x = 0;
-  st_probe_t probe[] =
-    {
-      /*
-        The order of the init functions is important. snes_init() must be
-        called before nes_init(), but after gb_init() and sms_init().
-        sms_init() must be called before snes_init(), but after genesis_init().
-        There may be more dependencies, so don't change the order unless you
-        can verify it won't break anything.
-      */
-      {UCON64_GBA, gba_init, AUTO},
-      {UCON64_N64, n64_init, AUTO},
-      {UCON64_GEN, genesis_init, AUTO},
-      {UCON64_LYNX, lynx_init, AUTO},
-      {UCON64_GB, gb_init, AUTO},
-      {UCON64_SMS, sms_init, AUTO},
-      {UCON64_COLECO, coleco_init, AUTO},
-      {UCON64_SNES, snes_init, AUTO},
-      {UCON64_NES, nes_init, AUTO},
-      {UCON64_NGP, ngp_init, AUTO},
-      {UCON64_SWAN, swan_init, AUTO},
-      {UCON64_JAG, jaguar_init, AUTO},
-      {UCON64_ATA, atari_init, AUTO},
-      {UCON64_NDS, nds_init, AUTO},
-      {UCON64_VBOY, vboy_init, 0},
-      {UCON64_PCE, pce_init, 0}, // AUTO still works with non-PCE files
-      {UCON64_SWAN, swan_init, 0},
-      {UCON64_DC, dc_init, 0},
-#if 0
-      {UCON64_GC, NULL, 0},
-      {UCON64_GP32, NULL, 0},
-      {UCON64_INTELLI, NULL, 0},
-      {UCON64_S16, NULL, 0},
-      {UCON64_VEC, NULL, 0},
-#endif
-      {UCON64_UNKNOWN, unknown_console_init, 0},
-      {0, NULL, 0}
-    };
-
-  if (ucon64.console != UCON64_UNKNOWN)         // force recognition option was used
-    {
-      for (x = 0; probe[x].console != 0; x++)
-        if (probe[x].console == ucon64.console)
-          {
-            ucon64_clear_nfo (nfo);
-
-            probe[x].init (nfo);
-
-            return nfo;
-          }
-    }
-  else if (ucon64.file_size <= MAXROMSIZE)      // give auto recognition a try
-    {
-      for (x = 0; probe[x].console != 0; x++)
-        if (probe[x].flags & AUTO)
-          {
-            ucon64_clear_nfo (nfo);
-
-            if (!probe[x].init (nfo))
-              {
-                ucon64.console = probe[x].console;
-                return nfo;
-              }
-          }
-    }
-
-  return NULL;
 }
 
 
 int
-ucon64_nfo (void)
+ucon64_switches (st_ucon64_t *p)
 {
-  puts (ucon64.fname);
-  if (ucon64.fname_arch[0])
-    printf ("  (%s)\n", ucon64.fname_arch);
-  fputc ('\n', stdout);
-  if (ucon64.console == UCON64_UNKNOWN)
-    fprintf (stderr, "%s\n", ucon64_msg[CONSOLE_ERROR]);
+  switch (p->option)
+    {
+    case UCON64_FRONTEND:
+      ucon64.frontend = 1;                      // used by (for example) ucon64_gauge()
+      break;
 
-  if (ucon64.nfo && ucon64.console != UCON64_UNKNOWN)
-    ucon64_rom_nfo (ucon64.nfo);
+    case UCON64_NBAK:
+      ucon64.backup = 0;
+      break;
 
-  // Use ucon64.fcrc32 for SNES, Genesis & SMS interleaved/N64 non-interleaved
-  if (ucon64.fcrc32 && ucon64.crc32)
-    printf ("Search checksum (CRC32): 0x%08x\n"
-            "Data checksum (CRC32): 0x%08x\n", ucon64.crc32, ucon64.fcrc32);
-  else if (ucon64.fcrc32 || ucon64.crc32)
-    printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);
+    case UCON64_R:
+      ucon64.recursive = 1;
+      break;
 
-  // The check for the size of the file is made, so that uCON64 won't display a
-  //  (nonsense) DAT info line when dumping a ROM (file doesn't exist, so
-  //  ucon64.file_size is 0).
-  if (ucon64.file_size > 0 && ucon64.dat_enabled)
-    if (ucon64.dat)
-      ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
+#ifdef  USE_ANSI_COLOR
+    case UCON64_NCOL:
+      ucon64.ansi_color = 0;
+      break;
+#endif
 
-  fputc ('\n', stdout);
+    case UCON64_NS:
+      ucon64.split = 0;
+      break;
+
+    case UCON64_HD:
+      ucon64.backup_header_len = MIN (UNKNOWN_BACKUP_HEADER_LEN, fsizeof (ucon64.fname));
+      break;
+
+    case UCON64_HDN:
+      ucon64.backup_header_len = MIN (strtol (p->optarg, NULL, 10), fsizeof (ucon64.fname));
+      break;
+
+    case UCON64_NHD:
+      ucon64.backup_header_len = 0;
+      break;
+
+    case UCON64_SWP:                            // deprecated
+    case UCON64_INT:
+      ucon64.interleaved = 1;
+      break;
+
+    case UCON64_INT2:
+      ucon64.interleaved = 2;
+      break;
+
+    case UCON64_NSWP:                           // deprecated
+    case UCON64_NINT:
+      ucon64.interleaved = 0;
+      break;
+
+    case UCON64_PATCH:
+      ucon64.patch = p->optarg;
+      break;
+
+    case UCON64_PORT:
+#ifdef  USE_USB
+      if (!strnicmp (p->optarg, "usb", 3))
+        {
+          if (strlen (p->optarg) >= 4)
+            ucon64.usbport = strtol (p->optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
+          else                                  // we automatically detect the
+            ucon64.usbport = 1;                 //  USB port in the F2A code
+
+          /*
+            We don't want to make uCON64 behave different if --port=USB{n} is
+            specified *after* a transfer option (instead of before one), so we
+            have to reset ucon64.parport_needed here.
+          */
+          ucon64.parport_needed = 0;
+        }
+      else
+#endif
+        ucon64.parport = strtol (p->optarg, NULL, 16);
+      break;
+
+#ifdef  USE_PARALLEL
+    /*
+      We detect the presence of these options here so that we can drop
+      privileges ASAP.
+      Note that the libcd64 options are not listed here. We cannot drop
+      privileges before libcd64 is initialised (after cd64_t.devopen() has been
+      called).
+    */
+    case UCON64_XCMC:
+    case UCON64_XCMCT:
+    case UCON64_XDEX:
+    case UCON64_XDJR:
+    case UCON64_XF2A:                           // could be for USB version
+    case UCON64_XF2AMULTI:                      // idem
+    case UCON64_XF2AC:                          // idem
+    case UCON64_XF2AS:                          // idem
+    case UCON64_XF2AB:                          // idem
+    case UCON64_XFAL:
+    case UCON64_XFALMULTI:
+    case UCON64_XFALC:
+    case UCON64_XFALS:
+    case UCON64_XFALB:
+    case UCON64_XFIG:
+    case UCON64_XFIGS:
+    case UCON64_XFIGC:
+    case UCON64_XGBX:
+    case UCON64_XGBXS:
+    case UCON64_XGBXB:
+    case UCON64_XGD3:
+    case UCON64_XGD3R:
+    case UCON64_XGD3S:
+    case UCON64_XGD6:
+    case UCON64_XGD6R:
+    case UCON64_XGD6S:
+    case UCON64_XGG:
+    case UCON64_XGGS:
+    case UCON64_XGGB:
+    case UCON64_XLIT:
+    case UCON64_XMCCL:
+    case UCON64_XMCD:
+    case UCON64_XMD:
+    case UCON64_XMDS:
+    case UCON64_XMDB:
+    case UCON64_XMSG:
+    case UCON64_XPCE:
+    case UCON64_XPL:
+    case UCON64_XPLI:
+    case UCON64_XRESET:
+    case UCON64_XSF:
+    case UCON64_XSFS:
+    case UCON64_XSMC:
+    case UCON64_XSMCR:
+    case UCON64_XSMD:
+    case UCON64_XSMDS:
+    case UCON64_XSWC:
+    case UCON64_XSWC2:
+    case UCON64_XSWCR:
+    case UCON64_XSWCS:
+    case UCON64_XSWCC:
+    case UCON64_XV64:
+#ifdef  USE_USB
+      if (!ucon64.usbport)                      // no pport I/O if F2A option and USB F2A
+#endif
+      ucon64.parport_needed = 1;
+      /*
+        We want to make this possible:
+          1.) ucon64 <transfer option> <rom>
+          2.) ucon64 <transfer option> <rom> --port=<parallel port address>
+        The above works "automatically". The following type of command used to
+        be possible, but has been deprecated:
+          3.) ucon64 <transfer option> <rom> <parallel port address>
+        It has been removed, because it caused problems when specifying additional
+        switches without specifying the parallel port address. For example:
+          ucon64 -xfal -xfalm <rom>
+        This would be interpreted as:
+          ucon64 -xfal -xfalm <rom as file> <rom as parallel port address>
+        If <rom> has a name that starts with a number an I/O port associated
+        with that number will be accessed which might well have unwanted
+        results. We cannot check for valid I/O port numbers, because the I/O
+        port of the parallel port can be mapped to almost any 16-bit number.
+      */
+#if 0
+      if (ucon64.parport == UCON64_UNKNOWN)
+        if (ucon64.argc >= 4)
+          if (access (ucon64.argv[ucon64.argc - 1], F_OK))
+            // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
+            //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
+            ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
+#endif
+      break;
+
+#ifdef  USE_LIBCD64
+    case UCON64_XCD64:
+    case UCON64_XCD64B:
+    case UCON64_XCD64C:
+    case UCON64_XCD64E:
+    case UCON64_XCD64F:
+    case UCON64_XCD64M:
+    case UCON64_XCD64S:
+      // We don't really need the parallel port. We just have to make sure that
+      //  privileges aren't dropped.
+      ucon64.parport_needed = 2;
+      break;
+
+    case UCON64_XCD64P:
+      ucon64.io_mode = strtol (p->optarg, NULL, 10);
+      break;
+#endif
+
+    case UCON64_XCMCM:
+      ucon64.io_mode = strtol (p->optarg, NULL, 10);
+      break;
+
+    case UCON64_XFALM:
+    case UCON64_XGBXM:
+    case UCON64_XPLM:
+      ucon64.parport_mode = UCON64_EPP;
+      break;
+
+    case UCON64_XSWC_IO:
+      ucon64.io_mode = strtol (p->optarg, NULL, 16);
+
+      if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
+        puts ("WARNING: I/O mode not yet implemented");
+#if 0 // all these constants are defined by default
+      if (ucon64.io_mode & (SWC_IO_SPC7110 | SWC_IO_SDD1 | SWC_IO_SA1 | SWC_IO_MMX2))
+        puts ("WARNING: Be sure to compile swc.c with the appropriate constants defined");
+#endif
+
+      if (ucon64.io_mode > SWC_IO_MAX)
+        {
+          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.io_mode);
+          ucon64.io_mode = 0;
+        }
+      else
+        {
+          printf ("I/O mode: 0x%03x", ucon64.io_mode);
+          if (ucon64.io_mode)
+            {
+              char flagstr[100];
+
+              flagstr[0] = 0;
+              if (ucon64.io_mode & SWC_IO_FORCE_32MBIT)
+                strcat (flagstr, "force 32 Mbit dump, ");
+              if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
+                strcat (flagstr, "alternative ROM size method, ");
+              if (ucon64.io_mode & SWC_IO_SUPER_FX)
+                strcat (flagstr, "Super FX, ");
+              if (ucon64.io_mode & SWC_IO_SDD1)
+                strcat (flagstr, "S-DD1, ");
+              if (ucon64.io_mode & SWC_IO_SA1)
+                strcat (flagstr, "SA-1, ");
+              if (ucon64.io_mode & SWC_IO_SPC7110)
+                strcat (flagstr, "SPC7110, ");
+              if (ucon64.io_mode & SWC_IO_DX2_TRICK)
+                strcat (flagstr, "DX2 trick, ");
+              if (ucon64.io_mode & SWC_IO_MMX2)
+                strcat (flagstr, "Mega Man X 2, ");
+              if (ucon64.io_mode & SWC_IO_DUMP_BIOS)
+                strcat (flagstr, "dump BIOS, ");
+
+              if (flagstr[0])
+                flagstr[strlen (flagstr) - 2] = 0;
+              printf (" (%s)", flagstr);
+            }
+          fputc ('\n', stdout);
+        }
+      break;
+#endif // USE_PARALLEL
+
+    case UCON64_O:
+      {
+        struct stat fstate;
+        int dir = 0;
+
+        if (!stat (p->optarg, &fstate))
+          if (S_ISDIR (fstate.st_mode))
+            {
+              strcpy (ucon64.output_path, p->optarg);
+              if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
+                strcat (ucon64.output_path, FILE_SEPARATOR_S);
+              dir = 1;
+            }
+
+        if (!dir)
+          puts ("WARNING: Argument for -o must be a directory. Using current directory instead");
+      }
+      break;
+
+    case UCON64_NHI:
+      ucon64.snes_hirom = 0;
+      break;
+
+    case UCON64_HI:
+      ucon64.snes_hirom = SNES_HIROM;
+      break;
+
+    case UCON64_EROM:
+      ucon64.snes_header_base = SNES_EROM;
+      break;
+
+    case UCON64_BS:
+      ucon64.bs_dump = 1;
+      break;
+
+    case UCON64_NBS:
+      ucon64.bs_dump = 0;
+      break;
+
+    case UCON64_CTRL:
+      if (ucon64.controller != UCON64_UNKNOWN)
+        ucon64.controller |= 1 << strtol (p->optarg, NULL, 10);
+      else
+        ucon64.controller = 1 << strtol (p->optarg, NULL, 10);
+      break;
+
+    case UCON64_CTRL2:
+      if (ucon64.controller2 != UCON64_UNKNOWN)
+        ucon64.controller2 |= 1 << strtol (p->optarg, NULL, 10);
+      else
+        ucon64.controller2 = 1 << strtol (p->optarg, NULL, 10);
+      break;
+
+    case UCON64_NTSC:
+      if (ucon64.tv_standard == UCON64_UNKNOWN)
+        ucon64.tv_standard = 0;
+      else if (ucon64.tv_standard == 1)
+        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
+      break;
+
+    case UCON64_PAL:
+      if (ucon64.tv_standard == UCON64_UNKNOWN)
+        ucon64.tv_standard = 1;
+      else if (ucon64.tv_standard == 0)
+        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
+      break;
+
+    case UCON64_BAT:
+      ucon64.battery = 1;
+      break;
+
+    case UCON64_NBAT:
+      ucon64.battery = 0;
+      break;
+
+    case UCON64_VRAM:
+      ucon64.vram = 1;
+      break;
+
+    case UCON64_NVRAM:
+      ucon64.vram = 0;
+      break;
+
+    case UCON64_MIRR:
+      ucon64.mirror = strtol (p->optarg, NULL, 10);
+      break;
+
+    case UCON64_MAPR:
+      ucon64.mapr = p->optarg;                     // pass the _string_, it can be a
+      break;                                    //  board name
+
+    case UCON64_CMNT:
+      ucon64.comment = p->optarg;
+      break;
+
+    case UCON64_DUMPINFO:
+      ucon64.use_dump_info = 1;
+      ucon64.dump_info = p->optarg;
+      break;
+
+    case UCON64_Q:
+    case UCON64_QQ:                             // for now -qq is equivalent to -q
+      ucon64.quiet = 1;
+      break;
+
+    case UCON64_V:
+      ucon64.quiet = -1;
+      break;
+
+    case UCON64_SSIZE:
+      ucon64.part_size = strtol (p->optarg, NULL, 10) * MBIT;
+      break;
+
+    case UCON64_ID:
+      ucon64.id = -2;                           // just a value other than
+      break;                                    //  UCON64_UNKNOWN and smaller than 0
+
+    case UCON64_IDNUM:
+      ucon64.id = strtol (p->optarg, NULL, 10);
+      if (ucon64.id < 0)
+        ucon64.id = 0;
+      else if (ucon64.id > 999)
+        {
+          fprintf (stderr, "ERROR: NUM must be smaller than 999\n");
+          exit (1);
+        }
+      break;
+
+    case UCON64_REGION:
+      if (p->optarg[1] == 0 && toupper (p->optarg[0]) == 'X') // be insensitive to case
+        ucon64.region = 256;
+      else
+        ucon64.region = strtol (p->optarg, NULL, 10);
+      break;
+
+    default:
+      break;
+    }
 
   return 0;
-}
-
-
-static inline char *
-to_func (char *s, int len, int (*func) (int))
-{
-  char *p = s;
-
-  for (; len > 0; p++, len--)
-    *p = func (*p);
-
-  return s;
-}
-
-
-static inline int
-toprint (int c)
-{
-  if (isprint (c))
-    return c;
-
-  // characters that also work with printf()
-#ifdef  USE_ANSI_COLOR
-  if (c == '\x1b')
-    return ucon64.ansi_color ? c : '.';
-#endif
-
-  return strchr ("\t\n\r", c) ? c : '.';
-}
-
-
-void
-ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
-{
-  unsigned int padded = ucon64_testpad (ucon64.fname),
-               intro = ((ucon64.file_size - nfo->backup_header_len) > MBIT) ?
-                         ((ucon64.file_size - nfo->backup_header_len) % MBIT) : 0;
-  int x, split = (ucon64.split != UCON64_UNKNOWN) ?
-                 ucon64.split :
-                 ucon64_testsplit (ucon64.fname, NULL);
-  char buf[MAXBUFSIZE];
-
-  // backup unit header
-  if (nfo->backup_header && nfo->backup_header_len && nfo->backup_header_len != UNKNOWN_BACKUP_HEADER_LEN)
-    {
-      dumper (stdout, nfo->backup_header, nfo->backup_header_len, nfo->backup_header_start, DUMPER_HEX);
-      fputc ('\n', stdout);
-    }
-  else
-    if (nfo->backup_header_len && ucon64.quiet < 0)
-      {
-        ucon64_dump (stdout, ucon64.fname, nfo->backup_header_start, nfo->backup_header_len, DUMPER_HEX);
-        fputc ('\n', stdout);
-      }
-
-  // backup unit type?
-  if (nfo->backup_usage != NULL)
-    {
-      puts (nfo->backup_usage);
-      fputc ('\n', stdout);
-    }
-
-  // ROM header
-  if (nfo->header && nfo->header_len)
-    {
-      dumper (stdout, nfo->header, nfo->header_len,
-        nfo->header_start + nfo->backup_header_len, DUMPER_HEX);
-      fputc ('\n', stdout);
-    }
-
-  // console type
-  if (nfo->console_usage != NULL)
-    puts (nfo->console_usage);
-
-  // name, maker, country and size
-  strcpy (buf, (nfo->name ? nfo->name : ""));
-  x = (nfo->data_size != UCON64_UNKNOWN) ?
-      nfo->data_size :
-      ucon64.file_size - nfo->backup_header_len;
-
-  printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
-          // some ROMs have a name with control chars in it -> replace control chars
-          to_func (buf, strlen (buf), toprint),
-          (nfo->maker ? nfo->maker : ""),
-          (nfo->country ? nfo->country : ""),
-          x,
-          TOMBIT_F (x));
-
-  // padded?
-  if (!padded)
-    puts ("Padded: No");
-  else
-    printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded, TOMBIT_F (padded));
-
-  // intro, trainer?
-  // nes.c determines itself whether or not there is a trainer
-  if (intro && ucon64.console != UCON64_NES)
-    printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
-
-  // interleaved?
-  if (nfo->interleaved != UCON64_UNKNOWN)
-    // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
-    //  nonsense for others
-    printf ("Interleaved/Swapped: %s\n",
-      nfo->interleaved ?
-        (nfo->interleaved > 1 ? "Yes (2)" : "Yes") :
-        "No");
-
-  // backup unit header?
-  if (nfo->backup_header_len)
-    printf ("Backup unit/emulator header: Yes, %d Bytes\n",
-      nfo->backup_header_len);
-  else
-// for NoisyB: <read only mode ON>
-    puts ("Backup unit/emulator header: No");   // printing No is handy for SNES ROMs
-// for NoisyB: <read only mode OFF>
-
-  // split?
-  if (split)
-    {
-      printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
-      // nes.c calculates the correct checksum for split ROMs (=Pasofami
-      // format), so there is no need to join the files
-      if (ucon64.console != UCON64_NES)
-        puts ("NOTE: To get the correct checksum the ROM parts must be joined");
-    }
-
-  // miscellaneous info
-  if (nfo->misc[0])
-    {
-      strcpy (buf, nfo->misc);
-      printf ("%s\n", to_func (buf, strlen (buf), toprint));
-    }
-
-  // internal checksums?
-  if (nfo->has_internal_crc)
-    {
-      char *fstr;
-
-      // the internal checksum of GBA ROMS stores only the checksum of the
-      //  internal header
-      if (ucon64.console != UCON64_GBA)
-        fstr = "Checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)\n";
-      else
-        fstr = "Header checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)\n";
-
-      sprintf (buf, fstr,
-        nfo->internal_crc_len * 2, nfo->internal_crc_len * 2);
-#ifdef  USE_ANSI_COLOR
-      printf (buf,
-        ucon64.ansi_color ?
-          ((nfo->current_internal_crc == nfo->internal_crc) ?
-            "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
-          :
-          ((nfo->current_internal_crc == nfo->internal_crc) ? "Ok" : "Bad"),
-        nfo->current_internal_crc,
-        (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
-        nfo->internal_crc);
-#else
-      printf (buf,
-        (nfo->current_internal_crc == nfo->internal_crc) ? "Ok" : "Bad",
-        nfo->current_internal_crc,
-        (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
-        nfo->internal_crc);
-#endif
-
-      if (nfo->internal_crc2[0])
-        printf ("%s\n", nfo->internal_crc2);
-    }
-
-  fflush (stdout);
 }
 
 
@@ -1364,6 +1182,8 @@ ucon64_usage (int argc, char *argv[], int view)
 #endif
 
   // single usage
+#warning fix usage display for a single console
+#if 0
   for (x = 0; arg[x].val; x++)
     if (arg[x].console) // IS console
       for (y = 0; option[y]; y++)
@@ -1375,6 +1195,7 @@ ucon64_usage (int argc, char *argv[], int view)
                 single = 1;
                 break;
               }
+#endif
 
   if (!single)
     switch (view)
@@ -1450,11 +1271,11 @@ ucon64_usage (int argc, char *argv[], int view)
 }
 
 
-#ifdef  TEST_CMDLINE
+#ifdef  TEST_UCON64
 void
 ucon64_test (void)
 {
-  st_test_cmdline_t t[] =
+  st_test_t t[] =
     {
       {UCON64_1991,	"ucon64 -1991 /tmp/test/test.smd;"
                         "ucon64 -gen test.smd;"
@@ -1796,6 +1617,6 @@ TEST_BREAK
   }              
 #endif
 
-  test_cmdline (t);
+  test (t);
 }
 #endif

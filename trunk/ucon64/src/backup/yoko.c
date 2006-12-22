@@ -36,8 +36,7 @@ const st_getopt2_t yoko_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "YOKO backup unit",
-      NULL
+      NULL, "YOKO backup unit"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };

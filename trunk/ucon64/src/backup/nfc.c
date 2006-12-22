@@ -37,8 +37,7 @@ const st_getopt2_t nfc_usage[] =
     {
       NULL, 0, 0, 0,
       NULL, "Neo Flash Card"
-      /* "2005 NEO Flash Team http://www.neoflash.com" */,
-      NULL
+      /* "2005 NEO Flash Team http://www.neoflash.com" */
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };

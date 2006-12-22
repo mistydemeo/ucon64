@@ -76,7 +76,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "itypes.h"
 #include "parallel.h"
 #include "getopt2.h"
-#include "ucon64.h"
 
 
 #if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
@@ -977,15 +976,4 @@ parport_close (int parport)
 }
 
 
-void
-parport_print_info (void)
-{
-#ifdef  USE_PPDEV
-  printf ("Using parallel port device: %s\n", ucon64.parport_dev);
-#elif   defined AMIGA
-  printf ("Using parallel port device: %s, port %d\n", ucon64.parport_dev, ucon64.parport);
-#else
-  printf ("Using I/O port base address: 0x%x\n", ucon64.parport);
-#endif
-}
 #endif // USE_PARALLEL

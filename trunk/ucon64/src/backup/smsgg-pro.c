@@ -39,41 +39,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smsgg-pro.h"
 
 
-static st_ucon64_obj_t smsggpro_obj[] =
-  {
-    {UCON64_SMS, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
-    {UCON64_SMS, WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t smsggpro_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "SMS-PRO/GG-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
-      NULL
+      NULL, "SMS-PRO/GG-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xgg", 0, 0, UCON64_XGG,
       NULL, "send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically (32 Mbits) when ROM does not exist",
-      &smsggpro_obj[0]
+      "receives automatically (32 Mbits) when ROM does not exist"
     },
     {
       "xggs", 0, 0, UCON64_XGGS,
       NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &smsggpro_obj[1]
+      "receives automatically when SRAM does not exist"
     },
     {
       "xggb", 1, 0, UCON64_XGGB,
       "BANK", "send/receive SRAM to/from SMS-PRO/GG-PRO BANK\n"
       "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &smsggpro_obj[1]
+      "receives automatically when SRAM does not exist"
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

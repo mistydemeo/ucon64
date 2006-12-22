@@ -39,27 +39,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "pce-pro.h"
 
 
-static st_ucon64_obj_t pcepro_obj[] =
-  {
-    {UCON64_PCE, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}
-  };
-
 const st_getopt2_t pcepro_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "PCE-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
-      NULL
+      NULL, "PCE-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xpce", 0, 0, UCON64_XPCE,
       NULL, "send/receive ROM to/from PCE-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically (32 Mbits) when ROM does not exist",
-      &pcepro_obj[0]
+      "receives automatically (32 Mbits) when ROM does not exist"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

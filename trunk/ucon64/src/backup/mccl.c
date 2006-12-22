@@ -75,26 +75,19 @@ Data Read Procedure:
 #include "misc/parallel.h"
 
 
-static st_ucon64_obj_t mccl_obj[] =
-  {
-    {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t mccl_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Mad Catz Camera Link (Game Boy Camera)"/*"XXXX Mad Catz Inc. http://www.madcatz.com"*/,
-      NULL
+      NULL, "Mad Catz Camera Link (Game Boy Camera)"/*"XXXX Mad Catz Inc. http://www.madcatz.com"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xmccl", 0, 0, UCON64_XMCCL,
-      NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT",
-      &mccl_obj[0]
+      NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

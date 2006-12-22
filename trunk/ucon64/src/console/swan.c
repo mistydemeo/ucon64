@@ -37,30 +37,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static int swan_chksum (unsigned char *rom_buffer);
 
-static st_ucon64_obj_t swan_obj[] =
-  {
-    {0, WF_DEFAULT},
-    {UCON64_SWAN, WF_SWITCH}
-  };
 
 const st_getopt2_t swan_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "WonderSwan/WonderSwan Color/SwanCrystal"/*"1999/2000/2002 Bandai"*/,
-      NULL
+      NULL, "WonderSwan/WonderSwan Color/SwanCrystal"/*"1999/2000/2002 Bandai"*/
     },
     {
       UCON64_SWAN_S, 0, 0, UCON64_SWAN,
-      NULL, "force recognition",
-      &swan_obj[1]
+      NULL, "force recognition"
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum",
-      &swan_obj[0]
+      NULL, "fix ROM checksum"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
 };
 
 
@@ -87,7 +79,7 @@ swan_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte
 
   ucon64_fread (buf, SWAN_HEADER_START + 8, 2, dest_name);
-  dumper (stdout, buf, 2, SWAN_HEADER_START + 8, DUMPER_HEX);
+  dumper (stdout, buf, 2, SWAN_HEADER_START + 8, 0);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;

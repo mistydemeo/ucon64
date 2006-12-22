@@ -33,29 +33,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cc2.h"
 
 
-#if 0
-static st_ucon64_obj_t cc2_obj[] =
-  {
-    {UCON64_ATA, WF_STOP | WF_NO_ROM}
-  };
-#endif
-
 const st_getopt2_t cc2_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Cuttle Card (2)",/*"2001 Shell's Electronic http://www.shells.com"*/
-      NULL
+      NULL, "Cuttle Card (2)"/*"2001 Shell's Electronic http://www.shells.com"*/
     },
 #if 0
     {
       "xcc2", 0, 0, UCON64_XCC2,
       NULL, "send/receive ROM to/from Cuttle Card (2)\n"
       "actually Cuttle Card (2) backup units use audio\n"
-      "input/output to transfer ROMs",
-      &cc2_obj[0]
+      "input/output to transfer ROMs"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 

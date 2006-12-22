@@ -44,47 +44,44 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // maximum number of arguments uCON64 takes from the cmdline
 #define UCON64_MAX_ARGS 512
 
-#define UCON64_OPTION 1000
-#define UCON64_CONSOLE 0
 
+/*
+  uCON64 workflow flags
 
-// options (consoles)
-enum
-{
-  UCON64_3DO = UCON64_CONSOLE + 1,
-  UCON64_ATA,
-  UCON64_CD32,
-  UCON64_CDI,
-  UCON64_COLECO,
-  UCON64_DC,
-  UCON64_GB,
-  UCON64_GBA,
-  UCON64_GC,
-  UCON64_GEN,
-  UCON64_GP32,
-  UCON64_INTELLI,
-  UCON64_JAG,
-  UCON64_LYNX,
-  UCON64_ARCADE,
-  UCON64_N64,
-  UCON64_NDS,
-  UCON64_NES,
-  UCON64_NG,
-  UCON64_NGP,
-  UCON64_PCE,
-  UCON64_PS2,
-  UCON64_PSX,
-  UCON64_S16,
-  UCON64_SAT,
-  UCON64_SMS,
-  // don't mix the following with UCON64_GG (Game Genie), used only for --mgdgg
-  UCON64_GAMEGEAR,
-  UCON64_SNES,
-  UCON64_SWAN,
-  UCON64_VBOY,
-  UCON64_VEC,
-  UCON64_XBOX
-};
+  WF_DEMUX          identify console type of ROM
+                      returns NULL if ROM can't be identified
+  WF_OPEN           open ROM and read info
+                      returns NULL if ROM can't be identified
+
+  WF_NFO            output ROM info from WF_OPEN (before processing ROM)
+
+TODO:  WF_PAR            option requires a parallel port
+TODO:  WF_USB            option requires a USB port
+TODO:  WF_SERIAL         option requires a serial port
+TODO:  WF_RO             option will access ROM or FILE in read-only mode
+TODO:  WF_RW             option will read and write
+  WF_NO_SPLIT       option does not work with split ROMs
+  WF_NEEDS_ROM      option does NOT require a ROM
+  WF_NEEDS_CRC32    option does NOT require a CRC32 calculation
+  WF_EXIT           exit() uCON64 after this option ran once
+                      --multi (and --xfalmulti) takes more than one file as
+                      argument, but should be executed only once;
+                      stop after sending one ROM to a copier ("multizip");
+                      stop after applying a patch so that the patch file won't
+                      be interpreted as ROM
+*/
+#define WF_DEMUX        (1)
+#define WF_OPEN         (1<<1)
+#define WF_NFO          (1<<2)
+#define WF_EXIT         (1<<3)
+#define WF_NEEDS_ROM    (1<<4)
+#define WF_NEEDS_CRC32  (1<<5)
+#define WF_NO_SPLIT     (1<<6)
+//#define WF_PAR          (1<<7)
+//#define WF_USB          (1<<8)
+//#define WF_SERIAL       (1<<9)
+//#define WF_RO           (1<<10)
+//#define WF_RW           (1<<11)
 
 
 // option strings (consoles)
@@ -122,10 +119,44 @@ enum
 #define UCON64_XBOX_S     "xbox"
 
 
-// the other options
 enum
 {
-  UCON64_1991 = UCON64_OPTION + 1,
+// options (consoles)
+  UCON64_3DO = 1,
+  UCON64_ATA,
+  UCON64_CD32,
+  UCON64_CDI,
+  UCON64_COLECO,
+  UCON64_DC,
+  UCON64_GB,
+  UCON64_GBA,
+  UCON64_GC,
+  UCON64_GEN,
+  UCON64_GP32,
+  UCON64_INTELLI,
+  UCON64_JAG,
+  UCON64_LYNX,
+  UCON64_ARCADE,
+  UCON64_N64,
+  UCON64_NDS,
+  UCON64_NES,
+  UCON64_NG,
+  UCON64_NGP,
+  UCON64_PCE,
+  UCON64_PS2,
+  UCON64_PSX,
+  UCON64_S16,
+  UCON64_SAT,
+  UCON64_SMS,
+  // don't mix the following with UCON64_GG (Game Genie), used only for --mgdgg
+  UCON64_GAMEGEAR,
+  UCON64_SNES,
+  UCON64_SWAN,
+  UCON64_VBOY,
+  UCON64_VEC,
+  UCON64_XBOX,
+// the other options (start at 1000+1)
+  UCON64_1991 = 1001,
   UCON64_A,
   UCON64_B,
   UCON64_B0,
@@ -265,7 +296,7 @@ enum
   UCON64_ROTR,
   UCON64_RU,
   UCON64_S,
-  UCON64_SAM,
+//  UCON64_SAM,
   UCON64_SC,
   UCON64_SCAN,
   UCON64_SCR,
@@ -364,60 +395,5 @@ enum
   UCON64_Z64
 };
 
-
-// parallel port modes
-typedef enum
-{
-  UCON64_SPP,
-  UCON64_EPP,
-  UCON64_ECP
-} parport_mode_t;
-
-
-/*
-  uCON64 workflow flags
-
-  WF_PROBE          probe for console type
-  WF_INIT           init ROM info (ucon64_init()) necessary
-                      w/o this flag WF_NFO and WF_NFO_AFTER
-                      will be ignored
-  WF_NFO            show info output before processing rom
-  WF_NO_ROM         for this option no ROM is required
-  WF_NO_CRC32       no CRC32 calculation necessary for this option; this
-                      overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
-  WF_STOP           a "stop" option:
-                    - -multi (and -xfalmulti) takes more than one file as
-                      argument, but should be executed only once.
-                    - stop after sending one ROM to a copier ("multizip")
-                    - stop after applying a patch so that the patch file won't
-                      be interpreted as ROM
-  WF_PAR            option requires a parallel port
-  WF_USB            option requires a USB port
-  WF_SERIAL         option requires a serial port
-  WF_NO_SPLIT       option does not work with split ROMs
-  WF_RO             option will read only (no backup required, etc.)
-  WF_RW             option will read and write
-  WF_DEFAULT        same as WF_INIT | WF_PROBE | WF_NFO
-
-  example:
-  WF_NFO | WF_NFO_AFTER
-                    a ROM is required and info will be shown before and
-                    after it has been processed
-*/
-#define WF_PROBE      (1)
-#define WF_INIT       (1 << 1)
-#define WF_NFO        (1 << 2)
-#define WF_STOP       (1 << 3)
-#define WF_NO_ROM     (1 << 5)
-//#define WF_PAR        (1 << 6)
-//#define WF_USB        (1 << 7)
-//#define WF_SERIAL     (1 << 8)
-#define WF_NO_CRC32   (1 << 9)
-#define WF_NO_SPLIT   (1 << 10)
-#define WF_SWITCH     (1 << 11)
-#define WF_NO_ARCHIVE (1 << 12)
-#define WF_RO         (1 << 13)
-#define WF_RW         (1 << 14)
-#define WF_DEFAULT    (WF_PROBE | WF_INIT | WF_NFO)
 
 #endif // UCON64_DEFINES_H

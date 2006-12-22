@@ -36,24 +36,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/backup.h"
 
 
-static st_ucon64_obj_t ngp_obj[] =
-  {
-    {UCON64_NGP, WF_SWITCH}
-  };
-
 const st_getopt2_t ngp_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Neo Geo Pocket/Neo Geo Pocket Color"/*"1998/1999 SNK http://www.neogeo.co.jp"*/,
-      NULL
+      NULL, "Neo Geo Pocket/Neo Geo Pocket Color"/*"1998/1999 SNK http://www.neogeo.co.jp"*/
     },
     {
       UCON64_NGP_S, 0, 0, UCON64_NGP,
-      NULL, "force recognition",
-      &ngp_obj[0]
+      NULL, "force recognition"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

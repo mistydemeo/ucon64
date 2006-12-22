@@ -51,77 +51,60 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int sms_chksum (unsigned char *rom_buffer, int rom_size);
 
 
-static st_ucon64_obj_t sms_obj[] =
-  {
-    {0, WF_SWITCH},
-    {0, WF_DEFAULT},
-    {0, WF_DEFAULT | WF_NO_SPLIT},
-    {0, WF_INIT | WF_PROBE | WF_STOP},
-    {UCON64_SMS, WF_SWITCH},
-    {UCON64_SMS, WF_DEFAULT | WF_NO_SPLIT}
-  };
-
 const st_getopt2_t sms_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Sega Master System(II/III)/Game Gear (Handheld)"/*"1986/1990 SEGA http://www.sega.com"*/,
-      NULL
+      NULL, "Sega Master System(II/III)/Game Gear (Handheld)"/*"1986/1990 SEGA http://www.sega.com"*/
     },
     {
       UCON64_SMS_S, 0, 0, UCON64_SMS,
-      NULL, "force recognition",
-      &sms_obj[4]
+      NULL, "force recognition"
+    },
+    {
+      UCON64_GAMEGEAR_S, 0, 0, UCON64_GAMEGEAR,
+      NULL, "same as " OPTION_LONG_S UCON64_SMS_S
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved format",
-      &sms_obj[0]
+      NULL, "force ROM is in interleaved format"
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved format",
-      &sms_obj[0]
+      NULL, "force ROM is not in interleaved format"
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)",
-      &sms_obj[2]
+      NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)"
     },
     {
       "mgdgg", 0, 0, UCON64_MGDGG,
-      NULL, "same as " OPTION_LONG_S "mgd, but gives GG name",
-      &sms_obj[5]
+      NULL, "same as " OPTION_LONG_S "mgd, but gives GG name"
     },
     {
       "smd", 0, 0, UCON64_SMD,
-      NULL, "convert to Super Magic Drive/SMD",
-      &sms_obj[2]
+      NULL, "convert to Super Magic Drive/SMD"
     },
     {
       "smds", 0, 0, UCON64_SMDS,
-      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD",
-      NULL
+      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"
     },
     {
       "sc", 0, 0, UCON64_SC,
       NULL, "convert to SuperCard\n"
-            "(creates: SAV template)",
-      &sms_obj[1]
+            "(creates: SAV template)"
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum (SMS only)",
-      &sms_obj[1]
+      NULL, "fix ROM checksum (SMS only)"
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with SMS-PRO/GG-PRO flash card,\n"
       "truncated to SIZE Mbit; file with loader must be specified\n"
-      "first, then all the ROMs, multi-game file to create last",
-      &sms_obj[3]
+      "first, then all the ROMs, multi-game file to create last"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 typedef struct st_sms_header
@@ -275,7 +258,7 @@ sms_chk (st_ucon64_nfo_t *rominfo)
   else
     ucon64_fwrite (buf, rominfo->backup_header_len + offset, 2, dest_name, "r+b");
 
-  dumper (stdout, buf, 2, rominfo->backup_header_len + offset, DUMPER_HEX);
+  dumper (stdout, buf, 2, rominfo->backup_header_len + offset, 0);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -670,10 +653,10 @@ sms_init (st_ucon64_nfo_t *rominfo)
 
       if (rominfo->interleaved)
         {
-          ucon64.fcrc32 = ucon64_crc32 (0, rom_buffer, size);
+          ucon64.fcrc32 = crc32_wrap (0, rom_buffer, size);
           smd_deinterleave (rom_buffer, size);
         }
-      ucon64.crc32 = ucon64_crc32 (0, rom_buffer, size);
+      ucon64.crc32 = crc32_wrap (0, rom_buffer, size);
 
       if (!is_gamegear)
         {

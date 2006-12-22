@@ -902,31 +902,23 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
  * uCON64 wrapping *
  *******************/
 
-static st_ucon64_obj_t cmc_obj[] =
-  {
-    {UCON64_GEN, WF_STOP | WF_NO_ROM},
-    {UCON64_GEN, WF_SWITCH}
-  };
 
 const st_getopt2_t cmc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Cyan's Megadrive ROM copier"/*"1999-2004 Cyan Helkaraxe"*/,
-      NULL
+      NULL, "Cyan's Megadrive ROM copier"/*"1999-2004 Cyan Helkaraxe"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xcmc", 0, 0, UCON64_XCMC,
-      NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT",
-      &cmc_obj[0]
+      NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT"
     },
     {
       "xcmct", 1, 0, UCON64_XCMCT,
       "TEST", "run test TEST\n"
       "TEST=1 burn-in reliability test (specify speed)\n"
-      "TEST=2 testbench mode (experts only)",
-      &cmc_obj[0]
+      "TEST=2 testbench mode (experts only)"
     },
     {
       "xcmcm", 1, 0, UCON64_XCMCM,
@@ -934,11 +926,10 @@ const st_getopt2_t cmc_usage[] =
       "SPEED=1 slow (debug)\n"
       "SPEED=2 medium\n"
       "SPEED=3 fast (default)\n"                // verify with value of DEFAULT_SPEED
-      "SPEED=4 full speed (risky)",
-      &cmc_obj[1]
+      "SPEED=4 full speed (risky)"
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

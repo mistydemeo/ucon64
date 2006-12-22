@@ -61,6 +61,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                 start       seeks to start pos of fname
                 len         a vector from start
 
+  quick_fread()    same as fread but takes start and src is a filename
+  quick_fwrite()   same as fwrite but takes start and dest is a filename; mode
+                     is the same as fopen() modes
+  quick_fgetc()    same as fgetc but takes filename instead of FILE and a pos
+  quick_fputc()    same as fputc but takes filename instead of FILE and a pos
+                     buf,s,bs,b,f,m == buffer,start,blksize,blks,filename,mode
+
   getfile()           runs callback_func with the realpath() of file/dir as string
                         flags:
   0                           pass all files/dirs with their realpath()
@@ -81,8 +88,8 @@ extern char *dirname2 (const char *path, char *dir);
 extern const char *basename2 (const char *path);
 extern const char *get_suffix (const char *filename);
 extern char *set_suffix (char *filename, const char *suffix);
-extern int mkdir2 (const char *path);
-extern int rmdir2 (const char *path);
+//extern int mkdir2 (const char *path);
+//extern int rmdir2 (const char *path);
 extern int same_file (const char *filename1, const char *filename2);
 extern int same_filesystem (const char *filename1, const char *filename2);
 extern int rename2 (const char *oldname, const char *newname);
@@ -96,10 +103,10 @@ extern int fcopy (const char *src, size_t start, size_t len, const char *dest,
 extern int quick_io (void *buffer, size_t start, size_t len, const char *fname,
                      const char *mode);
 extern int quick_io_c (int value, size_t pos, const char *fname, const char *mode);
-
-extern int quick_io_func (int (*func) (const unsigned char *, int, void *),
-                          void *object, size_t start,
-                          size_t len, const char *fname);
+#define quick_fgetc(f, p)           (quick_io_c(0, p, f, "rb"))
+#define quick_fputc(f, p, b, m)     (quick_io_c(b, p, f, m))
+#define quick_fread(b, s, l, f)     (quick_io(b, s, l, f, "rb"))
+#define quick_fwrite(b, s, l, f, m) (quick_io((void *) b, s, l, f, m))
 
 #define GETFILE_FILES_ONLY     1
 #define GETFILE_RECURSIVE      (1 << 1)
@@ -107,7 +114,7 @@ extern int quick_io_func (int (*func) (const unsigned char *, int, void *),
 extern int getfile (int argc, char **argv, int (*callback_func) (const char *), int flags);
 
 
-extern unsigned char *fopenmallocread (const char *filename, int maxlength);
+//extern unsigned char *fopenmallocread (const char *filename, int maxlength);
 
 
 #endif // MISC_FILE_H

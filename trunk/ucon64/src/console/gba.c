@@ -53,45 +53,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int gba_chksum (void);
 
 
-static st_ucon64_obj_t gba_obj[] =
-  {
-    {0, WF_DEFAULT},
-    {0, WF_INIT | WF_PROBE | WF_STOP},
-    {UCON64_GBA, WF_SWITCH},
-    {UCON64_GBA, WF_DEFAULT}
-  };
-
 const st_getopt2_t gba_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game Boy Advance (SP)"/*"2001 Nintendo http://www.nintendo.com"*/,
-      NULL
+      NULL, "Game Boy Advance (SP)"/*"2001 Nintendo http://www.nintendo.com"*/
     },
     {
       UCON64_GBA_S, 0, 0, UCON64_GBA,
-      NULL, "force recognition",
-      &gba_obj[2]
+      NULL, "force recognition"
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &gba_obj[0]
+      "NEW_NAME", "change internal ROM name to NEW_NAME"
     },
     {
       "logo", 0, 0, UCON64_LOGO,
-      NULL, "restore ROM logo character data (offset: 0x04-0x9F)",
-      &gba_obj[0]
+      NULL, "restore ROM logo character data (offset: 0x04-0x9F)"
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM header checksum",
-      &gba_obj[0]
+      NULL, "fix ROM header checksum"
     },
     {
       "sram", 0, 0, UCON64_SRAM,
-      NULL, "patch ROM for SRAM saving",
-      &gba_obj[3]
+      NULL, "patch ROM for SRAM saving"
     },
     {
       "sc", 0, 0, UCON64_SC,
@@ -100,8 +86,7 @@ const st_getopt2_t gba_usage[] =
             "enables \"Saver patch\", \"restart to Menu\" and\n"
             "\"Real Time Save\""
 #endif
-            "(creates SAV and SCI templates)",
-      &gba_obj[3]
+            "(creates SAV and SCI templates)"
     },
     {
       "crp", 1, 0, UCON64_CRP,
@@ -113,18 +98,16 @@ const st_getopt2_t gba_usage[] =
       "WAIT_TIME=16 faster than 28, but slower than 20\n"
       "WAIT_TIME=20 default in most original cartridges\n"
       "WAIT_TIME=24 fastest cartridge access speed\n"
-      "WAIT_TIME=28 faster than 8 but slower than 16",
-      &gba_obj[3]
+      "WAIT_TIME=28 faster than 8 but slower than 16"
     },
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with FAL/F2A flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
-      "all the ROMs, multi-game file to create last",
-      &gba_obj[1]
+      "all the ROMs, multi-game file to create last"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 
@@ -310,7 +293,7 @@ gba_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->backup_header_len + 0xbd,
     buf, "r+b");
 
-  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->backup_header_len + 0xbd, DUMPER_HEX);
+  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->backup_header_len + 0xbd, 0);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;

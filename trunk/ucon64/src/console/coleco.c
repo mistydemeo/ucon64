@@ -40,24 +40,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "coleco.h"
 
 
-static st_ucon64_obj_t coleco_obj[] =
-  {
-    {UCON64_COLECO, WF_SWITCH}
-  };
-
 const st_getopt2_t coleco_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Coleco/ColecoVision"/*"1982"*/,
-      NULL
+      NULL, "Coleco/ColecoVision"
+//      "1982"
     },
     {
       UCON64_COLECO_S, 0, 0, UCON64_COLECO,
-      NULL, "force recognition",
-      &coleco_obj[0]
+      NULL, "force recognition"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

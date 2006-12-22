@@ -41,18 +41,16 @@ const st_getopt2_t mgd_usage[] =
     {
       NULL, 0, 0, 0,
       NULL, "Multi Game Doctor (2)/Multi Game Hunter/MGH"
-      /*"19XX Bung Enterprises Ltd http://www.bung.com.hk\n" "?Makko Toys Co., Ltd.?"*/,
-      NULL
+      /*"19XX Bung Enterprises Ltd http://www.bung.com.hk\n" "?Makko Toys Co., Ltd.?"*/
     },
 #if 0
     {
       "xmgd", 0, 0, UCON64_XMGD,
       NULL, "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when " OPTION_LONG_S "rom does not exist",
-      NULL
+      "receives automatically when " OPTION_LONG_S "rom does not exist"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

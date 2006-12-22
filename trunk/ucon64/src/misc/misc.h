@@ -37,20 +37,15 @@ extern "C" {
 /*
   dumper()        dump n bytes of buffer
                     you can use here a virtual_start for the displayed counter
-                    DUMPER_HEX
-                    dump in hex (base: 16) (default)
+                    (default: dump in hex with a hex line count)
                     DUMPER_BIT
                     dump in bits (base: 2)
                     DUMPER_CODE
                     dump as C code
                     DUMPER_TEXT
                     printf() only isalnum() chars
-                    DUMPER_HEX_COUNT
-                    show position as hex value (default)
                     DUMPER_DEC_COUNT
                     show position as decimal value
-                    DUMPER_HEX_UPPER
-                    show hex values in uppercase (default: lowercase)
   change_mem{2}() see header of implementation for usage
   build_cm_patterns() helper function for change_mem2() to read search patterns
                     from a file
@@ -69,17 +64,14 @@ extern "C" {
   wait2()         wait (sleep) a specified number of milliseconds
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
 */
-#define DUMPER_HEX       (0)
-#define DUMPER_HEX_COUNT (0)
 #define DUMPER_BIT       (1)
 #define DUMPER_CODE      (1 << 1)
 #define DUMPER_TEXT      (1 << 2)
 #define DUMPER_DEC       (1 << 3)
 #define DUMPER_DEC_COUNT (1 << 4)
-#define DUMPER_DEFAULT   (DUMPER_HEX_COUNT|DUMPER_HEX)
-//#define DUMPER_HEX_UPPER (1 << 5)
 extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
                     int virtual_start, unsigned int flags);
+
 
 typedef struct st_cm_set
 {

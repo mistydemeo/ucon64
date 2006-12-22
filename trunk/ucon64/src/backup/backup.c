@@ -34,8 +34,7 @@ const st_getopt2_t unknown_backup_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Unknown backup unit/emulator",
-      NULL
+      NULL, "Unknown backup unit/emulator"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };

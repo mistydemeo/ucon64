@@ -68,16 +68,22 @@ extern const char *ucon64_msg[];
                         see how it and the flags work
   remove_temp_file()    remove possible temp file created by ucon64_file_handler()
   ucon64_output_fname()
-  ucon64_gauge()        wrapper for misc.c/gauge()
+  mkbak()
+
+  ucon64_gauge()        wrapper
   ucon64_testpad()      test if ROM is padded
   ucon64_testsplit()    test if ROM is split
                           optionally a callback function can be used for specific
                           testing
-  ucon64_configfile()   configfile handling
   ucon64_rename()       DAT or internal header based rename
-  ucon64_e()            emulator "frontend"
-  ucon64_pattern()      change file based on patterns specified in pattern_fname
   ucon64_get_binary()   choose to load external or internal binaries
+
+  bswap16_n()       bswap16() n bytes of buffer
+
+  ucon64_dump()     wrapper
+  ucon64_find()     wrapper
+  ucon64_chksum()   wrapper
+  ucon64_filefile() compare two files for similarities or differencies
 */
 #define OF_FORCE_BASENAME 1
 #define OF_FORCE_SUFFIX   2
@@ -85,55 +91,36 @@ extern const char *ucon64_msg[];
 extern int ucon64_file_handler (char *dest, char *src, int flags);
 extern void remove_temp_file (void);
 extern char *ucon64_output_fname (char *requested_fname, int flags);
+typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
+extern char *mkbak (const char *filename, backup_t type);
+
+extern void parport_print_info (void);
+
 extern int ucon64_gauge (time_t init_time, int pos, int size);
 extern int ucon64_testpad (const char *filename);
 extern int ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *));
 extern int ucon64_rename (int mode);
-extern int ucon64_e (void);
-extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
-typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
-extern char *mkbak (const char *filename, backup_t type);
-extern unsigned int ucon64_crc32 (unsigned int crc, const void *buffer, unsigned int size);
 extern int ucon64_get_binary (const unsigned char **data, char *id);
 
-
-/*
-  Some general file stuff that MUST NOT and WILL NOT be written again and again
-
-  ucon64_fread()    same as fread but takes start and src is a filename
-  ucon64_fwrite()   same as fwrite but takes start and dest is a filename; mode
-                      is the same as fopen() modes
-  ucon64_fgetc()    same as fgetc but takes filename instead of FILE and a pos
-  ucon64_fputc()    same as fputc but takes filename instead of FILE and a pos
-                      buf,s,bs,b,f,m == buffer,start,blksize,blks,filename,mode
-  bswap16_n()       bswap16() n bytes of buffer
-  wswap32_n()      wswap32() n bytes of buffer
-  ucon64_fbswap16() bswap16() len bytes of file from start
-  ucon64_fwswap32() wswap32() len bytes of file from start
-  ucon64_dump()     file oriented wrapper for memdump() (uses the same flags)
-  ucon64_find()     file oriented wrapper for memsearch() (uses the same flags)
-  ucon64_chksum()   file oriented wrapper for chksum()
-                      if (!sha1) {sha1 won't be calculated!}
-  ucon64_filefile() compare two files for similarities or differencies
-*/
-#define ucon64_fgetc(f, p)           (quick_io_c(0, p, f, "rb"))
-#define ucon64_fputc(f, p, b, m)     (quick_io_c(b, p, f, m))
-#define ucon64_fread(b, s, l, f)     (quick_io(b, s, l, f, "rb"))
-#define ucon64_fwrite(b, s, l, f, m) (quick_io((void *) b, s, l, f, m))
+#define ucon64_fgetc quick_fgetc
+#define ucon64_fputc quick_fputc
+#define ucon64_fread quick_fread
+#define ucon64_fwrite quick_fwrite
 
 extern int bswap16_n (void *buffer, int n);
-extern int wswap32_n (void *buffer, int n);
 
-extern void ucon64_fbswap16 (const char *src_fname, size_t start, size_t len, const char *dest_fname);
-extern void ucon64_fwswap32 (const char *src_fname, size_t start, size_t len, const char *dest_fname);
-extern void ucon64_dump (FILE *output, const char *filename, size_t start,
-                         size_t len, uint32_t flags);
+extern int ucon64_dump (FILE *output, const char *filename, size_t start,
+                        size_t len, uint32_t flags);
 // Be sure the following constant doesn't conflict with the MEMCMP2_* constants
 #define UCON64_FIND_QUIET (1 << 31)
 extern int ucon64_find (const char *filename, size_t start, size_t len,
                         const char *search, int searchlen, uint32_t flags, int flag2);
 extern int ucon64_chksum (char *sha1, char *md5, unsigned int *crc32, // uint16_t *crc16,
                           const char *filename, size_t start);
+#define UCON64_FILEFILE_DIFF 0
+#define UCON64_FILEFILE_SAME 1
 extern void ucon64_filefile (const char *filename1, int start1,
-                             const char *filename2, int start2, int similar);
+                             const char *filename2, int start2, int mode);
+
+
 #endif // #ifndef UCON64_MISC_H

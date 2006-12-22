@@ -36,8 +36,7 @@ const st_getopt2_t ssc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Smart Card/SSC",
-      NULL
+      NULL, "Super Smart Card/SSC"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };

@@ -41,41 +41,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "md-pro.h"
 
 
-static st_ucon64_obj_t mdpro_obj[] =
-  {
-    {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
-    {UCON64_GEN, WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t mdpro_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "MD-PRO flash card programmer"/*"2003 ToToTEK Multi Media http://www.tototek.com"*/,
-      NULL
+      NULL, "MD-PRO flash card programmer"/*"2003 ToToTEK Multi Media http://www.tototek.com"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xmd", 0, 0, UCON64_XMD,
       NULL, "send/receive ROM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically (32/64 Mbits) when ROM does not exist",
-      &mdpro_obj[0]
+      "receives automatically (32/64 Mbits) when ROM does not exist"
     },
     {
       "xmds", 0, 0, UCON64_XMDS,
       NULL, "send/receive SRAM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &mdpro_obj[1]
+      "receives automatically when SRAM does not exist"
     },
     {
       "xmdb", 1, 0, UCON64_XMDB,
       "BANK", "send/receive SRAM to/from MD-PRO BANK\n"
       "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &mdpro_obj[1]
+      "receives automatically when SRAM does not exist"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

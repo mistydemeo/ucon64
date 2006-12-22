@@ -32,6 +32,9 @@ extern "C" {
 #else                                           // __MSDOS__, _WIN32 (VC++)
 #include "itypes.h"
 #endif
+#ifdef  USE_CRC
+#include "hash_crc.h"
+#endif
 #ifdef  USE_MD4
 #include "hash_md4.h"                           // MD4_CTX
 #endif

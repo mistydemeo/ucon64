@@ -38,61 +38,46 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "dc.h"
 
 
-static st_ucon64_obj_t dc_obj[] =
-  {
-    {UCON64_DC, WF_SWITCH},
-    {UCON64_DC, WF_DEFAULT},
-    {UCON64_DC, WF_NO_ROM}
-  };
-
 const st_getopt2_t dc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Dreamcast" /* "1998 SEGA http://www.sega.com" */,
-      NULL
+      NULL, "Dreamcast" /* "1998 SEGA http://www.sega.com" */
     },
     {
       UCON64_DC_S, 0, 0, UCON64_DC,
-      NULL, "force recognition",
-      &dc_obj[0]
+      NULL, "force recognition"
     },
 #if 0
     {
       "vms", 1, 0, UCON64_VMS,
-      "SAV", "convert NES SAV file to a VMS file for use with NesterDC",
-      NULL
+      "SAV", "convert NES SAV file to a VMS file for use with NesterDC"
     },
 #endif
     {
       "scr", 0, 0, UCON64_SCR,
-      NULL, "scramble 1ST_READ.BIN for selfboot CDs",
-      &dc_obj[1]
+      NULL, "scramble 1ST_READ.BIN for selfboot CDs"
     },
     {
       "unscr", 0, 0, UCON64_UNSCR,
-      NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs",
-      &dc_obj[1]
+      NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs"
     },
 #if 0
     {
       "ip", 1, 0, UCON64_IP,
-      "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE",
-      NULL
+      "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"
     },
 #endif
     {
       "mkip", 0, 0, UCON64_MKIP,
-      NULL, "generate IP.BIN file with default values",
-      &dc_obj[2]
+      NULL, "generate IP.BIN file with default values"
     },
     {
       "parse", 1, 0, UCON64_PARSE,
       "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
-      "creates an empty template when TEMPLATE does not exist",
-      &dc_obj[2]
+      "creates an empty template when TEMPLATE does not exist"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

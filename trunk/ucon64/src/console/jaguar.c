@@ -38,24 +38,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "jaguar.h"
 
 
-static st_ucon64_obj_t jaguar_obj[] =
-  {
-    {UCON64_JAG, WF_SWITCH}
-  };
-
 const st_getopt2_t jaguar_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"/*"1989 Flare2/1993 Atari/1995 Atari"*/,
-      NULL
+      NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"/*"1989 Flare2/1993 Atari/1995 Atari"*/
     },
     {
       UCON64_JAG_S, 0, 0, UCON64_JAG,
-      NULL, "force recognition",
-      &jaguar_obj[0]
+      NULL, "force recognition"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
 };
 
 

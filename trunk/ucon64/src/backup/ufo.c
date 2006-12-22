@@ -35,8 +35,7 @@ const st_getopt2_t ufo_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super UFO Pro 8"/*"UFO Enterprises"*/,
-      NULL
+      NULL, "Super UFO Pro 8"/*"UFO Enterprises"*/
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };

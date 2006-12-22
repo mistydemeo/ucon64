@@ -48,68 +48,48 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PCE_HEADER_LEN 0x30
 
 
-static st_ucon64_obj_t pce_obj[] =
-  {
-    {0, WF_SWITCH},
-    {0, WF_DEFAULT},
-    {0, WF_DEFAULT | WF_NO_SPLIT},
-    {0, WF_INIT | WF_PROBE},
-    {0, WF_INIT | WF_PROBE | WF_STOP},
-    {UCON64_PCE, WF_SWITCH},
-    {UCON64_PCE, WF_DEFAULT}
-  };
-
 const st_getopt2_t pce_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\n"
-      "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)"/*"1987/1990 NEC"*/,
-      NULL
+      "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)"/*"1987/1990 NEC"*/
     },
     {
       UCON64_PCE_S, 0, 0, UCON64_PCE,
-      NULL, "force recognition",
-      &pce_obj[5]
+      NULL, "force recognition"
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved (bit-swapped) format",
-      &pce_obj[0]
+      NULL, "force ROM is in interleaved (bit-swapped) format"
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved (bit-swapped) format",
-      &pce_obj[0]
+      NULL, "force ROM is not in interleaved (bit-swapped) format"
     },
     {
       "msg", 0, 0, UCON64_MSG,
-      NULL, "convert to Magic Super Griffin/MSG",
-      &pce_obj[6]
+      NULL, "convert to Magic Super Griffin/MSG"
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game Doctor*/MGD2/RAW",
-      &pce_obj[2]
+      NULL, "convert to Multi Game Doctor*/MGD2/RAW"
     },
     {
       "swap", 0, 0, UCON64_SWAP,
-      NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)",
-      &pce_obj[3]
+      NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"
     },
     {
       "f", 0, 0, UCON64_F,
-      NULL, "fix region protection",
-      &pce_obj[1]
+      NULL, "fix region protection"
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with PCE-PRO flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
-      "all the ROMs, multi-game file to create last",
-      &pce_obj[4]
+      "all the ROMs, multi-game file to create last"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
 };
 
 #define PCE_MAKER_MAX 86
@@ -1126,7 +1106,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
   if ((result == -1 && swapped != 0) || swapped == 1)
     {                                   // don't swap the bits if -nint is specified
       if (ucon64.do_not_calc_crc == UCON64_UNKNOWN || swapped == 1)
-        ucon64.fcrc32 = ucon64_crc32 (0, rom_buffer, size);
+        ucon64.fcrc32 = crc32_wrap (0, rom_buffer, size);
       swapbits (rom_buffer, size);
       if (pce_check (rom_buffer, size) == 1)
         {
@@ -1153,7 +1133,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
   if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
     {
       if (!ucon64.crc32)
-        ucon64.crc32 = ucon64_crc32 (0, rom_buffer, size);
+        ucon64.crc32 = crc32_wrap (0, rom_buffer, size);
       // additional info
       key.crc32 = ucon64.crc32;
       info = (st_pce_data_t *) bsearch (&key, pce_data,

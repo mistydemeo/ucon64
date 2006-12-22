@@ -30,6 +30,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include "ucon64_defines.h"                     // MAXBUFSIZE, etc..
+#include "ucon64_dat.h"
+
+
+// parallel port modes
+typedef enum
+{
+  UCON64_SPP,
+  UCON64_EPP,
+  UCON64_ECP
+} parport_mode_t;
 
 
 /*
@@ -38,15 +48,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                     type was identified.
   st_ucon64_t     this struct containes st_ucon64_nfo_t and unspecific
                     informations and some workflow stuff
-  st_ucon64_obj_t ucon64 object for use in st_getopt2_t
 */
 typedef struct
 {
-  const char *console_usage;                    // console system of the ROM
-  const char *backup_usage;                     // backup unit of the ROM
-
+  const char *fname;                            // file name of ROM (w/ path)
+  unsigned int crc32;                           // crc32 of ROM (w/o backup header, w/ intro)
   int interleaved;                              // ROM is interleaved (swapped)
   int data_size;                                // ROM data size without "red tape"
+
+  const char *console_usage;                    // console system of the ROM
+  const char *backup_usage;                     // backup unit of the ROM
 
   const void *backup_header;                    // (possible) header of backup unit
   int backup_header_start;                      // start of backup unit header (mostly 0)
@@ -71,46 +82,21 @@ typedef struct
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
 } st_ucon64_nfo_t;
 
+
 typedef struct
 {
   int argc;
-  char **argv;
+  char *const *argv;
 
-  int option;                                   // current option (UCON64_HEX, UCON64_FIND, ...)
-  const char *optarg;                           // ptr to current options optarg
-  char *temp_file;                              // global temp_file
-
-
-  const char *fname;                            // ROM (cmdline) with path
-  int recursive;
-
-  char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
-  int file_size;                                // (uncompressed) ROM file size (NOT console specific)
-  unsigned int crc32;                           // crc32 value of ROM (used for DAT files) (NOT console specific)
-  unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk (NOT console specific)
-
-  /*
-    if console == UCON64_UNKNOWN or st_ucon64_nfo_t == NULL ucon64_rom_nfo() won't
-    be shown
-  */
   int console;                                  // the detected console system
+  int option;                                   // current option
+  const char *optarg;                           // ptr to current options optarg
 
-  const char *file;                             // FILE (cmdline) with path
+  const char *patch;                            // default: argv[argc - 1]
 
-  char configfile[FILENAME_MAX];                // path and name of the config file
-  char configdir[FILENAME_MAX];                 // directory for config
-  char datdir[FILENAME_MAX];                    // directory for DAT files
-  char output_path[FILENAME_MAX];               // -o argument (default: cwd)
-//#if     defined USE_PPDEV || defined AMIGA
-  char parport_dev[80];                         // parallel port device (e.g.
-//#endif                                          //  /dev/parport0 or parallel.device)
-  int parport_needed;
-  int parport;                                  // parallel port address
-  parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
-#ifdef  USE_USB
-  int usbport;                                  // non-zero => use usbport, 1 = USB0, 2 = USB1
-  char usbport_dev[80];                         // usb port device (e.g. /dev/usb/hiddev0)
-#endif
+  const char *fname;                            // file name of ROM (or archive with ROM inside; w/ path)
+  int file_size;
+  unsigned int fcrc32;                          // crc32 of file
 
 #ifdef  USE_ANSI_COLOR
   int ansi_color;
@@ -119,10 +105,26 @@ typedef struct
   int frontend;                                 // flag if uCON64 was started by a frontend
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
+  int recursive;
 
-  uint32_t flags;                               // detect and init ROM info
+  char *temp_file;                              // global temp_file
+  char output_path[FILENAME_MAX];               // -o argument (default: cwd)
 
-  int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
+  char configfile[FILENAME_MAX];                // path and name of the config file
+  char configdir[FILENAME_MAX];                 // directory for config
+  char datdir[FILENAME_MAX];                    // directory for DAT files
+
+#if     defined USE_PPDEV || defined AMIGA
+  char parport_dev[FILENAME_MAX];               // parallel port device (e.g.
+#endif                                          //  /dev/parport0 or parallel.device)
+  int parport_needed;
+  int parport;                                  // parallel port address
+  parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
+
+#ifdef  USE_USB
+  int usbport;                                  // non-zero => use usbport, 1 = USB0, 2 = USB1
+  char usbport_dev[FILENAME_MAX];               // usb port device (e.g. /dev/usb/hiddev0)
+#endif
 
   /*
     These values override values in st_ucon64_nfo_t. Use (val != UCON64_UNKNOWN)
@@ -131,8 +133,14 @@ typedef struct
   */
   int backup_header_len;                             // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
+  st_ucon64_nfo_t *nfo;                         // info from <console>_init() (st_ucon64_nfo_t *)
+
+  st_ucon64_dat_t *dat;                         // info from DATabase (st_ucon64_dat_t *)
 
 #if 1
+#warning move this to st_ucon64_nfo_t
+  unsigned int crc32;                           // crc32 of ROM (used for DAT files)
+  int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
   // the following values are for SNES, NES, Genesis and Nintendo 64
@@ -154,18 +162,8 @@ typedef struct
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF
 #endif
-
-  void *dat;                                    // info from DATabase (st_ucon64_dat_t *)
-  st_ucon64_nfo_t *nfo;                         // info from <console>_init() (st_ucon64_nfo_t *)
 } st_ucon64_t;
 
-typedef struct
-{
-  int console;                                  // UCON64_SNES, etc...
-  uint32_t flags;                               // WF_INIT, etc..
-//  const char *optarg;                           // pointer to optarg
-                                                // initialised with NULL and used later
-} st_ucon64_obj_t;
 
 /*
   ucon64_init()         init st_ucon64_nfo_t, st_ucon64_dat_t and dm_image_t
@@ -184,10 +182,11 @@ enum {
   USAGE_VIEW_PAD,
   USAGE_VIEW_DAT,
   USAGE_VIEW_PATCH,
-  USAGE_VIEW_BACKUP,
-  USAGE_VIEW_DISC
+  USAGE_VIEW_BACKUP
 };
 extern void ucon64_usage (int argc, char *argv[], int view);
 
 extern st_ucon64_t ucon64;
+
+
 #endif // UCON64_H

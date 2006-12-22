@@ -38,24 +38,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "vboy.h"
 
 
-static st_ucon64_obj_t vboy_obj[] =
-  {
-    {UCON64_VBOY, WF_SWITCH}
-  };
-
 const st_getopt2_t vboy_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Nintendo Virtual Boy"/*"19XX Nintendo http://www.nintendo.com"*/,
-      NULL
+      NULL, "Nintendo Virtual Boy"/*"19XX Nintendo http://www.nintendo.com"*/
     },
     {
       UCON64_VBOY_S, 0, 0, UCON64_VBOY,
-      NULL, "force recognition",
-      &vboy_obj[0]
+      NULL, "force recognition"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

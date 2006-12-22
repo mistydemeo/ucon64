@@ -55,140 +55,105 @@ static int save_rom (st_ucon64_nfo_t *rominfo, const char *name,
                      unsigned char **buffer, int size);
 
 
-static st_ucon64_obj_t genesis_obj[] =
-  {
-    {0, WF_SWITCH},
-    {0, WF_DEFAULT},
-    {0, WF_DEFAULT | WF_NO_SPLIT},
-    {0, WF_INIT | WF_PROBE},
-    {0, WF_INIT | WF_PROBE | WF_STOP},
-    {UCON64_GEN, WF_SWITCH},
-    {UCON64_GEN, WF_DEFAULT},
-    {UCON64_GEN, WF_DEFAULT | WF_NO_SPLIT}
-  };
-
 const st_getopt2_t genesis_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"/*"1989/19XX/19XX Sega http://www.sega.com"*/,
-      NULL
+      NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"/*"1989/19XX/19XX Sega http://www.sega.com"*/
     },
     {
       UCON64_GEN_S, 0, 0, UCON64_GEN,
-      NULL, "force recognition",
-      &genesis_obj[5]
+      NULL, "force recognition"
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved format (SMD)",
-      &genesis_obj[0]
+      NULL, "force ROM is in interleaved format (SMD)"
     },
     {
       "int2", 0, 0, UCON64_INT2,
-      NULL, "force ROM is in interleaved format 2 (MGD)",
-      &genesis_obj[0]
+      NULL, "force ROM is in interleaved format 2 (MGD)"
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved format (BIN/RAW)",
-      &genesis_obj[0]
+      NULL, "force ROM is not in interleaved format (BIN/RAW)"
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change foreign ROM name to NEW_NAME",
-      &genesis_obj[1]
+      "NEW_NAME", "change foreign ROM name to NEW_NAME"
     },
     {
       "n2", 1, 0, UCON64_N2,
-      "NEW_NAME", "change Japanese ROM name to NEW_NAME",
-      &genesis_obj[6]
+      "NEW_NAME", "change Japanese ROM name to NEW_NAME"
     },
     {
       "smd", 0, 0, UCON64_SMD,
-      NULL, "convert to Super Magic Drive/SMD",
-      &genesis_obj[2]
+      NULL, "convert to Super Magic Drive/SMD"
     },
     {
       "smds", 0, 0, UCON64_SMDS,
-      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD",
-      NULL
+      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"
     },
-    {
+    { 
       "bin", 0, 0, UCON64_BIN,
-      NULL, "convert to Magicom/BIN/RAW",
-      &genesis_obj[7]
+      NULL, "convert to Magicom/BIN/RAW"
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game*/MGD2/MGH",
-      &genesis_obj[2]
+      NULL, "convert to Multi Game*/MGD2/MGH"
     },
 #if 0
     {
       "gf", 0, 0, UCON64_GF,
-      NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE",
-      NULL
+      NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE"
     },
     {
       "ga", 0, 0, UCON64_GA,
-      NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE",
-      NULL
+      NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE"
     },
     {
       "gym", 0, 0, UCON64_GYM,
-      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE",
-      NULL
+      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE"
     },
     {
       "cym", 0, 0, UCON64_CYM,
-      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE",
-      NULL
+      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE"
     },
 #endif
     {
       "stp", 0, 0, UCON64_STP,
       NULL, "convert SRAM from backup unit for use with an emulator\n"
-      OPTION_LONG_S "stp just strips the first 512 bytes",
-      NULL
+      OPTION_LONG_S "stp just strips the first 512 bytes"
     },
     {
       "j", 0, 0, UCON64_J,
-      NULL, "join split ROM",
-      &genesis_obj[3]
+      NULL, "join split ROM"
     },
     {
       "s", 0, 0, UCON64_S,
-      NULL, "split ROM; default part size is 8 Mb (4 Mb for SMD)",
-      &genesis_obj[2]
+      NULL, "split ROM; default part size is 8 Mb (4 Mb for SMD)"
     },
     {
       "ssize", 1, 0, UCON64_SSIZE,
-      "SIZE", "specify split part size in Mbit",
-      &genesis_obj[0]
+      "SIZE", "specify split part size in Mbit"
     },
     {
       "f", 0, 0, UCON64_F,
-      NULL, "remove NTSC/PAL protection",
-      &genesis_obj[1]
+      NULL, "remove NTSC/PAL protection"
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum",
-      &genesis_obj[1]
+      NULL, "fix ROM checksum"
     },
     {
       "1991", 0, 0, UCON64_1991,
       NULL, "fix old third party ROMs to work with consoles build after\n"
-      "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"",
-      &genesis_obj[6]
+      "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\""
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with MD-PRO flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
-      "all the ROMs, multi-game file to create last",
-      &genesis_obj[4]
+      "all the ROMs, multi-game file to create last"
     },
     {
       "region", 1, 0, UCON64_REGION,
@@ -196,20 +161,18 @@ const st_getopt2_t genesis_usage[] =
       "CODE=0 force NTSC/Japan for all games\n"
       "CODE=1 force NTSC/U.S.A. for all games\n"
       "CODE=2 force PAL for all games\n"
-      "CODE=x use whatever setting games expect",
-      &genesis_obj[5]
+      "CODE=x use whatever setting games expect"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 const st_getopt2_t bin_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Magicom/BIN/RAW",
-      NULL
+      NULL, "Magicom/BIN/RAW"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 typedef struct st_genesis_header
@@ -848,7 +811,7 @@ genesis_chk (st_ucon64_nfo_t *rominfo)
   rom_buffer[GENESIS_HEADER_START + 143] = rominfo->current_internal_crc;      // low byte of checksum
   rom_buffer[GENESIS_HEADER_START + 142] = rominfo->current_internal_crc >> 8; // high byte of checksum
 
-  dumper (stdout, &rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e, DUMPER_HEX);
+  dumper (stdout, &rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e, 0);
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -1008,7 +971,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
   if (type != BIN)
     {
       if (ucon64.fcrc32 == 0)
-        ucon64.fcrc32 = ucon64_crc32 (ucon64.fcrc32, rom_buffer, genesis_rom_size);
+        ucon64.fcrc32 = crc32_wrap (ucon64.fcrc32, rom_buffer, genesis_rom_size);
 
       if (type == SMD)
         smd_deinterleave (rom_buffer, bytesread);
@@ -1017,7 +980,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
     }
 
   if (ucon64.crc32 == 0)                        // calculate the CRC32 only once
-    ucon64.crc32 = ucon64_crc32 (0, rom_buffer, bytesread);
+    ucon64.crc32 = crc32_wrap (0, rom_buffer, bytesread);
 
   fclose (file);
   return rom_buffer;

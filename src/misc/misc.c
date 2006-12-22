@@ -228,7 +228,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
             (int) (pos + virtual_start + 1),
             (int) (pos + virtual_start + 1));
       }
-    else // if (flags & DUMPER_HEX) // default
+    else // default
       {
         if (!(pos & 15))
           fprintf (output, (flags & DUMPER_DEC_COUNT ? "%08d  " : "%08x  "),
@@ -253,7 +253,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
     }
   else if (flags & DUMPER_CODE)
     return;
-  else // if (flags & DUMPER_HEX) // default
+  else // default
     {
       if (pos & 15)
         {

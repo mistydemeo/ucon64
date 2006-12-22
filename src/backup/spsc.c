@@ -37,20 +37,18 @@ const st_getopt2_t spsc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "(Starpath) Supercharger",
+      NULL, "(Starpath) Supercharger"
       /*"19XX Bridgestone http://www.bridgestonemultimedia.com"*/
-      NULL
     },
 #if 0
     {
       "xspsc", 0, 0, UCON64_XSPSC,
       NULL, "send/receive ROM to/from (Starpath) Supercharger\n"
       "actually (Starpath) Supercharger backup units use\n"
-      "audio input/output to transfer ROMs",
-      &ucon64_wf[WF_OBJ_ATA_STOP_NO_ROM]
+      "audio input/output to transfer ROMs"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

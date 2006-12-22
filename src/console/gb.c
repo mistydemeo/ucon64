@@ -47,75 +47,57 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GB_HEADER_LEN (sizeof (st_gb_header_t))
 
 
-static st_ucon64_obj_t gb_obj[] =
-  {
-    {0, WF_DEFAULT},
-    {UCON64_GB, WF_SWITCH},
-    {UCON64_GB, WF_DEFAULT}
-  };
-
 const st_getopt2_t gb_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "Game Boy/(Super GB)/GB Pocket/Color GB"
-      /*"1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"*/,
-      NULL
+      /*"1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"*/
     },
     {
       UCON64_GB_S, 0, 0, UCON64_GB,
-      NULL, "force recognition",
-      &gb_obj[1]
+      NULL, "force recognition"
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &gb_obj[0]
+      "NEW_NAME", "change internal ROM name to NEW_NAME"
     },
     {
       "logo", 0, 0, UCON64_LOGO,
-      NULL, "restore ROM logo character data (offset: 0x104-0x134)",
-      &gb_obj[0]
+      NULL, "restore ROM logo character data (offset: 0x104-0x134)"
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game*/MGD2/RAW",
-      &gb_obj[0]
+      NULL, "convert to Multi Game*/MGD2/RAW"
     },
     {
       "ssc", 0, 0, UCON64_SSC,
-      NULL, "convert to Super Smart Card/SSC",
-      &gb_obj[2]
+      NULL, "convert to Super Smart Card/SSC"
     },
     {
       "sc", 0, 0, UCON64_SC,
       NULL, "convert to SuperCard\n"
-            "(creates: SAV template)",
-      &gb_obj[0]
+            "(creates: SAV template)"
     },
     {
       "sgb", 0, 0, UCON64_SGB,
-      NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX",
-      &gb_obj[2]
+      NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"
     },
     {
       "gbx", 0, 0, UCON64_GBX,
-      NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC",
-      &gb_obj[2]
+      NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"
     },
     {
       "n2gb", 1, 0, UCON64_N2GB,
       "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
       "ROM should be KAMI's FC Emulator ROM image\n"
-      "NESROM should contain 16 kB of PRG data and 8 kB of CHR data",
-      &gb_obj[2]
+      "NESROM should contain 16 kB of PRG data and 8 kB of CHR data"
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum",
-      &gb_obj[0]
+      NULL, "fix ROM checksum"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 
@@ -413,7 +395,7 @@ gb_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fwrite (buf, rominfo->backup_header_len + GB_HEADER_START + 0x4d, 3,
                  dest_name, "r+b");
 
-  dumper (stdout, buf, 3, GB_HEADER_START + rominfo->backup_header_len + 0x4d, DUMPER_HEX);
+  dumper (stdout, buf, 3, GB_HEADER_START + rominfo->backup_header_len + 0x4d, 0);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;

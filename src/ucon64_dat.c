@@ -86,103 +86,78 @@ static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
 
-static st_ucon64_obj_t ucon64_dat_obj[] =
-  {
-    {0, WF_STOP | WF_NO_ROM},
-    {0, WF_INIT | WF_NO_SPLIT},
-    {0, WF_INIT | WF_PROBE},
-    {0, WF_NO_ARCHIVE},
-    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT}
-  };
-
 const st_getopt2_t ucon64_dat_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "DATabase (support for DAT files)",
-      NULL
+      NULL, "DATabase (support for DAT files)"
     },
     {
       "db", 0, 0, UCON64_DB,
-      NULL, "DATabase statistics",
-      &ucon64_dat_obj[0]
+      NULL, "DATabase statistics"
     },
     {
       "dbv", 0, 0, UCON64_DBV,
-      NULL, "like " OPTION_LONG_S "db but more verbose",
-      &ucon64_dat_obj[0]
+      NULL, "like " OPTION_LONG_S "db but more verbose"
     },
 #if 0
     {
       "dbsql", 0, 0, UCON64_DBSQL,
-      NULL, "turn all DAT files into a ANSI SQL script",
-      &ucon64_dat_obj[0]
+      NULL, "turn all DAT files into a ANSI SQL script"
     },
 #endif
     {
       "dbs", 1, 0, UCON64_DBS,
-      "CRC32", "search ROM with CRC32 in DATabase",
-      &ucon64_dat_obj[0]
+      "CRC32", "search ROM with CRC32 in DATabase"
     },
     {
       "scan", 0, 0, UCON64_SCAN,
       NULL, "generate ROM list for all ROMs using DATabase\n"
-      "like: GoodXXXX scan ...",
-      &ucon64_dat_obj[4]
+      "like: GoodXXXX scan ..."
     },
     {
       "lsd", 0, 0, UCON64_LSD,
-      NULL, "same as " OPTION_LONG_S "scan",
-      &ucon64_dat_obj[2]
+      NULL, "same as " OPTION_LONG_S "scan"
     },
     {
       "mkdat", 1, 0, UCON64_MKDAT,
-      "DATFILE", "create DAT file; use -o to specify an output directory",
-      &ucon64_dat_obj[2]
+      "DATFILE", "create DAT file; use -o to specify an output directory"
     },
     {
       "rdat", 0, 0, UCON64_RDAT,
       NULL, "rename ROMs to their DATabase names\n"
-      "use -o to specify an output directory",
-      &ucon64_dat_obj[4]
+      "use -o to specify an output directory"
     },
     {
       "rrom", 0, 0, UCON64_RROM,
-      NULL, "rename ROMs to their internal names (if any)",
-      &ucon64_dat_obj[4]
+      NULL, "rename ROMs to their internal names (if any)"
     },
     {
       "r83", 0, 0, UCON64_R83,
-      NULL, "rename to 8.3 filenames",
-      &ucon64_dat_obj[3]
+      NULL, "rename to 8.3 filenames"
     },
     {
       "rjoliet", 0, 0, UCON64_RJOLIET,
-      NULL, "rename to Joliet compatible filenames",
-      &ucon64_dat_obj[3]
+      NULL, "rename to Joliet compatible filenames"
     },
     {
       "rl", 0, 0, UCON64_RL,
-      NULL, "rename to lowercase",
-      &ucon64_dat_obj[3] 
+      NULL, "rename to lowercase"
     },
     {
       "ru", 0, 0, UCON64_RU,
-      NULL, "rename to uppercase",
-      &ucon64_dat_obj[3]
+      NULL, "rename to uppercase"
     },
 #if 0
     {
       "good", 0, 0, UCON64_GOOD,
       NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
-      "the DATabase",
-      NULL
+      "the DATabase"
     },
 #endif
     {
       NULL, 0, 0, 0,
-      NULL, NULL,
-      NULL
+      NULL, NULL
     }
   };
 
@@ -1035,7 +1010,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                    int backup_header_len)
 {
   static int first_file = 1, console;
-  int n, x;
+  int n;
   static char *console_name;
   char fname[FILENAME_MAX], *ptr;
   time_t time_t_val;
@@ -1228,9 +1203,6 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     }
 
   fputs (filename, stdout);
-  if (ucon64.quiet == -1)                       // -v was specified
-    if (ucon64.fname_arch[0])
-      printf (" (%s)", ucon64.fname_arch);
   fputc ('\n', stdout);
 
   if (ucon64.console != console)                // ucon64.quiet == -1
@@ -1245,22 +1217,12 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
 
   // Store the CRC32 to check if a file is unique
   ucon64_mkdat_entries[ucon64_n_files].crc32 = ucon64.crc32;
+#warning TEST this
   /*
     Also store the name of the file to display a helpful error message if a
-    file is not unique (a duplicate). We store the current filename inside the
-    archive as well, to be even more helpful :-)
+    file is not unique (a duplicate).
   */
-  x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 1);
-  if (!(ucon64_mkdat_entries[ucon64_n_files].fname = (char *) malloc (x)))
-    {                                                 // + 3 for " ()"
-      fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);  //  + 1 for ASCII-z
-      exit (1);
-    }
-  sprintf (ucon64_mkdat_entries[ucon64_n_files].fname, "%s%s%s%s",
-    fname,
-    ucon64.fname_arch[0] ? " (" : "",
-    ucon64.fname_arch[0] ? ucon64.fname_arch : "",
-    ucon64.fname_arch[0] ? ")" : "");
+  ucon64_mkdat_entries[ucon64_n_files].fname = fname;
 
   ptr = (char *) get_suffix (fname);
   if (*ptr)
@@ -1281,7 +1243,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            fname,
                            fname,
                            ucon64.crc32,
-                           ucon64.file_size - backup_header_len);
+                           fsizeof (ucon64.fname) - backup_header_len);
   ucon64_n_files++;
   return 0;
 }

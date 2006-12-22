@@ -35,25 +35,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/parallel.h"
 
 
-static st_ucon64_obj_t dex_obj[] =
-  {
-    {0, WF_DEFAULT | WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t dex_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "DexDrive"/*"19XX InterAct http://www.dexdrive.de"*/,
-      NULL
+      NULL, "DexDrive"/*"19XX InterAct http://www.dexdrive.de"*/
     },
     {
       "xdex", 1, 0, UCON64_XDEX,
       "N", "send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &dex_obj[0]
+      "receives automatically when SRAM does not exist"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

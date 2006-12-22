@@ -36,6 +36,8 @@ extern "C" {
              use zlib's crc32() if USE_ZLIB is defined...
              ... but make it possible to link against a library
              that uses zlib while this code does not use it
+
+  crc32_wrap() wrapper for own or zlib's crc32()
 */
 extern unsigned short crc16 (unsigned short crc, const void *buffer, unsigned int size);
 #ifdef  USE_ZLIB
@@ -43,6 +45,7 @@ extern unsigned short crc16 (unsigned short crc, const void *buffer, unsigned in
 #else
 extern unsigned int crc32 (unsigned int crc, const void *buffer, unsigned int size);
 #endif
+extern unsigned int crc32_wrap (unsigned int crc, const void *buffer, unsigned int size);
 
 
 #ifdef  __cplusplus

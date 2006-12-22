@@ -47,46 +47,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int nds_chksum (void);
 
 
-static st_ucon64_obj_t nds_obj[] =
-  {
-    {0, WF_DEFAULT},
-    {UCON64_NDS, WF_SWITCH},
-    {UCON64_NDS, WF_DEFAULT} 
-  };
-
 const st_getopt2_t nds_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Nintendo DS"/*"2005 Nintendo http://www.nintendo.com"*/,
-      NULL
+      NULL, "Nintendo DS"/*"2005 Nintendo http://www.nintendo.com"*/
     },
     {
       UCON64_NDS_S, 0, 0, UCON64_NDS,
-      NULL, "force recognition",
-      &nds_obj[1]
+      NULL, "force recognition"
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME",
-      &nds_obj[0]
+      "NEW_NAME", "change internal ROM name to NEW_NAME"
     },
     {
       "logo", 0, 0, UCON64_LOGO,
-      NULL, "restore ROM logo character data",
-      &nds_obj[0]
+      NULL, "restore ROM logo character data"
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM header checksum",
-      &nds_obj[0]
+      NULL, "fix ROM header checksum"
     },
     {
       "sc", 0, 0, UCON64_SC,
-      NULL, "convert to SuperCard\n",
-      &nds_obj[2]
+      NULL, "convert to SuperCard\n"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 
@@ -212,7 +199,7 @@ nds_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fwrite (p, NDS_HEADER_START + rominfo->backup_header_len + 0x15e,
     2, dest_name, "r+b");
 
-  dumper (stdout, p, 2, NDS_HEADER_START + rominfo->backup_header_len + 0x15e, DUMPER_HEX);
+  dumper (stdout, p, 2, NDS_HEADER_START + rominfo->backup_header_len + 0x15e, 0);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;

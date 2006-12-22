@@ -39,27 +39,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/parallel.h"
 
 
-static st_ucon64_obj_t doctor64_obj[] =
-  {
-    {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t doctor64_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Doctor V64"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
-      NULL
+      NULL, "Doctor V64"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xv64", 0, 0, UCON64_XV64,
       NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist",
-      &doctor64_obj[0]
+      "receives automatically when ROM does not exist"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

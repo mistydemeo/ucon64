@@ -230,8 +230,8 @@ st_configure_in_t configure_in[] = {
     {NULL},
     {NULL},
     {NULL},
-    "#TEST_CMDLINE=1\n"
-    "#CFLAGS+=-DTEST_CMDLINE\n",
+    "#TEST_UCON64=1\n"
+    "#CFLAGS+=-DTEST_UCON64\n",
     NULL,
     NULL,
     NULL

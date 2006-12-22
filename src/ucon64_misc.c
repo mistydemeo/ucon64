@@ -55,18 +55,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "patch/patch.h"
 
 
-/*
-  This is a string pool. gcc 2.9x generates something like this itself, but it
-  seems gcc 3.x does not. By using a string pool the executable will be
-  smaller than without it.
-  It's also handy in order to be consistent with messages.
-*/
+// this is handy in order to be consistent with messages.
 const char *ucon64_msg[] =
   {
     "ERROR: Communication with backup unit failed\n"                    // PARPORT_ERROR
     "TIP:   Check cables and connection\n"
     "       Turn the backup unit off and on\n"
-//    "       Split ROMs must be joined first\n" // handled with WF_NO_SPLIT
     "       Use " OPTION_LONG_S "port={3bc, 378, 278, ...} to specify a parallel port address\n"
     "       Set the port to SPP (standard, normal) mode in your BIOS as some backup\n"
     "         units do not support EPP and ECP style parallel ports\n"
@@ -98,48 +92,28 @@ const char *ucon64_msg[] =
   };
 
 
-static st_ucon64_obj_t ucon64_option_obj[] =
-  {
-    {0, WF_SWITCH},
-    {0, WF_DEFAULT},
-    {0, WF_STOP},
-    {0, WF_NO_ROM},
-    {0, WF_DEFAULT | WF_STOP | WF_NO_ROM},
-    {0, WF_NO_ARCHIVE},
-    {0, WF_INIT},
-    {0, WF_INIT | WF_PROBE},
-    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT},
-    {0, WF_INIT | WF_PROBE | WF_NO_CRC32}
-  };
-
-
 const st_getopt2_t ucon64_options_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Options",
-      NULL
+      NULL, "Options"
     },
     {
       "o", 1, 0, UCON64_O,
-      "DIRECTORY", "specify output directory",
-      &ucon64_option_obj[0]
+      "DIRECTORY", "specify output directory"
     },
     {
       "r", 0, 0, UCON64_R,
-      NULL, "process subdirectories recursively",
-      &ucon64_option_obj[0]
+      NULL, "process subdirectories recursively"
     },
     {
       "nbak", 0, 0, UCON64_NBAK,
-      NULL, "prevents backup files (*.BAK)",
-      &ucon64_option_obj[0]
+      NULL, "prevents backup files (*.BAK)"
     },
 #ifdef  USE_ANSI_COLOR
     {
       "ncol", 0, 0, UCON64_NCOL,
-      NULL, "disable ANSI colors in output",
-      &ucon64_option_obj[0]
+      NULL, "disable ANSI colors in output"
     },
 #endif
 #if     defined USE_PARALLEL || defined USE_USB
@@ -164,144 +138,118 @@ const st_getopt2_t ucon64_options_usage[] =
 #endif
         "} (default: auto)\n"
         "In order to connect a copier to a PC's parallel port\n"
-        "you need a standard bidirectional parallel cable",
-      &ucon64_option_obj[0]
+        "you need a standard bidirectional parallel cable"
     },
 #endif // defined USE_PARALLEL || defined USE_USB
 #ifdef  USE_PARALLEL
     {
       "xreset", 0, 0, UCON64_XRESET,
-      NULL, "reset parallel port",
-      &ucon64_option_obj[3]             // it's NOT a stop option
+      NULL, "reset parallel port"
     },
 #endif
     {
       "hdn", 1, 0, UCON64_HDN,
-      "N", "force ROM has backup unit/emulator header with size of N Bytes",
-      &ucon64_option_obj[0]
+      "N", "force ROM has backup unit/emulator header with size of N Bytes"
     },
     {
       "hd", 0, 0, UCON64_HD,
       NULL, "same as " OPTION_LONG_S "hdn=512\n"
-      "most backup units use a header with a size of 512 Bytes",
-      &ucon64_option_obj[0]
+      "most backup units use a header with a size of 512 Bytes"
     },
     {
       "nhd", 0, 0, UCON64_NHD,
-      NULL, "force ROM has no backup unit/emulator header",
-      &ucon64_option_obj[0]
+      NULL, "force ROM has no backup unit/emulator header"
     },
     {
       "ns", 0, 0, UCON64_NS,
-      NULL, "force ROM is not split",
-      &ucon64_option_obj[0]
+      NULL, "force ROM is not split"
     },
     {
       "e", 0, 0, UCON64_E,
-      NULL, "emulate/run ROM (check " PROPERTY_HOME_RC("ucon64") " for all Emulator settings)",
-      &ucon64_option_obj[1]
+      NULL, "emulate/run ROM (check " PROPERTY_HOME_RC("ucon64") " for all Emulator settings)"
     },
     {
       "crc", 0, 0, UCON64_CRC,
-      NULL, "show CRC32 value of ROM",
-      &ucon64_option_obj[9]
+      NULL, "show CRC32 value of ROM"
     },
     {
       "sha1", 0, 0, UCON64_SHA1,
-      NULL, "show SHA1 value of ROM",
-      &ucon64_option_obj[9]
+      NULL, "show SHA1 value of ROM"
     },
     {
       "md5", 0, 0, UCON64_MD5,
-      NULL, "show MD5 value of ROM",
-      &ucon64_option_obj[9]
+      NULL, "show MD5 value of ROM"
     },
     {
       "ls", 0, 0, UCON64_LS,
-      NULL, "generate ROM list for all recognized ROMs",
-      &ucon64_option_obj[7]
+      NULL, "generate ROM list for all recognized ROMs"
     },
     {
       "lsv", 0, 0, UCON64_LSV,
-      NULL, "like " OPTION_LONG_S "ls but more verbose",
-      &ucon64_option_obj[7]
+      NULL, "like " OPTION_LONG_S "ls but more verbose"
     },
     {
       "hex", 2, 0, UCON64_HEX,
       "ST", "show ROM as hexdump\n"
-      "ST is the optional start value in bytes",
-      NULL
+      "ST is the optional start value in bytes"
     },
     {
       "bits", 2, 0, UCON64_BITS,
-      "ST", "show ROM as bitdump",
-      NULL
+      "ST", "show ROM as bitdump"
     },
     {
       "code", 2, 0, UCON64_CODE,
-      "ST", "show ROM as code",
-      NULL
+      "ST", "show ROM as code"
     },
     {
       "print", 2, 0, UCON64_PRINT,
-      "ST", "show ROM in printable characters",
-      NULL
+      "ST", "show ROM in printable characters"
     },
     {
       "find", 1, 0, UCON64_FIND,
-      "STRING", "find STRING in ROM (wildcard: '?')",
-      &ucon64_option_obj[6]
+      "STRING", "find STRING in ROM (wildcard: '?')"
     },
     {
       "findi", 1, 0, UCON64_FINDI,
-      "STR", "like " OPTION_LONG_S "find but ignores the case of alpha bytes",
-      &ucon64_option_obj[6]
+      "STR", "like " OPTION_LONG_S "find but ignores the case of alpha bytes"
     },
     {
       "findr", 1, 0, UCON64_FINDR,
       "STR", "like " OPTION_LONG_S "find but looks also for shifted/relative similarities\n"
-      "(no wildcard supported)",
-      &ucon64_option_obj[6]
+      "(no wildcard supported)"
     },
     {
       "hfind", 1, 0, UCON64_HFIND,
       "HEX", "find HEX codes in ROM; use quotation " OPTION_LONG_S "hfind=\"75 ? 4f 4e\"\n"
-             "(wildcard: '?')",
-      &ucon64_option_obj[6]
+             "(wildcard: '?')"
     },
     {
       "hfindr", 1, 0, UCON64_HFINDR,
       "HEX", "like " OPTION_LONG_S "hfind but looks also for shifted/relative similarities\n"
-      "(no wildcard supported)",
-      &ucon64_option_obj[6]
+      "(no wildcard supported)"
     },
     {
       "dfind", 1, 0, UCON64_DFIND,
       "DEC", "find DEC values in ROM; use quotation " OPTION_LONG_S "dfind=\"117 ? 79 78\"\n"
-             "(wildcard: '?')",
-      &ucon64_option_obj[6]
+             "(wildcard: '?')"
     },
     {
       "dfindr", 1, 0, UCON64_DFINDR,
       "DEC", "like " OPTION_LONG_S "dfind but looks also for shifted/relative similarities\n"
-      "(no wildcard supported)",
-      &ucon64_option_obj[6]
+      "(no wildcard supported)"
     },
     {
       "c", 1, 0, UCON64_C,
-      "FILE", "compare FILE with ROM for differences",
-      NULL
+      "FILE", "compare FILE with ROM for differences"
     },
     {
       "cs", 1, 0, UCON64_CS,
-      "FILE", "compare FILE with ROM for similarities",
-      NULL
+      "FILE", "compare FILE with ROM for similarities"
     },
 #if 0
     {
       "c2", 1, 0, UCON64_C2,
-      "FILE", "like " OPTION_S "c but shows differences as graphic",
-      NULL
+      "FILE", "like " OPTION_S "c but shows differences as graphic"
     },
 #endif
     {
@@ -312,100 +260,80 @@ const st_getopt2_t ucon64_options_usage[] =
               "WHAT=\"dat\"    show help for DAT support\n"
               "WHAT=\"patch\"  show help for patching ROMs\n"
               "WHAT=\"backup\" show help for backup units\n"
-              OPTION_LONG_S "help " OPTION_LONG_S "snes would show only SNES related help",
-      &ucon64_option_obj[2]
+              OPTION_LONG_S "help " OPTION_LONG_S "snes would show only SNES related help"
     },
     {
       "h", 2, 0, UCON64_HELP,
-      "WHAT", "same as " OPTION_LONG_S "help",
-      &ucon64_option_obj[2]
+      "WHAT", "same as " OPTION_LONG_S "help"
     },
     {
       "?", 2, 0, UCON64_HELP,
-      "WHAT", "same as " OPTION_LONG_S "help",
-      &ucon64_option_obj[2]
+      "WHAT", "same as " OPTION_LONG_S "help"
     },
     {
       "version", 0, 0, UCON64_VER,
-      NULL, "output version information and exit",
-      &ucon64_option_obj[2]
+      NULL, "output version information and exit"
     },
     {
       "q", 0, 0, UCON64_Q,
-      NULL, "be quiet (don't show ROM info)",
-      &ucon64_option_obj[0]
+      NULL, "be quiet (don't show ROM info)"
     },
 #if 0
     {
       "qq", 0, 0, UCON64_QQ,
-      NULL, "be even more quiet",
-      &ucon64_option_obj[0]
+      NULL, "be even more quiet"
     },
 #endif
     {
       "v", 0, 0, UCON64_V,
-      NULL, "be more verbose (show backup unit headers also)",
-      &ucon64_option_obj[0]
+      NULL, "be more verbose (show backup unit headers also)"
     },
     {
       "frontend", 0, 0, UCON64_FRONTEND,
-      NULL, "switch behaviour for frontends",
-      &ucon64_option_obj[0]
+      NULL, "switch behaviour for frontends"
     },
     // hidden options
     {
-      "dual", 2, 0, UCON64_BITS,                // dual was renamed to binary
-      NULL, NULL,
-      NULL
+      "dual", 2, 0, UCON64_BITS,                // dual was renamed to bits
+      NULL, NULL
     },
     {
       "crchd", 0, 0, UCON64_CRCHD,              // backward compat.
-      NULL, NULL,
-      &ucon64_option_obj[9]
+      NULL, NULL
     },
     {
       "file", 1, 0, UCON64_FILE,                // obsolete?
-      NULL, NULL,
-      &ucon64_option_obj[0]
+      NULL, NULL
     },
     {
       "id", 0, 0, UCON64_ID,                    // currently only used in snes.c
-      NULL, NULL,
-      &ucon64_option_obj[0]
+      NULL, NULL
     },
     {
       "rom", 0, 0, UCON64_ROM,                  // obsolete?
-      NULL, NULL,
-      &ucon64_option_obj[0]
+      NULL, NULL
     },
     {
       "rename", 0, 0, UCON64_RDAT,              // is now "rdat"
-      NULL, NULL,
-      &ucon64_option_obj[8]
+      NULL, NULL
     },
     {
       "force63", 0, 0, UCON64_RJOLIET,          // is now "rjoilet"
-      NULL, NULL,
-      &ucon64_option_obj[5]
+      NULL, NULL
     },
     {
       "rr83", 0, 0, UCON64_R83,                 // is now "r83"
-      NULL, NULL,
-      &ucon64_option_obj[5]
+      NULL, NULL
     },
     {
       "83", 0, 0, UCON64_R83,                   // is now "r83"
-      NULL, NULL,
-      &ucon64_option_obj[5]
+      NULL, NULL
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
-  };
-
-
-static st_ucon64_obj_t ucon64_padding_obj[] =
-  {
-    {0, WF_DEFAULT},
-    {0, WF_INIT | WF_NO_SPLIT}
+    {
+      "padhd", 0, 0, UCON64_PADHD,              // backward compat.
+      NULL, NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 
@@ -413,58 +341,75 @@ const st_getopt2_t ucon64_padding_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Padding",
-      NULL
+      NULL, "Padding"
     },
     {
       "ispad", 0, 0, UCON64_ISPAD,
-      NULL, "check if ROM is padded",
-      &ucon64_padding_obj[1]
+      NULL, "check if ROM is padded"
     },
     {
       "pad", 0, 0, UCON64_PAD,
-      NULL, "pad ROM to next Mb",
-      &ucon64_padding_obj[0]
+      NULL, "pad ROM to next Mb"
     },
     {
       "p", 0, 0, UCON64_P,
-      NULL, "same as " OPTION_LONG_S "pad",
-      &ucon64_padding_obj[0]
+      NULL, "same as " OPTION_LONG_S "pad"
     },
     {
       "padn", 1, 0, UCON64_PADN,
-      "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)",
-      &ucon64_padding_obj[0]
+      "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"
     },
     {
       "strip", 1, 0, UCON64_STRIP,
-      "N", "strip N Bytes from end of ROM",
-      NULL
+      "N", "strip N Bytes from end of ROM"
     },
     {
       "stpn", 1, 0, UCON64_STPN,
-      "N", "strip N Bytes from start of ROM",
-      NULL
+      "N", "strip N Bytes from start of ROM"
     },
     {
       "stp", 0, 0, UCON64_STP,
       NULL, "same as " OPTION_LONG_S "stpn=512\n"
-      "most backup units use a header with a size of 512 Bytes",
-      NULL
+      "most backup units use a header with a size of 512 Bytes"
     },
     {
       "insn", 1, 0, UCON64_INSN,
-      "N", "insert N Bytes (0x00) before ROM",
-      NULL
+      "N", "insert N Bytes (0x00) before ROM"
     },
     {
       "ins", 0, 0, UCON64_INS,
       NULL, "same as " OPTION_LONG_S "insn=512\n"
-      "most backup units use a header with a size of 512 Bytes",
-      NULL
+      "most backup units use a header with a size of 512 Bytes"
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
+
+
+int
+bswap16_n (void *buffer, int n)
+// bswap16() n bytes of buffer
+{
+  int i = n;
+  uint16_t *w = (uint16_t *) buffer;
+
+  for (; i > 1; i -= 2, w++)
+    *w = bswap_16 (*w);
+
+  return n;                                     // return # of bytes swapped
+}
+
+
+void
+parport_print_info (void)
+{
+#ifdef  USE_PPDEV
+  printf ("Using parallel port device: %s\n", ucon64.parport_dev);
+#elif   defined AMIGA
+  printf ("Using parallel port device: %s, port %d\n", ucon64.parport_dev, ucon64.parport);
+#else
+  printf ("Using I/O port base address: 0x%x\n", ucon64.parport);
+#endif
+}
 
 
 static unsigned char *binbuf = NULL;
@@ -570,50 +515,6 @@ ucon64_get_binary (const unsigned char **data, char *id)
 
 
 int
-bswap16_n (void *buffer, int n)
-// bswap16() n bytes of buffer
-{
-  int i = n;
-  uint16_t *w = (uint16_t *) buffer;
-
-  for (; i > 1; i -= 2, w++)
-    *w = bswap_16 (*w);
-
-  return n;                                     // return # of bytes swapped
-}
-
-
-int
-wswap32_n (void *buffer, int n)
-// wswap32() n/2 words of buffer
-{
-  int i = n;
-  uint32_t *l = (uint32_t *) buffer;
-
-  i >>= 1;                                      // # words = # bytes / 2
-  for (; i > 1; i -= 2, l++)
-    *l = wswap_32 (*l);
-
-  return n;                                     // return # of bytes swapped
-}
-
-
-unsigned int
-ucon64_crc32 (unsigned int crc, const void *buffer, unsigned int size)
-{
-  st_hash_t *h = NULL;
-
-  h = hash_open (HASH_CRC32);
-  h->crc32 = crc;
-  h = hash_update (h, buffer, size);
-  crc = hash_get_crc32 (h);
-  hash_close (h);
-
-  return crc;
-}
-
-
-int
 ucon64_file_handler (char *dest, char *src, int flags)
 /*
   We have to handle the following cases (for example -swc and rom.swc exists):
@@ -699,16 +600,8 @@ ucon64_output_fname (char *requested_fname, int flags)
   //  location in the original string
   strncpy (suffix, get_suffix (requested_fname), sizeof (suffix))[sizeof (suffix) - 1] = 0; // in case suffix is >= 80 chars
 
-  // OF_FORCE_BASENAME is necessary for options like -gd3. Of course that
-  //  code should handle archives and come up with unique filenames for
-  //  archives with more than one file.
-  if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
-    {
-      strcpy (fname, basename2 (requested_fname));
-      sprintf (requested_fname, "%s%s", ucon64.output_path, fname);
-    }
-  else                                          // an archive (for now: zip file)
-    sprintf (requested_fname, "%s%s", ucon64.output_path, ucon64.fname_arch);
+  strcpy (fname, basename2 (requested_fname));
+  sprintf (requested_fname, "%s%s", ucon64.output_path, fname);
 
   /*
     Keep the requested suffix, but only if it isn't ".zip" or ".gz". This
@@ -728,7 +621,6 @@ ucon64_output_fname (char *requested_fname, int flags)
 }
 
 
-#if 1
 int
 ucon64_testpad (const char *filename)
 /*
@@ -782,39 +674,6 @@ ucon64_testpad (const char *filename)
   fclose (file);
   return n;
 }
-#else
-int
-ucon64_testpad (const char *filename)
-// test if EOF is padded (repeating bytes)
-{
-  int pos = ucon64.file_size - 1, buf_pos = pos % MAXBUFSIZE,
-      c = ucon64_fgetc (filename, pos);
-  unsigned char buf[MAXBUFSIZE];
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return -1;
-
-  for (pos -= buf_pos; !fseek (fh, pos, SEEK_SET) && pos > -1;
-       pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
-    {
-      fread (buf, 1, buf_pos, fh);
-
-      for (; buf_pos > 0; buf_pos--)
-        if (buf[buf_pos - 1] != c)
-          {
-            fclose (fh);
-
-            return ucon64.file_size - (pos + buf_pos) > 1 ?
-              ucon64.file_size - (pos + buf_pos) : 0;
-          }
-    }
-
-  fclose (fh);
-
-  return ucon64.file_size;                      // the whole file is "padded"
-}
-#endif
 
 
 int
@@ -1006,7 +865,7 @@ ucon64_rename (int mode)
             return 0;
           }
         strcpy (buf, p);
-        crc = ucon64_crc32 (0, (unsigned char *) buf, len);
+        crc = crc32_wrap (0, (unsigned char *) buf, len);
         len2 = strlen (suffix);
         len -= len2;
         if (len2 <= 16)                 // len > 48
@@ -1045,7 +904,7 @@ ucon64_rename (int mode)
         p = basename2 (ucon64.fname);
         len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
         strcpy (buf, p);
-        crc = ucon64_crc32 (0, (unsigned char *) buf, len);
+        crc = crc32_wrap (0, (unsigned char *) buf, len);
         len2 = strlen (suffix);
         len -= len2;
         if (len <= 8 && len2 <= 4)      // FAT maximum file name length is 8 + 4 chars
@@ -1152,280 +1011,28 @@ ucon64_rename (int mode)
 
 
 int
-ucon64_e (void)
-{
-  int result = 0, x = 0;
-  char buf[MAXBUFSIZE], name[MAXBUFSIZE];
-  const char *value_p = NULL;
-  typedef struct
-  {
-    int id;
-    const char *s;
-  } st_strings_t;
-  st_strings_t s[] = {
-    {UCON64_3DO,      "emulate_" UCON64_3DO_S},
-    {UCON64_ATA,      "emulate_" UCON64_ATA_S},
-    {UCON64_CD32,     "emulate_" UCON64_CD32_S},
-    {UCON64_CDI,      "emulate_" UCON64_CDI_S},
-    {UCON64_COLECO,   "emulate_" UCON64_COLECO_S},
-    {UCON64_DC,       "emulate_" UCON64_DC_S},
-    {UCON64_GB,       "emulate_" UCON64_GB_S},
-    {UCON64_GBA,      "emulate_" UCON64_GBA_S},
-    {UCON64_GC,       "emulate_" UCON64_GC_S},
-    {UCON64_GEN,      "emulate_" UCON64_GEN_S},
-    {UCON64_GP32,     "emulate_" UCON64_GP32_S},
-    {UCON64_INTELLI,  "emulate_" UCON64_INTELLI_S},
-    {UCON64_JAG,      "emulate_" UCON64_JAG_S},
-    {UCON64_LYNX,     "emulate_" UCON64_LYNX_S},
-    {UCON64_ARCADE,   "emulate_" UCON64_ARCADE_S},
-    {UCON64_N64,      "emulate_" UCON64_N64_S},
-    {UCON64_NDS,      "emulate_" UCON64_NDS_S},
-    {UCON64_NES,      "emulate_" UCON64_NES_S},
-    {UCON64_NG,       "emulate_" UCON64_NG_S},
-    {UCON64_NGP,      "emulate_" UCON64_NGP_S},
-    {UCON64_PCE,      "emulate_" UCON64_PCE_S},
-    {UCON64_PS2,      "emulate_" UCON64_PS2_S},
-    {UCON64_PSX,      "emulate_" UCON64_PSX_S},
-    {UCON64_S16,      "emulate_" UCON64_S16_S},
-    {UCON64_SAT,      "emulate_" UCON64_SAT_S},
-    {UCON64_SMS,      "emulate_" UCON64_SMS_S},
-    {UCON64_GAMEGEAR, "emulate_" UCON64_GAMEGEAR_S},
-    {UCON64_SNES,     "emulate_" UCON64_SNES_S},
-    {UCON64_SWAN,     "emulate_" UCON64_SWAN_S},
-    {UCON64_VBOY,     "emulate_" UCON64_VBOY_S},
-    {UCON64_VEC,      "emulate_" UCON64_VEC_S},
-    {UCON64_XBOX,     "emulate_" UCON64_XBOX_S},
-    {0,               NULL}
-  };
-
-  if (access (ucon64.configfile, F_OK) != 0)
-    {
-      fprintf (stderr, "ERROR: %s does not exist\n", ucon64.configfile);
-      return -1;
-    }
-
-  sprintf (name, "emulate_%08x", ucon64.crc32); // look for emulate_<crc32>
-  value_p = get_property (ucon64.configfile, name, PROPERTY_MODE_TEXT);
-
-  if (value_p == NULL)
-    {
-      sprintf (name, "emulate_0x%08x", ucon64.crc32); // look for emulate_0x<crc32>
-      value_p = get_property (ucon64.configfile, name, PROPERTY_MODE_TEXT);
-    }
-
-  if (value_p == NULL)
-    for (x = 0; s[x].s; x++)
-      if (s[x].id == ucon64.console)
-        {
-          value_p = get_property (ucon64.configfile, s[x].s, PROPERTY_MODE_TEXT);
-          break;
-        }
-
-  if (value_p == NULL)
-    {
-      fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
-               "       %s\n"
-               "TIP:   If the wrong console was detected you might try to force recognition\n"
-               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
-               name, ucon64.configfile);
-      return -1;
-    }
-
-  sprintf (buf, "%s \"%s\"", value_p, ucon64.fname);
-
-  puts (buf);
-  fflush (stdout);
-
-  result = system (buf)
-#if     !(defined __MSDOS__ || defined _WIN32)
-           >> 8                                 // the exit code is coded in bits 8-15
-#endif                                          //  (does not apply to DJGPP, MinGW & VC++)
-           ;
-
-#if 1
-  // Snes9x (Linux) for example returns a non-zero value on a normal exit
-  //  (3)...
-  // under WinDOS, system() immediately returns with exit code 0 when
-  //  starting a Windows executable (as if fork() was called) it also
-  //  returns 0 when the exe could not be started
-  if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
-    {
-      fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"
-                       "TIP:   If the wrong emulator was used you might try to force recognition\n"
-                       "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
-               result);
-    }
-#endif
-  return result;
-}
-
-
-#define PATTERN_BUFSIZE (64 * 1024)
-/*
-  In order for this function to be really useful for general purposes
-  change_mem2() should be changed so that it will return detailed status
-  information. Since we don't use it for general purposes, this has not a high
-  priority. It will be updated as soon as there is a need.
-  The thing that currently goes wrong is that offsets that fall outside the
-  buffer (either positive or negative) won't result in a change. It will result
-  in memory corruption...
-*/
-int
-ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
-       buffer[PATTERN_BUFSIZE];
-  FILE *srcfile, *destfile;
-  int bytesread = 0, n, n_found = 0, n_patterns, overlap = 0;
-  st_cm_pattern_t *patterns = NULL;
-
-  realpath2 (pattern_fname, src_name);
-  // First try the current directory, then the configuration directory
-  if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, pattern_fname);
-  n_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
-  if (n_patterns == 0)
-    {
-      fprintf (stderr, "ERROR: No patterns found in %s\n", src_name);
-      cleanup_cm_patterns (&patterns, n_patterns);
-      return -1;
-    }
-  else if (n_patterns < 0)
-    {
-      char dir1[FILENAME_MAX], dir2[FILENAME_MAX];
-      dirname2 (pattern_fname, dir1);
-      dirname2 (src_name, dir2);
-
-      fprintf (stderr, "ERROR: Could not read from %s, not in %s nor in %s\n",
-                       basename2 (pattern_fname), dir1, dir2);
-      // when build_cm_patterns() returns -1, cleanup_cm_patterns() should not be called
-      return -1;
-    }
-
-  printf ("Found %d pattern%s in %s\n", n_patterns, n_patterns != 1 ? "s" : "", src_name);
-
-  for (n = 0; n < n_patterns; n++)
-    {
-      if (patterns[n].search_size > overlap)
-        {
-          overlap = patterns[n].search_size;
-          if (overlap > PATTERN_BUFSIZE)
-            {
-              fprintf (stderr,
-                       "ERROR: Pattern %d is too large, specify a shorter pattern\n",
-                       n + 1);
-              cleanup_cm_patterns (&patterns, n_patterns);
-              return -1;
-            }
-        }
-
-      if ((patterns[n].offset < 0 && patterns[n].offset <= -patterns[n].search_size) ||
-           patterns[n].offset > 0)
-        printf ("WARNING: The offset of pattern %d falls outside the search pattern.\n"
-                "         This can cause problems with the current implementation of --pattern.\n"
-                "         Please consider enlarging the search pattern.\n",
-                n + 1);
-    }
-  overlap--;
-
-  puts ("Searching for patterns...");
-
-  strcpy (src_name, ucon64.fname);
-  strcpy (dest_name, ucon64.fname);
-  ucon64_file_handler (dest_name, src_name, 0);
-  if ((srcfile = fopen (src_name, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
-      return -1;
-    }
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
-  if (rominfo->backup_header_len)                    // copy header (if present)
-    {
-      n = rominfo->backup_header_len;
-      while ((bytesread = fread (buffer, 1, MIN (n, PATTERN_BUFSIZE), srcfile)))
-        {
-          fwrite (buffer, 1, bytesread, destfile);
-          n -= bytesread;
-        }
-    }
-
-  n = fread (buffer, 1, overlap, srcfile);      // keep bytesread set to 0
-  if (n < overlap)                              // DAMN special cases!
-    {
-      n_found += change_mem2 (buffer, n, patterns[n].search,
-                              patterns[n].search_size, patterns[n].wildcard,
-                              patterns[n].escape, patterns[n].replace,
-                              patterns[n].replace_size, patterns[n].offset,
-                              patterns[n].sets);
-      fwrite (buffer, 1, n, destfile);
-      n = -1;
-    }
-  else
-    do
-      {
-        if (bytesread)                          // the code also works without this if
-          {
-            for (n = 0; n < n_patterns; n++)
-              {
-                int x = 1 - patterns[n].search_size;
-                n_found += change_mem2 (buffer + overlap + x,
-                                        bytesread + patterns[n].search_size - 1,
-                                        patterns[n].search, patterns[n].search_size,
-                                        patterns[n].wildcard, patterns[n].escape,
-                                        patterns[n].replace, patterns[n].replace_size,
-                                        patterns[n].offset, patterns[n].sets);
-              }
-            fwrite (buffer, 1, bytesread, destfile);
-            memmove (buffer, buffer + bytesread, overlap);
-          }
-      }
-    while ((bytesread = fread (buffer + overlap, 1, PATTERN_BUFSIZE - overlap, srcfile)));
-  if (n != -1)
-    fwrite (buffer, 1, overlap, destfile);
-
-  fclose (srcfile);
-  fclose (destfile);
-  cleanup_cm_patterns (&patterns, n_patterns);
-
-  printf ("Found %d pattern%s\n", n_found, n_found != 1 ? "s" : "");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return n_found;
-}
-#undef PATTERN_BUFSIZE
-
-
-typedef struct
-{
-  FILE *output;
-  int virtual_pos;
-  uint32_t flags;
-} st_ucon64_dump_t;
-
-
-static int
-ucon64_dump_func (const unsigned char *buffer, int n, void *object)
-{
-  st_ucon64_dump_t *o = (st_ucon64_dump_t *) object;
-
-  dumper (o->output, buffer, n, o->virtual_pos, o->flags);
-  o->virtual_pos += n;
-
-  return n;
-}
-
-
-void
 ucon64_dump (FILE *output, const char *filename, size_t start, size_t len,
              uint32_t flags)
 {
-  st_ucon64_dump_t o = {output, start, flags};
+#warning TEST ucon64_dump()
+  FILE *fh = NULL;
+  size_t pos = start;
+  int result = 0;
+  char buf[MAXBUFSIZE];
 
-  quick_io_func (ucon64_dump_func, &o, start, len, filename);
+  if (!(fh = fopen (filename, "rb")))
+    return -1;
+
+  fseek (fh, start, SEEK_SET);
+  while ((result = fread (buf, 1, MAXBUFSIZE, fh)))
+    {
+      dumper (output, buf, result, pos, flags);
+      pos += result;
+    }
+
+  fclose (fh);
+
+  return 0;
 }
 
 
@@ -1467,7 +1074,7 @@ ucon64_find_func (const unsigned char *buffer, int n, void *object)
             {
               dumper (stdout, compare,
                 MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0 + 1)),
-                o->found, DUMPER_HEX);
+                o->found, 0);
               fputc ('\n', stdout);
             }
         }
@@ -1484,7 +1091,7 @@ ucon64_find_func (const unsigned char *buffer, int n, void *object)
             {
               dumper (stdout, ptr1,
                 MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0 + 1)),
-                o->found, DUMPER_HEX);
+                o->found, 0);
               fputc ('\n', stdout);
             }
           ptr1++;
@@ -1556,10 +1163,7 @@ ucon64_find (const char *filename, size_t start, size_t len,
   if (!(flags & UCON64_FIND_QUIET))
     {
       fputs (basename2 (filename), stdout);
-      if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
-      else
-        fputc ('\n', stdout);
+      fputc ('\n', stdout);
 
     // TODO: display "b?a" as "b" "a"
     if (!(flags & (MEMCMP2_CASE | MEMCMP2_REL)))
@@ -1577,38 +1181,22 @@ ucon64_find (const char *filename, size_t start, size_t len,
       }
     }
 
-  result = quick_io_func (ucon64_find_func, &o, start, len, filename);
+#warning fix find
+//  result = quick_io_func (ucon64_find_func, &o, start, len, filename);
 
   return o.found;                               // return last occurrence or -1
-}
-
-
-static int
-ucon64_chksum_func (const unsigned char *buffer, int n, void *object)
-{
-  st_hash_t *h = (st_hash_t *) object;
-
-  h = hash_update (h, buffer, n);
-
-  return n;
 }
 
 
 int
 ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *filename, size_t start)
 {
+#warning TEST ucon64_chksum()
   int result = 0;
   st_hash_t *h = NULL;
   int flags = 0;
-
-  if (!start)
-    start = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
-
-  fputs (basename2 (ucon64.fname), stdout);
-  if (ucon64.fname_arch[0])
-    printf (" (%s)\n", basename2 (ucon64.fname_arch));
-  else
-    fputc ('\n', stdout);
+  FILE *fh = NULL;
+  unsigned char buf[MAXBUFSIZE];
 
   if (sha1_s)
     flags |= HASH_SHA1;
@@ -1622,8 +1210,21 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
   if (!h)
     return -1;
 
-  result = quick_io_func (ucon64_chksum_func, &h, start,
-                          fsizeof (filename) - start, filename);
+  if (!(fh = fopen (filename, "rb")))
+    return -1;
+
+#warning this backup_header_len stuff might belong somewhere else
+  if (!start)
+    start = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+
+  fseek (fh, start, SEEK_SET);
+  while ((result = fread (buf, 1, MAXBUFSIZE, fh)))
+    h = hash_update (h, buf, result);
+
+  fclose (fh);
+
+  fputs (basename2 (ucon64.fname), stdout);
+  fputc ('\n', stdout);
 
   if (sha1_s)
     {
@@ -1644,62 +1245,7 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
 
   hash_close (h);
 
-  return result;
-}
-
-
-#warning fix ucon64_fbswap16 and ucon64_fwswap32
-typedef struct
-{
-  FILE *dest_file;
-} st_ucon64_swap_t;
-
-
-static inline int
-ucon64_fbswap16_func (const unsigned char *buffer, int n, void *object)
-{
-  st_ucon64_swap_t *o = (st_ucon64_swap_t *) object;
-
-  bswap16_n ((void *) buffer, n);
-  return fwrite (buffer, n, 1, o->dest_file);
-}
-
-
-static inline int
-ucon64_fwswap32_func (const unsigned char *buffer, int n, void *object)
-{
-  st_ucon64_swap_t *o = (st_ucon64_swap_t *) object;
-
-  wswap32_n ((void *) buffer, n);
-  return fwrite (buffer, n, 1, o->dest_file);
-}
-
-
-void
-ucon64_fbswap16 (const char *src_fname, size_t start, size_t len, const char *dest_fname)
-{
-  st_ucon64_swap_t o;
-
-  o.dest_file = fopen (dest_fname, "wb");
-
-  if (o.dest_file)
-    quick_io_func (ucon64_fbswap16_func, &o, start, len, src_fname);
-
-  fclose (o.dest_file);
-}
-
-
-void
-ucon64_fwswap32 (const char *src_fname, size_t start, size_t len, const char *dest_fname)
-{
-  st_ucon64_swap_t o;
-
-  o.dest_file = fopen (dest_fname, "wb");
-
-  if (o.dest_file)
-    quick_io_func (ucon64_fwswap32_func, &o, start, len, src_fname);
-
-  fclose (o.dest_file);
+  return 0;
 }
 
 
@@ -1721,10 +1267,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #endif
   FILE *file1, *file2;
 
-  printf ("Comparing %s", basename2 (ucon64.fname));
-  if (ucon64.fname_arch[0])
-    printf (" (%s)", basename2 (ucon64.fname_arch));
-  printf (" with %s\n", filename1);
+  printf ("Comparing %s with %s\n", basename2 (ucon64.fname), filename1);
 
   if (same_file (filename1, filename2))
     {
@@ -1811,9 +1354,9 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
                           break;
 
                       printf ("%s:\n", filename1);
-                      dumper (stdout, &buf1[base], len, start1 + base + bytesread2, DUMPER_HEX);
+                      dumper (stdout, &buf1[base], len, start1 + base + bytesread2, 0);
                       printf ("%s:\n", filename2);
-                      dumper (stdout, &buf2[base], len, start2 + base + bytesread2, DUMPER_HEX);
+                      dumper (stdout, &buf2[base], len, start2 + base + bytesread2, 0);
                       fputc ('\n', stdout);
                       base += len;
                       n_bytes += len;

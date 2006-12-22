@@ -41,32 +41,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/snes.h"                       // for snes_get_file_type ()
 
 
-static st_ucon64_obj_t swc_obj[] =
-  {
-    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
-    {UCON64_SNES, WF_STOP | WF_NO_ROM},
-    {UCON64_SNES, WF_SWITCH}
-  };
-
 const st_getopt2_t swc_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC"
-      /*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/,
-      NULL
+      /*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xswc", 0, 0, UCON64_XSWC,
       NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist",
-      &swc_obj[0]
+      "receives automatically when ROM does not exist"
     },
     {
       "xswc2", 0, 0, UCON64_XSWC2,
-      NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)",
-      &swc_obj[0]
+      NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"
     },
 #if 1
 /*
@@ -88,31 +78,27 @@ const st_getopt2_t swc_usage[] =
       "MODE=0x080 Mega Man X 2\n"
       "MODE=0x100 dump BIOS\n"
       "It is possible to combine flags. MODE=0x44 makes it possible\n"
-      "to dump for example Yoshi's Island",
-      &swc_obj[2]
+      "to dump for example Yoshi's Island"
     },
 #endif
     {
       "xswcs", 0, 0, UCON64_XSWCS,
       NULL,
       "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &swc_obj[1]
+      "receives automatically when SRAM does not exist"
     },
     {
       "xswcc", 0, 0, UCON64_XSWCC,
       NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
-      OPTION_LONG_S "port=PORT\n" "receives automatically when SRAM does not exist",
-      &swc_obj[1]
+      OPTION_LONG_S "port=PORT\n" "receives automatically when SRAM does not exist"
     },
     {
       "xswcr", 0, 0, UCON64_XSWCR,
       NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when RTS file does not exist",
-      &swc_obj[1]
+      "receives automatically when RTS file does not exist"
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 #ifdef  USE_PARALLEL
@@ -210,14 +196,14 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 
       ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
       ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
-      dumper (stdout, buffer, 8, address, DUMPER_HEX);
+      dumper (stdout, buffer, 8, address, 0);
 
       ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
       ffe_send_command0 ((unsigned short) ((address & 0x1fff) + 0x2000), 0);
 
       ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
       ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
-      dumper (stdout, buffer, 8, address, DUMPER_HEX);
+      dumper (stdout, buffer, 8, address, 0);
     }
 #endif
 

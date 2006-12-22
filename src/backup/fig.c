@@ -39,42 +39,32 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/snes.h"                       // for snes_get_snes_hirom()
 
 
-static st_ucon64_obj_t fig_obj[] =
-  {
-    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
-    {UCON64_SNES, WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t fig_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"
-      /*"1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"*/,
-      NULL
+      /*"1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xfig", 0, 0, UCON64_XFIG,
       NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist",
-      &fig_obj[0]
+      "receives automatically when ROM does not exist"
     },
     {
       "xfigs", 0, 0, UCON64_XFIGS,
       NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &fig_obj[1]
+      "receives automatically when SRAM does not exist"
     },
     {
       "xfigc", 0, 0, UCON64_XFIGC, NULL,
       "send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
+      "receives automatically when SRAM does not exist"
 //      "Press q to abort; ^C might cause invalid state of backup unit"
-      &fig_obj[1]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

@@ -39,10 +39,9 @@ const st_getopt2_t sc_usage[] =
     {
       NULL, 0, 0, 0,
       NULL, "Super Card (CF to GBA Adapter)"
-      /* "2004 Super Card http://www.supercard.cn" */,
-      NULL
+      /* "2004 Super Card http://www.supercard.cn" */
     },
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

@@ -37,34 +37,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "sflash.h"
 
 
-static st_ucon64_obj_t sflash_obj[] =
-  {
-    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
-    {UCON64_SNES, WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t sflash_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Flash flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
-      NULL
+      NULL, "Super Flash flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xsf", 0, 0, UCON64_XSF,
       NULL, "send/receive ROM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically (64 Mbits) when ROM does not exist",
-      &sflash_obj[0]
+      "receives automatically (64 Mbits) when ROM does not exist"
     },
     {
       "xsfs", 0, 0, UCON64_XSFS,
       NULL, "send/receive SRAM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &sflash_obj[1]
+      "receives automatically when SRAM does not exist"
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

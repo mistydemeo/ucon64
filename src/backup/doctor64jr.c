@@ -145,34 +145,26 @@ void mainproc(void *arg) {
 #include "doctor64jr.h"
 
 
-static st_ucon64_obj_t doctor64jr_obj[] =
-  {
-    {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM}
-  };
-
 const st_getopt2_t doctor64jr_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Doctor V64 Junior"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
-      NULL
+      NULL, "Doctor V64 Junior"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/
     },
 #ifdef  USE_PARALLEL
     {
       "xdjr", 0, 0, UCON64_XDJR,
-      NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT",
-      &doctor64jr_obj[0]
+      NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT"
     },
 #if 0
     {
       "xdjrs", 0, 0, UCON64_XDJRS,
       NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist",
-      &doctor64jr_obj[0]
+      "receives automatically when SRAM does not exist"
     },
 #endif
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL}
   };
 
 

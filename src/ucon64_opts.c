@@ -192,7 +192,9 @@ static int
 ucon64_tmp_crc (st_ucon64_t *p)
 {
   unsigned int checksum = 0;
-  ucon64_chksum (NULL, NULL, &checksum, p->fname, 0);
+#warning ucon64.nfo?
+  ucon64_chksum (NULL, NULL, &checksum, p->fname,
+                 ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
   return 0;
 }
 
@@ -212,7 +214,9 @@ ucon64_tmp_sha1 (st_ucon64_t *p)
   char buf[MAXBUFSIZE];
 
 #warning buf?
-  ucon64_chksum (buf, NULL, NULL, p->fname, 0);
+#warning ucon64.nfo?
+  ucon64_chksum (buf, NULL, NULL, p->fname,
+                 ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
   return 0;
 }
 
@@ -223,7 +227,9 @@ ucon64_tmp_md5 (st_ucon64_t *p)
   char buf[MAXBUFSIZE];
 
 #warning buf?
-  ucon64_chksum (NULL, buf, NULL, p->fname, 0);
+#warning ucon64.nfo?
+  ucon64_chksum (NULL, buf, NULL, p->fname,
+                 ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
   return 0;
 }
 

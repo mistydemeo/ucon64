@@ -361,7 +361,9 @@ atari_init (st_ucon64_nfo_t * rominfo)
     return -1;
 
   ucon64_fread (image, 0, size, ucon64.fname);
-  ucon64_chksum (NULL, md5, &crc32, ucon64.fname, 0);
+#warning ucon64.nfo?
+  ucon64_chksum (NULL, md5, &crc32, ucon64.fname,
+                 ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
 
   bsmode = get_game_bsmode_by_crc (crc32);
   if (bsmode == -1)

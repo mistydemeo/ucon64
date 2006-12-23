@@ -27,7 +27,8 @@ typedef struct
   int console;                                  // UCON64_SNES, etc...
   int flags;                               // WF_INIT, etc..
   int (*func) (st_ucon64_t *);
-  const char *optarg;  // option argument
+//  const char *optarg;  // option argument
+//  st_getopt2_t *usage;
 } st_ucon64_filter_t;
 
 

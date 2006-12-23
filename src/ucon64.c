@@ -716,7 +716,8 @@ main (int argc, char **argv)
       if (ucon64_flags & WF_NEEDS_CRC32)
         {
 #warning fcrc32 == raw_crc32?
-          ucon64_chksum (NULL, NULL, &ucon64.fcrc32, ucon64.fname, 0);
+          ucon64_chksum (NULL, NULL, &ucon64.fcrc32, ucon64.fname,
+                         ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
           ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo->backup_header_len);
         }
     
@@ -763,7 +764,7 @@ main (int argc, char **argv)
             return -1;
           }
 
-#warning TODO
+#warning TODO ucon64_dat_close()
 //      if (ucon64.dat)
 //        ucon64_dat_close (ucon64.dat);
 
@@ -1182,19 +1183,23 @@ ucon64_usage (int argc, char *argv[], int view)
 #endif
 
   // single usage
-#warning fix usage display for a single console
 #if 0
-  for (x = 0; arg[x].val; x++)
-    if (arg[x].console) // IS console
-      for (y = 0; option[y]; y++)
-        for (c = 0; option[y][c].name || option[y][c].help; c++)
-          if (option[y][c].object)
-            if (((st_ucon64_obj_t *) option[y][c].object)->console == arg[x].console)
-              {
+  for (x = 0; options[x]; x++)
+    for (y = 0; ucon64_filter[y]; y++)
+      if (options[x].val == ucon64_filter[y].option &&
+          ucon64_filter[y].console == ucon64.console)
+        
+
+
+  for (y = 0; option[y]; y++)
+    for (c = 0; option[y][c].name || option[y][c].help; c++)
+      if (option[y][c].object)
+        if (((st_ucon64_obj_t *) option[y][c].object)->console == arg[x].console)
+          {
                 getopt2_usage (option[y]);
                 single = 1;
                 break;
-              }
+          }
 #endif
 
   if (!single)

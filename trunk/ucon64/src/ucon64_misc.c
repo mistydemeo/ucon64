@@ -435,33 +435,22 @@ ucon64_get_binary (const unsigned char **data, char *id)
 
   if (p)
     {
+      if (binbuf)
+        {
+          free (binbuf);
+          binbuf = NULL;
+        }
+
       if (!access (p, R_OK))
         {
           int len = fsizeof (p);
+          binbuf = fread2 (p, 1024 * 1024);
 
           if (binbuf)
             {
-              free (binbuf);
-              binbuf = NULL;
-            }
-
-          binbuf = malloc (len + 1);
-          if (binbuf)
-            {
-              FILE *fh = fopen (p, "rb");
-              if (fh)
-                {
-                  fread (&binbuf, len, 1, fh);
-                  fclose (fh);
-
-                  *data = binbuf;
-
-                  register_func (ucon64_free_binary);
-
-                  return len;
-                }
-              free (binbuf);
-              binbuf = NULL;
+              *data = binbuf;
+              register_func (ucon64_free_binary);
+              return len;
             }
         }
 #if 1
@@ -1018,19 +1007,35 @@ ucon64_dump (FILE *output, const char *filename, size_t start, size_t len,
   FILE *fh = NULL;
   size_t pos = start;
   int result = 0;
-  char buf[MAXBUFSIZE];
+  unsigned char *buffer = NULL;
+  int buffer_size = 0;
 
   if (!(fh = fopen (filename, "rb")))
     return -1;
 
-  fseek (fh, start, SEEK_SET);
-  while ((result = fread (buf, 1, MAXBUFSIZE, fh)))
+  if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
+    if ((buffer = (unsigned char *) malloc (len)))   //  in their entirety
+      buffer_size = len;
+
+  if (!buffer)                                  // default to MAXBUFSIZE
+    if ((buffer = (unsigned char *) malloc (MAXBUFSIZE)))
+      buffer_size = MAXBUFSIZE;
+
+  if (!buffer)
     {
-      dumper (output, buf, result, pos, flags);
+      fclose (fh);
+      return -1;
+    }
+
+  fseek (fh, start, SEEK_SET);
+  while ((result = fread (buffer, 1, buffer_size, fh)))
+    {
+      dumper (output, buffer, result, pos, flags);
       pos += result;
     }
 
   fclose (fh);
+  free (buffer);
 
   return 0;
 }
@@ -1192,11 +1197,13 @@ int
 ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *filename, size_t start)
 {
 #warning TEST ucon64_chksum()
+  int len = 0;
   int result = 0;
   st_hash_t *h = NULL;
   int flags = 0;
   FILE *fh = NULL;
-  unsigned char buf[MAXBUFSIZE];
+  int buffer_size = 0;
+  unsigned char *buffer = NULL;
 
   if (sha1_s)
     flags |= HASH_SHA1;
@@ -1213,15 +1220,26 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *fil
   if (!(fh = fopen (filename, "rb")))
     return -1;
 
-#warning this backup_header_len stuff might belong somewhere else
-  if (!start)
-    start = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+  if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
+    if ((buffer = (unsigned char *) malloc (len)))   //  in their entirety
+      buffer_size = len;
+
+  if (!buffer)                                  // default to MAXBUFSIZE
+    if ((buffer = (unsigned char *) malloc (MAXBUFSIZE)))
+      buffer_size = MAXBUFSIZE;
+
+  if (!buffer)
+    {
+      fclose (fh);
+      return -1;
+    }
 
   fseek (fh, start, SEEK_SET);
-  while ((result = fread (buf, 1, MAXBUFSIZE, fh)))
-    h = hash_update (h, buf, result);
+  while ((result = fread (buffer, 1, buffer_size, fh)))
+    h = hash_update (h, buffer, result);
 
   fclose (fh);
+  free (buffer);
 
   fputs (basename2 (ucon64.fname), stdout);
   fputc ('\n', stdout);

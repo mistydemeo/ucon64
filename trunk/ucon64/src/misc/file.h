@@ -49,6 +49,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   baknam()    produces a backup name for a filename
                 bla.txt would return bla.bak or bla.b01 if bla.bak already exists
   fcopy()     copy src from start for len to dest with mode
+  fread2()    does fopen(), malloc(), fread() in one step and returns pointer to
+                data (must be free()'d) or NULL if anything failed
   fsizeof()   returns size of a file in bytes
 
   quick_io()   returns number of bytes read or written
@@ -99,6 +101,7 @@ extern char *baknam (char *fname);
 extern int fsizeof (const char *filename);
 extern int fcopy (const char *src, size_t start, size_t len, const char *dest,
                   const char *dest_mode);
+extern unsigned char *fread2 (const char *filename, int maxlength);
 
 extern int quick_io (void *buffer, size_t start, size_t len, const char *fname,
                      const char *mode);
@@ -112,9 +115,6 @@ extern int quick_io_c (int value, size_t pos, const char *fname, const char *mod
 #define GETFILE_RECURSIVE      (1 << 1)
 #define GETFILE_RECURSIVE_ONCE (1 << 2)
 extern int getfile (int argc, char **argv, int (*callback_func) (const char *), int flags);
-
-
-//extern unsigned char *fopenmallocread (const char *filename, int maxlength);
 
 
 #endif // MISC_FILE_H

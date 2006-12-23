@@ -738,9 +738,6 @@ fcopy (const char *source, size_t start, size_t len, const char *dest, const cha
   if (!(src = fopen (source, "rb")))
     return -1;
 
-  if (!(dst = fopen (dest, mode)))
-    return -1;
-
   if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
     if ((buffer = (unsigned char *) malloc (len)))   //  in their entirety
       buffer_size = len;
@@ -750,7 +747,17 @@ fcopy (const char *source, size_t start, size_t len, const char *dest, const cha
       buffer_size = MAXBUFSIZE;
 
   if (!buffer)
-    return -1;
+    {
+      fclose (src);
+      return -1;
+    }
+
+  if (!(dst = fopen (dest, mode)))
+    {
+      fclose (src);
+      free (buffer);
+      return -1;
+    }
 
   fseek (dst, 0, SEEK_END); // append
 
@@ -759,6 +766,7 @@ fcopy (const char *source, size_t start, size_t len, const char *dest, const cha
 
   fclose (dst);
   fclose (src);
+  free (buffer);
 
   return result == -1 ? result : 0;
 }
@@ -1003,16 +1011,17 @@ rmdir2 (const char *path)
 #endif
   return rmdir (path);
 }
+#endif
 
 
 unsigned char *
-fopenmallocread (const char *filename, int maxlength)
+fread2 (const char *filename, int maxlength)
 {
   FILE *fh = NULL;
   unsigned char *p = NULL;
   int len = fsizeof (filename);
 
-  if (len > maxlength)
+  if (len > maxlength || len == -1)
     return NULL;
 
   if (!(fh = fopen (filename, "rb")))
@@ -1030,5 +1039,3 @@ fopenmallocread (const char *filename, int maxlength)
 
   return p;
 }
-
-#endif

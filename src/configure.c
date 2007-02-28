@@ -9,6 +9,9 @@ gcc configure.c -o config.status && ./config.status && exit 0
 cc -DCOMPILER=cc configure.c -o config.status && ./config.status && exit 0
 g++ configure.c -o config.status && ./config.status && exit 0
 egcs configure.c -o config.status && ./config.status && exit 0
+c99 configure.c -o config.status && ./config.status && exit 0
+c89 configure.c -o config.status && ./config.status && exit 0
+echo "ERROR: could not find any C or C++ compiler" ; exit 0
 #endif
 #endif
 #endif
@@ -19,7 +22,9 @@ egcs configure.c -o config.status && ./config.status && exit 0
 #include <stdio.h>              // FILENAME_MAX, FILE
 #include <stdlib.h>             // getenv()
 #include <string.h>             // strncpy(), strchr()
-  typedef struct
+
+
+typedef struct
 {
   // search for any of these libs, headers or files
   // using find_lib() of find_header() and find_file()
@@ -95,11 +100,11 @@ find (const char *path)
 #if     FILENAME_MAX > MAXBUFSIZE
   char buf[FILENAME_MAX];
 
-  strncpy (buf, path, FILENAME_MAX)[FILENAME_MAX] = 0;
+  strncpy (buf, path, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 #else
   char buf[MAXBUFSIZE];
 
-  strncpy (buf, path, MAXBUFSIZE)[MAXBUFSIZE] = 0;
+  strncpy (buf, path, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
 #endif
 
 #ifdef  __CYGWIN__
@@ -197,9 +202,9 @@ find_file (const char *filename)
     return -1;
 
 #if     FILENAME_MAX > MAXBUFSIZE
-  strncpy (buf, p, FILENAME_MAX)[FILENAME_MAX] = 0;
+  strncpy (buf, p, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 #else
-  strncpy (buf, p, MAXBUFSIZE)[MAXBUFSIZE] = 0;
+  strncpy (buf, p, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
 #endif
 
   a = buf;
@@ -209,11 +214,11 @@ find_file (const char *filename)
 #if     FILENAME_MAX > MAXBUFSIZE
       char path[FILENAME_MAX];
 
-      strncpy (path, a, FILENAME_MAX)[FILENAME_MAX] = 0;
+      strncpy (path, a, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 #else
       char path[MAXBUFSIZE];
 
-      strncpy (path, a, MAXBUFSIZE)[MAXBUFSIZE] = 0;
+      strncpy (path, a, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
 #endif
 #else
 #if     FILENAME_MAX > MAXBUFSIZE

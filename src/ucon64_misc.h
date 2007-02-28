@@ -76,7 +76,7 @@ extern const char *ucon64_msg[];
                           optionally a callback function can be used for specific
                           testing
   ucon64_rename()       DAT or internal header based rename
-  ucon64_get_binary()   choose to load external or internal binaries
+  ucon64_get_contrib()  choose to load contributed files (external or internal)
 
   bswap16_n()       bswap16() n bytes of buffer
 
@@ -100,7 +100,7 @@ extern int ucon64_gauge (time_t init_time, int pos, int size);
 extern int ucon64_testpad (const char *filename);
 extern int ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *));
 extern int ucon64_rename (int mode);
-extern int ucon64_get_binary (const unsigned char **data, char *id);
+extern int ucon64_get_contrib (const unsigned char **data, char *id);
 
 #define ucon64_fgetc quick_fgetc
 #define ucon64_fputc quick_fputc

@@ -46,6 +46,8 @@ extern unsigned short crc16 (unsigned short crc, const void *buffer, unsigned in
 extern unsigned int crc32 (unsigned int crc, const void *buffer, unsigned int size);
 #endif
 extern unsigned int crc32_wrap (unsigned int crc, const void *buffer, unsigned int size);
+extern unsigned int crc32_to_int (unsigned int crc);
+extern unsigned int int_to_crc32 (unsigned int i);
 
 
 #ifdef  __cplusplus

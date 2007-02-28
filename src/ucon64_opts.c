@@ -50,6 +50,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
+#warning build filters with these
+#define UCON64_FILTER_BUILD(id,d,o,c,r,w) FILTER_BUILD(&NULL,id,d,o,c,r,w,&NULL,&NULL,&NULL,&NULL)
+
+
 static long int
 strtol2 (const char *str, char **tail)
 {
@@ -586,7 +590,7 @@ ucon64_tmp_insn (st_ucon64_t *p)
 static int
 ucon64_tmp_a (st_ucon64_t *p)
 {
-  aps_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
+  aps_apply (p->fname, p->fname_optarg);
   return 0;
 }
 
@@ -594,7 +598,7 @@ ucon64_tmp_a (st_ucon64_t *p)
 static int
 ucon64_tmp_b (st_ucon64_t *p)
 {
-  bsl_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
+  bsl_apply (p->fname, p->fname_optarg);
   return 0;
 }
 
@@ -602,7 +606,7 @@ ucon64_tmp_b (st_ucon64_t *p)
 static int
 ucon64_tmp_i (st_ucon64_t *p)
 {
-  ips_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
+  ips_apply (p->fname, p->fname_optarg);
   return 0;
 }
 
@@ -610,7 +614,7 @@ ucon64_tmp_i (st_ucon64_t *p)
 static int
 ucon64_tmp_ppf (st_ucon64_t *p)
 {
-  ppf_apply (p->fname, ucon64.argv[ucon64.argc - 1]);
+  ppf_apply (p->fname, p->fname_optarg);
   return 0;
 }
 

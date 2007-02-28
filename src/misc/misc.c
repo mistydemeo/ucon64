@@ -55,6 +55,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
+#ifdef  HAVE_INTTYPES_H
+#include "inttypes.h"
+#else
+#include "misc/itypes.h"
+#endif
 #include "misc.h"
 
 
@@ -912,6 +917,36 @@ truncate (const char *path, off_t size)
   CloseHandle (file);
 
   return retval ? 0 : -1;                       // truncate() returns zero on success
+}
+
+
+char *
+mkdtemp (char *template)
+{
+  char *p = NULL;
+
+  p = _mktemp (template);
+
+  while (_mkdir (p) != 0)
+    p = _mktemp (template);
+
+  return template;
+}
+
+
+int
+mkstemp (char *template)
+{
+  char *p = NULL;
+
+  p = _mktemp (template);
+
+  while (access (p, X_OK) != 0)
+    p = _mktemp (template);
+
+  fopen (template, "wb");
+
+  return 0;
 }
 
 

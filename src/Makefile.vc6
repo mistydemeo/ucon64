@@ -50,6 +50,12 @@ all: $(TARGETS)
 
 
 clean:
+	del ucon64.plg
+	del ucon64.ncb
+	del ucon64.dep
+	del ucon64.mak
+	del Debug
+	del Release
 	del *.obj
 	del patch\*.obj
 	del console\*.obj

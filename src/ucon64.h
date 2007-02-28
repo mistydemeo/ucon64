@@ -33,15 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 
 
-// parallel port modes
-typedef enum
-{
-  UCON64_SPP,
-  UCON64_EPP,
-  UCON64_ECP
-} parport_mode_t;
-
-
 /*
   st_ucon64_nfo_t this struct contains very specific informations only
                     <console>_init() can supply after the correct console
@@ -83,6 +74,15 @@ typedef struct
 } st_ucon64_nfo_t;
 
 
+// parallel port modes
+typedef enum
+{
+  UCON64_SPP,
+  UCON64_EPP,
+  UCON64_ECP
+} parport_mode_t;
+
+
 typedef struct
 {
   int argc;
@@ -90,13 +90,17 @@ typedef struct
 
   int console;                                  // the detected console system
   int option;                                   // current option
-  const char *optarg;                           // ptr to current options optarg
-
-  const char *patch;                            // default: argv[argc - 1]
+  const char *optarg;                           // pointer to current options' optarg
 
   const char *fname;                            // file name of ROM (or archive with ROM inside; w/ path)
   int file_size;
   unsigned int fcrc32;                          // crc32 of file
+
+  const char *fname_last;                       // last file name specified on cmdline (hack for some options)
+  const char *fname_optarg;                     // file name specified via optarg (default: same as fname_last)
+
+  char *temp_file;                              // global temp_file
+  char output_path[FILENAME_MAX];               // -o argument (default: cwd)
 
 #ifdef  USE_ANSI_COLOR
   int ansi_color;
@@ -106,9 +110,6 @@ typedef struct
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
   int recursive;
-
-  char *temp_file;                              // global temp_file
-  char output_path[FILENAME_MAX];               // -o argument (default: cwd)
 
   char configfile[FILENAME_MAX];                // path and name of the config file
   char configdir[FILENAME_MAX];                 // directory for config
@@ -126,19 +127,8 @@ typedef struct
   char usbport_dev[FILENAME_MAX];               // usb port device (e.g. /dev/usb/hiddev0)
 #endif
 
-  /*
-    These values override values in st_ucon64_nfo_t. Use (val != UCON64_UNKNOWN)
-    to check them. When adding new ones don't forget to update
-    ucon64_execute_options() too.
-  */
-  int backup_header_len;                             // length of backup unit header 0 == no bu hdr
-  int interleaved;                              // ROM is interleaved (swapped)
-  st_ucon64_nfo_t *nfo;                         // info from <console>_init() (st_ucon64_nfo_t *)
-
-  st_ucon64_dat_t *dat;                         // info from DATabase (st_ucon64_dat_t *)
-
 #if 1
-#warning move this to st_ucon64_nfo_t
+  // TODO: move this to st_ucon64_nfo_t and use (st_ucon64_nfo_t *) force instead
   unsigned int crc32;                           // crc32 of ROM (used for DAT files)
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
   int id;                                       // generate unique name (currently
@@ -161,7 +151,15 @@ typedef struct
   int tv_standard;                              // NES UNIF
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF
+
+  int backup_header_len;                        // length of backup unit header 0 == no bu hdr
+  int interleaved;                              // ROM is interleaved (swapped)
+#else
+  st_ucon64_nfo_t *force;                       // this overrides the default values for nfo
 #endif
+  st_ucon64_nfo_t *nfo;                         // info from ucon64_console_open()
+
+  st_ucon64_dat_t *dat;                         // info from DATabase ucon64_dat_open()
 } st_ucon64_t;
 
 

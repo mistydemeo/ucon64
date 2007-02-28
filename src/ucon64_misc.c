@@ -412,22 +412,22 @@ parport_print_info (void)
 }
 
 
-static unsigned char *binbuf = NULL;
+static unsigned char *contrib_buf = NULL;
 
 
 void
-ucon64_free_binary (void)
+ucon64_free_contrib (void)
 {
-  if (!binbuf)
+  if (!contrib_buf)
     return;
 
-  free (binbuf);
-  binbuf = NULL;
+  free (contrib_buf);
+  contrib_buf = NULL;
 }
 
 
 int
-ucon64_get_binary (const unsigned char **data, char *id)
+ucon64_get_contrib (const unsigned char **data, char *id)
 {
   const char *p = NULL;
 
@@ -435,21 +435,21 @@ ucon64_get_binary (const unsigned char **data, char *id)
 
   if (p)
     {
-      if (binbuf)
+      if (contrib_buf)
         {
-          free (binbuf);
-          binbuf = NULL;
+          free (contrib_buf);
+          contrib_buf = NULL;
         }
 
       if (!access (p, R_OK))
         {
           int len = fsizeof (p);
-          binbuf = fread2 (p, 1024 * 1024);
+          contrib_buf = fread2 (p, 1024 * 1024);
 
-          if (binbuf)
+          if (contrib_buf)
             {
-              *data = binbuf;
-              register_func (ucon64_free_binary);
+              *data = contrib_buf;
+              register_func (ucon64_free_contrib);
               return len;
             }
         }
@@ -1052,9 +1052,8 @@ typedef struct
 
 
 static int
-ucon64_find_func (const unsigned char *buffer, int n, void *object)
+ucon64_find_func (const unsigned char *buffer, int n, st_ucon64_find_t *o)
 {
-  st_ucon64_find_t *o = (st_ucon64_find_t *) object;
   char *ptr0 = (char *) buffer, *ptr1 = (char *) buffer;
   int m;
   static char match[MAXBUFSIZE - 1], compare[MAXBUFSIZE + 16 + 1];
@@ -1130,10 +1129,14 @@ int
 ucon64_find (const char *filename, size_t start, size_t len,
              const char *search, int searchlen, uint32_t flags, int flag2)
 {
+#warning TEST ucon64_find()
   int result = 0;
   st_ucon64_find_t o = { search, flags, searchlen, start, -2 };
   // o.found == -2 signifies a new find operation (usually for a new file)
   char buf[MAXBUFSIZE], *values[UCON64_MAX_ARGS];
+  FILE *fh = NULL;
+  int buffer_size = 0;
+  unsigned char *buffer = NULL;
 
   strncpy (buf, search, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
 
@@ -1186,8 +1189,29 @@ ucon64_find (const char *filename, size_t start, size_t len,
       }
     }
 
-#warning fix find
-//  result = quick_io_func (ucon64_find_func, &o, start, len, filename);
+  if (!(fh = fopen (filename, "rb")))
+    return -1;
+
+  if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
+    if ((buffer = (unsigned char *) malloc (len)))   //  in their entirety
+      buffer_size = len;
+
+  if (!buffer)                                  // default to MAXBUFSIZE
+    if ((buffer = (unsigned char *) malloc (MAXBUFSIZE)))
+      buffer_size = MAXBUFSIZE;
+
+  if (!buffer)
+    {
+      fclose (fh);
+      return -1;
+    }
+
+  fseek (fh, start, SEEK_SET);
+  while ((result = fread (buffer, 1, buffer_size, fh)))
+    ucon64_find_func (buffer, result, &o);
+
+  fclose (fh);
+  free (buffer);
 
   return o.found;                               // return last occurrence or -1
 }
@@ -1197,7 +1221,7 @@ int
 ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, const char *filename, size_t start)
 {
 #warning TEST ucon64_chksum()
-  int len = 0;
+  int len = fsizeof (filename) - start;
   int result = 0;
   st_hash_t *h = NULL;
   int flags = 0;

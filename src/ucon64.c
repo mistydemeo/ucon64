@@ -493,14 +493,15 @@ main (int argc, char **argv)
   ucon64.argc = argc;
   ucon64.argv = argv;
 
-  ucon64.fname =
-  ucon64.mapr =
-  ucon64.comment = "";
-  ucon64.patch = ucon64.argv[ucon64.argc - 1];
-
-#warning ucon64.backup_header_len can be (-1) (UCON64_UNKNOWN)
+  ucon64.fname = "";
+  ucon64.fname_optarg =
+  ucon64.fname_last = ucon64.argv[ucon64.argc - 1];
   ucon64.console = UCON64_UNKNOWN;
 
+  ucon64.mapr =
+  ucon64.comment = "";
+
+#warning ucon64.backup_header_len can be (-1) (UCON64_UNKNOWN)
   ucon64.backup_header_len =
   ucon64.battery =
   ucon64.bs_dump =
@@ -675,6 +676,11 @@ main (int argc, char **argv)
 
 #warning TODO: unzip into a temp dir
 
+      if (!(ucon64_flags & WF_RO))
+        {
+#warning TODO: put mkbak() code and similar stuff like -o and tmpfile here
+        }
+
       if (ucon64.console == UCON64_UNKNOWN)
         if (ucon64_flags & WF_DEMUX)
           ucon64.console = ucon64_console_demux (ucon64.fname);
@@ -832,7 +838,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_PATCH:
-      ucon64.patch = p->optarg;
+      ucon64.fname_optarg = p->optarg;
       break;
 
     case UCON64_PORT:
@@ -1282,6 +1288,7 @@ ucon64_test (void)
 {
   st_test_t t[] =
     {
+#if 0
       {UCON64_1991,	"ucon64 -1991 /tmp/test/test.smd;"
                         "ucon64 -gen test.smd;"
                         "rm test.smd", 0xadc940f4},
@@ -1581,8 +1588,12 @@ TEST_BREAK
       {UCON64_XSWCR,	"ucon64 -xswcr", 0},    // NO TEST: transfer code
       {UCON64_XSWCS,	"ucon64 -xswcs", 0},    // NO TEST: transfer code
       {UCON64_XV64,	"ucon64 -xv64", 0},     // NO TEST: transfer code
+#endif
+#warning new test() struct
+            {
+{UCON64_XV64, UCON64_XV64,UCON64_XV64,0 }    "ucon64 -xv64", 0},     // NO TEST: transfer code
 
-      {0, NULL, 0}
+      {{0}, NULL, 0}
     };
 //  int x = 0;
 //  unsigned int crc = 0;

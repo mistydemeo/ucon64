@@ -121,3 +121,23 @@ crc32_wrap (unsigned int crc, const void *buffer, unsigned int size)
   return crc;
 }
 
+
+unsigned int
+int_to_crc32 (unsigned int i)
+{
+  return crc32_wrap (0, (unsigned char *) &i, sizeof (unsigned int));
+}
+
+
+unsigned int
+crc32_to_int (unsigned int crc)
+{
+  unsigned int i = 0;
+  int len = sizeof (unsigned int);
+
+  for (; i <= 0xffffffff; i++)
+    if (crc32_wrap (0, (unsigned char *) &i, len) == crc)
+      return i;
+
+  return 0;
+}

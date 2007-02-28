@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define TOMBIT(x) ((int)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 
-#define MAXROMSIZE (512 * MBIT)
+//#define MAXROMSIZE (512 * MBIT)
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
@@ -55,14 +55,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   WF_NFO            output ROM info from WF_OPEN (before processing ROM)
 
+TODO:  WF_RO             option will access ROM or FILE in read-only mode
+  WF_NEEDS_ROM      option does NOT require a ROM
+  WF_NEEDS_CRC32    option does NOT require a CRC32 calculation
+  WF_NO_SPLIT       option does not work with split ROMs
 TODO:  WF_PAR            option requires a parallel port
 TODO:  WF_USB            option requires a USB port
 TODO:  WF_SERIAL         option requires a serial port
-TODO:  WF_RO             option will access ROM or FILE in read-only mode
-TODO:  WF_RW             option will read and write
-  WF_NO_SPLIT       option does not work with split ROMs
-  WF_NEEDS_ROM      option does NOT require a ROM
-  WF_NEEDS_CRC32    option does NOT require a CRC32 calculation
   WF_EXIT           exit() uCON64 after this option ran once
                       --multi (and --xfalmulti) takes more than one file as
                       argument, but should be executed only once;
@@ -73,15 +72,14 @@ TODO:  WF_RW             option will read and write
 #define WF_DEMUX        (1)
 #define WF_OPEN         (1<<1)
 #define WF_NFO          (1<<2)
-#define WF_EXIT         (1<<3)
+#define WF_RO           (1<<3)
 #define WF_NEEDS_ROM    (1<<4)
 #define WF_NEEDS_CRC32  (1<<5)
 #define WF_NO_SPLIT     (1<<6)
 //#define WF_PAR          (1<<7)
 //#define WF_USB          (1<<8)
 //#define WF_SERIAL       (1<<9)
-//#define WF_RO           (1<<10)
-//#define WF_RW           (1<<11)
+#define WF_EXIT         (1<<10)
 
 
 // option strings (consoles)
@@ -111,7 +109,7 @@ TODO:  WF_RW             option will read and write
 #define UCON64_S16_S      "s16"
 #define UCON64_SAT_S      "sat"
 #define UCON64_SMS_S      "sms"
-#define UCON64_GAMEGEAR_S "gg"
+#define UCON64_GAMEGEAR_S "gamegear"
 #define UCON64_SNES_S     "snes"
 #define UCON64_SWAN_S     "swan"
 #define UCON64_VBOY_S     "vboy"

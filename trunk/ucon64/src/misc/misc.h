@@ -125,6 +125,8 @@ extern char *fix_character_set (char *str);
 #include <sys/types.h>
 
 extern int truncate (const char *path, off_t size);
+extern char *mkdtemp (char *template);
+extern int mkstemp (char *template);
 
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.

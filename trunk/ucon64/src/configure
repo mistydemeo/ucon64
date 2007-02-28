@@ -9,6 +9,9 @@ gcc configure.c -o config.status && ./config.status && exit 0
 cc -DCOMPILER=cc configure.c -o config.status && ./config.status && exit 0
 g++ configure.c -o config.status && ./config.status && exit 0
 egcs configure.c -o config.status && ./config.status && exit 0
+c99 configure.c -o config.status && ./config.status && exit 0
+c89 configure.c -o config.status && ./config.status && exit 0
+echo "ERROR: could not find any C or C++ compiler" ; exit 0
 #endif
 #endif
 #endif

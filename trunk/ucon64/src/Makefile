@@ -124,7 +124,9 @@ all: $(TARGETS)
 
 
 CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
-cd backup/libcd64 && $(MAKE) clean
+cd backup/libcd64 && $(MAKE) clean; \
+rm -Rf ucon64.plg ucon64.ncb ucon64.dep ucon64.mak Debug Release *.obj */*.obj
+
 
 clean:
 ifeq ($(GCC_WIN),1)

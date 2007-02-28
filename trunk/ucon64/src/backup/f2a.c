@@ -331,7 +331,7 @@ f2a_connect_usb (void)
   struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
 
-  f2afirmware_len = ucon64_get_binary (&f2afirmware, "f2afirmware");
+  f2afirmware_len = ucon64_get_contrib (&f2afirmware, "f2afirmware");
 
   usb_init ();
   usb_find_busses ();
@@ -514,7 +514,7 @@ f2a_boot_usb (void)
           "Uploading iLinker client\n"
           "Please turn OFF, then ON your GBA with SELECT and START held down\n");
 
-  iclient_len = ucon64_get_binary (&iclient, "iclientu");
+  iclient_len = ucon64_get_contrib (&iclient, "iclientu");
 
   // boot the GBA
   memset (&sm, 0, sizeof (f2a_sendmsg_t));
@@ -612,7 +612,7 @@ f2a_write_usb (int n_files, char **files, int address)
     {
       printf ("Uploading multiloader\n");
 
-      loader_len = ucon64_get_binary (&loader, "gbaloader");
+      loader_len = ucon64_get_contrib (&loader, "gbaloader");
 
 #if 0 // just use a correct loader file - dbjh
       ((int *) loader)[0] = me2be_32 (0x2e0000ea); // start address
@@ -902,8 +902,8 @@ f2a_boot_par (void)
   if (f2a_receive_raw_par (recv, 4))
     return -1;
 
-  iclientp_len = ucon64_get_binary (&iclientp, "iclientp");
-  ilogo_len = ucon64_get_binary (&ilogo, "ilogo");
+  iclientp_len = ucon64_get_contrib (&iclientp, "iclientp");
+  ilogo_len = ucon64_get_contrib (&ilogo, "ilogo");
 
   if (f2a_send_buffer_par (CMD_WRITEDATA, LOGO_ADDR, ilogo_len, ilogo,
                            0, 0, 0, 0))
@@ -933,7 +933,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
     {
       printf ("Uploading multiloader\n");
 
-      loader_len = ucon64_get_binary (&loader, "gbaloader");
+      loader_len = ucon64_get_contrib (&loader, "gbaloader");
 
 #if 0 // just use a correct loader file - dbjh
       ((int *) loader)[0] = me2le_32 (0x2e0000ea); // start address

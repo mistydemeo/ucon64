@@ -35,7 +35,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
 #include <sys/stat.h>                           // for S_IFLNK
+#ifdef  __linux__
 #include <sys/time.h>
+#endif
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
 #elif   defined __unix__
@@ -651,7 +653,6 @@ truncate2 (const char *filename, unsigned long new_size)
 
 char *
 tmpnam3 (char *temp, int dir)
-// deprecated
 {
   char *t = NULL, *p = NULL;
 
@@ -668,15 +669,14 @@ tmpnam3 (char *temp, int dir)
   free (p);
 
   if (!dir)
-    {
-      if (mkstemp (temp) == -1)
-        return NULL;
-    }
-  else
-    if (mkdtemp (temp) == NULL)
-      return NULL;
+    if (mkstemp (temp) != -1)
+      return temp;
 
-  return temp;
+  if (dir)
+    if (mkdtemp (temp))
+      return temp;
+
+  return NULL;
 }
 
 
@@ -759,6 +759,7 @@ fcopy (const char *source, size_t start, size_t len, const char *dest, const cha
       return -1;
     }
 
+  fseek (src, start, SEEK_SET);
   fseek (dst, 0, SEEK_END); // append
 
   while ((result = fread (buffer, 1, buffer_size, src)))

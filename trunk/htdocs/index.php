@@ -15,7 +15,7 @@ require_once ("misc/misc.php");
                        "uCON64 - The backup tool and wonderful emulator's Swiss Army knife program",
                        "0",   // refresh
                        "utf-8", // charset
-                       1,       // use dublin core
+                       0,       // use dublin core
                        NULL,    // default dc-desc
                        "snes, magicom, magic drive, bung, game doctor, multi game hunter, wild card, dx2, pro fighter, "
                       ."smart bros, multi game doctor, dragon boy, gamestation, game master, game doctor, mini doctor, "

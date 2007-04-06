@@ -44,8 +44,9 @@ If you are using uCON64 you may also consider visiting one of these cool sites<b
 <!--a href="http://www.hkems.com/">Welcome To EMS Production Limited</a-->
 <a href="http://www.gsarchives.net/index2.php">Game Sprite Archives</a><br>
 <a href="http://chui.dcemu.co.uk/index.html">Chui's DC projects</a><br>
+<a href="http://forthewiin.org">A Linux driver for the Nintendo Wii remote</a><br>
+<a href="http://www.supercard.cn/eng/index.htm">Chinese Supercard Homepage</a><br>
 <!--http://www.supermagi.com/
-http://www.supercard.cn/eng/index.htm
 http://krypt.dyndns.org:81/dcfactory/utils.phtml
 http://www.panelmonkey.org/
 http://romhack.de/utilities/grafik.php

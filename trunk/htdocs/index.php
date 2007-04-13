@@ -50,7 +50,7 @@ require_once ("misc/misc.php");
 <center>
 <?php
 
-require_once ("index_news.html.inc");
+require_once ("index_news.inc");
 
 ?>
 </center>
@@ -63,7 +63,7 @@ require_once ("index_news.html.inc");
 <a name="ucon64"></a><center>
 <?php
 
-require_once ("index_ucon64.html.inc");
+require_once ("index_ucon64.inc");
 
 ?>
 </center>
@@ -76,7 +76,7 @@ require_once ("index_ucon64.html.inc");
 <a name="ucon64dat"></a><center>
 <?php
 
-require_once ("index_ucon64dat.html.inc");
+require_once ("index_ucon64dat.inc");
 
 ?>
 </center>
@@ -89,7 +89,7 @@ require_once ("index_ucon64dat.html.inc");
 <a name="ucon64gui"></a><center>
 <?php
 
-require_once ("index_ucon64gui.html.inc");
+require_once ("index_ucon64gui.inc");
 
 ?>
 </center>
@@ -102,7 +102,7 @@ require_once ("index_ucon64gui.html.inc");
 <a name="ucon64misc"></a><center>
 <?php
 
-require_once ("index_ucon64misc.html.inc");
+require_once ("index_ucon64misc.inc");
 
 ?>
 </center>
@@ -115,7 +115,7 @@ require_once ("index_ucon64misc.html.inc");
 <a name="links"></a><center>
 <?php
 
-require_once ("index_links.html.inc");
+require_once ("index_links.inc");
 
 ?>
 </center>
@@ -128,7 +128,7 @@ require_once ("index_links.html.inc");
 <center>
 <?php
 
-require_once ("index_bbs.html.inc");
+require_once ("index_bbs.inc");
 
 ?>
 </center>

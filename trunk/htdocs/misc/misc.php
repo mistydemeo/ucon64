@@ -22,6 +22,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 function
+time_ms ()
+// returns milliseconds since midnight
+{
+  $tv = gettimeofday ();
+
+  if ($tv)
+    {
+      $t = $tv['usec'] / 1000;
+      $t += ($tv['sec'] % 86400) * 1000;
+    }
+
+  return $t;
+}
+
+
+function
 window_open ()
 {
 /*

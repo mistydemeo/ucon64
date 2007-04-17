@@ -30,6 +30,9 @@ extern "C" {
 /*
   String manipulation
 
+  strutf8()     encode string to utf-8
+  utf8str()     decode utf-8 to string
+
   strupr()      strupr() clone
   strlwr()      strlwr() clone
 
@@ -81,6 +84,9 @@ extern "C" {
   strnicmp()    same as strncasecmp()
   strcasestr2() strcasestr() clone for non-GNU platforms
 */
+//extern unsigned char *strutf8 (const char *s);
+//extern char *utf8str (const unsigned char *s);
+
 extern char *strlwr (char *str);
 extern char *strupr (char *str);
 

@@ -221,7 +221,7 @@ static const st_getopt2_t lf[] =
   };
 
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
 static void
 ucon64_sanity_check (void)
 {
@@ -254,7 +254,7 @@ ucon64_sanity_check (void)
       }
   }
 }
-//#endif
+#endif
 
 
 void
@@ -474,9 +474,9 @@ main (int argc, char **argv)
 #ifdef  DEBUG
   getopt2_sanity_check (option); // check (st_getopt2_t *) options consistency
 #endif
-//#ifdef  DEBUG
+#ifdef  DEBUG
   ucon64_sanity_check ();
-//#endif
+#endif
 
   printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2006\n"
     "Uses code from various people. See 'developers.html' for more!\n"

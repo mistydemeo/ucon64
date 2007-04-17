@@ -62,6 +62,90 @@ to_func (char *s, int len, int (*func) (int))
 #endif
 
 
+/*
+unsigned char *
+strutf8 (const char *s)
+{
+  static unsigned char *d = NULL;
+  unsigned char *p = NULL;
+
+  if (d)
+    free (d);
+
+  d = malloc ((strlen (s) + 1) * 3);
+
+  if (!d)
+    return NULL;
+
+  p = d;
+
+//  strcpy (p, s);
+//  strrep (p, "\r\n", "\n");
+
+  for (; *s; s++, p++)
+    {
+//      if (*s == '\r')
+//        continue;
+
+      if (*s < 128)
+        *p = *s;
+      else if (*s > 127 && *s < 2048)
+        {
+          *p = ((*s) >> 6) | 192;
+          p++;
+          *p = ((*s) & 63) | 128;
+        }
+      else
+        {
+          *p = ((*s) >> 12) | 224;
+          p++;
+          *p = (((*s) >> 6) & 63) | 128;
+          p++;
+          *p = ((*s) & 63) | 128;
+        }
+    }
+
+  return d;
+}
+
+
+char *
+utf8str (const unsigned char *s)
+{
+  static char *d = NULL;
+  char *p = NULL;
+
+  if (d)
+    free (d);
+
+  d = malloc (strlen (s));
+
+  if (!d)
+    return NULL;
+
+  p = d;
+
+  for (; *s; s++, p++)
+    {
+      if (*s < 128)
+        *p = *s;
+      else if (*s > 191 && *s < 224)
+        {
+          *p = ((*s) << 6) | ((*(s + 1)) & 63);
+          s++;
+        }
+      else
+        {
+          *p = (((*s) & 15) << 12) | (((*(s + 1)) & 63) << 6) | ((*(s + 1)) & 63);
+          s += 2;
+        }
+    }
+
+  return d;
+}
+*/
+
+
 char *
 strupr (char *s)
 {

@@ -63,6 +63,7 @@ extern "C" {
   handle_registered_funcs() calls all the registered functions
   wait2()         wait (sleep) a specified number of milliseconds
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
+  parse_date()        parse dates with different formats to time_t
 */
 #define DUMPER_BIT       (1)
 #define DUMPER_CODE      (1 << 1)
@@ -105,6 +106,7 @@ extern void handle_registered_funcs (void);
 extern void wait2 (int nmillis);
 extern char *getenv2 (const char *variable);
 extern int misc_digits (unsigned long value);
+extern time_t strptime2 (const char *s);
 
 
 /*

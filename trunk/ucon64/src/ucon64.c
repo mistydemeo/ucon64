@@ -69,7 +69,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"
 #include "misc/string.h"
 #include "misc/term.h"
-#include "misc/codec.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"

@@ -123,7 +123,8 @@ TARGETS+=$(TARGET)
 all: $(TARGETS)
 
 
-CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
+CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
+	config.log config.status config.cache; \
 cd backup/libcd64 && $(MAKE) clean; \
 rm -Rf ucon64.plg ucon64.ncb ucon64.dep ucon64.mak Debug Release *.obj */*.obj
 

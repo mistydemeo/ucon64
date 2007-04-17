@@ -76,6 +76,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 
 
+#ifndef _WIN32
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
+#endif
+
+
 typedef struct st_func_node
 {
   void (*func) (void);
@@ -713,6 +719,63 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
     }
   free (*patterns);
   *patterns = NULL;
+}
+
+
+time_t
+strptime2 (const char *s)
+{
+  int i = 0;
+  char y[100], m[100], d[100];
+  char h[100], min[100];
+//  char sec[100];
+  struct tm time_tag;
+  time_t t = time (0);
+  const char *month_s[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", NULL};
+
+  *y = *m = *d = *h = *min = 0;
+
+  if (s[10] == 'T')                     // YYYY-MM-DDT00:00+00:00
+    {
+      sscanf (s, " %4s-%2s-%2sT%2s:%2s", y, m, d, h, min);
+    }
+  else if (s[3] == ',' && s[4] == ' ')  // Mon, 31 Jul 2006 15:05:00 GMT
+    {
+      sscanf (s + 5, "%2s %s %4s %2s:%2s", d, m, y, h, min);
+
+      for (i = 0; month_s[i]; i++)
+        if (!stricmp (m, month_s[i]))
+          {
+            sprintf (m, "%d", i + 1);
+            break;
+          }
+    }
+  else if (s[4] == '-' && s[7] == '-')  // 2006-07-19
+    {
+      sscanf (s, "%4s-%2s-%2s", y, m, d);
+    }
+  else                                  // YYYYMMDDTHHMMSS
+    {
+//      sscanf (s, " %4s%2s%2sT", y, m, d);
+    }
+
+  memset (&time_tag, 0, sizeof (struct tm));
+
+  if (*y)
+    time_tag.tm_year = strtol (y, NULL, 10) - 1900;
+  if (*m)
+    time_tag.tm_mon = strtol (m, NULL, 10) - 1;
+  if (*d)
+    time_tag.tm_mday = strtol (d, NULL, 10);
+  if (*h)
+    time_tag.tm_hour = strtol (h, NULL, 10);
+  if (*min)
+    time_tag.tm_min = strtol (min, NULL, 10);
+
+  t = mktime (&time_tag);
+
+  return t;
 }
 
 

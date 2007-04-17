@@ -75,7 +75,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   0                           pass all files/dirs with their realpath()
   GETFILE_FILES_ONLY     pass only files with their realpath()
   GETFILE_RECURSIVE      pass all files/dirs with their realpath()'s recursively
-  GETFILE_RECURSIVE_ONCE like GETOPT2_FILE_RECURSIVE, but only one level deep
+  GETFILE_RECURSIVE_ONCE like GETFILE_FILE_RECURSIVE, but only one level deep
   (GETFILE_FILES_ONLY|GETFILE_RECURSIVE)
                            pass only files with their realpath()'s recursively
 

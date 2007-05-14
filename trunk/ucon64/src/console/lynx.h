@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LYNX_H
 #define LYNX_H
+
 typedef struct st_lnx_header
 {
   char magic[4];
@@ -33,22 +34,21 @@ typedef struct st_lnx_header
 } st_lnx_header_t;
 
 
-extern int lynxer_main(const char *FileName);
+extern const st_getopt2_t lynx_usage[];
 
+
+extern UCON64_FILTER_TYPE (lynx_lnx);
+extern UCON64_FILTER_TYPE (lynx_lyx);
+extern UCON64_FILTER_TYPE (lynx_nrot);
+extern UCON64_FILTER_TYPE (lynx_rotl);
+extern UCON64_FILTER_TYPE (lynx_rotr);
+extern UCON64_FILTER_TYPE (lynx_init);
+
+extern const char *lynx_lyx_desc;
+extern int lynxer_main(const char *FileName);
 extern int lynx_b0 (st_ucon64_nfo_t *rominfo, const char *value);
 extern int lynx_b1 (st_ucon64_nfo_t *rominfo, const char *value);
-
-extern int lynx_lnx (st_ucon64_nfo_t *rominfo);
-
-extern int lynx_lyx (st_ucon64_nfo_t *rominfo);
-extern const char *lynx_lyx_desc;
-
 extern int lynx_n (st_ucon64_nfo_t *rominfo, const char *name);
-extern int lynx_nrot (st_ucon64_nfo_t *rominfo);
-extern int lynx_rotl (st_ucon64_nfo_t *rominfo);
-extern int lynx_rotr (st_ucon64_nfo_t *rominfo);
 
-extern int lynx_init (st_ucon64_nfo_t *rominfo);
 
-extern const st_getopt2_t lynx_usage[];
 #endif // LYNX_H

@@ -26,13 +26,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t gba_usage[];
 extern const unsigned char gba_logodata[];
 
-extern int gba_chk (st_ucon64_nfo_t *rominfo);
+extern UCON64_FILTER_TYPE (gba_chk);
+extern UCON64_FILTER_TYPE (gba_init);
+extern UCON64_FILTER_TYPE (gba_logo);
+extern UCON64_FILTER_TYPE (gba_sram);
+extern UCON64_FILTER_TYPE (gba_sc);
+
 extern int gba_crp (st_ucon64_nfo_t *rominfo, const char *value);
-extern int gba_init (st_ucon64_nfo_t *rominfo);
-extern int gba_logo (st_ucon64_nfo_t *rominfo);
 extern int gba_n (st_ucon64_nfo_t *rominfo, const char *name);
-extern int gba_sram (void);
 extern int gba_multi (int truncate_size, char *fname);
-extern int gba_sc (void);
+
 
 #endif

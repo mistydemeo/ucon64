@@ -719,7 +719,8 @@ gb_chksum (st_ucon64_nfo_t *rominfo)
 
 
 int
-gb_sc (void)
+gb_sc (st_ucon64_nfo_t *rominfo)
 {
+  (void) rominfo;
   return sc_sram (ucon64.fname);
 }

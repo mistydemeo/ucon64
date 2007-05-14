@@ -5839,7 +5839,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
 
 
 int
-nes_unif (void)
+nes_unif (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
@@ -6253,7 +6253,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
 
 
 int
-nes_ines (void)
+nes_ines (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
@@ -6326,10 +6326,10 @@ nes_ines (void)
 
 
 int
-nes_pasofami (void)
+nes_pasofami (st_ucon64_nfo_t *rominfo)
 {
   // nes_s() does iNES -> Pasofami. nes_s() checks for type
-  return nes_s ();
+  return nes_s (rominfo);
 }
 
 
@@ -6523,7 +6523,7 @@ nes_ineshd (st_ucon64_nfo_t *rominfo)
 
 
 int
-nes_dint (void)
+nes_dint (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -6843,7 +6843,7 @@ write_prm (st_ines_header_t *header, const char *fname)
 
 
 int
-nes_s (void)
+nes_s (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
   unsigned char *trainer_data = NULL, *prg_data = NULL, *chr_data = NULL;
@@ -6936,7 +6936,7 @@ nes_s (void)
 
 
 int
-nes_n (const char *name)
+nes_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   if (type != UNIF)
     {
@@ -6949,7 +6949,7 @@ nes_n (const char *name)
   else
     internal_name = NULL;
 
-  return nes_unif ();                           // will call nes_unif_unif()
+  return nes_unif (rominfo);                           // will call nes_unif_unif()
 }
 
 
@@ -7647,7 +7647,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
 
 
 int
-nes_fds (void)
+nes_fds (st_ucon64_nfo_t *rominfo)
 /*
   This function converts a Famicom Disk System disk image from FAM format to
   FDS format. It does almost the same as -strip apart from three checks
@@ -7707,7 +7707,7 @@ nes_fds (void)
 
 
 int
-nes_sc (void)
+nes_sc (st_ucon64_nfo_t *rominfo)
 {
   return sc_sram (ucon64.fname);
 }

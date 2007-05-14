@@ -394,4 +394,17 @@ enum
 };
 
 
+#if 0
+#define UCON64_FILTER(id,name) \
+const st_filter_t name = \
+  { \
+    id, \
+    (int (*) (void *)) & name, \
+  };
+#endif
+
+
+#define UCON64_FILTER_TYPE(name) int name (st_ucon64_nfo_t *rominfo)
+
+
 #endif // UCON64_DEFINES_H

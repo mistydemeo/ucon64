@@ -99,6 +99,7 @@ extern char *stritrim_s (char *str, const char *left, const char *right);
 extern char *strmove (char *to, char *from);
 extern char *strins (char *str, const char *ins);
 extern char *strrep (char *str, const char *orig, const char *rep);
+extern char *strcat2 (const char *a, const char *b);
 
 extern char *strcode (char *str);
 extern char *strhtml (char *str);

@@ -20,10 +20,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DC_H
 #define DC_H
-extern int dc_init (st_ucon64_nfo_t *rominfo);
+
+
 extern const st_getopt2_t dc_usage[];
+
+
+extern UCON64_FILTER_TYPE (dc_init);
+extern UCON64_FILTER_TYPE (dc_mkip);
+extern UCON64_FILTER_TYPE (dc_scramble);
+extern UCON64_FILTER_TYPE (dc_unscramble);
+
+
 extern int dc_parse (const char *template_file);
-extern int dc_mkip (void);
-extern int dc_scramble (void);
-extern int dc_unscramble (void);
 #endif

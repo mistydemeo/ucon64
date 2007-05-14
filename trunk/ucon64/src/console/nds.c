@@ -321,8 +321,9 @@ nds_chksum (void)
 
 
 int
-nds_sc (void)
+nds_sc (st_ucon64_nfo_t *rominfo)
 {
+  (void) rominfo;
 #warning write nds_sc()
   return 0;
 }

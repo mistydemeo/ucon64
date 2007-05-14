@@ -24,15 +24,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t sms_usage[];
 
-extern int sms_gg (st_ucon64_nfo_t *rominfo);
-extern int sms_ggd (st_ucon64_nfo_t *rominfo);
-extern int sms_gge (st_ucon64_nfo_t *rominfo);
-extern int sms_init (st_ucon64_nfo_t *rominfo);
+extern UCON64_FILTER_TYPE (sms_gg);
+extern UCON64_FILTER_TYPE (sms_ggd);
+extern UCON64_FILTER_TYPE (sms_gge);
+extern UCON64_FILTER_TYPE (sms_init);
+extern UCON64_FILTER_TYPE (sms_smd);
+extern UCON64_FILTER_TYPE (sms_smds);
+extern UCON64_FILTER_TYPE (sms_chk);
+extern UCON64_FILTER_TYPE (sms_sc);
+
+
 extern int sms_mgd (st_ucon64_nfo_t *rominfo, int console);
-extern int sms_smd (st_ucon64_nfo_t *rominfo);
-extern int sms_smds (void);
-extern int sms_chk (st_ucon64_nfo_t *rominfo);
 extern int sms_multi (int truncate_size, char *fname);
-extern int sms_sc (void);
+
 
 #endif

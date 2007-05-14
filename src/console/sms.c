@@ -205,7 +205,7 @@ sms_smd (st_ucon64_nfo_t *rominfo)
 
 
 int
-sms_smds (void)
+sms_smds (st_ucon64_nfo_t *rominfo)
 {
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -726,7 +726,7 @@ sms_chksum (unsigned char *rom_buffer, int rom_size)
 
 
 int
-sms_sc (void)
+sms_sc (st_ucon64_nfo_t *rominfo)
 {
   return sc_sram (ucon64.fname);
 }

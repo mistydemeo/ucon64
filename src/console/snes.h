@@ -33,33 +33,38 @@ typedef enum { SWC = 1, GD3, UFO, FIG, MGD_SNES, SMC } snes_file_t;
 
 extern const st_getopt2_t snes_usage[];
 
-extern snes_file_t snes_get_file_type (void);
-extern int snes_backup_header_info (st_ucon64_nfo_t *rominfo);
-extern int snes_chk (st_ucon64_nfo_t *rominfo);
-extern int snes_col (const char *color);
-extern int snes_demirror (st_ucon64_nfo_t *rominfo);
-extern int snes_densrt (st_ucon64_nfo_t *rominfo);
-extern int snes_dint (st_ucon64_nfo_t *rominfo);
-extern int snes_f (st_ucon64_nfo_t *rominfo);
-extern int snes_fig (st_ucon64_nfo_t *rominfo);
-extern int snes_figs (st_ucon64_nfo_t *rominfo);
-extern int snes_gd3 (st_ucon64_nfo_t *rominfo);
-extern int snes_gd3s (st_ucon64_nfo_t *rominfo);
+
+extern UCON64_FILTER_TYPE (snes_backup_header_info);
+extern UCON64_FILTER_TYPE (snes_chk);
+extern UCON64_FILTER_TYPE (snes_demirror);
+extern UCON64_FILTER_TYPE (snes_densrt);
+extern UCON64_FILTER_TYPE (snes_dint);
+extern UCON64_FILTER_TYPE (snes_f);
+extern UCON64_FILTER_TYPE (snes_fig);
+extern UCON64_FILTER_TYPE (snes_figs);
+extern UCON64_FILTER_TYPE (snes_gd3);
+extern UCON64_FILTER_TYPE (snes_gd3s);
+extern UCON64_FILTER_TYPE (snes_init);
+extern UCON64_FILTER_TYPE (snes_j);
+extern UCON64_FILTER_TYPE (snes_k);
+extern UCON64_FILTER_TYPE (snes_l);
+extern UCON64_FILTER_TYPE (snes_mgd);
+extern UCON64_FILTER_TYPE (snes_mgh);
+extern UCON64_FILTER_TYPE (snes_s);
+extern UCON64_FILTER_TYPE (snes_smc);
+extern UCON64_FILTER_TYPE (snes_swc);
+extern UCON64_FILTER_TYPE (snes_swcs);
+extern UCON64_FILTER_TYPE (snes_ufo);
+extern UCON64_FILTER_TYPE (snes_ufos);
+
+
 extern int snes_get_snes_hirom (void);
-extern int snes_init (st_ucon64_nfo_t *rominfo);
-extern int snes_j (st_ucon64_nfo_t *rominfo);
-extern int snes_k (st_ucon64_nfo_t *rominfo);
-extern int snes_l (st_ucon64_nfo_t *rominfo);
+extern snes_file_t snes_get_file_type (void);
+extern int snes_col (const char *color);
 extern int snes_make_gd_names (const char *filename, st_ucon64_nfo_t *rominfo, char **names);
-extern int snes_mgd (st_ucon64_nfo_t *rominfo);
-extern int snes_mgh (st_ucon64_nfo_t *rominfo);
 extern int snes_multi (int truncate_size, char *fname);
 extern int snes_n (st_ucon64_nfo_t *rominfo, const char *name);
-extern int snes_s (st_ucon64_nfo_t *rominfo);
 extern void snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header);
-extern int snes_smc (st_ucon64_nfo_t *rominfo);
-extern int snes_swc (st_ucon64_nfo_t *rominfo);
-extern int snes_swcs (st_ucon64_nfo_t *rominfo);
-extern int snes_ufo (st_ucon64_nfo_t *rominfo);
-extern int snes_ufos (st_ucon64_nfo_t *rominfo);
+
+
 #endif // SNES_H

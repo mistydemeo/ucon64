@@ -44,8 +44,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                 on one file system
   truncate2() don't use truncate() to enlarge files, because the result is
                 undefined (by POSIX) use truncate2() instead which does both
-  tmpnam2()   deprecated
-  tmpnam3()   replacement for tmpnam() temp must have the size of FILENAME_MAX
   baknam()    produces a backup name for a filename
                 bla.txt would return bla.bak or bla.b01 if bla.bak already exists
   fcopy()     copy src from start for len to dest with mode
@@ -96,7 +94,6 @@ extern int same_file (const char *filename1, const char *filename2);
 extern int same_filesystem (const char *filename1, const char *filename2);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, unsigned long size);
-extern char *tmpnam3 (char *temp, int dir);
 extern char *baknam (char *fname);
 extern int fsizeof (const char *filename);
 extern int fcopy (const char *src, size_t start, size_t len, const char *dest,

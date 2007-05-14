@@ -188,6 +188,21 @@ strins (char *dest, const char *ins)
 
 
 char *
+strcat2 (const char *a, const char *b)
+{
+  char *p = malloc (strlen (a) + strlen (b) + 1);
+
+  if (!p)
+    return NULL;
+
+  strcpy (p, a);
+  strcat (p, b);
+
+  return p;
+}
+
+
+char *
 strcasestr2 (const char *str, const char *search)
 {
   if (!(*search))

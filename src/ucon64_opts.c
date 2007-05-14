@@ -50,10 +50,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-#warning build filters with these
-#define UCON64_FILTER_BUILD(id,d,o,c,r,w) FILTER_BUILD(&NULL,id,d,o,c,r,w,&NULL,&NULL,&NULL,&NULL)
-
-
 static long int
 strtol2 (const char *str, char **tail)
 {
@@ -1040,7 +1036,7 @@ ucon64_tmp_dint (st_ucon64_t *p)
   switch (p->console)
     {
       case UCON64_NES:
-        nes_dint ();
+        nes_dint (p->nfo);
         return 0;
 
       case UCON64_PCE:
@@ -1117,7 +1113,7 @@ ucon64_tmp_f (st_ucon64_t *p)
 static int
 ucon64_tmp_fds (st_ucon64_t *p)
 {
-  nes_fds ();
+  nes_fds (p->nfo);
   return 0;
 }
 
@@ -1216,7 +1212,7 @@ ucon64_tmp_gge (st_ucon64_t *p)
 static int
 ucon64_tmp_ines (st_ucon64_t *p)
 {
-  nes_ines ();
+  nes_ines (p->nfo);
   return 0;
 }
 
@@ -1256,7 +1252,7 @@ ucon64_tmp_parse (st_ucon64_t *p)
 static int
 ucon64_tmp_mkip (st_ucon64_t *p)
 {
-  dc_mkip ();
+  dc_mkip (p->nfo);
   return 0;
 }
 
@@ -1417,7 +1413,7 @@ ucon64_tmp_n (st_ucon64_t *p)
         return 0;
 
       case UCON64_NES:
-        nes_n (p->optarg);
+        nes_n (p->nfo, p->optarg);
         return 0;
 
       case UCON64_SNES:
@@ -1460,7 +1456,7 @@ ucon64_tmp_nrot (st_ucon64_t *p)
 static int
 ucon64_tmp_pasofami (st_ucon64_t *p)
 {
-  nes_pasofami ();
+  nes_pasofami (p->nfo);
   return 0;
 }
 
@@ -1507,7 +1503,7 @@ ucon64_tmp_s (st_ucon64_t *p)
         return 0;
 
       case UCON64_NES:
-        nes_s ();
+        nes_s (p->nfo);
         return 0;
 
       case UCON64_SNES:
@@ -1522,7 +1518,7 @@ ucon64_tmp_s (st_ucon64_t *p)
 static int
 ucon64_tmp_scr (st_ucon64_t *p)
 {
-  dc_scramble ();
+  dc_scramble (p->nfo);
   return 0;
 }
 
@@ -1578,11 +1574,11 @@ ucon64_tmp_smds (st_ucon64_t *p)
   switch (p->console)
     {
       case UCON64_GEN:
-        genesis_smds ();
+        genesis_smds (p->nfo);
         return 0;
 
       case UCON64_SMS:
-        sms_smds ();
+        sms_smds (p->nfo);
         return 0;
     }
 
@@ -1593,7 +1589,7 @@ ucon64_tmp_smds (st_ucon64_t *p)
 static int
 ucon64_tmp_sram (st_ucon64_t *p)
 {
-  gba_sram ();
+  gba_sram (p->nfo);
   return 0;
 }
 
@@ -1604,23 +1600,23 @@ ucon64_tmp_sc (st_ucon64_t *p)
   switch (p->console)
     {
       case UCON64_SMS:
-        sms_sc ();
+        sms_sc (p->nfo);
         return 0;
 
       case UCON64_GB:
-        gb_sc ();
+        gb_sc (p->nfo);
         return 0;
 
       case UCON64_GBA:
-        gba_sc ();
+        gba_sc (p->nfo);
         return 0;
 
       case UCON64_NES:
-        nes_sc ();
+        nes_sc (p->nfo);
         return 0;
 
       case UCON64_NDS:
-        nds_sc ();
+        nds_sc (p->nfo);
         return 0;
     }
 
@@ -1671,7 +1667,7 @@ ucon64_tmp_ufos (st_ucon64_t *p)
 static int
 ucon64_tmp_unif (st_ucon64_t *p)
 {
-  nes_unif ();
+  nes_unif (p->nfo);
   return 0;
 }
 
@@ -1679,7 +1675,7 @@ ucon64_tmp_unif (st_ucon64_t *p)
 static int
 ucon64_tmp_unscr (st_ucon64_t *p)
 {
-  dc_unscramble ();
+  dc_unscramble (p->nfo);
   return 0;
 }
 

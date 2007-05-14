@@ -27,17 +27,22 @@ typedef enum { SMD = 1, BIN, MGD_GEN } genesis_file_t;
 extern const st_getopt2_t genesis_usage[];
 
 extern genesis_file_t genesis_get_file_type (void);
-extern int genesis_1991 (st_ucon64_nfo_t *rominfo);
-extern int genesis_chk (st_ucon64_nfo_t *rominfo);
-extern int genesis_j (st_ucon64_nfo_t *rominfo);
+
+
+extern UCON64_FILTER_TYPE (genesis_1991);
+extern UCON64_FILTER_TYPE (genesis_chk);
+extern UCON64_FILTER_TYPE (genesis_j);
+extern UCON64_FILTER_TYPE (genesis_s);
+extern UCON64_FILTER_TYPE (genesis_smd);
+extern UCON64_FILTER_TYPE (genesis_bin);
+extern UCON64_FILTER_TYPE (genesis_mgd);
+extern UCON64_FILTER_TYPE (genesis_init);
+extern UCON64_FILTER_TYPE (genesis_f);
+extern UCON64_FILTER_TYPE (genesis_smds);
+
+
 extern int genesis_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int genesis_n2 (st_ucon64_nfo_t *rominfo, const char *name);
-extern int genesis_s (st_ucon64_nfo_t *rominfo);
-extern int genesis_smd (st_ucon64_nfo_t *rominfo);
-extern int genesis_smds (void);
-extern int genesis_bin (st_ucon64_nfo_t *rominfo);
-extern int genesis_mgd (st_ucon64_nfo_t *rominfo);
 extern int genesis_multi (int truncate_size, char *fname);
-extern int genesis_init (st_ucon64_nfo_t *rominfo);
-extern int genesis_f (st_ucon64_nfo_t *rominfo);
+
 #endif

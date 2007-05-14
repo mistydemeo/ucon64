@@ -224,8 +224,9 @@ genesis_smd (st_ucon64_nfo_t *rominfo)
 
 
 int
-genesis_smds (void)
+genesis_smds (st_ucon64_nfo_t *rominfo)
 {
+  (void) rominfo;
   char dest_name[FILENAME_MAX];
   unsigned char buf[32768];
   st_smd_header_t header;

@@ -22,10 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PCE_H
 extern const st_getopt2_t pce_usage[];
 
-extern int pce_init (st_ucon64_nfo_t *rominfo);
-extern int pce_mgd (st_ucon64_nfo_t *rominfo);
-extern int pce_msg (st_ucon64_nfo_t *rominfo);
-extern int pce_swap (st_ucon64_nfo_t *rominfo);
-extern int pce_f (st_ucon64_nfo_t *rominfo);
+extern UCON64_FILTER_TYPE (pce_init);
+extern UCON64_FILTER_TYPE (pce_mgd);
+extern UCON64_FILTER_TYPE (pce_msg);
+extern UCON64_FILTER_TYPE (pce_swap);
+extern UCON64_FILTER_TYPE (pce_f);
+
+
 extern int pce_multi (int truncate_size, char *fname);
+
 #endif

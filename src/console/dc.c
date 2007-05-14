@@ -421,8 +421,10 @@ dc_parse (const char *templ_file)
 
 
 int
-dc_mkip (void)
+dc_mkip (st_ucon64_nfo_t *rominfo)
 {
+  (void) rominfo;
+
   dc_parse ("default");
 
   return 0;
@@ -608,8 +610,9 @@ scramble (const char *src, char *dst)
 
 
 int
-dc_scramble (void)
+dc_scramble (st_ucon64_nfo_t *rominfo)
 {
+  (void) rominfo;
   char dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.fname);
@@ -624,8 +627,9 @@ dc_scramble (void)
 
 
 int
-dc_unscramble (void)
+dc_unscramble (st_ucon64_nfo_t *rominfo)
 {
+  (void) rominfo;
   char dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.fname);

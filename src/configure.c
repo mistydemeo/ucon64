@@ -344,7 +344,8 @@ main (int argc, char **argv)
     }
 
   puts
-    ("\nYou may edit config.mak and/or config.h by hand to disable features\n");
+    ("\n");
+//    ("\nYou may edit config.mak and/or config.h by hand to disable features\n");
 
   return 0;
 }

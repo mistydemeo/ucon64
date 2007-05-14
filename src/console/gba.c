@@ -301,9 +301,11 @@ gba_chk (st_ucon64_nfo_t *rominfo)
 
 
 int
-gba_sram (void)
+gba_sram (st_ucon64_nfo_t *rominfo)
 // This function is based on Omar Kilani's gbautil 1.1
 {
+  (void) rominfo;
+
   unsigned char st_orig[2][10] =
     {
       { 0x0E, 0x48, 0x39, 0x68, 0x01, 0x60, 0x0E, 0x48, 0x79, 0x68 },
@@ -1059,7 +1061,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
 #endif
 
 int
-gba_sc (void)
+gba_sc (st_ucon64_nfo_t *rominfo)
 #warning fix gba_sc()
 /*
   reverse engineered from SuperCard.exe

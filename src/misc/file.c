@@ -651,43 +651,6 @@ truncate2 (const char *filename, unsigned long new_size)
 }
 
 
-char *
-tmpnam3 (char *temp, int dir)
-{
-  char *t = NULL, *p = NULL;
-
-  if (!temp)
-    return NULL;
-  
-  t = getenv2 ("TEMP");
-
-  if (!(p = malloc (strlen (t) + strlen (temp) + 12)))
-    return NULL;
-
-  sprintf (p, "%s" FILE_SEPARATOR_S "%st_XXXXXX", t, temp);
-  strcpy (temp, p);
-  free (p);
-
-  if (!dir)
-    if (mkstemp (temp) != -1)
-      return temp;
-
-  if (dir)
-    if (mkdtemp (temp))
-      return temp;
-
-  return NULL;
-}
-
-
-char *
-tmpnam2 (char *temp)
-// deprecated
-{
-  return tmpnam3 (temp, 0);
-}
-
-
 int
 fsizeof (const char *filename)
 {

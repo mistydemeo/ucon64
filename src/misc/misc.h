@@ -46,6 +46,7 @@ extern "C" {
                     printf() only isalnum() chars
                     DUMPER_DEC_COUNT
                     show position as decimal value
+  tmpnam3()   replacement for tmpnam() temp must have the size of FILENAME_MAX
   change_mem{2}() see header of implementation for usage
   build_cm_patterns() helper function for change_mem2() to read search patterns
                     from a file
@@ -87,6 +88,7 @@ typedef struct st_cm_pattern
   st_cm_set_t *sets;
 } st_cm_pattern_t;
 
+extern char *tmpnam3 (char *temp, int dir);
 extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
                        char wc, char esc, char *newstr, int newsize, int offset, ...);
 extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,

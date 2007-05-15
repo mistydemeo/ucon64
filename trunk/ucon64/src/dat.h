@@ -32,13 +32,15 @@ typedef struct
   char misc[DAT_MAXBUFLEN];                     // miscellaneous information about the ROM
   char rom_name[FILENAME_MAX];                  // filename of the ROM
   uint32_t rom_size;                            // size in bytes
+  const char *country;
 } st_dat_entry_t;
 
 
 typedef struct
 {
-  char dat_fname[FILENAME_MAX];                 // dat filename
-  char datfile[FILENAME_MAX];                   // internal dat name
+  char fname[FILENAME_MAX];                     // dat filename
+
+//  char datfile[FILENAME_MAX];                   // internal dat name
   char author[DAT_MAXBUFLEN];                   // dat author
   char version[DAT_MAXBUFLEN];                  // dat version
   char date[DAT_MAXBUFLEN];                     // dat date
@@ -47,33 +49,30 @@ typedef struct
 } st_dat_t;
 
 
-#define DAT_FLAG_IDX 1
-extern st_dat_t *dat_open (const char *dat_fname, int flags);
-#if 0
-extern st_dat_t *dat_create (const char *dat_fname,
-                             const char *author,
-                             const char *version,
-                             const char *refname,
-                             const char *comment,
-                             const char *date);
-#endif
+/*
+  dat_create()  create a empty DAT file
+  dat_open()    open a existing DAT file
+  dat_close()   close DAT file
+  dat_read()    read entry with crc32 from DAT file
+  dat_write()   add entry to DAT file
+*/
+extern int dat_create (const char *dat_fname,
+            const char *author,
+            const char *email,
+            const char *homepage,
+            const char *url,
+            const char *version,
+            const char *comment,
+            const char *plugin,
+            const char *refname);
+extern st_dat_t *dat_open (const char *dat_fname);
 extern int dat_close (st_dat_t *dat);
-
-
-//#define DAT_SEEK_SET 0
-//#define DAT_SEEK_CUR 1
-//#define DAT_SEEK_END 2
-//extern int dat_seek_by_entry (st_dat_t *dat, int entry, int offset);
-
-
-extern st_dat_entry_t *dat_read (st_dat_t *dat, uint32_t crc32);
-#if 0
+extern const st_dat_entry_t *dat_read (st_dat_t *dat, uint32_t crc32);
 extern int dat_write (st_dat_t *dat, uint32_t crc32,
-                                     const char *name,
-                                     const char *misc,
-                                     const char *rom_name,
-                                     uint32_t rom_size);
-#endif
+//                          const char *name,
+//                          const char *misc,
+                          const char *rom_name,
+                          uint32_t rom_size);
 
                    
 #endif // DAT_H

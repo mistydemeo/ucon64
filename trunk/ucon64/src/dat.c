@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/string.h"
 #include "misc/itypes.h"
 #include "misc/property.h"
 #include "misc/file.h"
@@ -42,6 +43,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #undef  MAXBUFSIZE
 #endif
 #define MAXBUFSIZE 32768
+
+
+// romcenter defaults
+#define MAX_FIELDS_IN_DAT 32
+#define DAT_FIELD_SEPARATOR (0xac)
+#define DAT_FIELD_SEPARATOR_S "\xac"
 
 
 typedef struct
@@ -106,131 +113,81 @@ static const char *dat_flags[][2] =
   };
 
 
-static int
-dat_log (FILE *log, const char *s)
-{
-  char buf[32];
-  time_t t = time (0);
-
-  strftime (buf, 32, "%b %d %H:%M:%S", localtime (&t));
-
-  fprintf (log, "%s rsstool(%d): ", buf, getpid());
-  fputs (s, log);
-  fputc ('\n', log);
-  fflush (log);
-
-  return 0;
-}
-
-
-static const char *
-dat_get_idx_name (const char *dat_fname)
-{
-  static char buf[FILENAME_MAX];
-  strncpy (buf, dat_fname, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
-  set_suffix (buf, ".idx");
-  return buf;
-}
-
-
-static const char *
-dat_get_log_name (const char *dat_fname)
-{
-  static char buf[FILENAME_MAX];
-  strncpy (buf, dat_fname, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
-  set_suffix (buf, ".log");
-  return buf;
-}
-
-
 static st_dat_entry_t *
-dat_get_next_entry (FILE *d)
+dat_parse_line (const char *line)
 {
   uint32_t pos = 0;
   int x = 0;
   static st_dat_entry_t dat_entry;
-  char line[MAXBUFSIZE];
   char buf[MAXBUFSIZE], *p = NULL;
-
-#define MAX_FIELDS_IN_DAT 32
-#define DAT_FIELD_SEPARATOR (0xac)
-#define DAT_FIELD_SEPARATOR_S "\xac"
-
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL };
 
-#if 0
-  if (fgets (line, MAXBUFSIZE, d))
-    {
-      if ((unsigned char) *line != DAT_FIELD_SEPARATOR)
-        return NULL;
+  if (!line)
+    return NULL;
 
-      strncpy (buf, line, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
+  if (!(*line))
+    return NULL;
+
+  if ((unsigned char) *line != DAT_FIELD_SEPARATOR)
+    return NULL;
+
+  memset (&dat_entry, 0, sizeof (st_dat_entry_t));
+
+  strncpy (buf, line, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
 
   strarg (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
 
-  memset (&dat, 0, sizeof (st_ucon64_dat_t));
-
-  strcpy (dat->datfile, basename2 (fname));
-
   if (dat_field[3])
-    strcpy (dat->name, dat_field[3]);
+    strcpy (dat_entry.name, dat_field[3]);
 
   if (dat_field[4])
-    strcpy (dat->fname, dat_field[4]);
+    strcpy (dat_entry.rom_name, dat_field[4]);
 
   if (dat_field[5])
-    sscanf (dat_field[5], "%x", (unsigned int *) &dat->crc32);
+    sscanf (dat_field[5], "%x", (unsigned int *) &dat_entry.crc32);
 
   if (dat_field[6][0] == 'N' && dat_field[7][0] == 'O')
     // e.g. GoodSNES bad crc & Nintendo FDS DAT
-    sscanf (dat_field[8], "%d", (int *) &dat->fsize);
+    sscanf (dat_field[8], "%d", (int *) &dat_entry.rom_size);
   else
-    sscanf (dat_field[6], "%d", (int *) &dat->fsize);
+    sscanf (dat_field[6], "%d", (int *) &dat_entry.rom_size);
 
   *buf = 0;
   for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
-    if (strstr (dat->name, dat_flags[x][0]))
+    if (strstr (dat_entry.name, dat_flags[x][0]))
       sprintf (p, "%s, ", dat_flags[x][1]);
   if (buf[0])
     {
       if ((p = strrchr (buf, ',')))
         *p = 0;
-      sprintf (dat->misc, "Flags: %s", buf);
+      sprintf (dat_entry.misc, "Flags: %s", buf);
     }
 
-  p = dat->name;
-  dat->country = NULL;
+  p = dat_entry.name;
+  dat_entry.country = NULL;
   for (pos = 0; dat_country[pos][0]; pos++)
     if (stristr (p, dat_country[pos][0]))
       {
-        dat->country = dat_country[pos][1];
+        dat_entry.country = dat_country[pos][1];
         break;
       }
 
-  fname_to_console (dat->datfile, dat);
-  dat->backup_usage = unknown_backup_usage[0].help;
-
-  return dat;
-
-    }
-#endif
-
-  return NULL;
+  return &dat_entry;
 }
 
 
 static int
-dat_index (const char *dat_fname)
+dat_create_index (const char *dat_fname)
 {
   char idx_fname[FILENAME_MAX];
-  char log_fname[FILENAME_MAX];
-  int entries = 0;
   char buf[MAXBUFSIZE];
   st_idx_entry_t idx_entry;
+  st_dat_entry_t *dat_entry = NULL;
   struct stat dat_state, idx_state;
-  FILE *d = NULL, *idx = NULL, *log = NULL;
+  FILE *d = NULL, *idx = NULL;
 
-  strncpy (idx_fname, dat_get_idx_name (dat_fname), FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  strncpy (idx_fname, dat_fname, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  set_suffix (idx_fname, ".idx");
 
   if (!stat (dat_fname, &dat_state) && !stat (idx_fname, &idx_state))
     if (dat_state.st_mtime < idx_state.st_mtime)
@@ -239,57 +196,96 @@ dat_index (const char *dat_fname)
   if (!(d = fopen (dat_fname, "rb")))
     return -1;
 
-  strncpy (log_fname, dat_get_log_name (dat_fname), FILENAME_MAX)[FILENAME_MAX - 1] = 0;
-
   if (!(idx = fopen (idx_fname, "w")))
     {
       fclose (d);
       return -1;
     }
 
-  if (!(log = fopen (log_fname, "a")))
-    {
-      fclose (d);
-      fclose (idx);
-      return -1;
-    }
-
-  idx_entry.filepos = ftell (d);
   while ((fgets (buf, MAXBUFSIZE, d)))
     {
-      st_dat_entry_t *dat_entry = dat_get_next_entry (d);
+      idx_entry.filepos = ftell (d);
 
-      if (dat_entry)
+      if ((dat_entry = dat_parse_line (buf)))
         {
           idx_entry.crc32 = dat_entry->crc32;
           fwrite (&idx_entry, 1, sizeof (st_idx_entry_t), idx);
         }
-
-      idx_entry.filepos = ftell (d);
-      entries++;
     }
-
-  sprintf (buf, "%d entries found in %s", entries, dat_fname);
-  dat_log (log, buf);
 
   fclose (d);
   fclose (idx);
-  fclose (log);
+
+  return 0;
+}
+
+
+int
+dat_create (const char *dat_fname,
+            const char *author,
+            const char *email,
+            const char *homepage,
+            const char *url,
+            const char *version,
+            const char *comment,
+            const char *plugin,
+            const char *refname)
+{
+//  char fname[FILENAME_MAX], *ptr;
+  time_t time_t_val;
+  struct tm *t;
+  FILE *fh = NULL;
+
+  if (!(fh = fopen (dat_fname, "w")))
+    return -1;
+
+  time_t_val = time (NULL);
+  t = localtime (&time_t_val);
+
+  // RomCenter uses files in DOS text format, so we generate a file in that format
+  fprintf (fh, "[CREDITS]\r\n"
+               "author=%s\r\n"
+               "email=%s\r\n"
+               "homepage=%s\r\n"
+               "url=%s\r\n"
+               "version=%s\r\n"
+               "date=%d/%d/%d\r\n"
+               "comment=%s\r\n"
+               "[DAT]\r\n"
+               "version=2.50\r\n" // required by RomCenter!
+               "plugin=%s\r\n"
+               "[EMULATOR]\r\n"
+               "refname=%s\r\n"
+               "version=\r\n"
+               "[GAMES]\r\n",
+               author,
+               email,
+               homepage,
+               url,
+               version,
+               t->tm_mday,
+               t->tm_mon + 1,
+               t->tm_year + 1900,
+               comment,
+               plugin,
+               refname);
+
+  fclose (fh);
 
   return 0;
 }
 
 
 st_dat_t *
-dat_open (const char *dat_fname, int flags)
+dat_open (const char *dat_fname)
 {
   static st_dat_t dat;
   const char *p = NULL;
 
-  if (flags & DAT_FLAG_IDX)
-    dat_index (dat_fname);
+  // create index file if necessary
+  dat_create_index (dat_fname);
 
-  strncpy (dat.dat_fname, dat_fname, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  strncpy (dat.fname, dat_fname, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
   // read dat header
   if ((p = get_property (dat_fname, "author", PROPERTY_MODE_TEXT)))
@@ -321,68 +317,6 @@ dat_open (const char *dat_fname, int flags)
 }
 
 
-#if 0
-st_dat_t *
-dat_create (const char *dat_fname,
-            const char *author,
-            const char *version,
-            const char *refname,
-            const char *comment,
-            const char *date)
-{
-  return 0;
-}
-#endif
-
-
-st_dat_entry_t *
-dat_read (st_dat_t *dat, uint32_t crc32)
-{
-  st_dat_entry_t *dat_entry = NULL;
-  char idx_fname[FILENAME_MAX];
-  st_idx_entry_t idx_entry;
-  FILE *idx = NULL, *d = NULL;
-
-  strncpy (idx_fname, dat_get_idx_name (dat->dat_fname), FILENAME_MAX)[FILENAME_MAX - 1] = 0;
-
-  if (!(idx = fopen (idx_fname, "rb")))
-    return NULL;
-
-  if (!(d = fopen (dat->dat_fname, "rb")))
-    {
-      fclose (idx);
-      return NULL;
-    }
-
-  while ((fread (&idx_entry, 1, sizeof (st_idx_entry_t), idx)))
-    if (idx_entry.crc32 == crc32)
-      break;
-
-  fclose (idx);
-
-
-  fseek (d, idx_entry.filepos, SEEK_SET);
-  dat_entry = dat_get_next_entry (d);
-
-  fclose (d);
-
-  return dat_entry;
-}
-
-
-#if 0
-int
-dat_write (st_dat_t *dat, uint32_t crc32,
-                          const char *name,
-                          const char *misc,
-                          const char *rom_name,
-                          uint32_t rom_size)
-{
-  return 0;
-}
-#endif
-
-
 int
 dat_close (st_dat_t *dat)
 {
@@ -392,15 +326,94 @@ dat_close (st_dat_t *dat)
 }
 
 
+const st_dat_entry_t *
+dat_read (st_dat_t *dat, uint32_t crc32)
+{
+  st_dat_entry_t *dat_entry = NULL;
+  st_idx_entry_t idx_entry;
+  char idx_fname[FILENAME_MAX];
+  char buf[MAXBUFSIZE];
+  FILE *idx = NULL, *d = NULL;
+
+  strncpy (idx_fname, dat->fname, FILENAME_MAX)[FILENAME_MAX - 1] = 0;                   
+  set_suffix (idx_fname, ".idx");
+
+  if (!(idx = fopen (idx_fname, "rb")))
+    return NULL;
+
+  while ((fread (&idx_entry, 1, sizeof (st_idx_entry_t), idx)))
+    if (idx_entry.crc32 == crc32)
+      {
+        if (!(d = fopen (dat->fname, "r")))
+          {
+            fclose (idx);
+            return NULL;
+          }
+
+        fseek (d, idx_entry.filepos, SEEK_SET);
+        if ((fgets (buf, MAXBUFSIZE, d)))
+          dat_entry = dat_parse_line (buf);
+
+        fclose (d);
+
+        break;
+      }
+
+  fclose (idx);
+
+  return dat_entry;
+}
+
+
+int
+dat_write (st_dat_t *dat, uint32_t crc32,
+//                          const char *name,
+//                          const char *misc,
+                          const char *rom_name,
+                          uint32_t rom_size)
+{
+  FILE *fh = NULL;
+
+  if (!(fh = fopen (dat->fname, "a")))
+    {
+      fprintf (stderr, "ERROR: %s does not exist\n", dat->fname);
+      return -1;
+    }
+
+  fseek (fh, 0, SEEK_END);
+  fprintf (fh, DAT_FIELD_SEPARATOR_S "%s" // set file name
+               DAT_FIELD_SEPARATOR_S "%s" // set full name
+               DAT_FIELD_SEPARATOR_S "%s" // clone file name
+               DAT_FIELD_SEPARATOR_S "%s" // clone full name
+               DAT_FIELD_SEPARATOR_S "%s" // rom file name
+               DAT_FIELD_SEPARATOR_S "%08x" // RC quirck: leading zeroes are required
+               DAT_FIELD_SEPARATOR_S "%d"
+               DAT_FIELD_SEPARATOR_S // merged clone name
+               DAT_FIELD_SEPARATOR_S // merged rom name
+               DAT_FIELD_SEPARATOR_S "\r\n",
+               rom_name,
+               rom_name,
+               rom_name,
+               rom_name,
+               rom_name,
+               crc32,
+               rom_size);
+
+  fclose (fh);
+
+  return 0;
+}
+
+
 #ifdef  TEST
 int
 main (int argc, char **argv)
 {
-  st_dat_t *dat = dat_open (argv[1], DAT_FLAG_IDX);
+  st_dat_t *dat = dat_open (argv[1]);
 
   if (dat)
     {
-      st_dat_entry_t *dat_entry = dat_read (dat, 0x12345678);
+      const st_dat_entry_t *dat_entry = dat_read (dat, 0x12345678);
       dat_close (dat);
     }
  

@@ -63,7 +63,7 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o \
         console/atari.o console/coleco.o console/console.o console/dc.o console/gb.o \
         console/gba.o console/genesis.o console/jaguar.o console/lynx.o \
-        console/n64.o console/nds.o console/nes.o \
+        console/n64.o console/nds.o console/nes.o console/nintendo.o \
         console/ngp.o console/pce.o console/sms.o \
         console/snes.o console/swan.o console/vboy.o \
         backup/backup.o backup/cc2.o backup/cd64.o backup/cmc.o backup/dex.o \

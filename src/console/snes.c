@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "console.h"
 #include "snes.h"
+#include "nintendo.h"
 #include "backup/backup.h"
 
 

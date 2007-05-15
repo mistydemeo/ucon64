@@ -72,7 +72,7 @@ typedef struct
 
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
 
-  st_ucon64_dat_t *dat;                         // info from DATabase ucon64_dat_open()
+//  st_ucon64_dat_t *dat;                         // info from DATabase ucon64_dat_open()
 } st_ucon64_nfo_t;
 
 
@@ -160,6 +160,9 @@ typedef struct
   st_ucon64_nfo_t *force;                       // this overrides the default values for nfo
 #endif
   st_ucon64_nfo_t *nfo;                         // info from ucon64_console_open()
+
+// move this to st_ucon64_nfo_t
+  st_ucon64_dat_t *dat;                         // info from DATabase ucon64_dat_open()
 } st_ucon64_t;
 
 

@@ -70,10 +70,6 @@ extern const st_getopt2_t psx_usage[];
 extern const st_getopt2_t neogeo_usage[];
 
 
-#define NINTENDO_MAKER_LEN 684
-extern const char *nintendo_maker[];
-
-
 /*
   ucon64_e()            emulator "frontend"
 */

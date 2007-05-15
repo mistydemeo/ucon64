@@ -40,6 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/backup.h"
 #include "patch/patch.h"
 #include "console.h"
+#include "nintendo.h"
 #include "gb.h"
 
 

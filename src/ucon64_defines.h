@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_UNKNOWN (-1)
 
-#define UCON64_VERSION_S "2.0.1rc0"
+#define UCON64_VERSION_S "2.0.1rc1"
 
 // version of config file layout
 #define UCON64_CONFIG_VERSION 209

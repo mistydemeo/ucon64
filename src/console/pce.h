@@ -27,8 +27,8 @@ extern UCON64_FILTER_TYPE (pce_mgd);
 extern UCON64_FILTER_TYPE (pce_msg);
 extern UCON64_FILTER_TYPE (pce_swap);
 extern UCON64_FILTER_TYPE (pce_f);
+extern UCON64_FILTER_TYPE (pce_multi);
 
-
-extern int pce_multi (int truncate_size, char *fname);
+//extern int pce_multi_fname (int truncate_size, char *fname);
 
 #endif

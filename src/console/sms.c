@@ -124,8 +124,8 @@ static int is_gamegear;
 
 
 // see src/backup/mgd.h for the file naming scheme
-int
-sms_mgd (st_ucon64_nfo_t *rominfo, int console)
+static int
+sms_mgd_local (st_ucon64_nfo_t *rominfo, int console)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
@@ -160,6 +160,20 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
     printf ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
             "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.\n");
   return 0;
+}
+
+
+int
+sms_mgdgg (st_ucon64_nfo_t *rominfo)
+{
+  return sms_mgd_local (rominfo, UCON64_GG);
+}
+
+
+int
+sms_mgdsms (st_ucon64_nfo_t *rominfo)
+{
+  return sms_mgd_local (rominfo, UCON64_SMS);
 }
 
 
@@ -311,7 +325,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-sms_multi (int truncate_size, char *fname)
+sms_multi_fname (int truncate_size, char *fname)
 {
 #define BUFSIZE 0x20000
 // BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
@@ -480,6 +494,13 @@ sms_multi (int truncate_size, char *fname)
   ucon64.do_not_calc_crc = org_do_not_calc_crc;
 
   return 0;
+}
+
+
+int
+sms_multi (st_ucon64_nfo_t *rominfo)
+{
+  return sms_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
 }
 
 

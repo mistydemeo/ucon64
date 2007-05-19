@@ -31,12 +31,10 @@ extern UCON64_FILTER_TYPE (n64_v64);
 extern UCON64_FILTER_TYPE (n64_z64);
 extern UCON64_FILTER_TYPE (n64_swap);
 extern UCON64_FILTER_TYPE (n64_swap2);
-
-
-extern int n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile);
-extern int n64_n (st_ucon64_nfo_t *rominfo, const char *name);
-extern int n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile);
-extern int n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom);
+extern UCON64_FILTER_TYPE (n64_n);
+extern UCON64_FILTER_TYPE (n64_bot);
+extern UCON64_FILTER_TYPE (n64_sram);
+extern UCON64_FILTER_TYPE (n64_usms);
 
 
 #endif

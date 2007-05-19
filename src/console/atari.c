@@ -594,9 +594,11 @@ write_byte_as_wav (FILE *wav_file, unsigned char b, int times)
 
 
 int
-atari_cc2 (const char *fname, int bsmode)
+atari_cc2 (st_ucon64_nfo_t *rominfo)
 {
-  (void) bsmode; // TODO: bsmode override
+  (void) rominfo;
+  const char *fname = ucon64.fname;
+  int bsmode = ucon64.optarg ? strtol (ucon64.optarg, NULL, 10) : 0;
   unsigned char buffer[0x200];
   int i, j, page;
   int force_empty = 0, init_bank;
@@ -613,6 +615,8 @@ atari_cc2 (const char *fname, int bsmode)
   FILE *bin_file = NULL;
   time_t start_time = time (0);
   st_audio_wav_t wav_header;
+
+  printf (ucon64_msg[UNTESTED]);
 
   wav_generator (buffer, WAV_CLEARINGTONE_LEN, WAV_VOLUME, TYPE_SINE_WAVE);
 

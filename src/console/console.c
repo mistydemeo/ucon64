@@ -445,8 +445,9 @@ ucon64_console_close (st_ucon64_nfo_t * nfo)
 
 
 int
-ucon64_e (void)
+ucon64_e (st_ucon64_nfo_t *rominfo)
 {
+  (void) rominfo;
   int result = 0, x = 0;
   char buf[MAXBUFSIZE], name[MAXBUFSIZE];
   const char *value_p = NULL;

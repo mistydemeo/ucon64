@@ -32,10 +32,11 @@ extern UCON64_FILTER_TYPE (sms_smd);
 extern UCON64_FILTER_TYPE (sms_smds);
 extern UCON64_FILTER_TYPE (sms_chk);
 extern UCON64_FILTER_TYPE (sms_sc);
+extern UCON64_FILTER_TYPE (sms_mgdgg);
+extern UCON64_FILTER_TYPE (sms_mgdsms);
+extern UCON64_FILTER_TYPE (sms_multi);
 
-
-extern int sms_mgd (st_ucon64_nfo_t *rominfo, int console);
-extern int sms_multi (int truncate_size, char *fname);
+//extern int sms_multi_fname (int truncate_size, char *fname);
 
 
 #endif

@@ -847,7 +847,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-pce_multi (int truncate_size, char *fname)
+pce_multi_fname (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
@@ -987,6 +987,13 @@ pce_multi (int truncate_size, char *fname)
   ucon64.do_not_calc_crc = org_do_not_calc_crc;
 
   return 0;
+}
+
+
+int
+pce_multi (st_ucon64_nfo_t *rominfo)
+{
+  return pce_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
 }
 
 

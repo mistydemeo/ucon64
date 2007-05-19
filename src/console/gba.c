@@ -248,8 +248,9 @@ const unsigned char gba_logodata[] =            // Note: not a static variable
 
 
 int
-gba_n (st_ucon64_nfo_t *rominfo, const char *name)
+gba_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   char buf[GBA_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, 0, GBA_NAME_LEN);
@@ -532,8 +533,9 @@ gba_sram (st_ucon64_nfo_t *rominfo)
 
 
 int
-gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
+gba_crp (st_ucon64_nfo_t *rominfo)
 {
+  const char *value = ucon64.optarg;
   FILE *srcfile, *destfile;
   int bytesread, n = 0;
   char buffer[32 * 1024], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
@@ -718,7 +720,7 @@ gba_chksum (void)
 
 
 int
-gba_multi (int truncate_size, char *multi_fname)
+gba_multi_fname (int truncate_size, char *multi_fname)
 // TODO: Check if 1024 Mbit multi-game files are supported by the FAL code
 {
 #define BUFSIZE (32 * 1024)
@@ -860,6 +862,13 @@ gba_multi (int truncate_size, char *multi_fname)
            totalsize / (float) MBIT);
 
   return 0;
+}
+
+
+int
+gba_multi (st_ucon64_nfo_t *rominfo)
+{
+  return gba_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
 }
 
 

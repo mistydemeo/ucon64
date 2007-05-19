@@ -780,15 +780,17 @@ genesis_name (st_ucon64_nfo_t *rominfo, const char *name1, const char *name2)
 
 
 int
-genesis_n (st_ucon64_nfo_t *rominfo, const char *name)
+genesis_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   return genesis_name (rominfo, name, NULL);
 }
 
 
 int
-genesis_n2 (st_ucon64_nfo_t *rominfo, const char *name)
+genesis_n2 (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   return genesis_name (rominfo, NULL, name);
 }
 
@@ -1088,7 +1090,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
 
 
 int
-genesis_multi (int truncate_size, char *fname)
+genesis_multi_fname (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)                     // must be a multiple of 16 kB
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
@@ -1277,6 +1279,13 @@ genesis_multi (int truncate_size, char *fname)
   ucon64.do_not_calc_crc = org_do_not_calc_crc;
 
   return 0;
+}
+
+
+int
+genesis_multi (st_ucon64_nfo_t *rominfo)
+{
+  return genesis_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
 }
 
 

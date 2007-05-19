@@ -1,5 +1,5 @@
 /*
-win32.c - win32 compat. stuff
+win32.h - miscellaneous win32 functions
 
 Copyright (c) 2006 NoisyB
 

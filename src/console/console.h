@@ -77,7 +77,7 @@ extern int ucon64_console_demux (const char *fname);
 extern st_ucon64_nfo_t *ucon64_console_open (const char *fname, int console);
 extern int ucon64_console_close (st_ucon64_nfo_t * nfo);
 
-extern int ucon64_e (void);
+extern int ucon64_e (st_ucon64_nfo_t *rominfo);
 extern void ucon64_rom_nfo (const st_ucon64_nfo_t *nfo);
 
 #endif // CONSOLE_H

@@ -188,9 +188,10 @@ gb_logo (st_ucon64_nfo_t *rominfo)
 
 
 int
-gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
+gb_n2gb (st_ucon64_nfo_t *rominfo)
 {
 #define EMULATOR_LEN 0x10000
+  const char *nesrom = ucon64.optarg;
   st_ines_header_t ines_header;
   int n = 0, crc = 0;
   unsigned char *buf;
@@ -361,8 +362,9 @@ gb_sgb (st_ucon64_nfo_t *rominfo)
 
 
 int
-gb_n (st_ucon64_nfo_t *rominfo, const char *name)
+gb_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   char buf[GB_NAME_LEN + 1], dest_name[FILENAME_MAX];
   int gb_name_len =
     (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?

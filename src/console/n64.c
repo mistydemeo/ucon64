@@ -266,8 +266,9 @@ n64_z64 (st_ucon64_nfo_t *rominfo)
 
 
 int
-n64_n (st_ucon64_nfo_t *rominfo, const char *name)
+n64_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   char buf[N64_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, ' ', N64_NAME_LEN);
@@ -323,10 +324,11 @@ n64_chk (st_ucon64_nfo_t *rominfo)
 
 
 int
-n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
+n64_sram (st_ucon64_nfo_t *rominfo)
 // Function to insert an SRAM file in LaC's SRAM upload tool (which is an N64
 //  program)
 {
+  const char *sramfile = ucon64.optarg;
   char sram[N64_SRAM_SIZE], dest_name[FILENAME_MAX], buf[8];
 
   if (access (sramfile, F_OK))
@@ -360,8 +362,9 @@ n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
 
 
 int
-n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
+n64_bot (st_ucon64_nfo_t *rominfo)
 {
+  const char *bootfile = ucon64.optarg;
   char buf[N64_BC_SIZE], dest_name[FILENAME_MAX];
 
   if (!access (bootfile, F_OK))
@@ -395,8 +398,9 @@ n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
 
 
 int
-n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
+n64_usms (st_ucon64_nfo_t *rominfo)
 {
+  const char *smsrom = ucon64.optarg;
   char dest_name[FILENAME_MAX], *usmsbuf;
   int size;
 

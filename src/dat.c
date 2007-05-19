@@ -405,6 +405,15 @@ dat_write (st_dat_t *dat, uint32_t crc32,
 }
 
 
+int
+dat_write_ansisql (st_dat_t *dat, FILE *out)
+{
+  (void) dat;
+  (void) out;
+  return 0;
+}
+
+
 #ifdef  TEST
 int
 main (int argc, char **argv)

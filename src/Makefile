@@ -57,6 +57,7 @@ endif
 
 
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
+        dat.o \
         misc/file.o misc/getopt.o misc/getopt2.o \
         misc/hash.o misc/hash_crc.o misc/hash_md5.o misc/hash_sha1.o \
         misc/misc.o misc/parallel.o misc/property.o misc/string.o misc/term.o \

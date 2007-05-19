@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "ucon64_dat.h"
 #include "ucon64_opts.h"
+#include "ucon64_defines.h"
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -48,6 +49,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_PARALLEL
 #include "misc/parallel.h"
 #endif
+
+
+#define UCON64_FILTER_TYPE2(name,name_short) \
+static int \
+ucon64_tmp_##name_short (st_ucon64_t *p) \
+{ \
+  name (p->nfo); \
+  return 0; \
+}
 
 
 static long int
@@ -87,13 +97,9 @@ toprint (int c)
 }
 
 
-#warning merge all *_tmp_* funcs into the funcs they wrap
 static int
 ucon64_tmp_help (st_ucon64_t *p)
 {
-printf ("SHIT");
-fflush (stdout);
-
   int x = 0;
     /*
       Many tools ignore other options if --help has been specified. We do the
@@ -892,808 +898,12 @@ ucon64_tmp_mkdat (st_ucon64_t *p)
 
 
 static int
-ucon64_tmp_multi (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GBA:
-        gba_multi (strtol (p->optarg, NULL, 10) * MBIT, NULL);
-        return 0;
-      case UCON64_GEN: 
-        genesis_multi (strtol (p->optarg, NULL, 10) * MBIT, NULL);
-        return 0;
-      case UCON64_PCE:
-        pce_multi (strtol (p->optarg, NULL, 10) * MBIT, NULL);
-        return 0;
-      case UCON64_SMS:                        // Sega Master System *and* Game Gear
-        sms_multi (strtol (p->optarg, NULL, 10) * MBIT, NULL);
-        return 0;
-      case UCON64_SNES:
-        snes_multi (strtol (p->optarg, NULL, 10) * MBIT, NULL);
-        return 0;
-    }
-  return -1;
-}
-
-
-static int
-ucon64_tmp_e (st_ucon64_t *p)
-{
-  ucon64_e ();
-  return 0;
-}
-
-
-static int
-ucon64_tmp_1991 (st_ucon64_t *p)
-{
-  genesis_1991 (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_b0 (st_ucon64_t *p)
-{
-  lynx_b0 (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_b1 (st_ucon64_t *p)
-{
-  lynx_b1 (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_bin (st_ucon64_t *p)
-{
-  genesis_bin (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_bot (st_ucon64_t *p)
-{
-  n64_bot (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_chk (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GB:
-        gb_chk (p->nfo);
-        return 0;
-
-      case UCON64_GBA:
-        gba_chk (p->nfo);
-        return 0;
-
-      case UCON64_GEN:
-        genesis_chk (p->nfo);
-        return 0;
-
-      case UCON64_N64:
-        n64_chk (p->nfo);
-        return 0;
-
-      case UCON64_SMS:
-        sms_chk (p->nfo);
-        return 0;
-
-      case UCON64_SNES: 
-        snes_chk (p->nfo);
-        return 0;
-
-      case UCON64_SWAN:
-        swan_chk (p->nfo);
-        return 0;
-
-      case UCON64_NDS:
-        nds_chk (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_col (st_ucon64_t *p)
-{
-  snes_col (p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_crp (st_ucon64_t *p)
-{
-  gba_crp (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
 ucon64_tmp_dbuh (st_ucon64_t *p)
 {
   snes_backup_header_info (p->nfo);
   return 0;
 }
 
-
-static int
-ucon64_tmp_dint (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_NES:
-        nes_dint (p->nfo);
-        return 0;
-
-      case UCON64_PCE:
-        pce_swap (p->nfo);
-        return 0;
-
-      case UCON64_SNES:
-        snes_dint (p->nfo);
-        return 0;
-
-      case UCON64_N64:
-        n64_swap (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_swap (st_ucon64_t *p)
-{
-  ucon64_tmp_dint (p);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_swap2 (st_ucon64_t *p)
-{
-  // --swap2 is currently used only for Nintendo 64
-  n64_swap2 (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_dmirr (st_ucon64_t *p)
-{
-  snes_demirror (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_dnsrt (st_ucon64_t *p)
-{
-  snes_densrt (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_f (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GEN:
-        genesis_f (p->nfo);
-        return 0;
-
-      case UCON64_PCE:
-        pce_f (p->nfo);
-        return 0;
-
-      case UCON64_SNES:
-        snes_f (p->nfo);
-        return 0;
-    }
-  return -1;
-}
-
-
-static int
-ucon64_tmp_fds (st_ucon64_t *p)
-{
-  nes_fds (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_fdsl (st_ucon64_t *p)
-{
-  nes_fdsl (p->nfo, NULL);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ffe (st_ucon64_t *p)
-{
-  nes_ffe (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_fig (st_ucon64_t *p)
-{
-  snes_fig (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_figs (st_ucon64_t *p)
-{
-  snes_figs (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_gbx (st_ucon64_t *p)
-{
-  gb_gbx (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_gd3 (st_ucon64_t *p)
-{
-  snes_gd3 (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_gd3s (st_ucon64_t *p)
-{
-  snes_gd3s (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_gg (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GB:
-      case UCON64_GEN:
-      case UCON64_NES: 
-      case UCON64_SMS:
-      case UCON64_SNES:
-        gg_apply (p->nfo, p->optarg);
-        return 0;
-    }
-
-  fputs ("ERROR: Cannot apply Game Genie code for this ROM/console\n", stderr);
-  return -1;
-}
-
-
-static int
-ucon64_tmp_ggd (st_ucon64_t *p)
-{
-  gg_display (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_gge (st_ucon64_t *p)
-{
-  gg_display (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ines (st_ucon64_t *p)
-{
-  nes_ines (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ineshd (st_ucon64_t *p)
-{
-  nes_ineshd (p->nfo);
-  return 0;
-}
-
-
-#if 0
-static int
-ucon64_tmp_ip (st_ucon64_t *p)
-{
-  return 0;
-}
-
-
-static int
-ucon64_tmp_vms (st_ucon64_t *p)
-{
-  return 0;
-}
-#endif
-
-
-static int
-ucon64_tmp_parse (st_ucon64_t *p)
-{
-  dc_parse (p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_mkip (st_ucon64_t *p)
-{
-  dc_mkip (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_j (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GEN:
-        genesis_j (p->nfo);
-        return 0;
-
-      case UCON64_NES:
-        nes_j (NULL);
-        return 0;
-
-      case UCON64_SNES:
-        snes_j (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_k (st_ucon64_t *p)
-{
-  snes_k (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_l (st_ucon64_t *p)
-{
-  snes_l (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_lnx (st_ucon64_t *p)
-{
-  lynx_lnx (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_logo (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GB:
-        gb_logo (p->nfo);
-        return 0;
-  
-      case UCON64_GBA:
-        gba_logo (p->nfo);
-        return 0;
-  
-      case UCON64_NDS:
-        nds_logo (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_lsram (st_ucon64_t *p)
-{
-  n64_sram (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_lyx (st_ucon64_t *p)
-{
-  lynx_lyx (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_mgd (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GB:
-        gb_mgd (p->nfo);
-        return 0;
-
-      case UCON64_GEN:
-        genesis_mgd (p->nfo);
-        return 0;
-
-      case UCON64_PCE:
-        pce_mgd (p->nfo);
-        return 0;
-
-      case UCON64_SMS:
-        sms_mgd (p->nfo, UCON64_SMS);
-        return 0;
-
-      case UCON64_SNES:
-        snes_mgd (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_mgdgg (st_ucon64_t *p)
-{
-  sms_mgd (p->nfo, UCON64_GAMEGEAR);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_msg (st_ucon64_t *p)
-{
-  pce_msg (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_n (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GB:
-        gb_n (p->nfo, p->optarg);
-        return 0;
-
-      case UCON64_GBA:
-        gba_n (p->nfo, p->optarg);
-        return 0;
-
-      case UCON64_GEN:
-        genesis_n (p->nfo, p->optarg);
-        return 0;
-
-      case UCON64_LYNX:
-        lynx_n (p->nfo, p->optarg);
-        return 0;
-
-      case UCON64_N64:
-        n64_n (p->nfo, p->optarg);
-        return 0;
-
-      case UCON64_NES:
-        nes_n (p->nfo, p->optarg);
-        return 0;
-
-      case UCON64_SNES:
-        snes_n (p->nfo, p->optarg);
-        return 0;
-
-      case UCON64_NDS:
-        nds_n (p->nfo, p->optarg);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_n2 (st_ucon64_t *p)
-{
-  genesis_n2 (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_n2gb (st_ucon64_t *p)
-{
-  gb_n2gb (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_nrot (st_ucon64_t *p)
-{
-  lynx_nrot (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_pasofami (st_ucon64_t *p)
-{
-  nes_pasofami (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_pattern (st_ucon64_t *p)
-{
-  ucon64_pattern (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_poke (st_ucon64_t *p)
-{
-  patch_poke (&ucon64);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_rotl (st_ucon64_t *p)
-{
-  lynx_rotl (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_rotr (st_ucon64_t *p)
-{
-  lynx_rotr (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_s (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GEN:
-        genesis_s (p->nfo);
-        return 0;
-
-      case UCON64_NES:
-        nes_s (p->nfo);
-        return 0;
-
-      case UCON64_SNES:
-        snes_s (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_scr (st_ucon64_t *p)
-{
-  dc_scramble (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_sgb (st_ucon64_t *p)
-{
-  gb_sgb (p->nfo);
-  return 0;
-}
-
-
-#ifdef  HAVE_MATH_H
-static int
-ucon64_tmp_cc2 (st_ucon64_t *p)
-{
-  printf (ucon64_msg[UNTESTED]);
-  atari_cc2 (p->fname, p->optarg ? strtol (p->optarg, NULL, 10) : 0);
-  return 0;
-}
-#endif
-
-
-static int
-ucon64_tmp_smc (st_ucon64_t *p)
-{
-  snes_smc (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_smd (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GEN:
-        genesis_smd (p->nfo);
-        return 0;
-
-      case UCON64_SMS:
-        sms_smd (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_smds (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_GEN:
-        genesis_smds (p->nfo);
-        return 0;
-
-      case UCON64_SMS:
-        sms_smds (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_sram (st_ucon64_t *p)
-{
-  gba_sram (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_sc (st_ucon64_t *p)
-{
-  switch (p->console)
-    {
-      case UCON64_SMS:
-        sms_sc (p->nfo);
-        return 0;
-
-      case UCON64_GB:
-        gb_sc (p->nfo);
-        return 0;
-
-      case UCON64_GBA:
-        gba_sc (p->nfo);
-        return 0;
-
-      case UCON64_NES:
-        nes_sc (p->nfo);
-        return 0;
-
-      case UCON64_NDS:
-        nds_sc (p->nfo);
-        return 0;
-    }
-
-  return -1;
-}
-
-
-static int
-ucon64_tmp_ssc (st_ucon64_t *p)
-{
-  gb_ssc (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_swc (st_ucon64_t *p)
-{
-  snes_swc (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_swcs (st_ucon64_t *p)
-{
-  snes_swcs (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ufo (st_ucon64_t *p)
-{
-  snes_ufo (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ufos (st_ucon64_t *p)
-{
-  snes_ufos (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_unif (st_ucon64_t *p)
-{
-  nes_unif (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_unscr (st_ucon64_t *p)
-{
-  dc_unscramble (p->nfo);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_usms (st_ucon64_t *p)
-{
-  n64_usms (p->nfo, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_v64 (st_ucon64_t *p)
-{
-  n64_v64 (p->nfo);
-  return 0;
-}
 
 #ifdef  USE_PARALLEL
 /*
@@ -1881,7 +1091,7 @@ ucon64_tmp_xfalmulti (st_ucon64_t *p)
       if (p->output_path[strlen (p->output_path) - 1] != FILE_SEPARATOR)
         strcat (p->output_path, FILE_SEPARATOR_S);
     }
-  if (gba_multi (strtol (p->optarg, NULL, 10) * MBIT, src_name) == 0)
+  if (gba_multi_fname (strtol (p->optarg, NULL, 10) * MBIT, src_name) == 0)
     { // Don't try to start a transfer if there was a problem
       fputc ('\n', stdout);
       fal_write_rom (src_name, p->parport);
@@ -2532,12 +1742,116 @@ ucon64_tmp_xf2ab (st_ucon64_t *p)
 #endif // USE_PARALLEL || USE_USB
 
 
-static int
-ucon64_tmp_z64 (st_ucon64_t *p)
-{
-  n64_z64 (p->nfo);
-  return 0;
-}
+#warning merge all *_tmp_* funcs into the funcs they wrap
+UCON64_FILTER_TYPE2 (genesis_1991, 1991)
+UCON64_FILTER_TYPE2 (lynx_b0, b0)
+UCON64_FILTER_TYPE2 (lynx_b1, b1)
+UCON64_FILTER_TYPE2 (genesis_bin, bin)
+UCON64_FILTER_TYPE2 (n64_bot, bot)
+UCON64_FILTER_TYPE2 (snes_col, col)
+UCON64_FILTER_TYPE2 (gba_crp, crp)
+UCON64_FILTER_TYPE2 (n64_swap2, swap2) // --swap2 is currently used only for Nintendo 64
+UCON64_FILTER_TYPE2 (snes_demirror, dmirr)
+UCON64_FILTER_TYPE2 (snes_densrt, dnsrt)
+UCON64_FILTER_TYPE2 (nes_fds, fds)
+UCON64_FILTER_TYPE2 (nes_fdsl, fdsl)
+UCON64_FILTER_TYPE2 (nes_ffe, ffe)
+UCON64_FILTER_TYPE2 (snes_fig, fig)
+UCON64_FILTER_TYPE2 (snes_figs, figs)
+UCON64_FILTER_TYPE2 (gb_gbx, gbx)
+UCON64_FILTER_TYPE2 (snes_gd3, gd3)
+UCON64_FILTER_TYPE2 (snes_gd3s, gd3s)
+UCON64_FILTER_TYPE2 (nes_ines, ines)
+UCON64_FILTER_TYPE2 (nes_ineshd, ineshd)
+UCON64_FILTER_TYPE2 (dc_parse, parse)
+UCON64_FILTER_TYPE2 (dc_mkip, mkip)
+UCON64_FILTER_TYPE2 (snes_k, k)
+UCON64_FILTER_TYPE2 (snes_l, l)
+UCON64_FILTER_TYPE2 (lynx_lnx, lnx)
+UCON64_FILTER_TYPE2 (n64_sram, lsram)
+UCON64_FILTER_TYPE2 (lynx_lyx, lyx)
+UCON64_FILTER_TYPE2 (sms_mgdgg, sms_mgdgg)
+UCON64_FILTER_TYPE2 (pce_msg, msg)
+UCON64_FILTER_TYPE2 (genesis_n2, n2)
+UCON64_FILTER_TYPE2 (gb_n2gb, n2gb)
+UCON64_FILTER_TYPE2 (lynx_nrot, nrot)
+UCON64_FILTER_TYPE2 (nes_pasofami, pasofami)
+UCON64_FILTER_TYPE2 (lynx_rotl, rotl)
+UCON64_FILTER_TYPE2 (lynx_rotr, rotr)
+UCON64_FILTER_TYPE2 (dc_scramble, scr)
+UCON64_FILTER_TYPE2 (gb_sgb, sgb)
+#ifdef  HAVE_MATH_H
+UCON64_FILTER_TYPE2 (atari_cc2, cc2)
+#endif
+UCON64_FILTER_TYPE2 (snes_smc, smc)
+UCON64_FILTER_TYPE2 (gba_sram, sram)
+UCON64_FILTER_TYPE2 (gb_ssc, ssc)
+UCON64_FILTER_TYPE2 (snes_swc, swc)
+UCON64_FILTER_TYPE2 (snes_swcs, swcs)
+UCON64_FILTER_TYPE2 (snes_ufo, ufo)
+UCON64_FILTER_TYPE2 (snes_ufos, ufos)
+UCON64_FILTER_TYPE2 (nes_unif, unif)
+UCON64_FILTER_TYPE2 (dc_unscramble, unscr)
+UCON64_FILTER_TYPE2 (n64_usms, usms)
+UCON64_FILTER_TYPE2 (n64_v64, v64)
+UCON64_FILTER_TYPE2 (gb_chk, gb_chk)
+UCON64_FILTER_TYPE2 (gba_chk, gba_chk)
+UCON64_FILTER_TYPE2 (genesis_chk, genesis_chk)
+UCON64_FILTER_TYPE2 (n64_chk, n64_chk)
+UCON64_FILTER_TYPE2 (sms_chk, sms_chk)
+UCON64_FILTER_TYPE2 (snes_chk, snes_chk)
+UCON64_FILTER_TYPE2 (swan_chk, swan_chk)
+UCON64_FILTER_TYPE2 (nds_chk, nds_chk)
+UCON64_FILTER_TYPE2 (nes_dint, nes_dint)
+UCON64_FILTER_TYPE2 (pce_swap, pce_swap)
+UCON64_FILTER_TYPE2 (snes_dint, snes_dint)
+UCON64_FILTER_TYPE2 (n64_swap, n64_swap)
+UCON64_FILTER_TYPE2 (n64_z64, z64)
+UCON64_FILTER_TYPE2 (ucon64_e, e)   
+UCON64_FILTER_TYPE2 (genesis_f, genesis_f)
+UCON64_FILTER_TYPE2 (pce_f, pce_f)
+UCON64_FILTER_TYPE2 (snes_f, snes_f)
+UCON64_FILTER_TYPE2 (genesis_j, genesis_j)
+//UCON64_FILTER_TYPE2 (nes_j, nes_j) // broken.. see nes.c
+UCON64_FILTER_TYPE2 (snes_j, snes_j)
+UCON64_FILTER_TYPE2 (gb_logo, gb_logo)
+UCON64_FILTER_TYPE2 (gba_logo, gba_logo)
+UCON64_FILTER_TYPE2 (nds_logo, nds_logo)
+UCON64_FILTER_TYPE2 (gb_mgd, gb_mgd)
+UCON64_FILTER_TYPE2 (genesis_mgd, genesis_mgd)
+UCON64_FILTER_TYPE2 (pce_mgd, pce_mgd)
+UCON64_FILTER_TYPE2 (sms_mgdsms, sms_mgdsms)
+UCON64_FILTER_TYPE2 (snes_mgd, snes_mgd)
+UCON64_FILTER_TYPE2 (gb_n, gb_n)
+UCON64_FILTER_TYPE2 (gba_n, gba_n)
+UCON64_FILTER_TYPE2 (genesis_n, genesis_n)
+UCON64_FILTER_TYPE2 (lynx_n, lynx_n)
+UCON64_FILTER_TYPE2 (n64_n, n64_n)
+UCON64_FILTER_TYPE2 (nes_n, nes_n)
+UCON64_FILTER_TYPE2 (snes_n, snes_n)
+UCON64_FILTER_TYPE2 (nds_n, nds_n)
+UCON64_FILTER_TYPE2 (genesis_s, genesis_s)
+UCON64_FILTER_TYPE2 (nes_s, nes_s)
+UCON64_FILTER_TYPE2 (snes_s, snes_s)
+UCON64_FILTER_TYPE2 (genesis_smd, genesis_smd)
+UCON64_FILTER_TYPE2 (sms_smd, sms_smd)
+UCON64_FILTER_TYPE2 (genesis_smds, genesis_smds)
+UCON64_FILTER_TYPE2 (sms_smds, sms_smds)
+UCON64_FILTER_TYPE2 (sms_sc, sms_sc)
+UCON64_FILTER_TYPE2 (gb_sc, gb_sc)      
+UCON64_FILTER_TYPE2 (gba_sc, gba_sc)      
+UCON64_FILTER_TYPE2 (nes_sc, nes_sc)      
+UCON64_FILTER_TYPE2 (nds_sc, nds_sc)      
+UCON64_FILTER_TYPE2 (gba_multi, gba_multi)
+UCON64_FILTER_TYPE2 (genesis_multi, gen_multi)
+UCON64_FILTER_TYPE2 (pce_multi, pce_multi)
+UCON64_FILTER_TYPE2 (sms_multi, sms_multi)
+UCON64_FILTER_TYPE2 (snes_multi, snes_multi)
+UCON64_FILTER_TYPE2 (gg_apply, gg)
+UCON64_FILTER_TYPE2 (patch_poke, poke)
+UCON64_FILTER_TYPE2 (gg_display, ggd)
+UCON64_FILTER_TYPE2 (gg_display, gge)
+UCON64_FILTER_TYPE2 (ucon64_pattern, pattern)
 
 
 st_ucon64_filter_t ucon64_filter[] = {
@@ -2849,9 +2163,33 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_MULTI,
-    0,
+    UCON64_GBA,
     WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_multi
+    ucon64_tmp_gba_multi
+  },
+  {
+    UCON64_MULTI,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gen_multi
+  },
+  {
+    UCON64_MULTI,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pce_multi
+  },
+  {
+    UCON64_MULTI,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sms_multi
+  },
+  {
+    UCON64_MULTI,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_multi
   },
   {
     UCON64_E,
@@ -2891,9 +2229,51 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_CHK,
-    0,
+    UCON64_GB,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_chk
+    ucon64_tmp_gb_chk
+  },
+  {
+    UCON64_CHK,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gba_chk
+  },
+  {
+    UCON64_CHK,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_genesis_chk
+  },
+  {
+    UCON64_CHK,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_n64_chk
+  },
+  {
+    UCON64_CHK,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sms_chk
+  },
+  {
+    UCON64_CHK,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_chk
+  },
+  {
+    UCON64_CHK,
+    UCON64_SWAN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_swan_chk
+  },
+  {
+    UCON64_CHK,
+    UCON64_NDS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nds_chk
   },
   {
     UCON64_COL,
@@ -2915,15 +2295,51 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_SWAP,
-    0,
+    UCON64_NES,
     WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_swap
+    ucon64_tmp_nes_dint
+  },
+  {
+    UCON64_SWAP,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pce_swap
+  },
+  {
+    UCON64_SWAP,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_dint
+  },
+  {
+    UCON64_SWAP,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_n64_swap
   },
   {
     UCON64_DINT,
-    0,
+    UCON64_NES,
     WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_dint
+    ucon64_tmp_nes_dint
+  },
+  {
+    UCON64_DINT,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pce_swap
+  },
+  {
+    UCON64_DINT,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_dint
+  },
+  {
+    UCON64_DINT,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_n64_swap
   },
   {
     UCON64_SWAP2,
@@ -2943,12 +2359,26 @@ st_ucon64_filter_t ucon64_filter[] = {
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
     ucon64_tmp_dnsrt
   },
+
   {
     UCON64_F,
-    0,
+    UCON64_GEN,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_f
+    ucon64_tmp_genesis_f
   },
+  {
+    UCON64_F,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pce_f
+  },
+  {
+    UCON64_F,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_f
+  },
+
   {
     UCON64_FDS,
     UCON64_NES,
@@ -2999,7 +2429,31 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_GG,
-    0,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gg
+  },
+  {
+    UCON64_GG,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gg
+  },
+  {
+    UCON64_GG,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gg
+  },
+  {
+    UCON64_GG,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gg
+  },
+  {
+    UCON64_GG,
+    UCON64_SNES,
     WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
     ucon64_tmp_gg
   },
@@ -3027,20 +2481,6 @@ st_ucon64_filter_t ucon64_filter[] = {
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
     ucon64_tmp_ineshd
   },
-#if 0
-  {
-    UCON64_IP,
-    0,
-    0,
-    ucon64_tmp_ip
-  },
-  {
-    UCON64_VMS,
-    0,
-    0,
-    ucon64_tmp_vms
-  },
-#endif
   {
     UCON64_PARSE,
     UCON64_DC,
@@ -3055,9 +2495,24 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_J,
-    0,
+    UCON64_GEN,
     WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_j
+    ucon64_tmp_genesis_j
+  },
+/*
+broken... see nes.c
+  {
+    UCON64_J,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nes_j
+  },
+*/
+  {
+    UCON64_J,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_j
   },
   {
     UCON64_K,
@@ -3079,9 +2534,21 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_LOGO,
-    0,
+    UCON64_GB,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_logo
+    ucon64_tmp_gb_logo
+  },
+  {
+    UCON64_LOGO,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gba_logo
+  },
+  {
+    UCON64_LOGO,
+    UCON64_NDS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nds_logo
   },
   {
     UCON64_LSRAM,
@@ -3097,15 +2564,45 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_MGD,
-    0,
+    UCON64_GB,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_mgd
+    ucon64_tmp_gb_mgd
+  },
+  {
+    UCON64_MGD,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_genesis_mgd
+  },
+  {
+    UCON64_MGD,
+    UCON64_PCE,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_pce_mgd
+  },
+  {
+    UCON64_MGD,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sms_mgdsms
+  },
+  {
+    UCON64_MGD,
+    UCON64_GG,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sms_mgdgg
+  },
+  {
+    UCON64_MGD,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_mgd
   },
   {
     UCON64_MGDGG,
     UCON64_SMS,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_mgdgg
+    ucon64_tmp_sms_mgdgg
   },
   {
     UCON64_MSG,
@@ -3115,9 +2612,51 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_N,
-    0,
+    UCON64_GB,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_n
+    ucon64_tmp_gb_n
+  },
+  {
+    UCON64_N,
+    UCON64_GBA,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gba_n
+  },
+  {
+    UCON64_N,
+    UCON64_GEN,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_genesis_n
+  },
+  {
+    UCON64_N,
+    UCON64_LYNX,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_lynx_n
+  },
+  {
+    UCON64_N,
+    UCON64_N64,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_n64_n
+  },
+  {
+    UCON64_N,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nes_n
+  },
+  {
+    UCON64_N,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_n
+  },
+  {
+    UCON64_N,
+    UCON64_NDS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nds_n
   },
   {
     UCON64_N2,
@@ -3169,9 +2708,21 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_S,
-    0,
+    UCON64_GEN,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_s
+    ucon64_tmp_genesis_s
+  },
+  {
+    UCON64_S,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nes_s
+  },
+  {
+    UCON64_S,
+    UCON64_SNES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_snes_s
   },
   {
     UCON64_SCR,
@@ -3201,15 +2752,27 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_SMD,
-    0,
+    UCON64_GEN,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_smd
+    ucon64_tmp_genesis_smd
+  },
+  {
+    UCON64_SMD,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sms_smd
   },
   {
     UCON64_SMDS,
-    UCON64_UNKNOWN,
+    UCON64_GEN,
     0,
-    ucon64_tmp_smds
+    ucon64_tmp_genesis_smds
+  },
+  {
+    UCON64_SMDS,
+    UCON64_SMS,
+    0,
+    ucon64_tmp_sms_smds
   },
   {
     UCON64_SRAM,
@@ -3219,9 +2782,33 @@ st_ucon64_filter_t ucon64_filter[] = {
   },
   {
     UCON64_SC,
+    UCON64_SMS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_sms_sc
+  },
+  {
+    UCON64_SC,
+    UCON64_GB,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_gb_sc
+  },
+  {
+    UCON64_SC,
     UCON64_GBA,
     WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sc
+    ucon64_tmp_gba_sc
+  },
+  {
+    UCON64_SC,
+    UCON64_NES,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nes_sc
+  },
+  {
+    UCON64_SC,
+    UCON64_NDS,
+    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
+    ucon64_tmp_nds_sc
   },
   {
     UCON64_SSC,

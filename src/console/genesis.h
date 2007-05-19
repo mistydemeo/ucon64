@@ -39,10 +39,10 @@ extern UCON64_FILTER_TYPE (genesis_mgd);
 extern UCON64_FILTER_TYPE (genesis_init);
 extern UCON64_FILTER_TYPE (genesis_f);
 extern UCON64_FILTER_TYPE (genesis_smds);
+extern UCON64_FILTER_TYPE (genesis_n);
+extern UCON64_FILTER_TYPE (genesis_n2);
+extern UCON64_FILTER_TYPE (genesis_multi);
 
-
-extern int genesis_n (st_ucon64_nfo_t *rominfo, const char *name);
-extern int genesis_n2 (st_ucon64_nfo_t *rominfo, const char *name);
-extern int genesis_multi (int truncate_size, char *fname);
+//extern int genesis_multi_fname (int truncate_size, char *fname);
 
 #endif

@@ -210,8 +210,9 @@ lynx_rotr (st_ucon64_nfo_t *rominfo)
 
 
 int
-lynx_n (st_ucon64_nfo_t *rominfo, const char *name)
+lynx_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
 
@@ -272,15 +273,17 @@ lynx_b (st_ucon64_nfo_t *rominfo, int bank, const char *value)
 
 
 int
-lynx_b0 (st_ucon64_nfo_t *rominfo, const char *value)
+lynx_b0 (st_ucon64_nfo_t *rominfo)
 {
+  const char *value = ucon64.optarg;
   return lynx_b (rominfo, 0, value);
 }
 
 
 int
-lynx_b1 (st_ucon64_nfo_t *rominfo, const char *value)
+lynx_b1 (st_ucon64_nfo_t *rominfo)
 {
+  const char *value = ucon64.optarg;
   return lynx_b (rominfo, 1, value);
 }
 

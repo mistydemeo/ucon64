@@ -50,6 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_opts.h"
 #include "ucon64_misc.h"
 #include "ucon64_dat.h"
+#include "ucon64_defines.h"
 #include "console/console.h"
 #include "backup/backup.h"
 #include "patch/patch.h"

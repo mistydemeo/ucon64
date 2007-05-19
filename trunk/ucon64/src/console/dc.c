@@ -389,8 +389,9 @@ parse_templ (const char *templ_file, char *ip)
 
 
 int
-dc_parse (const char *templ_file)
+dc_parse_fname (st_ucon64_nfo_t *rominfo, const char *templ_file)
 {
+  (void) rominfo;
   char ip[0x8000], dest_name[FILENAME_MAX];
 
   if (access (templ_file, F_OK) == -1)
@@ -421,13 +422,16 @@ dc_parse (const char *templ_file)
 
 
 int
+dc_parse (st_ucon64_nfo_t *rominfo)
+{
+  return dc_parse_fname (rominfo, ucon64.optarg);
+}
+
+
+int
 dc_mkip (st_ucon64_nfo_t *rominfo)
 {
-  (void) rominfo;
-
-  dc_parse ("default");
-
-  return 0;
+  return dc_parse_fname (rominfo, "default");
 }
 
 

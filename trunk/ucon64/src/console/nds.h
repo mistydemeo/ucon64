@@ -28,8 +28,6 @@ extern UCON64_FILTER_TYPE (nds_init);
 extern UCON64_FILTER_TYPE (nds_logo);
 extern UCON64_FILTER_TYPE (nds_chk);
 extern UCON64_FILTER_TYPE (nds_sc);
-
-
-extern int nds_n (st_ucon64_nfo_t *rominfo, const char *name);
+extern UCON64_FILTER_TYPE (nds_n);
 
 #endif

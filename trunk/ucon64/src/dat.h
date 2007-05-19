@@ -55,6 +55,10 @@ typedef struct
   dat_close()   close DAT file
   dat_read()    read entry with crc32 from DAT file
   dat_write()   add entry to DAT file
+
+  dat_write_ansisql()
+                write ANSI SQL script for importing
+                  a DAT file into a SQL database
 */
 extern int dat_create (const char *dat_fname,
             const char *author,
@@ -74,5 +78,7 @@ extern int dat_write (st_dat_t *dat, uint32_t crc32,
                           const char *rom_name,
                           uint32_t rom_size);
 
+
+extern int dat_write_ansisql (st_dat_t *dat, FILE *out);
                    
 #endif // DAT_H

@@ -238,10 +238,9 @@ extern UCON64_FILTER_TYPE (nes_init);
 extern UCON64_FILTER_TYPE (nes_unif);
 extern UCON64_FILTER_TYPE (nes_dint);
 extern UCON64_FILTER_TYPE (nes_sc);
+extern UCON64_FILTER_TYPE (nes_n);
+extern UCON64_FILTER_TYPE (nes_fdsl);
 
-
-extern int nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str);
-extern int nes_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int nes_j (unsigned char **mem_image);
 extern nes_file_t nes_get_file_type (void);
 

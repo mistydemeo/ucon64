@@ -1011,8 +1011,9 @@ const char *gg_argv[128];
 
 
 int
-gg_display (st_ucon64_nfo_t *rominfo, const char *code)
+gg_display (st_ucon64_nfo_t *rominfo)
 {
+  const char *code = ucon64.optarg;
   gg_argv[0] = "uggconv";
 
   switch (ucon64.console)
@@ -1055,8 +1056,9 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 
 
 int
-gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
+gg_apply (st_ucon64_nfo_t *rominfo)
 {
+  const char *code = ucon64.optarg;
   int size = ucon64.file_size - rominfo->backup_header_len, address, value,
       result = -1;
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];

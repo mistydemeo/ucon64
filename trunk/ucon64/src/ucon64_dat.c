@@ -166,11 +166,8 @@ static void
 closedir_ddat (void)
 {
   if (ddat)
-#ifndef _WIN32
     closedir (ddat);
-#else
-    FindClose (ddat);
-#endif
+
   ddat = NULL;
 }
 
@@ -211,7 +208,6 @@ custom_stricmp (const void *a, const void *b)
 static char *
 get_next_file (char *fname)
 {
-#ifndef _WIN32
   struct dirent *ep;
 
   if (!ddat)
@@ -226,35 +222,7 @@ get_next_file (char *fname)
         sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, ep->d_name);
         return fname;
       }
-#else
-  char search_pattern[FILENAME_MAX];
-  WIN32_FIND_DATA find_data;
 
-  if (!ddat)
-    {
-      // Note that FindFirstFile() & FindNextFile() are case insensitive
-      sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*.dat", ucon64.datdir);
-      if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
-        {
-          // Not being able to find a DAT file is not a real error
-          if (GetLastError () != ERROR_FILE_NOT_FOUND)
-            {
-              fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
-              return NULL;
-            }
-        }
-      else
-        {
-          sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
-          return fname;
-        }
-    }
-  while (FindNextFile (ddat, &find_data))
-    {
-      sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
-      return fname;
-    }
-#endif
   closedir_ddat ();
   return NULL;
 }

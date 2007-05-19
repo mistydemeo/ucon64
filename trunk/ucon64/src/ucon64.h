@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "ucon64_defines.h"                     // MAXBUFSIZE, etc..
 #include "ucon64_dat.h"
+#include "dat.h"
 
 
 /*
@@ -72,7 +73,8 @@ typedef struct
 
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
 
-//  st_ucon64_dat_t *dat;                         // info from DATabase ucon64_dat_open()
+  st_dat_t *dat;                                // current open DAT file (or NULL)
+  st_dat_entry_t *dat_entry;                    // entry from DAT file (or NULL)
 } st_ucon64_nfo_t;
 
 
@@ -161,7 +163,7 @@ typedef struct
 #endif
   st_ucon64_nfo_t *nfo;                         // info from ucon64_console_open()
 
-// move this to st_ucon64_nfo_t
+// obsolete
   st_ucon64_dat_t *dat;                         // info from DATabase ucon64_dat_open()
 } st_ucon64_t;
 

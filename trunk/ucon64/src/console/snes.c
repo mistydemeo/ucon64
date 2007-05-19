@@ -396,7 +396,7 @@ snes_get_file_type (void)
 
 
 int
-snes_col (const char *color)
+snes_col (st_ucon64_nfo_t *rominfo)
 /*
 The Nintendo Super Famicom is capable of displaying 256 colours from a
 palette of 32,768. These 256 colours are split into 8 palettes of 32 colours
@@ -431,6 +431,7 @@ Examples:
 Remember to load the lowest 8 bits first, then the top 7 bits.
 */
 {
+  const char *color = ucon64.optarg;
   int r, g, b;
   unsigned int col;
 
@@ -2322,8 +2323,9 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 
 
 int
-snes_n (st_ucon64_nfo_t *rominfo, const char *name)
+snes_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->backup_header_len, header_start,
       name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
@@ -3989,7 +3991,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
 
 
 int
-snes_multi (int truncate_size, char *fname)
+snes_multi_fname (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
@@ -4131,6 +4133,13 @@ snes_multi (int truncate_size, char *fname)
   ucon64.do_not_calc_crc = org_do_not_calc_crc;
 
   return 0;
+}
+
+
+int
+snes_multi (st_ucon64_nfo_t *rominfo)
+{
+  return snes_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
 }
 
 

@@ -56,14 +56,14 @@ extern UCON64_FILTER_TYPE (snes_swc);
 extern UCON64_FILTER_TYPE (snes_swcs);
 extern UCON64_FILTER_TYPE (snes_ufo);
 extern UCON64_FILTER_TYPE (snes_ufos);
+extern UCON64_FILTER_TYPE (snes_col);
+extern UCON64_FILTER_TYPE (snes_n);
+extern UCON64_FILTER_TYPE (snes_multi);
 
-
+//extern int snes_multi (int truncate_size, char *fname);
 extern int snes_get_snes_hirom (void);
 extern snes_file_t snes_get_file_type (void);
-extern int snes_col (const char *color);
 extern int snes_make_gd_names (const char *filename, st_ucon64_nfo_t *rominfo, char **names);
-extern int snes_multi (int truncate_size, char *fname);
-extern int snes_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern void snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header);
 
 

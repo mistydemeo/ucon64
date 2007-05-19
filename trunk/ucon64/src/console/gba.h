@@ -31,10 +31,10 @@ extern UCON64_FILTER_TYPE (gba_init);
 extern UCON64_FILTER_TYPE (gba_logo);
 extern UCON64_FILTER_TYPE (gba_sram);
 extern UCON64_FILTER_TYPE (gba_sc);
+extern UCON64_FILTER_TYPE (gba_crp);
+extern UCON64_FILTER_TYPE (gba_n);
+extern UCON64_FILTER_TYPE (gba_multi);
 
-extern int gba_crp (st_ucon64_nfo_t *rominfo, const char *value);
-extern int gba_n (st_ucon64_nfo_t *rominfo, const char *name);
-extern int gba_multi (int truncate_size, char *fname);
-
+extern int gba_multi_fname (int truncate_size, char *fname);
 
 #endif

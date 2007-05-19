@@ -33,8 +33,11 @@ extern const st_getopt2_t patch_usage[];
 /*
   ucon64_pattern()      change file based on patterns specified in pattern_fname
 */
-extern int patch_poke (st_ucon64_t *p);
-extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
+extern UCON64_FILTER_TYPE (patch_poke);
+
+#warning ucon64_tmp_pattern
+
+extern UCON64_FILTER_TYPE (ucon64_pattern);
 
 
 #endif

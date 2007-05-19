@@ -5092,6 +5092,7 @@ static const int unif_cck_ids[] = {CCK0_ID, CCK1_ID, CCK2_ID, CCK3_ID,
 static const char *nes_destfname = NULL, *internal_name;
 static int rom_size;
 static FILE *nes_destfile;
+static int nes_fdsl_local (st_ucon64_nfo_t *rominfo, char *output_str);
 
 
 static int
@@ -6936,8 +6937,10 @@ nes_s (st_ucon64_nfo_t *rominfo)
 
 
 int
-nes_n (st_ucon64_nfo_t *rominfo, const char *name)
+nes_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
+
   if (type != UNIF)
     {
       fprintf (stderr, "ERROR: This option is only meaningful for UNIF files\n");
@@ -7430,7 +7433,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       rominfo->backup_usage = fds_usage[0].help;
       rominfo->country = "Japan";
       strcat (rominfo->misc, "\n");
-      nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
+      nes_fdsl_local (rominfo, rominfo->misc);        // will also fill in rominfo->name
       break;
     case FAM:
       rominfo->backup_usage = fds_usage[0].help;
@@ -7444,7 +7447,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       ucon64_fread (&ffe_header, rominfo->backup_header_start, FAM_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &ffe_header;
       strcat (rominfo->misc, "\n");
-      nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
+      nes_fdsl_local (rominfo, rominfo->misc);        // will also fill in rominfo->name
 
       rom_size = ucon64.file_size - FAM_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
@@ -7519,7 +7522,7 @@ to_func (char *s, int len, int (*func) (int))
 
 
 int
-nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
+nes_fdsl_local (st_ucon64_nfo_t *rominfo, char *output_str)
 /*
   Note that NES people prefer $ to signify hexadecimal numbers (not 0x).
   However we will print only addresses that way.
@@ -7643,6 +7646,13 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
 
   fclose (srcfile);
   return 0;
+}
+
+
+int
+nes_fdsl (st_ucon64_nfo_t *rominfo)
+{
+  return nes_fdsl_local (rominfo, NULL);
 }
 
 

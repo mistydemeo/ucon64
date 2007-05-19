@@ -43,12 +43,13 @@ extern UCON64_FILTER_TYPE (lynx_nrot);
 extern UCON64_FILTER_TYPE (lynx_rotl);
 extern UCON64_FILTER_TYPE (lynx_rotr);
 extern UCON64_FILTER_TYPE (lynx_init);
+extern UCON64_FILTER_TYPE (lynx_b0);
+extern UCON64_FILTER_TYPE (lynx_b1);
+extern UCON64_FILTER_TYPE (lynx_n);
 
-extern const char *lynx_lyx_desc;
-extern int lynxer_main(const char *FileName);
-extern int lynx_b0 (st_ucon64_nfo_t *rominfo, const char *value);
-extern int lynx_b1 (st_ucon64_nfo_t *rominfo, const char *value);
-extern int lynx_n (st_ucon64_nfo_t *rominfo, const char *name);
+
+//extern const char *lynx_lyx_desc;
+//extern int lynxer_main(const char *FileName);
 
 
 #endif // LYNX_H

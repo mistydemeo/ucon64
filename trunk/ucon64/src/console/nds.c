@@ -153,8 +153,9 @@ const unsigned char nds_logodata[NDS_LOGODATA_LEN] =
 
 
 int
-nds_n (st_ucon64_nfo_t *rominfo, const char *name)
+nds_n (st_ucon64_nfo_t *rominfo)
 {
+  const char *name = ucon64.optarg;
   char buf[NDS_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, 0, NDS_NAME_LEN);

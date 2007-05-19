@@ -35,9 +35,7 @@ extern UCON64_FILTER_TYPE (gb_sgb);
 extern UCON64_FILTER_TYPE (gb_ssc);
 extern UCON64_FILTER_TYPE (gb_init);
 extern UCON64_FILTER_TYPE (gb_logo);
-
-
-extern int gb_n (st_ucon64_nfo_t *rominfo, const char *name);
-extern int gb_n2gb (st_ucon64_nfo_t *rominfo, const char *emu_rom);
+extern UCON64_FILTER_TYPE (gb_n);
+extern UCON64_FILTER_TYPE (gb_n2gb);
 
 #endif

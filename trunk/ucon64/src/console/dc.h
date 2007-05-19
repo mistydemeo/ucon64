@@ -29,7 +29,5 @@ extern UCON64_FILTER_TYPE (dc_init);
 extern UCON64_FILTER_TYPE (dc_mkip);
 extern UCON64_FILTER_TYPE (dc_scramble);
 extern UCON64_FILTER_TYPE (dc_unscramble);
-
-
-extern int dc_parse (const char *template_file);
+extern UCON64_FILTER_TYPE (dc_parse);
 #endif

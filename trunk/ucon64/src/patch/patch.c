@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64_misc.h"
+#include "ucon64_defines.h"
 #include "patch.h"
 
 
@@ -61,8 +62,9 @@ const st_getopt2_t patch_usage[] =
 
 #warning test patch_poke()
 int
-patch_poke (st_ucon64_t *p)
+patch_poke (st_ucon64_nfo_t *rominfo)
 {
+  st_ucon64_t *p = &ucon64;
   int value = 0, x = 0;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   const char *optarg = p->optarg;
@@ -111,8 +113,9 @@ patch_poke (st_ucon64_t *p)
   in memory corruption...
 */
 int
-ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
+ucon64_pattern (st_ucon64_nfo_t *rominfo)
 {
+  const char *pattern_fname = ucon64.optarg;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[PATTERN_BUFSIZE];
   FILE *srcfile, *destfile;

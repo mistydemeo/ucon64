@@ -28,10 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 extern const st_getopt2_t atari_usage[];
 
-
 extern UCON64_FILTER_TYPE (atari_init);
-
 #ifdef  HAVE_MATH_H
-extern int atari_cc2 (const char *filename, int bsm);
+extern UCON64_FILTER_TYPE (atari_cc2);
 #endif
 #endif

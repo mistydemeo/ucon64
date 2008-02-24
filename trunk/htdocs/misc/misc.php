@@ -22,6 +22,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 function
+scandir4 ($path, $sort)
+{
+  $i = 0;
+  $a = array ();
+
+  $dir = opendir ($path);
+  while (($a[$i] = readdir ($dir)) != false)
+    $i++;
+  closedir ($dir);
+
+  if ($sort)
+    array_multisort ($a, SORT_DESC);
+  else
+    sort ($a);
+
+  return $a;
+}
+
+
+function
 time_ms ()
 // returns milliseconds since midnight
 {
@@ -102,9 +122,7 @@ function
 set_suffix ($filename, $suffix)
 {
   // always use set_suffix() and NEVER the code below
-  strcpy (get_suffix ($filename), $suffix);
-
-  return $filename;
+  return str_replace (get_suffix ($filename), $suffix, $filename);
 }
 
 
@@ -210,20 +228,30 @@ force_mozilla ()
 
 
 function
-misc_exec ($cmdline)
+misc_exec ($cmdline, $debug)
 {
-  $a = array();
+  if ($debug)
+    echo $cmdline."\n";
 
-//  exec ("bash -c \"".$cmdline."\"", $a, $res);
-  exec ($cmdline, $a, $res);
+  if ($debug < 2)
+    {
+      $a = array();
 
-  $p = $res."\n";
+//      exec ("bash -c \"".$cmdline."\"", $a, $res);
+      exec ($cmdline, $a, $res);
 
-  $i_max = sizeof ($a);
-  for ($i = 0; $i < $i_max; $i++)
-    $p .= $a[$i]."\n";
+      $p = "";
+      if ($debug)
+        $p = $res."\n";
 
-  return $p;
+      $i_max = sizeof ($a);
+      for ($i = 0; $i < $i_max; $i++)
+        $p .= $a[$i]."\n";
+
+      return $p;
+    }
+
+  return "";
 }
 
 
@@ -241,24 +269,45 @@ get_request_value ($name)
 
 
 function
+html_head_tags_meta ($name, $content)
+{
+  if ($name && $content)
+    return "<meta name=\"".$name."\" content=\"".$content."\">\n";
+
+  return "";
+}
+
+
+function
+html_head_tags_http_equiv ($http_equiv, $content)
+{
+  if ($http_equiv && $content)
+    return "<meta http-equiv=\"".$http_equiv."\" content=\"".$content."\">\n";
+
+  return "";
+}
+
+
+function
 html_head_tags ($icon, $title, $refresh, $charset,
-                $use_dc, $dc_desc, $dc_keywords, $dc_identifier, $dc_lang, $dc_author)
+                $use_dc, $desc, $keywords, $identifier, $lang, $author)
 {
   $p = "";
 
-  if ($charset)
-    $p .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset="
-         .$charset
-         ."\">\n";
-  else
-    $p .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n";
+  $p .= html_head_tags_http_equiv ("Content-Type", "text/html; charset=".($charset ? $charset : "UTF-8"));
 
   if ($refresh > 0)
-    $p .= "<meta http-equiv=\"refresh\" content=\""
-         .$refresh
-         ."; URL="
-         .$_SERVER['REQUEST_URI']
-         ."\">\n";
+    $p .= html_head_tags_http_equiv ("refresh", $refresh."; URL=".$_SERVER['REQUEST_URI']);
+
+/*
+?>
+    <meta http-equiv="imagetoolbar" content="no">
+    <meta http-equiv="reply-to" content="editor@NOSPAM.sniptools.com">
+    <meta http-equiv="MSThemeCompatible" content="Yes">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="Expires" content="Mon, 24 Sep 1976 12:43:30 IST">
+<?php
+*/
 
   if ($icon)
     $p .= "<link rel=\"icon\" href=\""
@@ -270,110 +319,48 @@ html_head_tags ($icon, $title, $refresh, $charset,
           .$title
           ."</title>\n";
 
-  if (!$use_dc)
-    {
-      echo $p;
-      return;
-    }
+  if ($use_dc)
+    $p .= html_head_tags_meta ("description", $desc ? $desc : $title)
+         .html_head_tags_meta ("author", $author ? $author : "Admin")
+         .html_head_tags_meta ("keywords", $keywords ? $keywords : "html, php")
+         .html_head_tags_meta ("robots", "follow")
+         ."<!-- Dublin Core -->\n"
+         .html_head_tags_meta ("DC.Title", $desc ? $desc : $title)
+         .html_head_tags_meta ("DC.Creator", $author ? $author : "Admin")
+         .html_head_tags_meta ("DC.Subject", $desc ? $desc : $title)
+         .html_head_tags_meta ("DC.Description", $desc ? $desc : $title)
+         .html_head_tags_meta ("DC.Publisher", $author ? $author : "Admin")
+//         .html_head_tags_meta ("DC.Contributor", "")
+//         .html_head_tags_meta ("DC.Date", "")
+         .html_head_tags_meta ("DC.Type", "Software")
+         .html_head_tags_meta ("DC.Format", "text/html")
+         .html_head_tags_meta ("DC.Identifier", $identifier ? $identifier : "localhost")
+//         .html_head_tags_meta ("DC.Source", "")
+         .html_head_tags_meta ("DC.Language", $lang ? $lang : "en")
+//         .html_head_tags_meta ("DC.Relation", "")
+//         .html_head_tags_meta ("DC.Coverage", "")
+//         .html_head_tags_meta ("DC.Rights", "GPL")
 
-  $p .= "<meta name=\"description\" content=\""
-       .($dc_desc ? $dc_desc : $title)
-       ."\">\n"
-
-       ."<meta name=\"author\" content=\""
-       .($dc_author ? $dc_author : "Admin")
-       ."\">\n"
-
-       ."<meta name=\"keywords\" content=\""
-       .($dc_keywords ? $dc_keywords : "html, php")
-       ."\">\n"
-
-       ."<meta name=\"robots\" content=\"follow\">\n"
-
-       ."<!-- Dublin Core -->\n"
-       ."<meta name=\"DC.Title\" content=\""
-       .($dc_desc ? $dc_desc : $title)
-       ."\">\n"
-
-       ."<meta name=\"DC.Creator\" content=\""
-       .($dc_author ? $dc_author : "Admin")
-       ."\">\n"
-
-       ."<meta name=\"DC.Subject\" content=\""
-       .($dc_desc ? $dc_desc : $title)
-       ."\">\n"
-
-       ."<meta name=\"DC.Description\" content=\""
-       .($dc_desc ? $dc_desc : $title)
-       ."\">\n"
-
-       ."<meta name=\"DC.Publisher\" content=\""
-       .($dc_author ? $dc_author : "Admin")
-       ."\">\n"
-
-//       ."<meta name=\"DC.Contributor\" content=\""
-//       ."\">\n"
-
-//       ."<meta name=\"DC.Date\" content=\""
-//       ."\">\n"
-
-       ."<meta name=\"DC.Type\" content=\"Software\">\n"
-
-       ."<meta name=\"DC.Format\" content=\"text/html\">\n"
-
-       ."<meta name=\"DC.Identifier\" content=\""
-       .($dc_identifier ? $dc_identifier : "localhost")
-       ."\">\n"
-
-//       ."<meta name=\"DC.Source\" content=\""
-//       ."\">\n"
-
-       ."<meta name=\"DC.Language\" content=\""
-       .($dc_lang ? $dc_lang : "en")
-       ."\">\n"
-
-//       ."<meta name=\"DC.Relation\" content=\""
-//       ."\">\n"
-//       ."<meta name=\"DC.Coverage\" content=\""
-//       ."\">\n"
-//       ."<meta name=\"DC.Rights\" content=\"GPL\">\n"
-    ;
-
-
-
-/*
-?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-<head profile="http://geotags.com/geo">
-    
-    <meta name="description" content="Trapping keyboard events with Javascript -- in a cross-browser way [Sniptools]">
-    <meta name="keywords" content="Javascript keyboard events, keypress, javascript, keyCode, which, repeat, keydown event, Sniptools">
-    <meta name="author" content="Shashank Tripathi">
-    <meta name="revisit-after" content="1 week">
-    <meta name="robots" content="index,all">
-    <meta name="revisit-after" content="7 days">
-    <meta name="author" content="Shashank Tripathi">
-    <meta name="generator" content="Homesite 5.0&nbsp; | &nbsp;  Dreamweaver 6 beta&nbsp; | &nbsp; TopStyle 3&nbsp; | &nbsp; Notepad&nbsp; | &nbsp; Adobe PS 7.0">
-    <meta name="resource-type" content="Public">
-    <meta name="classification" content="Internet Services">
-    <meta name="MSSmartTagsPreventParsing" content="TRUE">
-    <meta name="robots" content="ALL">
-    <meta name="distribution" content="Global">
-    <meta name="rating" content="Safe For Kids">
-    <meta name="language" content="English">
-    <meta name="doc-type" content="Public">
-    <meta name="doc-class" content="Living Document">
-    <meta name="doc-rights" content="Copywritten Work">
-    <meta name="distribution" content="Global">
-
-    <meta http-equiv="imagetoolbar" content="no">
-    <meta http-equiv="reply-to" content="editor@NOSPAM.sniptools.com">
-    <meta http-equiv="MSThemeCompatible" content="Yes">
-    <meta http-equiv="Content-Language" content="en">
-    <meta http-equiv="Expires" content="Mon, 24 Sep 1976 12:43:30 IST">
-<?php
-*/
+//       .html_head_tags_meta ("description", "Trapping keyboard events with Javascript -- in a cross-browser way [Sniptools]")
+//       .html_head_tags_meta ("keywords", "Javascript keyboard events, keypress, javascript, keyCode, which, repeat, keydown event, Sniptools")
+//       .html_head_tags_meta ("author", "Shashank Tripathi")
+//       .html_head_tags_meta ("revisit-after", "1 week")
+//       .html_head_tags_meta ("robots", "index,all")
+//       .html_head_tags_meta ("revisit-after", "7 days")
+//       .html_head_tags_meta ("author", "Shashank Tripathi")
+//       .html_head_tags_meta ("generator", "Homesite 5.0&nbsp; | &nbsp;  Dreamweaver 6 beta&nbsp; | &nbsp; TopStyle 3&nbsp; | &nbsp; Notepad&nbsp; | &nbsp; Adobe PS 7.0")
+//       .html_head_tags_meta ("resource-type", "Public")
+//       .html_head_tags_meta ("classification", "Internet Services")
+//       .html_head_tags_meta ("MSSmartTagsPreventParsing", "TRUE")
+//       .html_head_tags_meta ("robots", "ALL")
+//       .html_head_tags_meta ("distribution", "Global")
+//       .html_head_tags_meta ("rating", "Safe For Kids")
+//       .html_head_tags_meta ("language", "English")
+//       .html_head_tags_meta ("doc-type", "Public")
+//       .html_head_tags_meta ("doc-class", "Living Document")
+//       .html_head_tags_meta ("doc-rights", "Copywritten Work")
+//       .html_head_tags_meta ("distribution", "Global")
+;
 
   return $p;
 }
@@ -482,39 +469,84 @@ misc_proxy ($url, $translate_func, $flags)
 }
 
 
-function
-rsstool_table_insert ($db, $url, $title, $desc, $site, $dl_url, $date, $dl_date)
+class rrdtool
 {
-  $p = sprintf ("INSERT INTO `rsstool_table` ("
-      ." `rsstool_url`, `rsstool_url_md5`, `rsstool_url_crc32`,"
-      ." `rsstool_dl_url`, `rsstool_dl_url_md5`, `rsstool_dl_url_crc32`,"
-      ." `rsstool_title`, `rsstool_title_md5`, `rsstool_title_crc32`,"
-      ." `rsstool_site`, `rsstool_desc`, `rsstool_date`, `rsstool_dl_date`) VALUES ('"
-      .$db->sql_stresc ($url)
-      ."', '"
-      .$db->sql_stresc (md5 ($url))
-      ."', %u, '"
-      .$db->sql_stresc ($dl_url)
-      ."', '"
-      .$db->sql_stresc (md5 ($dl_url))
-      ."', %u, '"
-      .$db->sql_stresc ($title)
-      ."', '"
-      .$db->sql_stresc (md5 ($title))
-      ."', %u, '"
-      .$db->sql_stresc ($site)
-      ."', '"
-      .$db->sql_stresc ($desc)
-      ."', '"
-      .$db->sql_stresc ($date)
-      ."', '"
-      .$db->sql_stresc ($dl_date)
-      ."');", $db->sql_stresc (crc32 ($url)),
-              $db->sql_stresc (crc32 ($dl_url)),
-              $db->sql_stresc (crc32 ($title)));
+  var $rrd;
+//  var $w;
+//  var $h;
 
-  $db->sql_write ($p, 1);
+
+function
+rrdtool_open ($rrd)
+{
+  $this->rrd = $rrd;
+  $step = 1;
+  $p = "rrdtool create "
+      .$rrd
+      ." --step "
+      .$step
+      ." DS:values:ABSOLUTE:"
+//      .$step * 2
+      ."900"
+      .":U:U"
+      ." RRA:AVERAGE:0.5:1:9000" 
+      ." RRA:AVERAGE:0.5:4:9000" 
+      ." RRA:AVERAGE:0.5:24:9000" 
+//      ." RRA:AVERAGE:0.5:1:2160" 
+//      ." RRA:AVERAGE:0.5:5:2016" 
+//      ." RRA:AVERAGE:0.5:15:2880"
+//      ." RRA:AVERAGE:0.5:60:8760"
+//      ." RRA:MAX:0.5:1:2160" 
+//      ." RRA:MAX:0.5:5:2016" 
+//      ." RRA:MAX:0.5:15:2880"
+//      ." RRA:MAX:0.5:60:8760"
+;
+
+//  echo $p;
+
+  // create if necessary
+  if (!file_exists ($rrd))
+    return misc_exec ($p, 1);
+  return 0;
 }
+
+
+function
+rrdtool_update ($time, $value)
+{
+  if (!$time)
+//    $time = time ();
+    $time = "N";
+
+  return misc_exec ("rrdtool update "
+                   .$this->rrd
+                   ." "
+                   .$time
+                   .":"
+                   .$value, 1);
+}
+
+
+function
+rrdtool_graph ($file, $seconds, $img_w, $img_h)
+{
+  return misc_exec ("rrdtool graph "
+                   .$file
+                   ." -s -"
+                   .$seconds
+                   ." -a PNG"
+//                   ." --vertical-label \"Values\""
+                   ." -w "
+                   .$img_w
+                   ." -h "
+                   .$img_h
+                   ." DEF:show="
+                   .$this->rrd
+                   .":values:AVERAGE LINE1:show#ff0000:Value", 1);
+}
+
+
+};
 
 
 ?>

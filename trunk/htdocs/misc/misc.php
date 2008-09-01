@@ -19,6 +19,54 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+if (!defined ("MISC_MISC_PHP"))
+{
+define ("MISC_MISC_PHP", 1);
+//error_reporting(E_ALL | E_STRICT);
+
+function getIp($address)
+    {
+        // If it isn't a valid IP assume it is a hostname
+        $preg = '#^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}' .
+                '(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$#';
+        if (!preg_match($preg, $address)) {
+            $result = gethostbyname($address);
+
+            // Not a valid host nor IP
+            if ($result === $address) {
+                $result = false;
+             }
+        } else {
+            $result = $address;
+        }
+        
+        return $result;
+    }
+
+function
+check_udp ($address, $port)
+{
+  $fp = fsockopen("udp://".$address, $port, $errno, $errstr, 1); 
+  if (!$fp)
+    return 0;
+
+  socket_set_timeout ($fp, 2);
+  if (!fwrite($fp,"\x00"))
+    return 0;
+
+  $t1 = time();
+  $res = fread($fp, 1);
+  $t2 = time();
+  fclose ($fp);
+
+  if ($t2 - $t1 > 1)
+    return 0; 
+
+  if (!($res))
+    return 0;
+
+  return 1;
+}
 
 
 function
@@ -651,6 +699,71 @@ get_js ()
         .($this->have_flash ? 1 : 0)
         .";\n";
 }
+
+}
+
+/*
+Include a file into a page
+With the component Microsoft.XMLHTTP for IE and XMLHttpRequest for Mozilla-based browser to make HTTP request and fetch the response without loading a new page.
+
+Suppose we have an header that we want to include in each page (header.inc)
+
+<h1>Header included</h1>
+
+and footer (footer.inc)
+
+<h2>Footer included</h2>
+
+then to use them in each page we do something like this (includedemo.html)
+
+<HTML>
+<HEAD>
+<TITLE> Include Demo </TITLE>
+<SCRIPT LANGUAGE="JavaScript">
+
+// new prototype defintion
+document.include = function (url) {
+ if ('undefined' == typeof(url)) return false;
+ var p,rnd;
+ if (document.all){
+   // For IE, create an ActiveX Object instance 
+   p = new ActiveXObject("Microsoft.XMLHTTP");
+ } 
+ else {
+   // For mozilla, create an instance of XMLHttpRequest.
+   p = new XMLHttpRequest();
+ }
+ // Prevent browsers from caching the included page
+ // by appending a random  number
+ rnd = Math.random().toString().substring(2);
+ url = url.indexOf('?')>-1 ? url+'&rnd='+rnd : url+'?rnd='+rnd;
+ // Open the url and write out the response
+ p.open("GET",url,false);
+ p.send(null);
+ document.write( p.responseText );
+}
+
+</SCRIPT>
+</HEAD>
+<BODY>
+<script>
+document.include('header.inc');
+</script>
+this the body
+<script>
+document.include('footer.inc');
+</script>
+</BODY>
+</HTML>  
+
+Try it here
+If you find this article useful, consider making a small donation
+to show your supportfor this Web site and its content.	
+
+Written and compiled by Réal Gagnon ©1998-2005
+[ home ]
+*/
+
 
 }
 

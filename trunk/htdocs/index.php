@@ -76,9 +76,6 @@ require_once ("misc/widget.php");
 20041028 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">unexpected release of flc 1.2.0</a><br>
 20040319 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 1.9.8-4 released</a><br>
 <br>
-<img src="images/black.png" height="10" width="590">
-<br>
-<br>
     </td>
   </tr>
 </table>

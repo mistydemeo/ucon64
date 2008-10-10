@@ -130,6 +130,9 @@ respective owners.
 #include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/parallel.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"
@@ -902,23 +905,31 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
  * uCON64 wrapping *
  *******************/
 
+static st_ucon64_obj_t cmc_obj[] =
+  {
+    {UCON64_GEN, WF_STOP | WF_NO_ROM},
+    {UCON64_GEN, WF_SWITCH}
+  };
 
 const st_getopt2_t cmc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Cyan's Megadrive ROM copier"/*"1999-2004 Cyan Helkaraxe"*/
+      NULL, "Cyan's Megadrive ROM copier"/*"1999-2004 Cyan Helkaraxe"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xcmc", 0, 0, UCON64_XCMC,
-      NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT"
+      NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT",
+      &cmc_obj[0]
     },
     {
       "xcmct", 1, 0, UCON64_XCMCT,
       "TEST", "run test TEST\n"
       "TEST=1 burn-in reliability test (specify speed)\n"
-      "TEST=2 testbench mode (experts only)"
+      "TEST=2 testbench mode (experts only)",
+      &cmc_obj[0]
     },
     {
       "xcmcm", 1, 0, UCON64_XCMCM,
@@ -926,10 +937,11 @@ const st_getopt2_t cmc_usage[] =
       "SPEED=1 slow (debug)\n"
       "SPEED=2 medium\n"
       "SPEED=3 fast (default)\n"                // verify with value of DEFAULT_SPEED
-      "SPEED=4 full speed (risky)"
+      "SPEED=4 full speed (risky)",
+      &cmc_obj[1]
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

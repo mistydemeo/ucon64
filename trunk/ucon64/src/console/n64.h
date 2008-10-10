@@ -23,18 +23,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t n64_usage[];
 
+extern int n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile);
+extern int n64_chk (st_ucon64_nfo_t *rominfo);
 
-extern UCON64_FILTER_TYPE (n64_chk);
-extern UCON64_FILTER_TYPE (n64_f);
-extern UCON64_FILTER_TYPE (n64_init);
-extern UCON64_FILTER_TYPE (n64_v64);
-extern UCON64_FILTER_TYPE (n64_z64);
-extern UCON64_FILTER_TYPE (n64_swap);
-extern UCON64_FILTER_TYPE (n64_swap2);
-extern UCON64_FILTER_TYPE (n64_n);
-extern UCON64_FILTER_TYPE (n64_bot);
-extern UCON64_FILTER_TYPE (n64_sram);
-extern UCON64_FILTER_TYPE (n64_usms);
-
+extern int n64_f (st_ucon64_nfo_t *rominfo);
+extern int n64_init (st_ucon64_nfo_t *rominfo);
+extern int n64_n (st_ucon64_nfo_t *rominfo, const char *name);
+extern int n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile);
+extern int n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom);
+extern int n64_v64 (st_ucon64_nfo_t *rominfo);
+extern int n64_z64 (st_ucon64_nfo_t *rominfo);
 
 #endif

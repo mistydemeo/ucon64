@@ -108,12 +108,10 @@ extern const char *get_property_from_string (char *str, const char *propname,
 #define PROPERTY_MODE_TEXT 0
 #define PROPERTY_MODE_FILENAME 1
 extern const char *get_property (const char *filename, const char *propname, int mode);
-extern unsigned long get_property_int (const char *filename, const char *propname);
+extern int get_property_int (const char *filename, const char *propname);
 
 extern int set_property (const char *filename, const char *propname,
                          const char *value, const char *comment);
-extern int set_property_int (const char *filename, const char *propname,
-                             unsigned long value, const char *comment);
 extern int set_property_array (const char *filename, const st_property_t *prop);
 
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL, NULL))

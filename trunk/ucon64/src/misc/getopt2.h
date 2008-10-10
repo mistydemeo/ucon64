@@ -50,6 +50,19 @@ extern "C" {
                   you will use THESE everywhere and you will NEVER change them
                 </imperative>
 
+  getopt2_file()        runs callback_func with the realpath() of file/dir as string
+                        flags:
+  0                           pass all files/dirs with their realpath()
+  GETOPT2_FILE_FILES_ONLY     pass only files with their realpath()
+  GETOPT2_FILE_RECURSIVE      pass all files/dirs with their realpath()'s recursively
+  GETOPT2_FILE_RECURSIVE_ONCE like GETOPT2_FILE_RECURSIVE, but only one level deep
+  (GETOPT2_FILE_FILES_ONLY|GETOPT2_FILE_RECURSIVE)
+                           pass only files with their realpath()'s recursively
+
+  callback_func()       getopt2_file() expects the callback_func to return the following
+                          values:
+                          0 == ok, 1 == skip the rest/break, -1 == failure/break
+
   Debugging and Development
 
   getopt2_sanity_check() check the whole st_getopt2_t array for dupes/errors/etc...
@@ -75,6 +88,7 @@ typedef struct
                               // "--name=arg_name" if has_arg == 1
                               // "--name[=arg_name]" if has_arg == 2
   const char *help;           // --help, -h, -? output for the current option
+  void *object;               // could be used for workflow objects
 } st_getopt2_t;
 
 extern void getopt2_usage (const st_getopt2_t *option);
@@ -82,6 +96,11 @@ extern int getopt2_long (struct option *long_option, const st_getopt2_t *option,
 extern int getopt2_long_only (struct option *long_option, const st_getopt2_t *option, int n);
 extern int getopt2_short (char *short_option, const st_getopt2_t *option, int n);
 extern const st_getopt2_t *getopt2_get_index_by_val (const st_getopt2_t *option, int val);
+
+#define GETOPT2_FILE_FILES_ONLY     1
+#define GETOPT2_FILE_RECURSIVE      (1 << 1)
+#define GETOPT2_FILE_RECURSIVE_ONCE (1 << 2)
+extern int getopt2_file (int argc, char **argv, int (* callback_func) (const char *), int flags);
 
 
 #ifdef  DEBUG

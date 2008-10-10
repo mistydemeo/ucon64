@@ -1,508 +1,183 @@
-#if 0
-#if 0
-#if 0 // configure - create config.mak and config.h
-#if 0
-#if 0 // written by 2005 NoisyB
-#if 0
-#if 0
-cc configure.c -o config.status && ./config.status && exit 0
-gcc configure.c -o config.status && ./config.status && exit 0
-g++ configure.c -o config.status && ./config.status && exit 0
-egcs configure.c -o config.status && ./config.status && exit 0
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(uCON64, 2.0.1, ucon64-main@lists.sourceforge.net)
+AC_CONFIG_HEADER(config.h libdiscmage/config.h)
 
 
-st_configure_in_t configure_in[] = {
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-#ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__,
-    "MSDOS=1\n",                                 //  because DJGPP defines both
-#elif   defined __unix__
-#ifdef  __CYGWIN__
-    "CYGWIN=1\n",
-#elif   defined __FreeBSD__
-    "FREEBSD=1\n",
-#elif   defined __OpenBSD__
-    "OPENBSD=1\n",
-#elif   defined __linux__
-    "LINUX=1\n",
-#elif   defined __solaris__
-#ifdef __sparc__
-    "SOLARIS_SPARC=1\n",
-#else
-    "SOLARIS_I386=1\n",
-#endif
-#else
-    "GENERIC_UNIX=1\n",
-#endif
-#elif   defined _WIN32
-#ifdef  __MINGW32__
-    "MINGW=1\n",
-#else
-    "WIN32=1\n",
-#endif
-#elif   defined __APPLE__
-#if   defined __POWERPC__ || defined __ppc__
-    "APPLE_PPC=1\n",
-#else
-    "APPLE=1\n",
-#endif
-#elif   defined __BEOS__
-    "BEOS=1\n",
-#elif   defined AMIGA
-#if defined __PPC__
-    "AMIGA_PPC=1\n",
-#else
-    "AMIGA_68K=1\n",
-#endif
-#else
-    "\n",
-#endif
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"gcc", NULL},
-    "CC=gcc\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"cc", NULL},
-    "ifndef CC\nCC=cc\nendif\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"g++", NULL},
-    "CPP=g++\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"gpp", NULL},
-    "ifndef CPP\nCPP=gpp\nendif\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"gmake", NULL},
-    NULL,
-    NULL,
-    "*** if make fails you may try gmake instead",
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"/usr/local/include", NULL},
-    "includedir=/usr/local/include\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"/usr/include", NULL},
-    "ifndef includedir\n"
-    "includedir=/usr/include\n"
-    "endif\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"/usr/local/lib", NULL},
-    "libdir=/usr/local/lib\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"/usr/lib", NULL},
-    "ifndef libdir\n"
-    "libdir=/usr/lib\n"
-    "endif\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    "DESTDIR=\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"/usr/local/bin", NULL},
-    "BINDIR=/usr/local/bin\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"/usr/bin", NULL},
-    "ifndef BINDIR\n"
-    "BINDIR=/usr/bin\n"
-    "endif\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"/usr/bin/install", NULL},
-    "INSTALL=/usr/bin/install -c\n"
-    "INSTALL_PROGRAM=${INSTALL}\n"
-    "INSTALL_DATA=${INSTALL} -m 644\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {"install", NULL},
-    "ifndef INSTALL\n"
-    "INSTALL=install -c\n"
-    "INSTALL_PROGRAM=${INSTALL}\n"
-    "INSTALL_DATA=${INSTALL} -m 644\n"
-    "endif\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    NULL,
-    "//#define DEBUG\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    NULL,
-    "//#define TEST\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    "#TEST_UCON64=1\n"
-    "#CFLAGS+=-DTEST_UCON64\n",
-    NULL,
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    NULL,
-    "#define USE_CRC\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    NULL,
-    "#define USE_MD5\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    NULL,
-    "#define USE_SHA1\n",
-    NULL,
-    NULL
-  },
-#if 1
-  // enable dynamic loading of library
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    "DLOPEN=1",
-    "#define DLOPEN\n",
-    "dlopen............................   yes",
-    "dlopen............................   no"
-  },
-#endif
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    NULL,
-    "#define USE_ANSI_COLOR\n",
-    "ANSI support......................   yes",
-    "ANSI support......................   no"
-  },
-  {
-    {NULL},
-    {"inttypes.h", NULL},
-    {NULL},
-    NULL,
-    "#define HAVE_INTTYPES_H 1\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {"byteswap.h", NULL},
-    {NULL},
-    NULL,
-    "#define HAVE_BYTESWAP_H 1\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {"stdlib.h", NULL},
-    {NULL},
-    NULL,
-    "#define HAVE_STDLIB_H 1\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {"unistd.h", NULL},
-    {NULL},
-    NULL,
-    "#define HAVE_UNISTD_H 1\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {"dirent.h", NULL},
-    {NULL},
-    NULL,
-    "#define HAVE_DIRENT_H 1\n",
-    NULL,
-    NULL
-  },
-  {
-    {NULL},
-    {"math.h", NULL},
-    {NULL},
-    "USE_MATH=1\n"
-    "LDFLAGS+=-lm\n",
-    "#define HAVE_MATH_H 1\n",
-    NULL,
-    NULL
-  },
-#if 0
-  {
-    {NULL},
-    {"termcap.h", NULL},
-    {NULL},
-    "USE_TERMCAP=1\n"
-    "LDFLAGS+=-ltermcap\n",
-    "#define USE_TERMCAP 1\n",
-    NULL,
-    NULL
-  },
-#endif
-#if 0
-  {
-    {NULL},
-    {"zlib.h", NULL},
-    {NULL},
-    "USE_ZLIB=1\n"
-    "LDFLAGS+=-lz\n",
-    "#define USE_ZLIB 1\n",
-    "zlib support......................   yes",
-    "zlib support......................   no"
-  },
-#endif
-  {
-    {NULL},
-    {"sys/io.h", NULL},
-    {NULL},
-    "HAVE_SYS_IO_H=1\n",
-    "#define HAVE_SYS_IO_H 1\n",
-    NULL,
-    NULL
-  },
-#if 0
-  {
-    {NULL},
-    {"arpa/inet.h", "netdb.h", "netinet/in.h", "sys/file.h", "sys/socket.h", NULL},
-    {NULL},
-    "USE_TCP=1\n",
-    "#define USE_TCP 1\n",
-    "Network support...................   yes",
-    "Network support...................   no\n"
-    "*** could not find sys/socket.h and probably other files required for\n"
-    "*** network use. Please report this to the developerof this package"
-  },
-#endif
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    "USE_PARALLEL=1\n",
-    "#define USE_PARALLEL 1\n",
-    "PAR port support..................   yes",
-    "PAR port support..................   no"
-  },
-  {
-    {"linux/ppdev.h", NULL},
-    {NULL},
-    {NULL},
-    "USE_PPDEV=1\n",
-    "#define USE_PPDEV 1\n",
-    "ppdev (linux) support.............   yes",
-    "ppdev (linux) support.............   no"
-  },
-#if 0
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    "USE_SERIAL=1\n",
-    "#define USE_SERIAL 1\n",
-    "serial port support...............   yes",
-    "serial port support...............   no"
-  },
-#endif
-  {
-    {"usb.h", NULL},
-    {NULL},
-    {NULL},
-    "USE_USB=1\n",
-    "#define USE_USB 1\n",
-    "USB port support..................   yes",
-    "USB port support..................   no"
-  },
-  {
-    {NULL},
-    {NULL},
-    {NULL},
-    "USE_LIBCD64=1\n",
-    "#define USE_LIBCD64 1\n",
-    "libcd64 (static) support..........   yes",
-    "libcd64 (static) support..........   no"
-// libi386 is necessary under OpenBSD, but only if libcd64 isn't enabled. The
-//  reason is that libcd64 already includes libi386.
-//  LIBI386_MAKE="-li386"
-  },
-  {{NULL}, {NULL}, {NULL}, NULL, NULL, NULL, NULL}
-};
+dnl Checks for programs.
+AC_PROG_CC(gcc egcs cc)
+AC_PROG_GCC_TRADITIONAL
 
 
-const char *lib_dirs[] = {
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined AMIGA || defined __APPLE__      // Mac OS X actually
-// GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
-  "./",
-  "/usr/lib/",
-  "/usr/local/lib/",
-#else // DJGPP, Win32
-  "c:\\windows\\system\\",
-  "d:\\windows\\system\\",
-  "e:\\windows\\system\\",
-  "f:\\windows\\system\\",
-  "g:\\windows\\system\\",
-  "h:\\windows\\system\\",
-  "c:\\windows\\system32\\",
-  "d:\\windows\\system32\\",
-  "e:\\windows\\system32\\",
-  "f:\\windows\\system32\\",
-  "g:\\windows\\system32\\",
-  "h:\\windows\\system32\\",
-#endif
-  NULL
-};
+AC_MSG_CHECKING(whether debug output is enabled)
+AC_ARG_ENABLE(debug,
+              AC_HELP_STRING([--enable-debug],
+                             [enable debug output (default: no)]),
+              enable_debug=$enableval,
+              enable_debug=no)
+if test $enable_debug = yes; then
+  AC_DEFINE(DEBUG, 1, [enable debug output (default: no)])
+fi
+AC_MSG_RESULT($enable_debug)
 
 
-const char *header_dirs[] = {
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined AMIGA || defined __APPLE__      // Mac OS X actually
-// GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
-  "./",
-  "/usr/include/",
-  "/usr/local/include/",
-  "/usr/local/usr/local/include/",
-#else // DJGPP, Win32
-  "c:\\Programme\\Microsoft Visual Studio\\vc98\\Include\\"
-  "d:\\Programme\\Microsoft Visual Studio\\vc98\\Include\\"
-  "e:\\Programme\\Microsoft Visual Studio\\vc98\\Include\\"
-  "f:\\Programme\\Microsoft Visual Studio\\vc98\\Include\\"
-  "g:\\Programme\\Microsoft Visual Studio\\vc98\\Include\\"
-  "h:\\Programme\\Microsoft Visual Studio\\vc98\\Include\\"
-  "c:\\Program Files\\Microsoft Visual Studio\\vc98\\Include\\"
-  "d:\\Program Files\\Microsoft Visual Studio\\vc98\\Include\\"
-  "e:\\Program Files\\Microsoft Visual Studio\\vc98\\Include\\"
-  "f:\\Program Files\\Microsoft Visual Studio\\vc98\\Include\\"
-  "g:\\Program Files\\Microsoft Visual Studio\\vc98\\Include\\"
-  "h:\\Program Files\\Microsoft Visual Studio\\vc98\\Include\\"
-#endif
-  NULL
-};
+AC_MSG_CHECKING(whether support for parallel port backup units is enabled)
+AC_ARG_ENABLE(parallel,
+              AC_HELP_STRING([--enable-parallel],
+                             [enable support for parallel port backup units (default: yes)]),
+              enable_parallel=$enableval,
+              enable_parallel=yes)
+if test $enable_parallel = yes; then
+  AC_DEFINE(USE_PARALLEL, 1, [enable support for parallel port backup units (default: yes)])
+fi
+AC_MSG_RESULT($enable_parallel)
 
 
-const char *file_dirs[] = {
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined AMIGA || defined __APPLE__      // Mac OS X actually
-// GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
-  "",
-  "./",
-#else // DJGPP, Win32
-  "c:\\",
-  "d:\\",
-  "e:\\",
-  "f:\\",
-  "g:\\",
-  "h:\\",
-#endif
-  NULL
-};
+dnl AC_MSG_CHECKING(whether support for serial port backup units is enabled)
+dnl AC_ARG_ENABLE(serial,
+dnl              AC_HELP_STRING([--enable-serial],
+dnl                              [enable support for serial port backup units (default: yes)]),
+dnl               enable_serial=$enableval,
+dnl               enable_serial=yes)
+dnl if test $enable_serial = yes; then
+dnl   AC_DEFINE(USE_SERIAL, 1, [enable support for serial port backup units (default: yes)])
+dnl fi
+dnl AC_MSG_RESULT($enable_serial)
+
+
+AC_MSG_CHECKING(whether to use ppdev)
+AC_ARG_ENABLE(ppdev,
+              AC_HELP_STRING([--enable-ppdev],
+                             [use ppdev for parallel port I/O (default: no)]),
+              enable_ppdev=$enableval,
+              enable_ppdev=no)
+if test $enable_ppdev = yes; then
+  AC_TRY_COMPILE([#include <linux/ppdev.h>], , enable_ppdev=yes, enable_ppdev=no)
+fi
+if test $enable_ppdev = yes; then
+  AC_DEFINE(USE_PPDEV, 1, [use ppdev for parallel port I/O (default: no)])
+fi
+AC_MSG_RESULT($enable_ppdev)
+
+
+AC_MSG_CHECKING(whether the use of color is enabled)
+AC_ARG_ENABLE(ansi_color,
+              AC_HELP_STRING([--enable-ansi-color],
+                             [enable usage of color (default: yes)]),
+              enable_ansi_color=$enableval,
+              enable_ansi_color=yes)
+if test $enable_ansi_color = yes; then
+  AC_DEFINE(USE_ANSI_COLOR, 1, [enable usage of color (default: yes)])
+fi
+AC_MSG_RESULT($enable_ansi_color)
+
+
+AC_MSG_CHECKING(whether add-on libraries are dynamically loaded)
+AC_ARG_ENABLE(dload,
+              AC_HELP_STRING([--enable-dload],
+                             [enable dynamic loading of add-on libraries (default: yes)]),
+              enable_dload=$enableval,
+              enable_dload=yes)
+if test $enable_dload = yes; then
+  AC_DEFINE(DLOPEN, 1, [enable dynamic loading of add-on libraries (default: yes)])
+  DEFINE_DLOPEN_MAKE="DLOPEN=1"
+fi
+AC_MSG_RESULT($enable_dload)
+AC_SUBST(DEFINE_DLOPEN_MAKE)
+
+
+AC_MSG_CHECKING(whether libdiscmage is enabled)
+AC_ARG_ENABLE(discmage,
+              AC_HELP_STRING([--enable-discmage],
+                             [enable libdiscmage (default: yes)]),
+              enable_discmage=$enableval,
+              enable_discmage=yes)
+if test $enable_discmage = yes; then
+  AC_DEFINE(USE_DISCMAGE, 1, [enable libdiscmage (default: yes)])
+  DEFINE_DISCMAGE_MAKE="USE_DISCMAGE=1"
+fi
+AC_MSG_RESULT($enable_discmage)
+AC_SUBST(DEFINE_DISCMAGE_MAKE)
+
+
+dnl This belongs here, not at the checks for libraries. We don't have to check
+dnl  if libcd64 is present as it is part of our source tree.
+AC_MSG_CHECKING(whether libcd64 is enabled)
+AC_ARG_ENABLE(libcd64,
+              AC_HELP_STRING([--enable-libcd64],
+                             [enable libcd64 (default: no)]),
+              enable_libcd64=$enableval,
+              enable_libcd64=no)
+if test $enable_libcd64 = yes; then
+  AC_DEFINE(USE_LIBCD64, 1, [enable libcd64 (default: no)])
+  DEFINE_LIBCD64_MAKE="USE_LIBCD64=1"
+else
+  dnl libi386 is necessary under OpenBSD, but only if libcd64 isn't enabled. The
+  dnl  reason is that libcd64 already includes libi386.
+  LIBI386_MAKE="-li386"
+fi
+AC_MSG_RESULT($enable_libcd64)
+AC_SUBST(DEFINE_LIBCD64_MAKE)
+AC_SUBST(LIBI386_MAKE)
+
+
+dnl Checks for libraries.
+AC_MSG_CHECKING(for zlib)
+AC_ARG_WITH(zlib,
+            AC_HELP_STRING([--with-zlib],
+                           [build with gzip and zip support (default: yes)]),
+            with_zlib=$withval,
+            with_zlib=yes)
+if test $with_zlib = yes; then
+  AC_TRY_COMPILE([#include <zlib.h>], , with_zlib=yes, with_zlib=no)
+fi
+if test $with_zlib = yes; then
+  AC_DEFINE(USE_ZLIB, 1, [build with gzip and zip support (default: yes)])
+  DEFINE_ZLIB_MAKE="USE_ZLIB=1"
+fi
+AC_MSG_RESULT($with_zlib)
+AC_SUBST(DEFINE_ZLIB_MAKE)
+
+
+AC_MSG_CHECKING(for libusb)
+AC_ARG_WITH(libusb,
+            AC_HELP_STRING([--with-libusb],
+                           [build with (lib)usb support (default: no)]),
+            with_libusb=$withval,
+            with_libusb=no)
+if test $with_libusb = yes; then
+  AC_TRY_COMPILE([#include <usb.h>], , with_libusb=yes, with_libusb=no)
+fi
+if test $with_libusb = yes; then
+  AC_DEFINE(USE_USB, 1, [build with (lib)usb support (default: no)])
+  DEFINE_USB_MAKE="USE_USB=1"
+fi
+AC_MSG_RESULT($with_libusb)
+AC_SUBST(DEFINE_USB_MAKE)
+
+
+dnl Checks for header files.
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h unistd.h byteswap.h inttypes.h sys/io.h)
+dnl NOT zlib.h! Or else --with[out]-zlib gets overrriden in config.h.
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_UID_T
+AC_C_INLINE
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+AC_FUNC_MEMCMP
+AC_FUNC_STRFTIME
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(realpath)
+
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+
+AC_OUTPUT(config.mak libdiscmage/Makefile)
+
+echo
+echo NOTE: On non-Linux systems you might need to use gmake instead of make

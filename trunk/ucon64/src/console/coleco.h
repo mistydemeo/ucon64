@@ -23,6 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t coleco_usage[];
 
-extern UCON64_FILTER_TYPE (coleco_init);
+extern int coleco_init (st_ucon64_nfo_t *rominfo);
 
 #endif

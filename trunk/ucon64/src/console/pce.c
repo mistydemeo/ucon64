@@ -30,11 +30,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
-#include "misc/itypes.h"
-#include "misc/hash.h"
+#include "misc/chksum.h"
 #include "misc/misc.h"
 #include "misc/string.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -48,48 +50,68 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PCE_HEADER_LEN 0x30
 
 
+static st_ucon64_obj_t pce_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_PCE, WF_SWITCH},
+    {UCON64_PCE, WF_DEFAULT}
+  };
+
 const st_getopt2_t pce_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\n"
-      "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)"/*"1987/1990 NEC"*/
+      "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)"/*"1987/1990 NEC"*/,
+      NULL
     },
     {
       UCON64_PCE_S, 0, 0, UCON64_PCE,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &pce_obj[5]
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved (bit-swapped) format"
+      NULL, "force ROM is in interleaved (bit-swapped) format",
+      &pce_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved (bit-swapped) format"
+      NULL, "force ROM is not in interleaved (bit-swapped) format",
+      &pce_obj[0]
     },
     {
       "msg", 0, 0, UCON64_MSG,
-      NULL, "convert to Magic Super Griffin/MSG"
+      NULL, "convert to Magic Super Griffin/MSG",
+      &pce_obj[6]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game Doctor*/MGD2/RAW"
+      NULL, "convert to Multi Game Doctor*/MGD2/RAW",
+      &pce_obj[2]
     },
     {
       "swap", 0, 0, UCON64_SWAP,
-      NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"
+      NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)",
+      &pce_obj[3]
     },
     {
       "f", 0, 0, UCON64_F,
-      NULL, "fix region protection"
+      NULL, "fix region protection",
+      &pce_obj[1]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with PCE-PRO flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
-      "all the ROMs, multi-game file to create last"
+      "all the ROMs, multi-game file to create last",
+      &pce_obj[4]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 #define PCE_MAKER_MAX 86
@@ -781,7 +803,7 @@ pce_f (st_ucon64_nfo_t *rominfo)
 /*
   Region protection codes are found in (American) TurboGrafx-16 games. It
   prevents those games from running on a PC-Engine. One search pattern seems
-  sufficient to fix/unprotect all TG-16 games. In addition to that, the protection
+  sufficient to fix/crack all TG-16 games. In addition to that, the protection
   code appears to be always somewhere in the first 32 kB.
 */
 {
@@ -847,7 +869,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-pce_multi_fname (int truncate_size, char *fname)
+pce_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
@@ -902,9 +924,9 @@ pce_multi_fname (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
                                        ucon64.backup_header_len : 0;
-      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
+      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (pce_init (ucon64.nfo) != 0)
@@ -990,13 +1012,6 @@ pce_multi_fname (int truncate_size, char *fname)
 }
 
 
-int
-pce_multi (st_ucon64_nfo_t *rominfo)
-{
-  return pce_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
-}
-
-
 static int
 pce_check (unsigned char *buf, unsigned int len)
 // This function was contributed by Cowering. Comments are his unless stated
@@ -1072,7 +1087,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
   st_pce_data_t *info, key;
 
   x = ucon64.file_size % (16 * 1024);
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
     ucon64.backup_header_len : (ucon64.file_size > x ? x : 0);
 
   size = ucon64.file_size - rominfo->backup_header_len;
@@ -1107,13 +1122,13 @@ pce_init (st_ucon64_nfo_t *rominfo)
        memmem2 (rom_buffer, x, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 26, 0) == 0 &&
        memcmp (rom_buffer, "HESM", 4))
     swapped = 1;
-  if (ucon64.interleaved != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.interleaved))
     swapped = ucon64.interleaved;
 
   if ((result == -1 && swapped != 0) || swapped == 1)
     {                                   // don't swap the bits if -nint is specified
-      if (ucon64.do_not_calc_crc == UCON64_UNKNOWN || swapped == 1)
-        ucon64.fcrc32 = crc32_wrap (0, rom_buffer, size);
+      if (!UCON64_ISSET (ucon64.do_not_calc_crc) || swapped == 1)
+        ucon64.fcrc32 = crc32 (0, rom_buffer, size);
       swapbits (rom_buffer, size);
       if (pce_check (rom_buffer, size) == 1)
         {
@@ -1137,10 +1152,10 @@ pce_init (st_ucon64_nfo_t *rominfo)
   rominfo->console_usage = pce_usage[0].help;
   rominfo->backup_usage = rominfo->backup_header_len ? msg_usage[0].help : mgd_usage[0].help;
 
-  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       if (!ucon64.crc32)
-        ucon64.crc32 = crc32_wrap (0, rom_buffer, size);
+        ucon64.crc32 = crc32 (0, rom_buffer, size);
       // additional info
       key.crc32 = ucon64.crc32;
       info = (st_pce_data_t *) bsearch (&key, pce_data,
@@ -1149,9 +1164,8 @@ pce_init (st_ucon64_nfo_t *rominfo)
       if (info)
         {
           if (info->maker)
-            rominfo->maker = pce_maker[MIN (info->maker, PCE_MAKER_MAX - 1)] ?
-                             pce_maker[MIN (info->maker, PCE_MAKER_MAX - 1)] :
-                             ucon64_msg[UNKNOWN_MSG];
+            rominfo->maker = NULL_TO_UNKNOWN_S (pce_maker[MIN (info->maker,
+                                                               PCE_MAKER_MAX - 1)]);
 
           if (info->serial)
             if (info->serial[0])

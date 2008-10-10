@@ -49,7 +49,6 @@ extern void outportw (unsigned short port, unsigned short word);
 
 extern int parport_open (int parport);
 extern int parport_close (int parport);
-
-
+extern void parport_print_info (void);
 #endif // USE_PARALLEL
 #endif // MISC_PARALLEL_H

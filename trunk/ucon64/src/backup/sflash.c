@@ -25,10 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "misc/bswap.h"
 #include "misc/parallel.h"
 #include "misc/itypes.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
 #include "ucon64.h"
@@ -37,25 +39,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "sflash.h"
 
 
+static st_ucon64_obj_t sflash_obj[] =
+  {
+    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
+    {UCON64_SNES, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t sflash_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Flash flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/
+      NULL, "Super Flash flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xsf", 0, 0, UCON64_XSF,
       NULL, "send/receive ROM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically (64 Mbits) when ROM does not exist"
+      "receives automatically (64 Mbits) when ROM does not exist",
+      &sflash_obj[0]
     },
     {
       "xsfs", 0, 0, UCON64_XSFS,
       NULL, "send/receive SRAM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist"
+      "receives automatically when SRAM does not exist",
+      &sflash_obj[1]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -186,7 +197,7 @@ sf_read_rom (const char *filename, unsigned int parport, int size)
     {
       read_block (address, buffer);             // 0x100 bytes read
       if (read_block == ttt_read_rom_b)
-        bswap16_n (buffer, 0x100);
+        ucon64_bswap16_n (buffer, 0x100);
       fwrite (buffer, 1, 0x100, file);
       address += 0x100;
       if ((address & 0x3fff) == 0)

@@ -30,14 +30,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t patch_usage[];
 
-/*
-  ucon64_pattern()      change file based on patterns specified in pattern_fname
-*/
-extern UCON64_FILTER_TYPE (patch_poke);
-
-#warning ucon64_tmp_pattern
-
-extern UCON64_FILTER_TYPE (ucon64_pattern);
-
 
 #endif

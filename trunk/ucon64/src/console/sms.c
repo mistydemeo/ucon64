@@ -30,18 +30,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
-#include "misc/itypes.h"
-#include "misc/hash.h"
+#include "misc/chksum.h"
 #include "misc/misc.h"
 #include "misc/string.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "sms.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
-#include "backup/sc.h"
 #include "backup/smsgg-pro.h"
 
 
@@ -51,60 +52,71 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int sms_chksum (unsigned char *rom_buffer, int rom_size);
 
 
+static st_ucon64_obj_t sms_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_SMS, WF_SWITCH},
+    {UCON64_SMS, WF_DEFAULT | WF_NO_SPLIT}
+  };
+
 const st_getopt2_t sms_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Sega Master System(II/III)/Game Gear (Handheld)"/*"1986/1990 SEGA http://www.sega.com"*/
+      NULL, "Sega Master System(II/III)/Game Gear (Handheld)"/*"1986/1990 SEGA http://www.sega.com"*/,
+      NULL
     },
     {
       UCON64_SMS_S, 0, 0, UCON64_SMS,
-      NULL, "force recognition"
-    },
-    {
-      UCON64_GAMEGEAR_S, 0, 0, UCON64_GAMEGEAR,
-      NULL, "same as " OPTION_LONG_S UCON64_SMS_S
+      NULL, "force recognition",
+      &sms_obj[4]
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved format"
+      NULL, "force ROM is in interleaved format",
+      &sms_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved format"
+      NULL, "force ROM is not in interleaved format",
+      &sms_obj[0]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)"
+      NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)",
+      &sms_obj[2]
     },
     {
       "mgdgg", 0, 0, UCON64_MGDGG,
-      NULL, "same as " OPTION_LONG_S "mgd, but gives GG name"
+      NULL, "same as " OPTION_LONG_S "mgd, but gives GG name",
+      &sms_obj[5]
     },
     {
       "smd", 0, 0, UCON64_SMD,
-      NULL, "convert to Super Magic Drive/SMD"
+      NULL, "convert to Super Magic Drive/SMD",
+      &sms_obj[2]
     },
     {
       "smds", 0, 0, UCON64_SMDS,
-      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"
-    },
-    {
-      "sc", 0, 0, UCON64_SC,
-      NULL, "convert to SuperCard\n"
-            "(creates: SAV template)"
+      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD",
+      NULL
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum (SMS only)"
+      NULL, "fix ROM checksum (SMS only)",
+      &sms_obj[1]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with SMS-PRO/GG-PRO flash card,\n"
       "truncated to SIZE Mbit; file with loader must be specified\n"
-      "first, then all the ROMs, multi-game file to create last"
+      "first, then all the ROMs, multi-game file to create last",
+      &sms_obj[3]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_sms_header
@@ -124,8 +136,8 @@ static int is_gamegear;
 
 
 // see src/backup/mgd.h for the file naming scheme
-static int
-sms_mgd_local (st_ucon64_nfo_t *rominfo, int console)
+int
+sms_mgd (st_ucon64_nfo_t *rominfo, int console)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
@@ -160,20 +172,6 @@ sms_mgd_local (st_ucon64_nfo_t *rominfo, int console)
     printf ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
             "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.\n");
   return 0;
-}
-
-
-int
-sms_mgdgg (st_ucon64_nfo_t *rominfo)
-{
-  return sms_mgd_local (rominfo, UCON64_GG);
-}
-
-
-int
-sms_mgdsms (st_ucon64_nfo_t *rominfo)
-{
-  return sms_mgd_local (rominfo, UCON64_SMS);
 }
 
 
@@ -219,7 +217,7 @@ sms_smd (st_ucon64_nfo_t *rominfo)
 
 
 int
-sms_smds (st_ucon64_nfo_t *rominfo)
+sms_smds (void)
 {
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
@@ -272,7 +270,7 @@ sms_chk (st_ucon64_nfo_t *rominfo)
   else
     ucon64_fwrite (buf, rominfo->backup_header_len + offset, 2, dest_name, "r+b");
 
-  dumper (stdout, buf, 2, rominfo->backup_header_len + offset, 0);
+  dumper (stdout, buf, 2, rominfo->backup_header_len + offset, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -325,7 +323,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-sms_multi_fname (int truncate_size, char *fname)
+sms_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE 0x20000
 // BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
@@ -387,11 +385,10 @@ sms_multi_fname (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                                      ucon64.backup_header_len :
-                                      0;
-      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
-                                ucon64.interleaved : 0;
+      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+                                       ucon64.backup_header_len : 0;
+      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+                                       ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (sms_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be an SMS/GG ROM\n", ucon64.fname);
@@ -497,13 +494,6 @@ sms_multi_fname (int truncate_size, char *fname)
 }
 
 
-int
-sms_multi (st_ucon64_nfo_t *rominfo)
-{
-  return sms_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
-}
-
-
 static int
 sms_testinterleaved (st_ucon64_nfo_t *rominfo)
 {
@@ -603,12 +593,12 @@ sms_init (st_ucon64_nfo_t *rominfo)
   is_gamegear = 0;
   memset (&sms_header, 0, SMS_HEADER_LEN);
 
-  if (ucon64.backup_header_len != UCON64_UNKNOWN)       // -hd, -nhd or -hdn option was specified
+  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn option was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
   else
     rominfo->backup_header_len = sms_header_len ();
 
-  rominfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : sms_testinterleaved (rominfo);
 
   if (rominfo->interleaved)
@@ -662,7 +652,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
       break;
     }
 
-  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       int size = ucon64.file_size - rominfo->backup_header_len;
       if (!(rom_buffer = (unsigned char *) malloc (size)))
@@ -674,10 +664,10 @@ sms_init (st_ucon64_nfo_t *rominfo)
 
       if (rominfo->interleaved)
         {
-          ucon64.fcrc32 = crc32_wrap (0, rom_buffer, size);
+          ucon64.fcrc32 = crc32 (0, rom_buffer, size);
           smd_deinterleave (rom_buffer, size);
         }
-      ucon64.crc32 = crc32_wrap (0, rom_buffer, size);
+      ucon64.crc32 = crc32 (0, rom_buffer, size);
 
       if (!is_gamegear)
         {
@@ -743,11 +733,4 @@ sms_chksum (unsigned char *rom_buffer, int rom_size)
       sum -= rom_buffer[i];
 
   return sum;
-}
-
-
-int
-sms_sc (st_ucon64_nfo_t *rominfo)
-{
-  return sc_sram (ucon64.fname);
 }

@@ -26,6 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ufo.h"
@@ -35,7 +38,8 @@ const st_getopt2_t ufo_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super UFO Pro 8"/*"UFO Enterprises"*/
+      NULL, "Super UFO Pro 8"/*"UFO Enterprises"*/,
+      NULL
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

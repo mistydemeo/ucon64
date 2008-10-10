@@ -228,20 +228,18 @@ typedef struct
 #define FAM_HEADER_LEN  192
 
 
-extern UCON64_FILTER_TYPE (nes_fds);
-extern UCON64_FILTER_TYPE (nes_s);
-extern UCON64_FILTER_TYPE (nes_pasofami);
-extern UCON64_FILTER_TYPE (nes_ineshd);
-extern UCON64_FILTER_TYPE (nes_ffe);
-extern UCON64_FILTER_TYPE (nes_ines);
-extern UCON64_FILTER_TYPE (nes_init);
-extern UCON64_FILTER_TYPE (nes_unif);
-extern UCON64_FILTER_TYPE (nes_dint);
-extern UCON64_FILTER_TYPE (nes_sc);
-extern UCON64_FILTER_TYPE (nes_n);
-extern UCON64_FILTER_TYPE (nes_fdsl);
-
+extern int nes_fds (void);
+extern int nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str);
+extern int nes_n (const char *name);
+extern int nes_s (void);
+extern int nes_pasofami (void);
+extern int nes_ineshd (st_ucon64_nfo_t *rominfo);
+extern int nes_ffe (st_ucon64_nfo_t *rominfo);
+extern int nes_ines (void);
+extern int nes_init (st_ucon64_nfo_t *rominfo);
+extern int nes_unif (void);
 extern int nes_j (unsigned char **mem_image);
+extern int nes_dint (void);
 extern nes_file_t nes_get_file_type (void);
 
 #endif // NES_H

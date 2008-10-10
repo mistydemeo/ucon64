@@ -27,10 +27,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
-#include "misc/itypes.h"
 #include "misc/string.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"
@@ -40,17 +42,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/parallel.h"                      //  snes_get_snes_hirom()
 
 
+static st_ucon64_obj_t gd_obj[] =
+  {
+    {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_SNES, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t gd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/
+      NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xgd3", 0, 0, UCON64_XGD3, // supports split files
       NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-      "this option uses the Game Doctor SF3 protocol"
+      "this option uses the Game Doctor SF3 protocol",
+      &gd_obj[0]
     },
     {
       "xgd6", 0, 0, UCON64_XGD6,
@@ -60,29 +70,34 @@ const st_getopt2_t gd_usage[] =
       NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist\n"
 #endif
-      "this option uses the Game Doctor SF6 protocol"
+      "this option uses the Game Doctor SF6 protocol",
+      &gd_obj[0]
     },
     {
       "xgd3s", 0, 0, UCON64_XGD3S,
-      NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT"
+      NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT",
+      &gd_obj[1]
     },
     // --xgd3r should remain hidden until receiving works
     {
       "xgd3r", 0, 0, UCON64_XGD3R,
-      NULL, NULL
+      NULL, NULL,
+      &gd_obj[1]
     },
     {
       "xgd6s", 0, 0, UCON64_XGD6S,
       NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist"
+      "receives automatically when SRAM does not exist",
+      &gd_obj[1]
     },
     {
       "xgd6r", 0, 0, UCON64_XGD6R,
       NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n" OPTION_LONG_S "port=PORT\n"
-      "receives automatically when saver file does not exist"
+      "receives automatically when saver file does not exist",
+      &gd_obj[1]
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -211,13 +226,13 @@ gd_checkabort (int status)
 static void
 remove_destfile (void)
 {
-  if (!gd_destfname)
-    return;
-
-  printf ("Removing: %s\n", gd_destfname);
-  fclose (gd_destfile);
-  remove (gd_destfname);
-  gd_destfname = NULL;
+  if (gd_destfname)
+    {
+      printf ("Removing: %s\n", gd_destfname);
+      fclose (gd_destfile);
+      remove (gd_destfname);
+      gd_destfname = NULL;
+    }
 }
 
 

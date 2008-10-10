@@ -29,9 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -40,18 +42,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "coleco.h"
 
 
+static st_ucon64_obj_t coleco_obj[] =
+  {
+    {UCON64_COLECO, WF_SWITCH}
+  };
+
 const st_getopt2_t coleco_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Coleco/ColecoVision"
-//      "1982"
+      NULL, "Coleco/ColecoVision"/*"1982"*/,
+      NULL
     },
     {
       UCON64_COLECO_S, 0, 0, UCON64_COLECO,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &coleco_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -117,9 +125,8 @@ coleco_init (st_ucon64_nfo_t *rominfo)
   rominfo->console_usage = coleco_usage[0].help;
   rominfo->backup_usage = unknown_backup_usage[0].help;
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                               ucon64.backup_header_len :
-                               0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
   ucon64_fread (&coleco_header, ucon64.backup_header_len, COLECO_HEADER_LEN, ucon64.fname);
 
@@ -150,5 +157,6 @@ coleco_init (st_ucon64_nfo_t *rominfo)
         coleco_header.start,
         coleco_header.type == 0xaa55 ? "Coleco" : "ColecoVision");
     }
+
   return result;
 }

@@ -25,9 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -36,17 +38,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/backup.h"
 
 
+static st_ucon64_obj_t ngp_obj[] =
+  {
+    {UCON64_NGP, WF_SWITCH}
+  };
+
 const st_getopt2_t ngp_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Neo Geo Pocket/Neo Geo Pocket Color"/*"1998/1999 SNK http://www.neogeo.co.jp"*/
+      NULL, "Neo Geo Pocket/Neo Geo Pocket Color"/*"1998/1999 SNK http://www.neogeo.co.jp"*/,
+      NULL
     },
     {
       UCON64_NGP_S, 0, 0, UCON64_NGP,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &ngp_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -69,7 +78,7 @@ ngp_init (st_ucon64_nfo_t *rominfo)
   char *snk_code = "COPYRIGHT BY SNK CORPORATION",
        *third_code = " LICENSED BY SNK CORPORATION", buf[MAXBUFSIZE];
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
 
   ucon64_fread (&ngp_header, NGP_HEADER_START + rominfo->backup_header_len,
     NGP_HEADER_LEN, ucon64.fname);

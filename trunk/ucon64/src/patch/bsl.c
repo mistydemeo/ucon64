@@ -26,22 +26,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "bsl.h"
 
 
+static st_ucon64_obj_t bsl_obj[] =
+  {
+    {0, WF_STOP}
+  };
+
 const st_getopt2_t bsl_usage[] =
   {
     {
       "b", 0, 0, UCON64_B,
-      NULL, "apply Baseline/BSL PATCH to ROM"
+      NULL, "apply Baseline/BSL PATCH to ROM",
+      &bsl_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

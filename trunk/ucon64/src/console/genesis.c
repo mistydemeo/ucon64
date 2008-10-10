@@ -31,10 +31,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
-#include "misc/itypes.h"
 #include "misc/misc.h"
-#include "misc/hash.h"
+#include "misc/chksum.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -55,105 +57,140 @@ static int save_rom (st_ucon64_nfo_t *rominfo, const char *name,
                      unsigned char **buffer, int size);
 
 
+static st_ucon64_obj_t genesis_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_GEN, WF_SWITCH},
+    {UCON64_GEN, WF_DEFAULT},
+    {UCON64_GEN, WF_DEFAULT | WF_NO_SPLIT}
+  };
+
 const st_getopt2_t genesis_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"/*"1989/19XX/19XX Sega http://www.sega.com"*/
+      NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"/*"1989/19XX/19XX Sega http://www.sega.com"*/,
+      NULL
     },
     {
       UCON64_GEN_S, 0, 0, UCON64_GEN,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &genesis_obj[5]
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved format (SMD)"
+      NULL, "force ROM is in interleaved format (SMD)",
+      &genesis_obj[0]
     },
     {
       "int2", 0, 0, UCON64_INT2,
-      NULL, "force ROM is in interleaved format 2 (MGD)"
+      NULL, "force ROM is in interleaved format 2 (MGD)",
+      &genesis_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved format (BIN/RAW)"
+      NULL, "force ROM is not in interleaved format (BIN/RAW)",
+      &genesis_obj[0]
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change foreign ROM name to NEW_NAME"
+      "NEW_NAME", "change foreign ROM name to NEW_NAME",
+      &genesis_obj[1]
     },
     {
       "n2", 1, 0, UCON64_N2,
-      "NEW_NAME", "change Japanese ROM name to NEW_NAME"
+      "NEW_NAME", "change Japanese ROM name to NEW_NAME",
+      &genesis_obj[6]
     },
     {
       "smd", 0, 0, UCON64_SMD,
-      NULL, "convert to Super Magic Drive/SMD"
+      NULL, "convert to Super Magic Drive/SMD",
+      &genesis_obj[2]
     },
     {
       "smds", 0, 0, UCON64_SMDS,
-      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"
+      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD",
+      NULL
     },
-    { 
+    {
       "bin", 0, 0, UCON64_BIN,
-      NULL, "convert to Magicom/BIN/RAW"
+      NULL, "convert to Magicom/BIN/RAW",
+      &genesis_obj[7]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game*/MGD2/MGH"
+      NULL, "convert to Multi Game*/MGD2/MGH",
+      &genesis_obj[2]
     },
 #if 0
     {
       "gf", 0, 0, UCON64_GF,
-      NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE"
+      NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE",
+      NULL
     },
     {
       "ga", 0, 0, UCON64_GA,
-      NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE"
+      NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE",
+      NULL
     },
     {
       "gym", 0, 0, UCON64_GYM,
-      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE"
+      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE",
+      NULL
     },
     {
       "cym", 0, 0, UCON64_CYM,
-      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE"
+      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE",
+      NULL
     },
 #endif
     {
       "stp", 0, 0, UCON64_STP,
       NULL, "convert SRAM from backup unit for use with an emulator\n"
-      OPTION_LONG_S "stp just strips the first 512 bytes"
+      OPTION_LONG_S "stp just strips the first 512 bytes",
+      NULL
     },
     {
       "j", 0, 0, UCON64_J,
-      NULL, "join split ROM"
+      NULL, "join split ROM",
+      &genesis_obj[3]
     },
     {
       "s", 0, 0, UCON64_S,
-      NULL, "split ROM; default part size is 8 Mb (4 Mb for SMD)"
+      NULL, "split ROM; default part size is 8 Mb (4 Mb for SMD)",
+      &genesis_obj[2]
     },
     {
       "ssize", 1, 0, UCON64_SSIZE,
-      "SIZE", "specify split part size in Mbit"
+      "SIZE", "specify split part size in Mbit",
+      &genesis_obj[0]
     },
     {
       "f", 0, 0, UCON64_F,
-      NULL, "remove NTSC/PAL protection"
+      NULL, "remove NTSC/PAL protection",
+      &genesis_obj[1]
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum"
+      NULL, "fix ROM checksum",
+      &genesis_obj[1]
     },
     {
       "1991", 0, 0, UCON64_1991,
       NULL, "fix old third party ROMs to work with consoles build after\n"
-      "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\""
+      "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"",
+      &genesis_obj[6]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with MD-PRO flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
-      "all the ROMs, multi-game file to create last"
+      "all the ROMs, multi-game file to create last",
+      &genesis_obj[4]
     },
     {
       "region", 1, 0, UCON64_REGION,
@@ -161,18 +198,20 @@ const st_getopt2_t genesis_usage[] =
       "CODE=0 force NTSC/Japan for all games\n"
       "CODE=1 force NTSC/U.S.A. for all games\n"
       "CODE=2 force PAL for all games\n"
-      "CODE=x use whatever setting games expect"
+      "CODE=x use whatever setting games expect",
+      &genesis_obj[5]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 const st_getopt2_t bin_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Magicom/BIN/RAW"
+      NULL, "Magicom/BIN/RAW",
+      NULL
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_genesis_header
@@ -224,9 +263,8 @@ genesis_smd (st_ucon64_nfo_t *rominfo)
 
 
 int
-genesis_smds (st_ucon64_nfo_t *rominfo)
+genesis_smds (void)
 {
-  (void) rominfo;
   char dest_name[FILENAME_MAX];
   unsigned char buf[32768];
   st_smd_header_t header;
@@ -489,7 +527,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
   int x, nparts, surplus, size = ucon64.file_size - rominfo->backup_header_len,
       part_size;
 
-  if (ucon64.part_size != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.part_size))
     {
       part_size = ucon64.part_size;
       // Don't allow too small part sizes, see src/console/snes.c (snes_s())
@@ -780,17 +818,15 @@ genesis_name (st_ucon64_nfo_t *rominfo, const char *name1, const char *name2)
 
 
 int
-genesis_n (st_ucon64_nfo_t *rominfo)
+genesis_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   return genesis_name (rominfo, name, NULL);
 }
 
 
 int
-genesis_n2 (st_ucon64_nfo_t *rominfo)
+genesis_n2 (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   return genesis_name (rominfo, NULL, name);
 }
 
@@ -814,7 +850,7 @@ genesis_chk (st_ucon64_nfo_t *rominfo)
   rom_buffer[GENESIS_HEADER_START + 143] = rominfo->current_internal_crc;      // low byte of checksum
   rom_buffer[GENESIS_HEADER_START + 142] = rominfo->current_internal_crc >> 8; // high byte of checksum
 
-  dumper (stdout, &rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e, 0);
+  dumper (stdout, &rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e, DUMPER_HEX);
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -838,7 +874,6 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning fix genpal.txt access
   strcpy (fname, "genpal.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
@@ -893,7 +928,6 @@ genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning fix mdntsc.txt access
   strcpy (fname, "mdntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
@@ -943,7 +977,7 @@ genesis_f (st_ucon64_nfo_t *rominfo)
     In the Philipines the television standard is NTSC, but do games made
     for the Philipines exist?
     Just like with SNES we don't guarantee anything for files that needn't be
-    fixed/patched.
+    fixed/cracked/patched.
   */
   if (genesis_tv_standard == 0)               // NTSC (Japan, U.S.A. or Brazil ('4'))
     return genesis_fix_ntsc_protection (rominfo);
@@ -974,7 +1008,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
   if (type != BIN)
     {
       if (ucon64.fcrc32 == 0)
-        ucon64.fcrc32 = crc32_wrap (ucon64.fcrc32, rom_buffer, genesis_rom_size);
+        ucon64.fcrc32 = crc32 (ucon64.fcrc32, rom_buffer, genesis_rom_size);
 
       if (type == SMD)
         smd_deinterleave (rom_buffer, bytesread);
@@ -983,7 +1017,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
     }
 
   if (ucon64.crc32 == 0)                        // calculate the CRC32 only once
-    ucon64.crc32 = crc32_wrap (0, rom_buffer, bytesread);
+    ucon64.crc32 = crc32 (0, rom_buffer, bytesread);
 
   fclose (file);
   return rom_buffer;
@@ -1074,7 +1108,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
     it's running on another type of console. For example, a Japanese game
     running on a (European) Mega Drive should have the P and E bit set to 0.
   */
-  if (ucon64.region != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.region))
     {
       if (!genesis_japanese)
         flags |= 0x20;                          // set E(urope)
@@ -1090,7 +1124,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
 
 
 int
-genesis_multi_fname (int truncate_size, char *fname)
+genesis_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)                     // must be a multiple of 16 kB
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
@@ -1125,7 +1159,7 @@ genesis_multi_fname (int truncate_size, char *fname)
     }
 
   // do this check here, because one error message is enough (not for every game)
-  if (ucon64.region != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.region))
     switch (ucon64.region)
       {
       case 0:                                   // NTSC/Japan
@@ -1158,12 +1192,10 @@ genesis_multi_fname (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                                      ucon64.backup_header_len :
-                                      0;
-      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
-                                ucon64.interleaved :
-                                0;
+      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+                                       ucon64.backup_header_len : 0;
+      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+                                       ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (genesis_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be a Genesis ROM\n", ucon64.fname);
@@ -1173,7 +1205,7 @@ genesis_multi_fname (int truncate_size, char *fname)
               modify ucon64.console temporarily only to be able to help detect
               problems with incorrect files.
       */
-      if (ucon64.region != UCON64_UNKNOWN)
+      if (UCON64_ISSET (ucon64.region))
         switch (ucon64.region)
           {
           case 0:                               // NTSC/Japan
@@ -1279,13 +1311,6 @@ genesis_multi_fname (int truncate_size, char *fname)
   ucon64.do_not_calc_crc = org_do_not_calc_crc;
 
   return 0;
-}
-
-
-int
-genesis_multi (st_ucon64_nfo_t *rominfo)
-{
-  return genesis_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
 }
 
 
@@ -1441,10 +1466,10 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       rominfo->backup_header_len = SMD_HEADER_LEN;
     }
 
-  if (ucon64.backup_header_len != UCON64_UNKNOWN)       // -hd, -nhd or -hdn option was specified
+  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn option was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
 
-  rominfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : genesis_testinterleaved (rominfo);
 
   if (rominfo->interleaved == 0)
@@ -1482,7 +1507,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
         GENESIS_HEADER_LEN, ucon64.fname);
     }
 
-  if (ucon64.split == UCON64_UNKNOWN)
+  if (!UCON64_ISSET (ucon64.split))
     {
       if (type == SMD)
         {
@@ -1539,7 +1564,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   if (maker[3] == 'T' && maker[4] == '-')
     {
       sscanf (&maker[5], "%03d", &value);
-      rominfo->maker = genesis_maker[value & 0xff] ? genesis_maker[value & 0xff] : ucon64_msg[UNKNOWN_MSG];
+      rominfo->maker = NULL_TO_UNKNOWN_S (genesis_maker[value & 0xff]);
     }
   else
     {
@@ -1579,9 +1604,8 @@ genesis_init (st_ucon64_nfo_t *rominfo)
         genesis_japanese = 1;
       if (genesis_japanese || country_code == 'U' || country_code == '4')
         genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil ('4') use NTSC
-      strcat (country, genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)] ?
-                       genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)] :
-                       ucon64_msg[UNKNOWN_MSG]);
+      strcat (country, NULL_TO_UNKNOWN_S
+               (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
       strcat (country, ", ");
     }
   x = strlen (country);
@@ -1650,9 +1674,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   sprintf ((char *) buf, "I/O device(s): %s",
-    genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)] ?
-    genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)] :
-    ucon64_msg[UNKNOWN_MSG]);
+    NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)]));
   for (x = 0; x < 3; x++)
     {
       const char *io_device = genesis_io[MIN (OFFSET (genesis_header, 145 + x), GENESIS_IO_MAX - 1)];
@@ -1677,7 +1699,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   // internal ROM crc
-  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
         return -1;

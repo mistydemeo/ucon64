@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/misc.h"
 #include "misc/parallel.h"
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"
@@ -34,19 +37,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "mcd.h"
 
 
+static st_ucon64_obj_t mcd_obj[] =
+  {
+    {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM}
+  };
+
 const st_getopt2_t mcd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Mike Pavone's Genesis/Sega CD transfer cable"
+      NULL, "Mike Pavone's Genesis/Sega CD transfer cable",
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xmcd", 0, 0, UCON64_XMCD,
-      NULL, "receive ROM from Genesis/Sega CD; " OPTION_LONG_S "port=PORT"
+      NULL, "receive ROM from Genesis/Sega CD; " OPTION_LONG_S "port=PORT",
+      &mcd_obj[0]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

@@ -33,12 +33,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/property.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/string.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console.h"
-#include "nintendo.h"
 #include "gba.h"
 #include "backup/backup.h"
 
@@ -46,6 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GBA_NAME_LEN 12
 #define GBA_HEADER_START 0
 #define GBA_HEADER_LEN (sizeof (st_gba_header_t))
+#define GBA_MENU_SIZE 20916
 #define GBA_BLANK_SIZE 52232
 #define GBA_SAV_TEMPLATE_SIZE 65536
 #define GBA_SCI_TEMPLATE_SIZE 458752
@@ -54,40 +57,55 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int gba_chksum (void);
 
 
+static st_ucon64_obj_t gba_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {UCON64_GBA, WF_SWITCH},
+    {UCON64_GBA, WF_DEFAULT}
+  };
+
 const st_getopt2_t gba_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game Boy Advance (SP)"/*"2001 Nintendo http://www.nintendo.com"*/
+      NULL, "Game Boy Advance (SP)"/*"2001 Nintendo http://www.nintendo.com"*/,
+      NULL
     },
     {
       UCON64_GBA_S, 0, 0, UCON64_GBA,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &gba_obj[2]
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME"
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      &gba_obj[0]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
-      NULL, "restore ROM logo character data (offset: 0x04-0x9F)"
+      NULL, "restore ROM logo character data (offset: 0x04-0x9F)",
+      &gba_obj[0]
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM header checksum"
+      NULL, "fix ROM header checksum",
+      &gba_obj[0]
     },
     {
       "sram", 0, 0, UCON64_SRAM,
-      NULL, "patch ROM for SRAM saving"
+      NULL, "patch ROM for SRAM saving",
+      &gba_obj[3]
     },
     {
       "sc", 0, 0, UCON64_SC,
-      NULL, "convert to SuperCard\n"
+      NULL, "convert to Super Card (CF to GBA Adapter)\n"
 #if 0
             "enables \"Saver patch\", \"restart to Menu\" and\n"
             "\"Real Time Save\""
 #endif
-            "(creates SAV and SCI templates)"
+            "(creates SAV and SCI templates)",
+      &gba_obj[3]
     },
     {
       "crp", 1, 0, UCON64_CRP,
@@ -99,16 +117,18 @@ const st_getopt2_t gba_usage[] =
       "WAIT_TIME=16 faster than 28, but slower than 20\n"
       "WAIT_TIME=20 default in most original cartridges\n"
       "WAIT_TIME=24 fastest cartridge access speed\n"
-      "WAIT_TIME=28 faster than 8 but slower than 16"
+      "WAIT_TIME=28 faster than 8 but slower than 16",
+      &gba_obj[3]
     },
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with FAL/F2A flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
-      "all the ROMs, multi-game file to create last"
+      "all the ROMs, multi-game file to create last",
+      &gba_obj[1]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -248,9 +268,8 @@ const unsigned char gba_logodata[] =            // Note: not a static variable
 
 
 int
-gba_n (st_ucon64_nfo_t *rominfo)
+gba_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   char buf[GBA_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, 0, GBA_NAME_LEN);
@@ -295,7 +314,7 @@ gba_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->backup_header_len + 0xbd,
     buf, "r+b");
 
-  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->backup_header_len + 0xbd, 0);
+  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->backup_header_len + 0xbd, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -303,11 +322,9 @@ gba_chk (st_ucon64_nfo_t *rominfo)
 
 
 int
-gba_sram (st_ucon64_nfo_t *rominfo)
+gba_sram (void)
 // This function is based on Omar Kilani's gbautil 1.1
 {
-  (void) rominfo;
-
   unsigned char st_orig[2][10] =
     {
       { 0x0E, 0x48, 0x39, 0x68, 0x01, 0x60, 0x0E, 0x48, 0x79, 0x68 },
@@ -533,9 +550,8 @@ gba_sram (st_ucon64_nfo_t *rominfo)
 
 
 int
-gba_crp (st_ucon64_nfo_t *rominfo)
+gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
 {
-  const char *value = ucon64.optarg;
   FILE *srcfile, *destfile;
   int bytesread, n = 0;
   char buffer[32 * 1024], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
@@ -596,9 +612,8 @@ gba_init (st_ucon64_nfo_t *rominfo)
   int result = -1, value;
   char buf[MAXBUFSIZE];
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                               ucon64.backup_header_len :
-                               0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
   ucon64_fread (&gba_header, GBA_HEADER_START +
            rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
@@ -608,9 +623,8 @@ gba_init (st_ucon64_nfo_t *rominfo)
   else
     {
 #if 0 // AFAIK (dbjh) GBA ROMs never have a header
-      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                                   ucon64.backup_header_len :
-                                   UNKNOWN_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+        ucon64.backup_header_len : UNKNOWN_HEADER_LEN;
 
       ucon64_fread (&gba_header, GBA_HEADER_START +
                rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
@@ -641,7 +655,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
   }
   if (value < 0 || value >= NINTENDO_MAKER_LEN)
     value = 0;
-  rominfo->maker = nintendo_maker[value] ? nintendo_maker[value] : ucon64_msg[UNKNOWN_MSG];
+  rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[value]);
 
   // ROM country
   rominfo->country =
@@ -687,7 +701,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
     }
 
   // internal ROM crc
-  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 1;
@@ -720,7 +734,7 @@ gba_chksum (void)
 
 
 int
-gba_multi_fname (int truncate_size, char *multi_fname)
+gba_multi (int truncate_size, char *multi_fname)
 // TODO: Check if 1024 Mbit multi-game files are supported by the FAL code
 {
 #define BUFSIZE (32 * 1024)
@@ -863,56 +877,6 @@ gba_multi_fname (int truncate_size, char *multi_fname)
 
   return 0;
 }
-
-
-int
-gba_multi (st_ucon64_nfo_t *rominfo)
-{
-  return gba_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
-}
-
-
-/*
-SONICPINBALL
-
-o:
-00060430  ff f7 88 fd  00 04 03 0c  03 4a 01 24  07 e0 00 00  .........J.$....
-r:
-00060430  1b 23 1b 02  32 20 03 43  03 4a 01 24  07 e0 00 00  .#..2 .C.J.$....
-
-o:
-0006053c  70 b5 90 b0  15 4d 29 88  15 4e 31 40  15 48 00 68  p....M)..N1@.H.h
-r:
-0006053c  00 b5 00 20  02 bc 08 47  15 4e 31 40  15 48 00 68  ... ...G.N1@.H.h
-
-o:
-000605ac  e8 89 03 02  70 b5 46 46  40 b4 90 b0  00 04 03 0c  ....p.FF@.......
-r:
-000605ac  e8 89 03 02  00 b5 00 20  02 bc 08 47  00 04 03 0c  ....... ...G....
-
-YU-GI-OH DDM
-/windows/test_supercard3/new/rs-yugi.gba
-Comparing rs-yugi.gba with ucon64/rs-yugi.gba
-ucon64/rs-yugi.gba:
-00058b74  ff f7 aa ff  00 04 ......
-/windows/test_supercard3/new/rs-yugi.gba:
-00058b74  1b 23 1b 02  32 20 .#..2
-
-ucon64/rs-yugi.gba:
-00058b7b  0c .
-/windows/test_supercard3/new/rs-yugi.gba:
-00058b7b  43 C
-
-ucon64/rs-yugi.gba:
-0005904c  70 b5 90 b0  p...
-/windows/test_supercard3/new/rs-yugi.gba:
-0005904c  00 20 70 47  . pG
-
-ucon64/rs-yugi.gba:
-000590c0  70 b5 46 46  p.FF
-/windows/test_supercard3/new/rs-yugi.gba:
-000590c0  00 20 70 47  . pG
-*/
 
 
 static int
@@ -1071,8 +1035,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
 #endif
 
 int
-gba_sc (st_ucon64_nfo_t *rominfo)
-#warning fix gba_sc()
+gba_sc (void)
 /*
   reverse engineered from SuperCard.exe
   
@@ -1166,10 +1129,9 @@ gba_sc (st_ucon64_nfo_t *rominfo)
   int x = 0;
   unsigned int fsize = ucon64.file_size, padded = 0;
   uint32_t address = 0, pos = 0;
-  char dest_name[FILENAME_MAX];
+  char dest_name[FILENAME_MAX], fname[FILENAME_MAX];
   unsigned char *buffer, *ptr = NULL;
-  const unsigned char *gba_menu_sc = NULL;
-  int gba_menu_sc_len = 0;
+  const char *p = NULL;
   FILE *destfile;
   
   strcpy (dest_name, ucon64.fname);
@@ -1266,13 +1228,19 @@ gba_sc (st_ucon64_nfo_t *rominfo)
     0x00, 0x00, 0x00, 0x00,
   */
   // write the menu (the formulas will NOT be optimized)
-  gba_menu_sc_len = ucon64_get_contrib (&gba_menu_sc, "gbaloader_sc");
-  fwrite (&gba_menu_sc, 1, gba_menu_sc_len, destfile);
+  p = get_property (ucon64.configfile, "gbaloader_sc", PROPERTY_MODE_FILENAME);
+  strncpy (fname, p ? p : "sc_menu.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  if (ucon64_fread (buffer, 0, GBA_MENU_SIZE, fname) <= 0)
+    {
+      fprintf (stderr, "ERROR: Could not load Super Card loader (%s)\n", fname);
+      exit (1);                                 // fatal
+    }
+  fwrite (buffer, 1, GBA_MENU_SIZE, destfile);
   pos = ftell (destfile);                       // truncate() this later
 
   // calculate and write new start address
-  printf ("New start address: 0x%08x\n", (int) (pos - gba_menu_sc_len + 0x8000000));
-  address = ((pos - gba_menu_sc_len - 8) >> 2) & 0xffffff;
+  printf ("New start address: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 0x8000000));
+  address = ((pos - GBA_MENU_SIZE - 8) >> 2) & 0xffffff;
   fseek (destfile, 0, SEEK_SET);
 #ifdef  WORDS_BIGENDIAN
   address = bswap_32 (address);
@@ -1280,9 +1248,9 @@ gba_sc (st_ucon64_nfo_t *rominfo)
   fwrite (&address, 1, 3, destfile);
 
   // calculate and write new address at offset 0x60
-  printf ("New offset 0x60 address: 0x%08x\n", (int) (pos - gba_menu_sc_len + 846));
-  address = (pos - gba_menu_sc_len + 846 - 2) & 0xffffff;
-  if ((pos - gba_menu_sc_len) > 128 * MBIT)
+  printf ("New offset 0x60 address: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 846));
+  address = (pos - GBA_MENU_SIZE + 846 - 2) & 0xffffff;
+  if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
     address |= 0x09000000;                      // 0x09 == "large" jmp?
   else
     address |= 0x08000000;
@@ -1293,13 +1261,13 @@ gba_sc (st_ucon64_nfo_t *rominfo)
   fwrite (&address, 1, 4, destfile);
 
   // calculate and write new address in menu
-  printf ("New address in menu: 0x%08x\n", (int) (pos - gba_menu_sc_len + 846 - 53076));
-  address = (pos - gba_menu_sc_len + 846 - 53076 - 2) & 0xffffff;
-  if ((pos - gba_menu_sc_len) > 128 * MBIT)
+  printf ("New address in menu: 0x%08x\n", (int) (pos - GBA_MENU_SIZE + 846 - 53076));
+  address = (pos - GBA_MENU_SIZE + 846 - 53076 - 2) & 0xffffff;
+  if ((pos - GBA_MENU_SIZE) > 128 * MBIT)
     address |= 0x09000000;                      // 0x09 == "large" jmp?
   else
     address |= 0x08000000;
-  fseek (destfile, pos - gba_menu_sc_len + 784, SEEK_SET);
+  fseek (destfile, pos - GBA_MENU_SIZE + 784, SEEK_SET);
 #ifdef  WORDS_BIGENDIAN
   address = bswap_32 (address);
 #endif
@@ -1341,6 +1309,5 @@ gba_sc (st_ucon64_nfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
 
   free (buffer);
-
   return 0;
 }

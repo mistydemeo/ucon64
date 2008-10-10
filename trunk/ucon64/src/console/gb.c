@@ -30,17 +30,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <string.h>
-#include "misc/itypes.h"
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/string.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/backup.h"
 #include "patch/patch.h"
 #include "console.h"
-#include "nintendo.h"
 #include "gb.h"
 
 
@@ -48,57 +49,69 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GB_HEADER_LEN (sizeof (st_gb_header_t))
 
 
+static st_ucon64_obj_t gb_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_GB, WF_SWITCH},
+    {UCON64_GB, WF_DEFAULT}
+  };
+
 const st_getopt2_t gb_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "Game Boy/(Super GB)/GB Pocket/Color GB"
-      /*"1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"*/
+      /*"1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"*/,
+      NULL
     },
     {
       UCON64_GB_S, 0, 0, UCON64_GB,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &gb_obj[1]
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME"
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      &gb_obj[0]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
-      NULL, "restore ROM logo character data (offset: 0x104-0x134)"
+      NULL, "restore ROM logo character data (offset: 0x104-0x134)",
+      &gb_obj[0]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game*/MGD2/RAW"
+      NULL, "convert to Multi Game*/MGD2/RAW",
+      &gb_obj[0]
     },
     {
       "ssc", 0, 0, UCON64_SSC,
-      NULL, "convert to Super Smart Card/SSC"
-    },
-    {
-      "sc", 0, 0, UCON64_SC,
-      NULL, "convert to SuperCard\n"
-            "(creates: SAV template)"
+      NULL, "convert to Super Smart Card/SSC",
+      &gb_obj[2]
     },
     {
       "sgb", 0, 0, UCON64_SGB,
-      NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"
+      NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX",
+      &gb_obj[2]
     },
     {
       "gbx", 0, 0, UCON64_GBX,
-      NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"
+      NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC",
+      &gb_obj[2]
     },
     {
       "n2gb", 1, 0, UCON64_N2GB,
       "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
       "ROM should be KAMI's FC Emulator ROM image\n"
-      "NESROM should contain 16 kB of PRG data and 8 kB of CHR data"
+      "NESROM should contain 16 kB of PRG data and 8 kB of CHR data",
+      &gb_obj[2]
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum"
+      NULL, "fix ROM checksum",
+      &gb_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -188,10 +201,9 @@ gb_logo (st_ucon64_nfo_t *rominfo)
 
 
 int
-gb_n2gb (st_ucon64_nfo_t *rominfo)
+gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
 {
 #define EMULATOR_LEN 0x10000
-  const char *nesrom = ucon64.optarg;
   st_ines_header_t ines_header;
   int n = 0, crc = 0;
   unsigned char *buf;
@@ -362,9 +374,8 @@ gb_sgb (st_ucon64_nfo_t *rominfo)
 
 
 int
-gb_n (st_ucon64_nfo_t *rominfo)
+gb_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   char buf[GB_NAME_LEN + 1], dest_name[FILENAME_MAX];
   int gb_name_len =
     (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?
@@ -398,7 +409,7 @@ gb_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fwrite (buf, rominfo->backup_header_len + GB_HEADER_START + 0x4d, 3,
                  dest_name, "r+b");
 
-  dumper (stdout, buf, 3, GB_HEADER_START + rominfo->backup_header_len + 0x4d, 0);
+  dumper (stdout, buf, 3, GB_HEADER_START + rominfo->backup_header_len + 0x4d, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -518,9 +529,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
     },
     *str;
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                               ucon64.backup_header_len :
-                               0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
 
   if (ucon64.file_size <
       (int) (rominfo->backup_header_len + GB_HEADER_START + GB_HEADER_LEN))
@@ -532,9 +541,8 @@ gb_init (st_ucon64_nfo_t *rominfo)
     result = 0;
   else
     {
-      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                                   ucon64.backup_header_len :
-                                   (int) SSC_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+        ucon64.backup_header_len : (int) SSC_HEADER_LEN;
 
       ucon64_fread (&gb_header, rominfo->backup_header_len + GB_HEADER_START,
                     GB_HEADER_LEN, ucon64.fname);
@@ -578,7 +586,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
     x = 2;                                      // Rocket Games
   else if (x < 0 || x >= NINTENDO_MAKER_LEN)
     x = 0;
-  rominfo->maker = nintendo_maker[x] ? nintendo_maker[x] : ucon64_msg[UNKNOWN_MSG];
+  rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
 
   // ROM country
   rominfo->country = gb_header.country == 0 ? "Japan" : "U.S.A. & Europe";
@@ -589,7 +597,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
   if (gb_header.rom_type <= 0x1f)
-    str = gb_romtype1[gb_header.rom_type] ? gb_romtype1[gb_header.rom_type] : ucon64_msg[UNKNOWN_MSG];
+    str = NULL_TO_UNKNOWN_S (gb_romtype1[gb_header.rom_type]);
   else if (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99)
     str = gb_romtype2[gb_header.rom_type - 0x97];
   else if (gb_header.rom_type >= 0xfd)
@@ -661,7 +669,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
         strcat (rominfo->misc, "Bad");
     }
 
-  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;
@@ -718,12 +726,4 @@ gb_chksum (st_ucon64_nfo_t *rominfo)
   free (rom_buffer);
 
   return sum;
-}
-
-
-int
-gb_sc (st_ucon64_nfo_t *rominfo)
-{
-  (void) rominfo;
-  return sc_sram (ucon64.fname);
 }

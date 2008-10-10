@@ -32,11 +32,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "misc/itypes.h"
-#include "misc/bswap.h"
-#include "misc/hash.h"
+#include "misc/chksum.h"
 #include "misc/file.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -54,84 +55,110 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define LAC_ROM_SIZE   1310720
 
 
+static st_ucon64_obj_t n64_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_INIT | WF_PROBE},
+    {UCON64_N64, WF_SWITCH},
+    {UCON64_N64, WF_DEFAULT},
+    {UCON64_N64, WF_INIT | WF_PROBE}
+  };
+
 const st_getopt2_t n64_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Nintendo 64"/*"1996 Nintendo http://www.nintendo.com"*/
+      NULL, "Nintendo 64"/*"1996 Nintendo http://www.nintendo.com"*/,
+      NULL
     },
     {
       UCON64_N64_S, 0, 0, UCON64_N64,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &n64_obj[3]
     },
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved format (2143, V64)"
+      NULL, "force ROM is in interleaved format (2143, V64)",
+      &n64_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved format (1234, Z64)"
+      NULL, "force ROM is not in interleaved format (1234, Z64)",
+      &n64_obj[0]
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME"
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      &n64_obj[1]
     },
     {
       "v64", 0, 0, UCON64_V64,
-      NULL, "convert to Doctor V64 (and compatibles/interleaved)"
+      NULL, "convert to Doctor V64 (and compatibles/interleaved)",
+      &n64_obj[4]
     },
     {
       "z64", 0, 0, UCON64_Z64,
-      NULL, "convert to Mr. Backup Z64 (not interleaved)"
+      NULL, "convert to Mr. Backup Z64 (not interleaved)",
+      &n64_obj[4]
     },
     {
       "dint", 0, 0, UCON64_DINT,
-      NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)"
+      NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)",
+      &n64_obj[2]
     },
     {
       "swap", 0, 0, UCON64_SWAP,
-      NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM"
+      NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM",
+      &n64_obj[2]
     },
     {
       "swap2", 0, 0, UCON64_SWAP2,
-      NULL, "word-swap ROM (1234 <-> 3412)"
+      NULL, "word-swap ROM (1234 <-> 3412)",
+      NULL
     },
 #if 0
     {
       "f", 0, 0, UCON64_F,
-      NULL, "remove NTSC/PAL protection"
+      NULL, "remove NTSC/PAL protection",
+      NULL
     },
 #endif
     {
       "bot", 1, 0, UCON64_BOT,
       "BOOTCODE", "replace/extract BOOTCODE (4032 Bytes) in/from ROM;\n"
-      "extracts automatically if BOOTCODE does not exist"
+      "extracts automatically if BOOTCODE does not exist",
+      &n64_obj[4]
     },
     {
       "lsram", 1, 0, UCON64_LSRAM,
       "SRAM", "LaC's SRAM upload tool; ROM should be LaC's ROM image\n"
       "the SRAM must have a size of 512 Bytes\n"
       "this option generates a ROM which can be used to transfer\n"
-      "SRAMs to your cartridge's SRAM (EEPROM)"
+      "SRAMs to your cartridge's SRAM (EEPROM)",
+      &n64_obj[5]
     },
     {
       "usms", 1, 0, UCON64_USMS,
       "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/Game Gear emulator);\n"
       "ROM should be Jos Kwanten's UltraSMS ROM image\n"
-      "works only for SMS ROMs which are <= 4 Mb in size"
+      "works only for SMS ROMs which are <= 4 Mb in size",
+      &n64_obj[4]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum\n"
-      "supports 6101, 6102, 6103, 6105 and 6106 boot codes"
+      "supports 6101, 6102, 6103, 6105 and 6106 boot codes",
+      &n64_obj[1]
     },
 #if 0
     {
       "bios", 1, 0, UCON64_BIOS,
-      "BIOS", "enable backup in Doctor V64 BIOS"
+      "BIOS", "enable backup in Doctor V64 BIOS",
+      NULL
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
@@ -169,58 +196,6 @@ static st_n64_chksum_t n64crc;
 static int n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename);
 
 
-static int
-wswap32_n (void *buffer, int n)
-// wswap32() n/2 words of buffer
-{
-  int i = n;
-  uint32_t *l = (uint32_t *) buffer;
-
-  i >>= 1;                                      // # words = # bytes / 2
-  for (; i > 1; i -= 2, l++)
-    *l = wswap_32 (*l);
-
-  return n;                                     // return # of bytes swapped
-}
-
-
-#define UCON64_BSWAP16 0
-#define UCON64_WSWAP32 1
-
-
-static int
-ucon64_swap (const char *filename, size_t start, size_t len, int mode)
-{
-#warning TEST ucon64_swap()
-  FILE *fh = NULL;
-  size_t pos = start;
-  int result = 0;
-  char buf[MAXBUFSIZE];
-
-  if (!(fh = fopen (filename, "r+b")))
-    return -1;
-
-  fseek (fh, start, SEEK_SET);
-  while ((result = fread (buf, 1, MAXBUFSIZE, fh)))
-    {
-      fseek (fh, pos, SEEK_CUR);
-
-      if (mode == UCON64_BSWAP16)
-        bswap16_n ((void *) buf, result);
-      else if (mode == UCON64_WSWAP32)
-        wswap32_n ((void *) buf, result);
-
-      fwrite (buf, 1, MAXBUFSIZE, fh);
-
-      pos += result;
-    }
-
-  fclose (fh);
-
-  return 0;
-}
-
-
 int
 n64_v64 (st_ucon64_nfo_t *rominfo)
 {
@@ -236,7 +211,7 @@ n64_v64 (st_ucon64_nfo_t *rominfo)
   set_suffix (dest_name, ".v64");
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_swap (dest_name, 0, ucon64.file_size, UCON64_BSWAP16);
+  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -258,7 +233,7 @@ n64_z64 (st_ucon64_nfo_t *rominfo)
   set_suffix (dest_name, ".z64");
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_swap (dest_name, 0, ucon64.file_size, UCON64_BSWAP16);
+  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -266,16 +241,15 @@ n64_z64 (st_ucon64_nfo_t *rominfo)
 
 
 int
-n64_n (st_ucon64_nfo_t *rominfo)
+n64_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   char buf[N64_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, ' ', N64_NAME_LEN);
   strncpy (buf, name, strlen (name) > N64_NAME_LEN ? N64_NAME_LEN : strlen (name));
 
   if (rominfo->interleaved)
-    bswap16_n (buf, N64_NAME_LEN);
+    ucon64_bswap16_n (buf, N64_NAME_LEN);
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -283,6 +257,16 @@ n64_n (st_ucon64_nfo_t *rominfo)
   ucon64_fwrite (buf, rominfo->backup_header_len + 32, N64_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}
+
+
+int
+n64_f (st_ucon64_nfo_t *rominfo)
+{
+  // TODO: PAL/NTSC fix
+  (void) rominfo;                               // warning remover
+  fputs ("ERROR: The function for cracking N64 region protections is not yet implemented\n", stderr);
   return 0;
 }
 
@@ -301,7 +285,7 @@ n64_update_chksum (st_ucon64_nfo_t *rominfo, const char *filename, char *buf)
       crc <<= 8;
     }
   if (rominfo->interleaved)
-    bswap16_n (buf, 8);
+    ucon64_bswap16_n (buf, 8);
   ucon64_fwrite (buf, rominfo->backup_header_len + 16, 8, filename, "r+b");
 }
 
@@ -316,7 +300,7 @@ n64_chk (st_ucon64_nfo_t *rominfo)
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   n64_update_chksum (rominfo, dest_name, buf);
-  dumper (stdout, buf, 8, rominfo->backup_header_len + 16, 0);
+  dumper (stdout, buf, 8, rominfo->backup_header_len + 16, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -324,11 +308,10 @@ n64_chk (st_ucon64_nfo_t *rominfo)
 
 
 int
-n64_sram (st_ucon64_nfo_t *rominfo)
+n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
 // Function to insert an SRAM file in LaC's SRAM upload tool (which is an N64
 //  program)
 {
-  const char *sramfile = ucon64.optarg;
   char sram[N64_SRAM_SIZE], dest_name[FILENAME_MAX], buf[8];
 
   if (access (sramfile, F_OK))
@@ -347,7 +330,7 @@ n64_sram (st_ucon64_nfo_t *rominfo)
   ucon64_fread (sram, 0, N64_SRAM_SIZE, sramfile);
 
   if (rominfo->interleaved)
-    bswap16_n (sram, N64_SRAM_SIZE);
+    ucon64_bswap16_n (sram, N64_SRAM_SIZE);
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -362,9 +345,8 @@ n64_sram (st_ucon64_nfo_t *rominfo)
 
 
 int
-n64_bot (st_ucon64_nfo_t *rominfo)
+n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
 {
-  const char *bootfile = ucon64.optarg;
   char buf[N64_BC_SIZE], dest_name[FILENAME_MAX];
 
   if (!access (bootfile, F_OK))
@@ -373,7 +355,7 @@ n64_bot (st_ucon64_nfo_t *rominfo)
       ucon64_fread (buf, 0, N64_BC_SIZE, bootfile);
 
       if (rominfo->interleaved)
-        bswap16_n (buf, N64_BC_SIZE);
+        ucon64_bswap16_n (buf, N64_BC_SIZE);
 
       ucon64_file_handler (dest_name, NULL, 0);
       fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
@@ -385,11 +367,11 @@ n64_bot (st_ucon64_nfo_t *rominfo)
       strcpy (dest_name, bootfile);
 //      set_suffix (dest_name, ".bot");
       ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-
-      fcopy (ucon64.fname, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE, dest_name, "wb");
+      fcopy (ucon64.fname, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE,
+             dest_name, "wb");
 
       if (rominfo->interleaved)
-        ucon64_swap (dest_name, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE, UCON64_BSWAP16);
+        ucon64_fbswap16 (dest_name, 0, fsizeof (dest_name));
     }
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -398,9 +380,8 @@ n64_bot (st_ucon64_nfo_t *rominfo)
 
 
 int
-n64_usms (st_ucon64_nfo_t *rominfo)
+n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
 {
-  const char *smsrom = ucon64.optarg;
   char dest_name[FILENAME_MAX], *usmsbuf;
   int size;
 
@@ -428,7 +409,7 @@ n64_usms (st_ucon64_nfo_t *rominfo)
   ucon64_fread (usmsbuf, 0, size, smsrom);
 
   if (rominfo->interleaved)
-    bswap16_n (usmsbuf, size);
+    ucon64_bswap16_n (usmsbuf, size);
 
   // Jos Kwanten's rominserter.exe produces a file named Patched.v64
   strcpy (dest_name, "Patched.v64");
@@ -491,7 +472,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
       "Australia", NULL, NULL, "France, Germany, The Netherlands", NULL // Holland is an incorrect name for The Netherlands
     };
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
 
   ucon64_fread (&n64_header, rominfo->backup_header_len, N64_HEADER_LEN, ucon64.fname);
 
@@ -518,7 +499,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
   else
     result = -1;
 
-  if (ucon64.interleaved != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.interleaved))
     rominfo->interleaved = ucon64.interleaved;
   if (ucon64.console == UCON64_N64)
     result = 0;
@@ -531,21 +512,19 @@ n64_init (st_ucon64_nfo_t *rominfo)
   // internal ROM name
   strncpy (rominfo->name, (char *) &OFFSET (n64_header, 32), N64_NAME_LEN);
   if (rominfo->interleaved)
-    bswap16_n (rominfo->name, N64_NAME_LEN);
+    ucon64_bswap16_n (rominfo->name, N64_NAME_LEN);
   rominfo->name[N64_NAME_LEN] = 0;
 
   // ROM maker
-  rominfo->maker = n64_maker[MIN (OFFSET (n64_header, 59 ^ rominfo->interleaved), N64_MAKER_MAX - 1)] ?
-                   n64_maker[MIN (OFFSET (n64_header, 59 ^ rominfo->interleaved), N64_MAKER_MAX - 1)] :
-                   ucon64_msg[UNKNOWN_MSG];
+  rominfo->maker = NULL_TO_UNKNOWN_S (n64_maker[MIN (OFFSET
+    (n64_header, 59 ^ rominfo->interleaved), N64_MAKER_MAX - 1)]);
 
   // ROM country
-  rominfo->country = n64_country[MIN (OFFSET (n64_header, 63 ^ (!rominfo->interleaved)), N64_COUNTRY_MAX - 1)] ?
-                     n64_country[MIN (OFFSET (n64_header, 63 ^ (!rominfo->interleaved)), N64_COUNTRY_MAX - 1)] :
-                     ucon64_msg[UNKNOWN_MSG];
+  rominfo->country = NULL_TO_UNKNOWN_S (n64_country[MIN (OFFSET
+    (n64_header, 63 ^ (!rominfo->interleaved)), N64_COUNTRY_MAX - 1)]);
 
   // CRC stuff
-  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 4;
@@ -629,10 +608,10 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
       ucon64_fread (crc32_mem, rominfo->backup_header_len, n, filename);
       if (!rominfo->interleaved)
         {
-          ucon64.fcrc32 = crc32_wrap (0, crc32_mem, n);
-          bswap16_n (crc32_mem, n);
+          ucon64.fcrc32 = crc32 (0, crc32_mem, n);
+          ucon64_bswap16_n (crc32_mem, n);
         }
-      ucon64.crc32 = crc32_wrap (0, crc32_mem, n);
+      ucon64.crc32 = crc32 (0, crc32_mem, n);
       free (crc32_mem);
 #endif
       return -1;                                // ROM is too small
@@ -659,19 +638,19 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
   if (!rominfo->interleaved)
     {
-      fcrc32 = crc32_wrap (0, crc32_mem, CHECKSUM_START);
-      bswap16_n (crc32_mem, CHECKSUM_START);
+      fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
+      ucon64_bswap16_n (crc32_mem, CHECKSUM_START);
     }
   else
-    bswap16_n (bootcode_buf, N64_BC_SIZE);
-  scrc32 = crc32_wrap (0, crc32_mem, CHECKSUM_START);
+    ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
+  scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
 #else
   fseek (file, rominfo->backup_header_len + N64_HEADER_LEN, SEEK_SET);
   fread (bootcode_buf, 1, N64_BC_SIZE, file);
   if (rominfo->interleaved)
-    bswap16_n (bootcode_buf, N64_BC_SIZE);
+    ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
 #endif
-  n = crc32_wrap (0, bootcode_buf, N64_BC_SIZE);
+  n = crc32 (0, bootcode_buf, N64_BC_SIZE);
   if (n == 0x0b050ee0)
     {
       bootcode = 6103;
@@ -710,10 +689,10 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
               if (!rominfo->interleaved)
                 {
                   memcpy (crc32_mem, chunk, n);
-                  fcrc32 = crc32_wrap (fcrc32, crc32_mem, n);
-                  bswap16_n (crc32_mem, n);
+                  fcrc32 = crc32 (fcrc32, crc32_mem, n);
+                  ucon64_bswap16_n (crc32_mem, n);
                 }
-              scrc32 = crc32_wrap (scrc32, crc32_mem, n);
+              scrc32 = crc32 (scrc32, crc32_mem, n);
 #endif
             }
         }
@@ -783,10 +762,10 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     {
       if (!rominfo->interleaved)
         {
-          fcrc32 = crc32_wrap (fcrc32, crc32_mem, n);
-          bswap16_n (crc32_mem, n);
+          fcrc32 = crc32 (fcrc32, crc32_mem, n);
+          ucon64_bswap16_n (crc32_mem, n);
         }
-      scrc32 = crc32_wrap (scrc32, crc32_mem, n);
+      scrc32 = crc32 (scrc32, crc32_mem, n);
     }
 
   ucon64.crc32 = scrc32;
@@ -795,41 +774,5 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 #endif
 
   fclose (file);
-  return 0;
-}
-
-
-int
-n64_swap (st_ucon64_nfo_t *rominfo)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  strcpy (src_name, ucon64.fname);
-  strcpy (dest_name, ucon64.fname);
-
-  puts ("Converting file...");
-  ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_swap (dest_name, 0, ucon64.file_size, UCON64_BSWAP16);
-  printf (ucon64_msg[WROTE], dest_name);
-
-  return 0;
-}
-
-
-int
-n64_swap2 (st_ucon64_nfo_t *rominfo)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  strcpy (src_name, ucon64.fname);
-  strcpy (dest_name, ucon64.fname);
-
-  puts ("Converting file...");
-  ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_swap (dest_name, 0, ucon64.file_size, UCON64_WSWAP32);
-  printf (ucon64_msg[WROTE], dest_name);
-
   return 0;
 }

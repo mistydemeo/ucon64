@@ -32,6 +32,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/bswap.h"
 #include "misc/file.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -40,50 +43,67 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "lynx.h"
 
 
+static st_ucon64_obj_t lynx_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_LYNX, WF_SWITCH},
+    {UCON64_LYNX, WF_DEFAULT}
+  };
+
 const st_getopt2_t lynx_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Handy (prototype)/Lynx/Lynx II"/*"1987 Epyx/1989 Atari/1991 Atari"*/
+      NULL, "Handy (prototype)/Lynx/Lynx II"/*"1987 Epyx/1989 Atari/1991 Atari"*/,
+      NULL
     },
     {
       UCON64_LYNX_S, 0, 0, UCON64_LYNX,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &lynx_obj[1]
     },
     {
       "lyx", 0, 0, UCON64_LYX,
-      NULL, "convert to LYX/RAW (strip 64 Bytes LNX header)"
+      NULL, "convert to LYX/RAW (strip 64 Bytes LNX header)",
+      &lynx_obj[2]
     },
     {
       "lnx", 0, 0, UCON64_LNX,
       NULL, "convert to LNX (uses default values for the header);\n"
-      "adjust the LNX header with the following options"
+      "adjust the LNX header with the following options",
+      &lynx_obj[2]
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)"
+      "NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)",
+      &lynx_obj[0]
     },
     {
       "nrot", 0, 0, UCON64_NROT,
-      NULL, "set no rotation (LNX only)"
+      NULL, "set no rotation (LNX only)",
+      &lynx_obj[2]
     },
     {
       "rotl", 0, 0, UCON64_ROTL,
-      NULL, "set rotation left (LNX only)"
+      NULL, "set rotation left (LNX only)",
+      &lynx_obj[2]
     },
     {
       "rotr", 0, 0, UCON64_ROTR,
-      NULL, "set rotation right (LNX only)"
+      NULL, "set rotation right (LNX only)",
+      &lynx_obj[2]
     },
     {
       "b0", 1, 0, UCON64_B0,
-      "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)"
+      "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)",
+      &lynx_obj[2]
     },
     {
       "b1", 1, 0, UCON64_B1,
-      "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)"
+      "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)",
+      &lynx_obj[2]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 const char *lynx_lyx_desc = "convert to LYX/RAW (strip 64 Bytes LNX header)";
@@ -210,9 +230,8 @@ lynx_rotr (st_ucon64_nfo_t *rominfo)
 
 
 int
-lynx_n (st_ucon64_nfo_t *rominfo)
+lynx_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
 
@@ -273,17 +292,15 @@ lynx_b (st_ucon64_nfo_t *rominfo, int bank, const char *value)
 
 
 int
-lynx_b0 (st_ucon64_nfo_t *rominfo)
+lynx_b0 (st_ucon64_nfo_t *rominfo, const char *value)
 {
-  const char *value = ucon64.optarg;
   return lynx_b (rominfo, 0, value);
 }
 
 
 int
-lynx_b1 (st_ucon64_nfo_t *rominfo)
+lynx_b1 (st_ucon64_nfo_t *rominfo, const char *value)
 {
-  const char *value = ucon64.optarg;
   return lynx_b (rominfo, 1, value);
 }
 
@@ -306,11 +323,10 @@ lynx_init (st_ucon64_nfo_t *rominfo)
 
   if (!strncmp (lnx_header.magic, "LYNX", 4))
     {
-      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                                   ucon64.backup_header_len :
-                                   (int) LNX_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+        ucon64.backup_header_len : (int) LNX_HEADER_LEN;
 
-      if (ucon64.backup_header_len != UCON64_UNKNOWN && !ucon64.backup_header_len)
+      if (UCON64_ISSET (ucon64.backup_header_len) && !ucon64.backup_header_len)
         return ucon64.console == UCON64_LYNX ? 0 : result;
 
       ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.fname);

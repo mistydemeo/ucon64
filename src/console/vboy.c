@@ -27,29 +27,37 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console.h"
 #include "backup/backup.h"
-#include "nintendo.h"
 #include "vboy.h"
 
+
+static st_ucon64_obj_t vboy_obj[] =
+  {
+    {UCON64_VBOY, WF_SWITCH}
+  };
 
 const st_getopt2_t vboy_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Nintendo Virtual Boy"/*"19XX Nintendo http://www.nintendo.com"*/
+      NULL, "Nintendo Virtual Boy"/*"19XX Nintendo http://www.nintendo.com"*/,
+      NULL
     },
     {
       UCON64_VBOY_S, 0, 0, UCON64_VBOY,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &vboy_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -91,7 +99,7 @@ vboy_init (st_ucon64_nfo_t *rominfo)
     {
       result = 0;
 
-      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
         ucon64.backup_header_len : 0;
 
       rominfo->header_start = VBOY_HEADER_START - rominfo->backup_header_len;
@@ -114,9 +122,7 @@ vboy_init (st_ucon64_nfo_t *rominfo)
       }
       if (value < 0 || value >= NINTENDO_MAKER_LEN)
         value = 0;
-      rominfo->maker = nintendo_maker[value] ?
-                       nintendo_maker[value] :
-                       ucon64_msg[UNKNOWN_MSG];
+      rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[value]);
 
       // ROM country
       rominfo->country =

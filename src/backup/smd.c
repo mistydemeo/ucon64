@@ -28,6 +28,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include "misc/misc.h"
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
 #include "ucon64.h"
@@ -36,25 +39,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smd.h"
 
 
+static st_ucon64_obj_t smd_obj[] =
+  {
+    {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
+    {UCON64_GEN, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t smd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Com Pro/Super Magic Drive/SMD"/*"19XX Front Far East/FFE http://www.front.com.tw"*/
+      NULL, "Super Com Pro/Super Magic Drive/SMD"/*"19XX Front Far East/FFE http://www.front.com.tw"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xsmd", 0, 0, UCON64_XSMD,
       NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist"
+      "receives automatically when ROM does not exist",
+      &smd_obj[0]
     },
     {
       "xsmds", 0, 0, UCON64_XSMDS,
       NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist"
+      "receives automatically when SRAM does not exist",
+      &smd_obj[1]
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

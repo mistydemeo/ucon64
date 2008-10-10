@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define F_OK 00
 #endif
 #endif
+#include "file.h"
 #include "getopt.h"                             // struct option
 #include "getopt2.h"
 #include "string.h"
@@ -87,7 +88,7 @@ getopt2_sanity_check_output (st_getopt2_t *p)
 void
 getopt2_sanity_check (const st_getopt2_t *option)
 {
-  int x = 0, y = 0, c = 0;
+  int x, y = 0;
 
   for (x = 0; option[x].name || option[x].help; x++)
     if (option[x].name)
@@ -100,103 +101,9 @@ getopt2_sanity_check (const st_getopt2_t *option)
                 fprintf (stderr, "ERROR: getopt2_sanity_check(): found dupe %s%s with different has_arg, or val\n",
                   option[x].name[1] ? OPTION_LONG_S : OPTION_S, option[x].name);
               }
-
-#if 0
-  // how many options (incl. dupes) do we have?
-  for (x = y = 0; options[x].name || options[x].help; x++)
-    if (options[x].name)
-      y++;
-  printf ("DEBUG: Total options (with dupes): %d\n", y);
-  printf ("DEBUG: UCON64_MAX_ARGS == %d, %s\n", UCON64_MAX_ARGS,
-    (y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options"));
-#endif
-
-#if 0
-  // list all options as a single st_getopt2_t array
-  for (x = 0; options[x].name || options[x].help; x++)
-    if (options[x].name)
-      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-#endif
-
-#if 0
-  // how many consoles does uCON64 support?
-  for (x = y = 0; options[x].name || options[x].help; x++)
-    if (options[x].name && options[x].object)
-      if (options[x].val == ((st_ucon64_obj_t *) options[x].object)->console)
-        getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-#endif
-
-#if 0
-  // find options without an object (allowed)
-  for (x = 0; options[x].name || options[x].help; x++)
-    if (options[x].name && !options[x].object)
-      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-#endif
-
-#if 0
-  // find options without a console (allowed)
-  for (x = 0; options[x].name || options[x].help; x++)
-    if (options[x].name && !((st_ucon64_obj_t *) options[x].object)->console)
-      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-#endif
-
-#if 0
-  // find options without a workflow (allowed)
-  for (x = 0; options[x].name || options[x].help; x++)
-    if (options[x].name && !((st_ucon64_obj_t *) options[x].object)->flags)
-      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-#endif
-
-#if 0
-  // find options without a val (NOT allowed)
-  for (x = 0; options[x].name || options[x].help; x++)
-    if (options[x].name && !options[x].val)
-      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-#endif
-
-#if 0
-  // find options with has_arg but without arg_name AND/OR usage
-  // hidden options without arg_name AND usage are allowed
-  for (x = 0; options[x].name || options[x].help; x++)
-    if (options[x].name &&
-        ((!options[x].has_arg && options[x].arg_name) ||
-         (options[x].has_arg && !options[x].arg_name) ||
-         !options[x].help))
-      getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-#endif
-
-#if 0
-  // find dupe (NOT a problem) options that have different values for val,
-  // flag, and/or object (NOT allowed)
-  // getopt1() will always use the 1st option in the array
-  // (st_getopt2_t *)->arg_name and (st_getopt2_t *)->help can be as
-  // different as you like
-  for (x = 0; options[x].name || options[x].help; x++)
-    if (options[x].name)
-      for (y = 0; options[y].name || options[y].help; y++)
-        if (options[y].name && x != y) // IS option
-          if (!strcmp (options[y].name, options[x].name))
-            if (options[y].has_arg != options[x].has_arg || // (NOT allowed)
-                options[y].flag != options[x].flag || // (NOT allowed)
-                options[y].val != options[x].val || // (NOT allowed)
-//                options[y].arg_name != options[x].arg_name || // (allowed)
-//                options[y].help != options[x].help || // (allowed)
-                ((st_ucon64_obj_t *) options[y].object)->console != ((st_ucon64_obj_t *) options[x].object)->console // (NOT allowed)
-                ((st_ucon64_obj_t *) options[x].object)->flags != ((st_ucon64_obj_t *) options[x].object)->flags) // (NOT allowed)
-              {
-                fputs ("ERROR: different dupe options found\n  ", stdout);
-                getopt2_sanity_check_output ((st_getopt2_t *) &options[x]);
-                fputs ("  ", stdout);
-                getopt2_sanity_check_output ((st_getopt2_t *) &options[y]);
-                fputs ("\n\n", stdout);
-              }
-#endif
-  fflush (stdout);
 }
-#endif  // DEBUG
 
 
-#if 0
 void
 getopt2_parse_usage (const char *usage_output)
 // parse usage output into st_getopt2_t array (for development)
@@ -302,7 +209,7 @@ getopt2_usage_code (const st_getopt2_t *usage)
         (int) usage[i].object);
     }
 }
-#endif // #if 0
+#endif // DEBUG
 
 
 void
@@ -320,10 +227,10 @@ getopt2_usage (const st_getopt2_t *usage)
               // long or short name?
               (usage[i].name[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
               usage[i].name,
-              (usage[i].arg_name && usage[i].has_arg == 2) ? "[" : "", // == 2 arg is optional
+              usage[i].has_arg == 2 ? "[" : "", // == 2 arg is optional
               usage[i].arg_name ? OPTARG_S : "",
               usage[i].arg_name ? usage[i].arg_name : "",
-              (usage[i].arg_name && usage[i].has_arg == 2) ? "]" : ""); // == 2 arg is optional
+              usage[i].has_arg == 2 ? "]" : ""); // == 2 arg is optional
 
             if (strlen (buf) < 16)
               {
@@ -453,6 +360,141 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
 }
 
 
+static int
+getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
+                        int *calls, int flags)
+{
+  char path[FILENAME_MAX];
+  struct stat fstate;
+
+  if (strlen (fname) >= FILENAME_MAX - 2)
+    return 0;
+
+  realpath2 (fname, path);
+
+  /*
+    Try to get file status information only if the file with name fname exists.
+    If the file does not exist I set st_mode to 0 instead of __S_IFREG, because I
+    don't know if the latter is portable. - dbjh
+  */
+  if (access (path, F_OK) == 0)
+    {
+      if (stat (path, &fstate) != 0)
+        return 0;
+    }
+  else
+    fstate.st_mode = 0;
+
+  /*
+    We test whether fname is a directory, because we handle directories
+    differently. The callback function should test whether its argument is a
+    regular file, a character special file, a block special file, a FIFO
+    special file, a symbolic link or a socket. If the flags
+    GETOPT2_FILE_FILES_ONLY, GETOPT2_FILE_RECURSIVE and
+    GETOPT2_FILE_RECURSIVE_ONCE were not used by the calling function, it may
+    also have to test whether the argument is a directory.
+  */
+  if (S_ISDIR (fstate.st_mode) ?
+        !(flags & (GETOPT2_FILE_FILES_ONLY |
+                   GETOPT2_FILE_RECURSIVE |
+                   GETOPT2_FILE_RECURSIVE_ONCE)) :
+        1)                                      // everything else: call callback
+    {
+      int result = 0; 
+
+#ifdef  DEBUG
+      printf ("callback_func() == %s\n", path);
+      fflush (stdout);
+#endif
+
+      result = callback_func (path);
+
+      if (!result)
+        (*calls)++;
+
+      return result;
+    }
+
+  if (S_ISDIR (fstate.st_mode) &&
+      (flags & (GETOPT2_FILE_RECURSIVE | GETOPT2_FILE_RECURSIVE_ONCE)))
+    {
+      int result = 0; 
+#ifndef _WIN32
+      struct dirent *ep;
+      DIR *dp;
+#else
+      char search_pattern[FILENAME_MAX];
+      WIN32_FIND_DATA find_data;
+      HANDLE dp;
+#endif
+      char buf[FILENAME_MAX], *p;
+
+#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
+      char c = toupper (path[0]);
+      if (path[strlen (path) - 1] == FILE_SEPARATOR ||
+          (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == 0))
+#else
+      if (path[strlen (path) - 1] == FILE_SEPARATOR)
+#endif
+        p = "";
+      else
+        p = FILE_SEPARATOR_S;
+
+#ifndef _WIN32
+      if ((dp = opendir (path)))
+        {
+          while ((ep = readdir (dp)))
+            if (strcmp (ep->d_name, ".") != 0 &&
+                strcmp (ep->d_name, "..") != 0)
+              {
+                sprintf (buf, "%s%s%s", path, p, ep->d_name);
+                result = getopt2_file_recursion (buf, callback_func, calls,
+                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
+                if (result != 0)
+                  break;
+              }
+          closedir (dp);
+        }
+#else
+      sprintf (search_pattern, "%s%s*", path, p);
+      if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
+        {
+          do
+            if (strcmp (find_data.cFileName, ".") != 0 &&
+                strcmp (find_data.cFileName, "..") != 0)
+              {
+                sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
+                result = getopt2_file_recursion (buf, callback_func, calls,
+                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
+                if (result != 0)
+                  break;
+              }
+          while (FindNextFile (dp, &find_data));
+          FindClose (dp);
+        }
+#endif
+    }
+
+  return 0;
+}
+
+
+int
+getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int flags)
+{
+  int x = optind, calls = 0, result = 0;
+
+  for (; x < argc; x++)
+    {
+      result = getopt2_file_recursion (argv[x], callback_func, &calls, flags);
+      if (result != 0)
+        break;
+    }
+
+  return calls;
+}
+
+
 #if TEST
 // compile with -DTEST to build an executable
 
@@ -562,4 +604,4 @@ main (int argc, char **argv)
 
   exit (0);
 }
-#endif
+#endif // TEST

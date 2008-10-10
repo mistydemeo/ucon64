@@ -27,57 +27,74 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "misc/itypes.h"
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/property.h"
 #include "misc/string.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "dc.h"
 
 
+static st_ucon64_obj_t dc_obj[] =
+  {
+    {UCON64_DC, WF_SWITCH},
+    {UCON64_DC, WF_DEFAULT},
+    {UCON64_DC, WF_NO_ROM}
+  };
+
 const st_getopt2_t dc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Dreamcast" /* "1998 SEGA http://www.sega.com" */
+      NULL, "Dreamcast" /* "1998 SEGA http://www.sega.com" */,
+      NULL
     },
     {
       UCON64_DC_S, 0, 0, UCON64_DC,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &dc_obj[0]
     },
 #if 0
     {
       "vms", 1, 0, UCON64_VMS,
-      "SAV", "convert NES SAV file to a VMS file for use with NesterDC"
+      "SAV", "convert NES SAV file to a VMS file for use with NesterDC",
+      NULL
     },
 #endif
     {
       "scr", 0, 0, UCON64_SCR,
-      NULL, "scramble 1ST_READ.BIN for selfboot CDs"
+      NULL, "scramble 1ST_READ.BIN for selfboot CDs",
+      &dc_obj[1]
     },
     {
       "unscr", 0, 0, UCON64_UNSCR,
-      NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs"
+      NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs",
+      &dc_obj[1]
     },
 #if 0
     {
       "ip", 1, 0, UCON64_IP,
-      "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"
+      "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE",
+      NULL
     },
 #endif
     {
       "mkip", 0, 0, UCON64_MKIP,
-      NULL, "generate IP.BIN file with default values"
+      NULL, "generate IP.BIN file with default values",
+      &dc_obj[2]
     },
     {
       "parse", 1, 0, UCON64_PARSE,
       "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
-      "creates an empty template when TEMPLATE does not exist"
+      "creates an empty template when TEMPLATE does not exist",
+      &dc_obj[2]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -389,9 +406,8 @@ parse_templ (const char *templ_file, char *ip)
 
 
 int
-dc_parse_fname (st_ucon64_nfo_t *rominfo, const char *templ_file)
+dc_parse (const char *templ_file)
 {
-  (void) rominfo;
   char ip[0x8000], dest_name[FILENAME_MAX];
 
   if (access (templ_file, F_OK) == -1)
@@ -422,16 +438,11 @@ dc_parse_fname (st_ucon64_nfo_t *rominfo, const char *templ_file)
 
 
 int
-dc_parse (st_ucon64_nfo_t *rominfo)
+dc_mkip (void)
 {
-  return dc_parse_fname (rominfo, ucon64.optarg);
-}
+  dc_parse ("default");
 
-
-int
-dc_mkip (st_ucon64_nfo_t *rominfo)
-{
-  return dc_parse_fname (rominfo, "default");
+  return 0;
 }
 
 
@@ -614,9 +625,8 @@ scramble (const char *src, char *dst)
 
 
 int
-dc_scramble (st_ucon64_nfo_t *rominfo)
+dc_scramble (void)
 {
-  (void) rominfo;
   char dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.fname);
@@ -631,9 +641,8 @@ dc_scramble (st_ucon64_nfo_t *rominfo)
 
 
 int
-dc_unscramble (st_ucon64_nfo_t *rominfo)
+dc_unscramble (void)
 {
-  (void) rominfo;
   char dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.fname);

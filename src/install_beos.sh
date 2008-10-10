@@ -15,6 +15,11 @@ if [ "$areply" ==  "Install" ]; then
   if [ ! -e "$HOME/.ucon64/dat" ]; then
     mkdir "$HOME/.ucon64/dat"
   fi
+  if [ -f libdiscmage/discmage.so ]; then
+    cp libdiscmage/discmage.so "$HOME/.ucon64"
+  elif [ -f discmage.so ]; then
+    cp discmage.so "$HOME/.ucon64"
+  fi
   # ask for ioport driver installation
   drreply=$(alert "In order to communicate with a backup device (\"copier\") uCON64 needs the BeOS ioport driver by Caz Jones. You needn't install it if you don't want to use uCON64 for communicating with a copier.
 

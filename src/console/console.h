@@ -30,9 +30,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "lynx.h"
 #include "n64.h"
 #include "nds.h"
+#include "neogeo.h"
 #include "nes.h"
 #include "ngp.h"
 #include "pce.h"
+#include "psx.h"
 #include "sms.h"
 #include "snes.h"
 #include "swan.h"
@@ -66,18 +68,10 @@ extern const st_getopt2_t sat_usage[];
 extern const st_getopt2_t vc4000_usage[];
 extern const st_getopt2_t vectrex_usage[];
 extern const st_getopt2_t xbox_usage[];
-extern const st_getopt2_t psx_usage[];
-extern const st_getopt2_t neogeo_usage[];
 
 
-/*
-  ucon64_e()            emulator "frontend"
-*/
-extern int ucon64_console_demux (const char *fname);
-extern st_ucon64_nfo_t *ucon64_console_open (const char *fname, int console);
-extern int ucon64_console_close (st_ucon64_nfo_t * nfo);
+#define NINTENDO_MAKER_LEN 684
+extern const char *nintendo_maker[];
 
-extern int ucon64_e (st_ucon64_nfo_t *rominfo);
-extern void ucon64_rom_nfo (const st_ucon64_nfo_t *nfo);
 
 #endif // CONSOLE_H

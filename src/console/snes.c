@@ -35,14 +35,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/string.h"
-#include "misc/hash.h"
+#include "misc/chksum.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console.h"
 #include "snes.h"
-#include "nintendo.h"
 #include "backup/backup.h"
 
 
@@ -73,118 +75,159 @@ static void handle_nsrt_header (st_ucon64_nfo_t *rominfo, unsigned char *header,
                                 const char **snes_country);
 
 
+static st_ucon64_obj_t snes_obj[] =
+  {
+    {0, WF_SWITCH},
+    {0, WF_DEFAULT},
+    {0, WF_DEFAULT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_STOP},
+    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT},
+    {UCON64_SNES, WF_SWITCH},
+    {UCON64_SNES, WF_DEFAULT},
+    {UCON64_SNES, WF_DEFAULT | WF_NO_SPLIT},
+    {UCON64_SNES, WF_NO_ROM},
+    {UCON64_SNES, WF_INIT | WF_PROBE}
+  };
+
 const st_getopt2_t snes_usage[] =
   {
     {
       NULL, 0, 0, 0,
       NULL, "Super Nintendo Entertainment System/SNES/Super Famicom"
-      /*"1990 Nintendo http://www.nintendo.com"*/
+      /*"1990 Nintendo http://www.nintendo.com"*/,
+      NULL
     },
     {
       UCON64_SNES_S, 0, 0, UCON64_SNES,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &snes_obj[6]
     },
     {
       "hi", 0, 0, UCON64_HI,
-      NULL, "force ROM is HiROM"
+      NULL, "force ROM is HiROM",
+      &snes_obj[6]
     },
     {
       "nhi", 0, 0, UCON64_NHI,
-      NULL, "force ROM is not HiROM"
+      NULL, "force ROM is not HiROM",
+      &snes_obj[6]
     },
     {
       "erom", 0, 0, UCON64_EROM,
-      NULL, "force ROM is \"Extended\" (combine with -hi for Extended HiROM)"
+      NULL, "force ROM is \"Extended\" (combine with -hi for Extended HiROM)",
+      &snes_obj[6]
     },
 #if 0
     {
       "hd", 0, 0, UCON64_HD,
-      NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)"
+      NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)",
+      &snes_obj[0]
     },
     {
       "nhd", 0, 0, UCON64_NHD,
-      NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)"
+      NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)",
+      &snes_obj[0]
     },
     {
       "ns", 0, 0, UCON64_NS,
-      NULL, "force ROM is not split"
+      NULL, "force ROM is not split",
+      &snes_obj[0]
     },
 #endif
     {
       "int", 0, 0, UCON64_INT,
-      NULL, "force ROM is in interleaved format (GD3/UFO)"
+      NULL, "force ROM is in interleaved format (GD3/UFO)",
+      &snes_obj[0]
     },
     {
       "int2", 0, 0, UCON64_INT2,
-      NULL, "force ROM is in interleaved format 2 (SFX)"
+      NULL, "force ROM is in interleaved format 2 (SFX)",
+      &snes_obj[0]
     },
     {
       "nint", 0, 0, UCON64_NINT,
-      NULL, "force ROM is not in interleaved format"
+      NULL, "force ROM is not in interleaved format",
+      &snes_obj[0]
     },
     {
       "bs", 0, 0, UCON64_BS,
-      NULL, "force ROM is a Broadcast Satellaview dump"
+      NULL, "force ROM is a Broadcast Satellaview dump",
+      &snes_obj[6]
     },
     {
       "nbs", 0, 0, UCON64_NBS,
-      NULL, "force ROM is a regular cartridge dump"
+      NULL, "force ROM is a regular cartridge dump",
+      &snes_obj[6]
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME"
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      &snes_obj[1]
     },
     {
       "fig", 0, 0, UCON64_FIG,
-      NULL, "convert to *Pro Fighter*/FIG"
+      NULL, "convert to *Pro Fighter*/FIG",
+      &snes_obj[8]
     },
     {
       "figs", 0, 0, UCON64_FIGS,
-      NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/FIG"
+      NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/FIG",
+      &snes_obj[10]
     },
     {
       "gd3", 0, 0, UCON64_GD3,
-      NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"
+      NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)",
+      &snes_obj[8]
     },
 #if 0
 // the next switch remains undocumented until we know of a good checksum algorithm
     {
       "id", 0, 0, UCON64_ID,
-      NULL, "force -gd3 to produce a unique file name"
+      NULL, "force -gd3 to produce a unique file name",
+      &snes_obj[0]
     },
 #endif
     {
       "idnum", 1, 0, UCON64_IDNUM,
       "NUM", "make -gd3 produce file names where first file has numerical\n"
-      "identifier NUM, next NUM + 1, etc. "
+      "identifier NUM, next NUM + 1, etc. ",
+      &snes_obj[6]
     },
     {
       "gd3s", 0, 0, UCON64_GD3S,
-      NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*"
+      NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*",
+      &snes_obj[10]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game*/MGD2/MGH/RAW"
+      NULL, "convert to Multi Game*/MGD2/MGH/RAW",
+      &snes_obj[2]
     },
     {
       "smc", 0, 0, UCON64_SMC,
-      NULL, "convert to Super Magicom/SMC"
+      NULL, "convert to Super Magicom/SMC",
+      &snes_obj[8]
     },
     {
       "swc", 0, 0, UCON64_SWC,
-      NULL, "convert to Super Wild Card*/SWC"
+      NULL, "convert to Super Wild Card*/SWC",
+      &snes_obj[8]
     },
     {
       "swcs", 0, 0, UCON64_SWCS,
-      NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/SWC"
+      NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/SWC",
+      &snes_obj[10]
     },
     {
       "ufo", 0, 0, UCON64_UFO,
-      NULL, "convert to Super UFO"
+      NULL, "convert to Super UFO",
+      &snes_obj[8]
     },
     {
       "ufos", 0, 0, UCON64_UFOS,
-      NULL, "convert emulator *.srm (SRAM) to Super UFO"
+      NULL, "convert emulator *.srm (SRAM) to Super UFO",
+      &snes_obj[10]
     },
     {
       "ctrl", 1, 0, UCON64_CTRL,
@@ -192,7 +235,8 @@ const st_getopt2_t snes_usage[] =
       "TYPE=0 gamepad\n"
       "TYPE=1 mouse\n"
       "TYPE=2 mouse / gamepad\n"
-      "TYPE=6 multitap"
+      "TYPE=6 multitap",
+      &snes_obj[0]
     },
     {
       "ctrl2", 1, 0, UCON64_CTRL2,
@@ -204,76 +248,92 @@ const st_getopt2_t snes_usage[] =
       "TYPE=4 super scope / gamepad\n"
       "TYPE=5 Konami's justifier\n"
       "TYPE=6 multitap\n"
-      "TYPE=7 mouse / super scope / gamepad"
+      "TYPE=7 mouse / super scope / gamepad",
+      &snes_obj[6]
     },
     {
       "stp", 0, 0, UCON64_STP,
       NULL, "convert SRAM from backup unit for use with an emulator\n"
-      OPTION_LONG_S "stp just strips the first 512 bytes"
+      OPTION_LONG_S "stp just strips the first 512 bytes",
+      NULL
     },
     {
       "dbuh", 0, 0, UCON64_DBUH,
-      NULL, "display (relevant part of) backup unit header"
+      NULL, "display (relevant part of) backup unit header",
+      &snes_obj[7]
     },
     {
       "dint", 0, 0, UCON64_DINT,
-      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)"
+      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
+      &snes_obj[5]
     },
     {
       "col", 1, 0, UCON64_COL,
       "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)"
       /*"this routine was used to find green colors in games and\n"
-      "to replace them with red colors (blood mode)"*/
+      "to replace them with red colors (blood mode)"*/,
+      &snes_obj[9]
     },
     {
       "j", 0, 0, UCON64_J,
-      NULL, "join split ROM"
+      NULL, "join split ROM",
+      &snes_obj[3]
     },
     {
       "s", 0, 0, UCON64_S,
-      NULL, "split ROM; default part size is 8 Mb"
+      NULL, "split ROM; default part size is 8 Mb",
+      &snes_obj[2]
     },
     {
       "ssize", 1, 0, UCON64_SSIZE,
-      "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)"
+      "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)",
+      &snes_obj[0]
     },
 #if 0
     {
       "p", 0, 0, UCON64_P,
-      NULL, "pad ROM to full Mb"
+      NULL, "pad ROM to full Mb",
+      &snes_obj[1]
     },
 #endif
     {
       "k", 0, 0, UCON64_K,
-      NULL, "remove protection"
+      NULL, "remove protection (crack)",
+      &snes_obj[7]
     },
     {
       "f", 0, 0, UCON64_F,
-      NULL, "remove NTSC/PAL protection"
+      NULL, "remove NTSC/PAL protection",
+      &snes_obj[1]
     },
     {
       "l", 0, 0, UCON64_L,
-      NULL, "remove SlowROM checks"
+      NULL, "remove SlowROM checks",
+      &snes_obj[7]
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum"
+      NULL, "fix ROM checksum",
+      &snes_obj[1]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with Super Flash flash card,\n"
       "truncated to SIZE Mbit; file with loader must be specified\n"
-      "first, then all the ROMs, multi-game file to create last"
+      "first, then all the ROMs, multi-game file to create last",
+      &snes_obj[4]
     },
     {
       "dmirr", 0, 0, UCON64_DMIRR,
-      NULL, "\"de-mirror\" ROM (strip mirrored block from end of ROM)"
+      NULL, "\"de-mirror\" ROM (strip mirrored block from end of ROM)",
+      &snes_obj[7]
     },
     {
       "dnsrt", 0, 0, UCON64_DNSRT,
-      NULL, "\"de-NSRT\" ROM (restore name and checksum from NSRT header)"
+      NULL, "\"de-NSRT\" ROM (restore name and checksum from NSRT header)",
+      &snes_obj[7]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_snes_header
@@ -396,7 +456,7 @@ snes_get_file_type (void)
 
 
 int
-snes_col (st_ucon64_nfo_t *rominfo)
+snes_col (const char *color)
 /*
 The Nintendo Super Famicom is capable of displaying 256 colours from a
 palette of 32,768. These 256 colours are split into 8 palettes of 32 colours
@@ -431,7 +491,6 @@ Examples:
 Remember to load the lowest 8 bits first, then the top 7 bits.
 */
 {
-  const char *color = ucon64.optarg;
   int r, g, b;
   unsigned int col;
 
@@ -858,7 +917,7 @@ make_gd_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
 
   strcpy (dest_name, filename);
 
-  if (ucon64.id != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.id))
     {
       if (ucon64.id >= 0)
         // code for -idnum=NUM
@@ -1417,7 +1476,7 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
           fprintf (stderr, "ERROR: HiROM > 32 Mbit -- conversion not yet implemented\n");
           return;
         }
-      if (ucon64.part_size != UCON64_UNKNOWN)
+      if (UCON64_ISSET (ucon64.part_size))
         printf ("WARNING: Splitting Super UFO HiROM, ignoring switch "OPTION_LONG_S"ssize\n");
     }
 
@@ -1590,7 +1649,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
 {
   int size = ucon64.file_size - rominfo->backup_header_len, part_size;
 
-  if (ucon64.part_size != UCON64_UNKNOWN && !(type == GD3 || type == UFO))
+  if (UCON64_ISSET (ucon64.part_size) && !(type == GD3 || type == UFO))
     {
       part_size = ucon64.part_size;
       /*
@@ -1640,7 +1699,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
 
   if (!rominfo->backup_header_len || type == GD3)    // GD3 format
     {
-      if (ucon64.part_size != UCON64_UNKNOWN)
+      if (UCON64_ISSET (ucon64.part_size))
         printf ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize\n");
       snes_split_gd3 (rominfo, size);
     }
@@ -1844,7 +1903,6 @@ when it has been patched with -f.
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning fix snescopy.txt access
   strcpy (src_name, "snescopy.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -1854,7 +1912,7 @@ when it has been patched with -f.
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
 
-  puts ("Attempting protection fix...");
+  puts ("Attempting crack...");
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);
@@ -2001,7 +2059,6 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning fix snespal.txt access
   strcpy (src_name, "snespal.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2111,7 +2168,6 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning fix snesntsc.txt access
   strcpy (src_name, "snesntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2249,7 +2305,6 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-#warning fix snesslow.txt access
   strcpy (src_name, "snesslow.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
@@ -2323,9 +2378,8 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 
 
 int
-snes_n (st_ucon64_nfo_t *rominfo)
+snes_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->backup_header_len, header_start,
       name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
@@ -2383,7 +2437,7 @@ snes_chk (st_ucon64_nfo_t *rominfo)
     header_start = rominfo->header_start;
   ucon64_fwrite (buf, header_start + rominfo->backup_header_len + 44, 4, dest_name, "r+b");
 
-  dumper (stdout, buf, 4, header_start + rominfo->backup_header_len + 44, 0);
+  dumper (stdout, buf, 4, header_start + rominfo->backup_header_len + 44, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -2411,7 +2465,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   if (size < 64 * 1024)                         // snes_deinterleave() reads blocks of 32 kB
     return 0;                                   // file cannot be interleaved
 
-  crc = crc32_wrap (0, rom_buffer, 512);
+  crc = crc32 (0, rom_buffer, 512);
   /*
     Special case hell
 
@@ -2705,7 +2759,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
     }
 
   ucon64_fread (&header, 0, 512, ucon64.fname);
-  dumper (stdout, header, 48, 0, 0);   // show only the part that is
+  dumper (stdout, header, 48, 0, DUMPER_HEX);   // show only the part that is
   fputc ('\n', stdout);                         //  interpreted by copier
 
   if (type == SWC || type == FIG || type == SMC || type == UFO)
@@ -3016,7 +3070,7 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
             rominfo->backup_header_len = SWC_HEADER_LEN;
         }
     }
-  if (ucon64.backup_header_len != UCON64_UNKNOWN)       // -hd, -nhd or -hdn switch was specified
+  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn switch was specified
     {
       rominfo->backup_header_len = ucon64.backup_header_len;
       if (type == MGD_SNES && rominfo->backup_header_len)
@@ -3081,7 +3135,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
   */
 
   // step 3.
-  if (ucon64.snes_hirom != UCON64_UNKNOWN)         // -hi or -nhi switch was specified
+  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
     {
       snes_hirom = ucon64.snes_hirom;
       // keep snes_deinterleave() from changing snes_hirom
@@ -3090,7 +3144,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
         snes_hirom = 0;
     }
 
-  if (ucon64.snes_header_base != UCON64_UNKNOWN)   // -erom switch was specified
+  if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
     {
       snes_header_base = ucon64.snes_header_base;
       if (snes_header_base &&
@@ -3114,7 +3168,7 @@ snes_set_bs_dump (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, int size)
     causes the code to be skipped for Sufami Turbo dumps.
   */
   if (bs_dump &&
-      snes_header_base == SNES_EROM && (ucon64.snes_header_base == UCON64_UNKNOWN))
+      snes_header_base == SNES_EROM && !UCON64_ISSET (ucon64.snes_header_base))
     {
       bs_dump = 0;
       snes_header_base = 0;
@@ -3122,7 +3176,7 @@ snes_set_bs_dump (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, int size)
       rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
       memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
     }
-  if (ucon64.bs_dump != UCON64_UNKNOWN)            // -bs or -nbs switch was specified
+  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs switch was specified
     {
       bs_dump = ucon64.bs_dump;
       if (bs_dump && snes_header_base == SNES_EROM)
@@ -3226,7 +3280,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
 
   snes_handle_backup_header (rominfo, &header);      // step 1. & first part of step 2.
 
-  if (ucon64.split != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.split))
     snes_split = ucon64.split;
   else
     {
@@ -3246,12 +3300,12 @@ snes_init (st_ucon64_nfo_t *rominfo)
   if (size < (int) (SNES_HEADER_START + SNES_HEADER_LEN))
     {
       snes_hirom = 0;
-      if (ucon64.snes_hirom != UCON64_UNKNOWN)     // see snes_set_hirom()
+      if (UCON64_ISSET (ucon64.snes_hirom))     // see snes_set_hirom()
         snes_hirom = ucon64.snes_hirom;
       snes_hirom_ok = 1;
 
       rominfo->interleaved = 0;
-      if (ucon64.interleaved != UCON64_UNKNOWN)
+      if (UCON64_ISSET (ucon64.interleaved))
         rominfo->interleaved = ucon64.interleaved;
       return -1;                                // don't continue (seg faults!)
     }
@@ -3274,13 +3328,13 @@ snes_init (st_ucon64_nfo_t *rominfo)
   rominfo->header = &snes_header;
 
   // step 4.
-  rominfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : snes_testinterleaved (rom_buffer, size, x);
 
-  calc_checksums = (ucon64.do_not_calc_crc == UCON64_UNKNOWN) && result == 0;
+  calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
   // we want the CRC32 of the "raw" data (too)
   if (calc_checksums)
-    ucon64.fcrc32 = crc32_wrap (0, rom_buffer, size);
+    ucon64.fcrc32 = crc32 (0, rom_buffer, size);
 
   // bs_dump has to be set before calling snes_chksum(), but snes_check_bs()
   //  needs snes_header to be filled with the correct data
@@ -3346,12 +3400,12 @@ snes_init (st_ucon64_nfo_t *rominfo)
           */
           *bs_date_ptr = me2le_16 (0x0042);
           get_nsrt_info (rom_buffer, rominfo->header_start, (unsigned char *) &header);
-          ucon64.crc32 = crc32_wrap (0, rom_buffer, size);
+          ucon64.crc32 = crc32 (0, rom_buffer, size);
         }
       else if (rominfo->interleaved || nsrt_header)
         {
           get_nsrt_info (rom_buffer, rominfo->header_start, (unsigned char *) &header);
-          ucon64.crc32 = crc32_wrap (0, rom_buffer, size);
+          ucon64.crc32 = crc32 (0, rom_buffer, size);
         }
       else
         {
@@ -3400,14 +3454,12 @@ snes_init (st_ucon64_nfo_t *rominfo)
   if (x < 0 || x >= NINTENDO_MAKER_LEN)
     x = 0;
   rominfo->maker = snes_header.maker == 0 ? "Demo or Beta ROM?" :
-    (nintendo_maker[x] ? nintendo_maker[x] : ucon64_msg[UNKNOWN_MSG]);
+    NULL_TO_UNKNOWN_S (nintendo_maker[x]);
 
   if (!bs_dump)
     {
       // ROM country
-      rominfo->country = snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)] ?
-                         snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)] :
-                         ucon64_msg[UNKNOWN_MSG];
+      rominfo->country = NULL_TO_UNKNOWN_S (snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)]);
 
       // misc stuff
       pos += sprintf (rominfo->misc + pos, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
@@ -3793,7 +3845,7 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
   int score = 0, x, y;
 
 //  dumper (stdout, (char *) rom_buffer + SNES_HEADER_START + header_offset,
-//           SNES_HEADER_LEN, SNES_HEADER_START + header_offset, 0);
+//           SNES_HEADER_LEN, SNES_HEADER_START + header_offset, DUMPER_HEX);
 
   // game ID info (many games don't have useful info here)
   if (snes_isprint ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4))
@@ -3991,7 +4043,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
 
 
 int
-snes_multi_fname (int truncate_size, char *fname)
+snes_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
@@ -4046,9 +4098,9 @@ snes_multi_fname (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
+      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
                                        ucon64.backup_header_len : 0;
-      ucon64.nfo->interleaved = (ucon64.interleaved != UCON64_UNKNOWN) ?
+      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                                        ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (snes_init (ucon64.nfo) != 0)
@@ -4133,13 +4185,6 @@ snes_multi_fname (int truncate_size, char *fname)
   ucon64.do_not_calc_crc = org_do_not_calc_crc;
 
   return 0;
-}
-
-
-int
-snes_multi (st_ucon64_nfo_t *rominfo)
-{
-  return snes_multi_fname (strtol (ucon64.optarg, NULL, 10) * MBIT, NULL);
 }
 
 
@@ -4241,7 +4286,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
 {
   int x;
 
-  if (((ucon64.controller != UCON64_UNKNOWN) || (ucon64.controller2 != UCON64_UNKNOWN))
+  if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
       && !nsrt_header)                          // don't overwrite these values
     {
       if (rominfo->current_internal_crc != rominfo->internal_crc)
@@ -4266,7 +4311,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
       header[0x1ec] = NSRT_HEADER_VERSION;
     }
 
-  if (ucon64.controller != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.controller))
     {
       for (x = 0; x < 8; x++)
         if ((ucon64.controller >> x) & 1)
@@ -4278,7 +4323,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
         }
       header[0x1ed] = x << 4;
     }
-  if (ucon64.controller2 != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.controller2))
     {
       for (x = 0; x < 8; x++)
         if ((ucon64.controller2 >> x) & 1)
@@ -4292,7 +4337,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
     }
 
   // set the checksum bytes
-  if (ucon64.controller != UCON64_UNKNOWN || ucon64.controller2 != UCON64_UNKNOWN)
+  if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
     set_nsrt_checksum (header);
 }
 
@@ -4369,9 +4414,7 @@ handle_nsrt_header (st_ucon64_nfo_t *rominfo, unsigned char *header,
            "  Port 1 controller type: %s\n"
            "  Port 2 controller type: %s\n"
            "  Header version: %.1f",
-           (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)] ?
-            snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)] :
-            ucon64_msg[UNKNOWN_MSG]),
+           NULL_TO_UNKNOWN_S (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)]),
            name,
            header[0x1e6] + (header[0x1e7] << 8),
            str_list[ctrl1],

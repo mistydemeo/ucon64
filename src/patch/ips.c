@@ -29,9 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <string.h>
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -47,17 +49,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define DEBUG_IPS
 
 
+static st_ucon64_obj_t ips_obj[] =
+  {
+    {0, WF_STOP}
+  };
+
 const st_getopt2_t ips_usage[] =
   {
     {
       "i", 0, 0, UCON64_I,
-      NULL, "apply IPS PATCH to ROM (IPS<=v1.2)"
+      NULL, "apply IPS PATCH to ROM (IPS<=v1.2)",
+      &ips_obj[0]
     },
     {
       "mki", 1, 0, UCON64_MKI,
-      "ORG_ROM", "create IPS patch; ROM should be the modified ROM"
+      "ORG_ROM", "create IPS patch; ROM should be the modified ROM",
+      &ips_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 static FILE *orgfile, *modfile, *ipsfile, *destfile;
@@ -83,13 +92,13 @@ read_byte (FILE *file)
 static void
 remove_destfile (void)
 {
-  if (!destfname)
-    return;
-
-  printf ("Removing: %s\n", destfname);
-  fclose (destfile);                        // necessary under DOS/Win9x for DJGPP port
-  remove (destfname);
-  destfname = NULL;
+  if (destfname)
+    {
+      printf ("Removing: %s\n", destfname);
+      fclose (destfile);                        // necessary under DOS/Win9x for DJGPP port
+      remove (destfname);
+      destfname = NULL;
+    }
 }
 
 

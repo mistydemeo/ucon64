@@ -22,20 +22,41 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_DEFINES_H
 #define UCON64_DEFINES_H
 
+// Please make sure that NO definition except FALSE has 0 as value!
+#if     (!defined TRUE || !defined FALSE)
+#define FALSE 0
+#define TRUE (!FALSE)
+#endif
+
+#if     (!defined MIN || !defined MAX)
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef LIB_VERSION
+#define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
+#endif
+#define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
+//#define RANDOM(min, max) ((rand () % (max - min)) + min)
 #define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])
 
 #define UCON64_UNKNOWN (-1)
+#define UCON64_UNKNOWN_S "Unknown"
+#define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-#define UCON64_VERSION_S "2.0.1rc1"
+#define UCON64_VERSION_S "2.0.1"
 
-// version of config file layout
-#define UCON64_CONFIG_VERSION 209
+/* program version counter */
+//#define UCON64_VERSION 201
+
+/* version of config file layout */
+#define UCON64_CONFIG_VERSION 208
 
 #define MBIT 131072
 #define TOMBIT(x) ((int)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 
-//#define MAXROMSIZE (512 * MBIT)
+#define MAXROMSIZE (512 * MBIT)
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
@@ -44,83 +65,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // maximum number of arguments uCON64 takes from the cmdline
 #define UCON64_MAX_ARGS 512
 
-
-/*
-  uCON64 workflow flags
-
-  WF_DEMUX          identify console type of ROM
-                      returns NULL if ROM can't be identified
-  WF_OPEN           open ROM and read info
-                      returns NULL if ROM can't be identified
-
-  WF_NFO            output ROM info from WF_OPEN (before processing ROM)
-
-TODO:  WF_RO             option will access ROM or FILE in read-only mode
-  WF_NEEDS_ROM      option does NOT require a ROM
-  WF_NEEDS_CRC32    option does NOT require a CRC32 calculation
-  WF_NO_SPLIT       option does not work with split ROMs
-TODO:  WF_PAR            option requires a parallel port
-TODO:  WF_USB            option requires a USB port
-TODO:  WF_SERIAL         option requires a serial port
-  WF_EXIT           exit() uCON64 after this option ran once
-                      --multi (and --xfalmulti) takes more than one file as
-                      argument, but should be executed only once;
-                      stop after sending one ROM to a copier ("multizip");
-                      stop after applying a patch so that the patch file won't
-                      be interpreted as ROM
-*/
-#define WF_DEMUX        (1)
-#define WF_OPEN         (1<<1)
-#define WF_NFO          (1<<2)
-#define WF_RO           (1<<3)
-#define WF_NEEDS_ROM    (1<<4)
-#define WF_NEEDS_CRC32  (1<<5)
-#define WF_NO_SPLIT     (1<<6)
-//#define WF_PAR          (1<<7)
-//#define WF_USB          (1<<8)
-//#define WF_SERIAL       (1<<9)
-#define WF_EXIT         (1<<10)
+#define UCON64_OPTION 1000
+#define UCON64_CONSOLE 0
 
 
-// option strings (consoles)
-#define UCON64_3DO_S      "3do"
-#define UCON64_ATA_S      "ata"
-#define UCON64_CD32_S     "cd32"
-#define UCON64_CDI_S      "cdi"
-#define UCON64_COLECO_S   "coleco"
-#define UCON64_DC_S       "dc"
-#define UCON64_GB_S       "gb"
-#define UCON64_GBA_S      "gba"
-#define UCON64_GC_S       "gc"
-#define UCON64_GEN_S      "gen"
-#define UCON64_GP32_S     "gp32"
-#define UCON64_INTELLI_S  "intelli"
-#define UCON64_JAG_S      "jag"
-#define UCON64_LYNX_S     "lynx"
-#define UCON64_ARCADE_S   "arcade"
-#define UCON64_N64_S      "n64"
-#define UCON64_NDS_S      "nds"
-#define UCON64_NES_S      "nes"
-#define UCON64_NG_S       "ng"
-#define UCON64_NGP_S      "ngp"
-#define UCON64_PCE_S      "pce"
-#define UCON64_PS2_S      "ps2"
-#define UCON64_PSX_S      "psx"
-#define UCON64_S16_S      "s16"
-#define UCON64_SAT_S      "sat"
-#define UCON64_SMS_S      "sms"
-#define UCON64_GAMEGEAR_S "gamegear"
-#define UCON64_SNES_S     "snes"
-#define UCON64_SWAN_S     "swan"
-#define UCON64_VBOY_S     "vboy"
-#define UCON64_VEC_S      "vec"
-#define UCON64_XBOX_S     "xbox"
-
-
+// options (consoles)
 enum
 {
-// options (consoles)
-  UCON64_3DO = 1,
+  UCON64_3DO = UCON64_CONSOLE + 1,
   UCON64_ATA,
   UCON64_CD32,
   UCON64_CDI,
@@ -152,9 +104,49 @@ enum
   UCON64_SWAN,
   UCON64_VBOY,
   UCON64_VEC,
-  UCON64_XBOX,
-// the other options (start at 1000+1)
-  UCON64_1991 = 1001,
+  UCON64_XBOX
+};
+
+
+// option strings (consoles)
+#define UCON64_3DO_S      "3do"
+#define UCON64_ATA_S      "ata"
+#define UCON64_CD32_S     "cd32"
+#define UCON64_CDI_S      "cdi"
+#define UCON64_COLECO_S   "coleco"
+#define UCON64_DC_S       "dc"
+#define UCON64_GB_S       "gb"
+#define UCON64_GBA_S      "gba"
+#define UCON64_GC_S       "gc"
+#define UCON64_GEN_S      "gen"
+#define UCON64_GP32_S     "gp32"
+#define UCON64_INTELLI_S  "intelli"
+#define UCON64_JAG_S      "jag"
+#define UCON64_LYNX_S     "lynx"
+#define UCON64_ARCADE_S   "arcade"
+#define UCON64_N64_S      "n64"
+#define UCON64_NDS_S      "nds"
+#define UCON64_NES_S      "nes"
+#define UCON64_NG_S       "ng"
+#define UCON64_NGP_S      "ngp"
+#define UCON64_PCE_S      "pce"
+#define UCON64_PS2_S      "ps2"
+#define UCON64_PSX_S      "psx"
+#define UCON64_S16_S      "s16"
+#define UCON64_SAT_S      "sat"
+#define UCON64_SMS_S      "sms"
+#define UCON64_GAMEGEAR_S "gg"
+#define UCON64_SNES_S     "snes"
+#define UCON64_SWAN_S     "swan"
+#define UCON64_VBOY_S     "vboy"
+#define UCON64_VEC_S      "vec"
+#define UCON64_XBOX_S     "xbox"
+
+
+// the other options
+enum
+{
+  UCON64_1991 = UCON64_OPTION + 1,
   UCON64_A,
   UCON64_B,
   UCON64_B0,
@@ -162,11 +154,9 @@ enum
   UCON64_BAT,
   UCON64_BIN,
   UCON64_BIOS,
-  UCON64_BITS,
   UCON64_BOT,
   UCON64_BS,
   UCON64_C,
-  UCON64_CC2,
   UCON64_CHK,
   UCON64_CODE,
   UCON64_COL,
@@ -179,7 +169,6 @@ enum
   UCON64_CMNT,
   UCON64_DB,
   UCON64_DBS,
-  UCON64_DBSQL,
   UCON64_DBUH,
   UCON64_DBV,
   UCON64_DFIND,
@@ -187,6 +176,7 @@ enum
   UCON64_DINT,
   UCON64_DMIRR,
   UCON64_DNSRT,
+  UCON64_DUAL,
   UCON64_DUMPINFO,
   UCON64_E,
   UCON64_EROM,
@@ -294,7 +284,7 @@ enum
   UCON64_ROTR,
   UCON64_RU,
   UCON64_S,
-//  UCON64_SAM,
+  UCON64_SAM,
   UCON64_SC,
   UCON64_SCAN,
   UCON64_SCR,
@@ -390,21 +380,63 @@ enum
   UCON64_XSWCS,
   UCON64_XSWCC,
   UCON64_XV64,
-  UCON64_Z64
+  UCON64_Z64,
+
+//  UCON64_FORCE63,
+  UCON64_GUI,
+
+  // Keep these (libdiscmage) options separate
+  UCON64_DISC = UCON64_OPTION + 250,
+  UCON64_MKCUE,
+  UCON64_MKSHEET,
+  UCON64_MKTOC,
+  UCON64_RIP,
+  UCON64_BIN2ISO,
+  UCON64_ISOFIX,
+  UCON64_XCDRW,
+  UCON64_CDMAGE
 };
 
+/*
+  uCON64 workflow flags
 
-#if 0
-#define UCON64_FILTER(id,name) \
-const st_filter_t name = \
-  { \
-    id, \
-    (int (*) (void *)) & name, \
-  };
-#endif
+  WF_PROBE          probe for console type
+  WF_INIT           init ROM info (ucon64_init()) necessary
+                      w/o this flag WF_NFO and WF_NFO_AFTER
+                      will be ignored
+  WF_NFO            show info output before processing rom
+  WF_NO_ROM         for this option no ROM is required
+  WF_NO_CRC32       no CRC32 calculation necessary for this option; this
+                      overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
+  WF_STOP           a "stop" option:
+                    - -multi (and -xfalmulti) takes more than one file as
+                      argument, but should be executed only once.
+                    - stop after sending one ROM to a copier ("multizip")
+                    - stop after applying a patch so that the patch file won't
+                      be interpreted as ROM
+  WF_PAR            this option requires a parallel port
+  WF_USB            this option requires a USB port
+  WF_SERIAL         this option requires a serial port
+  WF_NO_SPLIT       this option does not work with split ROMs
+  WF_DEFAULT        same as WF_INIT | WF_PROBE | WF_NFO
 
-
-#define UCON64_FILTER_TYPE(name) int name (st_ucon64_nfo_t *rominfo)
-
+  example:
+  WF_NFO | WF_MFO_AFTER
+                    a ROM is required and info will be shown before and
+                    after it has been processed
+*/
+#define WF_PROBE      (1)
+#define WF_INIT       (1 << 1)
+#define WF_NFO        (1 << 2)
+#define WF_STOP       (1 << 3)
+#define WF_NO_ROM     (1 << 5)
+//#define WF_PAR        (1 << 6)
+//#define WF_USB        (1 << 7)
+//#define WF_SERIAL     (1 << 8)
+#define WF_NO_CRC32   (1 << 9)
+#define WF_NO_SPLIT   (1 << 10)
+#define WF_SWITCH     (1 << 11)
+#define WF_NO_ARCHIVE (1 << 12)
+#define WF_DEFAULT    (WF_PROBE | WF_INIT | WF_NFO)
 
 #endif // UCON64_DEFINES_H

@@ -65,6 +65,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ctype.h>
 #include "misc/misc.h"
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/parallel.h"
 #include "misc/file.h"
@@ -75,35 +78,47 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gb.h"                         // GB_NAME_LEN, gb_logodata,
                                                 //  rocket_logodata
 
+static st_ucon64_obj_t gbx_obj[] =
+  {
+    {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_GB, WF_STOP | WF_NO_ROM},
+    {UCON64_GB, WF_SWITCH}
+  };
+
 const st_getopt2_t gbx_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game Boy Xchanger/GBDoctor"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/
+      NULL, "Game Boy Xchanger/GBDoctor"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xgbx", 0, 0, UCON64_XGBX,
       NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist"
+      "receives automatically when ROM does not exist",
+      &gbx_obj[0]
     },
     {
       "xgbxs", 0, 0, UCON64_XGBXS,
       NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist"
+      "receives automatically when SRAM does not exist",
+      &gbx_obj[1]
     },
     {
       "xgbxb", 1, 0, UCON64_XGBXB,
       "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
       "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist"
+      "receives automatically when ROM does not exist",
+      &gbx_obj[1]
     },
     {
       "xgbxm", 0, 0, UCON64_XGBXM,
-      NULL, "try to enable EPP mode, default is SPP mode"
+      NULL, "try to enable EPP mode, default is SPP mode",
+      &gbx_obj[2]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -697,7 +712,7 @@ check_eeprom (void)
       set_adr (i);                              // adr2,adr1,adr0
       buffer[i / 2] = read_byte ();
     }
-//  dumper (stdout, buffer, 64, 0, 0);
+//  dumper (stdout, buffer, 64, 0, DUMPER_HEX);
 
   if (buffer[0] == 0x89 && buffer[1] == 0x15
       && buffer[0x10] == 'Q' && buffer[0x11] == 'R' && buffer[0x12] == 'Y')
@@ -760,7 +775,7 @@ check_card (void)
   else if (memcmp (buffer + 4, gb_logodata, GB_LOGODATA_LEN) != 0)
     {
       puts ("WARNING: Cartridge does not contain official Nintendo logo data");
-      dumper (stdout, buffer, 0x50, 0x100, 0);
+      dumper (stdout, buffer, 0x50, 0x100, DUMPER_HEX);
     }
 
   gb_name_len = (buffer[0x43] == 0x80 || buffer[0x43] == 0xc0) ?
@@ -1120,7 +1135,7 @@ dump_intel_data (void)
       set_adr (i);
       buffer[i] = read_data ();
     }
-  dumper (stdout, buffer, 64, 0, 0);
+  dumper (stdout, buffer, 64, 0, DUMPER_HEX);
 }
 
 
@@ -1388,7 +1403,7 @@ intel_id (void)
       set_adr (i);                              // adr2,adr1,adr0
       buffer[i / 2] = read_byte ();
     }
-//  dumper (stdout, buffer, 64, 0, 0);
+//  dumper (stdout, buffer, 64, 0, DUMPER_HEX);
 
   printf ("Manufacture code = 0x%02x\n", buffer[0]);
   printf ("Device code = 0x%02x\n", buffer[1]);
@@ -1460,7 +1475,7 @@ test_sram_wv (int n_banks)
       idx = 0;
       set_sram_bank (bank);
       gen_pat (bank);
-//      dumper (stdout, buffer, 0x10, 0, 0);
+//      dumper (stdout, buffer, 0x10, 0, DUMPER_HEX);
       for (j = 0; j < 0x20; j++)
         {                                       // 32 x 256 = 8192(8kbytes)
           set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
@@ -1502,7 +1517,7 @@ try_read (void)
   set_ai (3);                                   // point to data r/w port
   for (i = 0; i < 16; i++)
     buffer[i] = read_data ();
-  dumper (stdout, buffer, 16, 0, 0);
+  dumper (stdout, buffer, 16, 0, DUMPER_HEX);
 }
 
 
@@ -1545,7 +1560,7 @@ test_intel (void)
       set_adr (i);                              // adr2,adr1,adr0
       buffer[i / 2] = read_byte ();
     }
-  dumper (stdout, buffer, 64, 0, 0);
+  dumper (stdout, buffer, 64, 0, DUMPER_HEX);
 
   out_adr2_data (0x0000, 0x70);                 // read status register
   printf ("Status register = 0x%02x\n", read_byte ());

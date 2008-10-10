@@ -26,6 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/misc.h"
 #include "misc/parallel.h"
@@ -35,28 +38,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "pl.h"
 
 
+static st_ucon64_obj_t pl_obj[] =
+  {
+    {UCON64_NGP, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_NGP, WF_STOP | WF_NO_ROM},
+    {UCON64_NGP, WF_SWITCH}
+  };
+
 const st_getopt2_t pl_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Pocket Linker"/*"19XX Bung Enterprises Ltd"*/
+      NULL, "Pocket Linker"/*"19XX Bung Enterprises Ltd"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xpl", 0, 0, UCON64_XPL,
       NULL, "send/receive ROM to/from Pocket Linker; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when ROM does not exist"
+      "receives automatically when ROM does not exist",
+      &pl_obj[0]
     },
     {
       "xpli", 0, 0, UCON64_XPLI,
-      NULL, "show information about inserted cartridge; " OPTION_LONG_S "port=PORT"
+      NULL, "show information about inserted cartridge; " OPTION_LONG_S "port=PORT",
+      &pl_obj[1]
     },
     {
       "xplm", 0, 0, UCON64_XPLM,
-      NULL, "try to enable EPP mode, default is SPP mode"
+      NULL, "try to enable EPP mode, default is SPP mode",
+      &pl_obj[2]
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

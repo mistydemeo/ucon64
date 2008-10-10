@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "misc/itypes.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ssc.h"
@@ -36,7 +39,8 @@ const st_getopt2_t ssc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Smart Card/SSC"
+      NULL, "Super Smart Card/SSC",
+      NULL
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

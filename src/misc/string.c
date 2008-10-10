@@ -29,8 +29,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "string.h"
 
 
-#if 0
-static int
+#ifdef  _MSC_VER
+// Visual C++ doesn't allow inline in C source code
+#define inline __inline
+#endif
+
+
+static inline int
 is_func (char *s, int len, int (*func) (int))
 {
   char *p = s;
@@ -49,7 +54,7 @@ is_func (char *s, int len, int (*func) (int))
 }
 
 
-static char *
+static inline char *
 to_func (char *s, int len, int (*func) (int))
 {
   char *p = s;
@@ -59,146 +64,19 @@ to_func (char *s, int len, int (*func) (int))
 
   return s;
 }
-#endif
-
-
-/*
-unsigned char *
-strutf8 (const char *s)
-{
-  static unsigned char *d = NULL;
-  unsigned char *p = NULL;
-
-  if (d)
-    free (d);
-
-  d = malloc ((strlen (s) + 1) * 3);
-
-  if (!d)
-    return NULL;
-
-  p = d;
-
-//  strcpy (p, s);
-//  strrep (p, "\r\n", "\n");
-
-  for (; *s; s++, p++)
-    {
-//      if (*s == '\r')
-//        continue;
-
-      if (*s < 128)
-        *p = *s;
-      else if (*s > 127 && *s < 2048)
-        {
-          *p = ((*s) >> 6) | 192;
-          p++;
-          *p = ((*s) & 63) | 128;
-        }
-      else
-        {
-          *p = ((*s) >> 12) | 224;
-          p++;
-          *p = (((*s) >> 6) & 63) | 128;
-          p++;
-          *p = ((*s) & 63) | 128;
-        }
-    }
-
-  return d;
-}
-
-
-char *
-utf8str (const unsigned char *s)
-{
-  static char *d = NULL;
-  char *p = NULL;
-
-  if (d)
-    free (d);
-
-  d = malloc (strlen (s));
-
-  if (!d)
-    return NULL;
-
-  p = d;
-
-  for (; *s; s++, p++)
-    {
-      if (*s < 128)
-        *p = *s;
-      else if (*s > 191 && *s < 224)
-        {
-          *p = ((*s) << 6) | ((*(s + 1)) & 63);
-          s++;
-        }
-      else
-        {
-          *p = (((*s) & 15) << 12) | (((*(s + 1)) & 63) << 6) | ((*(s + 1)) & 63);
-          s += 2;
-        }
-    }
-
-  return d;
-}
-*/
 
 
 char *
 strupr (char *s)
 {
-  char *p = s;
-
-  for (; *p; p++)
-    *p = toupper (*p);
-
-  return s;
+  return to_func (s, strlen (s), toupper);
 }
 
 
 char *
 strlwr (char *s)
 {
-  char *p = s;
-
-  for (; *p; p++)
-    *p = tolower (*p);
-
-  return s;
-}
-
-
-char *
-strmove (char *to, char *from)
-{
-  return memmove (to, from, strlen (from) + 1); // + 1 because of termination
-}
-
-
-char *
-strins (char *dest, const char *ins)
-{
-  strmove (dest + strlen (ins), dest);
-  memcpy (dest, ins, strlen (ins));
-
-  return dest;
-}
-
-
-char *
-strcat2 (const char *a, const char *b)
-{
-  char *p = malloc (strlen (a) + strlen (b) + 1);
-
-  if (!p)
-    return NULL;
-
-  strcpy (p, a);
-  strcat (p, b);
-
-  return p;
+  return to_func (s, strlen (s), tolower);
 }
 
 
@@ -213,76 +91,12 @@ strcasestr2 (const char *str, const char *search)
 
 
 char *
-strrstr (char *str, const char *search)
+strtrimr (char *str)
 {
-  unsigned int search_len = strlen (search);
-  char *p = NULL;
+  int i = strlen (str) - 1;
 
-  if (strlen (str) < search_len)
-    return NULL;
-
-  p = strchr (str, 0) - search_len;
-
-  for (;; p--)
-    {
-      if (!strncmp (p, search, search_len))
-        return p;
-
-      if (p == str)
-        return NULL;
-    }
-
-  return NULL;
-}
-
-
-char *
-strristr (char *str, const char *search)
-{
-  unsigned int search_len = strlen (search);
-  char *p = NULL;
-
-  if (strlen (str) < search_len)
-    return NULL;
-
-  p = strchr (str, 0) - search_len;
-
-  for (;; p--)
-    {
-      if (!strnicmp (p, search, search_len))
-        return p;
-
-      if (p == str)
-        return NULL;
-    }
-
-  return NULL;
-}
-
-
-char *
-strtrim (char *str, int (*left) (int), int (*right) (int))
-{
-  if (left)
-    {
-      char *p = str;
-
-      while (*p && left ((int) *p))
-        p++;
-
-      if (p - str)
-        strmove (str, p);
-    }
-
-  if (right)
-    {
-      char *p = strchr (str, 0);
-
-      while ((p - 1) - str && right ((int) *(p - 1)))
-        p--;
-
-      *p = 0;
-    }
+  while (isspace ((int) str[i]) && (i >= 0))
+    str[i--] = 0;
 
   return str;
 }
@@ -291,112 +105,15 @@ strtrim (char *str, int (*left) (int), int (*right) (int))
 char *
 strtriml (char *str)
 {
-  return strtrim (str, isspace, NULL);
-}
+  int i = 0, j;
 
+  j = strlen (str) - 1;
 
-char *
-strtrimr (char *str)
-{
-  return strtrim (str, NULL, isspace);
-}
+  while (isspace ((int) str[i]) && (i <= j))
+    i++;
 
-
-char *
-strtrim_s (char *str, const char *left, const char *right)
-{
-  if (left)
-    {
-      char *p = strstr (str, left);
-
-      if (p)
-        strmove (str, p + strlen (left));
-    }
-
-  if (right)
-    {
-      char *p = strrstr (str, right);
-
-      if (p)
-        *p = 0;
-    }
-
-  return str;
-}
-
-
-char *
-stritrim_s (char *str, const char *left, const char *right)
-{
-  if (left)
-    {
-      char *p = stristr (str, left);
-
-      if (p)
-        strmove (str, p + strlen (left));
-    }
-
-  if (right)
-    {
-      char *p = strristr (str, right);
-
-      if (p)
-        *p = 0;
-    }
-
-  return str;
-}
-
-
-char *
-strrep (char *str, const char *orig, const char *rep)
-{
-  int o_len = strlen (orig);
-  int r_len = strlen (rep);
-  char *p = str;
-
-//  if (r_len)
-    while ((p = strstr (p, orig)))
-      {
-        strmove (p + r_len, p + o_len);
-        memcpy (p, rep, r_len);
-        p += r_len;
-      }
-
-  return str;
-}
-
-
-char *
-strcode (char *str)
-{
-  strrep (str, "~", "\\~");
-  strrep (str, "%", "\\%");
-  strrep (str, "|", "\\|");
-  strrep (str, "'", "\\'");
-  strrep (str, "&", "\\&");
-  strrep (str, ";", "\\;");
-  strrep (str, "?", "\\?");
-  strrep (str, "!", "\\!");
-  strrep (str, "*", "\\*");
-  strrep (str, "[", "\\[");
-  strrep (str, "]", "\\]");
-  strrep (str, "{", "\\{");
-  strrep (str, "}", "\\}");
-  strrep (str, "(", "\\(");
-  strrep (str, ")", "\\)");
-  strrep (str, "<", "\\<");
-  strrep (str, ">", "\\>");
-
-  return str;
-}
-
-
-char *
-strhtml (char *str)
-{
-  strrep (str, "<", "&lt;");
-  strrep (str, ">", "&gt;");
+  if (0 < i)
+    strcpy (str, &str[i]);
 
   return str;
 }
@@ -440,15 +157,9 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
 int
 memcmp2 (const void *buffer, const void *search, size_t searchlen, unsigned int flags)
 {
-#define WILDCARD(f)  (f & 0xff)
-  size_t i = 0, j = 0;
+  size_t i = 0;
   const unsigned char *b = (const unsigned char *) buffer,
                       *s = (const unsigned char *) search;
-
-#ifdef  DEBUG
-  if (flags & MEMMEM2_WCARD (0))
-    printf ("wildcard: %c\n", WILDCARD (flags));
-#endif
 
   if (!flags)
     return memcmp (buffer, search, searchlen);
@@ -460,28 +171,26 @@ memcmp2 (const void *buffer, const void *search, size_t searchlen, unsigned int 
         return -1;
     }
 
-  for (i = j = 0; i < searchlen; i++, j++)
+  for (i = 0; i < searchlen; i++)
     {
       if (flags & MEMMEM2_WCARD (0))
-        {
-          if (*(s + i) == WILDCARD (flags))
-            continue;
-        }
+        if (*(s + i) == (flags & 0xff))
+          continue;
 
       if (flags & MEMMEM2_REL)
         {
-          if ((*(b + j) - *(b + j + 1)) != (*(s + i) - *(s + i + 1)))
+          if ((*(b + i) - *(b + i + 1)) != (*(s + i) - *(s + i + 1)))
             break;
         }
       else
         {
           if (flags & MEMMEM2_CASE && isalpha (*(s + i)))
             {
-              if (tolower (*(b + j)) != tolower (*(s + i)))
+              if (tolower (*(b + i)) != tolower (*(s + i)))
                 break;
             }
           else
-            if (*(b + j) != *(s + i))
+            if (*(b + i) != *(s + i))
               break;
         }
     }
@@ -503,31 +212,3 @@ memmem2 (const void *buffer, size_t bufferlen,
 
   return NULL;
 }
-
-
-#if 0
-//#ifdef  TEST
-int
-main (int argc, char **argv)
-{
-#define MAXBUFSIZE 32768
-  char buf[MAXBUFSIZE];
-#if 0
-  const char *b = "123(123.32.21.44)214";
-  const char *s = "(xxx.xx.xx.xx)";
-
-//  const char *p = memmem2 (b, strlen (b), s, strlen (s), MEMCMP2_WCARD('*', 'x'));
-  const char *p = memmem2 (b, strlen (b), s, strlen (s), MEMCMP2_WCARD('x'));
-  printf ("%s\n", p);
-
-  strcpy (buf, "1234567890");
-  strins (buf + 2, 6, "abc");
-  printf ("%s\n", buf);
-#else
-  strcpy (buf, "12434akjgkjh56453fdsg");
-  stritrim_s (buf, "sg", "xx");
-  printf (buf);
-#endif  
-  return 0;
-}
-#endif

@@ -32,105 +32,84 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/getopt2.h"
 #include "misc/file.h"
 #include "misc/string.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ucon64_dat.h"
-#include "ucon64_opts.h"
-#include "ucon64_defines.h"
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
-#include "misc/hash.h"
+#include "misc/chksum.h"
 #ifdef  USE_PARALLEL
 #include "misc/parallel.h"
 #endif
 
 
-#define UCON64_FILTER_TYPE2(name,name_short) \
-static int \
-ucon64_tmp_##name_short (st_ucon64_t *p) \
-{ \
-  name (p->nfo); \
-  return 0; \
-}
+#ifdef  _MSC_VER
+// Visual C++ doesn't allow inline in C source code
+#define inline __inline
+#endif
 
 
 static long int
 strtol2 (const char *str, char **tail)
 {
   long int i;
-#warning make more intelligent (hex)
+
   return (i = strtol (str, tail, 10)) ? i : strtol (str, tail, 16);
 }
 
 
-static char *
-to_func (char *s, int len, int (*func) (int))
-{
-  char *p = s;
-
-  for (; len > 0; p++, len--)
-    *p = func (*p);
-
-  return s;
-}
-
-
-static int
-toprint (int c)
-{
-  if (isprint (c))
-    return c;
-
-  // characters that also work with printf()
-#ifdef  USE_ANSI_COLOR
-  if (c == '\x1b')
-    return ucon64.ansi_color ? c : '.';
-#endif
-
-  return strchr ("\t\n\r", c) ? c : '.';
-}
-
-
-static int
-ucon64_tmp_help (st_ucon64_t *p)
+int
+ucon64_switches (st_ucon64_t *p)
 {
   int x = 0;
+  int c = p->option;
+  const char *optarg = p->optarg;
+
+  /*
+    Handle options or switches that cause other _options_ to be ignored except
+    other options of the same class (so the order in which they were specified
+    matters).
+    We have to do this here (not in ucon64_options()) or else other options
+    might be executed before these.
+  */
+  switch (c)
+    {
     /*
       Many tools ignore other options if --help has been specified. We do the
       same (compare with GNU tools).
     */
+    case UCON64_HELP:
       x = USAGE_VIEW_LONG;
-      if (p->optarg)
+      if (optarg)
         {
-          if (!strcmp (p->optarg, "pad"))
+          if (!strcmp (optarg, "pad"))
             x = USAGE_VIEW_PAD;
-          else if (!strcmp (p->optarg, "dat"))
+          else if (!strcmp (optarg, "dat"))
             x = USAGE_VIEW_DAT;
-          else if (!strcmp (p->optarg, "patch"))
+          else if (!strcmp (optarg, "patch"))
             x = USAGE_VIEW_PATCH;
-          else if (!strcmp (p->optarg, "backup"))
+          else if (!strcmp (optarg, "backup"))
             x = USAGE_VIEW_BACKUP;
+          else if (!strcmp (optarg, "disc"))
+            x = USAGE_VIEW_DISC;
         }
       ucon64_usage (ucon64.argc, ucon64.argv, x);
+      exit (0);
 
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ver (st_ucon64_t *p)
-{
     /*
       It's also common to exit after displaying version information.
       On some configurations printf is a macro (Red Hat Linux 6.2 + GCC 3.2),
       so we can't use preprocessor directives in the argument list.
     */
+    case UCON64_VER:
       printf ("version:                           %s (%s)\n"
               "platform:                          %s\n",
               UCON64_VERSION_S, __DATE__,
@@ -182,6 +161,39 @@ ucon64_tmp_ver (st_ucon64_t *p)
               access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ",
               ucon64.configfile);
 
+#ifdef  USE_DISCMAGE
+      printf ("discmage DLL:                      ");
+
+#ifdef  DLOPEN
+      puts (ucon64.discmage_path);
+#else
+#if     defined __MSDOS__
+      printf ("discmage.dxe");
+#elif   defined __CYGWIN__ || defined _WIN32
+      printf ("discmage.dll");
+#elif   defined __APPLE__                       // Mac OS X actually
+      printf ("libdiscmage.dylib");
+#elif   defined __unix__ || defined __BEOS__
+      printf ("libdiscmage.so");
+#else
+      printf ("unknown");
+#endif
+      puts (", dynamically linked");
+#endif // DLOPEN
+
+      printf ("discmage enabled:                  %s\n",
+              ucon64.discmage_enabled ? "yes" : "no");
+
+      if (ucon64.discmage_enabled)
+        {
+          x = dm_get_version ();
+          printf ("discmage version:                  %d.%d.%d (%s)\n",
+                  x >> 16, x >> 8, x, dm_get_version_s ());
+        }
+      else
+        puts ("discmage version:                  not available");
+#endif // USE_DISCMAGE
+
       printf ("configuration directory:           %s\n"
               "DAT file directory:                %s\n"
               "entries in DATabase:               %d\n"
@@ -190,3144 +202,2115 @@ ucon64_tmp_ver (st_ucon64_t *p)
               ucon64.datdir,
               ucon64_dat_total_entries (),
               ucon64.dat_enabled ? "yes" : "no");
-  return 0;
-}
+      exit (0);
+      break;
 
+    case UCON64_FRONTEND:
+      ucon64.frontend = 1;                      // used by (for example) ucon64_gauge()
+      break;
 
-static int
-ucon64_tmp_crc (st_ucon64_t *p)
-{
-  unsigned int checksum = 0;
-#warning ucon64.nfo?
-  ucon64_chksum (NULL, NULL, &checksum, p->fname,
-                 ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
-  return 0;
-}
+    case UCON64_NBAK:
+      ucon64.backup = 0;
+      break;
 
+    case UCON64_R:
+      ucon64.recursive = 1;
+      break;
 
-static int
-ucon64_tmp_crchd (st_ucon64_t *p)                          // deprecated
-{
-  unsigned int checksum = 0;
-  ucon64_chksum (NULL, NULL, &checksum, p->fname, UNKNOWN_BACKUP_HEADER_LEN);
-  return 0;
-}
+#ifdef  USE_ANSI_COLOR
+    case UCON64_NCOL:
+      ucon64.ansi_color = 0;
+      break;
+#endif
 
+    case UCON64_RIP:
+    case UCON64_MKTOC:
+    case UCON64_MKCUE:
+    case UCON64_MKSHEET:
+    case UCON64_BIN2ISO:
+    case UCON64_ISOFIX:
+    case UCON64_XCDRW:
+    case UCON64_DISC:
+    case UCON64_CDMAGE:
+      ucon64.force_disc = 1;
+      break;
 
-static int
-ucon64_tmp_sha1 (st_ucon64_t *p)
-{
-  char buf[MAXBUFSIZE];
+    case UCON64_NS:
+      ucon64.split = 0;
+      break;
 
-#warning buf?
-#warning ucon64.nfo?
-  ucon64_chksum (buf, NULL, NULL, p->fname,
-                 ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
-  return 0;
-}
+    case UCON64_HD:
+      ucon64.backup_header_len = UNKNOWN_BACKUP_HEADER_LEN;
+      break;
 
+    case UCON64_HDN:
+      ucon64.backup_header_len = strtol (optarg, NULL, 10);
+      break;
 
-static int
-ucon64_tmp_md5 (st_ucon64_t *p)
-{
-  char buf[MAXBUFSIZE];
+    case UCON64_NHD:
+      ucon64.backup_header_len = 0;
+      break;
 
-#warning buf?
-#warning ucon64.nfo?
-  ucon64_chksum (NULL, buf, NULL, p->fname,
-                 ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len);
-  return 0;
-}
+    case UCON64_SWP:                            // deprecated
+    case UCON64_INT:
+      ucon64.interleaved = 1;
+      break;
 
+    case UCON64_INT2:
+      ucon64.interleaved = 2;
+      break;
 
-static int
-ucon64_tmp_hex (st_ucon64_t *p)
-{
-  ucon64_dump (stdout, p->fname,
-               p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               fsizeof (p->fname), 0);
-  return 0;
-}
+    case UCON64_NSWP:                           // deprecated
+    case UCON64_NINT:
+      ucon64.interleaved = 0;
+      break;
 
+    case UCON64_PORT:
+#ifdef  USE_USB
+      if (!strnicmp (optarg, "usb", 3))
+        {
+          if (strlen (optarg) >= 4)
+            ucon64.usbport = strtol (optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
+          else                                  // we automatically detect the
+            ucon64.usbport = 1;                 //  USB port in the F2A code
 
-static int
-ucon64_tmp_bits (st_ucon64_t *p)
-{
-  ucon64_dump (stdout, p->fname,
-               p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               fsizeof (p->fname), DUMPER_BIT);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_code (st_ucon64_t *p)
-{
-  ucon64_dump (stdout, p->fname,
-               p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               fsizeof (p->fname), DUMPER_CODE);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_print (st_ucon64_t *p)
-{
-  ucon64_dump (stdout, p->fname,
-               p->optarg ? MAX (strtol2 (p->optarg, NULL), 0) : 0,
-               fsizeof (p->fname), DUMPER_TEXT);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_c (st_ucon64_t *p)
-{
-  ucon64_filefile (p->optarg, 0, p->fname, 0, FALSE);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_cs (st_ucon64_t *p)
-{
-  ucon64_filefile (p->optarg, 0, p->fname, 0, TRUE);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_find (st_ucon64_t *p)
-{
-  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
-               strlen (p->optarg), MEMCMP2_WCARD ('?'), 0);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_findr (st_ucon64_t *p)
-{
-  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
-               strlen (p->optarg), MEMCMP2_REL, 0);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_findi (st_ucon64_t *p)
-{
-  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
-               strlen (p->optarg), MEMCMP2_WCARD ('?') | MEMCMP2_CASE, 0);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_hfind (st_ucon64_t *p)
-{
-  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
-               strlen (p->optarg), MEMCMP2_WCARD ('?'), 1);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_hfindr (st_ucon64_t *p)
-{
-  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
-               strlen (p->optarg), MEMCMP2_REL, 1);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_dfind (st_ucon64_t *p)
-{
-  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
-               strlen (p->optarg), MEMCMP2_WCARD ('?'), 1);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_dfindr (st_ucon64_t *p)
-{
-  ucon64_find (p->fname, 0, fsizeof (p->fname), p->optarg,
-               strlen (p->optarg), MEMCMP2_REL, 1);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_pad (st_ucon64_t *p)
-{
-  int value = 0;
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
-
-  if (p->nfo)
-    value = p->nfo->backup_header_len;
-  ucon64_file_handler (dest_name, src_name, 0);
-
-  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "wb");
-  if (truncate2 (dest_name, fsizeof (p->fname) + (MBIT - ((fsizeof (p->fname) - value) % MBIT))) == -1)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
-      exit (1);
-    }
-
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-
-  return 0;
-}
-
-
-static int
-ucon64_tmp_padhd (st_ucon64_t *p)                         // deprecated
-{
-  int value = UNKNOWN_BACKUP_HEADER_LEN;
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
-
-  if (p->nfo)
-    value = p->nfo->backup_header_len;
-  ucon64_file_handler (dest_name, src_name, 0);
-
-  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "wb");
-  if (truncate2 (dest_name, fsizeof (p->fname) + (MBIT - ((fsizeof (p->fname) - value) % MBIT))) == -1)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
-      exit (1);
-    }
-
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-
-  return 0;
-}
-
-
-static int
-ucon64_tmp_p (st_ucon64_t *p)
-{
-  ucon64_tmp_pad (p);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_padn (st_ucon64_t *p)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
-
-  ucon64_file_handler (dest_name, src_name, 0);
-
-  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "wb");
-  if (truncate2 (dest_name, strtol (p->optarg, NULL, 10) +
-        (p->nfo ? p->nfo->backup_header_len : 0)) == -1)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
-      exit (1);
-    }
-
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ispad (st_ucon64_t *p)
-{
-  int padded = 0;
-
-  if ((padded = ucon64_testpad (p->fname)) != -1)
-    {
-      if (!padded)
-        puts ("Padded: No\n");
+          /*
+            We don't want to make uCON64 behave different if --port=USB{n} is
+            specified *after* a transfer option (instead of before one), so we
+            have to reset ucon64.parport_needed here.
+          */
+          ucon64.parport_needed = 0;
+        }
       else
-        printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n\n", padded,
-                (float) padded / MBIT);
-    }
-  return 0;
-}
+#endif
+        ucon64.parport = strtol (optarg, NULL, 16);
+      break;
 
+#ifdef  USE_PARALLEL
+    /*
+      We detect the presence of these options here so that we can drop
+      privileges ASAP.
+      Note that the libcd64 options are not listed here. We cannot drop
+      privileges before libcd64 is initialised (after cd64_t.devopen() has been
+      called).
+    */
+    case UCON64_XCMC:
+    case UCON64_XCMCT:
+    case UCON64_XDEX:
+    case UCON64_XDJR:
+    case UCON64_XF2A:                           // could be for USB version
+    case UCON64_XF2AMULTI:                      // idem
+    case UCON64_XF2AC:                          // idem
+    case UCON64_XF2AS:                          // idem
+    case UCON64_XF2AB:                          // idem
+    case UCON64_XFAL:
+    case UCON64_XFALMULTI:
+    case UCON64_XFALC:
+    case UCON64_XFALS:
+    case UCON64_XFALB:
+    case UCON64_XFIG:
+    case UCON64_XFIGS:
+    case UCON64_XFIGC:
+    case UCON64_XGBX:
+    case UCON64_XGBXS:
+    case UCON64_XGBXB:
+    case UCON64_XGD3:
+    case UCON64_XGD3R:
+    case UCON64_XGD3S:
+    case UCON64_XGD6:
+    case UCON64_XGD6R:
+    case UCON64_XGD6S:
+    case UCON64_XGG:
+    case UCON64_XGGS:
+    case UCON64_XGGB:
+    case UCON64_XLIT:
+    case UCON64_XMCCL:
+    case UCON64_XMCD:
+    case UCON64_XMD:
+    case UCON64_XMDS:
+    case UCON64_XMDB:
+    case UCON64_XMSG:
+    case UCON64_XPCE:
+    case UCON64_XPL:
+    case UCON64_XPLI:
+    case UCON64_XRESET:
+    case UCON64_XSF:
+    case UCON64_XSFS:
+    case UCON64_XSMC:
+    case UCON64_XSMCR:
+    case UCON64_XSMD:
+    case UCON64_XSMDS:
+    case UCON64_XSWC:
+    case UCON64_XSWC2:
+    case UCON64_XSWCR:
+    case UCON64_XSWCS:
+    case UCON64_XSWCC:
+    case UCON64_XV64:
+#ifdef  USE_USB
+      if (!ucon64.usbport)                      // no pport I/O if F2A option and USB F2A
+#endif
+      ucon64.parport_needed = 1;
+      /*
+        We want to make this possible:
+          1.) ucon64 <transfer option> <rom>
+          2.) ucon64 <transfer option> <rom> --port=<parallel port address>
+        The above works "automatically". The following type of command used to
+        be possible, but has been deprecated:
+          3.) ucon64 <transfer option> <rom> <parallel port address>
+        It has been removed, because it caused problems when specifying additional
+        switches without specifying the parallel port address. For example:
+          ucon64 -xfal -xfalm <rom>
+        This would be interpreted as:
+          ucon64 -xfal -xfalm <rom as file> <rom as parallel port address>
+        If <rom> has a name that starts with a number an I/O port associated
+        with that number will be accessed which might well have unwanted
+        results. We cannot check for valid I/O port numbers, because the I/O
+        port of the parallel port can be mapped to almost any 16-bit number.
+      */
+#if 0
+      if (ucon64.parport == UCON64_UNKNOWN)
+        if (ucon64.argc >= 4)
+          if (access (ucon64.argv[ucon64.argc - 1], F_OK))
+            // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
+            //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
+            ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
+#endif
+      break;
 
-static int
-ucon64_tmp_strip (st_ucon64_t *p)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+#ifdef  USE_LIBCD64
+    case UCON64_XCD64:
+    case UCON64_XCD64B:
+    case UCON64_XCD64C:
+    case UCON64_XCD64E:
+    case UCON64_XCD64F:
+    case UCON64_XCD64M:
+    case UCON64_XCD64S:
+      // We don't really need the parallel port. We just have to make sure that
+      //  privileges aren't dropped.
+      ucon64.parport_needed = 2;
+      break;
 
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
+    case UCON64_XCD64P:
+      ucon64.io_mode = strtol (optarg, NULL, 10);
+      break;
+#endif
 
-  ucon64_file_handler (dest_name, src_name, 0);
-  fcopy (src_name, 0, fsizeof (p->fname) - strtol (p->optarg, NULL, 10),
-    dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return 0;
-}
+    case UCON64_XCMCM:
+      ucon64.io_mode = strtol (optarg, NULL, 10);
+      break;
 
+    case UCON64_XFALM:
+    case UCON64_XGBXM:
+    case UCON64_XPLM:
+      ucon64.parport_mode = UCON64_EPP;
+      break;
 
-static int
-ucon64_tmp_stp (st_ucon64_t *p)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+    case UCON64_XSWC_IO:
+      ucon64.io_mode = strtol (optarg, NULL, 16);
 
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
+      if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
+        puts ("WARNING: I/O mode not yet implemented");
+#if 0 // all these constants are defined by default
+      if (ucon64.io_mode & (SWC_IO_SPC7110 | SWC_IO_SDD1 | SWC_IO_SA1 | SWC_IO_MMX2))
+        puts ("WARNING: Be sure to compile swc.c with the appropriate constants defined");
+#endif
 
-  ucon64_file_handler (dest_name, src_name, 0);
-  fcopy (src_name, 512, fsizeof (p->fname), dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return 0;
-}
-
-
-static int
-ucon64_tmp_stpn (st_ucon64_t *p)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
-
-  ucon64_file_handler (dest_name, src_name, 0);
-  fcopy (src_name, strtol (p->optarg, NULL, 10), fsizeof (p->fname), dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ins (st_ucon64_t *p)
-{
-  char buf[MAXBUFSIZE];
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
-
-  ucon64_file_handler (dest_name, src_name, 0);
-  memset (buf, 0, 512);
-  ucon64_fwrite (buf, 0, 512, dest_name, "wb");
-  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "ab");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return 0;
-}
-
-
-static int
-ucon64_tmp_insn (st_ucon64_t *p)
-{
-  int value = strtol (p->optarg, NULL, 10);
-  char buf[MAXBUFSIZE];
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
-
-  ucon64_file_handler (dest_name, src_name, 0);
-  if (value <= MAXBUFSIZE)
-    {
-      memset (buf, 0, value);
-      ucon64_fwrite (buf, 0, value, dest_name, "wb");
-    }
-  else
-    {
-      int bytesleft = value, bytestowrite;
-      memset (buf, 0, MAXBUFSIZE);
-      while (bytesleft > 0)
+      if (ucon64.io_mode > SWC_IO_MAX)
         {
-          bytestowrite = bytesleft <= MAXBUFSIZE ? bytesleft : MAXBUFSIZE;
-          ucon64_fwrite (buf, 0, bytestowrite, dest_name,
-            bytesleft == value ? "wb" : "ab"); // we have to use "wb" for
-          bytesleft -= bytestowrite;           //  the first iteration
+          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.io_mode);
+          ucon64.io_mode = 0;
         }
-    }
-  fcopy (src_name, 0, fsizeof (p->fname), dest_name, "ab");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-  return 0;
-}
-
-
-static int
-ucon64_tmp_a (st_ucon64_t *p)
-{
-  aps_apply (p->fname, p->fname_optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_b (st_ucon64_t *p)
-{
-  bsl_apply (p->fname, p->fname_optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_i (st_ucon64_t *p)
-{
-  ips_apply (p->fname, p->fname_optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ppf (st_ucon64_t *p)
-{
-  ppf_apply (p->fname, p->fname_optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_mka (st_ucon64_t *p)
-{
-  aps_create (p->optarg, p->fname);          // original, modified
-  return 0;
-}
-
-
-static int
-ucon64_tmp_mki (st_ucon64_t *p)
-{
-  ips_create (p->optarg, p->fname);          // original, modified
-  return 0;
-}
-
-
-static int
-ucon64_tmp_mkppf (st_ucon64_t *p)
-{
-  ppf_create (p->optarg, p->fname);          // original, modified
-  return 0;
-}
-
-
-static int
-ucon64_tmp_na (st_ucon64_t *p)
-{
-  aps_set_desc (p->fname, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_nppf (st_ucon64_t *p)
-{
-  ppf_set_desc (p->fname, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_idppf (st_ucon64_t *p)
-{
-  ppf_set_fid (p->fname, p->optarg);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_lsd (st_ucon64_t *p)
-{
-  if (p->dat_enabled)
-    {
-      if (p->crc32)
+      else
         {
-          fputs (basename2 (p->fname), stdout);
-          fputc ('\n', stdout);
-          // Use p->fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
-          printf ("Checksum (CRC32): 0x%08x\n", p->fcrc32 ?
-                  p->fcrc32 : p->crc32);
-          ucon64_dat_nfo ((st_ucon64_dat_t *) p->dat, 1);
+          printf ("I/O mode: 0x%03x", ucon64.io_mode);
+          if (ucon64.io_mode)
+            {
+              char flagstr[100];
+
+              flagstr[0] = 0;
+              if (ucon64.io_mode & SWC_IO_FORCE_32MBIT)
+                strcat (flagstr, "force 32 Mbit dump, ");
+              if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
+                strcat (flagstr, "alternative ROM size method, ");
+              if (ucon64.io_mode & SWC_IO_SUPER_FX)
+                strcat (flagstr, "Super FX, ");
+              if (ucon64.io_mode & SWC_IO_SDD1)
+                strcat (flagstr, "S-DD1, ");
+              if (ucon64.io_mode & SWC_IO_SA1)
+                strcat (flagstr, "SA-1, ");
+              if (ucon64.io_mode & SWC_IO_SPC7110)
+                strcat (flagstr, "SPC7110, ");
+              if (ucon64.io_mode & SWC_IO_DX2_TRICK)
+                strcat (flagstr, "DX2 trick, ");
+              if (ucon64.io_mode & SWC_IO_MMX2)
+                strcat (flagstr, "Mega Man X 2, ");
+              if (ucon64.io_mode & SWC_IO_DUMP_BIOS)
+                strcat (flagstr, "dump BIOS, ");
+
+              if (flagstr[0])
+                flagstr[strlen (flagstr) - 2] = 0;
+              printf (" (%s)", flagstr);
+            }
           fputc ('\n', stdout);
         }
-    }
-  else
-    printf (ucon64_msg[DAT_NOT_ENABLED]);
-  return 0;
-}
+      break;
+#endif // USE_PARALLEL
 
+    case UCON64_PATCH: // --patch and --file are the same
+    case UCON64_FILE:
+      ucon64.file = optarg;
+      break;
 
-static int
-ucon64_tmp_scan (st_ucon64_t *p)
-{
-  ucon64_tmp_lsd (p);
-  return 0;
-}
+    case UCON64_I:
+    case UCON64_B:
+    case UCON64_A:
+    case UCON64_NA:
+    case UCON64_PPF:
+    case UCON64_NPPF:
+    case UCON64_IDPPF:
+      if (!ucon64.file || !ucon64.file[0])
+        ucon64.file = ucon64.argv[ucon64.argc - 1];
+      break;
 
+#if 0
+    case UCON64_ROM:
+      if (optarg)
+        ucon64.fname = optarg;
+      break;
+#endif
 
-static int
-ucon64_tmp_lsv (st_ucon64_t *p)
-{
-#warning huh?
-//  if (p->nfo)
-//    ucon64_nfo ();
-  return 0;
-}
-
-
-static int
-ucon64_tmp_ls (st_ucon64_t *p)
-{
-  char buf[MAXBUFSIZE];
-  struct stat fstate;
-  char *ptr = NULL;
-
-  if (p->nfo)
-    ptr = p->nfo->name;
-
-  if (p->dat)
-    {
-      if (!ptr)
-        ptr = ((st_ucon64_dat_t *) p->dat)->name;
-      else if (!ptr[0])
-        ptr = ((st_ucon64_dat_t *) p->dat)->name;
-    }
-
-  if (ptr)
-    if (ptr[0])
+    case UCON64_O:
       {
-        if (stat (p->fname, &fstate) != 0)
-          return 0;
-        strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
-        printf ("%-31.31s %10d %s %s", to_func (ptr, strlen (ptr), toprint),
-                fsizeof (p->fname), buf, basename2 (p->fname));
-        fputc ('\n', stdout);
+        struct stat fstate;
+        int dir = 0;
+
+        if (!stat (optarg, &fstate))
+          if (S_ISDIR (fstate.st_mode))
+            {
+              strcpy (ucon64.output_path, optarg);
+              if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
+                strcat (ucon64.output_path, FILE_SEPARATOR_S);
+              dir = 1;
+            }
+
+        if (!dir)
+          puts ("WARNING: Argument for -o must be a directory. Using current directory instead");
       }
-  return 0;
-}
+      break;
 
+    case UCON64_NHI:
+      ucon64.snes_hirom = 0;
+      break;
 
-static int
-ucon64_tmp_rdat (st_ucon64_t *p)
-{
-  ucon64_rename (UCON64_RDAT);
-  return 0;
-}
+    case UCON64_HI:
+      ucon64.snes_hirom = SNES_HIROM;
+      break;
 
+    case UCON64_EROM:
+      ucon64.snes_header_base = SNES_EROM;
+      break;
 
-static int
-ucon64_tmp_rrom (st_ucon64_t *p)
-{
-  ucon64_rename (UCON64_RROM);
-  return 0;
-}
+    case UCON64_BS:
+      ucon64.bs_dump = 1;
+      break;
 
+    case UCON64_NBS:
+      ucon64.bs_dump = 0;
+      break;
 
-static int
-ucon64_tmp_r83 (st_ucon64_t *p)
-{
-  ucon64_rename (UCON64_R83);
-  return 0;
-}
+    case UCON64_CTRL:
+      if (UCON64_ISSET (ucon64.controller))
+        ucon64.controller |= 1 << strtol (optarg, NULL, 10);
+      else
+        ucon64.controller = 1 << strtol (optarg, NULL, 10);
+      break;
 
+    case UCON64_CTRL2:
+      if (UCON64_ISSET (ucon64.controller2))
+        ucon64.controller2 |= 1 << strtol (optarg, NULL, 10);
+      else
+        ucon64.controller2 = 1 << strtol (optarg, NULL, 10);
+      break;
 
-static int
-ucon64_tmp_rjoliet (st_ucon64_t *p)
-{
-  ucon64_rename (UCON64_RJOLIET);
-  return 0;
-}
+    case UCON64_NTSC:
+      if (!UCON64_ISSET (ucon64.tv_standard))
+        ucon64.tv_standard = 0;
+      else if (ucon64.tv_standard == 1)
+        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
+      break;
 
+    case UCON64_PAL:
+      if (!UCON64_ISSET (ucon64.tv_standard))
+        ucon64.tv_standard = 1;
+      else if (ucon64.tv_standard == 0)
+        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
+      break;
 
-static int
-ucon64_tmp_rl (st_ucon64_t *p)
-{
-  char rename_buf[FILENAME_MAX];
-#ifdef  AMIGA
-  char *ptr = NULL;
-  char tmpbuf[FILENAME_MAX];
+    case UCON64_BAT:
+      ucon64.battery = 1;
+      break;
 
-  ptr = basename2 (tmpnam3 (tmpbuf, 0));
-  rename2 (p->fname, ptr);
-#endif
-  strcpy (rename_buf, basename2 (p->fname));
-  printf ("Renaming \"%s\" to ", rename_buf);
-  strlwr (rename_buf);
-  ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-  printf ("\"%s\"\n", rename_buf);
-#ifdef  AMIGA
-  rename2 (ptr, rename_buf);
-#else
-  rename2 (p->fname, rename_buf);
-#endif
-  p->fname = (const char *) rename_buf;
-  return 0;
-}
+    case UCON64_NBAT:
+      ucon64.battery = 0;
+      break;
 
+    case UCON64_VRAM:
+      ucon64.vram = 1;
+      break;
 
-static int
-ucon64_tmp_ru (st_ucon64_t *p)
-{
-  char rename_buf[FILENAME_MAX];
-#ifdef  AMIGA
-  char *ptr = NULL;
-  char tmpbuf[FILENAME_MAX];
+    case UCON64_NVRAM:
+      ucon64.vram = 0;
+      break;
 
-  ptr = basename2 (tmpnam3 (tmpbuf, 0));
-  rename2 (p->fname, ptr);
-#endif
-  strcpy (rename_buf, basename2 (p->fname));
-  printf ("Renaming \"%s\" to ", rename_buf);
-  strupr (rename_buf);
-  ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-  printf ("\"%s\"\n", rename_buf);
-#ifdef  AMIGA
-  rename2 (ptr, rename_buf);
-#else
-  rename2 (p->fname, rename_buf);
-#endif
-  p->fname = (const char *) rename_buf;
-  return 0;
-}
+    case UCON64_MIRR:
+      ucon64.mirror = strtol (optarg, NULL, 10);
+      break;
 
+    case UCON64_MAPR:
+      ucon64.mapr = optarg;                     // pass the _string_, it can be a
+      break;                                    //  board name
 
-static int
-ucon64_tmp_dbv (st_ucon64_t *p)
-{
-  if (p->dat_enabled)
-    {
-      ucon64_dat_view (p->console, 1);
-      printf ("TIP: %s " OPTION_LONG_S "dbv " OPTION_LONG_S "nes"
-              " would show only information about known NES ROMs\n\n",
-              basename2 (p->argv[0]));
-    }
-  else
-    fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
-  return 0;
-}
+    case UCON64_CMNT:
+      ucon64.comment = optarg;
+      break;
 
+    case UCON64_DUMPINFO:
+      ucon64.use_dump_info = 1;
+      ucon64.dump_info = optarg;
+      break;
 
-static int
-ucon64_tmp_db (st_ucon64_t *p)
-{
-  if (p->quiet > -1)
-    {
-      if (p->dat_enabled)
+    case UCON64_Q:
+    case UCON64_QQ:                             // for now -qq is equivalent to -q
+      ucon64.quiet = 1;
+      break;
+
+    case UCON64_V:
+      ucon64.quiet = -1;
+      break;
+
+    case UCON64_SSIZE:
+      ucon64.part_size = strtol (optarg, NULL, 10) * MBIT;
+      break;
+
+    case UCON64_ID:
+      ucon64.id = -2;                           // just a value other than
+      break;                                    //  UCON64_UNKNOWN and smaller than 0
+
+    case UCON64_IDNUM:
+      ucon64.id = strtol (optarg, NULL, 10);
+      if (ucon64.id < 0)
+        ucon64.id = 0;
+      else if (ucon64.id > 999)
         {
-          ucon64_dat_view (p->console, 0);
-          printf ("TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes"
+          fprintf (stderr, "ERROR: NUM must be smaller than 999\n");
+          exit (1);
+        }
+      break;
+
+    case UCON64_REGION:
+      if (optarg[1] == 0 && toupper (optarg[0]) == 'X') // be insensitive to case
+        ucon64.region = 256;
+      else
+        ucon64.region = strtol (optarg, NULL, 10);
+      break;
+
+    default:
+      break;
+    }
+
+  return 0;
+}
+
+
+static inline char *
+to_func (char *s, int len, int (*func) (int))
+{
+  char *p = s;
+
+  for (; len > 0; p++, len--)
+    *p = func (*p);
+
+  return s;
+}
+
+
+static inline int
+toprint (int c)
+{
+  if (isprint (c))
+    return c;
+
+  // characters that also work with printf()
+#ifdef  USE_ANSI_COLOR
+  if (c == '\x1b')
+    return ucon64.ansi_color ? c : '.';
+#endif
+
+  return strchr ("\t\n\r", c) ? c : '.';
+}
+
+
+int
+ucon64_options (st_ucon64_t *p)
+{
+#ifdef  USE_PARALLEL
+  int enableRTS = -1;                           // for UCON64_XSWC & UCON64_XSWC2
+#endif
+  int value = 0, x = 0, padded, c = p->option;
+  unsigned int checksum;
+  char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       *ptr = NULL, *values[UCON64_MAX_ARGS];
+#ifdef  AMIGA
+  char tmpbuf[FILENAME_MAX];
+#endif
+  static char rename_buf[FILENAME_MAX];
+  struct stat fstate;
+  const char *optarg = p->optarg;
+
+  if (ucon64.fname)
+    {
+      strcpy (src_name, ucon64.fname);
+      strcpy (dest_name, ucon64.fname);
+    }
+
+  switch (c)
+    {
+    case UCON64_CRCHD:                          // deprecated
+      value = UNKNOWN_BACKUP_HEADER_LEN;
+    case UCON64_CRC:
+      if (!value)
+        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+      fputs (basename2 (ucon64.fname), stdout);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+      else
+        fputc ('\n', stdout);
+      checksum = 0;
+      ucon64_chksum (NULL, NULL, &checksum, ucon64.fname, value);
+      printf ("Checksum (CRC32): 0x%08x\n\n", checksum);
+      break;
+
+    case UCON64_SHA1:
+      if (!value)
+        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+      fputs (basename2 (ucon64.fname), stdout);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+      else
+        fputc ('\n', stdout);
+      ucon64_chksum (buf, NULL, NULL, ucon64.fname, value);
+      printf ("Checksum (SHA1): 0x%s\n\n", buf);
+      break;
+
+    case UCON64_MD5:
+      if (!value)
+        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+      fputs (basename2 (ucon64.fname), stdout);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+      else
+        fputc ('\n', stdout);
+      ucon64_chksum (NULL, buf, NULL, ucon64.fname, value);
+      printf ("Checksum (MD5): 0x%s\n\n", buf);
+      break;
+
+    case UCON64_HEX:
+      ucon64_dump (stdout, ucon64.fname,
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_HEX);
+      break;
+
+    case UCON64_DUAL:
+      ucon64_dump (stdout, ucon64.fname,
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_DUAL);
+      break;
+
+    case UCON64_CODE:
+      ucon64_dump (stdout, ucon64.fname,
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_CODE);
+      break;
+
+    case UCON64_PRINT:
+      ucon64_dump (stdout, ucon64.fname,
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_PRINT);
+      break;
+
+    case UCON64_C:
+      ucon64_filefile (optarg, 0, ucon64.fname, 0, FALSE);
+      break;
+
+    case UCON64_CS:
+      ucon64_filefile (optarg, 0, ucon64.fname, 0, TRUE);
+      break;
+
+    case UCON64_FIND:
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_WCARD ('?'));
+      break;
+
+    case UCON64_FINDR:
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
+                   strlen (optarg), MEMCMP2_REL);
+      break;
+
+    case UCON64_FINDI:
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg, strlen (optarg),
+                   MEMCMP2_WCARD ('?') | MEMCMP2_CASE);
+      break;
+
+    case UCON64_HFIND:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_WCARD ('?'));
+      break;
+
+    case UCON64_HFINDR:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_REL);
+      break;
+
+    case UCON64_DFIND:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_WCARD ('?'));
+      break;
+
+    case UCON64_DFINDR:
+      strcpy (buf, optarg);
+      value = strarg (values, buf, " ", UCON64_MAX_ARGS);
+      for (x = 0; x < value; x++)
+        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
+          buf[x] = '?';
+      buf[x] = 0;
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
+                   value, MEMCMP2_REL);
+      break;
+
+    case UCON64_PADHD:                          // deprecated
+      value = UNKNOWN_BACKUP_HEADER_LEN;
+    case UCON64_P:
+    case UCON64_PAD:
+      if (!value && ucon64.nfo)
+        value = ucon64.nfo->backup_header_len;
+      ucon64_file_handler (dest_name, src_name, 0);
+
+      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+      if (truncate2 (dest_name, ucon64.file_size + (MBIT - ((ucon64.file_size - value) % MBIT))) == -1)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
+          exit (1);
+        }
+
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
+
+    case UCON64_PADN:
+      ucon64_file_handler (dest_name, src_name, 0);
+
+      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+      if (truncate2 (dest_name, strtol (optarg, NULL, 10) +
+            (ucon64.nfo ? ucon64.nfo->backup_header_len : 0)) == -1)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
+          exit (1);
+        }
+
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
+
+    case UCON64_ISPAD:
+      if ((padded = ucon64_testpad (ucon64.fname)) != -1)
+        {
+          if (!padded)
+            puts ("Padded: No\n");
+          else
+            printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n\n", padded,
+                    (float) padded / MBIT);
+        }
+      break;
+
+    case UCON64_STRIP:
+      ucon64_file_handler (dest_name, src_name, 0);
+      fcopy (src_name, 0, ucon64.file_size - strtol (optarg, NULL, 10),
+        dest_name, "wb");
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
+
+    case UCON64_STP:
+      ucon64_file_handler (dest_name, src_name, 0);
+      fcopy (src_name, 512, ucon64.file_size, dest_name, "wb");
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
+
+    case UCON64_STPN:
+      ucon64_file_handler (dest_name, src_name, 0);
+      fcopy (src_name, strtol (optarg, NULL, 10), ucon64.file_size, dest_name, "wb");
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
+
+    case UCON64_INS:
+      ucon64_file_handler (dest_name, src_name, 0);
+      memset (buf, 0, 512);
+      ucon64_fwrite (buf, 0, 512, dest_name, "wb");
+      fcopy (src_name, 0, ucon64.file_size, dest_name, "ab");
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
+
+    case UCON64_INSN:
+      ucon64_file_handler (dest_name, src_name, 0);
+      value = strtol (optarg, NULL, 10);
+      if (value <= MAXBUFSIZE)
+        {
+          memset (buf, 0, value);
+          ucon64_fwrite (buf, 0, value, dest_name, "wb");
+        }
+      else
+        {
+          int bytesleft = value, bytestowrite;
+          memset (buf, 0, MAXBUFSIZE);
+          while (bytesleft > 0)
+            {
+              bytestowrite = bytesleft <= MAXBUFSIZE ? bytesleft : MAXBUFSIZE;
+              ucon64_fwrite (buf, 0, bytestowrite, dest_name,
+                bytesleft == value ? "wb" : "ab"); // we have to use "wb" for
+              bytesleft -= bytestowrite;           //  the first iteration
+            }
+        }
+      fcopy (src_name, 0, ucon64.file_size, dest_name, "ab");
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
+
+    case UCON64_A:
+      aps_apply (ucon64.fname, ucon64.file);
+      break;
+
+    case UCON64_B:
+      bsl_apply (ucon64.fname, ucon64.file);
+      break;
+
+    case UCON64_I:
+      ips_apply (ucon64.fname, ucon64.file);
+      break;
+
+    case UCON64_PPF:
+      ppf_apply (ucon64.fname, ucon64.file);
+      break;
+
+    case UCON64_MKA:
+      aps_create (optarg, ucon64.fname);          // original, modified
+      break;
+
+    case UCON64_MKI:
+      ips_create (optarg, ucon64.fname);          // original, modified
+      break;
+
+    case UCON64_MKPPF:
+      ppf_create (optarg, ucon64.fname);          // original, modified
+      break;
+
+    case UCON64_NA:
+      aps_set_desc (ucon64.fname, optarg);
+      break;
+
+    case UCON64_NPPF:
+      ppf_set_desc (ucon64.fname, optarg);
+      break;
+
+    case UCON64_IDPPF:
+      ppf_set_fid (ucon64.fname, optarg);
+      break;
+
+    case UCON64_SCAN:
+    case UCON64_LSD:
+      if (ucon64.dat_enabled)
+        {
+          if (ucon64.crc32)
+            {
+              fputs (basename2 (ucon64.fname), stdout);
+              if (ucon64.fname_arch[0])
+                printf (" (%s)\n", basename2 (ucon64.fname_arch));
+              else
+                fputc ('\n', stdout);
+              // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
+              printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ?
+                      ucon64.fcrc32 : ucon64.crc32);
+              ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
+              fputc ('\n', stdout);
+            }
+        }
+      else
+        printf (ucon64_msg[DAT_NOT_ENABLED]);
+      break;
+
+    case UCON64_LSV:
+      if (ucon64.nfo)
+        ucon64_nfo ();
+      break;
+
+    case UCON64_LS:
+      if (ucon64.nfo)
+        ptr = ucon64.nfo->name;
+
+      if (ucon64.dat)
+        {
+          if (!ptr)
+            ptr = ((st_ucon64_dat_t *) ucon64.dat)->name;
+          else if (!ptr[0])
+            ptr = ((st_ucon64_dat_t *) ucon64.dat)->name;
+        }
+
+      if (ptr)
+        if (ptr[0])
+          {
+            if (stat (ucon64.fname, &fstate) != 0)
+              break;
+            strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
+            printf ("%-31.31s %10d %s %s", to_func (ptr, strlen (ptr), toprint),
+                    ucon64.file_size, buf, basename2 (ucon64.fname));
+            if (ucon64.fname_arch[0])
+              printf (" (%s)\n", basename2 (ucon64.fname_arch));
+            else
+              fputc ('\n', stdout);
+          }
+      break;
+
+    case UCON64_RDAT:
+      ucon64_rename (UCON64_RDAT);
+      break;
+
+    case UCON64_RROM:
+      ucon64_rename (UCON64_RROM);
+      break;
+
+    case UCON64_R83:
+      ucon64_rename (UCON64_R83);
+      break;
+
+    case UCON64_RJOLIET:
+      ucon64_rename (UCON64_RJOLIET);
+      break;
+
+    case UCON64_RL:
+#ifdef  AMIGA
+      ptr = basename2 (tmpnam2 (tmpbuf));
+      rename2 (ucon64.fname, ptr);
+#endif
+      strcpy (rename_buf, basename2 (ucon64.fname));
+      printf ("Renaming \"%s\" to ", rename_buf);
+      strlwr (rename_buf);
+      ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      printf ("\"%s\"\n", rename_buf);
+#ifdef  AMIGA
+      rename2 (ptr, rename_buf);
+#else
+      rename2 (ucon64.fname, rename_buf);
+#endif
+      ucon64.fname = (const char *) rename_buf;
+      break;
+
+    case UCON64_RU:
+#ifdef  AMIGA
+      ptr = basename2 (tmpnam2 (tmpbuf));
+      rename2 (ucon64.fname, ptr);
+#endif
+      strcpy (rename_buf, basename2 (ucon64.fname));
+      printf ("Renaming \"%s\" to ", rename_buf);
+      strupr (rename_buf);
+      ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      printf ("\"%s\"\n", rename_buf);
+#ifdef  AMIGA
+      rename2 (ptr, rename_buf);
+#else
+      rename2 (ucon64.fname, rename_buf);
+#endif
+      ucon64.fname = (const char *) rename_buf;
+      break;
+
+#ifdef  USE_DISCMAGE
+    case UCON64_BIN2ISO:
+    case UCON64_ISOFIX:
+    case UCON64_RIP:
+    case UCON64_CDMAGE:
+      if (ucon64.discmage_enabled)
+        {
+          uint32_t flags = 0;
+
+          switch (c)
+            {
+              case UCON64_BIN2ISO:
+                flags |= DM_2048; // DM_2048 read sectors and convert to 2048 Bytes
+                break;
+
+              case UCON64_ISOFIX:
+                flags |= DM_FIX; // DM_FIX read sectors and fix (if needed/possible)
+                break;
+
+              case UCON64_CDMAGE:
+//                flags |= DM_CDMAGE;
+                break;
+            }
+
+          ucon64.image = dm_reopen (ucon64.fname, 0, (dm_image_t *) ucon64.image);
+          if (ucon64.image)
+            {
+              int track = strtol (optarg, NULL, 10);
+              if (track < 1)
+                track = 1;
+              track--; // decrement for dm_rip()
+
+              printf ("Writing track: %d\n\n", track + 1);
+
+              dm_set_gauge ((void (*)(int, int)) &discmage_gauge);
+              dm_rip ((dm_image_t *) ucon64.image, track, flags);
+              fputc ('\n', stdout);
+            }
+        }
+      else
+        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
+      break;
+
+    case UCON64_MKTOC:
+    case UCON64_MKCUE:
+    case UCON64_MKSHEET:
+      if (ucon64.discmage_enabled)
+        {
+          if (ucon64.image)
+            {
+              char buf[FILENAME_MAX];
+              strcpy (buf, ((dm_image_t *) ucon64.image)->fname);
+
+              if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
+                {
+                  set_suffix (buf, ".toc");
+                  ucon64_file_handler (buf, NULL, 0);
+
+                  if (!dm_toc_write ((dm_image_t *) ucon64.image))
+                    printf (ucon64_msg[WROTE], basename2 (buf));
+                  else
+                    fputs ("ERROR: Could not generate toc sheet\n", stderr);
+                }
+
+              if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
+                {
+                  set_suffix (buf, ".cue");
+                  ucon64_file_handler (buf, NULL, 0);
+
+                  if (!dm_cue_write ((dm_image_t *) ucon64.image))
+                    printf (ucon64_msg[WROTE], basename2 (buf));
+                  else
+                    fputs ("ERROR: Could not generate cue sheet\n", stderr);
+                }
+            }
+        }
+      else
+        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
+      break;
+
+    case UCON64_XCDRW:
+      if (ucon64.discmage_enabled)
+        {
+//          dm_set_gauge ((void *) &discmage_gauge);
+          if (!access (ucon64.fname, F_OK))
+            dm_disc_write ((dm_image_t *) ucon64.image);
+          else
+            dm_disc_read ((dm_image_t *) ucon64.image);
+        }
+      else
+        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
+      break;
+#endif // USE_DISCMAGE
+
+    case UCON64_DB:
+      if (ucon64.quiet > -1)
+        {
+          if (ucon64.dat_enabled)
+            {
+              ucon64_dat_view (ucon64.console, 0);
+              printf ("TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes"
+                      " would show only information about known NES ROMs\n\n",
+                      basename2 (ucon64.argv[0]));
+            }
+          else
+            fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
+          break;
+        }
+
+    case UCON64_DBV:
+      if (ucon64.dat_enabled)
+        {
+          ucon64_dat_view (ucon64.console, 1);
+          printf ("TIP: %s " OPTION_LONG_S "dbv " OPTION_LONG_S "nes"
                   " would show only information about known NES ROMs\n\n",
-                  basename2 (p->argv[0]));
+                  basename2 (ucon64.argv[0]));
         }
       else
         fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
-      return 0;
-    }
-  else return ucon64_tmp_dbv (p);
-}
+      break;
 
-
-static int
-ucon64_tmp_dbs (st_ucon64_t *p)
-{
-  if (p->dat_enabled)
-    {
-      p->crc32 = 0;
-      sscanf (p->optarg, "%x", &p->crc32);
-
-      if (!(p->dat = (st_ucon64_dat_t *) ucon64_dat_search (p->crc32, NULL)))
+    case UCON64_DBS:
+      if (ucon64.dat_enabled)
         {
-          printf (ucon64_msg[DAT_NOT_FOUND], p->crc32);
-          printf ("TIP: Be sure to install the right DAT files in %s\n", p->datdir);
+          ucon64.crc32 = 0;
+          sscanf (optarg, "%x", &ucon64.crc32);
+
+          if (!(ucon64.dat = (st_ucon64_dat_t *) ucon64_dat_search (ucon64.crc32, NULL)))
+            {
+              printf (ucon64_msg[DAT_NOT_FOUND], ucon64.crc32);
+              printf ("TIP: Be sure to install the right DAT files in %s\n", ucon64.datdir);
+            }
+          else
+            {
+              ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
+              printf ("\n"
+                      "TIP: %s " OPTION_LONG_S "dbs" OPTARG_S "0x%08x " OPTION_LONG_S
+                      "nes would search only for a NES ROM\n\n",
+                      basename2 (ucon64.argv[0]), ucon64.crc32);
+            }
         }
       else
+        fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
+      break;
+
+    case UCON64_MKDAT:
+      ucon64_create_dat (optarg, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
+      break;
+
+    case UCON64_MULTI:
+      switch (ucon64.console)
         {
-          ucon64_dat_nfo ((st_ucon64_dat_t *) p->dat, 1);
-          printf ("\n"
-                  "TIP: %s " OPTION_LONG_S "dbs" OPTARG_S "0x%08x " OPTION_LONG_S
-                  "nes would search only for a NES ROM\n\n",
-                  basename2 (p->argv[0]), p->crc32);
+        case UCON64_GBA:
+          gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_GEN:
+          genesis_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_PCE:
+          pce_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_SMS:                        // Sega Master System *and* Game Gear
+          sms_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_SNES:
+          snes_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        default:
+          return -1;
         }
-    }
-  else
-    fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
-  return 0;
-}
+      break;
 
+    case UCON64_E:
+      ucon64_e ();
+      break;
 
-static int
-ucon64_tmp_mkdat (st_ucon64_t *p)
-{
-  ucon64_create_dat (p->optarg, p->fname, p->nfo ? p->nfo->backup_header_len : 0);
-  return 0;
-}
+    case UCON64_1991:
+      genesis_1991 (ucon64.nfo);
+      break;
 
+    case UCON64_B0:
+      lynx_b0 (ucon64.nfo, optarg);
+      break;
 
-static int
-ucon64_tmp_dbuh (st_ucon64_t *p)
-{
-  snes_backup_header_info (p->nfo);
-  return 0;
-}
+    case UCON64_B1:
+      lynx_b1 (ucon64.nfo, optarg);
+      break;
 
+    case UCON64_BIN:
+      genesis_bin (ucon64.nfo);
+      break;
 
-#ifdef  USE_PARALLEL
-/*
-  It doesn't make sense to continue after executing a (send) backup option
-  ("multizip"). Don't return, but use break instead. ucon64_execute_options()
-  checks if an option was used that should stop uCON64.
-*/
-#ifdef  USE_LIBCD64
-static int
-ucon64_tmp_xcd64 (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    cd64_read_rom (p->fname, 64);
-  else
-    cd64_write_rom (p->fname);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_BIOS:
+      neogeo_bios (optarg);
+      break;
 
+    case UCON64_BOT:
+      n64_bot (ucon64.nfo, optarg);
+      break;
 
-static int
-ucon64_tmp_xcd64c (st_ucon64_t *p)
-{
-  if (!access (p->fname, F_OK) && p->backup)
-    printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
-  cd64_read_rom (p->fname, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_CHK:
+      switch (ucon64.console)
+        {
+        case UCON64_GB:
+          gb_chk (ucon64.nfo);
+          break;
+        case UCON64_GBA:
+          gba_chk (ucon64.nfo);
+          break;
+        case UCON64_GEN:
+          genesis_chk (ucon64.nfo);
+          break;
+        case UCON64_N64:
+          n64_chk (ucon64.nfo);
+          break;
+        case UCON64_SMS:
+          sms_chk (ucon64.nfo);
+          break;
+        case UCON64_SNES:
+          snes_chk (ucon64.nfo);
+          break;
+        case UCON64_SWAN:
+          swan_chk (ucon64.nfo);
+          break;
+        case UCON64_NDS:
+          nds_chk (ucon64.nfo);
+          break;
+        default:
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
+      break;
 
+    case UCON64_COL:
+      snes_col (optarg);
+      break;
 
-static int
-ucon64_tmp_xcd64b (st_ucon64_t *p)
-{
-  cd64_write_bootemu (p->fname);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_CRP:
+      gba_crp (ucon64.nfo, optarg);
+      break;
 
+    case UCON64_DBUH:
+      snes_backup_header_info (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xcd64s (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    cd64_read_sram (p->fname);
-  else
-    cd64_write_sram (p->fname);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_SWAP:
+    case UCON64_DINT:
+      switch (ucon64.console)
+        {
+        case UCON64_NES:
+          nes_dint ();
+          break;
+        case UCON64_PCE:
+          pce_swap (ucon64.nfo);
+          break;
+        case UCON64_SNES:
+          snes_dint (ucon64.nfo);
+          break;
+        default:                                // Nintendo 64
+          puts ("Converting file...");
+          ucon64_file_handler (dest_name, NULL, 0);
+          fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+          ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+          printf (ucon64_msg[WROTE], dest_name);
+          break;
+        }
+      break;
 
+    case UCON64_SWAP2:
+      // --swap2 is currently used only for Nintendo 64
+      puts ("Converting file...");
+      ucon64_file_handler (dest_name, NULL, 0);
+      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+      ucon64_fwswap32 (dest_name, 0, ucon64.file_size);
+      printf (ucon64_msg[WROTE], dest_name);
+      break;
 
-static int
-ucon64_tmp_xcd64f (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    cd64_read_flashram (p->fname);
-  else
-    cd64_write_flashram (p->fname);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_DMIRR:
+      snes_demirror (ucon64.nfo);
+      break;
 
+    case UCON64_DNSRT:
+      snes_densrt (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xcd64e (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    cd64_read_eeprom (p->fname);
-  else
-    cd64_write_eeprom (p->fname);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_F:
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_f (ucon64.nfo);
+          break;
+        case UCON64_N64:
+          n64_f (ucon64.nfo);
+          break;
+        case UCON64_PCE:
+          pce_f (ucon64.nfo);
+          break;
+        case UCON64_SNES:
+          snes_f (ucon64.nfo);
+          break;
+        default:
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
+      break;
 
+    case UCON64_FDS:
+      nes_fds ();
+      break;
 
-static int
-ucon64_tmp_xcd64m (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    cd64_read_mempack (p->fname, strtol (p->optarg, NULL, 10));
-  else
-    cd64_write_mempack (p->fname, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_FDSL:
+      nes_fdsl (ucon64.nfo, NULL);
+      break;
+
+    case UCON64_FFE:
+      nes_ffe (ucon64.nfo);
+      break;
+
+    case UCON64_FIG:
+      snes_fig (ucon64.nfo);
+      break;
+
+    case UCON64_FIGS:
+      snes_figs (ucon64.nfo);
+      break;
+
+    case UCON64_GBX:
+      gb_gbx (ucon64.nfo);
+      break;
+
+    case UCON64_GD3:
+      snes_gd3 (ucon64.nfo);
+      break;
+
+    case UCON64_GD3S:
+      snes_gd3s (ucon64.nfo);
+      break;
+
+    case UCON64_GG:
+      switch (ucon64.console)
+        {
+        case UCON64_GB:
+        case UCON64_GEN:
+        case UCON64_NES:
+        case UCON64_SMS:
+        case UCON64_SNES:
+          gg_apply (ucon64.nfo, optarg);
+          break;
+        default:
+          fputs ("ERROR: Cannot apply Game Genie code for this ROM/console\n", stderr);
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
+      break;
+
+    case UCON64_GGD:
+      gg_display (ucon64.nfo, optarg);
+      break;
+
+    case UCON64_GGE:
+      gg_display (ucon64.nfo, optarg);
+      break;
+
+    case UCON64_INES:
+      nes_ines ();
+      break;
+
+    case UCON64_INESHD:
+      nes_ineshd (ucon64.nfo);
+      break;
+
+#if 0
+    case UCON64_IP:
+      break;
 #endif
 
+    case UCON64_VMS:
+      break;
 
-static int
-ucon64_tmp_xreset (st_ucon64_t *p)
-{
-  parport_print_info ();
-  fputs ("Resetting parallel port...", stdout);
-  outportb ((unsigned short) (p->parport + PARPORT_DATA), 0);
-  outportb ((unsigned short) (p->parport + PARPORT_CONTROL), 0);
-  puts ("done");
-  return 0;
-}
+    case UCON64_PARSE:
+      dc_parse (optarg);
+      break;
 
+    case UCON64_MKIP:
+      dc_mkip ();
+      break;
 
-static int
-ucon64_tmp_xcmc (st_ucon64_t *p)
-{
-  if (!access (p->fname, F_OK) && p->backup)
-    printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
-  cmc_read_rom (p->fname, p->parport, p->io_mode); // p->io_mode contains speed value
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_J:
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_j (ucon64.nfo);
+          break;
+        case UCON64_NES:
+          nes_j (NULL);
+          break;
+        case UCON64_SNES:
+          snes_j (ucon64.nfo);
+          break;
+        default:
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
+      break;
 
+    case UCON64_K:
+      snes_k (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xcmct (st_ucon64_t *p)
-{
-  cmc_test (strtol (p->optarg, NULL, 10), p->parport, p->io_mode);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_L:
+      snes_l (ucon64.nfo);
+      break;
 
+    case UCON64_LNX:
+      lynx_lnx (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xdex (st_ucon64_t *p)
-{
-  printf (ucon64_msg[UNTESTED]);
-  if (access (p->fname, F_OK) != 0)
-    dex_read_block (p->fname, strtol (p->optarg, NULL, 10), p->parport);
-  else
-    dex_write_block (p->fname, strtol (p->optarg, NULL, 10), p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_LOGO:
+      switch (ucon64.console)
+        {
+          case UCON64_GB:
+            gb_logo (ucon64.nfo);
+            break;
+          case UCON64_GBA:
+            gba_logo (ucon64.nfo);
+            break;
+          case UCON64_NDS:
+            nds_logo (ucon64.nfo);
+            break;
+          default:
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+            return -1;
+        }
+      break;
 
+    case UCON64_LSRAM:
+      n64_sram (ucon64.nfo, optarg);
+      break;
 
-static int
-ucon64_tmp_xdjr (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    doctor64jr_read (p->fname, p->parport);
-  else
-    {
-      if (!p->nfo->interleaved)
-        fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
-               "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
-               stderr);
-      else
-        doctor64jr_write (p->fname, p->parport);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_LYX:
+      lynx_lyx (ucon64.nfo);
+      break;
 
+    case UCON64_MGD:
+      switch (ucon64.console)
+        {
+        case UCON64_GB:
+          gb_mgd (ucon64.nfo);
+          break;
+        case UCON64_GEN:
+          genesis_mgd (ucon64.nfo);
+          break;
+        case UCON64_NG:
+          neogeo_mgd ();
+          break;
+        case UCON64_PCE:
+          pce_mgd (ucon64.nfo);
+          break;
+        case UCON64_SMS:
+          sms_mgd (ucon64.nfo, UCON64_SMS);
+          break;
+        case UCON64_SNES:
+          snes_mgd (ucon64.nfo);
+          break;
+        default:
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
+      break;
 
-static int
-ucon64_tmp_xfal (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    fal_read_rom (p->fname, p->parport, 32);
-  else
-    fal_write_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_MGDGG:
+      sms_mgd (ucon64.nfo, UCON64_GAMEGEAR);
+      break;
 
+    case UCON64_MSG:
+      pce_msg (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xfalmulti (st_ucon64_t *p)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+    case UCON64_N:
+//      if (strlen (optarg) == 0)
+//        break;
+      switch (ucon64.console)
+        {
+        case UCON64_GB:
+          gb_n (ucon64.nfo, optarg);
+          break;
+        case UCON64_GBA:
+          gba_n (ucon64.nfo, optarg);
+          break;
+        case UCON64_GEN:
+          genesis_n (ucon64.nfo, optarg);
+          break;
+        case UCON64_LYNX:
+          lynx_n (ucon64.nfo, optarg);
+          break;
+        case UCON64_N64:
+          n64_n (ucon64.nfo, optarg);
+          break;
+        case UCON64_NES:
+          nes_n (optarg);
+          break;
+        case UCON64_SNES:
+          snes_n (ucon64.nfo, optarg);
+          break;
+        case UCON64_NDS:
+          nds_n (ucon64.nfo, optarg);
+          break;
+        default:
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
+      break;
 
-  if (p->fname)
-    {
-      strcpy (src_name, p->fname);
-      strcpy (dest_name, p->fname);
-    }
+    case UCON64_N2:
+//      if (strlen (optarg) == 0)
+//        break;
+      genesis_n2 (ucon64.nfo, optarg);
+      break;
 
-  tmpnam3 (src_name, 0);
-  p->temp_file = src_name;
-  register_func (remove_temp_file);
-  // gba_multi() calls ucon64_file_handler() so the directory part will be
-  //  stripped from src_name. The directory should be used though.
-  if (!p->output_path[0])
-    {
-      dirname2 (src_name, p->output_path);
-      if (p->output_path[strlen (p->output_path) - 1] != FILE_SEPARATOR)
-        strcat (p->output_path, FILE_SEPARATOR_S);
-    }
-  if (gba_multi_fname (strtol (p->optarg, NULL, 10) * MBIT, src_name) == 0)
-    { // Don't try to start a transfer if there was a problem
+    case UCON64_N2GB:
+      gb_n2gb (ucon64.nfo, optarg);
+      break;
+
+    case UCON64_NROT:
+      lynx_nrot (ucon64.nfo);
+      break;
+
+    case UCON64_PASOFAMI:
+      nes_pasofami ();
+      break;
+
+    case UCON64_PATTERN:
+      ucon64_pattern (ucon64.nfo, optarg);
+      break;
+
+    case UCON64_POKE:
+      ucon64_file_handler (dest_name, src_name, 0);
+      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+
+      sscanf (optarg, "%x:%x", &x, &value);
+      if (x >= ucon64.file_size)
+        {
+          fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
+          remove (dest_name);
+          break;
+        }
       fputc ('\n', stdout);
-      fal_write_rom (src_name, p->parport);
-    }
+      buf[0] = ucon64_fgetc (dest_name, x);
+      dumper (stdout, buf, 1, x, DUMPER_HEX);
 
-  unregister_func (remove_temp_file);
-  remove_temp_file ();
-  fputc ('\n', stdout);
-  return 0;
-}
+      ucon64_fputc (dest_name, x, value, "r+b");
 
+      buf[0] = value;
+      dumper (stdout, buf, 1, x, DUMPER_HEX);
+      fputc ('\n', stdout);
 
-static int
-ucon64_tmp_xfalc (st_ucon64_t *p)
-{
-  if (!access (p->fname, F_OK) && p->backup)
-    printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
-  fal_read_rom (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
+      printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
+      break;
 
+    case UCON64_ROTL:
+      lynx_rotl (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xfals (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    fal_read_sram (p->fname, p->parport, UCON64_UNKNOWN);
-  else
-    fal_write_sram (p->fname, p->parport, UCON64_UNKNOWN);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_ROTR:
+      lynx_rotr (ucon64.nfo);
+      break;
 
-
-static int
-ucon64_tmp_xfalb (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    fal_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  else
-    fal_write_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xfig (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
-    fig_read_rom (p->fname, p->parport);
-  else
-    {
-      if (!p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format\n",
-               stderr);
-      else if (p->nfo->interleaved)
-        fputs ("ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
-               "       interleaved ROMs. Convert to a FIG compatible format\n",
-               stderr);
-      else // file exists -> send it to the copier
-        fig_write_rom (p->fname, p->parport);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xfigs (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
-    fig_read_sram (p->fname, p->parport);
-  else                                      // file exists -> restore SRAM
-    fig_write_sram (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xfigc (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cart SRAM contents
-    fig_read_cart_sram (p->fname, p->parport);
-  else                                      // file exists -> restore SRAM
-    fig_write_cart_sram (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgbx (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge/flash card
-    gbx_read_rom (p->fname, p->parport);
-  else                                      // file exists -> send it to the programmer
-    gbx_write_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgbxs (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    gbx_read_sram (p->fname, p->parport, -1);
-  else
-    gbx_write_sram (p->fname, p->parport, -1);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgbxb (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    gbx_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  else
-    gbx_write_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgd3 (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
-    gd3_read_rom (p->fname, p->parport); // dumping is not yet supported
-  else
-    {
-      if (!p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
-               stderr);
-      else                                  // file exists -> send it to the copier
-        gd3_write_rom (p->fname, p->parport, p->nfo);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgd3s (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
-    gd3_read_sram (p->fname, p->parport); // dumping is not yet supported
-  else                                      // file exists -> restore SRAM
-    gd3_write_sram (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgd3r (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    gd3_read_saver (p->fname, p->parport);
-  else
-    gd3_write_saver (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgd6 (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    gd6_read_rom (p->fname, p->parport); // dumping is not yet supported
-  else
-    {
-      if (!p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
-               stderr);
-      else
-        gd6_write_rom (p->fname, p->parport, p->nfo);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgd6s (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    gd6_read_sram (p->fname, p->parport);
-  else
-    gd6_write_sram (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgd6r (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    gd6_read_saver (p->fname, p->parport);
-  else
-    gd6_write_saver (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xgg (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    smsgg_read_rom (p->fname, p->parport, 32 * MBIT);
-  else
-    {
-      if (p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has a header. Remove it with -stp or -mgd\n",
-               stderr);
-      else if (p->nfo->interleaved)
-        fputs ("ERROR: This ROM seems to be interleaved, but uCON64 doesn't support\n"
-               "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with -mgd\n",
-               stderr);
-      else
-        smsgg_write_rom (p->fname, p->parport);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xggs (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    smsgg_read_sram (p->fname, p->parport, -1);
-  else
-    smsgg_write_sram (p->fname, p->parport, -1);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xggb (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    smsgg_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  else
-    smsgg_write_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xlit (st_ucon64_t *p)
-{
-  if (!access (p->fname, F_OK) && p->backup)
-    printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
-  lynxit_read_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xmccl (st_ucon64_t *p)
-{
-  printf (ucon64_msg[UNTESTED]);
-  if (!access (p->fname, F_OK) && p->backup)
-    printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
-  mccl_read (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xmcd (st_ucon64_t *p)
-{
-  if (!access (p->fname, F_OK) && p->backup)
-    printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
-  mcd_read_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xmd (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump flash card
-    md_read_rom (p->fname, p->parport, 64 * MBIT); // reads 32 Mbit if Sharp card
-  else                                      // file exists -> send it to the MD-PRO
-    {
-      if (p->nfo->backup_header_len)     // binary with header is possible
-        fputs ("ERROR: This ROM has a header. Remove it with -stp or -bin\n",
-               stderr);
-      else if (genesis_get_file_type () != BIN)
-        fputs ("ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
-               "       binary files to the MD-PRO. Convert ROM with -bin\n",
-               stderr);
-      else
-        md_write_rom (p->fname, p->parport);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xmds (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
-    md_read_sram (p->fname, p->parport, -1);
-  else                                      // file exists -> restore SRAM
-    md_write_sram (p->fname, p->parport, -1);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xmdb (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    md_read_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  else
-    md_write_sram (p->fname, p->parport, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xmsg (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    msg_read_rom (p->fname, p->parport);
-  else
-    {
-      if (!p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format\n",
-               stderr);
-      else if (p->nfo->interleaved)
-        fputs ("ERROR: This ROM seems to be bit-swapped but the MSG doesn't support\n"
-               "       bit-swapped ROMs. Convert to an MSG compatible format\n",
-               stderr);
-      else
-        msg_write_rom (p->fname, p->parport);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xpce (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    pce_read_rom (p->fname, p->parport, 32 * MBIT);
-  else
-    pce_write_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xpl (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    pl_read_rom (p->fname, p->parport);
-  else
-    pl_write_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xpli (st_ucon64_t *p)
-{
-  pl_info (p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xsf (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump flash card
-    sf_read_rom (p->fname, p->parport, 64 * MBIT);
-  else                                      // file exists -> send it to the Super Flash
-    sf_write_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xsfs (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
-    sf_read_sram (p->fname, p->parport);
-  else                                      // file exists -> restore SRAM
-    sf_write_sram (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xsmc (st_ucon64_t *p)
-{
-  if (!p->nfo->backup_header_len)
-    fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n",
-           stderr);
-  else
-    smc_write_rom (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xsmcr (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    smc_read_rts (p->fname, p->parport);
-  else
-    smc_write_rts (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xsmd (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
-    smd_read_rom (p->fname, p->parport);
-  else                                      // file exists -> send it to the copier
-    {
-      if (!p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
-               stderr);
-      else if (!p->nfo->interleaved)
-        fputs ("ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
-               "       interleaved ROMs. Convert to an SMD compatible format\n",
-               stderr);
-      else
-        smd_write_rom (p->fname, p->parport);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xsmds (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
-    smd_read_sram (p->fname, p->parport);
-  else                                      // file exists -> restore SRAM
-    smd_write_sram (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xswc2 (st_ucon64_t *p)
-{
-  int enableRTS = -1;
-
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
-    swc_read_rom (p->fname, p->parport, p->io_mode);
-  else
-    {
-      if (!p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
-               stderr);
-      else if (p->nfo->interleaved)
-        fputs ("ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
-               "       interleaved ROMs. Convert to an SWC compatible format\n",
-               stderr);
-      else
+    case UCON64_S:
+      switch (ucon64.console)
         {
-          if (enableRTS != 0)
-            enableRTS = 1;
-          // file exists -> send it to the copier
-          swc_write_rom (p->fname, p->parport, enableRTS);
+        case UCON64_GEN:
+          genesis_s (ucon64.nfo);
+          break;
+        case UCON64_NES:
+          nes_s ();
+          break;
+        case UCON64_NG:
+          neogeo_s ();
+          break;
+        case UCON64_SNES:
+          snes_s (ucon64.nfo);
+          break;
+        default:
+// The next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
         }
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
+      break;
 
+    case UCON64_SAM:
+      neogeo_sam (optarg);
+      break;
 
-static int
-ucon64_tmp_xswc (st_ucon64_t *p)
-{
-  int enableRTS = 0;
+    case UCON64_SCR:
+      dc_scramble ();
+      break;
 
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump cartridge
-    swc_read_rom (p->fname, p->parport, p->io_mode);
-  else
-    {
-      if (!p->nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
-               stderr);
-      else if (p->nfo->interleaved)
-        fputs ("ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
-               "       interleaved ROMs. Convert to an SWC compatible format\n",
-               stderr);
-      else
+    case UCON64_SGB:
+      gb_sgb (ucon64.nfo);
+      break;
+
+    case UCON64_SMC:
+      snes_smc (ucon64.nfo);
+      break;
+
+    case UCON64_SMD:
+      switch (ucon64.console)
         {
-          if (enableRTS != 0)
-            enableRTS = 1;
-          // file exists -> send it to the copier
-          swc_write_rom (p->fname, p->parport, enableRTS);
+        case UCON64_GEN:
+          genesis_smd (ucon64.nfo);
+          break;
+        case UCON64_SMS:
+          sms_smd (ucon64.nfo);
+          break;
+        default:
+          return -1;
         }
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
+      break;
 
+    case UCON64_SMDS:
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_smds ();
+          break;
+        case UCON64_SMS:
+          sms_smds ();
+          break;
+        default:
+          return -1;
+        }
+      break;
 
-static int
-ucon64_tmp_xswcs (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
-    swc_read_sram (p->fname, p->parport);
-  else                                      // file exists -> restore SRAM
-    swc_write_sram (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_SRAM:
+      gba_sram ();
+      break;
 
+    case UCON64_SC:
+      gba_sc ();
+      break;
 
-static int
-ucon64_tmp_xswcc (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
-    swc_read_cart_sram (p->fname, p->parport, p->io_mode);
-  else                                      // file exists -> restore SRAM
-    swc_write_cart_sram (p->fname, p->parport, p->io_mode);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_SSC:
+      gb_ssc (ucon64.nfo);
+      break;
 
+    case UCON64_SWC:
+      snes_swc (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xswcr (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    swc_read_rts (p->fname, p->parport);
-  else
-    swc_write_rts (p->fname, p->parport);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_SWCS:
+      snes_swcs (ucon64.nfo);
+      break;
 
+    case UCON64_UFO:
+      snes_ufo (ucon64.nfo);
+      break;
 
-static int
-ucon64_tmp_xv64 (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    doctor64_read (p->fname, p->parport);
-  else
-    {
-      if (!p->nfo->interleaved)
-        fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
-               "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
-               stderr);
-      else
-        doctor64_write (p->fname, p->nfo->backup_header_len,
-                        fsizeof (p->fname), p->parport);
-    }
-  fputc ('\n', stdout);
-  return 0;
-}
-#endif // USE_PARALLEL
+    case UCON64_UFOS:
+      snes_ufos (ucon64.nfo);
+      break;
 
+    case UCON64_UNIF:
+      nes_unif ();
+      break;
 
-#if     defined USE_PARALLEL || defined USE_USB
-static int
-ucon64_tmp_xf2a (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    f2a_read_rom (p->fname, 32);
-  else
-    f2a_write_rom (p->fname, UCON64_UNKNOWN);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_UNSCR:
+      dc_unscramble ();
+      break;
 
+    case UCON64_USMS:
+      n64_usms (ucon64.nfo, optarg);
+      break;
 
-static int
-ucon64_tmp_xf2amulti (st_ucon64_t *p)
-{
-  f2a_write_rom (NULL, strtol (p->optarg, NULL, 10) * MBIT);
-  fputc ('\n', stdout);
-  return 0;
-}
+    case UCON64_V64:
+      n64_v64 (ucon64.nfo);
+      break;
 
-
-static int
-ucon64_tmp_xf2ac (st_ucon64_t *p)
-{
-  if (!access (p->fname, F_OK) && p->backup)
-    printf ("Wrote backup to: %s\n", mkbak (p->fname, BAK_MOVE));
-  f2a_read_rom (p->fname, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xf2as (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    f2a_read_sram (p->fname, UCON64_UNKNOWN);
-  else
-    f2a_write_sram (p->fname, UCON64_UNKNOWN);
-  fputc ('\n', stdout);
-  return 0;
-}
-
-
-static int
-ucon64_tmp_xf2ab (st_ucon64_t *p)
-{
-  if (access (p->fname, F_OK) != 0)
-    f2a_read_sram (p->fname, strtol (p->optarg, NULL, 10));
-  else
-    f2a_write_sram (p->fname, strtol (p->optarg, NULL, 10));
-  fputc ('\n', stdout);
-  return 0;
-}
-#endif // USE_PARALLEL || USE_USB
-
-
-#warning merge all *_tmp_* funcs into the funcs they wrap
-UCON64_FILTER_TYPE2 (genesis_1991, 1991)
-UCON64_FILTER_TYPE2 (lynx_b0, b0)
-UCON64_FILTER_TYPE2 (lynx_b1, b1)
-UCON64_FILTER_TYPE2 (genesis_bin, bin)
-UCON64_FILTER_TYPE2 (n64_bot, bot)
-UCON64_FILTER_TYPE2 (snes_col, col)
-UCON64_FILTER_TYPE2 (gba_crp, crp)
-UCON64_FILTER_TYPE2 (n64_swap2, swap2) // --swap2 is currently used only for Nintendo 64
-UCON64_FILTER_TYPE2 (snes_demirror, dmirr)
-UCON64_FILTER_TYPE2 (snes_densrt, dnsrt)
-UCON64_FILTER_TYPE2 (nes_fds, fds)
-UCON64_FILTER_TYPE2 (nes_fdsl, fdsl)
-UCON64_FILTER_TYPE2 (nes_ffe, ffe)
-UCON64_FILTER_TYPE2 (snes_fig, fig)
-UCON64_FILTER_TYPE2 (snes_figs, figs)
-UCON64_FILTER_TYPE2 (gb_gbx, gbx)
-UCON64_FILTER_TYPE2 (snes_gd3, gd3)
-UCON64_FILTER_TYPE2 (snes_gd3s, gd3s)
-UCON64_FILTER_TYPE2 (nes_ines, ines)
-UCON64_FILTER_TYPE2 (nes_ineshd, ineshd)
-UCON64_FILTER_TYPE2 (dc_parse, parse)
-UCON64_FILTER_TYPE2 (dc_mkip, mkip)
-UCON64_FILTER_TYPE2 (snes_k, k)
-UCON64_FILTER_TYPE2 (snes_l, l)
-UCON64_FILTER_TYPE2 (lynx_lnx, lnx)
-UCON64_FILTER_TYPE2 (n64_sram, lsram)
-UCON64_FILTER_TYPE2 (lynx_lyx, lyx)
-UCON64_FILTER_TYPE2 (sms_mgdgg, sms_mgdgg)
-UCON64_FILTER_TYPE2 (pce_msg, msg)
-UCON64_FILTER_TYPE2 (genesis_n2, n2)
-UCON64_FILTER_TYPE2 (gb_n2gb, n2gb)
-UCON64_FILTER_TYPE2 (lynx_nrot, nrot)
-UCON64_FILTER_TYPE2 (nes_pasofami, pasofami)
-UCON64_FILTER_TYPE2 (lynx_rotl, rotl)
-UCON64_FILTER_TYPE2 (lynx_rotr, rotr)
-UCON64_FILTER_TYPE2 (dc_scramble, scr)
-UCON64_FILTER_TYPE2 (gb_sgb, sgb)
-#ifdef  HAVE_MATH_H
-UCON64_FILTER_TYPE2 (atari_cc2, cc2)
-#endif
-UCON64_FILTER_TYPE2 (snes_smc, smc)
-UCON64_FILTER_TYPE2 (gba_sram, sram)
-UCON64_FILTER_TYPE2 (gb_ssc, ssc)
-UCON64_FILTER_TYPE2 (snes_swc, swc)
-UCON64_FILTER_TYPE2 (snes_swcs, swcs)
-UCON64_FILTER_TYPE2 (snes_ufo, ufo)
-UCON64_FILTER_TYPE2 (snes_ufos, ufos)
-UCON64_FILTER_TYPE2 (nes_unif, unif)
-UCON64_FILTER_TYPE2 (dc_unscramble, unscr)
-UCON64_FILTER_TYPE2 (n64_usms, usms)
-UCON64_FILTER_TYPE2 (n64_v64, v64)
-UCON64_FILTER_TYPE2 (gb_chk, gb_chk)
-UCON64_FILTER_TYPE2 (gba_chk, gba_chk)
-UCON64_FILTER_TYPE2 (genesis_chk, genesis_chk)
-UCON64_FILTER_TYPE2 (n64_chk, n64_chk)
-UCON64_FILTER_TYPE2 (sms_chk, sms_chk)
-UCON64_FILTER_TYPE2 (snes_chk, snes_chk)
-UCON64_FILTER_TYPE2 (swan_chk, swan_chk)
-UCON64_FILTER_TYPE2 (nds_chk, nds_chk)
-UCON64_FILTER_TYPE2 (nes_dint, nes_dint)
-UCON64_FILTER_TYPE2 (pce_swap, pce_swap)
-UCON64_FILTER_TYPE2 (snes_dint, snes_dint)
-UCON64_FILTER_TYPE2 (n64_swap, n64_swap)
-UCON64_FILTER_TYPE2 (n64_z64, z64)
-UCON64_FILTER_TYPE2 (ucon64_e, e)   
-UCON64_FILTER_TYPE2 (genesis_f, genesis_f)
-UCON64_FILTER_TYPE2 (pce_f, pce_f)
-UCON64_FILTER_TYPE2 (snes_f, snes_f)
-UCON64_FILTER_TYPE2 (genesis_j, genesis_j)
-//UCON64_FILTER_TYPE2 (nes_j, nes_j) // broken.. see nes.c
-UCON64_FILTER_TYPE2 (snes_j, snes_j)
-UCON64_FILTER_TYPE2 (gb_logo, gb_logo)
-UCON64_FILTER_TYPE2 (gba_logo, gba_logo)
-UCON64_FILTER_TYPE2 (nds_logo, nds_logo)
-UCON64_FILTER_TYPE2 (gb_mgd, gb_mgd)
-UCON64_FILTER_TYPE2 (genesis_mgd, genesis_mgd)
-UCON64_FILTER_TYPE2 (pce_mgd, pce_mgd)
-UCON64_FILTER_TYPE2 (sms_mgdsms, sms_mgdsms)
-UCON64_FILTER_TYPE2 (snes_mgd, snes_mgd)
-UCON64_FILTER_TYPE2 (gb_n, gb_n)
-UCON64_FILTER_TYPE2 (gba_n, gba_n)
-UCON64_FILTER_TYPE2 (genesis_n, genesis_n)
-UCON64_FILTER_TYPE2 (lynx_n, lynx_n)
-UCON64_FILTER_TYPE2 (n64_n, n64_n)
-UCON64_FILTER_TYPE2 (nes_n, nes_n)
-UCON64_FILTER_TYPE2 (snes_n, snes_n)
-UCON64_FILTER_TYPE2 (nds_n, nds_n)
-UCON64_FILTER_TYPE2 (genesis_s, genesis_s)
-UCON64_FILTER_TYPE2 (nes_s, nes_s)
-UCON64_FILTER_TYPE2 (snes_s, snes_s)
-UCON64_FILTER_TYPE2 (genesis_smd, genesis_smd)
-UCON64_FILTER_TYPE2 (sms_smd, sms_smd)
-UCON64_FILTER_TYPE2 (genesis_smds, genesis_smds)
-UCON64_FILTER_TYPE2 (sms_smds, sms_smds)
-UCON64_FILTER_TYPE2 (sms_sc, sms_sc)
-UCON64_FILTER_TYPE2 (gb_sc, gb_sc)      
-UCON64_FILTER_TYPE2 (gba_sc, gba_sc)      
-UCON64_FILTER_TYPE2 (nes_sc, nes_sc)      
-UCON64_FILTER_TYPE2 (nds_sc, nds_sc)      
-UCON64_FILTER_TYPE2 (gba_multi, gba_multi)
-UCON64_FILTER_TYPE2 (genesis_multi, gen_multi)
-UCON64_FILTER_TYPE2 (pce_multi, pce_multi)
-UCON64_FILTER_TYPE2 (sms_multi, sms_multi)
-UCON64_FILTER_TYPE2 (snes_multi, snes_multi)
-UCON64_FILTER_TYPE2 (gg_apply, gg)
-UCON64_FILTER_TYPE2 (patch_poke, poke)
-UCON64_FILTER_TYPE2 (gg_display, ggd)
-UCON64_FILTER_TYPE2 (gg_display, gge)
-UCON64_FILTER_TYPE2 (ucon64_pattern, pattern)
-
-
-st_ucon64_filter_t ucon64_filter[] = {
-  {
-    UCON64_CRCHD,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
-    ucon64_tmp_crchd
-  },
-  {
-    UCON64_CRC,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
-    ucon64_tmp_crc
-  },
-  {
-    UCON64_SHA1,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
-    ucon64_tmp_sha1
-  },
-  {
-    UCON64_MD5,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM,
-    ucon64_tmp_md5
-  },
-  {
-    UCON64_HEX,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_hex
-  },
-  {
-    UCON64_BITS,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_bits
-  },
-  {
-    UCON64_CODE,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_code
-  },
-  {
-    UCON64_PRINT,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_print
-  },
-  {
-    UCON64_C,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_c
-  },
-  {
-    UCON64_CS,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_cs
-  },
-  {
-    UCON64_FIND,
-    0,
-    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_find
-  },
-  {
-    UCON64_FINDR,
-    0,
-    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_findr
-  },
-  {
-    UCON64_FINDI,
-    0,
-    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_findi
-  },
-  {
-    UCON64_HFIND,
-    0,
-    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_hfind
-  },
-  {
-    UCON64_HFINDR,
-    0,
-    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_hfindr
-  },
-  {
-    UCON64_DFIND,
-    0,
-    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_dfind
-  },
-  {
-    UCON64_DFINDR,
-    0,
-    WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_dfindr
-  },
-  {
-    UCON64_PADHD,
-    0,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_padhd
-  },
-  {
-    UCON64_P,
-    0,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_p
-  },
-  {
-    UCON64_PAD,
-    0,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pad
-  },
-  {
-    UCON64_PADN,
-    0,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_padn
-  },
-  {
-    UCON64_ISPAD,
-    0,
-    WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ispad
-  },
-  {
-    UCON64_STRIP,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_strip
-  },
-  {
-    UCON64_STP,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_stp
-  },
-  {
-    UCON64_STPN,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_stpn
-  },
-  {
-    UCON64_INS,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_ins
-  },
-  {
-    UCON64_INSN,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_insn
-  },
-  {
-    UCON64_A,
-    0,
-    0,
-    ucon64_tmp_a
-  },
-  {
-    UCON64_B,
-    0,
-    0,
-    ucon64_tmp_b
-  },
-  {
-    UCON64_I,
-    0,
-    0,
-    ucon64_tmp_i
-  },
-  {
-    UCON64_PPF,
-    0,
-    0,
-    ucon64_tmp_ppf
-  },
-  {
-    UCON64_MKA,
-    0,
-    0,
-    ucon64_tmp_mka
-  },
-  {
-    UCON64_MKI,
-    0,
-    0,
-    ucon64_tmp_mki
-  },
-  {
-    UCON64_MKPPF,
-    0,
-    0,
-    ucon64_tmp_mkppf
-  },
-  {
-    UCON64_NA,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_na
-  },
-  {
-    UCON64_NPPF,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_nppf
-  },
-  {
-    UCON64_IDPPF,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_idppf
-  },
-  {
-    UCON64_SCAN,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_scan
-  },
-  {
-    UCON64_LSD,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_lsd
-  },
-  {
-    UCON64_LSV,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_lsv
-  },
-  {
-    UCON64_LS,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ls
-  },
-  {
-    UCON64_RDAT,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_rdat
-  },
-  {
-    UCON64_RROM,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_rrom
-  },
-  {
-    UCON64_R83,
-    0,
-    0,
-    ucon64_tmp_r83
-  },
-  {
-    UCON64_RJOLIET,
-    0,
-    0,
-    ucon64_tmp_rjoliet
-  },
-  {
-    UCON64_RL,
-    0,
-    0,
-    ucon64_tmp_rl
-  },
-  {
-    UCON64_RU,
-    0,
-    0,
-    ucon64_tmp_ru
-  },
-  {
-    UCON64_DB,
-    0,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_db
-  },
-  {
-    UCON64_DBV,
-    0,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_dbv
-  },
-  {
-    UCON64_DBS,
-    0,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_dbs
-  },
-  {
-    UCON64_MKDAT,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_mkdat
-  },
-  {
-    UCON64_MULTI,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gba_multi
-  },
-  {
-    UCON64_MULTI,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gen_multi
-  },
-  {
-    UCON64_MULTI,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pce_multi
-  },
-  {
-    UCON64_MULTI,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sms_multi
-  },
-  {
-    UCON64_MULTI,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_multi
-  },
-  {
-    UCON64_E,
-    0,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_e
-  },
-  {
-    UCON64_1991,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_1991
-  },
-  {
-    UCON64_B0,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_b0
-  },
-  {
-    UCON64_B1,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_b1
-  },
-  {
-    UCON64_BIN,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_bin
-  },
-  {
-    UCON64_BOT,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_bot
-  },
-  {
-    UCON64_CHK,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gb_chk
-  },
-  {
-    UCON64_CHK,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gba_chk
-  },
-  {
-    UCON64_CHK,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_genesis_chk
-  },
-  {
-    UCON64_CHK,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_n64_chk
-  },
-  {
-    UCON64_CHK,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sms_chk
-  },
-  {
-    UCON64_CHK,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_chk
-  },
-  {
-    UCON64_CHK,
-    UCON64_SWAN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_swan_chk
-  },
-  {
-    UCON64_CHK,
-    UCON64_NDS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nds_chk
-  },
-  {
-    UCON64_COL,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_col
-  },
-  {
-    UCON64_CRP,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_crp
-  },
-  {
-    UCON64_DBUH,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_dbuh
-  },
-  {
-    UCON64_SWAP,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nes_dint
-  },
-  {
-    UCON64_SWAP,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pce_swap
-  },
-  {
-    UCON64_SWAP,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_dint
-  },
-  {
-    UCON64_SWAP,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_n64_swap
-  },
-  {
-    UCON64_DINT,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nes_dint
-  },
-  {
-    UCON64_DINT,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pce_swap
-  },
-  {
-    UCON64_DINT,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_dint
-  },
-  {
-    UCON64_DINT,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_n64_swap
-  },
-  {
-    UCON64_SWAP2,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_swap2
-  },
-  {
-    UCON64_DMIRR,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_dmirr
-  },
-  {
-    UCON64_DNSRT,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_dnsrt
-  },
-
-  {
-    UCON64_F,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_genesis_f
-  },
-  {
-    UCON64_F,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pce_f
-  },
-  {
-    UCON64_F,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_f
-  },
-
-  {
-    UCON64_FDS,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_fds
-  },
-  {
-    UCON64_FDSL,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_fdsl
-  },
-  {
-    UCON64_FFE,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ffe
-  },
-  {
-    UCON64_FIG,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_fig
-  },
-  {
-    UCON64_FIGS,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_figs
-  },
-  {
-    UCON64_GBX,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gbx
-  },
-  {
-    UCON64_GD3,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gd3
-  },
-  {
-    UCON64_GD3S,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gd3s
-  },
-  {
-    UCON64_GG,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gg
-  },
-  {
-    UCON64_GG,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gg
-  },
-  {
-    UCON64_GG,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gg
-  },
-  {
-    UCON64_GG,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gg
-  },
-  {
-    UCON64_GG,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gg
-  },
-  {
-    UCON64_GGD,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_CRC32,
-    ucon64_tmp_ggd
-  },
-  {
-    UCON64_GGE,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_CRC32,
-    ucon64_tmp_gge
-  },
-  {
-    UCON64_INES,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ines
-  },
-  {
-    UCON64_INESHD,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ineshd
-  },
-  {
-    UCON64_PARSE,
-    UCON64_DC,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_parse
-  },
-  {
-    UCON64_MKIP,
-    UCON64_DC,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_mkip
-  },
-  {
-    UCON64_J,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_genesis_j
-  },
-/*
-broken... see nes.c
-  {
-    UCON64_J,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nes_j
-  },
-*/
-  {
-    UCON64_J,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_j
-  },
-  {
-    UCON64_K,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_k
-  },
-  {
-    UCON64_L,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_l
-  },
-  {
-    UCON64_LNX,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_lnx
-  },
-  {
-    UCON64_LOGO,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gb_logo
-  },
-  {
-    UCON64_LOGO,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gba_logo
-  },
-  {
-    UCON64_LOGO,
-    UCON64_NDS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nds_logo
-  },
-  {
-    UCON64_LSRAM,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_lsram
-  },
-  {
-    UCON64_LYX,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_lyx
-  },
-  {
-    UCON64_MGD,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gb_mgd
-  },
-  {
-    UCON64_MGD,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_genesis_mgd
-  },
-  {
-    UCON64_MGD,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pce_mgd
-  },
-  {
-    UCON64_MGD,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sms_mgdsms
-  },
-  {
-    UCON64_MGD,
-    UCON64_GG,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sms_mgdgg
-  },
-  {
-    UCON64_MGD,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_mgd
-  },
-  {
-    UCON64_MGDGG,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sms_mgdgg
-  },
-  {
-    UCON64_MSG,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_msg
-  },
-  {
-    UCON64_N,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gb_n
-  },
-  {
-    UCON64_N,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gba_n
-  },
-  {
-    UCON64_N,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_genesis_n
-  },
-  {
-    UCON64_N,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_lynx_n
-  },
-  {
-    UCON64_N,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_n64_n
-  },
-  {
-    UCON64_N,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nes_n
-  },
-  {
-    UCON64_N,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_n
-  },
-  {
-    UCON64_N,
-    UCON64_NDS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nds_n
-  },
-  {
-    UCON64_N2,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_n2
-  },
-  {
-    UCON64_N2GB,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_n2gb
-  },
-  {
-    UCON64_NROT,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nrot
-  },
-  {
-    UCON64_PASOFAMI,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pasofami
-  },
-  {
-    UCON64_PATTERN,
-    0,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_pattern
-  },
-  {
-    UCON64_POKE,
-    UCON64_UNKNOWN,
-    0,
-    ucon64_tmp_poke
-  },
-  {
-    UCON64_ROTL,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_rotl
-  },
-  {
-    UCON64_ROTR,
-    UCON64_LYNX,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_rotr
-  },
-  {
-    UCON64_S,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_genesis_s
-  },
-  {
-    UCON64_S,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nes_s
-  },
-  {
-    UCON64_S,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_snes_s
-  },
-  {
-    UCON64_SCR,
-    UCON64_DC,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_scr
-  },
-  {
-    UCON64_SGB,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sgb
-  },
-#ifdef  HAVE_MATH_H
-  {
-    UCON64_CC2,
-    UCON64_ATA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_cc2
-  },
-#endif
-  {
-    UCON64_SMC,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_smc
-  },
-  {
-    UCON64_SMD,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_genesis_smd
-  },
-  {
-    UCON64_SMD,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sms_smd
-  },
-  {
-    UCON64_SMDS,
-    UCON64_GEN,
-    0,
-    ucon64_tmp_genesis_smds
-  },
-  {
-    UCON64_SMDS,
-    UCON64_SMS,
-    0,
-    ucon64_tmp_sms_smds
-  },
-  {
-    UCON64_SRAM,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sram
-  },
-  {
-    UCON64_SC,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_sms_sc
-  },
-  {
-    UCON64_SC,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gb_sc
-  },
-  {
-    UCON64_SC,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_gba_sc
-  },
-  {
-    UCON64_SC,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nes_sc
-  },
-  {
-    UCON64_SC,
-    UCON64_NDS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_nds_sc
-  },
-  {
-    UCON64_SSC,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ssc
-  },
-  {
-    UCON64_SWC,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_swc
-  },
-  {
-    UCON64_SWCS,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_swcs
-  },
-  {
-    UCON64_UFO,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ufo
-  },
-  {
-    UCON64_UFOS,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_ufos
-  },
-  {
-    UCON64_UNIF,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_unif
-  },
-  {
-    UCON64_UNSCR,
-    UCON64_DC,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_unscr
-  },
-  {
-    UCON64_USMS,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_usms
-  },
-  {
-    UCON64_V64,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_v64
-  },
 #ifdef  USE_PARALLEL
+    /*
+      It doesn't make sense to continue after executing a (send) backup option
+      ("multizip"). Don't return, but use break instead. ucon64_execute_options()
+      checks if an option was used that should stop uCON64.
+    */
 #ifdef  USE_LIBCD64
-  {
-    UCON64_XCD64,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xcd64
-  },
-  {
-    UCON64_XCD64C,
-    UCON64_N64,
-    0,
-    ucon64_tmp_xcd64c
-  },
-  {
-    UCON64_XCD64B,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_xcd64b
-  },
-  {
-    UCON64_XCD64S,
-    UCON64_N64,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xcd64s
-  },
-  {
-    UCON64_XCD64F,
-    UCON64_N64,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xcd64f
-  },
-  {
-    UCON64_XCD64E,
-    UCON64_N64,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xcd64e
-  },
-  {
-    UCON64_XCD64M,
-    UCON64_N64,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xcd64m
-  },
+    case UCON64_XCD64:
+      if (access (ucon64.fname, F_OK) != 0)
+        cd64_read_rom (ucon64.fname, 64);
+      else
+        cd64_write_rom (ucon64.fname);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64C:
+      if (!access (ucon64.fname, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+      cd64_read_rom (ucon64.fname, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64B:
+      cd64_write_bootemu (ucon64.fname);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64S:
+      if (access (ucon64.fname, F_OK) != 0)
+        cd64_read_sram (ucon64.fname);
+      else
+        cd64_write_sram (ucon64.fname);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64F:
+      if (access (ucon64.fname, F_OK) != 0)
+        cd64_read_flashram (ucon64.fname);
+      else
+        cd64_write_flashram (ucon64.fname);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64E:
+      if (access (ucon64.fname, F_OK) != 0)
+        cd64_read_eeprom (ucon64.fname);
+      else
+        cd64_write_eeprom (ucon64.fname);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCD64M:
+      if (access (ucon64.fname, F_OK) != 0)
+        cd64_read_mempack (ucon64.fname, strtol (optarg, NULL, 10));
+      else
+        cd64_write_mempack (ucon64.fname, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
 #endif
-  {
-    UCON64_XRESET,
-    0,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xreset
-  },
-  {
-    UCON64_XCMC,
-    UCON64_GEN,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xcmc
-  },
-  {
-    UCON64_XCMCT,
-    UCON64_GEN,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xcmct
-  },
-  {
-    UCON64_XDEX,
-    0,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xdex
-  },
-  {
-    UCON64_XDJR,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xdjr
-  },
-  {
-    UCON64_XFAL,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xfal
-  },
-  {
-    UCON64_XFALMULTI,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_xfalmulti
-  },
-  {
-    UCON64_XFALC,
-    UCON64_GBA,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xfalc
-  },
-  {
-    UCON64_XFALS,
-    UCON64_GBA,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xfals
-  },
-  {
-    UCON64_XFALB,
-    UCON64_GBA,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xfalb
-  },
-  {
-    UCON64_XFIG,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xfig
-  },
-  {
-    UCON64_XFIGS,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xfigs
-  },
-  {
-    UCON64_XFIGC,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xfigc
-  },
-  {
-    UCON64_XGBX,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xgbx
-  },
-  {
-    UCON64_XGBXS,
-    UCON64_GB,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xgbxs
-  },
-  {
-    UCON64_XGBXB,
-    UCON64_GB,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xgbxb
-  },
-  {
-    UCON64_XGD3,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xgd3
-  },
-  {
-    UCON64_XGD3S,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xgd3s
-  },
-  {
-    UCON64_XGD3R,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xgd3r
-  },
-  {
-    UCON64_XGD6,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xgd6
-  },
-  {
-    UCON64_XGD6S,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xgd6s
-  },
-  {
-    UCON64_XGD6R,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xgd6r
-  },
-  {
-    UCON64_XGG,
-    UCON64_SMS,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xgg
-  },
-  {
-    UCON64_XGGS,
-    UCON64_SMS,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xggs
-  },
-  {
-    UCON64_XGGB,
-    UCON64_SMS,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xggb
-  },
-  {
-    UCON64_XLIT,
-    UCON64_LYNX,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xlit
-  },
-  {
-    UCON64_XMCCL,
-    UCON64_GB,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xmccl
-  },
-  {
-    UCON64_XMCD,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xmcd
-  },
-  {
-    UCON64_XMD,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xmd
-  },
-  {
-    UCON64_XMDS,
-    UCON64_GEN,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xmds
-  },
-  {
-    UCON64_XMDB,
-    UCON64_GEN,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xmdb
-  },
-  {
-    UCON64_XMSG,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xmsg
-  },
-  {
-    UCON64_XPCE,
-    UCON64_PCE,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xpce
-  },
-  {
-    UCON64_XPL,
-    UCON64_NGP,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xpl
-  },
-  {
-    UCON64_XPLI,
-    UCON64_NGP,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xpli
-  },
-  {
-    UCON64_XSF,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xsf
-  },
-  {
-    UCON64_XSFS,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xsfs
-  },
-  {
-    UCON64_XSMC,
-    UCON64_NES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_xsmc
-  },
-  {
-    UCON64_XSMCR,
-    UCON64_NES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xsmcr
-  },
-  {
-    UCON64_XSMD,
-    UCON64_GEN,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xsmd
-  },
-  {
-    UCON64_XSMDS,
-    UCON64_GEN,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xsmds
-  },
-  {
-    UCON64_XSWC,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xswc
-  },
-  {
-    UCON64_XSWC2,
-    UCON64_SNES,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NO_SPLIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xswc2
-  },
-  {
-    UCON64_XSWCS,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xswcs
-  },
-  {
-    UCON64_XSWCC,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xswcc
-  },
-  {
-    UCON64_XSWCR,
-    UCON64_SNES,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xswcr
-  },
-  {
-    UCON64_XV64,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xv64
-  },
+
+    case UCON64_XRESET:
+      parport_print_info ();
+      fputs ("Resetting parallel port...", stdout);
+      outportb ((unsigned short) (ucon64.parport + PARPORT_DATA), 0);
+      outportb ((unsigned short) (ucon64.parport + PARPORT_CONTROL), 0);
+      puts ("done");
+      break;
+
+    case UCON64_XCMC:
+      if (!access (ucon64.fname, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+      cmc_read_rom (ucon64.fname, ucon64.parport, ucon64.io_mode); // ucon64.io_mode contains speed value
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCMCT:
+      cmc_test (strtol (optarg, NULL, 10), ucon64.parport, ucon64.io_mode);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XDEX:
+      if (access (ucon64.fname, F_OK) != 0)
+        dex_read_block (ucon64.fname, strtol (optarg, NULL, 10), ucon64.parport);
+      else
+        dex_write_block (ucon64.fname, strtol (optarg, NULL, 10), ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XDJR:
+      if (access (ucon64.fname, F_OK) != 0)
+        doctor64jr_read (ucon64.fname, ucon64.parport);
+      else
+        {
+          if (!ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
+                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
+                   stderr);
+          else
+            doctor64jr_write (ucon64.fname, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFAL:
+      if (access (ucon64.fname, F_OK) != 0)
+        fal_read_rom (ucon64.fname, ucon64.parport, 32);
+      else
+        fal_write_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALMULTI:
+      tmpnam2 (src_name);
+      ucon64.temp_file = src_name;
+      register_func (remove_temp_file);
+      // gba_multi() calls ucon64_file_handler() so the directory part will be
+      //  stripped from src_name. The directory should be used though.
+      if (!ucon64.output_path[0])
+        {
+          dirname2 (src_name, ucon64.output_path);
+          if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
+            strcat (ucon64.output_path, FILE_SEPARATOR_S);
+        }
+      if (gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name) == 0)
+        { // Don't try to start a transfer if there was a problem
+          fputc ('\n', stdout);
+          ucon64.file_size = fsizeof (src_name);
+          fal_write_rom (src_name, ucon64.parport);
+        }
+
+      unregister_func (remove_temp_file);
+      remove_temp_file ();
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALC:
+      if (!access (ucon64.fname, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+      fal_read_rom (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALS:
+      if (access (ucon64.fname, F_OK) != 0)
+        fal_read_sram (ucon64.fname, ucon64.parport, UCON64_UNKNOWN);
+      else
+        fal_write_sram (ucon64.fname, ucon64.parport, UCON64_UNKNOWN);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALB:
+      if (access (ucon64.fname, F_OK) != 0)
+        fal_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        fal_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFIG:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+        fig_read_rom (ucon64.fname, ucon64.parport);
+      else
+        {
+          if (!ucon64.nfo->backup_header_len)
+            fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format\n",
+                   stderr);
+          else if (ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
+                   "       interleaved ROMs. Convert to a FIG compatible format\n",
+                   stderr);
+          else // file exists -> send it to the copier
+            fig_write_rom (ucon64.fname, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFIGS:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        fig_read_sram (ucon64.fname, ucon64.parport);
+      else                                      // file exists -> restore SRAM
+        fig_write_sram (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFIGC:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cart SRAM contents
+        fig_read_cart_sram (ucon64.fname, ucon64.parport);
+      else                                      // file exists -> restore SRAM
+        fig_write_cart_sram (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGBX:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge/flash card
+        gbx_read_rom (ucon64.fname, ucon64.parport);
+      else                                      // file exists -> send it to the programmer
+        gbx_write_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGBXS:
+      if (access (ucon64.fname, F_OK) != 0)
+        gbx_read_sram (ucon64.fname, ucon64.parport, -1);
+      else
+        gbx_write_sram (ucon64.fname, ucon64.parport, -1);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGBXB:
+      if (access (ucon64.fname, F_OK) != 0)
+        gbx_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        gbx_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD3:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+        gd3_read_rom (ucon64.fname, ucon64.parport); // dumping is not yet supported
+      else
+        {
+          if (!ucon64.nfo->backup_header_len)
+            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
+                   stderr);
+          else                                  // file exists -> send it to the copier
+            gd3_write_rom (ucon64.fname, ucon64.parport, ucon64.nfo);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD3S:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        gd3_read_sram (ucon64.fname, ucon64.parport); // dumping is not yet supported
+      else                                      // file exists -> restore SRAM
+        gd3_write_sram (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD3R:
+      if (access (ucon64.fname, F_OK) != 0)
+        gd3_read_saver (ucon64.fname, ucon64.parport);
+      else
+        gd3_write_saver (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6:
+      if (access (ucon64.fname, F_OK) != 0)
+        gd6_read_rom (ucon64.fname, ucon64.parport); // dumping is not yet supported
+      else
+        {
+          if (!ucon64.nfo->backup_header_len)
+            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
+                   stderr);
+          else
+            gd6_write_rom (ucon64.fname, ucon64.parport, ucon64.nfo);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6S:
+      if (access (ucon64.fname, F_OK) != 0)
+        gd6_read_sram (ucon64.fname, ucon64.parport);
+      else
+        gd6_write_sram (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6R:
+      if (access (ucon64.fname, F_OK) != 0)
+        gd6_read_saver (ucon64.fname, ucon64.parport);
+      else
+        gd6_write_saver (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGG:
+      if (access (ucon64.fname, F_OK) != 0)
+        smsgg_read_rom (ucon64.fname, ucon64.parport, 32 * MBIT);
+      else
+        {
+          if (ucon64.nfo->backup_header_len)
+            fputs ("ERROR: This ROM has a header. Remove it with -stp or -mgd\n",
+                   stderr);
+          else if (ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM seems to be interleaved, but uCON64 doesn't support\n"
+                   "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with -mgd\n",
+                   stderr);
+          else
+            smsgg_write_rom (ucon64.fname, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGGS:
+      if (access (ucon64.fname, F_OK) != 0)
+        smsgg_read_sram (ucon64.fname, ucon64.parport, -1);
+      else
+        smsgg_write_sram (ucon64.fname, ucon64.parport, -1);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGGB:
+      if (access (ucon64.fname, F_OK) != 0)
+        smsgg_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        smsgg_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XLIT:
+      if (!access (ucon64.fname, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+      lynxit_read_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMCCL:
+      if (!access (ucon64.fname, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+      mccl_read (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMCD:
+      if (!access (ucon64.fname, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+      mcd_read_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMD:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump flash card
+        md_read_rom (ucon64.fname, ucon64.parport, 64 * MBIT); // reads 32 Mbit if Sharp card
+      else                                      // file exists -> send it to the MD-PRO
+        {
+          if (ucon64.nfo->backup_header_len)     // binary with header is possible
+            fputs ("ERROR: This ROM has a header. Remove it with -stp or -bin\n",
+                   stderr);
+          else if (genesis_get_file_type () != BIN)
+            fputs ("ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
+                   "       binary files to the MD-PRO. Convert ROM with -bin\n",
+                   stderr);
+          else
+            md_write_rom (ucon64.fname, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMDS:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        md_read_sram (ucon64.fname, ucon64.parport, -1);
+      else                                      // file exists -> restore SRAM
+        md_write_sram (ucon64.fname, ucon64.parport, -1);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMDB:
+      if (access (ucon64.fname, F_OK) != 0)
+        md_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        md_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMSG:
+      if (access (ucon64.fname, F_OK) != 0)
+        msg_read_rom (ucon64.fname, ucon64.parport);
+      else
+        {
+          if (!ucon64.nfo->backup_header_len)
+            fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format\n",
+                   stderr);
+          else if (ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM seems to be bit-swapped but the MSG doesn't support\n"
+                   "       bit-swapped ROMs. Convert to an MSG compatible format\n",
+                   stderr);
+          else
+            msg_write_rom (ucon64.fname, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XPCE:
+      if (access (ucon64.fname, F_OK) != 0)
+        pce_read_rom (ucon64.fname, ucon64.parport, 32 * MBIT);
+      else
+        pce_write_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XPL:
+      if (access (ucon64.fname, F_OK) != 0)
+        pl_read_rom (ucon64.fname, ucon64.parport);
+      else
+        pl_write_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XPLI:
+      pl_info (ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSF:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump flash card
+        sf_read_rom (ucon64.fname, ucon64.parport, 64 * MBIT);
+      else                                      // file exists -> send it to the Super Flash
+        sf_write_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSFS:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        sf_read_sram (ucon64.fname, ucon64.parport);
+      else                                      // file exists -> restore SRAM
+        sf_write_sram (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMC: // we don't use WF_NO_ROM => no need to check for file
+      if (!ucon64.nfo->backup_header_len)
+        fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n",
+               stderr);
+      else
+        smc_write_rom (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMCR:
+      if (access (ucon64.fname, F_OK) != 0)
+        smc_read_rts (ucon64.fname, ucon64.parport);
+      else
+        smc_write_rts (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMD:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+        smd_read_rom (ucon64.fname, ucon64.parport);
+      else                                      // file exists -> send it to the copier
+        {
+          if (!ucon64.nfo->backup_header_len)
+            fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
+                   stderr);
+          else if (!ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
+                   "       interleaved ROMs. Convert to an SMD compatible format\n",
+                   stderr);
+          else
+            smd_write_rom (ucon64.fname, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMDS:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        smd_read_sram (ucon64.fname, ucon64.parport);
+      else                                      // file exists -> restore SRAM
+        smd_write_sram (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSWC:
+      enableRTS = 0;                            // falling through
+    case UCON64_XSWC2:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+        swc_read_rom (ucon64.fname, ucon64.parport, ucon64.io_mode);
+      else
+        {
+          if (!ucon64.nfo->backup_header_len)
+            fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
+                   stderr);
+          else if (ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
+                   "       interleaved ROMs. Convert to an SWC compatible format\n",
+                   stderr);
+          else
+            {
+              if (enableRTS != 0)
+                enableRTS = 1;
+              // file exists -> send it to the copier
+              swc_write_rom (ucon64.fname, ucon64.parport, enableRTS);
+            }
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSWCS:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        swc_read_sram (ucon64.fname, ucon64.parport);
+      else                                      // file exists -> restore SRAM
+        swc_write_sram (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSWCC:
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        swc_read_cart_sram (ucon64.fname, ucon64.parport, ucon64.io_mode);
+      else                                      // file exists -> restore SRAM
+        swc_write_cart_sram (ucon64.fname, ucon64.parport, ucon64.io_mode);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSWCR:
+      if (access (ucon64.fname, F_OK) != 0)
+        swc_read_rts (ucon64.fname, ucon64.parport);
+      else
+        swc_write_rts (ucon64.fname, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XV64:
+      if (access (ucon64.fname, F_OK) != 0)
+        doctor64_read (ucon64.fname, ucon64.parport);
+      else
+        {
+          if (!ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
+                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
+                   stderr);
+          else
+            doctor64_write (ucon64.fname, ucon64.nfo->backup_header_len,
+                            ucon64.file_size, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
 #endif // USE_PARALLEL
+
 #if     defined USE_PARALLEL || defined USE_USB
-  {
-    UCON64_XF2A,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_CRC32,
-    ucon64_tmp_xf2a
-  },
-  {
-    UCON64_XF2AMULTI,
-    UCON64_GBA,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_xf2amulti
-  },
-  {
-    UCON64_XF2AC,
-    UCON64_GBA,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xf2ac
-  },
-  {
-    UCON64_XF2AS,
-    UCON64_GBA,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xf2as
-  },
-  {
-    UCON64_XF2AB,
-    UCON64_GBA,
-    WF_NEEDS_CRC32,
-    ucon64_tmp_xf2ab
-  },
+    case UCON64_XF2A:
+      if (access (ucon64.fname, F_OK) != 0)
+        f2a_read_rom (ucon64.fname, 32);
+      else
+        f2a_write_rom (ucon64.fname, UCON64_UNKNOWN);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AMULTI:
+      f2a_write_rom (NULL, strtol (optarg, NULL, 10) * MBIT);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AC:
+      if (!access (ucon64.fname, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+      f2a_read_rom (ucon64.fname, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AS:
+      if (access (ucon64.fname, F_OK) != 0)
+        f2a_read_sram (ucon64.fname, UCON64_UNKNOWN);
+      else
+        f2a_write_sram (ucon64.fname, UCON64_UNKNOWN);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AB:
+      if (access (ucon64.fname, F_OK) != 0)
+        f2a_read_sram (ucon64.fname, strtol (optarg, NULL, 10));
+      else
+        f2a_write_sram (ucon64.fname, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
 #endif // USE_PARALLEL || USE_USB
-  {
-    UCON64_Z64,
-    UCON64_N64,
-    WF_DEMUX|WF_OPEN|WF_EXIT|WF_NEEDS_ROM|WF_NEEDS_CRC32,
-    ucon64_tmp_z64
-  },
-  {
-    UCON64_HELP,
-    0,
-    WF_EXIT,
-    ucon64_tmp_help
-  },
-  {
-    UCON64_VER,
-    0,
-    WF_EXIT,
-    ucon64_tmp_ver
-  },
-/*
-  switches
 
-  switches are not console specific and have no flags
-  the function is always ucon64_switches()
-*/
-#warning switches are not console specific and have no flags?
-  {UCON64_BAT, 0, 0, NULL},
-  {UCON64_BS, 0, 0, NULL},
-  {UCON64_CMNT, 0, 0, NULL},
-  {UCON64_CTRL2, 0, 0, NULL},
-  {UCON64_CTRL, 0, 0, NULL},
-  {UCON64_DUMPINFO, 0, 0, NULL},
-  {UCON64_EROM, 0, 0, NULL},
-  {UCON64_FILE, 0, 0, NULL},  // deprecated
-  {UCON64_FRONTEND, 0, 0, NULL},
-  {UCON64_HD, 0, 0, NULL},
-  {UCON64_HDN, 0, 0, NULL},
-  {UCON64_HI, 0, 0, NULL},
-  {UCON64_ID, 0, 0, NULL},
-  {UCON64_IDNUM, 0, 0, NULL},
-  {UCON64_INT2, 0, 0, NULL},
-  {UCON64_INT, 0, 0, NULL},
-  {UCON64_MAPR, 0, 0, NULL},
-  {UCON64_MIRR, 0, 0, NULL},
-  {UCON64_NBAK, 0, 0, NULL},
-  {UCON64_NBAT, 0, 0, NULL},
-  {UCON64_NBS, 0, 0, NULL},
-  {UCON64_NCOL, 0, 0, NULL},
-  {UCON64_NHD, 0, 0, NULL},
-  {UCON64_NHI, 0, 0, NULL},
-  {UCON64_NINT, 0, 0, NULL},
-  {UCON64_NS, 0, 0, NULL},
-  {UCON64_NTSC, 0, 0, NULL},
-  {UCON64_NVRAM, 0, 0, NULL},
-  {UCON64_O, 0, 0, NULL},
-  {UCON64_PAL, 0, 0, NULL},
-  {UCON64_PATCH, 0, 0, NULL},
-  {UCON64_PORT, 0, 0, NULL},
-  {UCON64_Q, 0, 0, NULL},
-//  {UCON64_QQ, 0, 0, NULL},   // reserved
-  {UCON64_R, 0, 0, NULL},
-  {UCON64_REGION, 0, 0, NULL},
-  {UCON64_ROM, 0, 0, NULL}, // deprecated
-  {UCON64_SSIZE, 0, 0, NULL},
-//  {UCON64_SWP, 0, 0, NULL},  // deprecated
-  {UCON64_V, 0, 0, NULL},
-  {UCON64_VRAM, 0, 0, NULL},
-  {UCON64_XCD64P, 0, 0, NULL},
-  {UCON64_XCMCM, 0, 0, NULL},
-  {UCON64_XFALM, 0, 0, NULL},
-  {UCON64_XGBXM, 0, 0, NULL},
-  {UCON64_XPLM, 0, 0, NULL},
-  {UCON64_XSWC_IO, 0, 0, NULL},
+    case UCON64_Z64:
+      n64_z64 (ucon64.nfo);
+      break;
 
-//  {UCON64_3DO, 0, 0, NULL},
-  {UCON64_ATA, 0, 0, NULL},
-//  {UCON64_CD32, 0, 0, NULL},
-//  {UCON64_CDI, 0, 0, NULL},
-  {UCON64_COLECO, 0, 0, NULL},
-  {UCON64_DC, 0, 0, NULL},
-  {UCON64_GB, 0, 0, NULL},
-  {UCON64_GBA, 0, 0, NULL},
-//  {UCON64_GC, 0, 0, NULL},
-  {UCON64_GEN, 0, 0, NULL},
-//  {UCON64_GP32, 0, 0, NULL},
-//  {UCON64_INTELLI, 0, 0, NULL},
-  {UCON64_JAG, 0, 0, NULL},
-  {UCON64_LYNX, 0, 0, NULL},
-//  {UCON64_ARCADE, 0, 0, NULL},
-  {UCON64_N64, 0, 0, NULL},
-  {UCON64_NDS, 0, 0, NULL},
-  {UCON64_NES, 0, 0, NULL},
-//  {UCON64_NG, 0, 0, NULL},
-  {UCON64_NGP, 0, 0, NULL},
-  {UCON64_PCE, 0, 0, NULL},
-//  {UCON64_PS2, 0, 0, NULL},
-//  {UCON64_PSX, 0, 0, NULL},
-//  {UCON64_S16, 0, 0, NULL},
-//  {UCON64_SAT, 0, 0, NULL},
-  {UCON64_SMS, 0, 0, NULL},
-  {UCON64_GAMEGEAR, 0, 0, NULL},
-  {UCON64_SNES, 0, 0, NULL},
-  {UCON64_SWAN, 0, 0, NULL},
-  {UCON64_VBOY, 0, 0, NULL},
-//  {UCON64_VEC, 0, 0, NULL},
-//  {UCON64_XBOX, 0, 0, NULL},
-  {0, 0, 0, NULL}
-};
+      default:
+      break;
+    }
+
+  return 0;
+}

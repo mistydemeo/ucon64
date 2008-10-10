@@ -36,12 +36,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _WIN32
 #include <windows.h>
 #endif
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/getopt2.h"
 #include "misc/property.h"
 #include "misc/string.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ucon64_dat.h"
@@ -86,78 +88,96 @@ static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
 
+static st_ucon64_obj_t ucon64_dat_obj[] =
+  {
+    {0, WF_STOP | WF_NO_ROM},
+    {0, WF_INIT | WF_NO_SPLIT},
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_NO_ARCHIVE},
+    {0, WF_INIT | WF_PROBE | WF_NO_SPLIT}
+  };
+
 const st_getopt2_t ucon64_dat_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "DATabase (support for DAT files)"
+      NULL, "DATabase (support for DAT files)",
+      NULL
     },
     {
       "db", 0, 0, UCON64_DB,
-      NULL, "DATabase statistics"
+      NULL, "DATabase statistics",
+      &ucon64_dat_obj[0]
     },
     {
       "dbv", 0, 0, UCON64_DBV,
-      NULL, "like " OPTION_LONG_S "db but more verbose"
+      NULL, "like " OPTION_LONG_S "db but more verbose",
+      &ucon64_dat_obj[0]
     },
-#if 0
-    {
-      "dbsql", 0, 0, UCON64_DBSQL,
-      NULL, "turn all DAT files into a ANSI SQL script"
-    },
-#endif
     {
       "dbs", 1, 0, UCON64_DBS,
-      "CRC32", "search ROM with CRC32 in DATabase"
+      "CRC32", "search ROM with CRC32 in DATabase",
+      &ucon64_dat_obj[0]
     },
     {
       "scan", 0, 0, UCON64_SCAN,
       NULL, "generate ROM list for all ROMs using DATabase\n"
-      "like: GoodXXXX scan ..."
+      "like: GoodXXXX scan ...",
+      &ucon64_dat_obj[4]
     },
     {
       "lsd", 0, 0, UCON64_LSD,
-      NULL, "same as " OPTION_LONG_S "scan"
+      NULL, "same as " OPTION_LONG_S "scan",
+      &ucon64_dat_obj[2]
     },
     {
       "mkdat", 1, 0, UCON64_MKDAT,
-      "DATFILE", "create DAT file; use -o to specify an output directory"
+      "DATFILE", "create DAT file; use -o to specify an output directory",
+      &ucon64_dat_obj[2]
     },
     {
       "rdat", 0, 0, UCON64_RDAT,
       NULL, "rename ROMs to their DATabase names\n"
-      "use -o to specify an output directory"
+      "use -o to specify an output directory",
+      &ucon64_dat_obj[4]
     },
     {
       "rrom", 0, 0, UCON64_RROM,
-      NULL, "rename ROMs to their internal names (if any)"
+      NULL, "rename ROMs to their internal names (if any)",
+      &ucon64_dat_obj[4]
     },
     {
       "r83", 0, 0, UCON64_R83,
-      NULL, "rename to 8.3 filenames"
+      NULL, "rename to 8.3 filenames",
+      &ucon64_dat_obj[3]
     },
     {
       "rjoliet", 0, 0, UCON64_RJOLIET,
-      NULL, "rename to Joliet compatible filenames"
+      NULL, "rename to Joliet compatible filenames",
+      &ucon64_dat_obj[3]
     },
     {
       "rl", 0, 0, UCON64_RL,
-      NULL, "rename to lowercase"
+      NULL, "rename to lowercase",
+      &ucon64_dat_obj[3] 
     },
     {
       "ru", 0, 0, UCON64_RU,
-      NULL, "rename to uppercase"
+      NULL, "rename to uppercase",
+      &ucon64_dat_obj[3]
     },
 #if 0
     {
       "good", 0, 0, UCON64_GOOD,
       NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
-      "the DATabase"
+      "the DATabase",
+      NULL
     },
 #endif
     {
       NULL, 0, 0, 0,
-      NULL, NULL
+      NULL, NULL,
+      NULL
     }
   };
 
@@ -166,8 +186,11 @@ static void
 closedir_ddat (void)
 {
   if (ddat)
+#ifndef _WIN32
     closedir (ddat);
-
+#else
+    FindClose (ddat);
+#endif
   ddat = NULL;
 }
 
@@ -208,6 +231,7 @@ custom_stricmp (const void *a, const void *b)
 static char *
 get_next_file (char *fname)
 {
+#ifndef _WIN32
   struct dirent *ep;
 
   if (!ddat)
@@ -222,7 +246,35 @@ get_next_file (char *fname)
         sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, ep->d_name);
         return fname;
       }
+#else
+  char search_pattern[FILENAME_MAX];
+  WIN32_FIND_DATA find_data;
 
+  if (!ddat)
+    {
+      // Note that FindFirstFile() & FindNextFile() are case insensitive
+      sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*.dat", ucon64.datdir);
+      if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
+        {
+          // Not being able to find a DAT file is not a real error
+          if (GetLastError () != ERROR_FILE_NOT_FOUND)
+            {
+              fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
+              return NULL;
+            }
+        }
+      else
+        {
+          sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+          return fname;
+        }
+    }
+  while (FindNextFile (ddat, &find_data))
+    {
+      sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+      return fname;
+    }
+#endif
   closedir_ddat ();
   return NULL;
 }
@@ -957,19 +1009,19 @@ ucon64_close_datfile (void)
 {
   int n;
 
-  if (!ucon64_datfile)
-    return;
-
-  fclose (ucon64_datfile);
-  printf (ucon64_msg[WROTE], ucon64_dat_fname);
-  ucon64_datfile = NULL;
-
-  for (n = 0; n < ucon64_n_files; n++)
+  if (ucon64_datfile)
     {
-      free (ucon64_mkdat_entries[n].fname);
-      ucon64_mkdat_entries[n].fname = NULL;
+      fclose (ucon64_datfile);
+      printf (ucon64_msg[WROTE], ucon64_dat_fname);
+      ucon64_datfile = NULL;
+
+      for (n = 0; n < ucon64_n_files; n++)
+        {
+          free (ucon64_mkdat_entries[n].fname);
+          ucon64_mkdat_entries[n].fname = NULL;
+        }
+      ucon64_n_files = 0;
     }
-  ucon64_n_files = 0;
 }
 
 
@@ -978,7 +1030,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                    int backup_header_len)
 {
   static int first_file = 1, console;
-  int n;
+  int n, x;
   static char *console_name;
   char fname[FILENAME_MAX], *ptr;
   time_t time_t_val;
@@ -1171,6 +1223,9 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     }
 
   fputs (filename, stdout);
+  if (ucon64.quiet == -1)                       // -v was specified
+    if (ucon64.fname_arch[0])
+      printf (" (%s)", ucon64.fname_arch);
   fputc ('\n', stdout);
 
   if (ucon64.console != console)                // ucon64.quiet == -1
@@ -1185,12 +1240,22 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
 
   // Store the CRC32 to check if a file is unique
   ucon64_mkdat_entries[ucon64_n_files].crc32 = ucon64.crc32;
-#warning TEST this
   /*
     Also store the name of the file to display a helpful error message if a
-    file is not unique (a duplicate).
+    file is not unique (a duplicate). We store the current filename inside the
+    archive as well, to be even more helpful :-)
   */
-  ucon64_mkdat_entries[ucon64_n_files].fname = fname;
+  x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 1);
+  if (!(ucon64_mkdat_entries[ucon64_n_files].fname = (char *) malloc (x)))
+    {                                                 // + 3 for " ()"
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);  //  + 1 for ASCII-z
+      exit (1);
+    }
+  sprintf (ucon64_mkdat_entries[ucon64_n_files].fname, "%s%s%s%s",
+    fname,
+    ucon64.fname_arch[0] ? " (" : "",
+    ucon64.fname_arch[0] ? ucon64.fname_arch : "",
+    ucon64.fname_arch[0] ? ")" : "");
 
   ptr = (char *) get_suffix (fname);
   if (*ptr)
@@ -1211,7 +1276,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            fname,
                            fname,
                            ucon64.crc32,
-                           fsizeof (ucon64.fname) - backup_header_len);
+                           ucon64.file_size - backup_header_len);
   ucon64_n_files++;
   return 0;
 }

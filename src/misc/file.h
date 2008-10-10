@@ -22,7 +22,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MISC_FILE_H
 #define MISC_FILE_H
-#include "defines.h"
+
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <sys/types.h>                          // off_t
+#ifdef  HAVE_INTTYPES_H
+#include <inttypes.h>
+#else                                           // __MSDOS__, _WIN32 (VC++)
+#include "itypes.h"
+#endif
+
+
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined AMIGA || defined __APPLE__      // Mac OS X actually
+// GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
+#else // DJGPP, Win32
+#define FILE_SEPARATOR '\\'
+#define FILE_SEPARATOR_S "\\"
+#endif
 
 
 /*
@@ -36,50 +56,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   basename2() basename() replacement
   dirname2()  dirname() replacement
   realpath2() realpath() replacement
-  same_file() returns 1 if two filenames refer to one file, otherwise it
+  one_file()  returns 1 if two filenames refer to one file, otherwise it
                 returns 0
-  same_filesystem() returns 1 if two filenames refer to files on one file
+  one_filesystem() returns 1 if two filenames refer to files on one file
                 system, otherwise it returns 0
   rename2()   renames oldname to newname even if oldname and newname are not
                 on one file system
   truncate2() don't use truncate() to enlarge files, because the result is
                 undefined (by POSIX) use truncate2() instead which does both
-  baknam()    produces a backup name for a filename
-                bla.txt would return bla.bak or bla.b01 if bla.bak already exists
+  tmpnam2()   replacement for tmpnam() temp must have the size of FILENAME_MAX
+  mkbak()     modes
+                BAK_DUPE (default)
+                  rename file to keep attributes and copy it back to old name
+                  and return new name
+                  filename -> rename() -> buf -> f_cpy() -> filename -> return buf
+                BAK_MOVE
+                 just rename file and return new name (static)
+                 filename -> rename() -> buf -> return buf
   fcopy()     copy src from start for len to dest with mode
-  fread2()    does fopen(), malloc(), fread() in one step and returns pointer to
-                data (must be free()'d) or NULL if anything failed
+  fcopy_raw() copy src to dest without looking at the file data (no
+                decompression like with fcopy())
   fsizeof()   returns size of a file in bytes
-
-  quick_io()   returns number of bytes read or written
+  quick_io()  returns number of bytes read or written
   quick_io_c() returns byte read or fputc()'s status
-
   quick_io_func()
-              malloc()s reads from fname into a buffer and passes it to func
-                func()      func(buffer, buffer_len, object)
-                object      a freely defineavble object the will also passed to func
-                start       seeks to start pos of fname
-                len         a vector from start
-
-  quick_fread()    same as fread but takes start and src is a filename
-  quick_fwrite()   same as fwrite but takes start and dest is a filename; mode
-                     is the same as fopen() modes
-  quick_fgetc()    same as fgetc but takes filename instead of FILE and a pos
-  quick_fputc()    same as fputc but takes filename instead of FILE and a pos
-                     buf,s,bs,b,f,m == buffer,start,blksize,blks,filename,mode
-
-  getfile()           runs callback_func with the realpath() of file/dir as string
-                        flags:
-  0                           pass all files/dirs with their realpath()
-  GETFILE_FILES_ONLY     pass only files with their realpath()
-  GETFILE_RECURSIVE      pass all files/dirs with their realpath()'s recursively
-  GETFILE_RECURSIVE_ONCE like GETFILE_FILE_RECURSIVE, but only one level deep
-  (GETFILE_FILES_ONLY|GETFILE_RECURSIVE)
-                           pass only files with their realpath()'s recursively
-
-  callback_func()       getfile() expects the callback_func to return the following
-                          values:
-                          0 == ok, 1 == skip the rest/break, -1 == failure/break
+              runs func() everytime it loads a new buffer
+                write modes will overwrite the file specified
+                NOTE: modes of all quick_*() are similar to fopen() modes
+                mode: "r.."
+                func(void *, int) must always return the number of bytes or a
+                negative value if a problem occured
+                mode: "a.." or "w.."
+                func(void *, int) must always return the exact number of bytes
+                (int) or the buffer won't be written
 */
 extern int isfname (int c);
 extern int tofname (int c);
@@ -88,30 +97,25 @@ extern char *dirname2 (const char *path, char *dir);
 extern const char *basename2 (const char *path);
 extern const char *get_suffix (const char *filename);
 extern char *set_suffix (char *filename, const char *suffix);
-//extern int mkdir2 (const char *path);
-//extern int rmdir2 (const char *path);
-extern int same_file (const char *filename1, const char *filename2);
-extern int same_filesystem (const char *filename1, const char *filename2);
+extern int one_file (const char *filename1, const char *filename2);
+extern int one_filesystem (const char *filename1, const char *filename2);
 extern int rename2 (const char *oldname, const char *newname);
-extern int truncate2 (const char *filename, unsigned long size);
-extern char *baknam (char *fname);
-extern int fsizeof (const char *filename);
+extern int truncate2 (const char *filename, off_t size);
+extern char *tmpnam2 (char *temp);
+typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
+extern char *mkbak (const char *filename, backup_t type);
 extern int fcopy (const char *src, size_t start, size_t len, const char *dest,
                   const char *dest_mode);
-extern unsigned char *fread2 (const char *filename, int maxlength);
-
+extern int fcopy_raw (const char *src, const char *dest);
+#ifndef  USE_ZLIB
+// archive.h's definition gets higher "precedence"
+extern int fsizeof (const char *filename);
+#endif
 extern int quick_io (void *buffer, size_t start, size_t len, const char *fname,
                      const char *mode);
 extern int quick_io_c (int value, size_t pos, const char *fname, const char *mode);
-#define quick_fgetc(f, p)           (quick_io_c(0, p, f, "rb"))
-#define quick_fputc(f, p, b, m)     (quick_io_c(b, p, f, m))
-#define quick_fread(b, s, l, f)     (quick_io(b, s, l, f, "rb"))
-#define quick_fwrite(b, s, l, f, m) (quick_io((void *) b, s, l, f, m))
-
-#define GETFILE_FILES_ONLY     1
-#define GETFILE_RECURSIVE      (1 << 1)
-#define GETFILE_RECURSIVE_ONCE (1 << 2)
-extern int getfile (int argc, char **argv, int (*callback_func) (const char *), int flags);
-
+extern int quick_io_func (int (*callback_func) (void *, int, void *),
+                          int func_maxlen, void *object, size_t start,
+                          size_t len, const char *fname, const char *mode);
 
 #endif // MISC_FILE_H

@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "misc/itypes.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "nfc.h"
@@ -37,7 +40,8 @@ const st_getopt2_t nfc_usage[] =
     {
       NULL, 0, 0, 0,
       NULL, "Neo Flash Card"
-      /* "2005 NEO Flash Team http://www.neoflash.com" */
+      /* "2005 NEO Flash Team http://www.neoflash.com" */,
+      NULL
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

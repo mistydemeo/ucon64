@@ -56,7 +56,9 @@ Portions copyright (c) 2002        dbjh
 #include <ctype.h>
 #include "misc/file.h"
 #include "misc/misc.h"
-#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -71,6 +73,12 @@ Portions copyright (c) 2002        dbjh
 #define GAME_GENIE_MAX_STRLEN 12
 
 
+static st_ucon64_obj_t gg_obj[] =
+  {
+    {0, WF_INIT | WF_PROBE},
+    {0, WF_INIT | WF_PROBE | WF_NO_ROM}
+  };
+
 const st_getopt2_t gg_usage[] =
   {
     {
@@ -84,7 +92,8 @@ const st_getopt2_t gg_usage[] =
       OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "nes\n"
       "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
       OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "snes\n"
-      "CODE" OPTARG_S "'AAAAAA:VV'"
+      "CODE" OPTARG_S "'AAAAAA:VV'",
+      &gg_obj[1]
     },
     {
       "ggd", 1, 0, UCON64_GGD,
@@ -97,7 +106,8 @@ const st_getopt2_t gg_usage[] =
       OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "nes\n"
       "GG_CODE" OPTARG_S "'XXXXXX' or GG_CODE" OPTARG_S "'XXXXXXXX'\n"
       OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "snes\n"
-      "GG_CODE" OPTARG_S "'XXXX-XXXX'"
+      "GG_CODE" OPTARG_S "'XXXX-XXXX'",
+      &gg_obj[1]
     },
     {
       "gg", 1, 0, UCON64_GG,
@@ -108,9 +118,10 @@ const st_getopt2_t gg_usage[] =
       "Sega Master System(II/III)/Game Gear (Handheld),\n"
       "Genesis/Sega Mega Drive/Sega CD/32X/Nomad,\n"
       "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),\n"
-      "Super Nintendo Entertainment System/SNES/Super Famicom"
+      "Super Nintendo Entertainment System/SNES/Super Famicom",
+      &gg_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -850,7 +861,7 @@ gameGenieDecodeSNES (const char *in, char *out)
   decodeSNES (11, 6);
 
   // if a ROM was specified snes.c will handle ucon64.snes_hirom
-  if (ucon64.snes_hirom != UCON64_UNKNOWN)         // -hi or -nhi option was specified
+  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi option was specified
     hirom = ucon64.snes_hirom;
   // if only a ROM was specified (not -hi or -nhi) the next if will fail for a
   //  handful of ROMs, namely Sufami Turbo ROMs and Extended ROMs
@@ -1011,9 +1022,8 @@ const char *gg_argv[128];
 
 
 int
-gg_display (st_ucon64_nfo_t *rominfo)
+gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 {
-  const char *code = ucon64.optarg;
   gg_argv[0] = "uggconv";
 
   switch (ucon64.console)
@@ -1056,9 +1066,8 @@ gg_display (st_ucon64_nfo_t *rominfo)
 
 
 int
-gg_apply (st_ucon64_nfo_t *rominfo)
+gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
-  const char *code = ucon64.optarg;
   int size = ucon64.file_size - rominfo->backup_header_len, address, value,
       result = -1;
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
@@ -1117,12 +1126,12 @@ gg_apply (st_ucon64_nfo_t *rominfo)
 
   fputc ('\n', stdout);
   buf[0] = ucon64_fgetc (dest_name, address + rominfo->backup_header_len);
-  dumper (stdout, buf, 1, address + rominfo->backup_header_len, 0);
+  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
 
   ucon64_fputc (dest_name, address + rominfo->backup_header_len, value, "r+b");
 
   buf[0] = value;
-  dumper (stdout, buf, 1, address + rominfo->backup_header_len, 0);
+  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
   fputc ('\n', stdout);
 
   printf (ucon64_msg[WROTE], dest_name);

@@ -33,6 +33,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/bswap.h"
 #include "misc/file.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -44,21 +47,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define N64APS_MAGICLENGTH 5
 
 
+static st_ucon64_obj_t aps_obj[] =
+  {
+    {0, WF_STOP}
+  };
+
 const st_getopt2_t aps_usage[] =
   {
     {
       "a", 0, 0, UCON64_A,
-      NULL, "apply APS PATCH to ROM (APS<=v1.2)"
+      NULL, "apply APS PATCH to ROM (APS<=v1.2)",
+      &aps_obj[0]
     },
     {
       "mka", 1, 0, UCON64_MKA,
-      "ORG_ROM", "create APS patch; ROM should be the modified ROM"
+      "ORG_ROM", "create APS patch; ROM should be the modified ROM",
+      &aps_obj[0]
     },
     {
       "na", 1, 0, UCON64_NA,
-      "DESC", "change APS single line DESCRIPTION"
+      "DESC", "change APS single line DESCRIPTION",
+      NULL
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 char n64aps_magic[] = "APS10";
@@ -166,7 +177,7 @@ readN64header (void)
   fread (buffer, 1, 8, n64aps_modfile);
   fread (APSbuffer, 1, 8, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
-    bswap16_n (buffer, 8);
+    ucon64_bswap16_n (buffer, 8);
   if (memcmp (APSbuffer, buffer, 8))
     {
       printf ("WARNING: Incorrect image\n");
@@ -366,7 +377,7 @@ writeN64header (void)
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
   fread (buffer, 1, 8, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
-    bswap16_n (buffer, 8);
+    ucon64_bswap16_n (buffer, 8);
 
   fwrite (buffer, 1, 8, n64aps_apsfile);
   memset (buffer, 0, 5);

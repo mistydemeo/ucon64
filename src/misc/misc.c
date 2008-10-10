@@ -21,7 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifdef  HAVE_CONFIG_H
-#include "config.h"
+#include "config.h"                             // USE_ZLIB
 #endif
 #include <stddef.h>
 #include <stdlib.h>
@@ -55,11 +55,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
-#ifdef  HAVE_INTTYPES_H
-#include "inttypes.h"
-#else
-#include "misc/itypes.h"
+
+#ifdef  USE_ZLIB
+#include "archive.h"
 #endif
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined AMIGA || defined __APPLE__      // Mac OS X actually
+// GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
+#else // DJGPP, Win32
+#define FILE_SEPARATOR '\\'
+#define FILE_SEPARATOR_S "\\"
+#endif
+
 #include "misc.h"
 
 
@@ -74,12 +83,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #undef  MAXBUFSIZE
 #endif  // MAXBUFSIZE
 #define MAXBUFSIZE 32768
-
-
-#ifndef _WIN32
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
-#endif
 
 
 typedef struct st_func_node
@@ -119,7 +122,7 @@ bytes_per_second (time_t start_time, int nbytes)
 
 
 int
-misc_percent (unsigned long pos, unsigned long len)
+misc_percent (int pos, int len)
 {
   if (len < 1)
     len = 1;
@@ -190,26 +193,26 @@ wait2 (int nmillis)
 void
 dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
         unsigned int flags)
-#define DUMPER_REPLACER '.'
+// Do NOT use DUMPER_PRINT in uCON64 code - dbjh
 {
+#define DUMPER_REPLACER ('.')
   size_t pos;
   char buf[17];
   const unsigned char *p = (const unsigned char *) buffer;
-//  static int found = 0;
 
   memset (buf, 0, sizeof (buf));
   for (pos = 0; pos < bufferlen; pos++, p++)
-    if (flags & DUMPER_TEXT)
+    if (flags & DUMPER_PRINT)
       {
-        if (isalnum (*p) || *p == ' ')
-          {
-//            if (found > 1) // at least 2 chars
-              fputc (*p, output);
-//            found++;
-          }
-//        else found = 0;
+//        fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
+//          (int) (pos + virtual_start));
+        fprintf (output, "%c", isprint (*p) ||
+#ifdef USE_ANSI_COLOR
+                               *p == 0x1b || // ESC
+#endif
+                               isspace (*p) ? *p : DUMPER_REPLACER);
       }
-    else if (flags & DUMPER_BIT)
+    else if (flags & DUMPER_DUAL)
       {
         if (!(pos & 3))
           fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
@@ -239,7 +242,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
             (int) (pos + virtual_start + 1),
             (int) (pos + virtual_start + 1));
       }
-    else // default
+    else // if (flags & DUMPER_HEX) // default
       {
         if (!(pos & 15))
           fprintf (output, (flags & DUMPER_DEC_COUNT ? "%08d  " : "%08x  "),
@@ -252,9 +255,9 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
           fprintf (output, "%s\n", buf);
       }
 
-  if (flags & DUMPER_TEXT)
+  if (flags & DUMPER_PRINT)
     return;
-  else if (flags & DUMPER_BIT)
+  else if (flags & DUMPER_DUAL)
     {
       if (pos & 3)
         {
@@ -264,7 +267,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
     }
   else if (flags & DUMPER_CODE)
     return;
-  else // default
+  else // if (flags & DUMPER_HEX) // default
     {
       if (pos & 15)
         {
@@ -272,43 +275,6 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
           fprintf (output, "%s\n", buf);
         }
     }
-}
-
-
-char *
-tmpnam3 (char *temp, int dir)
-{
-  char *t = NULL, *p = NULL;
-
-  if (!temp)
-    return NULL;
-  
-  t = getenv2 ("TEMP");
-
-  if (!(p = malloc (strlen (t) + strlen (temp) + 12)))
-    return NULL;
-
-  sprintf (p, "%s" FILE_SEPARATOR_S "%st_XXXXXX", t, temp);
-  strcpy (temp, p);
-  free (p);
-
-  if (!dir)
-    if (mkstemp (temp) != -1)
-      return temp;
-
-  if (dir)
-    if (mkdtemp (temp))
-      return temp;
-
-  return NULL;
-}
-
-
-char *
-tmpnam2 (char *temp)
-// deprecated
-{
-  return tmpnam3 (temp, 0);
 }
 
 
@@ -759,63 +725,6 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 }
 
 
-time_t
-strptime2 (const char *s)
-{
-  int i = 0;
-  char y[100], m[100], d[100];
-  char h[100], min[100];
-//  char sec[100];
-  struct tm time_tag;
-  time_t t = time (0);
-  const char *month_s[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", NULL};
-
-  *y = *m = *d = *h = *min = 0;
-
-  if (s[10] == 'T')                     // YYYY-MM-DDT00:00+00:00
-    {
-      sscanf (s, " %4s-%2s-%2sT%2s:%2s", y, m, d, h, min);
-    }
-  else if (s[3] == ',' && s[4] == ' ')  // Mon, 31 Jul 2006 15:05:00 GMT
-    {
-      sscanf (s + 5, "%2s %s %4s %2s:%2s", d, m, y, h, min);
-
-      for (i = 0; month_s[i]; i++)
-        if (!stricmp (m, month_s[i]))
-          {
-            sprintf (m, "%d", i + 1);
-            break;
-          }
-    }
-  else if (s[4] == '-' && s[7] == '-')  // 2006-07-19
-    {
-      sscanf (s, "%4s-%2s-%2s", y, m, d);
-    }
-  else                                  // YYYYMMDDTHHMMSS
-    {
-//      sscanf (s, " %4s%2s%2sT", y, m, d);
-    }
-
-  memset (&time_tag, 0, sizeof (struct tm));
-
-  if (*y)
-    time_tag.tm_year = strtol (y, NULL, 10) - 1900;
-  if (*m)
-    time_tag.tm_mon = strtol (m, NULL, 10) - 1;
-  if (*d)
-    time_tag.tm_mday = strtol (d, NULL, 10);
-  if (*h)
-    time_tag.tm_hour = strtol (h, NULL, 10);
-  if (*min)
-    time_tag.tm_min = strtol (min, NULL, 10);
-
-  t = mktime (&time_tag);
-
-  return t;
-}
-
-
 char *
 getenv2 (const char *variable)
 /*
@@ -1020,32 +929,12 @@ truncate (const char *path, off_t size)
 }
 
 
-char *
-mkdtemp (char *template)
-{
-  char *p = NULL;
-
-  p = _mktemp (template);
-
-  while (_mkdir (p) != 0)
-    p = _mktemp (template);
-
-  return template;
-}
-
-
 int
-mkstemp (char *template)
+sync (void)
 {
-  char *p = NULL;
-
-  p = _mktemp (template);
-
-  while (access (p, X_OK) != 0)
-    p = _mktemp (template);
-
-  fopen (template, "wb");
-
+  _commit (fileno (stdout));
+  _commit (fileno (stderr));
+  fflush (NULL);                                // flushes all streams opened for output
   return 0;
 }
 
@@ -1093,6 +982,12 @@ chmod (const char *path, mode_t mode)
     return -1;
   else
     return 0;
+}
+
+
+void
+sync (void)
+{
 }
 
 

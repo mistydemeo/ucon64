@@ -29,6 +29,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "misc/misc.h"
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"
@@ -38,46 +41,61 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gba.h"
 
 
+static st_ucon64_obj_t fal_obj[] =
+  {
+    {UCON64_GBA, WF_DEFAULT | WF_STOP | WF_NO_ROM},
+    {UCON64_GBA, WF_DEFAULT | WF_STOP},
+    {UCON64_GBA, WF_STOP | WF_NO_ROM},
+    {UCON64_GBA, WF_SWITCH}
+  };
+
 const st_getopt2_t fal_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Flash Advance Linker"/*"2001 Visoly http://www.visoly.com"*/
+      NULL, "Flash Advance Linker"/*"2001 Visoly http://www.visoly.com"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xfal", 0, 0, UCON64_XFAL,
       NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically (32 Mbits) when ROM does not exist"
+      "receives automatically (32 Mbits) when ROM does not exist",
+      &fal_obj[0]
     },
     {
       "xfalmulti", 1, 0, UCON64_XFALMULTI, // send only
       "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
       "multi-game file truncated to SIZE Mbit); specify a loader in\n"
-      "the configuration file; " OPTION_LONG_S "port=PORT"
+      "the configuration file; " OPTION_LONG_S "port=PORT",
+      &fal_obj[1]
     },
     {
       "xfalc", 1, 0, UCON64_XFALC,
       "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
-      "N can be 8, 16, 32, 64, 128 or 256"
+      "N can be 8, 16, 32, 64, 128 or 256",
+      &fal_obj[2]
     },
     {
       "xfals", 0, 0, UCON64_XFALS,
       NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist"
+      "receives automatically when SRAM does not exist",
+      &fal_obj[2]
     },
     {
       "xfalb", 1, 0, UCON64_XFALB,
       "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
       "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when SRAM does not exist"
+      "receives automatically when SRAM does not exist",
+      &fal_obj[2]
     },
     {
       "xfalm", 0, 0, UCON64_XFALM,
-      NULL, "try to enable EPP mode, default is SPP mode"
+      NULL, "try to enable EPP mode, default is SPP mode",
+      &fal_obj[3]
     },
 #endif // USE_PARALLEL
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
@@ -917,10 +935,10 @@ GetFileSize2 (FILE *fp)
       if (FileHeader[0xbd] != Complement)
         puts ("NOTE: Fixing complement check");
 
-      fseek (fp, 0, SEEK_SET);
+      rewind (fp);
     }
   else
-    fseek (fp, 0, SEEK_SET);
+    rewind (fp);
 
   return ucon64.file_size;
 }

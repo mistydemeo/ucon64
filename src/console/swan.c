@@ -24,9 +24,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -37,22 +39,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static int swan_chksum (unsigned char *rom_buffer);
 
+static st_ucon64_obj_t swan_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_SWAN, WF_SWITCH}
+  };
 
 const st_getopt2_t swan_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "WonderSwan/WonderSwan Color/SwanCrystal"/*"1999/2000/2002 Bandai"*/
+      NULL, "WonderSwan/WonderSwan Color/SwanCrystal"/*"1999/2000/2002 Bandai"*/,
+      NULL
     },
     {
       UCON64_SWAN_S, 0, 0, UCON64_SWAN,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &swan_obj[1]
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM checksum"
+      NULL, "fix ROM checksum",
+      &swan_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
@@ -79,7 +89,7 @@ swan_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte
 
   ucon64_fread (buf, SWAN_HEADER_START + 8, 2, dest_name);
-  dumper (stdout, buf, 2, SWAN_HEADER_START + 8, 0);
+  dumper (stdout, buf, 2, SWAN_HEADER_START + 8, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -139,7 +149,7 @@ swan_init (st_ucon64_nfo_t *rominfo)
       "NMC", NULL, NULL
     };
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
 
   ucon64_fread (&swan_header, SWAN_HEADER_START + rominfo->backup_header_len,
            SWAN_HEADER_LEN, ucon64.fname);
@@ -149,9 +159,8 @@ swan_init (st_ucon64_nfo_t *rominfo)
   rominfo->header_len = SWAN_HEADER_LEN;
 
   // ROM maker
-  rominfo->maker = swan_maker[MIN (OFFSET (swan_header, 0), SWAN_MAKER_MAX - 1)] ?
-                   swan_maker[MIN (OFFSET (swan_header, 0), SWAN_MAKER_MAX - 1)] :
-                   ucon64_msg[UNKNOWN_MSG];
+  rominfo->maker = NULL_TO_UNKNOWN_S (swan_maker[MIN (OFFSET (swan_header, 0),
+                                      SWAN_MAKER_MAX - 1)]);
 
   // misc stuff
   sprintf ((char *) buf, "Minimum supported system: %s",

@@ -65,9 +65,11 @@ Data Read Procedure:
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -75,19 +77,26 @@ Data Read Procedure:
 #include "misc/parallel.h"
 
 
+static st_ucon64_obj_t mccl_obj[] =
+  {
+    {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t mccl_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Mad Catz Camera Link (Game Boy Camera)"/*"XXXX Mad Catz Inc. http://www.madcatz.com"*/
+      NULL, "Mad Catz Camera Link (Game Boy Camera)"/*"XXXX Mad Catz Inc. http://www.madcatz.com"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xmccl", 0, 0, UCON64_XMCCL,
-      NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT"
+      NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT",
+      &mccl_obj[0]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

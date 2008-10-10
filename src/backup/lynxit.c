@@ -32,6 +32,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc/misc.h"
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/term.h"
 #include "ucon64.h"
@@ -41,20 +44,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/parallel.h"
 
 
+static st_ucon64_obj_t lynxit_obj[] =
+  {
+    {UCON64_LYNX, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t lynxit_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Lynxit (Lynx cartridge backup board)"/*"1997 K.Wilkins (selfmade)"*/
+      NULL, "Lynxit (Lynx cartridge backup board)"/*"1997 K.Wilkins (selfmade)"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xlit", 0, 0, UCON64_XLIT,
-      NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT"
+      NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT",
 //    "                  receives automatically when ROM does not exist\n"
+      &lynxit_obj[0]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

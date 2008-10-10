@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "misc/itypes.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -37,16 +40,18 @@ const st_getopt2_t cc2_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Cuttle Card (2)"/*"2001 Shell's Electronic http://www.shells.com"*/
+      NULL, "Cuttle Card (2)",/*"2001 Shell's Electronic http://www.shells.com"*/
+      NULL
     },
 #if 0
     {
       "xcc2", 0, 0, UCON64_XCC2,
       NULL, "send/receive ROM to/from Cuttle Card (2)\n"
       "actually Cuttle Card (2) backup units use audio\n"
-      "input/output to transfer ROMs"
+      "input/output to transfer ROMs",
+      &ucon64_wf[WF_OBJ_ATA_STOP_NO_ROM]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 

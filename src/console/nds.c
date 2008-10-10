@@ -29,13 +29,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
-#include "misc/hash.h"
+#include "misc/chksum.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/backup.h"
 #include "console.h"
-#include "nintendo.h"
 #include "nds.h"
 
 
@@ -48,33 +50,40 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int nds_chksum (void);
 
 
+static st_ucon64_obj_t nds_obj[] =
+  {
+    {0, WF_DEFAULT},
+    {UCON64_NDS, WF_SWITCH}
+  };
+
 const st_getopt2_t nds_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Nintendo DS"/*"2005 Nintendo http://www.nintendo.com"*/
+      NULL, "Nintendo DS"/*"2005 Nintendo http://www.nintendo.com"*/,
+      NULL
     },
     {
       UCON64_NDS_S, 0, 0, UCON64_NDS,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &nds_obj[1]
     },
     {
       "n", 1, 0, UCON64_N,
-      "NEW_NAME", "change internal ROM name to NEW_NAME"
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      &nds_obj[0]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
-      NULL, "restore ROM logo character data"
+      NULL, "restore ROM logo character data",
+      &nds_obj[0]
     },
     {
       "chk", 0, 0, UCON64_CHK,
-      NULL, "fix ROM header checksum"
+      NULL, "fix ROM header checksum",
+      &nds_obj[0]
     },
-    {
-      "sc", 0, 0, UCON64_SC,
-      NULL, "convert to SuperCard\n"
-    },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
@@ -153,9 +162,8 @@ const unsigned char nds_logodata[NDS_LOGODATA_LEN] =
 
 
 int
-nds_n (st_ucon64_nfo_t *rominfo)
+nds_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
-  const char *name = ucon64.optarg;
   char buf[NDS_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, 0, NDS_NAME_LEN);
@@ -201,7 +209,7 @@ nds_chk (st_ucon64_nfo_t *rominfo)
   ucon64_fwrite (p, NDS_HEADER_START + rominfo->backup_header_len + 0x15e,
     2, dest_name, "r+b");
 
-  dumper (stdout, p, 2, NDS_HEADER_START + rominfo->backup_header_len + 0x15e, 0);
+  dumper (stdout, p, 2, NDS_HEADER_START + rominfo->backup_header_len + 0x15e, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -214,9 +222,8 @@ nds_init (st_ucon64_nfo_t *rominfo)
   int result = -1, value, pos;
   char buf[144];
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                               ucon64.backup_header_len :
-                               0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
   ucon64_fread (&nds_header, NDS_HEADER_START + rominfo->backup_header_len,
                 NDS_HEADER_LEN, ucon64.fname);
@@ -248,7 +255,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
   }
   if (value < 0 || value >= NINTENDO_MAKER_LEN)
     value = 0;
-  rominfo->maker = nintendo_maker[value] ? nintendo_maker[value] : ucon64_msg[UNKNOWN_MSG];
+  rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[value]);
 
   // ROM country
   rominfo->country =
@@ -285,7 +292,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
     }
 
   // internal ROM crc
-  if (ucon64.do_not_calc_crc == UCON64_UNKNOWN && result == 0)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 1;
@@ -306,26 +313,5 @@ int
 nds_chksum (void)
 // Note that this function only calculates the checksum of the internal header
 {
-  int crc16 = 0;
-  st_hash_t *h = hash_open (HASH_CRC16);
-
-  if (!h)
-    return -1;
-
-  h = hash_update (h, (unsigned char *) &nds_header, 0x15e);
-
-  crc16 = hash_get_crc16 (h);
-
-  hash_close (h);
-
-  return (~crc16) & 0xffff;
-}
-
-
-int
-nds_sc (st_ucon64_nfo_t *rominfo)
-{
-  (void) rominfo;
-#warning write nds_sc()
-  return 0;
+  return (~chksum_crc16 (0, &nds_header, 0x15e)) & 0xffff;
 }

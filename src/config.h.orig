@@ -91,6 +91,9 @@
 /* enable usage of color (default: yes) */
 #define USE_ANSI_COLOR 1
 
+/* enable libdiscmage (default: yes) */
+#define USE_DISCMAGE 1
+
 /* enable libcd64 (default: no) */
 #define USE_LIBCD64 1
 

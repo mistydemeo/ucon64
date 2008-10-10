@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "misc/misc.h"
 #include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
 #include "ucon64.h"
@@ -35,24 +38,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smc.h"
 
 
+static st_ucon64_obj_t smc_obj[] =
+  {
+    {UCON64_NES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT},
+    {UCON64_NES, WF_STOP | WF_NO_ROM}
+  };
+
 const st_getopt2_t smc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Magic Card"/*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/
+      NULL, "Super Magic Card"/*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/,
+      NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xsmc", 0, 0, UCON64_XSMC, // send only
-      NULL, "send ROM (in FFE format) to Super Magic Card; " OPTION_LONG_S "port=PORT"
+      NULL, "send ROM (in FFE format) to Super Magic Card; " OPTION_LONG_S "port=PORT",
+      &smc_obj[0]
     },
     {
       "xsmcr", 0, 0, UCON64_XSMCR,
       NULL, "send/receive RTS data to/from Super Magic Card; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically when RTS file does not exist"
+      "receives automatically when RTS file does not exist",
+      &smc_obj[1]
     },
 #endif
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

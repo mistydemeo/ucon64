@@ -27,9 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <string.h>
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -38,17 +40,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "jaguar.h"
 
 
+static st_ucon64_obj_t jaguar_obj[] =
+  {
+    {UCON64_JAG, WF_SWITCH}
+  };
+
 const st_getopt2_t jaguar_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"/*"1989 Flare2/1993 Atari/1995 Atari"*/
+      NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"/*"1989 Flare2/1993 Atari/1995 Atari"*/,
+      NULL
     },
     {
       UCON64_JAG_S, 0, 0, UCON64_JAG,
-      NULL, "force recognition"
+      NULL, "force recognition",
+      &jaguar_obj[0]
     },
-    {NULL, 0, 0, 0, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
@@ -67,9 +76,8 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x, value;
 
-  rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                               ucon64.backup_header_len :
-                               0;
+  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+    ucon64.backup_header_len : 0;
 
   ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
     rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
@@ -80,9 +88,8 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
     result = 0;
   else
     {
-      rominfo->backup_header_len = (ucon64.backup_header_len != UCON64_UNKNOWN) ?
-                                   ucon64.backup_header_len :
-                                   (int) UNKNOWN_BACKUP_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+        ucon64.backup_header_len : (int) UNKNOWN_BACKUP_HEADER_LEN;
 
       ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
           rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);

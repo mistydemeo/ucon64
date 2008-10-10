@@ -6,6 +6,7 @@
 <center><img src="images/new.png" border="0" width="200"></center>
 <br>
 <!--NEWS-->
+20081010 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">The uCON64 CVS has been restored to the last working version<br>
 20061110 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">The uCON64 CVS version is currently broken due to heavy<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;development</a><br>
 <a name="flc">20060923 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://flc.berlios.de">flc has been moved to its own site</a><br>
@@ -22,7 +23,7 @@
 <img src="images/black.png" height="10" width="590">
 <br>
 <br>
-<center><img src="images/rss.png" border="0" width="200"><br>Bookmarks</center>
+<!--center><img src="images/rss.png" border="0" width="200"><br>Bookmarks</center>
 <br>
 <br>
 <!--RSS NEWS-->
@@ -57,7 +58,7 @@
 <rsstool:start item=28><rsstool:date item=28> <a href="<rsstool:url item=28>"><rsstool:title item=28></a><br><rsstool:end item=28>
 <rsstool:start item=29><rsstool:date item=29> <a href="<rsstool:url item=29>"><rsstool:title item=29></a><br><rsstool:end item=29>
 <br>
-<rsstool:updated>
+<rsstool:updated-->
     </td>
   </tr>
 </table>

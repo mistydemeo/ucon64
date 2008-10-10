@@ -24,24 +24,27 @@ if (!defined ("MISC_MISC_PHP"))
 define ("MISC_MISC_PHP", 1);
 //error_reporting(E_ALL | E_STRICT);
 
-function getIp($address)
-    {
-        // If it isn't a valid IP assume it is a hostname
-        $preg = '#^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}' .
-                '(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$#';
-        if (!preg_match($preg, $address)) {
-            $result = gethostbyname($address);
 
-            // Not a valid host nor IP
-            if ($result === $address) {
-                $result = false;
-             }
-        } else {
-            $result = $address;
-        }
-        
-        return $result;
+function
+get_ip ($address)
+{
+  // if it isn't a valid IP assume it is a hostname
+  $preg = '#^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
+         .'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$#';
+  if (!preg_match($preg, $address))
+    {
+      $result = gethostbyname ($address);
+
+      // not a valid host nor IP
+      if ($result === $address)
+        $result = false;
     }
+  else
+    $result = $address;
+        
+  return $result;
+}
+
 
 function
 check_udp ($address, $port)
@@ -270,7 +273,7 @@ force_mozilla ()
 </span>
 <?php
 */
-      exit ();
+      exit;
     }
 }
 

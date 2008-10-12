@@ -501,11 +501,11 @@ Screenshots: <a href="images/belchblabla_ss.png">1</a>|<a href="images/belchchec
 <center><img src="images/figures2.png" border="0"></center>
 <font size="-1"><br>
 <br>
-<table border="0" bgcolor="#ffffff">
+<!--table border="0" bgcolor="#ffffff">
   <tr>   
     <td valign="top">
 <?php
-
+/*
   // relations
     echo ""
         .$w->widget_relate ($relate_site_title_s, $relate_site_url_s, "./", 0,
@@ -519,8 +519,8 @@ Screenshots: <a href="images/belchblabla_ss.png">1</a>|<a href="images/belchchec
 //                            WIDGET_RELATE_RSSFEED|
                             0)
         ."<br>";
-
-?></td></tr></table><br>
+*/
+?></td></tr></table--><br>
 <a href="http://sourceforge.net"><IMG src="http://sourceforge.net/sflogo.php?group_id=12381" width="88" height="31" border="0" alt="SourceForge Logo"></a><br>
 <br>
 <br>

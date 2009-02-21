@@ -1075,7 +1075,8 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
       else
         name[n] = toupper (name[n]);            // according to Leo, MDPACKU4.BIN
     }                                           //  only supports upper case characters
-  fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
+  fwrite (name, 1, 0x1b, destfile);             // 0x1 - 0x1c = name
+  fputc(0,destfile);                            // 0x1d is NULL TERMINATOR!!!
   fputc (size / MBIT, destfile);                // 0x1d = ROM size (not used by loader)
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 

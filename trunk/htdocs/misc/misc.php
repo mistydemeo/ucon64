@@ -2,7 +2,7 @@
 /*
 misc.php - miscellaneous functions
 
-Copyright (c) 2006 NoisyB
+Copyright (c) 2006 - 2009 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify
@@ -19,10 +19,308 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-if (!defined ("MISC_MISC_PHP"))
+if (!defined ('MISC_MISC_PHP'))
 {
-define ("MISC_MISC_PHP", 1);
+define ('MISC_MISC_PHP', 1);
 //error_reporting(E_ALL | E_STRICT);
+
+
+function
+tor_wrapper ($url, $tor_ip = '127.0.0.1', $tor_port = 8118, $timeout = 300)
+{
+  $agent = random_user_agent ();
+
+  $ack = curl_init();
+  curl_setopt ($ack, CURLOPT_PROXY, $tor_ip.':'.$tor_port);
+  curl_setopt ($ack, CURLOPT_URL, $url);
+  curl_setopt ($ack, CURLOPT_HEADER, 1);
+  curl_setopt ($ack, CURLOPT_USERAGENT, $agent);
+  curl_setopt ($ack, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt ($ack, CURLOPT_FOLLOWLOCATION, 1);
+  curl_setopt ($ack, CURLOPT_TIMEOUT, $timeout);
+  curl_setopt ($ack, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+
+  $syn = curl_exec ($ack);
+//  $info = curl_getinfo($ack);
+  curl_close ($ack);
+//  $info['http_code'];
+
+  return $syn;
+}
+
+
+function
+misc_url_exists ($url)
+{
+  if (file_get_contents ($url, FALSE, NULL, 0, 0) === false)
+    return false;
+  return true;
+}
+
+
+function
+misc_get_browser_config ()
+{
+  // get the settings of the browser and stores them in cookie
+  if (isset ($_GET['config']))
+    {
+      $a = array('js' => $_GET['js'],
+//                 'flash' => $_GET['flash'], 
+                 'w' => $_GET['w'], 
+                 'h' => $_GET['h'],
+        );
+
+      // DEBUG
+//      echo '<pre><tt>';
+//      print_r ($a);
+
+      // TODO: store in cookie
+
+      return $a;
+    }
+
+
+  $p = '';
+
+  // send javascript probe to browser and a refresh
+  $p .= '<script type="text/javascript">'."\n"
+//       .'var w = window.width;'."\n"
+//       .'var h = window.height;'."\n"
+       .'var w = screen.width;'."\n"
+       .'var h = screen.height;'."\n"
+       .'if (self.innerWidth != undefined)'."\n"
+       .'  {'."\n"
+       .'    w = self.innerWidth; h = self.innerHeight;'."\n"
+       .'  }'."\n"
+       .'else'."\n"
+       .'  {'."\n"
+       .'    var d = document.documentElement;'."\n"
+       .'    if (d)'."\n"
+       .'      {'."\n"
+       .'        w = d.clientWidth; h = d.clientHeight;'."\n"
+       .'      }'."\n"
+       .'  }'."\n"
+//       .'document.write (w+" "+h);'."\n"
+       .'document.write (\'<meta http-equiv="refresh" content="0,URL=?config=1'
+       .'&js=1'
+//       .'&flash=0'
+       .'&w=\'+w+\''
+       .'&h=\'+h+\''
+       .'">\');'."\n"
+       .'</script>'
+       .'<noscript>'
+       .'<meta http-equiv="refresh" content="0,URL=?config=1&js=0">'
+       .'</noscript>'
+;
+
+  echo $p;
+
+/*
+$flash = '
+function detectingFLASH() {
+  var browser = navigator.userAgent.toLowerCase();
+  flashVersion = 0;	
+	// NS3+, Opera3+, IE5+ Mac
+	if ( navigator.plugins != null && navigator.plugins.length > 0 ) {
+		var flashPlugin = navigator.plugins['Shockwave Flash'];
+		if ( typeof flashPlugin == 'object' ) { 
+			if ( flashPlugin.description.indexOf('7.') != -1 ) flashVersion = 7;
+			else if ( flashPlugin.description.indexOf('6.') != -1 ) flashVersion = 6;
+			else if ( flashPlugin.description.indexOf('5.') != -1 ) flashVersion = 5;
+			else if ( flashPlugin.description.indexOf('4.') != -1 ) flashVersion = 4;
+			else if ( flashPlugin.description.indexOf('3.') != -1 ) flashVersion = 3;
+		}
+	} // IE4+ Win32 (VBscript)
+	else if ( browser.indexOf("msie") != -1 && parseInt(navigator.appVersion) >= 4 && browser.indexOf("win")!= -1 && browser.indexOf("16bit")== -1 ) {
+	  document.write('<scr' + 'ipt language="VBScript"\> \n');
+		document.write('on error resume next \n');
+		document.write('DIM obFlash \n');
+		document.write('SET obFlash = CreateObject("ShockwaveFlash.ShockwaveFlash.7") \n');
+		document.write('IF IsObject(obFlash) THEN \n');
+		document.write('flashVersion = 7 \n');
+		document.write('ELSE SET obFlash = CreateObject("ShockwaveFlash.ShockwaveFlash.6") END IF \n');
+		document.write('IF flashVersion < 7 and IsObject(obFlash) THEN \n');
+		document.write('flashVersion = 6 \n');
+		document.write('ELSE SET obFlash = CreateObject("ShockwaveFlash.ShockwaveFlash.5") END IF \n');
+		document.write('IF flashVersion < 6 and IsObject(obFlash) THEN \n');
+		document.write('flashVersion = 5 \n');
+		document.write('ELSE SET obFlash = CreateObject("ShockwaveFlash.ShockwaveFlash.4") END IF \n');
+		document.write('IF flashVersion < 5 and IsObject(obFlash) THEN \n');
+		document.write('flashVersion = 4 \n');
+		document.write('ELSE SET obFlash = CreateObject("ShockwaveFlash.ShockwaveFlash.3") END IF \n');
+		document.write('IF flashVersion < 4 and IsObject(obFlash) THEN \n');
+		document.write('flashVersion = 3 \n');
+		document.write('END IF');
+	  document.write('</scr' + 'ipt\> \n');
+  } // no Flash
+  else {
+	flashVersion = -1;
+  }
+return flashVersion;
+';
+*/
+}
+
+
+function
+misc_explode_tag ($html_tag)
+{
+  // returns 2d array with tag name and attributes and their values
+  $s = strpos ($html_tag, '<') + 1;
+  $l = strrpos ($html_tag, '>') - $s;
+  $p = substr ($html_tag, $s, $l);
+  $p = trim ($p);
+  // '=      "' to '="'
+  $p = str_replace (array ('= "','=  "'), '="', $p);
+  $p = str_replace (array ('= "','=  "'), '="', $p);
+  $p = str_replace (array ('= "','=  "'), '="', $p);
+  // '      ="' to '="'
+  $p = str_replace (array (' ="','  ="'), '="', $p);
+  $p = str_replace (array (' ="','  ="'), '="', $p);
+  $p = str_replace (array (' ="','  ="'), '="', $p);
+
+  // DEBUG
+//  echo $p;
+
+  $a = explode (' ', $p);
+  $a = array_merge (array_unique ($a));
+
+  // DEBUG
+//  echo '<pre><tt>';
+//  print_r ($a);
+
+  $tag = array ();
+  $count = 0;
+  for ($i = 0; isset ($a[$i]); $i++)
+    if (strpos ($a[$i], '=')) // is attribute
+      {
+        $aa = explode ('=', $a[$i], 2);
+
+        $tag[strtolower (trim ($aa[0]))] = '"'.trim (trim ($aa[1]), '"').'"'; // trim first spaces then quotes
+      }
+    else // attribute without value (e.g. tag name)
+      $tag[strtolower (trim ($a[$i]))] = NULL;
+
+  // DEBUG
+//  echo '<pre><tt>';
+//  print_r ($tag);
+
+  return $tag;
+}
+
+
+function
+enforce_gre ()
+{
+  $p = '';
+
+  // enforce gecko render engine (used by firefox, safari, etc.)
+  if (!stristr ($_SERVER['HTTP_USER_AGENT'], "moz"))
+    {
+      $url = 'http://www.firefox.com';
+
+      // redirect using js
+//      $p .= '<script type="text/javascript"><!--'."\n"
+//           .'location.href="'.$url.'"'."\n"
+//           .'//--></script>'."\n";
+
+      $refresh = 1;
+      $p .= '<meta name="refresh" content="refresh: '.$refresh.'; url="'.$url.'">';
+
+      $p .= '<span style="font-family: arial,sans-serif;">'
+           .'<table border="0" cellpadding="0" cellspacing="0" width="80%" height="100">'
+           .'<tr>'
+           .'<td border="0" cellpadding="0" cellspacing="0" bgcolor="#ffff80" align="center">'
+           .'<font size="-1" face="arial" color="#000000">Your browser is not supported here. Redirecting...</font>'
+           .'</td>'
+           .'</tr>'
+           .'</table>'
+           .'</span>';
+
+      echo $p;
+
+      exit;
+    }
+}
+
+
+function
+misc_implode_tag ($tag)
+{
+  // DEBUG
+//  echo '<pre><tt>';
+//  print_r ($tag);
+
+  $p = '';
+
+  $p .= '<';
+
+  $a = array_keys ($tag);
+  for ($i = 0; $a[$i]; $i++)
+    {
+      if ($i > 0)
+        $p .= ' ';
+
+      $p .= $a[$i];
+
+      if ($tag[$a[$i]])
+        $p .= '='.$tag[$a[$i]];
+    }
+
+  $p .= '>';
+
+  return $p;
+}
+
+
+function
+misc_gettag ($html_tag, $attr = array(), $use_existing_attr = false)
+{
+  $tag = misc_explode_tag ($html_tag);
+
+  if (!$use_existing_attr)
+    {
+      // BUT keep the attributes without value (e.g. tag name)
+      $attr_keys = array_keys ($tag);
+      for ($i = 0; $attr_keys[$i]; $i++)
+        if ($tag[$attr_keys[$i]] == NULL)
+          $a[$attr_keys[$i]] = $tag[$attr_keys[$i]];
+      $tag = $a;
+    }
+
+  if (!$attr)
+    return misc_implode_tag ($tag);
+
+//  $tag = array_replace ($tag, $attr);
+  $attr_keys = array_keys ($attr);
+  for ($i = 0; $attr_keys[$i]; $i++)
+    if ($attr[$attr_keys[$i]] != NULL)
+      $tag[$attr_keys[$i]] = '"'.trim ($attr[$attr_keys[$i]], '"').'"';
+
+  return misc_implode_tag ($tag);
+}
+
+
+$ctype__ = array(32,32,32,32,32,32,32,32,32,40,40,40,40,40,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,
+  -120,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,4,4,4,4,4,4,4,4,4,4,16,16,16,16,16,16,
+  16,65,65,65,65,65,65,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,16,16,16,16,16,
+  16,66,66,66,66,66,66,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,16,16,16,16,32,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+function isalnum ($c){ global $ctype__; return ((($ctype__[( ord($c) )]&(01 | 02 | 04 )) != 0)?1:0);}
+function isalpha ($c){ global $ctype__; return ((($ctype__[( ord($c) )]&(01 | 02 )) != 0)?1:0);}
+function isascii ($c){ global $ctype__; return (((( ord($c) )<=0177) != 0)?1:0);}
+function iscntrl ($c){ global $ctype__; return ((($ctype__[( ord($c) )]& 040 ) != 0)?1:0);}
+function isdigit ($c){ global $ctype__; return ((($ctype__[( ord($c) )]& 04 ) != 0)?1:0);}
+function isgraph ($c){ global $ctype__; return ((($ctype__[( ord($c) )]&(020 | 01 | 02 | 04 )) != 0)?1:0);}
+function islower ($c){ global $ctype__; return ((($ctype__[( ord($c) )]& 02 ) != 0)?1:0);}
+function isprint ($c){ global $ctype__; return ((($ctype__[( ord($c) )]&(020 | 01 | 02 | 04 | 0200 )) != 0)?1:0);}
+function ispunct ($c){ global $ctype__; return ((($ctype__[( ord($c) )]& 020 ) != 0)?1:0);}
+function isspace ($c){ global $ctype__; return ((($ctype__[( ord($c) )]& 010 ) != 0)?1:0);}
+function isupper ($c){ global $ctype__; return ((($ctype__[( ord($c) )]& 01 ) != 0)?1:0);}
+function isxdigit ($c){ global $ctype__; return ((($ctype__[( ord($c) )]&(0100 | 04 )) != 0)?1:0);}
 
 
 function
@@ -49,12 +347,12 @@ get_ip ($address)
 function
 check_udp ($address, $port)
 {
-  $fp = fsockopen("udp://".$address, $port, $errno, $errstr, 1); 
+  $fp = fsockopen('udp://'.$address, $port, $errno, $errstr, 1); 
   if (!$fp)
     return 0;
 
   socket_set_timeout ($fp, 2);
-  if (!fwrite($fp,"\x00"))
+  if (!fwrite($fp,'\x00'))
     return 0;
 
   $t1 = time();
@@ -93,6 +391,20 @@ scandir4 ($path, $sort)
 
 
 function
+misc_download ($url, $path)
+{
+  if (!($img = file_get_contents ($url)))
+    return;
+
+  if (!($out = fopen ($path, 'wb')))
+    return;
+ 
+  fwrite ($out, $img);
+  fclose ($out);
+}
+
+
+function
 time_ms ()
 // returns milliseconds since midnight
 {
@@ -109,30 +421,42 @@ time_ms ()
 
 
 function
-window_open ()
+time_count ($t_date)
 {
-/*
-require_once ("misc/widget.php");
+  static $t_now = 0;
+  static $t_count = 0;
 
+  if ($t_now == 0)
+    $t_now = $t_count = time ();
 
-  $w = new misc_widget;
-  $w->widget_init (0, // css flags
-                   WIDGET_JS_WINDOW); // js flags
-?>
-<a href="javascript:js_window_open ('ripalot.php',
-                                    'mywindow',
-                                    'width=450,'
-                                   +'height=450,'
-                                   +'resizable=no,'
-                                   +'scrollbars=no,'
-                                   +'toolbar=no,'
-                                   +'location=no,'
-                                   +'directories=no,'
-                                   +'status=no,'
-                                   +'menubar=no,'
-                                   +'copyhistory=no');">Start</a>
-<?php
-*/
+  $p = NULL;
+
+  while ($t_count > $t_date)
+    {
+      $t_calc = $t_now - $t_count;
+
+      if ($t_calc < 3600)
+        {
+          $t_count -= 300;
+          if ($t_calc)
+            if ($t_count < $t_date)
+            $p .= sprintf ('%s', $t_calc / 60 .' minutes');
+        }
+      else if ($t_calc < 86400)
+        {
+          $t_count -= 3600;
+          if ($t_count < $t_date)
+            $p .= sprintf ('%s', $t_calc / 3600 .' hours');
+        }
+      else
+        {
+          $t_count -= 86400;
+          if ($t_count < $t_date)
+            $p .= sprintf ('%s', $t_calc / 86400 .' days');
+        }
+    }
+
+  return $p;
 }
 
 
@@ -144,10 +468,79 @@ islocalhost ()
 
 
 function
-isip ($ip)
+misc_get_keywords_alnum ($s, $keyword_size = 3)
 {
-  // $ip can also be a list of ip's
-  return stristr ($ip, $_SERVER['REMOTE_ADDR']);
+  if (strlen (trim ($s)) < $keyword_size)
+    return false;
+
+  for ($i = 0; $s[$i]; $i++)
+    if (!isalnum ($s[$i]) && $s[$i] != '_' && $s[$i] != '.')
+      return false;
+
+  return true;
+}
+
+
+function
+misc_get_keywords_alpha ($s, $keyword_size = 3)
+{
+  if (strlen (trim ($s)) < $keyword_size)
+    return false;
+
+  for ($i = 0; $s[$i]; $i++)
+    if (!isalpha ($s[$i]) && $s[$i] != '_' && $s[$i] != '.')
+      return false;
+
+  return true;
+}
+
+
+function
+misc_get_keywords ($s, $flag = 0) // default = isalnum
+{
+  $s = str_replace (array ('. ', ',', ';', '!', '?', '"'), ' ', $s);
+  $s = str_replace (array ('  ', '  ', '  ', '  ', '  '), ' ', $s);
+
+  for ($i = 0; $s[$i]; $i++)
+    if (ispunct ($s[$i]) && $s[$i] != '_' && $s[$i] != '.')
+      $s[$i] = ' ';
+
+  $a = explode (' ', strtolower ($s));
+  for ($i = 0; isset ($a[$i]); $i++)
+    $a[$i] = trim ($a[$i], ' .');
+  // TODO: more sensitivity instead of array_filter()
+  $a = array_filter ($a, (!$flag ? 'misc_get_keywords_alnum' : 'misc_get_keywords_alpha'));
+  $a = array_merge (array_unique ($a));
+
+  // DEBUG
+//  echo '<pre><tt>';
+//  print_r ($a);
+
+  $s = implode (' ', $a);
+  $s = trim ($s);
+
+  return $s;
+}
+
+
+function
+misc_get_keywords_html ($s, $flag = 0) // default = isalnum
+{
+  // so one keyword does not get glued to another because of strip_tags()
+  $s = str_replace ('>', '> ', $s);
+  $s = str_replace (array ('  ', '  ', '  ', '  ', '  '), ' ', $s);
+  $s = strip_tags ($s);
+
+  return misc_get_keywords ($s, $flag);
+}
+
+
+function
+echo_gzip ($p)
+{
+  ob_start ('ob_gzhandler');
+  echo $p;
+  ob_end_flush ();
 }
 
 
@@ -157,9 +550,9 @@ get_suffix ($filename)
 {
   $p = basename ($filename);
   if (!$p)
-    $p = filename;
+    $p = $filename;
 
-  $s = strchr ($p, '.');
+  $s = strrchr ($p, '.');
   if (!$s)
     $s = strchr ($p, 0);
   if ($s == $p)
@@ -177,121 +570,254 @@ set_suffix ($filename, $suffix)
 }
 
 
-/*
-  getfile()           runs callback_func with the realpath() of file/dir as string
-                        flags:
-  0                           pass all files/dirs with their realpath()
-  GETFILE_FILES_ONLY     pass only files with their realpath()
-  GETFILE_RECURSIVE      pass all files/dirs with their realpath()'s recursively
-  GETFILE_RECURSIVE_ONCE like GETFILE_FILE_RECURSIVE, but only one level deep
-  (GETFILE_FILES_ONLY|GETFILE_RECURSIVE)
-                           pass only files with their realpath()'s recursively
-
-  callback_func()       getfile() expects the callback_func to return the following
-                          values:
-                          0 == ok, 1 == skip the rest/break, -1 == failure/break
-*/
-//define ("GETFILE_FILES_ONLY",     1);
-//define ("GETFILE_RECURSIVE",      1<<1);
-//define ("GETFILE_RECURSIVE_ONCE", 1<<2);
 function
-getfile ($path_array, $callback_func, $flags)
+str_shorten ($s, $limit)
 {
-  $result = 0;
-  $i_max = sizeof ($path_array);
+  // Make sure a small or negative limit doesn't cause a negative length for substr().
+  if ($limit < 3)
+    $limit = 3;
 
-  for ($i = 0; $i < $i_max; $i++)
-    {
-      $dir = opendir ($path_array[$i]);
-
-      if ($dir)
-        {
-          while (($file = readdir ($dir)) != false)
-            if (strcmp ($file, "..") != 0 &&
-                strcmp ($file, ".") != 0)
-              {
-                $result = callback_func ($file);
-                if ($result == 1)
-                  {
-                    closedir ($dir);
-                    return 0;
-                  }
-                if ($result == -1)
-                  {
-                    closedir (dir);
-                    return -1;
-                  }
-              }
-          closedir ($dir);
-        }
-    }
-
-  return 0;
+  // Now truncate the string if it is over the limit.
+  if (strlen ($s) > $limit)
+    return substr($s, 0, $limit - 3).'..';
+  else
+    return $s;
 }
 
 
-if (!function_exists('sprint_r'))
+/*
+function
+short_name ($s, $limit)
+{
+  return str_shorten ($s, $limit);
+}
+*/
+
+
+function
+in_tag ($s)
+{
+  // are we inside a tag?
+  return strpos ($s, '>') < strpos ($s, '<');
+}
+
+
+function
+is_url ($s)
+{
+  // checks if string is a url
+  $is_url = 0;
+
+  if (strlen ($s) > 4 &&
+      isalpha ($s[0]) &&
+      !strstr ($s, '..') &&
+      substr_count ($s, '.') == 2 &&
+      (substr ($s, -4, 1) == '.' || substr ($s, -3, 1) == '.'))
+    $is_url = 1;
+
+  return $is_url;
+}
+
+
+function
+parse_links ($s)
+{
+  // turn plain text urls into links
+//  return preg_replace ('/\\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]/i', "<a href=\"#\" onclick=\"open_url('\\0')\";return false;>\\0</a>", $s);
+//  return ereg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]","<a href=\"\\0\">\\0</a>", $s);
+//  $s = eregi_replace("((([ftp://])|(http(s?)://))((:alnum:|[-\%\.\?\=\#\_\:\&\/\~\+\@\,\;])*))","<a href = '\\0' target='_blank'>\\0</a>", $s);
+//  $s = eregi_replace("(([^/])www\.|(^www\.))((:alnum:|[-\%\.\?\=\#\_\:\&\/\~\+\@\,\;])*)", "\\2<a href = 'http://www.\\4'>www.\\4</a>", $s);
+
+  $a = explode (' ', strip_tags ($s));
+  $a = array_merge (array_unique ($a)); // remove dupes
+
+  // find eventual urls
+  $a_size = sizeof ($a);
+  for ($i = 0; $i < $a_size; $i++)
+    if (is_url ($a[$i]))
+      {
+        if (stristr ($a[$i], 'http://'))
+          $s = str_replace ($a[$i], '<a href="'.$a[$i].'">'.$a[$i].'</a>', $s);
+        else
+          $s = str_replace ($a[$i], '<a href="http://'.$a[$i].'">'.$a[$i].'</a>', $s);
+      }
+
+  return $s;
+}
+
+
+if (!function_exists('sys_get_temp_dir'))
+{
+function
+sys_get_temp_dir ()
+{
+  if ($temp = getenv ('TMP'))
+    return $temp;
+  if ($temp = getenv ('TEMP'))
+    return $temp;
+  if ($temp = getenv ('TMPDIR'))
+    return $temp;
+  $temp = tempnam (__FILE__, '');
+  if (file_exists ($temp))
+    {
+      unlink ($temp);
+      return dirname ($temp);
+    }
+  return null;
+}
+}
+
+
+if (!function_exists ('sprint_r'))
 {
 function 
 sprint_r ($var)
 {
-  ob_start();
+  ob_start ();
 
   print_r ($var);
 
-  $ret = ob_get_contents();
+  $ret = ob_get_contents ();
 
-  ob_end_clean();
+  ob_end_clean ();
 
   return $ret;
 }
 }
 
 
+// turn any variable into XML string
 function
-force_mozilla ()
+var_xml ($v)
 {
-  if (!stristr ($_SERVER['HTTP_USER_AGENT'], "moz"))
-    {
-/*
-      echo "<script type=\"text/javascript\"><!--\n"
-          ."location.href=\"http://www.mozilla.com/firefox/\"\n"
-          ."//--></script>\n";
-*/
-      echo "<meta http-equiv=\"refresh\" content=\"1; URL=http://www.mozilla.com/firefox/\">";
+  ob_start ();
 
-/*
-?>
-<span style="font-family: arial,sans-serif;">
-<table border="0" cellpadding="0" cellspacing="0" width="80%" height="100">
-  <tr>
-    <td border="0" cellpadding="0" cellspacing="0" bgcolor="#ffff80" align="center">
-<font size="-1" face="arial" color="#000000">Your browser is not supported here. Redirecting...</font>
-    </td>
-  </tr>
-</table>
-</span>
-<?php
-*/
-      exit;
-    }
+  print_r ($v);
+//  var_dump ($v);
+
+  $p = ob_get_contents ();
+
+  ob_end_clean ();
+
+  $p = str_replace (array (' => ', 'SimpleXMLElement', 'Object'), '', $p);
+  $p = str_replace (array (']Array'), ']', $p);
+//  $p = str_replace (array ('('."\n"), '', $p);
+//  $p = str_replace ('[', '<', $p);
+//  $p = str_replace (']', '>', $p);
+  $p = '<?xml version="1.0" encoding="UTF-8"?>'.$p;
+
+  return $p;
 }
 
 
 function
-misc_exec ($cmdline, $debug)
+ftp_search ($search)
+{
+  $search = str_replace (' ', '+', $search);
+//  $query = 'intitle:("Index.of.*"|"Index.von.*") +("'.$search.'") -inurl:(htm|php|html|py|asp|pdf) -inurl:inurl -inurl:in
+  $query = 'intitle:("Index.of.*") +("'.$search.'") -inurl:(htm|php|html|py|asp|pdf) -inurl:inurl -inurl:index';
+  $url = 'http://www.google.com/search?q='.urlencode ($query);
+
+  return $url;
+}
+
+
+function
+video_search ($search)
+{
+  $search = str_replace (' ', '+', $search);
+//  $query = 'intitle:("Index.of.*"|"Index.von.*") +("'.$search.'") -inurl:(htm|php|html|py|asp|pdf) -inurl:inurl -inurl:in
+  $query = 'intitle:("Index.of.*") +("'.$search.'") -inurl:(htm|php|html|py|asp|pdf) -inurl:inurl -inurl:index';
+  $url = 'http://www.google.com/search?q='.urlencode ($query);
+
+  return $url;
+// youtube
+//    <feed>http://video.google.com/videosearch?q=quakeworld&amp;so=1&amp;output=rss&amp;num=1000</feed>
+//    <feed>http://gdata.youtube.com/feeds/api/videos?vq=quake1&amp;max-results=50</feed>
+}
+
+
+function
+wikipedia_search ($search)
+{
+  $url = 'http://en.wikipedia.org/w/index.php?title=Special%3ASearch&redirs=0&search='.$search.'&fulltext=Search&ns0=1';
+  return $url;
+}
+
+
+function
+lyrics_search ($search)
+{
+  $url = 'http://www.google.com/search?ie=UTF-8&oe=utf-8&q='.$search;
+  return $url;
+}
+
+
+function
+image_search ($search)
+{
+  $url = 'http://images.google.com/search?ie=UTF-8&oe=utf-8&q='.$search;             
+  return $url;
+}
+
+
+// gaming
+function
+walkthrough_search ($search)
+{
+  $url = 'http://images.google.com/search?ie=UTF-8&oe=utf-8&q=walkthrough+'.$search;
+  return $url;
+}
+
+
+// gaming
+function
+cheat_search ($search)
+{
+  $url = 'http://images.google.com/search?ie=UTF-8&oe=utf-8&q=cheat+'.$search;
+  return $url;
+}
+
+
+/*
+function
+vname (&$var, $scope=false, $prefix='unique', $suffix='value')
+{
+  if ($scope)
+    $vals = $scope;
+  else
+    $vals = $GLOBALS;
+
+  $old = $var;
+  $var = $new = $prefix.rand().$suffix;
+  $vname = FALSE;
+
+  foreach ($vals as $key => $val)
+    if($val === $new)
+      $vname = $key;
+
+  $var = $old;
+
+  return $vname;
+}
+*/
+
+
+function
+misc_exec ($cmdline, $debug = 0)
 {
   if ($debug)
-    echo $cmdline."\n";
+    echo 'cmdline: '.$cmdline."\n"
+        .'escaped: '.escapeshellcmd ($cmdline).' (not used)'."\n"
+;
 
   if ($debug < 2)
     {
       $a = array();
 
-//      exec ("bash -c \"".$cmdline."\"", $a, $res);
       exec ($cmdline, $a, $res);
 
-      $p = "";
+      $p = '';
       if ($debug)
         $p = $res."\n";
 
@@ -302,13 +828,29 @@ misc_exec ($cmdline, $debug)
       return $p;
     }
 
-  return "";
+  return '';
+}
+
+
+function
+get_cookie ($name)
+{
+//  if (isset ($_REQUEST[$name]))
+//    return $_REQUEST[$name];
+
+  if (isset ($_COOKIE[$name]))
+    return $_COOKIE[$name];
+
+  return NULL;
 }
 
 
 function
 get_request_value ($name)
 {
+//  global $_POST;
+//  global $_GET;
+
   if (isset ($_POST[$name]))
     return $_POST[$name];
 
@@ -320,452 +862,326 @@ get_request_value ($name)
 
 
 function
-html_head_tags_meta ($name, $content)
+http_build_query2 ($args = array(), $use_existing_arguments = false)
 {
-  if ($name && $content)
-    return "<meta name=\"".$name."\" content=\"".$content."\">\n";
+  if ($use_existing_arguments)
+    $a = array_merge ($_GET, $args); // $args overwrites $_GET
+  else
+    $a = $args;
 
-  return "";
+  if (!sizeof ($a))
+    return '';
+
+  return http_build_query ($a);
+} 
+
+
+function
+misc_getlink ($args = array(), $use_existing_arguments = false)
+{
+  return '?'.http_build_query2 ($args, $use_existing_arguments);
 }
 
 
 function
-html_head_tags_http_equiv ($http_equiv, $content)
+misc_seo_description ($html_body)
 {
-  if ($http_equiv && $content)
-    return "<meta http-equiv=\"".$http_equiv."\" content=\"".$content."\">\n";
-
-  return "";
+  // generate meta tag from the body
+  $p = strip_tags ($html_body);
+  $p = str_replace (array ('&nbsp;', '&gt;', '&lt;', "\n"), ' ', $p);
+  $p = misc_get_keywords ($p, 1);
+  return '<meta name="Description" content="'.$p.'">'
+        .'<meta name="keywords" content="'.$p.'">';
 }
 
 
 function
-html_head_tags ($icon, $title, $refresh, $charset,
-                $use_dc, $desc, $keywords, $identifier, $lang, $author)
+misc_head_tags ($icon, $refresh = 0, $charset = 'UTF-8')
 {
-  $p = "";
+  $p = '';
 
-  $p .= html_head_tags_http_equiv ("Content-Type", "text/html; charset=".($charset ? $charset : "UTF-8"));
+  $p .= '<meta http-equiv="Content-Type" content="text/html;charset='.$charset.'">';
+//  $p .= '<meta name="Content-Type" content="text/html; charset='.$charset.'">';
 
   if ($refresh > 0)
-    $p .= html_head_tags_http_equiv ("refresh", $refresh."; URL=".$_SERVER['REQUEST_URI']);
+//    header ('location:'.$_SERVER['REQUEST_URI']);
+    header ('refresh: '.$refresh.'; url='.$_SERVER['REQUEST_URI']);
+//    $p .= '<meta http-equiv="refresh" content="'.$refresh.'; URL='.$_SERVER['REQUEST_URI'].'">';
 
 /*
-?>
     <meta http-equiv="imagetoolbar" content="no">
     <meta http-equiv="reply-to" content="editor@NOSPAM.sniptools.com">
     <meta http-equiv="MSThemeCompatible" content="Yes">
     <meta http-equiv="Content-Language" content="en">
     <meta http-equiv="Expires" content="Mon, 24 Sep 1976 12:43:30 IST">
-<?php
 */
 
   if ($icon)
-    $p .= "<link rel=\"icon\" href=\""
-         .$icon
-         ."\" type=\"image/png\">\n";
-
-  if ($title)
-    $p .= "<title>"
-          .$title
-          ."</title>\n";
-
-  if ($use_dc)
-    $p .= html_head_tags_meta ("description", $desc ? $desc : $title)
-         .html_head_tags_meta ("author", $author ? $author : "Admin")
-         .html_head_tags_meta ("keywords", $keywords ? $keywords : "html, php")
-         .html_head_tags_meta ("robots", "follow")
-         ."<!-- Dublin Core -->\n"
-         .html_head_tags_meta ("DC.Title", $desc ? $desc : $title)
-         .html_head_tags_meta ("DC.Creator", $author ? $author : "Admin")
-         .html_head_tags_meta ("DC.Subject", $desc ? $desc : $title)
-         .html_head_tags_meta ("DC.Description", $desc ? $desc : $title)
-         .html_head_tags_meta ("DC.Publisher", $author ? $author : "Admin")
-//         .html_head_tags_meta ("DC.Contributor", "")
-//         .html_head_tags_meta ("DC.Date", "")
-         .html_head_tags_meta ("DC.Type", "Software")
-         .html_head_tags_meta ("DC.Format", "text/html")
-         .html_head_tags_meta ("DC.Identifier", $identifier ? $identifier : "localhost")
-//         .html_head_tags_meta ("DC.Source", "")
-         .html_head_tags_meta ("DC.Language", $lang ? $lang : "en")
-//         .html_head_tags_meta ("DC.Relation", "")
-//         .html_head_tags_meta ("DC.Coverage", "")
-//         .html_head_tags_meta ("DC.Rights", "GPL")
-
-//       .html_head_tags_meta ("description", "Trapping keyboard events with Javascript -- in a cross-browser way [Sniptools]")
-//       .html_head_tags_meta ("keywords", "Javascript keyboard events, keypress, javascript, keyCode, which, repeat, keydown event, Sniptools")
-//       .html_head_tags_meta ("author", "Shashank Tripathi")
-//       .html_head_tags_meta ("revisit-after", "1 week")
-//       .html_head_tags_meta ("robots", "index,all")
-//       .html_head_tags_meta ("revisit-after", "7 days")
-//       .html_head_tags_meta ("author", "Shashank Tripathi")
-//       .html_head_tags_meta ("generator", "Homesite 5.0&nbsp; | &nbsp;  Dreamweaver 6 beta&nbsp; | &nbsp; TopStyle 3&nbsp; | &nbsp; Notepad&nbsp; | &nbsp; Adobe PS 7.0")
-//       .html_head_tags_meta ("resource-type", "Public")
-//       .html_head_tags_meta ("classification", "Internet Services")
-//       .html_head_tags_meta ("MSSmartTagsPreventParsing", "TRUE")
-//       .html_head_tags_meta ("robots", "ALL")
-//       .html_head_tags_meta ("distribution", "Global")
-//       .html_head_tags_meta ("rating", "Safe For Kids")
-//       .html_head_tags_meta ("language", "English")
-//       .html_head_tags_meta ("doc-type", "Public")
-//       .html_head_tags_meta ("doc-class", "Living Document")
-//       .html_head_tags_meta ("doc-rights", "Copywritten Work")
-//       .html_head_tags_meta ("distribution", "Global")
-;
+    $p .= '<link rel="icon" href="'.$icon.'" type="image/png">';
 
   return $p;
 }
 
 
 /*
-  misc_proxy()
-    performs many different tasks (see below)
-    can be used to include other html pages inline
+  split html into an array with content separated by tags
+    returns an array
 
-  $translate_func
-    a (optional) callback function that translates foreign text in html
+  $a['start']      // [...<head>]
+  $a['head']       // <head>[...]</head>
+  $a['between']    // [</head>...<body>]
+  $a['body']       // <body>[...]</body>
+  $a['end']        // [</body>...]EOF
 */
-define ("PROXY_SHOW_HEADER",    1);     // insert the header as comment into the html
-//define ("PROXY_REQ_EDITOR",     1<<1);  // edit GET/POST requests/urls (shows all targets in a list)
-//define ("PROXY_MAKEPDF",        1<<2);  // turn the whole html page into a pdf
-define ("PROXY_PASS_FORMS",     1<<3);  // pass only form tags
-define ("PROXY_PASS_LINKS",     1<<4);  // pass only the http links
-//define ("PROXY_FILTER_COOKIES", 1<<5);  // remove cookies
-//define ("PROXY_FILTER_JS",      1<<6);  // remove JavaScript
-//define ("PROXY_FILTER_FLASH",   1<<7);  // remove Flash movies
-//define ("PROXY_FILTER_CSS",     1<<8);  // remove CSS
-//define ("PROXY_FILTER_ADS",     1<<9); // remove ads (content that comes from a different server)
-define ("PROXY_FILTER_HTML",    1<<10); // remove all html tags
-/*
-  A dereferer is a means to strip the details of the referring website from a
-  link request so that the target website cannot identify the page which was
-  clicked on to originate a request.
-*/
-//define ("PROXY_DEREFERER",      1<<12);
-/*
-  PROXY_PUSH_*
-    shows only the CAPTCHA dialog of a (news) site
-    and a title, url and description prompt (depending on the target)
-*/
-define ("PROXY_PUSH_DIGG",      1<<13);
-define ("PROXY_PUSH_SLASHDOT",  1<<14); // no CAPTCHA
-define ("PROXY_PUSH_DELICIOUS", 1<<15);
+function
+split_html_content ($html)
+{
+  $p = strtolower ($html);
+
+  // split in head, body (and the rest)
+  if (strpos ($p, '<head'))
+    {
+      $head_start = strpos ($p, '<head');
+      $head_start += strpos (substr ($p, $head_start), '>') + 1;
+      $head_len = strpos ($p, '</head>') - $head_start;
+    }
+  else
+    {
+      $head_start = 0;
+      $head_len = 0;
+    }
+
+  if (strpos ($p, '<body'))
+    {
+      $body_start = strpos ($p, '<body');
+      $body_start += strpos (substr ($p, $body_start), '>') + 1;
+      $body_len = strpos ($p, '</body>') - $body_start;
+    }
+  else
+    {
+      $body_start = 0;
+      $body_len = strlen ($html);
+    }
+
+  $start = substr ($html, 0, $head_start);
+  $head = substr ($html, $head_start, $head_len);
+  $between = substr ($html, $head_start + $head_len, $body_start - ($head_start + $head_len));
+
+  $body = substr ($html, $body_start, $body_len);
+
+  $end = substr ($html, $body_start + $body_len);
+
+  $a = array ();
+
+  $a['start'] = $start;
+  $a['head'] = $head;
+  $a['between'] = $between;
+  $a['body'] = $body;
+  $a['end'] = $end;
+
+  // DEBUG
+//print_r ($a);
+
+  return $a;
+}
+
+
+define ('ALLOW_DEF', ''
+       .'<a></a>'
+       .'<br>'
+
+       .'<font></font>'
+       .'<form></form>'
+
+       .'<img>'
+       .'<input>'
+
+       .'<option></option>'
+
+       .'<pre></pre>'
+
+       .'<select></select>'
+
+       .'<table></table>'
+       .'<td></td>'
+       .'<textarea></textarea>'
+       .'<tr></tr>'
+       .'<tt></tt>'
+);
+
 
 function
-misc_proxy ($url, $translate_func, $flags)
+embed_other_page ($url, $form_action = '', $form_method = 'GET', $allow = ALLOW_DEF)
 {
-//  $res_keys = $http_response_header; // deprecated
-  $res = apache_response_headers ();
-  $res_keys = array_keys ($res);
-  $req = apache_request_headers ();
-  $req_keys = array_keys ($req);
+  $html = '';
 
-  if (($fp = fopen ($url, "rb")) == false)
-    return -1;
+  $html = file_get_contents ($url);
+  // extract head (JS, CSS, etc.) and body
+  $a = split_html_content ($html);
+  $html = ''.$a['body'];
 
-  $p = "";
-  $i_max = sizeof ($res_keys);
-/*
-  for ($i = 1; $i < $i_max; $i++)
+  // normalize, remove unwanted tags
+  $html = strip_tags ($html, $allow);
+
+  // rewrite form action and method
+  // TODO: repeat
+  $html_tag = substr ($html, strpos ($html, '<form '));
+  $html_tag = substr ($html_tag, 0, strpos ($html_tag, '>') + 1);
+  $p = misc_gettag ($html_tag, array ('action' => $form_action, 'method' => $form_method), false);
+  $html = str_ireplace ($html_tag, $p, $html);
+
+  if ($form_method == 'POST')
     {
-      if (!strncasecmp ($res[$res_keys[$i]], "Content-Type: ", 14))
+      // replace GET links with POST forms if necessary
+      // TODO: repeat
+      $html_tag = substr ($html, strpos ($html, '<a '));
+      $html_tag = substr ($html_tag, 0, strpos ($html_tag, '</a>') + 1);
+
+      // TODO: transform a link into a button in a post form
+//      $p = a_href_to_post_form ($html_tag);
+      $html = str_ireplace ($html_tag, $p, $html);
+    }
+
+  // HACK: fix absolute links again                     
+//  $html = str_ireplace ($url.'http://', 'http://', $html);
+
+  return $html;
+}
+
+
+function
+embed_other_page_js ($url)
+{
+  $p = '';
+
+  $p .= '<script type="text/javascript">
+';
+
+//  $p .= 'document.include = function (url) { document.write (\'<script type="text/javascript" src="\'+url+\'"></scr\'+\'ipt>\'); }';
+
+  $p .= '// new prototype defintion
+document.include = function (url)
+{
+  if (typeof (url) == \'undefined\')
+    return false;
+
+  var p, rnd;
+  if (document.all) // IE: create an ActiveX Object instance
+    p = new ActiveXObject(\'Microsoft.XMLHTTP\');
+  else // mozilla: create an instance of XMLHttpRequest
+    p = new XMLHttpRequest ();
+
+  // prevent browsers from caching the included page by appending a random number
+  rnd = Math.random ().toString ().substring (2);
+  url = url.indexOf (\'?\') > -1 ? url+\'&rnd=\'+rnd : url+\'?rnd=\'+rnd;
+
+  // open the url and write out the response
+  p.open (\'GET\', url, false);
+  p.send (null);
+
+  document.write (p.responseText);
+}
+</script>
+<script>
+document.include (\''.$url.'\');
+</script>';
+
+  return $p;
+}
+
+
+function
+random_user_agent ()
+{
+  $ua = array('Mozilla','Opera','Microsoft Internet Explorer','ia_archiver');   
+  $op = array('Windows','Windows XP','Linux','Windows NT','Windows 2000','OSX');
+  $agent  = $ua[rand(0,3)].'/'.rand(1,8).'.'.rand(0,9).' ('.$op[rand(0,5)].' '.rand(1,7).'.'.rand(0,9).'; en-US;)';
+  return $agent;
+}
+
+
+function
+misc_youtube_download_single ($video_id, $debug = 0)
+{
+  // normalize
+  if (strpos ($video_id, '?v='))
+    $video_id = substr ($video_id, strpos ($video_id, '?v=') + 3);
+  if (strpos ($video_id, '&'))
+    $video_id = substr ($video_id, 0, strpos ($video_id, '&'));
+
+  // DEBUG
+//  echo $video_id;
+
+  $url = 'http://www.youtube.com/get_video_info?&video_id='.$video_id;
+
+/*
+  if (misc_url_exists ($url) === true)
+    {
+      $h = get_headers ($url);
+
+      // DEBUG
+//      print_r ($h);
+
+      return $h[19];
+    }
+*/
+
+  $page = file_get_contents ($url);
+  $a = array ();
+  parse_str ($page, &$a);
+
+  if ($debug == 1)
+    {
+      echo '<pre><tt>';
+      print_r ($a);
+      echo '</tt></pre>';
+    }
+
+  $b = explode (',', $a['fmt_url_map']);
+
+  if ($debug == 1)
+    {
+      echo '<pre><tt>';
+      print_r ($b);
+      echo '</tt></pre>';
+    }
+
+  $a = array_merge ($a, $b);
+
+  $url = urldecode ($b[0]);
+  $url = substr ($url, strrpos ($url, 'http://'));
+  $a['video_url'] = $url;
+
+  return $a;
+}
+
+
+function
+misc_youtube_download ($video_id, $debug = 0)
+{
+  $a = array ();
+
+  if (strstr ($video_id, '?v='))
+    $a[0] = misc_youtube_download_single ($video_id, $debug);
+  else if (strstr ($video_id, 'http://')) // RSS feed
+    {
+      $b = simplexml_load_file ($video_id);
+
+      if ($debug == 1)
         {
-          if ($res[$res_keys[$i]] == "Content-Type: audio/mpeg" ||
-              $res[$res_keys[$i]] == "Content-Type: application/octet-stream")
-            $p .= "Content-Disposition: attachment; filename=".$file;
+          echo '<pre><tt>';
+          print_r ($b);
+          echo '</tt></pre>';
         }
-      else
-        $p .= $res[$res_keys[$i]];
-      $p .= $res_keys[$i];
-    }
 
-  header ($p);
-*/
-
-  if ($flags & PROXY_SHOW_HEADER)
-    {
-      $p = "<!--\n";
-      $j_max = sizeof ($req_keys);
-      for ($j = 0; $j < $j_max; $j++)
-        $p .= $req_keys[$j]
-             .": "
-             .$req[$req_keys[$j]]
-             ."\n";
-
-      $p .= "\n\n\n\n";
-
-      for ($i = 0; $i < $i_max; $i++)
-        $p .= $res_keys[$i]
-             .": "
-             .$res[$res_keys[$i]]
-             ."\n";
-      $p .= "\n//-->";
-
-      echo $p;
-    }
-
-  if ($translate_func ||
-      $flags & PROXY_PASS_FORMS ||
-      $flags & PROXY_PASS_LINKS)
-    {
-      while (($p = fgets ($fp)))
-        echo $translate_func ($p);
+      for ($i = 0; isset ($b->channel->item[$i]); $i++)
+         $a[$i] = misc_youtube_download_single ($b->channel->item[$i]->link, $debug);
     }
   else
-    fpassthru ($fp);
+    $a[0] = misc_youtube_download_single ($video_id, $debug);
 
-  fclose ($fp);
-
-  return 0;
+  return $a;
 }
-
-
-class rrdtool
-{
-  var $rrd;
-//  var $w;
-//  var $h;
-
-
-function
-rrdtool_open ($rrd)
-{
-  $this->rrd = $rrd;
-  $step = 1;
-  $p = "rrdtool create "
-      .$rrd
-      ." --step "
-      .$step
-      ." DS:values:ABSOLUTE:"
-//      .$step * 2
-      ."900"
-      .":U:U"
-      ." RRA:AVERAGE:0.5:1:9000" 
-      ." RRA:AVERAGE:0.5:4:9000" 
-      ." RRA:AVERAGE:0.5:24:9000" 
-//      ." RRA:AVERAGE:0.5:1:2160" 
-//      ." RRA:AVERAGE:0.5:5:2016" 
-//      ." RRA:AVERAGE:0.5:15:2880"
-//      ." RRA:AVERAGE:0.5:60:8760"
-//      ." RRA:MAX:0.5:1:2160" 
-//      ." RRA:MAX:0.5:5:2016" 
-//      ." RRA:MAX:0.5:15:2880"
-//      ." RRA:MAX:0.5:60:8760"
-;
-
-//  echo $p;
-
-  // create if necessary
-  if (!file_exists ($rrd))
-    return misc_exec ($p, 1);
-  return 0;
-}
-
-
-function
-rrdtool_update ($time, $value)
-{
-  if (!$time)
-//    $time = time ();
-    $time = "N";
-
-  return misc_exec ("rrdtool update "
-                   .$this->rrd
-                   ." "
-                   .$time
-                   .":"
-                   .$value, 1);
-}
-
-
-function
-rrdtool_graph ($file, $seconds, $img_w, $img_h)
-{
-  return misc_exec ("rrdtool graph "
-                   .$file
-                   ." -s -"
-                   .$seconds
-                   ." -a PNG"
-//                   ." --vertical-label \"Values\""
-                   ." -w "
-                   .$img_w
-                   ." -h "
-                   .$img_h
-                   ." DEF:show="
-                   .$this->rrd
-                   .":values:AVERAGE LINE1:show#ff0000:Value", 1);
-}
-
-
-};
-
-
-class configure
-{
-  var $agent = NULL;
-
-  var $have_ns4 = 0;
-  var $have_ns6 = 0;
-  var $have_ie = 0;
-  var $have_op = 0;
-  var $have_other = 0;
-
-  var $have_css = 0;
-  var $have_js = 0;
-  var $have_flash = 0;
-
-
-function
-configure_new ()
-{
-  $p = "";
-
-  if (isset ($_SERVER['HTTP_USER_AGENT']))
-    {
-      $user_agent = strtolower ($_SERVER['HTTP_USER_AGENT']);
-
-      /*
-        the order is important, because opera must be tested first, and ie4 tested
-        for before ie general same for konqueror, then safari, then gecko, since
-        safari navigator user agent id's with 'gecko' in string.
-      */
-      if (stristr ($user_agent, "opera")) 
-        $p = "opera";
-      elseif (stristr ($user_agent, "msie 4")) 
-        $p = "msie4"; 
-      elseif (stristr ($user_agent, "msie")) 
-        $p = "msie"; 
-      elseif ((stristr ($user_agent, "konqueror")) ||
-              (stristr ($user_agent, "safari"))) 
-        $p = "safari"; 
-      elseif (stristr ($user_agent, "gecko")) 
-        $p = "mozilla";
-      elseif (stristr ($user_agent, "mozilla/4")) 
-        $p = "ns4";
-      else 
-        $p = false;
-
-      return $p;
-    }
-
-  return NULL;
-}
-
-
-function
-configure ()
-{
-  $this->agent = $_SERVER["HTTP_USER_AGENT"];
-
-  if (stristr ($this->agent, "Netscape"))
-    $this->have_ns4 = 1;
-  else if (stristr ($this->agent, "Mozilla"))
-    $this->have_ns6 = 1;
-  else if (stristr ($this->agent, "Microsoft"))
-    $this->have_ie = 1;
-  else if (stristr ($this->agent, "Opera"))
-    $this->have_op = 1;
-  else
-    $this->have_other = 1;
-
-  $this->have_css = 1;
-  $this->have_js = 1;
-  $this->have_flash = 1;
-}
-
-
-function
-get_js ()
-{
-  return "is_ns4 = "
-        .($this->have_ns4 ? 1 : 0)
-        .";\n"
-        ."is_ns6 = "
-        .($this->have_ns6 ? 1 : 0)
-        .";\n"
-        ."is_ie = "
-        .($this->have_ie ? 1 : 0)
-        .";\n"
-        ."is_op5 = "
-        .($this->have_op ? 1 : 0)
-        .";\n"
-        ."is_other = "
-        .($this->have_other ? 1 : 0)
-        .";\n"
-        ."is_css = "
-        .($this->have_css ? 1 : 0)
-        .";\n"
-        ."is_js = "
-        .($this->have_js ? 1 : 0)
-        .";\n"
-        ."is_flash = "
-        .($this->have_flash ? 1 : 0)
-        .";\n";
-}
-
-}
-
-/*
-Include a file into a page
-With the component Microsoft.XMLHTTP for IE and XMLHttpRequest for Mozilla-based browser to make HTTP request and fetch the response without loading a new page.
-
-Suppose we have an header that we want to include in each page (header.inc)
-
-<h1>Header included</h1>
-
-and footer (footer.inc)
-
-<h2>Footer included</h2>
-
-then to use them in each page we do something like this (includedemo.html)
-
-<HTML>
-<HEAD>
-<TITLE> Include Demo </TITLE>
-<SCRIPT LANGUAGE="JavaScript">
-
-// new prototype defintion
-document.include = function (url) {
- if ('undefined' == typeof(url)) return false;
- var p,rnd;
- if (document.all){
-   // For IE, create an ActiveX Object instance 
-   p = new ActiveXObject("Microsoft.XMLHTTP");
- } 
- else {
-   // For mozilla, create an instance of XMLHttpRequest.
-   p = new XMLHttpRequest();
- }
- // Prevent browsers from caching the included page
- // by appending a random  number
- rnd = Math.random().toString().substring(2);
- url = url.indexOf('?')>-1 ? url+'&rnd='+rnd : url+'?rnd='+rnd;
- // Open the url and write out the response
- p.open("GET",url,false);
- p.send(null);
- document.write( p.responseText );
-}
-
-</SCRIPT>
-</HEAD>
-<BODY>
-<script>
-document.include('header.inc');
-</script>
-this the body
-<script>
-document.include('footer.inc');
-</script>
-</BODY>
-</HTML>  
-
-Try it here
-If you find this article useful, consider making a small donation
-to show your supportfor this Web site and its content.	
-
-Written and compiled by Réal Gagnon ©1998-2005
-[ home ]
-*/
 
 
 }

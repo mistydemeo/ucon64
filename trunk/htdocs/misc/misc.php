@@ -26,26 +26,45 @@ define ('MISC_MISC_PHP', 1);
 
 
 function
-tor_wrapper ($url, $tor_ip = '127.0.0.1', $tor_port = 8118, $timeout = 300)
+tor_get_contents ($url, $tor_proxy_host = '127.0.0.1', $tor_proxy_port = 9050, $timeout = 300)
 {
+  $sock = curl_init();
+  if ($sock == FALSE)
+    {
+      echo 'CURL support missing';
+      return NULL;
+    }
+
+  curl_setopt ($sock, CURLOPT_PROXY, $tor_proxy_host.':'.$tor_proxy_port);
+  curl_setopt ($sock, CURLOPT_URL, $url);
+  curl_setopt ($sock, CURLOPT_HEADER, 1);
   $agent = random_user_agent ();
+  curl_setopt ($sock, CURLOPT_USERAGENT, $agent);
+  curl_setopt ($sock, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt ($sock, CURLOPT_FOLLOWLOCATION, 1);
+  curl_setopt ($sock, CURLOPT_TIMEOUT, $timeout);
+  curl_setopt ($sock, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
 
-  $ack = curl_init();
-  curl_setopt ($ack, CURLOPT_PROXY, $tor_ip.':'.$tor_port);
-  curl_setopt ($ack, CURLOPT_URL, $url);
-  curl_setopt ($ack, CURLOPT_HEADER, 1);
-  curl_setopt ($ack, CURLOPT_USERAGENT, $agent);
-  curl_setopt ($ack, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt ($ack, CURLOPT_FOLLOWLOCATION, 1);
-  curl_setopt ($ack, CURLOPT_TIMEOUT, $timeout);
-  curl_setopt ($ack, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+  $response = curl_exec ($sock);
+  if ($response == FALSE)
+    {
+      echo 'TOR not running';
+      return NULL;
+    }
 
-  $syn = curl_exec ($ack);
-//  $info = curl_getinfo($ack);
-  curl_close ($ack);
-//  $info['http_code'];
+  // DEBUG
+//  echo '<pre><tt>';
+//  print_r ($response);
 
-  return $syn;
+  $info = curl_getinfo ($sock);
+
+  // DEBUG
+//  echo '<pre><tt>';
+//  print_r ($info);
+
+  curl_close ($sock);
+
+  return $response;
 }
 
 
@@ -377,7 +396,7 @@ scandir4 ($path, $sort)
   $a = array ();
 
   $dir = opendir ($path);
-  while (($a[$i] = readdir ($dir)) != false)
+  while (($a[$i] = readdir ($dir)) !== false)
     $i++;
   closedir ($dir);
 
@@ -810,25 +829,22 @@ misc_exec ($cmdline, $debug = 0)
     echo 'cmdline: '.$cmdline."\n"
         .'escaped: '.escapeshellcmd ($cmdline).' (not used)'."\n"
 ;
+  if ($debug == 2)
+    return '';
 
-  if ($debug < 2)
-    {
-      $a = array();
+  $a = array();
 
-      exec ($cmdline, $a, $res);
+  exec ($cmdline, $a, $res);
 
-      $p = '';
-      if ($debug)
-        $p = $res."\n";
+  $p = '';
+  if ($debug)
+    $p = $res."\n";
 
-      $i_max = sizeof ($a);
-      for ($i = 0; $i < $i_max; $i++)
-        $p .= $a[$i]."\n";
+  $i_max = count ($a);
+  for ($i = 0; $i < $i_max; $i++)
+    $p .= $a[$i]."\n";
 
-      return $p;
-    }
-
-  return '';
+  return $p;
 }
 
 
@@ -1101,7 +1117,7 @@ random_user_agent ()
 
 
 function
-misc_youtube_download_single ($video_id, $debug = 0)
+misc_youtube_download_single ($video_id, $use_tor = 0, $debug = 0)
 {
   // normalize
   if (strpos ($video_id, '?v='))
@@ -1126,7 +1142,10 @@ misc_youtube_download_single ($video_id, $debug = 0)
     }
 */
 
-  $page = file_get_contents ($url);
+  if ($use_tor)
+    $page = tor_get_contents ($url);
+  else
+    $page = file_get_contents ($url);
   $a = array ();
   parse_str ($page, &$a);
 
@@ -1157,7 +1176,7 @@ misc_youtube_download_single ($video_id, $debug = 0)
 
 
 function
-misc_youtube_download ($video_id, $debug = 0)
+misc_youtube_download ($video_id, $use_tor = 0, $debug = 0)
 {
   $a = array ();
 
@@ -1165,7 +1184,13 @@ misc_youtube_download ($video_id, $debug = 0)
     $a[0] = misc_youtube_download_single ($video_id, $debug);
   else if (strstr ($video_id, 'http://')) // RSS feed
     {
-      $b = simplexml_load_file ($video_id);
+      if ($use_tor)
+        {
+          $xml = tor_get_contents ($video_id);
+          $b = simplexml_load_string ($xml);
+        }
+      else
+        $b = simplexml_load_file ($video_id);
 
       if ($debug == 1)
         {
@@ -1175,10 +1200,10 @@ misc_youtube_download ($video_id, $debug = 0)
         }
 
       for ($i = 0; isset ($b->channel->item[$i]); $i++)
-         $a[$i] = misc_youtube_download_single ($b->channel->item[$i]->link, $debug);
+         $a[$i] = misc_youtube_download_single ($b->channel->item[$i]->link, $use_tor, $debug);
     }
   else
-    $a[0] = misc_youtube_download_single ($video_id, $debug);
+    $a[0] = misc_youtube_download_single ($video_id, $use_tor, $debug);
 
   return $a;
 }

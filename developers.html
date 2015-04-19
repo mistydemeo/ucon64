@@ -243,7 +243,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    Then make your changes, email
    <a href="mailto:ucon64-main AT lists.sourceforge.net">ucon64-main AT lists.sourceforge.net</a>
    and you will be named in this file and in the sources of course. Just the
-   typical way of open source development.<br>
+   typical way of open source software development.<br>
 <br>
 <p>
 <a name="3"><b>Q3</b>: How do I get the source of uCON64, using CVS as an
@@ -257,9 +257,9 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    &nbsp;&nbsp; cvs -d:pserver:anonymous@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
    The uCON64 source will then be downloaded to the directory ./ucon64.<br>
    It can be very busy at SourceForge which may result in a message like:<br>
-   &nbsp;&nbsp; cvs [login aborted]: recv() from server cvs.sourceforge.net: EOF<br>
+   &nbsp;&nbsp; cvs [login aborted]: recv() from server ucon64.cvs.sourceforge.net: EOF<br>
    or<br>
-   &nbsp;&nbsp; cvs [checkout aborted]: recv() from server cvs.sourceforge.net: EOF<br>
+   &nbsp;&nbsp; cvs [checkout aborted]: recv() from server ucon64.cvs.sourceforge.net: EOF<br>
    If you get that message simply try again.<br>
    You can speed up the download by using the option -z with a compression level
    parameter. For example:<br>
@@ -273,15 +273,15 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    read/write access?</a><br>
 <b>A</b>: For read/write access you must have CVS and SSH installed and set the
    environment variable CVS_RSH=ssh. To download the source code, type:<br>
-   &nbsp;&nbsp; cvs -z 9 -d:ext:&#60;name&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
+   &nbsp;&nbsp; cvs -z 9 -d:ext:&#60;username&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
    &#60;enter password at prompt&#62;<br>
-   If you never logged on to cvs.sourceforge.net before you may get a message
+   If you never logged on to ucon64.cvs.sourceforge.net before you may get a message
    (from SSH) like:<br>
-   &nbsp;&nbsp; The authenticity of host 'cvs.sourceforge.net (66.35.250.207)' can't be established.<br>
-   &nbsp;&nbsp; DSA key fingerprint is 02:ab:7c:aa:49:ed:0b:a8:50:13:10:c2:3e:92:0f:42.<br>
+   &nbsp;&nbsp; The authenticity of host 'ucon64.cvs.sourceforge.net (66.35.250.88)' can't be established.<br>
+   &nbsp;&nbsp; RSA key fingerprint is 13:f1:65:c3:6c:b7:7e:a5:f0:f3:f5:19:f4:42:9c:4a.<br>
    &nbsp;&nbsp; Are you sure you want to continue connecting (yes/no)?<br>
    Type yes (the whole word). SSH will respond with a message like:<br>
-   &nbsp;&nbsp; Warning: Permanently added 'cvs.sourceforge.net' (DSA) to the list of known hosts.<br>
+   &nbsp;&nbsp; Warning: Permanently added 'ucon64.cvs.sourceforge.net,66.35.250.88' (RSA) to the list of known hosts.<br>
    Now all files will be downloaded. Afterwards you can simply cd into the top
    level directory and continue by just typing:<br>
    &nbsp;&nbsp; cvs update -PRd<br>
@@ -289,7 +289,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    &nbsp;&nbsp; cvs add &#60;file&#62;<br>
    &nbsp;&nbsp; cvs remove -f &#60;file&#62;<br>
    You don't need to specify
-   -d:ext:&#60;name&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 anymore, because
+   -d:ext:&#60;username&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 anymore, because
    that information is stored in the CVS directories then.<br>
    If you use the update command in combination with (-)d, never forget to also
    use the option -P or you will get a lot of crap.<br>
@@ -297,7 +297,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <p>
 <a name="5"><b>Q5</b>: How do I create a patch from the CVS repository?</a><br>
 <b>A</b>: As developer:<br>
-   cvs -d:ext:&#60;name&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 diff -Naur &#62;mychanges.patch<br>
+   cvs -d:ext:&#60;username&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 diff -Naur &#62;mychanges.patch<br>
    &#60;enter password at prompt&#62;<br>
    As anonymous:<br>
    &nbsp;&nbsp; cvs -d:pserver:anonymous@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 login<br>
@@ -305,7 +305,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    &nbsp;&nbsp; cvs -d:pserver:anonymous@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 diff -Naur &#62;mychanges.patch<br>
 <br>
 <p>
-<a name="6"><b>Q6</b>: How is the source of uCON64 organized?</a><br>
+<a name="6"><b>Q6</b>: How is the source code of uCON64 organized?</a><br>
 <b>A</b>: The heart of uCON64 is ucon64.h/st_ucon64_t. This <i>struct</i> is
    designed to hold all workflow relevant informations and it has pointers
    to different structs which will be != NULL depending on which type or

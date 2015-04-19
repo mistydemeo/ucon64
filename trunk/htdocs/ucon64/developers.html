@@ -297,12 +297,12 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <p>
 <a name="5"><b>Q5</b>: How do I create a patch from the CVS repository?</a><br>
 <b>A</b>: As developer:<br>
-   cvs -d:ext:&#60;username&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 diff -u &#62;mychanges.patch<br>
+   cvs -d:ext:&#60;username&#62;@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 diff -Naur &#62;mychanges.patch<br>
    &#60;enter password at prompt&#62;<br>
    As anonymous:<br>
    &nbsp;&nbsp; cvs -d:pserver:anonymous@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 login<br>
    &#60;just press enter at password prompt&#62;<br>
-   &nbsp;&nbsp; cvs -d:pserver:anonymous@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 diff -u &#62;mychanges.patch<br>
+   &nbsp;&nbsp; cvs -d:pserver:anonymous@ucon64.cvs.sourceforge.net:/cvsroot/ucon64 diff -Naur &#62;mychanges.patch<br>
 <br>
 <p>
 <a name="6"><b>Q6</b>: How is the source code of uCON64 organized?</a><br>

@@ -501,7 +501,7 @@ Screenshots: <a href="images/belchblabla_ss.png">1</a>|<a href="images/belchchec
 /*
   // relations
     echo ""
-        .widget_relate ($relate_site_title_s, $relate_site_url_s, "./", 0,
+        .$w->widget_relate ($relate_site_title_s, $relate_site_url_s, "./", 0,
 //                            WIDGET_RELATE_BOOKMARK|
 //                            WIDGET_RELATE_STARTPAGE|
 //                            WIDGET_RELATE_SEARCH|

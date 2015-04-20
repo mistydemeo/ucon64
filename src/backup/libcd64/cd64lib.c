@@ -763,7 +763,7 @@ int cd64_download_header(struct cd64_t *cd64, n64header_t *head, uint32_t locati
 		cd64->write_callback = cd64_write_mem;
 		ret = cd64_bios_grab(cd64, (void *) -1, location, size, NULL); /* -1 is just a random (non-zero) value */
 		cd64->write_callback = org_write_cb; /* restore original callback */
-		return 1;
+		return ret;
 	}
 	cd64->notice_callback2("Operation not supported by protocol.");
 	return 0;

@@ -1320,8 +1320,8 @@ fal_main (int argc, char **argv)
   int OptP = 0;
   int OptR = 0;
   int OptS = 0;
-  int OptV = 0;
-  int OptZ = 0;
+//  int OptV = 0;
+//  int OptZ = 0;
   int port = 0x378;
   int ChipSize = 32;
   int BackupMemOffset = 0;
@@ -1417,12 +1417,14 @@ fal_main (int argc, char **argv)
           strcpy (fname, argv[++arg]);
           OptR = 1;
           break;
+#if 0
         case 'v':
           // Verify flash cart
           SpaceCheck (argv[arg][2]);
           strcpy (fname2, argv[++arg]);
           OptV = 1;
           break;
+#endif
         case 'l':
           SpaceCheck (argv[arg][2]);
           i = atoi (argv[++arg]);
@@ -1446,9 +1448,11 @@ fal_main (int argc, char **argv)
           SpaceCheck (argv[arg][2]);
           WaitDelay = atoi (argv[++arg]);
           break;
+#if 0
         case 'z':
           OptZ = 1;
           break;
+#endif
         default:
 //          usage (argv[0]);
           ProgramExit (1);

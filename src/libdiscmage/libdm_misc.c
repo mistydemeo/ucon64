@@ -751,7 +751,6 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
   char buf[MAXBUFSIZE];
   st_iso_header_t iso_header;
   FILE *fh = NULL;
-  int result = -1;
 
 #ifndef USE_ANSI_COLOR
   (void) ansi_color;                            // warning remover
@@ -855,7 +854,6 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
         }
 
       memset (&iso_header, 0, sizeof (st_iso_header_t));
-      result = -1;
 
       if (track->iso_header_start != -1)
         if ((fh = fopen (image->fname, "rb")))

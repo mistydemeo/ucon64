@@ -483,7 +483,16 @@ init_crc_table (void *table, unsigned int polynomial)
 }
 
 
-static unsigned short crc16_table[256];
+
+static unsigned short *crc16_table = NULL;
+
+
+static void
+free_crc16_table (void)
+{
+  free (crc16_table);
+  crc16_table = NULL;
+}
 
 
 unsigned short
@@ -493,7 +502,9 @@ chksum_crc16 (unsigned short crc, const void *buffer, unsigned int size)
 
   if (!crc16_table)
     {
-      init_crc_table (&crc16_table, CRC16_POLYNOMIAL);
+      crc16_table = (unsigned short *) malloc (256 * 2);
+      register_func (free_crc16_table);
+      init_crc_table (crc16_table, CRC16_POLYNOMIAL);
     }
 
   crc = ~crc;
@@ -505,9 +516,15 @@ chksum_crc16 (unsigned short crc, const void *buffer, unsigned int size)
 
 // CRC32
 #ifndef USE_ZLIB
+static unsigned int *crc32_table = NULL;
 
 
-static unsigned int crc32_table[256];
+static void
+free_crc32_table (void)
+{
+  free (crc32_table);
+  crc32_table = NULL;
+}
 
 
 unsigned int
@@ -517,7 +534,9 @@ crc32 (unsigned int crc, const void *buffer, unsigned int size)
 
   if (!crc32_table)
     {
-      init_crc_table (&crc32_table, CRC32_POLYNOMIAL);
+      crc32_table = (unsigned int *) malloc (256 * 4);
+      register_func (free_crc32_table);
+      init_crc_table (crc32_table, CRC32_POLYNOMIAL);
     }
 
   crc = ~crc;

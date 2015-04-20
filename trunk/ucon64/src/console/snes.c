@@ -1,10 +1,10 @@
 /*
 snes.c - Super NES support for uCON64
 
-Copyright (c) 1999 - 2002 NoisyB
-Copyright (c) 2001 - 2005 dbjh
-Copyright (c) 2002 - 2003 John Weidman
-Copyright (c) 2004        JohnDie
+Copyright (c) 1999 - 2002       NoisyB
+Copyright (c) 2001 - 2005, 2015 dbjh
+Copyright (c) 2002 - 2003       John Weidman
+Copyright (c) 2004              JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -681,7 +681,7 @@ snes_dint (st_ucon64_nfo_t *rominfo)
   ucon64_file_handler (dest_name, src_name, 0);
 
   if (!rominfo->interleaved)
-    printf ("WARNING: Deinterleaving a ROM that was not detected as interleaved\n");
+    puts ("WARNING: Deinterleaving a ROM that was not detected as interleaved");
   fcopy (src_name, 0, backup_header_len, dest_name, "wb");
   write_deinterleaved_data (rominfo, src_name, dest_name,
                             ucon64.file_size - rominfo->backup_header_len, backup_header_len);
@@ -743,7 +743,7 @@ int
 snes_smc (st_ucon64_nfo_t *rominfo)
 {
   if ((bs_dump ? snes_header.bs_map_type : snes_header.map_type) & 0x10)
-    printf ("NOTE: This game might not work with a Super Magicom because it's a FastROM game\n");
+    puts ("NOTE: This game might not work with a Super Magicom because it's a FastROM game");
 
   return snes_ffe (rominfo, ".smc");
 }
@@ -847,7 +847,7 @@ snes_mgd (st_ucon64_nfo_t *rominfo)
   int size = ucon64.file_size - rominfo->backup_header_len;
 
   if (snes_hirom)
-    printf ("NOTE: This game might not work with a MGD because it's a HiROM game\n");
+    puts ("NOTE: This game might not work with a MGD because it's a HiROM game");
 
   strcpy (src_name, ucon64.fname);
   mgd_make_name (ucon64.fname, UCON64_SNES, size, dest_name);
@@ -928,7 +928,7 @@ make_gd_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
             current_id = ucon64.id;
           else if (current_id > 999)
             {
-              fprintf (stderr, "ERROR: Not enough IDs available for all files\n");
+              fputs ("ERROR: Not enough IDs available for all files\n", stderr);
               exit (1);
             }
           sprintf (id_str, "%03d", current_id);
@@ -1057,7 +1057,7 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
       else if (total4Mbparts == 10)
         {
           total4Mbparts = 12;                   // 40 Mbit HiROMs get padded to 48 Mbit
-          printf ("NOTE: Paddding to 48 Mbit\n");
+          puts ("NOTE: Paddding to 48 Mbit");
         }
 #endif
 
@@ -1175,7 +1175,7 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
     {
       if (total4Mbparts > 8)
         {
-          fprintf (stderr, "ERROR: This ROM > 32 Mbit LoROM -- can't convert\n");
+          fputs ("ERROR: This ROM > 32 Mbit LoROM -- can't convert\n", stderr);
           return -1;
         }
 
@@ -1473,11 +1473,11 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
     {
       if (size > 32 * MBIT)
         {
-          fprintf (stderr, "ERROR: HiROM > 32 Mbit -- conversion not yet implemented\n");
+          fputs ("ERROR: HiROM > 32 Mbit -- conversion not yet implemented\n", stderr);
           return;
         }
       if (UCON64_ISSET (ucon64.part_size))
-        printf ("WARNING: Splitting Super UFO HiROM, ignoring switch "OPTION_LONG_S"ssize\n");
+        puts ("WARNING: Splitting Super UFO HiROM, ignoring switch "OPTION_LONG_S"ssize");
     }
 
   strcpy (dest_name, ucon64.fname);
@@ -1665,8 +1665,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
       */
       if (part_size < 4 * MBIT)
         {
-          fprintf (stderr,
-            "ERROR: Split part size must be larger than or equal to 4 Mbit\n");
+          fputs ("ERROR: Split part size must be larger than or equal to 4 Mbit\n", stderr);
           return -1;
         }
     }
@@ -1678,7 +1677,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
     {
       if (size < 4 * MBIT && size != 2 * MBIT)
         { // "&& size != 2 * MBIT" is a fix for BS Chrono Trigger - Jet Bike Special (J)
-          printf ("NOTE: ROM size is smaller than 4 Mbit -- won't be split\n");
+          puts ("NOTE: ROM size is smaller than 4 Mbit -- won't be split");
           return -1;
         }
     }
@@ -1686,7 +1685,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
     {
       if (size < 2 * MBIT)
         {
-          printf ("NOTE: ROM size is smaller than 2 Mbit -- won't be split\n");
+          puts ("NOTE: ROM size is smaller than 2 Mbit -- won't be split");
           return -1;
         }
     }
@@ -1700,7 +1699,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
   if (!rominfo->backup_header_len || type == GD3)    // GD3 format
     {
       if (UCON64_ISSET (ucon64.part_size))
-        printf ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize\n");
+        puts ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize");
       snes_split_gd3 (rominfo, size);
     }
   else if (type == UFO)
@@ -2636,9 +2635,8 @@ int
 snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 {
   unsigned char blocks[256], *rom_buffer2;
-  int nblocks, i, j, org_hirom;
+  int nblocks, i, j;
 
-  org_hirom = snes_hirom;
   nblocks = rom_size >> 16;                     // # 32 kB blocks / 2
   if (nblocks * 2 > 256)
     return -1;                                  // file > 8 MB
@@ -2651,7 +2649,7 @@ snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom
                       ((i & 8) >> 2) | ((i & 16) >> 2);
           if (blocks[i] * 0x8000 + 0x8000 > rom_size)
             {
-              printf ("WARNING: This ROM cannot be handled as if it is in interleaved format 2\n");
+              puts ("WARNING: This ROM cannot be handled as if it is in interleaved format 2");
               rominfo->interleaved = 0;
               return -1;
             }
@@ -2743,7 +2741,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 
   if (rominfo->backup_header_len == 0) // type == MGD_SNES
     {
-      printf ("This ROM has no backup unit header\n");
+      puts ("NOTE: This ROM has no backup unit header");
       return -1;
     }
   else
@@ -2784,7 +2782,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 
       printf ("[2:7]    Run program in mode: %d", z);
       if (z == 2)
-        printf (" (bit 1=1)\n");
+        puts (" (bit 1=1)");
       else
         fputc ('\n', stdout);
 
@@ -2807,7 +2805,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 
       printf ("[2:1]    Run program in mode: %d", z);
       if (z == 0)
-        printf (" (bit 7=1)\n");
+        puts (" (bit 7=1)");
       else
         fputc ('\n', stdout);
 
@@ -2882,7 +2880,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       if (y)
         printf ("[14]     A15=%s selects SRAM\n", y == 1 ? "x" : y == 2 ? "0" : "1");
       else
-        printf ("[14]     A15 not used for SRAM control\n");
+        puts ("[14]     A15 not used for SRAM control");
       for (x = 0; x < 4; x++)
         {
           if (x & 1)
@@ -3935,7 +3933,7 @@ snes_demirror (st_ucon64_nfo_t *rominfo)           // nice verb :-)
   ucon64_fread (buffer, rominfo->backup_header_len, size, ucon64.fname);
   if (rominfo->interleaved)
     {
-      printf ("NOTE: ROM is interleaved -- deinterleaving\n");
+      puts ("NOTE: ROM is interleaved -- deinterleaving");
       snes_deinterleave (rominfo, &buffer, size);
     }
 
@@ -3963,7 +3961,7 @@ snes_demirror (st_ucon64_nfo_t *rominfo)           // nice verb :-)
   if (!fixed)
     {
       if (ucon64.quiet < 1)
-        printf ("NOTE: Did not detect a mirrored block -- no file has been written\n");
+        puts ("NOTE: Did not detect a mirrored block -- no file has been written");
       free (buffer);
       return 1;
     }
@@ -4055,7 +4053,7 @@ snes_multi (int truncate_size, char *fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      fputs ("ERROR: Can't make multi-game file of 0 bytes\n", stderr);
       return -1;
     }
 
@@ -4198,7 +4196,7 @@ snes_densrt (st_ucon64_nfo_t *rominfo)
   if (!nsrt_header)
     {
       if (ucon64.quiet < 1)
-        printf ("NOTE: ROM has no NSRT header -- no file has been written\n");
+        puts ("NOTE: ROM has no NSRT header -- no file has been written");
       return 1;
     }
 
@@ -4291,7 +4289,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
     {
       if (rominfo->current_internal_crc != rominfo->internal_crc)
         {
-          printf ("WARNING: The controller type info will be discarded (checksum is bad)\n");
+          puts ("WARNING: The controller type info will be discarded (checksum is bad)");
           return;
         }
 
@@ -4318,7 +4316,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
           break;
       if (x != 0 && x != 1 && x != 2 && x != 6)
         {
-          printf ("WARNING: Invalid value for controller in port 1, using \"0\"\n");
+          puts ("WARNING: Invalid value for controller in port 1, using \"0\"");
           x = 0;
         }
       header[0x1ed] = x << 4;
@@ -4330,7 +4328,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
           break;
       if (x >= 8)
         {
-          printf ("WARNING: Invalid value for controller in port 2, using \"0\"\n");
+          puts ("WARNING: Invalid value for controller in port 2, using \"0\"");
           x = 0;
         }
       header[0x1ed] |= x;

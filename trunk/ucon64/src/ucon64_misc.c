@@ -1905,7 +1905,6 @@ int
 ucon64_find (const char *filename, size_t start, size_t len,
              const char *search, int searchlen, uint32_t flags)
 {
-  int result = 0;
   st_ucon64_find_t o = { search, flags, searchlen, start, -2 };
   // o.found == -2 signifies a new find operation (usually for a new file)
 
@@ -1950,8 +1949,7 @@ ucon64_find (const char *filename, size_t start, size_t len,
       }
     }
 
-  result = quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len,
-                          filename, "rb");
+  quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len, filename, "rb");
 
   return o.found;                               // return last occurrence or -1
 }

@@ -933,7 +933,6 @@ void
 ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 {
   char buf[MAXBUFSIZE], *p = NULL;
-  int n;
 
   if (!dat)
     {
@@ -963,7 +962,6 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
     really differs from the canonical game name (usually file name without
     suffix).
   */
-  n = strlen (dat->fname);
   p = (char *) get_suffix (dat->fname);
   if (!(stricmp (p, ".nes") &&                  // NES
         stricmp (p, ".fds") &&                  // NES FDS

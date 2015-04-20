@@ -1314,7 +1314,7 @@ fal_main (int argc, char **argv)
   int arg, i;
   u8 Base = 0;
   FILE *fp;
-  char fname[128], fname2[128];
+  char fname[128];//, fname2[128];
   int OptB = 0;
   int OptD = 0;
   int OptP = 0;

@@ -356,7 +356,7 @@ f2a_connect_usb (void)
   struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
 
-  p = get_property_fname (ucon64.configfile, "f2afirmware", PROPERTY_MODE_FILENAME);
+  p = get_property (ucon64.configfile, "f2afirmware", PROPERTY_MODE_FILENAME);
   strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
 
   if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) <= 0)

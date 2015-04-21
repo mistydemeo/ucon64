@@ -548,7 +548,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (PC-Engine) reversed how -mgd &amp; -smg work. -mgd bit-swaps a file
   if it is detected as not being bit-swapped ("Japan mode"/"unencrypted"). -smg
   bit-swaps a file if it is detected as being bit-swapped
-  ("U.S.A. mode"/"encypted") (by dbjh; thanks to kyuusaku for the feedback)<br>
+  ("U.S.A. mode"/"encrypted") (by dbjh; thanks to kyuusaku for the feedback)<br>
   Note that if you want to play a game with an MGD2 on a PC-Engine that you
   have to manually bit-swap the file with -swap (or specify -int while
   converting).<br>
@@ -741,7 +741,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (SNES) fixed some other issues with auto-detection (by dbjh; many
   thanks to Dweezledap for reporting these problems and for testing)<br>
 <p>
-<a name="300">3.0.0</a><br>
+<a name="201">2.0.1</a><br>
 - updated (GB) internal name is 15 characters long only for GBC games. For GB
   and SGB games it's 16 characters long. Updated ROM info and -n (by dbjh;
   thanks to Anna Kubisty for reporting the problem and info)<br>
@@ -789,30 +789,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (all) -r process subdirectories recursively (by NoisyB and dbjh)<br>
 - updated (SNES) improved reliability of --xgd3 (should reduce the frequency of
   "File Size Error !") (by dbjh)<br>
-- added --help[=WHAT] WHAT=long,pad,dat,patch,backup,snes,etc. Help output
-  is now smaller (by NoisyB)<br>
-- replaced autoconf with faster and less complicated alternative (by NoisyB)<br>
-- completely dropped support for CD and DVD based consoles (libdiscmage development
-  seems to be stalled) (by NoisyB)<br>
-- made "support binaries" internal. This makes installation and use much easier,
-  but if external binaries for F2A and/or SuperCard are present they will be used
-  instead (by NoisyB)<br>
-- added (ATARI) --cc2 convert BIN to Cuttle Card (2)/(Starpath) Supercharger/WAV
-  (by NoisyB)<br>
-- added (NES) --sc convert to SuperCard (by NoisyB)<br>
-- added (GB) --sc convert to SuperCard (by NoisyB)<br>
-- added (SMS) --sc convert to SuperCard (by NoisyB)<br>
-- --dual is deprecated; --bits show ROM as bitdump is the replacement (by NoisyB)<br>
-<!--
-- added (NDS) --sc convert to SuperCard (by NoisyB)<br>
-- added (NDS) SnezziDS support (by NoisyB)<br>
-- added PPF3 support (by NoisyB)<br>
-- added DreamSNES ROMS.LST like output (by NoisyB)<br>
-- added -c2 show differencies in ANSI (1 char = 512 bytes) (by NoisyB)<br>
-- added support for other dat file formats (by NoisyB)<br>
-- added cloned functionalities of ckmame (by NoisyB)<br>
-- added DAT file to ANSI SQL conversion support (by NoisyB)<br>
--->
+- added --help[=WHAT] WHAT=long,pad,dat,patch,backup,disc. Help output is now
+  smaller (by NoisyB)<br>
 <br>
 <br>
 <br>

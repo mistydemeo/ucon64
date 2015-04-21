@@ -5,8 +5,8 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2005 NoisyB
-Copyright (c) 2001 - 2005 dbjh
+Copyright (c) 1999 - 2005       NoisyB
+Copyright (c) 2001 - 2005, 2015 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -985,6 +985,12 @@ main (int argc, char **argv)
             ucon64.dat_enabled = 1;
           }
 
+#ifdef  USE_DISCMAGE
+  // load libdiscmage (should be done before handling the switches (--ver), but
+  //  ucon64_usage() has a dependency as well)
+  ucon64.discmage_enabled = ucon64_load_discmage ();
+#endif
+
   if (argc < 2)
     {
       ucon64_usage (argc, argv, USAGE_VIEW_SHORT);
@@ -1038,11 +1044,6 @@ main (int argc, char **argv)
       arg[x].console);
 #endif
 
-
-#ifdef  USE_DISCMAGE
-  // load libdiscmage (should be done before handling the switches (--ver))
-  ucon64.discmage_enabled = ucon64_load_discmage ();
-#endif
 
   // switches
   for (x = 0; arg[x].val; x++)
@@ -1909,9 +1910,9 @@ ucon64_usage (int argc, char *argv[], int view)
 #elif   defined __CYGWIN__ || defined _WIN32
     "discmage.dll";
 #elif   defined __APPLE__                       // Mac OS X actually
-    "libdiscmage.dylib";
+    "discmage.dylib";
 #elif   defined __unix__ || defined __BEOS__
-    "libdiscmage.so";
+    "discmage.so";
 #else
     "library";
 #endif

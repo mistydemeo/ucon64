@@ -1,9 +1,9 @@
 /*
 ucon64_opts.c - switch()'es for all uCON64 options
 
-Copyright (c) 2002 - 2005 NoisyB
-Copyright (c) 2002 - 2005 dbjh
-Copyright (c) 2005        Jan-Erik Karlsson (Amiga)
+Copyright (c) 2002 - 2005       NoisyB
+Copyright (c) 2002 - 2005, 2015 dbjh
+Copyright (c) 2005              Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -172,9 +172,9 @@ ucon64_switches (st_ucon64_t *p)
 #elif   defined __CYGWIN__ || defined _WIN32
       printf ("discmage.dll");
 #elif   defined __APPLE__                       // Mac OS X actually
-      printf ("libdiscmage.dylib");
+      printf ("discmage.dylib");
 #elif   defined __unix__ || defined __BEOS__
-      printf ("libdiscmage.so");
+      printf ("discmage.so");
 #else
       printf ("unknown");
 #endif

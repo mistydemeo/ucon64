@@ -63,12 +63,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/property.h"
 
 
+#if     defined USE_PARALLEL || defined USE_USB
 static st_ucon64_obj_t f2a_obj[] =
   {
     {UCON64_GBA, WF_DEFAULT | WF_STOP | WF_NO_ROM},
     {UCON64_GBA, WF_DEFAULT | WF_STOP},
     {UCON64_GBA, WF_STOP | WF_NO_ROM}
   };
+#endif
 
 const st_getopt2_t f2a_usage[] =
   {

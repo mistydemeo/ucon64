@@ -148,10 +148,12 @@ void mainproc(void *arg) {
 #include "doctor64jr.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t doctor64jr_obj[] =
   {
     {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM}
   };
+#endif
 
 const st_getopt2_t doctor64jr_usage[] =
   {

@@ -44,12 +44,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/snes.h"                       // for snes_get_file_type ()
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t swc_obj[] =
   {
     {UCON64_SNES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
     {UCON64_SNES, WF_STOP | WF_NO_ROM},
     {UCON64_SNES, WF_SWITCH}
   };
+#endif
 
 const st_getopt2_t swc_usage[] =
   {

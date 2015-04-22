@@ -1851,7 +1851,9 @@ ucon64_usage (int argc, char *argv[], int view)
 
         case USAGE_VIEW_BACKUP:
 //          getopt2_usage (cc2_usage);
-//          getopt2_usage (cd64_usage);
+#ifdef  USE_LIBCD64
+          getopt2_usage (cd64_usage);
+#endif
           getopt2_usage (cmc_usage);
           getopt2_usage (dex_usage);
           getopt2_usage (doctor64_usage);

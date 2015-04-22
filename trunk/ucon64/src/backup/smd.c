@@ -39,11 +39,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smd.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t smd_obj[] =
   {
     {UCON64_GEN, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
     {UCON64_GEN, WF_STOP | WF_NO_ROM}
   };
+#endif
 
 const st_getopt2_t smd_usage[] =
   {

@@ -78,12 +78,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gb.h"                         // GB_NAME_LEN, gb_logodata,
                                                 //  rocket_logodata
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t gbx_obj[] =
   {
     {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM},
     {UCON64_GB, WF_STOP | WF_NO_ROM},
     {UCON64_GB, WF_SWITCH}
   };
+#endif
 
 const st_getopt2_t gbx_usage[] =
   {

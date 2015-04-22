@@ -42,11 +42,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smsgg-pro.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t smsggpro_obj[] =
   {
     {UCON64_SMS, WF_DEFAULT | WF_STOP | WF_NO_SPLIT | WF_NO_ROM},
     {UCON64_SMS, WF_STOP | WF_NO_ROM}
   };
+#endif
 
 const st_getopt2_t smsggpro_usage[] =
   {

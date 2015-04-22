@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gba.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t fal_obj[] =
   {
     {UCON64_GBA, WF_DEFAULT | WF_STOP | WF_NO_ROM},
@@ -48,6 +49,7 @@ static st_ucon64_obj_t fal_obj[] =
     {UCON64_GBA, WF_STOP | WF_NO_ROM},
     {UCON64_GBA, WF_SWITCH}
   };
+#endif
 
 const st_getopt2_t fal_usage[] =
   {

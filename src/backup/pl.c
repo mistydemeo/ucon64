@@ -38,12 +38,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "pl.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t pl_obj[] =
   {
     {UCON64_NGP, WF_DEFAULT | WF_STOP | WF_NO_ROM},
     {UCON64_NGP, WF_STOP | WF_NO_ROM},
     {UCON64_NGP, WF_SWITCH}
   };
+#endif
 
 const st_getopt2_t pl_usage[] =
   {

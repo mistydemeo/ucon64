@@ -38,11 +38,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smc.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t smc_obj[] =
   {
     {UCON64_NES, WF_DEFAULT | WF_STOP | WF_NO_SPLIT},
     {UCON64_NES, WF_STOP | WF_NO_ROM}
   };
+#endif
 
 const st_getopt2_t smc_usage[] =
   {

@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cd64.h"
 
 
+#if     defined USE_PARALLEL && defined USE_LIBCD64
 static st_ucon64_obj_t cd64_obj[] =
   {
     {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM},
@@ -44,6 +45,7 @@ static st_ucon64_obj_t cd64_obj[] =
     {UCON64_N64, WF_DEFAULT | WF_STOP},
     {UCON64_N64, WF_SWITCH}
   };
+#endif
 
 const st_getopt2_t cd64_usage[] =
   {

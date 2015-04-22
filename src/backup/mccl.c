@@ -77,10 +77,12 @@ Data Read Procedure:
 #include "misc/parallel.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t mccl_obj[] =
   {
     {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM}
   };
+#endif
 
 const st_getopt2_t mccl_usage[] =
   {

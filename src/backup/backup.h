@@ -27,7 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cc2.h"
 #include "spsc.h"
 #include "sc.h"
-#ifdef  USE_PARALLEL
 #include "cd64.h"
 #include "cmc.h"
 #include "dex.h"
@@ -59,10 +58,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ufo.h"
 #include "yoko.h"
 #include "z64.h"
-#endif // USE_PARALLEL
-#if     defined USE_PARALLEL || defined USE_USB
 #include "f2a.h"
-#endif
 
 
 /*

@@ -905,11 +905,13 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
  * uCON64 wrapping *
  *******************/
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t cmc_obj[] =
   {
     {UCON64_GEN, WF_STOP | WF_NO_ROM},
     {UCON64_GEN, WF_SWITCH}
   };
+#endif
 
 const st_getopt2_t cmc_usage[] =
   {

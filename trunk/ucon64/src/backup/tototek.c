@@ -258,9 +258,9 @@ ttt_read_rom_w (int addr, unsigned char *buf)   // original name: read_buff
   set_addr_read (addr);
   for (count = 0; count < 0x80; count++)
 #ifdef  WORDS_BIGENDIAN
-    ((unsigned short int *) buf)[count] = inportw (port_c); // read_dataw ()
-#else
     ((unsigned short int *) buf)[count] = bswap_16 (inportw (port_c)); // read_dataw ()
+#else
+    ((unsigned short int *) buf)[count] = inportw (port_c); // read_dataw ()
 #endif
 }
 

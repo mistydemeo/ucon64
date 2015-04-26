@@ -1,8 +1,27 @@
-//
-//  gcc term.c -o term -ltermcap -DUSE_TERMCAP
-//
-//  taken and modified from lame  frontend/console.c
-//
+/*
+term.c - terminal functions
+
+Copyright (c) 1999 - 2006 NoisyB
+Copyright (c) 2001 - 2005 dbjh
+Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
+
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+// gcc term.c -o term -ltermcap -DUSE_TERMCAP
+// st_term_t and term_*() functions taken and modified from lame frontend/console.c
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -57,13 +76,9 @@ typedef struct termios tty_t;
 #endif
 
 
-#if     (defined(_WIN32) && !defined(__CYGWIN__))
-# include <windows.h>
-#endif
-
 typedef struct
 {
-#if     (defined(_WIN32) && !defined(__CYGWIN__))
+#if     defined _WIN32 && !defined __CYGWIN__
   HANDLE Console_Handle;
 #endif
   int w;                        // display width
@@ -92,7 +107,7 @@ term_open (void)
   memset (t, 0, sizeof (st_term_t));
   t->w = 80;
   t->h = 25;
-#if     (defined(_WIN32) && !defined(__CYGWIN__))
+#if     defined _WIN32 && !defined __CYGWIN__
   t->Console_Handle = GetStdHandle (STD_ERROR_HANDLE);
 #endif
   strcpy (t->up, "\033[A");

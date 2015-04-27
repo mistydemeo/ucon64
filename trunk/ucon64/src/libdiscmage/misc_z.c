@@ -1,7 +1,7 @@
 /*
 misc_z.c - miscellaneous zlib functions
 
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2001 - 2004, 2015 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -72,12 +72,17 @@ q_fsize (const char *filename)
           return -1;
         }
 #if 1
-      // This is not much faster than the other method
+      // This is not much faster than the method below
       while (!gzeof ((gzFile) file))
-        gzseek ((gzFile) file, 1024 * 1024, SEEK_CUR);
+        {
+          gzgetc ((gzFile) file); // necessary in order to set EOF (zlib 1.2.8)
+          gzseek ((gzFile) file, 1024 * 1024, SEEK_CUR);
+        }
       size = gztell ((gzFile) file);
 #else
       // Is there a more efficient way to determine the uncompressed size?
+      int bytesread;
+      unsigned char buf[MAXBUFSIZE];
       while ((bytesread = gzread ((gzFile) file, buf, MAXBUFSIZE)) > 0)
         size += bytesread;
 #endif

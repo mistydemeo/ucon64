@@ -225,7 +225,7 @@ int cd64_bios_grab(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		sec = tb.time;
+		sec = (unsigned long int) tb.time;
 		usec = tb.millitm*1000;
 #else
 		gettimeofday(&tv, 0);
@@ -262,7 +262,7 @@ int cd64_bios_grab(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = ((tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
 #else
 		gettimeofday(&tv, 0);
 		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);
@@ -351,7 +351,7 @@ int cd64_bios_send(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		sec = tb.time;
+		sec = (unsigned long int) tb.time;
 		usec = tb.millitm*1000;
 #else
 		gettimeofday(&tv, 0);
@@ -416,7 +416,7 @@ int cd64_bios_send(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = ((tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
 #else
 		gettimeofday(&tv, 0);
 		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);
@@ -445,7 +445,7 @@ int cd64_ghemor_grab(struct cd64_t *cd64, void *io_id, uint8_t slow, int *elapse
 
 	int ret;
 	uint8_t tmp;
-	int sec = 0, usec = 0;
+	unsigned long int sec = 0, usec = 0;
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 	struct timeb tb;
 #else
@@ -463,7 +463,7 @@ int cd64_ghemor_grab(struct cd64_t *cd64, void *io_id, uint8_t slow, int *elapse
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		sec = tb.time;
+		sec = (unsigned long int) tb.time;
 		usec = tb.millitm*1000;
 #else
 		gettimeofday(&tv, 0);
@@ -510,7 +510,7 @@ int cd64_ghemor_grab(struct cd64_t *cd64, void *io_id, uint8_t slow, int *elapse
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = ((tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
 #else
 		gettimeofday(&tv, 0);
 		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);
@@ -523,7 +523,7 @@ int cd64_ghemor_grab(struct cd64_t *cd64, void *io_id, uint8_t slow, int *elapse
 int cd64_ghemor_send(struct cd64_t *cd64, void *io_id, uint32_t length,
 		int *elapsed) {
 
-	int sec = 0, usec = 0;
+	unsigned long int sec = 0, usec = 0;
 	uint16_t mycsum = 0;
 	unsigned int i;
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
@@ -536,7 +536,7 @@ int cd64_ghemor_send(struct cd64_t *cd64, void *io_id, uint32_t length,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		sec = tb.time;
+		sec = (unsigned long int) tb.time;
 		usec = tb.millitm*1000;
 #else
 		gettimeofday(&tv, 0);
@@ -576,7 +576,7 @@ int cd64_ghemor_send(struct cd64_t *cd64, void *io_id, uint32_t length,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = ((tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
 #else
 		gettimeofday(&tv, 0);
 		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);

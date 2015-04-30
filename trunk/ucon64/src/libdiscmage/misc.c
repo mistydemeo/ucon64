@@ -1,9 +1,9 @@
 /*
 misc.c - miscellaneous functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2004       NoisyB
+Copyright (c) 2001 - 2004, 2015 dbjh
+Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -2006,7 +2006,7 @@ gauge (time_t init_time, int pos, int size)
   if (pos > size || !size)
     return -1;
 
-  if ((curr = time (0) - init_time) == 0)
+  if ((curr = (int) difftime (time (0), init_time)) == 0)
     curr = 1;                                   // `round up' to at least 1 sec (no division
                                                 //  by zero below)
   bps = pos / curr;                             // # bytes/second (average transfer speed)
@@ -2377,7 +2377,7 @@ tmpnam2 (char *temp)
   if (!init)
     {
       init = time (0);
-      srand (init);
+      srand ((int) init);
     }
 
   *temp = 0;

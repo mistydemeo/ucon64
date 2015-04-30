@@ -2,6 +2,7 @@
 doctor64.c - Bung Doctor V64 support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB
+Copyright (c) 2015        dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -319,7 +320,8 @@ doctor64_read (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
-  int size, inittime, bytesreceived = 0;
+  int size, bytesreceived = 0;
+  time_t init_time;
 
   parport_print_info ();
   if (initCommunication (parport) == -1)
@@ -328,7 +330,7 @@ doctor64_read (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  inittime = time (0);
+  init_time = time (0);
 
   if (sendDownloadHeader (parport, &size) != 0)
     {
@@ -351,7 +353,7 @@ doctor64_read (const char *filename, unsigned int parport)
         }
       bytesreceived += sizeof buf;
       fwrite (buf, 1, sizeof buf, fh);
-      ucon64_gauge (inittime, bytesreceived, size);
+      ucon64_gauge (init_time, bytesreceived, size);
     }
 
   fclose (fh);
@@ -364,7 +366,8 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
-  unsigned int size, inittime, pos, bytessend = 0;
+  unsigned int size, pos, bytessend = 0;
+  time_t init_time;
 
   parport_print_info ();
   size = len - start;
@@ -373,7 +376,7 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
       fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
       exit (1);
     }
-  inittime = time (0);
+  init_time = time (0);
 
   strcpy (buf, filename);
   if (sendUploadHeader (parport, buf, size) != 0)
@@ -397,7 +400,7 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
       if (parport_write (buf, pos, parport) != 0)
         break;
       bytessend += sizeof buf;
-      ucon64_gauge (inittime, bytessend, size);
+      ucon64_gauge (init_time, bytessend, size);
     }
   fclose (fh);
   return 0;

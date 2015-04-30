@@ -671,7 +671,7 @@ INLINE uint8_t inb(uint16_t port) {
 	}
 	else {
 #ifdef _MSC_VER
-		return (unsigned char) inp(port);
+		return (unsigned char) _inp(port);
 #else
 		unsigned char byte;
 		__asm__ __volatile__
@@ -701,7 +701,7 @@ INLINE void outb(uint8_t byte, uint16_t port) {
 	}
 	else {
 #ifdef _MSC_VER
-		outp(port, byte);
+		_outp(port, byte);
 #else
 		__asm__ __volatile__
 		("outb %1, %0"
@@ -775,6 +775,9 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		exit(1);
 	}
 #elif defined _WIN32 || defined __CYGWIN__
+#ifdef  _MSC_VER
+#define access  _access
+#endif
 	{
 		char fname[FILENAME_MAX+1];
 		io_driver_found = 0;
@@ -839,6 +842,9 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		SetUnhandledExceptionFilter(org_exception_filter);
 #endif
 	}
+#ifdef  _MSC_VER
+#undef  access
+#endif
 #endif /* _WIN32 || __CYGWIN__ */
 
 	return 1;

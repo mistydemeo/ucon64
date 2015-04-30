@@ -1,9 +1,9 @@
 /*
 file.c - miscellaneous file functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2005 dbjh
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2004       NoisyB
+Copyright (c) 2001 - 2005, 2015 dbjh
+Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -660,7 +660,7 @@ tmpnam2 (char *temp)
 {
   char *p = getenv2 ("TEMP");
 
-  srand (time (0));
+  srand ((int) time (0));
 
   *temp = 0;
   while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs

@@ -1,9 +1,9 @@
 /*
 misc.c - miscellaneous functions
 
-Copyright (c) 1999 - 2005 NoisyB
-Copyright (c) 2001 - 2005 dbjh
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2005       NoisyB
+Copyright (c) 2001 - 2005, 2015 dbjh
+Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -56,6 +56,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
 
+#ifdef  HAVE_INTTYPES_H
+#include <inttypes.h>
+#else                                           // __MSDOS__, _WIN32 (VC++)
+#include "itypes.h"
+#endif
 #ifdef  USE_ZLIB
 #include "archive.h"
 #endif
@@ -112,7 +117,7 @@ misc_digits (unsigned long v)
 int
 bytes_per_second (time_t start_time, int nbytes)
 {
-  int curr = time (NULL) - start_time;
+  int curr = (int) difftime (time (0), start_time);
 
   if (curr < 1)
     curr = 1;                                   // "round up" to at least 1 sec (no division

@@ -1605,7 +1605,7 @@ ucon64_nfo (void)
 
 
 static inline char *
-to_func (char *s, int len, int (*func) (int))
+to_func (char *s, int len, char (*func) (char))
 {
   char *p = s;
 
@@ -1616,8 +1616,8 @@ to_func (char *s, int len, int (*func) (int))
 }
 
 
-static inline int
-toprint (int c)
+static inline char
+toprint (char c)
 {
   if (isprint (c))
     return c;

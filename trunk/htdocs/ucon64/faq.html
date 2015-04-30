@@ -274,9 +274,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    <b>Support for files in gzip (.gz) or zip format (.zip)</b><br>
    For gzip &amp; zip support you need zlib. If you do not have zlib you can
-   get it from <a href="http://www.gzip.org/zlib/">
-   http://www.gzip.org/zlib/</a>. There are two ways to get gzip &amp; zip
-   support for uCON64:<br>
+   get it from <a href="http://zlib.net/">http://zlib.net/</a>. There are two
+   ways to get gzip &amp; zip support for uCON64:<br>
    1.) When using the configure script.<br>
    By default gzip &amp; zip support will be enabled if configure can find zlib
    on your system. If you want to disable the feature, pass the option
@@ -287,12 +286,6 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    (remove the "//" in front of the line that defines it) <i>and</i> in
    Makefile and libdiscmage/Makefile (remove the "#" in front of the line that
    defines it).<br>
-<br>
-   There is one additional thing you should think of. The import library of
-   zlib versions later than 1.1.4 is named libzdll.a or zdll.lib. In practice
-   this means that if you want to use the DLL of zlib 1.2 (instead of the
-   static library), that you have to edit Makefile.vc6 or rename or copy
-   zdll.lib to zlib.lib.<br>
 <br>
    If you want to change other things in config.h or the makefiles do so before
    proceeding to the next step.<br>

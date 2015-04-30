@@ -2,7 +2,7 @@
 doctor64jr.c - Bung Doctor V64 Junior support for uCON64
 
 Copyright (c) 1999 - 2002 NoisyB
-Copyright (c) 2004        dbjh
+Copyright (c) 2004, 2015  dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -507,8 +507,8 @@ doctor64jr_read (const char *filename, unsigned int parport)
 int
 doctor64jr_write (const char *filename, unsigned int parport)
 {
-  unsigned int enable_write = 0, init_time, size, bytesread, bytessend = 0,
-               n_pages;
+  unsigned int enable_write = 0, size, bytesread, bytessend = 0, n_pages;
+  time_t init_time;
   unsigned short int page;
   FILE *file;
 

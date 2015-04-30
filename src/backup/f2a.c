@@ -1,10 +1,10 @@
 /*
 f2a.c - Flash 2 Advance support for uCON64
 
-Copyright (c) 2003        Ulrich Hecht <uli@emulinks.de>
-Copyright (c) 2003 - 2004 David Voswinkel <d.voswinkel@netcologne.de>
-Copyright (c) 2004        NoisyB
-Copyright (c) 2004 - 2005 dbjh
+Copyright (c) 2003              Ulrich Hecht <uli@emulinks.de>
+Copyright (c) 2003 - 2004       David Voswinkel <d.voswinkel@netcologne.de>
+Copyright (c) 2004              NoisyB
+Copyright (c) 2004 - 2005, 2015 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -873,7 +873,7 @@ parport_init_delay (int n_micros)
             ;
 #if     defined _WIN32 || defined __MSDOS__
           ftime (&t1);
-          n_ticks += (t1.time * 1000 + t1.millitm) - (t0.time * 1000 + t0.millitm);
+          n_ticks += ((int) t1.time * 1000 + t1.millitm) - ((int) t0.time * 1000 + t0.millitm);
 #else
           gettimeofday (&t1, NULL);
           n_ticks += (t1.tv_sec * 1000000 + t1.tv_usec) - (t0.tv_sec * 1000000 + t0.tv_usec);

@@ -1,9 +1,9 @@
 /*
 term.c - terminal functions
 
-Copyright (c) 1999 - 2006 NoisyB
-Copyright (c) 2001 - 2005 dbjh
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2006       NoisyB
+Copyright (c) 2001 - 2005, 2015 dbjh
+Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 // gcc term.c -o term -ltermcap -DUSE_TERMCAP
-// st_term_t and term_*() functions taken and modified from lame frontend/console.c
+// st_term_t and term_*() functions taken and modified from LAME frontend/console.c
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <termcap.h>
 #endif
 #include "term.h"
+#include "ucon64_defines.h"
 
 
 #ifdef  __MSDOS__

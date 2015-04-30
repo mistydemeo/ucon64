@@ -1,10 +1,10 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-Copyright (c) 1999 - 2006 NoisyB
-Copyright (c) 2001 - 2005 dbjh
-Copyright (c) 2001        Caz
-Copyright (c) 2002 - 2003 Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2006       NoisyB
+Copyright (c) 2001 - 2005, 2015 dbjh
+Copyright (c) 2001              Caz
+Copyright (c) 2002 - 2003       Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1059,7 +1059,7 @@ ucon64_gauge (time_t start_time, int pos, int size)
 
   if (pos == size)
     {
-      int curr = time (0) - start_time;
+      int curr = (int) difftime (time (0), start_time);
       // "round up" to at least 1 sec (to be consistent with ETA)
       if (curr < 1)
         curr = 1;

@@ -592,7 +592,7 @@ TEST_BREAK
   // this is why no external script is used for testing
   {
     int c = 0, y = 0;
-  
+
     // convert (st_getopt2_t **) to (st_getopt2_t *)
     memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
     for (c = x = 0; option[x]; x++)
@@ -614,11 +614,11 @@ TEST_BREAK
                 found = 1;
                 break;
               }
-            
+
           if (!found)
             printf ("option: %4d \"%s\" will NOT be tested\n", options[x].val, options[x].name);
         }
-  }              
+  }
 #endif
 
   for (x = 0; test[x].val; x++)
@@ -629,7 +629,7 @@ TEST_BREAK
       // NO testing?
       if (!test[x].cmdline || !test[x].crc32)
         continue;
-        
+
       crc = 0;
       if (test[x].crc32 != TEST_BUG && test[x].crc32 != TEST_TODO)
         {
@@ -642,7 +642,7 @@ TEST_BREAK
 
           sprintf (fname, "%d-output.txt", test[x].val);
           out = fopen (fname, "w");
-      
+
           while ((fgets (buf, MAXBUFSIZE, in)))
             {
               crc = crc32 (crc, (const void *) &buf, strlen (buf));
@@ -673,7 +673,7 @@ TEST_BREAK
         {
           fputs ("^^^ ", out);
           fputs (buf, out);
-      
+
           fclose (in);
           fclose (out);
         }
@@ -831,7 +831,7 @@ main (int argc, char **argv)
   if (argc == 1)
     ucon64_test ();
 #else
-  printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2005\n"
+  printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2005,2015\n"
     "Uses code from various people. See 'developers.html' for more!\n"
     "This may be freely redistributed under the terms of the GNU Public License\n\n");
 #endif

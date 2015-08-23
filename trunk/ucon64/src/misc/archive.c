@@ -648,7 +648,6 @@ popen2 (const char *command, const char *mode)
   if (fh_map == NULL)
     init_fh_map ();
 
-  file = popen (command, mode);
   if ((file = popen (command, mode)) == NULL)
     return NULL;
 

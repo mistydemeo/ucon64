@@ -75,8 +75,8 @@ q_fsize (const char *filename)
       // This is not much faster than the method below
       while (!gzeof ((gzFile) file))
         {
-          gzgetc ((gzFile) file); // necessary in order to set EOF (zlib 1.2.8)
           gzseek ((gzFile) file, 1024 * 1024, SEEK_CUR);
+          gzgetc ((gzFile) file); // necessary in order to set EOF (zlib 1.2.8)
         }
       size = gztell ((gzFile) file);
 #else
@@ -412,8 +412,8 @@ fseek2 (FILE *file, long offset, int mode)
           // Note that this is _slow_...
           while (!gzeof ((gzFile) file))
             {
-              gzgetc ((gzFile) file); // necessary for _uncompressed_ files in order to set EOF
               gzseek ((gzFile) file, 1024 * 1024, SEEK_CUR);
+              gzgetc ((gzFile) file); // necessary in order to set EOF (zlib 1.2.8)
             }
           offset += gztell ((gzFile) file);
           mode = SEEK_SET;

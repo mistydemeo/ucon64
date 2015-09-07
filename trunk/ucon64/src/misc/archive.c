@@ -89,14 +89,13 @@ fsizeof (const char *filename)
           gzseek ((gzFile) file, 1024 * 1024, SEEK_CUR);
           gzgetc ((gzFile) file); // necessary in order to set EOF (zlib 1.2.8)
         }
-      size = gztell ((gzFile) file);
 #else
       // Is there a more efficient way to determine the uncompressed size?
-      int bytesread;
       unsigned char buf[MAXBUFSIZE];
-      while ((bytesread = gzread ((gzFile) file, buf, MAXBUFSIZE)) > 0)
-        size += bytesread;
+      while (gzread ((gzFile) file, buf, MAXBUFSIZE) > 0)
+        ;
 #endif
+      size = gztell ((gzFile) file);
       gzclose ((gzFile) file);
       return size;
     }
@@ -421,24 +420,12 @@ fseek2 (FILE *file, long offset, int mode)
       if (mode == SEEK_END)                     // zlib doesn't support SEEK_END
         {
           // Note that this is _slow_...
-          while (!gzeof ((gzFile) file))
-            {
-              gzseek ((gzFile) file, 1024 * 1024, SEEK_CUR);
-              gzgetc ((gzFile) file); // necessary in order to set EOF (zlib 1.2.8)
-            }
+          unsigned char buf[MAXBUFSIZE];
+          while (gzread ((gzFile) file, buf, MAXBUFSIZE) > 0)
+            ;
           offset += gztell ((gzFile) file);
           mode = SEEK_SET;
         }
-      /*
-        FUCKING zlib documentation! It took me around 4 hours of debugging time
-        to find out that the doc is wrong! From the doc:
-          gzrewind(file) is equivalent to (int)gzseek(file, 0L, SEEK_SET)
-        That is not true for uncompressed files. gzrewind() doesn't change the
-        file pointer for uncompressed files in the ports I tested (zlib 1.1.3,
-        DJGPP, Cygwin & GNU/Linux). It clears the EOF indicator.
-      */
-      if (!finfo->compressed)
-        gzrewind ((gzFile) file);
       return gzseek ((gzFile) file, offset, mode) == -1 ? -1 : 0;
     }
   else if (finfo->fmode == FM_ZIP)

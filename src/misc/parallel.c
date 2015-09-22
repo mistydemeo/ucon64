@@ -1,10 +1,10 @@
 /*
 parallel.c - miscellaneous parallel port functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2001        Caz (original BeOS code)
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2004       NoisyB
+Copyright (c) 2001 - 2004, 2015 dbjh
+Copyright (c) 2001              Caz (original BeOS code)
+Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #elif   defined __BEOS__ || defined __FreeBSD__ // __OpenBSD__
 #include <fcntl.h>
 #elif   defined AMIGA                           // __BEOS__ || __FreeBSD__
-#error Parallel port I/O code is broken; Please contact Jan-Erik Karlsson
 #include <fcntl.h>
 #include <exec/types.h>
 #include <exec/io.h>
@@ -119,12 +118,12 @@ static struct MsgPort *parport;
 
 static void *io_driver;
 
-// inpout32.dll only has I/O functions for byte-sized I/O
-static unsigned char (__stdcall *Inp32) (unsigned short) = NULL;
-static void (__stdcall *Outp32) (unsigned short, unsigned char) = NULL;
+// The original inpout32.dll only has I/O functions for byte-sized I/O
+static short (__stdcall *Inp32) (short) = NULL;
+static void (__stdcall *Outp32) (short, short) = NULL;
 
-static unsigned char inpout32_input_byte (unsigned short port) { return Inp32 (port); }
-static void inpout32_output_byte (unsigned short port, unsigned char byte) { Outp32 (port, byte); }
+static unsigned char inpout32_input_byte (unsigned short port) { return (unsigned char) Inp32 ((short) port); }
+static void inpout32_output_byte (unsigned short port, unsigned char byte) { Outp32 ((short) port, (short) byte); }
 
 // io.dll has more functions then the ones we refer to here, but we don't need them
 static char (WINAPI *PortIn) (short int) = NULL;
@@ -139,10 +138,10 @@ static void io_output_byte (unsigned short port, unsigned char byte) { PortOut (
 static void io_output_word (unsigned short port, unsigned short word) { PortWordOut (port, word); }
 
 // dlportio.dll has more functions then the ones we refer to here, but we don't need them
-static unsigned char (__stdcall *DlPortReadPortUchar) (unsigned long) = NULL;
-static unsigned short (__stdcall *DlPortReadPortUshort) (unsigned long) = NULL;
-static void (__stdcall *DlPortWritePortUchar) (unsigned long, unsigned char) = NULL;
-static void (__stdcall *DlPortWritePortUshort) (unsigned long, unsigned short) = NULL;
+static unsigned char (__stdcall *DlPortReadPortUchar) (unsigned short) = NULL;
+static unsigned short (__stdcall *DlPortReadPortUshort) (unsigned short) = NULL;
+static void (__stdcall *DlPortWritePortUchar) (unsigned short, unsigned char) = NULL;
+static void (__stdcall *DlPortWritePortUshort) (unsigned short, unsigned short) = NULL;
 
 static unsigned char dlportio_input_byte (unsigned short port) { return DlPortReadPortUchar (port); }
 static unsigned short dlportio_input_word (unsigned short port) { return DlPortReadPortUshort (port); }
@@ -265,7 +264,7 @@ inportb (unsigned short port)
       read (parport_io_fd, &byte, 1);
       break;
     case 0x402:                                 // ECP register
-      printf ("WARNING: Ignored read from ECP register, returning 0\n");
+      puts ("WARNING: Ignored read from ECP register, returning 0");
       byte = 0;
       break;
     default:
@@ -310,7 +309,7 @@ inportb (unsigned short port)
   if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
-                       ucon64.parport_dev, ucon64.parport);
+               ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
 
@@ -375,7 +374,7 @@ inportw (unsigned short port)
   if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
-                       ucon64.parport_dev, ucon64.parport);
+               ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
 
@@ -426,7 +425,7 @@ outportb (unsigned short port, unsigned char byte)
       write (parport_io_fd, &byte, 1);
       break;
     case 0x402:                                 // ECP register
-      printf ("WARNING: Ignored write to ECP register\n");
+      puts ("WARNING: Ignored write to ECP register");
       break;
     default:
       fprintf (stderr,
@@ -451,7 +450,7 @@ outportb (unsigned short port, unsigned char byte)
   if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
-                       ucon64.parport_dev, ucon64.parport);
+               ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
 #elif   defined _WIN32 || defined __CYGWIN__
@@ -516,7 +515,7 @@ outportw (unsigned short port, unsigned short word)
   if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
-                       ucon64.parport_dev, ucon64.parport);
+               ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
 #elif   defined _WIN32 || defined __CYGWIN__
@@ -601,7 +600,7 @@ parport_open (int port)
     {
       fprintf (stderr, "ERROR: Could not open parallel port device (%s)\n"
                        "       Check if you have the required privileges\n",
-                       ucon64.parport_dev);
+               ucon64.parport_dev);
       exit (1);
     }
 
@@ -610,7 +609,7 @@ parport_open (int port)
     {
       fprintf (stderr, "ERROR: Could not get exclusive access to parallel port device (%s)\n"
                        "       Check if another module (like lp) uses the module parport\n",
-                       ucon64.parport_dev);
+               ucon64.parport_dev);
       exit (1);
     }
   t.tv_sec = 0;
@@ -626,7 +625,7 @@ parport_open (int port)
 
   if (ucon64.parport_mode == UCON64_EPP || ucon64.parport_mode == UCON64_ECP)
     if ((capabilities & (PARPORT_MODE_EPP | PARPORT_MODE_ECP)) == 0)
-      printf ("WARNING: EPP or ECP mode was requested, but not available\n");
+      puts ("WARNING: EPP or ECP mode was requested, but not available");
 
   // set mode for read() and write()
   if (capabilities & PARPORT_MODE_ECP)
@@ -650,17 +649,18 @@ parport_open (int port)
       parport_io_fd = open ("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
       if (parport_io_fd == -1)
         {
-          fprintf (stderr, "ERROR: Could not open I/O port device (no driver)\n"
-                           "       You can download the latest ioport driver from\n"
-                           "       http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n");
+          fputs ("ERROR: Could not open I/O port device (no driver)\n"
+                 "       You can download the latest ioport driver from\n"
+                 "       http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n",
+                 stderr);
           exit (1);
         }
       else
         {                                       // print warning, but continue
-          printf ("WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
-                  "         might not support this driver. You can download the latest ioport\n"
-                  "         driver from http://www.infernal.currantbun.com or\n"
-                  "         http://ucon64.sourceforge.net\n\n");
+          puts ("WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
+                "         might not support this driver. You can download the latest ioport\n"
+                "         driver from http://www.infernal.currantbun.com or\n"
+                "         http://ucon64.sourceforge.net\n");
         }
     }
 #elif   defined AMIGA
@@ -669,13 +669,13 @@ parport_open (int port)
   parport = CreatePort (NULL, 0);
   if (parport == NULL)
     {
-      fprintf (stderr, "ERROR: Could not create the MsgPort\n");
+      fputs ("ERROR: Could not create the MsgPort\n", stderr);
       exit (1);
     }
   parport_io_req = CreateExtIO (parport, sizeof (struct IOExtPar));
   if (parport_io_req == NULL)
     {
-      fprintf (stderr, "ERROR: Could not create the I/O request structure\n");
+      fputs ("ERROR: Could not create the I/O request structure\n", stderr);
       DeletePort (parport);
       parport_io_req = NULL;
       exit (1);
@@ -703,15 +703,16 @@ parport_open (int port)
       DeleteExtIO (parport_io_req);
       DeletePort (parport);
       parport_io_req = NULL;
-      fprintf (stderr, "ERROR: Could not register function with register_func()\n");
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit (1);
     }
 #elif   defined __FreeBSD__
   parport_io_fd = open ("/dev/io", O_RDWR);
   if (parport_io_fd == -1)
     {
-      fprintf (stderr, "ERROR: Could not open I/O port device (/dev/io)\n"
-                       "       (This program needs root privileges for the requested action)\n");
+      fputs ("ERROR: Could not open I/O port device (/dev/io)\n"
+             "       (This program needs root privileges for the requested action)\n",
+             stderr);
       exit (1);
     }
 #endif
@@ -720,7 +721,7 @@ parport_open (int port)
   if (register_func (close_io_port) == -1)
     {
       close (parport_io_fd);
-      fprintf (stderr, "ERROR: Could not register function with register_func()\n");
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit(1);
     }
 #endif
@@ -740,8 +741,9 @@ parport_open (int port)
   */
   if (iopl (3) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
-                       "       (This program needs root privileges for the requested action)\n");
+      fputs ("ERROR: Could not set the I/O privilege level to 3\n"
+             "       (This program needs root privileges for the requested action)\n",
+             stderr);
       exit (1);                                 // Don't return, if iopl() fails port access
     }                                           //  causes core dump
 #endif // __linux__ && (__i386__ || __x86_64__) && !USE_PPDEV
@@ -751,8 +753,9 @@ parport_open (int port)
   //  Linux (i386_set_ioperm() has the same limitation as ioperm()).
   if (i386_iopl (3) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
-                       "       (This program needs root privileges for the requested action)\n");
+      fputs ("ERROR: Could not set the I/O privilege level to 3\n"
+             "       (This program needs root privileges for the requested action)\n",
+             stderr);
       exit (1);
     }
 #endif
@@ -782,25 +785,13 @@ parport_open (int port)
       driver_found = 1;
       printf ("Using %s\n", fname);
 
-      DlPortReadPortUchar =
-#ifdef  __cplusplus // this is really nice: gcc wants something else than g++...
-                            (unsigned char (__stdcall *) (unsigned long))
-#endif
+      DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned short))
                             get_symbol (io_driver, "DlPortReadPortUchar");
-      DlPortReadPortUshort =
-#ifdef  __cplusplus
-                             (unsigned short (__stdcall *) (unsigned long))
-#endif
+      DlPortReadPortUshort = (unsigned short (__stdcall *) (unsigned short))
                              get_symbol (io_driver, "DlPortReadPortUshort");
-      DlPortWritePortUchar =
-#ifdef  __cplusplus
-                             (void (__stdcall *) (unsigned long, unsigned char))
-#endif
+      DlPortWritePortUchar = (void (__stdcall *) (unsigned short, unsigned char))
                              get_symbol (io_driver, "DlPortWritePortUchar");
-      DlPortWritePortUshort =
-#ifdef  __cplusplus
-                              (void (__stdcall *) (unsigned long, unsigned short))
-#endif
+      DlPortWritePortUshort = (void (__stdcall *) (unsigned short, unsigned short))
                               get_symbol (io_driver, "DlPortWritePortUshort");
       input_byte = dlportio_input_byte;
       input_word = dlportio_input_word;
@@ -815,35 +806,20 @@ parport_open (int port)
         {
           io_driver = open_module (fname);
 
-          IsDriverInstalled =
-#ifdef  __cplusplus
-                              (short int (WINAPI *) ())
-#endif
+          IsDriverInstalled = (short int (WINAPI *) ())
                               get_symbol (io_driver, "IsDriverInstalled");
           if (IsDriverInstalled ())
             {
               driver_found = 1;
               printf ("Using %s\n", fname);
 
-              PortIn =
-#ifdef  __cplusplus
-                       (char (WINAPI *) (short int))
-#endif
+              PortIn = (char (WINAPI *) (short int))
                        get_symbol (io_driver, "PortIn");
-              PortWordIn =
-#ifdef  __cplusplus
-                           (short int (WINAPI *) (short int))
-#endif
+              PortWordIn = (short int (WINAPI *) (short int))
                            get_symbol (io_driver, "PortWordIn");
-              PortOut =
-#ifdef  __cplusplus
-                        (void (WINAPI *) (short int, char))
-#endif
+              PortOut = (void (WINAPI *) (short int, char))
                         get_symbol (io_driver, "PortOut");
-              PortWordOut =
-#ifdef  __cplusplus
-                            (void (WINAPI *) (short int, short int))
-#endif
+              PortWordOut = (void (WINAPI *) (short int, short int))
                             get_symbol (io_driver, "PortWordOut");
               input_byte = io_input_byte;
               input_word = io_input_word;
@@ -858,22 +834,48 @@ parport_open (int port)
       sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
       if (access (fname, F_OK) == 0)
         {
+          io_driver = open_module (fname);
+
           driver_found = 1;
           printf ("Using %s\n", fname);
-          io_driver = open_module (fname);
-          Inp32 =
-#ifdef  __cplusplus
-                  (unsigned char (__stdcall *) (unsigned short))
-#endif
-                  get_symbol (io_driver, "Inp32");
-          Outp32 =
-#ifdef  __cplusplus
-                   (void (__stdcall *) (unsigned short, unsigned char))
-#endif
-                   get_symbol (io_driver, "Out32");
-          // note that inport_word and output_word keep their default value...
-          input_byte = inpout32_input_byte;
-          output_byte = inpout32_output_byte;
+
+          /*
+            Newer ports of inpout32.dll also contain the API provided by
+            dlportio.dll. Since the API of dlportio.dll does not have the flaws
+            of inpout32.dll (*signed* short return value and arguments), we
+            prefer it if it is present.
+          */
+          DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned short))
+                                has_symbol (io_driver, "DlPortReadPortUchar");
+          if (DlPortReadPortUchar != (void *) -1)
+            input_byte = dlportio_input_byte;
+          else
+            {
+              Inp32 = (short (__stdcall *) (short))
+                      get_symbol (io_driver, "Inp32");
+              input_byte = inpout32_input_byte;
+            }
+
+          DlPortWritePortUchar = (void (__stdcall *) (unsigned short, unsigned char))
+                                 has_symbol (io_driver, "DlPortWritePortUchar");
+          if (DlPortWritePortUchar != (void *) -1)
+            output_byte = dlportio_output_byte;
+          else
+            {
+              Outp32 = (void (__stdcall *) (short, short))
+                       get_symbol (io_driver, "Out32");
+              output_byte = inpout32_output_byte;
+            }
+
+          DlPortReadPortUshort = (unsigned short (__stdcall *) (unsigned short))
+                                 has_symbol (io_driver, "DlPortReadPortUshort");
+          if (DlPortReadPortUshort != (void *) -1)
+            input_word = dlportio_input_word;
+
+          DlPortWritePortUshort = (void (__stdcall *) (unsigned short, unsigned short))
+                                  has_symbol (io_driver, "DlPortWritePortUshort");
+          if (DlPortReadPortUshort != (void *) -1)
+            output_word = dlportio_output_word;
         }
     }
 
@@ -915,8 +917,8 @@ parport_open (int port)
 
       if (found != 1)
         {
-          fprintf (stderr, "ERROR: Could not find a parallel port on your system\n"
-                           "       Try to specify it by hand\n\n");
+          fputs ("ERROR: Could not find a parallel port on your system\n"
+                 "       Try to specify it by hand\n\n", stderr);
           exit (1);
         }
     }

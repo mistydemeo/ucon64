@@ -845,7 +845,7 @@ main (int argc, char **argv)
   // flush st_ucon64_t
   memset (&ucon64, 0, sizeof (st_ucon64_t));
 
-  // these members of ucon64 (except rom and fname_arch) don't change per file
+  // these members of ucon64 (except fname and fname_arch) don't change per file
   ucon64.argc = argc;
   ucon64.argv = argv;                           // must be set prior to calling
                                                 //  ucon64_load_discmage() (for DOS)
@@ -863,7 +863,7 @@ main (int argc, char **argv)
   ucon64.battery =
   ucon64.bs_dump =
   ucon64.backup_header_len =
-  ucon64.console =
+  ucon64.org_console =
   ucon64.controller =
   ucon64.controller2 =
   ucon64.do_not_calc_crc =
@@ -880,6 +880,8 @@ main (int argc, char **argv)
 
   ucon64.flags = WF_DEFAULT;
 
+  // ucon64.console does change per file
+  ucon64.console = ucon64.org_console;
 
   // convert (st_getopt2_t **) to (st_getopt2_t *)
   memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
@@ -1044,12 +1046,11 @@ main (int argc, char **argv)
       arg[x].console);
 #endif
 
-
   // switches
   for (x = 0; arg[x].val; x++)
     {
       if (arg[x].console != UCON64_UNKNOWN)
-        ucon64.console = arg[x].console;
+        ucon64.org_console = ucon64.console = arg[x].console;
       if (arg[x].flags)
         ucon64.flags = arg[x].flags;
       if (arg[x].val)
@@ -1228,6 +1229,8 @@ ucon64_execute_options (void)
   ucon64.crc32 =
   ucon64.fcrc32 = 0;
 
+  ucon64.console = ucon64.org_console;
+  
   for (x = 0; arg[x].val; x++)
     if (!(arg[x].flags & WF_SWITCH))
       {

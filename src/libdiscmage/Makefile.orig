@@ -60,6 +60,21 @@ endif                                   # GCC_WIN
 endif                                   # USE_ZLIB
 
 
+ifeq ($(OSTYPE),msys)                   # test msys before cygwin and DJGPP
+
+GCCA_DIR=/mingw/lib/gcc/mingw32/4.8.1/
+LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
+# MSYS problem: Specifying the library directory is necessary when compiling on
+# a different filesystem than the filesystem that MinGW is installed on.
+
+FULLLIBNAME=$(LIBNAME).dll
+DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e _DllMain@12 -o $(LIBNAME).dll
+DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
+ifndef DLOPEN
+DLLTOOLFLAGS+=-l $(LIBNAME).a
+endif
+
+else
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
 GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.3.3/
@@ -77,21 +92,6 @@ endif
 
 FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e $(ENTRY) -o $(LIBNAME).dll
-DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
-ifndef DLOPEN
-DLLTOOLFLAGS+=-l $(LIBNAME).a
-endif
-
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-
-GCCA_DIR=/mingw/lib/gcc/mingw32/3.4.2/
-LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
-# MSYS problem: Specifying the library directory is necessary when compiling on
-# a different filesystem than the filesystem that MinGW is installed on.
-
-FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e _DllMain@12 -o $(LIBNAME).dll
 DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
 ifndef DLOPEN
 DLLTOOLFLAGS+=-l $(LIBNAME).a

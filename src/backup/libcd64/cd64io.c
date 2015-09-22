@@ -5,7 +5,7 @@
  * I/O routines for CD64 device
  *
  * (c) 2004 Ryan Underwood
- * Portions (c) 2004, 2005 Daniel Horchner (OpenBSD, FreeBSD, BeOS, Win32, DOS)
+ * Portions (c) 2004, 2005, 2015 Daniel Horchner (OpenBSD, FreeBSD, BeOS, Win32, DOS)
  *
  * May be distributed under the terms of the GNU Lesser/Library General Public
  * License, or any later version of the same, as published by the Free Software
@@ -43,16 +43,19 @@
 
 static void *io_driver = NULL;
 static int io_driver_found = 0;
+/* inpout32.dll */
+static short (__stdcall *Inp32)(short) = NULL;
+static void (__stdcall *Outp32)(short, short) = NULL;
 /* io.dll */
 static char (WINAPI *PortIn)(short int) = NULL;
 static void (WINAPI *PortOut)(short int, char) = NULL;
 static short int (WINAPI *IsDriverInstalled)() = NULL;
 /* DlPortIO.dll */
-static unsigned char (__stdcall *DlPortReadPortUchar)(unsigned long) = NULL;
-static void (__stdcall *DlPortWritePortUchar)(unsigned long, unsigned char) = NULL;
+static unsigned char (__stdcall *DlPortReadPortUchar)(unsigned short) = NULL;
+static void (__stdcall *DlPortWritePortUchar)(unsigned short, unsigned char) = NULL;
 
-INLINE uint8_t inb(uint16_t);
-INLINE void outb(uint8_t, uint16_t);
+static INLINE uint8_t inb(uint16_t);
+static INLINE void outb(uint8_t, uint16_t);
 static uint8_t (*input_byte)(uint16_t) = inb;
 static void (*output_byte)(uint8_t, uint16_t) = outb;
 #endif
@@ -605,21 +608,43 @@ static void *get_symbol(void *handle, char *symbol_name, struct cd64_t *cd64) {
 	return symptr;
 }
 
+static void *has_symbol(void *handle, char *symbol_name) {
+
+	void *symptr = (void *) GetProcAddress((HINSTANCE) handle, symbol_name);
+	if (symptr == NULL) symptr = (void *) -1;
+	return symptr;
+}
+
+/* inpout32.dll */
+static uint8_t inpout32_input_byte(uint16_t port) {
+
+	return (uint8_t) Inp32((short) port);
+}
+
+static void inpout32_output_byte(uint8_t byte, uint16_t port) {
+
+	Outp32((short) port, (short) byte);
+}
+
 /* io.dll */
 static uint8_t io_input_byte(uint16_t port) {
+
 	return PortIn(port);
 }
 
 static void io_output_byte(uint8_t byte, uint16_t port) {
+
 	PortOut(port, byte);
 }
 
 /* DlPortIO.dll */
 static uint8_t dlportio_input_byte(uint16_t port) {
+
 	return DlPortReadPortUchar(port);
 }
 
 static void dlportio_output_byte(uint8_t byte, uint16_t port) {
+
 	DlPortWritePortUchar(port, byte);
 }
 
@@ -654,7 +679,7 @@ static LONG new_exception_filter(LPEXCEPTION_POINTERS exception_pointers) {
 #if ((defined _WIN32 || defined __CYGWIN__ || defined __BEOS__ || \
      defined __MSDOS__) && \
     (defined __i386__ || defined __x86_64__)) || defined _MSC_VER
-INLINE uint8_t inb(uint16_t port) {
+static INLINE uint8_t inb(uint16_t port) {
 
 #ifdef __MSDOS__
 	return inportb(port);
@@ -666,9 +691,7 @@ INLINE uint8_t inb(uint16_t port) {
 
 	return temp.data8;
 #else /* Win32 */
-	if (io_driver_found) {
-		return input_byte(port);
-	}
+	if (io_driver_found) return input_byte(port);
 	else {
 #ifdef _MSC_VER
 		return (unsigned char) _inp(port);
@@ -685,7 +708,7 @@ INLINE uint8_t inb(uint16_t port) {
 #endif
 }
 
-INLINE void outb(uint8_t byte, uint16_t port) {
+static INLINE void outb(uint8_t byte, uint16_t port) {
 
 #ifdef __MSDOS__
 	outportb(port, byte);
@@ -696,9 +719,7 @@ INLINE void outb(uint8_t byte, uint16_t port) {
 	temp.data8 = byte;
 	ioctl(io_portfd, 'w', &temp, 0);
 #else /* Win32 */
-	if (io_driver_found) {
-		output_byte(byte, port);
-	}
+	if (io_driver_found) output_byte(byte, port);
 	else {
 #ifdef _MSC_VER
 		_outp(port, byte);
@@ -783,38 +804,70 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		io_driver_found = 0;
 
 		if (!cd64->io_driver_dir[0]) strcpy(cd64->io_driver_dir, ".");
-		snprintf (fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
-		          cd64->io_driver_dir, "dlportio.dll");
+		snprintf(fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
+		         cd64->io_driver_dir, "dlportio.dll");
 		fname[FILENAME_MAX] = 0;
 		if (access(fname, F_OK) == 0) {
 			io_driver = open_module(fname, cd64);
 
 			io_driver_found = 1;
-			DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned long))
+			DlPortReadPortUchar = (unsigned char (__stdcall *)(unsigned short))
 			                      get_symbol(io_driver, "DlPortReadPortUchar", cd64);
-			DlPortWritePortUchar = (void (__stdcall *) (unsigned long, unsigned char))
+			DlPortWritePortUchar = (void (__stdcall *)(unsigned short, unsigned char))
 			                       get_symbol(io_driver, "DlPortWritePortUchar", cd64);
 			input_byte = dlportio_input_byte;
 			output_byte = dlportio_output_byte;
 		}
 
 		if (!io_driver_found) {
-			snprintf (fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
-			          cd64->io_driver_dir, "io.dll");
+			snprintf(fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
+			         cd64->io_driver_dir, "io.dll");
 			fname[FILENAME_MAX] = 0;
 			if (access(fname, F_OK) == 0) {
 				io_driver = open_module(fname, cd64);
 
-				IsDriverInstalled = (short int (WINAPI *) ())
+				IsDriverInstalled = (short int (WINAPI *)())
 				                    get_symbol(io_driver, "IsDriverInstalled", cd64);
 				if (IsDriverInstalled()) {
 					io_driver_found = 1;
-					PortIn = (char (WINAPI *) (short int))
+					PortIn = (char (WINAPI *)(short int))
 					         get_symbol(io_driver, "PortIn", cd64);
-					PortOut = (void (WINAPI *) (short int, char))
+					PortOut = (void (WINAPI *)(short int, char))
 					          get_symbol(io_driver, "PortOut", cd64);
 					input_byte = io_input_byte;
 					output_byte = io_output_byte;
+				}
+			}
+		}
+
+		if (!io_driver_found) {
+			snprintf(fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
+			         cd64->io_driver_dir, "inpout32.dll");
+			fname[FILENAME_MAX] = 0;
+			if (access(fname, F_OK) == 0) {
+				io_driver = open_module(fname, cd64);
+
+				io_driver_found = 1;
+				/* Newer ports of inpout32.dll also contain the API provided by
+				 * DlPortIO.dll. Since the API of DlPortIO.dll does not have
+				 * the flaws of inpout32.dll (*signed* short return value and
+				 * arguments), we prefer it if it is present. */
+				DlPortReadPortUchar = (unsigned char (__stdcall *)(unsigned short))
+				                      has_symbol(io_driver, "DlPortReadPortUchar");
+				if (DlPortReadPortUchar != (void *) -1) input_byte = dlportio_input_byte;
+				else {
+					Inp32 = (short (__stdcall *)(short))
+					        get_symbol(io_driver, "Inp32", cd64);
+					input_byte = inpout32_input_byte;
+				}
+
+				DlPortWritePortUchar = (void (__stdcall *)(unsigned short, unsigned char))
+				                       has_symbol(io_driver, "DlPortWritePortUchar");
+				if (DlPortWritePortUchar != (void *) -1) output_byte = dlportio_output_byte;
+				else {
+					Outp32 = (void (__stdcall *)(short, short))
+					         get_symbol(io_driver, "Out32", cd64);
+					output_byte = inpout32_output_byte;
 				}
 			}
 		}
@@ -835,8 +888,8 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		list.handler = org_handler;
 #elif defined _WIN32                            /* MinGW & Visual C++ */
 		LPTOP_LEVEL_EXCEPTION_FILTER org_exception_filter =
-		  SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
-		input_byte(0x378);                          /* 0x378 is okay */
+			SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
+		input_byte(0x378);                      /* 0x378 is okay */
 
 		/* if we get here accessing I/O port 0x378 did not cause an exception */
 		SetUnhandledExceptionFilter(org_exception_filter);

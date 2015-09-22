@@ -275,7 +275,7 @@ ucon64_switches (st_ucon64_t *p)
             ucon64.usbport = 1;                 //  USB port in the F2A code
 
           /*
-            We don't want to make uCON64 behave different if --port=USB{n} is
+            We don't want to make uCON64 behave differently if --port=USB{n} is
             specified *after* a transfer option (instead of before one), so we
             have to reset ucon64.parport_needed here.
           */
@@ -923,15 +923,15 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MKA:
-      aps_create (optarg, ucon64.fname);          // original, modified
+      aps_create (optarg, ucon64.fname);        // original, modified
       break;
 
     case UCON64_MKI:
-      ips_create (optarg, ucon64.fname);          // original, modified
+      ips_create (optarg, ucon64.fname);        // original, modified
       break;
 
     case UCON64_MKPPF:
-      ppf_create (optarg, ucon64.fname);          // original, modified
+      ppf_create (optarg, ucon64.fname);        // original, modified
       break;
 
     case UCON64_NA:
@@ -1914,7 +1914,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XFIGS:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
         fig_read_sram (ucon64.fname, ucon64.parport);
       else                                      // file exists -> restore SRAM
         fig_write_sram (ucon64.fname, ucon64.parport);
@@ -1922,7 +1922,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XFIGC:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cart SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cart SRAM contents
         fig_read_cart_sram (ucon64.fname, ucon64.parport);
       else                                      // file exists -> restore SRAM
         fig_write_cart_sram (ucon64.fname, ucon64.parport);
@@ -1930,7 +1930,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XGBX:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge/flash card
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge/flash card
         gbx_read_rom (ucon64.fname, ucon64.parport);
       else                                      // file exists -> send it to the programmer
         gbx_write_rom (ucon64.fname, ucon64.parport);
@@ -1954,7 +1954,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XGD3:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge
         gd3_read_rom (ucon64.fname, ucon64.parport); // dumping is not yet supported
       else
         {
@@ -1968,7 +1968,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XGD3S:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
         gd3_read_sram (ucon64.fname, ucon64.parport); // dumping is not yet supported
       else                                      // file exists -> restore SRAM
         gd3_write_sram (ucon64.fname, ucon64.parport);
@@ -2069,11 +2069,11 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XMD:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump flash card
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump flash card
         md_read_rom (ucon64.fname, ucon64.parport, 64 * MBIT); // reads 32 Mbit if Sharp card
       else                                      // file exists -> send it to the MD-PRO
         {
-          if (ucon64.nfo->backup_header_len)     // binary with header is possible
+          if (ucon64.nfo->backup_header_len)    // binary with header is possible
             fputs ("ERROR: This ROM has a header. Remove it with -stp or -bin\n",
                    stderr);
           else if (genesis_get_file_type () != BIN)
@@ -2087,7 +2087,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XMDS:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
         md_read_sram (ucon64.fname, ucon64.parport, -1);
       else                                      // file exists -> restore SRAM
         md_write_sram (ucon64.fname, ucon64.parport, -1);
@@ -2142,7 +2142,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSF:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump flash card
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump flash card
         sf_read_rom (ucon64.fname, ucon64.parport, 64 * MBIT);
       else                                      // file exists -> send it to the Super Flash
         sf_write_rom (ucon64.fname, ucon64.parport);
@@ -2150,7 +2150,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSFS:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
         sf_read_sram (ucon64.fname, ucon64.parport);
       else                                      // file exists -> restore SRAM
         sf_write_sram (ucon64.fname, ucon64.parport);
@@ -2175,7 +2175,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSMD:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge
         smd_read_rom (ucon64.fname, ucon64.parport);
       else                                      // file exists -> send it to the copier
         {
@@ -2193,7 +2193,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSMDS:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
         smd_read_sram (ucon64.fname, ucon64.parport);
       else                                      // file exists -> restore SRAM
         smd_write_sram (ucon64.fname, ucon64.parport);
@@ -2203,7 +2203,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_XSWC:
       enableRTS = 0;                            // falling through
     case UCON64_XSWC2:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge
         swc_read_rom (ucon64.fname, ucon64.parport, ucon64.io_mode);
       else
         {
@@ -2226,7 +2226,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSWCS:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
         swc_read_sram (ucon64.fname, ucon64.parport);
       else                                      // file exists -> restore SRAM
         swc_write_sram (ucon64.fname, ucon64.parport);
@@ -2234,7 +2234,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSWCC:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
         swc_read_cart_sram (ucon64.fname, ucon64.parport, ucon64.io_mode);
       else                                      // file exists -> restore SRAM
         swc_write_cart_sram (ucon64.fname, ucon64.parport, ucon64.io_mode);

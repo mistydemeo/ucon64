@@ -5,8 +5,8 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2004       NoisyB
+Copyright (c) 2001 - 2004, 2015 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -99,6 +99,7 @@ typedef struct
     be shown
   */
   int console;                                  // the detected console system
+  int org_console;                              // the value of console before processing the first file
 
   const char *file;                             // FILE (cmdline) with path
 

@@ -1,7 +1,7 @@
 /*
 dlopen.h - DLL support code
 
-Copyright (c) 2002 dbjh
+Copyright (c) 2002, 2015 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -23,5 +23,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 void *open_module (char *module_name);
 void *get_symbol (void *handle, char *symbol_name);
+void *has_symbol (void *handle, char *symbol_name);
 
 #endif // DLOPEN_H

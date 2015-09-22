@@ -287,15 +287,20 @@ endif
 # Dependencies
 
 # Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h misc/misc.h config.h ucon64_defines.h
+UCON64_STD_H=ucon64.h ucon64_misc.h misc/archive.h misc/getopt2.h misc/misc.h config.h ucon64_defines.h
 
 misc/archive.o: misc/archive.h misc/map.h config.h
 misc/chksum.o: misc/chksum.h config.h
 misc/dlopen.o: misc/dlopen.h misc/dxedll_pub.h config.h
-misc/getopt.o: misc/getopt.h
+misc/file.o: misc/file.h misc/archive.h misc/getopt.h misc/misc.h config.h
+misc/getopt.o: misc/getopt.h config.h
+misc/getopt2.o: misc/getopt2.h misc/file.h misc/getopt.h misc/string.h config.h
 misc/map.o: misc/map.h config.h
 misc/misc.o: misc/misc.h misc/archive.h config.h
 misc/parallel.o: misc/parallel.h config.h
+misc/property.o: misc/property.h misc/file.h misc/misc.h misc/string.h config.h
+misc/string.o: misc/string.h config.h
+misc/term.o: misc/term.h ucon64_defines.h config.h
 misc/usb.o: misc/usb.h config.h
 misc/unzip.o: misc/unzip.h config.h
 ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
@@ -364,6 +369,7 @@ backup/ffe.o: backup/ffe.h $(UCON64_STD_H)
 backup/fig.o: backup/fig.h console/snes.h $(UCON64_STD_H)
 backup/gd.o: backup/gd.h console/snes.h $(UCON64_STD_H)
 backup/gbx.o: backup/gbx.h $(UCON64_STD_H)
+backup/interceptor.o: backup/interceptor.h $(UCON64_STD_H)
 backup/lynxit.o: backup/lynxit.h $(UCON64_STD_H)
 backup/mccl.o: backup/mccl.h $(UCON64_STD_H)
 backup/mcd.o: backup/mcd.h $(UCON64_STD_H)
@@ -380,6 +386,7 @@ backup/smc.o: backup/smc.h backup/ffe.h $(UCON64_STD_H)
 backup/smd.o: backup/smd.h backup/ffe.h $(UCON64_STD_H)
 backup/smsgg-pro.o: backup/smsgg-pro.h backup/tototek.h $(UCON64_STD_H)
 backup/spsc.o: backup/spsc.h $(UCON64_STD_H)
+backup/ssc.o: backup/ssc.h $(UCON64_STD_H)
 backup/swc.o: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)
 backup/tototek.o: backup/tototek.h $(UCON64_STD_H)
 backup/ufo.o: backup/ufo.h $(UCON64_STD_H)

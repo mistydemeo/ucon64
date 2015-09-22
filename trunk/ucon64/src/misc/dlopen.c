@@ -1,7 +1,7 @@
 /*
 dlopen.c - DLL support code
 
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 2002 - 2005, 2015 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -51,8 +51,8 @@ extern int errno;
 void
 uninit_func (void)
 {
-  fprintf (stderr, "An uninitialized member of the import/export structure was called!\n"
-                   "Update dlopen.c/open_module()\n");
+  fputs ("ERROR: An uninitialized member of the import/export structure was called!\n"
+         "       Update dlopen.c/open_module()\n", stderr);
   exit (1);
 }
 #endif
@@ -260,7 +260,7 @@ get_symbol (void *handle, char *symbol_name)
   char *strptr;                                 //  comment in open_module()
 
   symptr = dlsym (handle, symbol_name);
-  if ((strptr = (char *) dlerror ()) != NULL)   // this is "the correct way"
+  if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
     {                                           //  according to the info page
       fputs (strptr, stderr);
       fputc ('\n', stderr);
@@ -290,6 +290,42 @@ get_symbol (void *handle, char *symbol_name)
       fprintf (stderr, "Could not find symbol: %s\n", symbol_name);
       exit (1);
     }
+#endif
+
+  return symptr;
+}
+
+
+void *
+has_symbol (void *handle, char *symbol_name)
+{
+  void *symptr;
+#ifdef  DJGPP
+  st_symbol_t *sym = map_get (dxe_map, handle);
+  if (sym == NULL)
+    {
+      fprintf (stderr, "Invalid handle: %x\n", (int) handle);
+      exit (1);
+    }
+
+  symptr = sym->dxe_symbol (symbol_name);
+  if (symptr == NULL)
+    symptr = (void *) -1;
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually, see
+  char *strptr;                                 //  comment in open_module()
+
+  symptr = dlsym (handle, symbol_name);
+  if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
+    symptr = (void *) -1;                       //  according to the info page
+#elif   defined _WIN32
+  symptr = (void *) GetProcAddress ((HINSTANCE) handle, symbol_name);
+  if (symptr == NULL)
+    symptr = (void *) -1;
+#elif   defined __BEOS__
+  int status = get_image_symbol ((int) handle, symbol_name,
+                                 B_SYMBOL_TYPE_TEXT, &symptr); // B_SYMBOL_TYPE_DATA/B_SYMBOL_TYPE_ANY
+  if (status != B_OK)
+    symptr = (void *) -1;
 #endif
 
   return symptr;

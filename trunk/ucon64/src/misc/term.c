@@ -54,6 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <proto/lowlevel.h>
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
+#include <io.h>                                 // isatty() (MinGW)
 #endif
 
 

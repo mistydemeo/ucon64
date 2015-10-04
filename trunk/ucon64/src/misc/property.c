@@ -58,8 +58,8 @@ property_check (const char *filename, int version, int verbose)
           fflush (stderr);
         }
 
-      if (!(fh = fopen (filename, "w"))) // opening the file in text mode
-        {                                         //  avoids trouble under DOS
+      if ((fh = fopen (filename, "w")) == NULL) // opening the file in text mode
+        {                                       //  avoids trouble under DOS
           printf ("FAILED\n\n");
           return -1;
         }
@@ -69,7 +69,7 @@ property_check (const char *filename, int version, int verbose)
     {
       p = get_property (filename, "version", PROPERTY_MODE_TEXT);
       if (strtol (p ? p : "0", NULL, 10) >= version)
-        return 0; // OK
+        return 0;                               // OK
 
       strcpy (buf, filename);
       set_suffix (buf, ".old");
@@ -109,7 +109,8 @@ property_check (const char *filename, int version, int verbose)
 
 
 const char *
-get_property_from_string (char *str, const char *propname, const char prop_sep, const char comment_sep)
+get_property_from_string (char *str, const char *propname, const char prop_sep,
+                          const char comment_sep)
 {
   static char value_s[MAXBUFSIZE];
   char str_end[8], *p = NULL, buf[MAXBUFSIZE];
@@ -125,7 +126,7 @@ get_property_from_string (char *str, const char *propname, const char prop_sep, 
     return NULL;                                // text after comment_sep is comment
 
   sprintf (str_end, "%c\r\n", comment_sep);
-  if ((p = strpbrk (buf, str_end)))             // strip *any* returns and comments
+  if ((p = strpbrk (buf, str_end)) != NULL)     // strip *any* returns and comments
     *p = 0;
 
   p = strchr (buf, prop_sep);
@@ -165,7 +166,8 @@ get_property (const char *filename, const char *propname, int mode)
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
     {                                           //  avoids trouble under DOS
       while (fgets (line, sizeof line, fh) != NULL)
-        if ((value_s = get_property_from_string (line, propname, PROPERTY_SEPARATOR, PROPERTY_COMMENT)))
+        if ((value_s = get_property_from_string (line, propname,
+               PROPERTY_SEPARATOR, PROPERTY_COMMENT)) != NULL)
           break;
 
       fclose (fh);
@@ -176,7 +178,7 @@ get_property (const char *filename, const char *propname, int mode)
     {
       if (!value_s)
         value_s = NULL;                         // value_s won't be changed
-                                                  //  after this func (=ok)
+                                                //  after this func (=ok)
     }
   else
     value_s = p;
@@ -212,8 +214,8 @@ get_property_int (const char *filename, const char *propname)
   if (*value_s)
     switch (tolower (*value_s))
       {
-        case '0':                                 // 0
-        case 'n':                                 // [Nn]o
+        case '0':                               // 0
+        case 'n':                               // [Nn]o
           return 0;
       }
 
@@ -234,7 +236,7 @@ set_property (const char *filename, const char *propname,
   if (stat (filename, &fstate) != 0)
     file_size = fstate.st_size;
 
-  if (!(str = (char *) malloc (file_size + MAXBUFSIZE)))
+  if ((str = (char *) malloc (file_size + MAXBUFSIZE)) == NULL)
     return -1;
 
   sprintf (line_end, "%c\r\n", PROPERTY_COMMENT);
@@ -246,7 +248,7 @@ set_property (const char *filename, const char *propname,
       while (fgets (line, sizeof line, fh) != NULL)
         {
           strcpy (line2, line);
-          if ((p = strpbrk (line2, line_end)))
+          if ((p = strpbrk (line2, line_end)) != NULL)
             *p = 0;                             // note that this "cuts" _line2_
           p = strchr (line2, PROPERTY_SEPARATOR);
           if (p)
@@ -314,7 +316,7 @@ set_property_array (const char *filename, const st_property_t *prop)
       result = set_property (filename, prop[i].name, prop[i].value_s,
                              prop[i].comment_s);
 
-      if (result == -1) // failed
+      if (result == -1)                         // failed
         break;
     }
 

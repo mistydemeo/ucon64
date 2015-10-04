@@ -59,7 +59,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
 const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
-const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
+const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
 
 #define ISODCL(from, to) (to - from + 1)
@@ -229,8 +229,8 @@ dm_get_track_mode_by_id (int id, int8_t *mode, uint16_t *sector_size)
   for (x = 0; track_probe[x].sector_size; x++)
     if (track_probe[x].id == id)
       {
-        *mode = track_probe[x].mode;
-        *sector_size = track_probe[x].sector_size;
+        *mode = (int8_t) track_probe[x].mode;
+        *sector_size = (uint16_t) track_probe[x].sector_size;
         return;
       }
 }
@@ -409,7 +409,7 @@ dm_fdopen (dm_image_t *image, int track_num, const char *mode)
   dm_track_t *track = (dm_track_t *) &image->track[track_num];
   FILE *fh;
 
-  if (!(fh = fopen (image->fname, mode)))
+  if ((fh = fopen (image->fname, mode)) == NULL)
     return NULL;
 
   if (!fseek (fh, track->track_start, SEEK_SET))
@@ -493,11 +493,11 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 #endif
 
 // open source and check
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return -1;
 
 // open dest.
-  if (!(fh2 = fopen (buf2, "wb")))
+  if ((fh2 = fopen (buf2, "wb")) == NULL)
     {
       fclose (fh);
       return -1;
@@ -519,11 +519,11 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
         result = fwrite (&buf[track->seek_header], 1, 2048, fh2);
       else
         {
-          const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
-                                       (const char) 0xff, (const char) 0xff,
-                                       (const char) 0xff, (const char) 0xff,
-                                       (const char) 0xff, (const char) 0xff,
-                                       (const char) 0xff, (const char) 0xff, 0};
+          const char sync_data[] = {0, 0xff, 0xff,
+                                       0xff, 0xff,
+                                       0xff, 0xff,
+                                       0xff, 0xff,
+                                       0xff, 0xff, 0};
 //          uint32_t value_32 = 0;
 
           memset (&buf2, 0, sizeof (buf2));
@@ -856,7 +856,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
       memset (&iso_header, 0, sizeof (st_iso_header_t));
 
       if (track->iso_header_start != -1)
-        if ((fh = fopen (image->fname, "rb")))
+        if ((fh = fopen (image->fname, "rb")) != NULL)
           if (fread (&iso_header, track->iso_header_start, sizeof (st_iso_header_t), fh))
             {
               if (verbose)

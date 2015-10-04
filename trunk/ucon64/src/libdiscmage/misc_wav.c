@@ -104,11 +104,11 @@ misc_wav_write_header (FILE *fh, int channels, int freq,
   strncpy ((char *) wav_header.fmt,   "fmt ", 4);
   wav_header.header_length =          me2le_32 (16); // always 16
   wav_header.format =                 me2le_16 (1); // WAVE_FORMAT_PCM == default
-  wav_header.channels =               me2le_16 (channels);
+  wav_header.channels =               (uint16_t) me2le_16 (channels);
   wav_header.freq =                   me2le_32 (freq);
   wav_header.bytespersecond =         me2le_32 (bytespersecond);
-  wav_header.blockalign =             me2le_16 (blockalign);
-  wav_header.bitspersample =          me2le_16 (bitspersample);
+  wav_header.blockalign =             (uint16_t) me2le_16 (blockalign);
+  wav_header.bitspersample =          (uint16_t) me2le_16 (bitspersample);
   strncpy ((char *) wav_header.data,  "data", 4);
   wav_header.data_length =            me2le_32 (data_length);
 

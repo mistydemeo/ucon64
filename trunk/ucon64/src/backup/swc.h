@@ -58,15 +58,15 @@ typedef struct st_swc_header
 #define SWC_HEADER_LEN (sizeof (st_swc_header_t))
 
 #ifdef USE_PARALLEL
-extern int swc_read_rom (const char *filename, unsigned int parport, int io_mode);
-extern int swc_write_rom (const char *filename, unsigned int parport, int enableRTS);
-extern int swc_read_sram (const char *filename, unsigned int parport);
-extern int swc_write_sram (const char *filename, unsigned int parport);
-extern int swc_read_rts (const char *filename, unsigned int parport);
-extern int swc_write_rts (const char *filename, unsigned int parport);
-extern int swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode);
-extern int swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode);
-extern void swc_unlock (unsigned int parport);
+extern int swc_read_rom (const char *filename, unsigned short parport, int io_mode);
+extern int swc_write_rom (const char *filename, unsigned short parport, int enableRTS);
+extern int swc_read_sram (const char *filename, unsigned short parport);
+extern int swc_write_sram (const char *filename, unsigned short parport);
+extern int swc_read_rts (const char *filename, unsigned short parport);
+extern int swc_write_rts (const char *filename, unsigned short parport);
+extern int swc_read_cart_sram (const char *filename, unsigned short parport, int io_mode);
+extern int swc_write_cart_sram (const char *filename, unsigned short parport, int io_mode);
+extern void swc_unlock (unsigned short parport);
 #endif
 
 #endif // SWC_H

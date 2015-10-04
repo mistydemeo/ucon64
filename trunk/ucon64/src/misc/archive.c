@@ -521,7 +521,7 @@ fgets2 (char *buffer, int maxlength, FILE *file)
       int n = 0, c = 0;
       while (n < maxlength - 1 && (c = fgetc (file)) != EOF)
         {
-          buffer[n] = c;                        // '\n' must also be stored in buffer
+          buffer[n] = (char) c;                 // '\n' must also be stored in buffer
           n++;
           if (c == '\n')
             {

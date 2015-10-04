@@ -91,7 +91,7 @@ readstdheader (void)
       fclose (n64aps_apsfile);
       exit (1);
     }
-  n64aps_patchtype = fgetc (n64aps_apsfile);
+  n64aps_patchtype = (unsigned char) fgetc (n64aps_apsfile);
   if (n64aps_patchtype != 1)                    // N64 patch
     {
       fprintf (stderr, "ERROR: Could not process patch file\n");
@@ -99,7 +99,7 @@ readstdheader (void)
       fclose (n64aps_apsfile);
       exit (1);
     }
-  n64aps_encodingmethod = fgetc (n64aps_apsfile);
+  n64aps_encodingmethod = (unsigned char) fgetc (n64aps_apsfile);
   if (n64aps_encodingmethod != 0)               // simple encoding
     {
       fprintf (stderr, "ERROR: Unknown or new encoding method\n");
@@ -126,7 +126,7 @@ readN64header (void)
 #ifdef  WORDS_BIGENDIAN
   n64aps_magictest = bswap_32 (n64aps_magictest);
 #endif
-  buffer[0] = fgetc (n64aps_apsfile);           // APS format
+  buffer[0] = (unsigned char) fgetc (n64aps_apsfile); // APS format
   if (((n64aps_magictest == 0x12408037) && (buffer[0] == 1)) ||
       ((n64aps_magictest != 0x12408037 && (buffer[0] == 0))))
       // 0 for Doctor format, 1 for everything else
@@ -158,8 +158,8 @@ readN64header (void)
     fseek (n64aps_modfile, 63, SEEK_SET);       // teritory
   else
     fseek (n64aps_modfile, 62, SEEK_SET);
-  teritory = fgetc (n64aps_modfile);
-  APSteritory = fgetc (n64aps_apsfile);
+  teritory = (unsigned char) fgetc (n64aps_modfile);
+  APSteritory = (unsigned char) fgetc (n64aps_apsfile);
   if (teritory != APSteritory)
     {
       printf ("WARNING: Wrong country\n");
@@ -235,12 +235,12 @@ readpatch (void)
   int APSreadlen, offset;
   unsigned char buffer[N64APS_BUFFERSIZE], size;
 
-  while ((APSreadlen = fread (&offset, 1, 4, n64aps_apsfile)))
+  while ((APSreadlen = fread (&offset, 1, 4, n64aps_apsfile)) != 0)
     {
 #ifdef  WORDS_BIGENDIAN
       offset = bswap_32 (offset);
 #endif
-      if ((size = fgetc (n64aps_apsfile)))
+      if ((size = (unsigned char) fgetc (n64aps_apsfile)) != 0)
         {
           fread (buffer, 1, size, n64aps_apsfile);
           if ((fseek (n64aps_modfile, offset, SEEK_SET)) != 0)
@@ -255,8 +255,8 @@ readpatch (void)
           unsigned char data, len;
           int i;
 
-          data = fgetc (n64aps_apsfile),
-          len = fgetc (n64aps_apsfile);
+          data = (unsigned char) fgetc (n64aps_apsfile),
+          len = (unsigned char) fgetc (n64aps_apsfile);
 
           if ((fseek (n64aps_modfile, offset, SEEK_SET)) != 0)
             {
@@ -371,7 +371,7 @@ writeN64header (void)
     fseek (n64aps_orgfile, 63, SEEK_SET);
   else
     fseek (n64aps_orgfile, 62, SEEK_SET);
-  teritory = fgetc (n64aps_orgfile);
+  teritory = (unsigned char) fgetc (n64aps_orgfile);
   fputc (teritory, n64aps_apsfile);
 
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
@@ -411,7 +411,7 @@ writepatch (void)
   fseek (n64aps_orgfile, 0, SEEK_SET);
   fseek (n64aps_modfile, 0, SEEK_SET);
   filepos = 0;
-  while ((newreadlen = fread (newbuffer, 1, N64APS_BUFFERSIZE, n64aps_modfile)))
+  while ((newreadlen = fread (newbuffer, 1, N64APS_BUFFERSIZE, n64aps_modfile)) != 0)
     {
       orgreadlen = fread (orgbuffer, 1, N64APS_BUFFERSIZE, n64aps_orgfile);
       for (i = orgreadlen; i < newreadlen; i++)

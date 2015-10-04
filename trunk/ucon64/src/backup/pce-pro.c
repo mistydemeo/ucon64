@@ -130,7 +130,7 @@ write_rom_by_page (int *addr, unsigned char *buf)
 
 
 int
-pce_read_rom (const char *filename, unsigned int parport, int size)
+pce_read_rom (const char *filename, unsigned short parport, int size)
 {
   FILE *file;
   unsigned char buffer[0x100];
@@ -182,7 +182,7 @@ pce_read_rom (const char *filename, unsigned int parport, int size)
 
 
 int
-pce_write_rom (const char *filename, unsigned int parport)
+pce_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x20];
@@ -262,7 +262,7 @@ pce_write_rom (const char *filename, unsigned int parport)
         bytesleft += 2 * MBIT;
       startaddress = address;
 
-      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
+      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)) != 0)
         {
           if ((address & 0xffff) == 0)
             ttt_erase_block (address);

@@ -65,7 +65,7 @@ mgd_interleave (unsigned char **buffer, int size)
   int n;
   unsigned char *src = *buffer;
 
-  if (!(*buffer = (unsigned char *) malloc (size)))
+  if ((*buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
       exit (1);
@@ -85,7 +85,7 @@ mgd_deinterleave (unsigned char **buffer, int data_size, int buffer_size)
   int n = 0, offset;
   unsigned char *src = *buffer;
 
-  if (!(*buffer = (unsigned char *) malloc (buffer_size)))
+  if ((*buffer = (unsigned char *) malloc (buffer_size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR], buffer_size);
       exit (1);
@@ -126,12 +126,12 @@ fread_mgd (void *buffer, size_t size, size_t number, FILE *fh)
       if (fpos_org & 1)
         {
           fseek (fh, fpos / 2, SEEK_SET);
-          *((unsigned char *) buffer) = fgetc (fh);
+          *((unsigned char *) buffer) = (unsigned char) fgetc (fh);
         }
       else
         {
           fseek (fh, fpos / 2 + fsize / 2, SEEK_SET);
-          *((unsigned char *) buffer) = fgetc (fh);
+          *((unsigned char *) buffer) = (unsigned char) fgetc (fh);
         }
       fseek (fh, fpos_org + 1, SEEK_SET);
       return 1;
@@ -187,7 +187,7 @@ static void
 remove_mgd_id (char *name, const char *id)
 {
   char *p = name;
-  while ((p = strstr (p, id)))
+  while ((p = strstr (p, id)) != NULL)
     {
       *p = 'X';
       *(p + 1) = 'X';
@@ -392,7 +392,7 @@ mgd_make_name (const char *filename, int console, int size, char *name)
       if (!strnicmp (name, fname, 3))
         strcpy (name, fname);
     }
-  if ((p = strchr (name, '.')))
+  if ((p = strchr (name, '.')) != NULL)
     *p = 0;
   n = strlen (name);
   if (size >= 10 * MBIT)
@@ -439,7 +439,7 @@ mgd_write_index_file (void *ptr, int n_names)
   if (n_names == 1)
     {
       strcpy (name, (char *) ptr);
-      if ((p = strrchr (name, '.')))
+      if ((p = strrchr (name, '.')) != NULL)
         *p = 0;
       sprintf (buf, "%s\r\n", name);            // DOS text file format
     }
@@ -450,7 +450,7 @@ mgd_write_index_file (void *ptr, int n_names)
       for (; n < n_names; n++)
         {
           strcpy (name, ((char **) ptr)[n]);
-          if ((p = strrchr (name, '.')))
+          if ((p = strrchr (name, '.')) != NULL)
             *p = 0;
           sprintf (buf + offset, "%s\r\n", name);
           offset += strlen (name) + 2;          // + 2 for "\r\n"

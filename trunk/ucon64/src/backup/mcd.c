@@ -85,24 +85,23 @@ read_block (unsigned char *buffer, int size, unsigned short parport)
 
   for (i = 0; i < size; i++)
     {
-      while (inportb ((unsigned short) (parport + PARPORT_STATUS)) & 0x08)
+      while (inportb (parport + PARPORT_STATUS) & 0x08)
         ;
-      outportb ((unsigned short) (parport + PARPORT_CONTROL), 0xa2);
+      outportb (parport + PARPORT_CONTROL, 0xa2);
 
-      while (!(inportb ((unsigned short) (parport + PARPORT_STATUS)) & 0x08))
+      while (!(inportb (parport + PARPORT_STATUS) & 0x08))
         ;
-      buffer[i] = inportb ((unsigned short) (parport + PARPORT_DATA)) & 0x0f;
-      outportb ((unsigned short) (parport + PARPORT_CONTROL), 0xa0);
+      buffer[i] = inportb (parport + PARPORT_DATA) & 0x0f;
+      outportb (parport + PARPORT_CONTROL, 0xa0);
 
-      while (inportb ((unsigned short) (parport + PARPORT_STATUS)) & 0x08)
+      while (inportb (parport + PARPORT_STATUS) & 0x08)
         ;
-      outportb ((unsigned short) (parport + PARPORT_CONTROL), 0xa2);
+      outportb (parport + PARPORT_CONTROL, 0xa2);
 
-      while (!(inportb ((unsigned short) (parport + PARPORT_STATUS)) & 0x08))
+      while (!(inportb (parport + PARPORT_STATUS) & 0x08))
         ;
-      buffer[i] |=
-        (inportb ((unsigned short) (parport + PARPORT_DATA)) & 0x0f) << 4;
-      outportb ((unsigned short) (parport + PARPORT_CONTROL), 0xa0);
+      buffer[i] |= (inportb (parport + PARPORT_DATA) & 0x0f) << 4;
+      outportb (parport + PARPORT_CONTROL, 0xa0);
     }
 }
 

@@ -76,15 +76,15 @@ static int check (unsigned char *info_block, int index1, int index2, int size);
 #if BUFFERSIZE < 512
 #error receive_rom_info() expects BUFFERSIZE to be at least 512 bytes.
 #endif
-void
+static void
 set_header (unsigned char *buffer)
 {
-  int n, m = 0;
-  unsigned char sizes[] = "\x10\x20\x30\x30\x40\x40\x60\x80";
+  unsigned short n;
+  unsigned char m = 0, sizes[] = "\x10\x20\x30\x30\x40\x40\x60\x80";
 
   for (n = 0; n < 128; n++)
     {
-      ffe_send_command (5, (unsigned short) n, 0);
+      ffe_send_command (5, n, 0);
       buffer[n] = ffe_send_command1 (0xa0a0);
       wait2 (1);
       if (buffer[n] != 0xff)
@@ -121,7 +121,7 @@ set_header (unsigned char *buffer)
 }
 
 
-int
+static int
 check (unsigned char *info_block, int index1, int index2, int size)
 {
   int n;
@@ -135,12 +135,13 @@ check (unsigned char *info_block, int index1, int index2, int size)
 
 
 int
-msg_read_rom (const char *filename, unsigned int parport)
+msg_read_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
-  unsigned char *buffer;
-  int size, blocksleft, blocksdone = 0, bytesreceived = 0, emu_mode_select;
+  unsigned char *buffer, blocksleft;
+  int size, bytesreceived = 0, emu_mode_select;
   time_t starttime;
+  unsigned short blocksdone = 0;
 
   ffe_init_io (parport);
 
@@ -178,9 +179,9 @@ msg_read_rom (const char *filename, unsigned int parport)
   starttime = time (NULL);
   while (blocksleft > 0)
     {
-      ffe_send_command (5, (unsigned short) blocksdone, 0);
+      ffe_send_command (5, blocksdone, 0);
       if (emu_mode_select && blocksdone >= 32)
-        ffe_send_command (5, (unsigned short) (blocksdone + 32), 0);
+        ffe_send_command (5, blocksdone + 32, 0);
       ffe_receive_block (0xa000, buffer, BUFFERSIZE);
       // vgs aborts if the checksum doesn't match the data, we let the user decide
       blocksleft--;
@@ -201,12 +202,13 @@ msg_read_rom (const char *filename, unsigned int parport)
 
 
 int
-msg_write_rom (const char *filename, unsigned int parport)
+msg_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0, blocksdone = 0, emu_mode_select, size;
+  int bytesread, bytessend = 0, emu_mode_select, size;
   time_t starttime;
+  unsigned short blocksdone = 0;
 
   ffe_init_io (parport);
 
@@ -231,10 +233,10 @@ msg_write_rom (const char *filename, unsigned int parport)
   printf ("Press q to abort\n\n");
 
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
-      ffe_send_command (5, (unsigned short) blocksdone, 0);
-      ffe_send_block (0x8000, buffer, bytesread);
+      ffe_send_command (5, blocksdone, 0);
+      ffe_send_block (0x8000, buffer, (unsigned short) bytesread);
       blocksdone++;
 
       bytessend += bytesread;

@@ -20,8 +20,8 @@
 #ifdef USE_PARALLEL
 
 // outportb() and inportb() are only present in uCON64 if USE_PARALLEL is defined
-#define psx_outportb(P, B) outportb((unsigned short) (P), (unsigned char) (B))
-#define psx_inportb(P) inportb((unsigned short) (P))
+#define psx_outportb(P, B) outportb ((unsigned short) (P), (unsigned char) (B))
+#define psx_inportb(P) inportb ((unsigned short) (P))
 
 #ifdef  __MSDOS__
 #include <stdlib.h>

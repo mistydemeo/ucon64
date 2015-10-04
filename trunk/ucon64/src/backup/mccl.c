@@ -112,9 +112,9 @@ const st_getopt2_t mccl_usage[] =
 int
 mccl_read (const char *filename, unsigned int parport)
 {
-  unsigned char buffer[0x1760];
+  unsigned char buffer[0x1760], inbyte;
   char dest_name[FILENAME_MAX];
-  int inbyte, count = 0;
+  int count = 0;
   time_t starttime;
 
   parport_print_info ();
@@ -138,14 +138,14 @@ mccl_read (const char *filename, unsigned int parport)
       outportb (CONTROL, 0x26);
       while ((inportb (STATUS) & 0x20) == 0)
         ;
-      inbyte = inportw (DATA) & 0xf;
+      inbyte = (unsigned char) (inportw (DATA) & 0xf);
       outportb (CONTROL, 0x22);
       while ((inportb (STATUS) & 0x20) != 0)
         ;
       outportb (CONTROL, 0x26);
       while ((inportb (STATUS) & 0x20) == 0)
         ;
-      inbyte |= (inportw (DATA) & 0xf) << 4;
+      inbyte |= (unsigned char) ((inportw (DATA) & 0xf) << 4);
       outportb (CONTROL, 0x22);
       while ((inportb (STATUS) & 0x20) != 0)
         ;

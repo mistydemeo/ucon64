@@ -229,7 +229,7 @@ gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
       return -1;
     }
 
-  if (!(buf = (unsigned char *) malloc (ucon64.file_size)))
+  if ((buf = (unsigned char *) malloc (ucon64.file_size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], ucon64.file_size);
       return -1;
@@ -246,8 +246,8 @@ gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
         crc += buf[rominfo->backup_header_len + n];
     }
 
-  buf[rominfo->backup_header_len + GB_HEADER_START + 0x4e] = crc >> 8;
-  buf[rominfo->backup_header_len + GB_HEADER_START + 0x4f] = crc;
+  buf[rominfo->backup_header_len + GB_HEADER_START + 0x4e] = (unsigned char) (crc >> 8);
+  buf[rominfo->backup_header_len + GB_HEADER_START + 0x4f] = (unsigned char) crc;
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   ucon64_fwrite (buf, 0, ucon64.file_size, dest_name, "wb");
@@ -260,7 +260,7 @@ gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
 
 static int
 gb_convert_data (st_ucon64_nfo_t *rominfo, unsigned char *conversion_table,
-                      const char *suffix)
+                 const char *suffix)
 {
   char dest_name[FILENAME_MAX], src_name[FILENAME_MAX];
   unsigned char buf[MAXBUFSIZE];
@@ -272,7 +272,7 @@ gb_convert_data (st_ucon64_nfo_t *rominfo, unsigned char *conversion_table,
   ucon64_file_handler (dest_name, src_name, 0);
 
   x = rominfo->backup_header_len;
-  while ((n_bytes = ucon64_fread (buf, x, MAXBUFSIZE, src_name)))
+  while ((n_bytes = ucon64_fread (buf, x, MAXBUFSIZE, src_name)) != 0)
     {
       for (n = 0; n < n_bytes; n++)
         buf[n] = conversion_table[(int) buf[n]];
@@ -404,8 +404,8 @@ gb_chk (st_ucon64_nfo_t *rominfo)
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
   buf[0] = checksum.header;
-  buf[1] = rominfo->current_internal_crc >> 8;
-  buf[2] = rominfo->current_internal_crc;
+  buf[1] = (char) (rominfo->current_internal_crc >> 8);
+  buf[2] = (char) rominfo->current_internal_crc;
   ucon64_fwrite (buf, rominfo->backup_header_len + GB_HEADER_START + 0x4d, 3,
                  dest_name, "r+b");
 
@@ -448,8 +448,8 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
 
   memset (&header, 0, UNKNOWN_BACKUP_HEADER_LEN);
 
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
+  header.size_low = (unsigned char) (size / 8192);
+  header.size_high = (unsigned char) (size / 8192 >> 8);
   header.id1 = 0xaa;
   header.id2 = 0xbb;
 #if 0 // TODO: find out correct value. 2 is used for Magic Super Griffin
@@ -708,7 +708,7 @@ gb_chksum (st_ucon64_nfo_t *rominfo)
   unsigned char *rom_buffer;
   int size = ucon64.file_size - rominfo->backup_header_len, i;
 
-  if (!(rom_buffer = (unsigned char *) malloc (size)))
+  if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return sum;

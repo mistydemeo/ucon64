@@ -5250,7 +5250,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
   if (chunk_header.id != id || pos >= rom_size) // || feof (file))
     {
 #ifdef  DEBUG_READ_CHUNK
-      printf ("exit1\n");
+      puts ("exit1");
 #endif
       return (st_unif_chunk_t *) NULL;
     }
@@ -5270,7 +5270,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
   memcpy (unif_chunk->data, rom_buffer + pos, chunk_header.length);
   pos += chunk_header.length;
 #ifdef  DEBUG_READ_CHUNK
-  printf ("exit2\n");
+  puts ("exit2");
 #endif
   return unif_chunk;
 #undef  DEBUG_READ_CHUNK
@@ -5403,7 +5403,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   unif_chunk.id = MAPR_ID;
   if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0)
     {
-      fprintf (stderr, "ERROR: No board name specified\n");
+      fputs ("ERROR: No board name specified\n", stderr);
       return -1;
     }
   unif_chunk.length = strlen (ucon64.mapr) + 1; // +1 to include ASCII-z
@@ -5438,7 +5438,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
 #endif
 
   if (UCON64_ISSET (ucon64.tv_standard))
-    b = ucon64.tv_standard;                     // necessary for big endian machines
+    b = (unsigned char) ucon64.tv_standard;     // necessary for big endian machines
   else
     b = ines_header.ctrl3 & INES_TVID;
   unif_chunk.id = TVCI_ID;
@@ -5467,14 +5467,14 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
                     ucon64.dump_info);
         }
       else                                      // Is this a warning or an error?
-        printf ("WARNING: No dumper info file was specified, chunk won't be written\n");
+        puts ("WARNING: No dumper info file was specified, chunk won't be written");
     }
 
   if (UCON64_ISSET (ucon64.controller))
     {
       unif_chunk.id = CTRL_ID;
       unif_chunk.length = 1;
-      b = ucon64.controller;                    // necessary for big endian machines
+      b = (unsigned char) ucon64.controller;    // necessary for big endian machines
       unif_chunk.data = &b;
       write_chunk (&unif_chunk, destfile);
     }
@@ -5542,7 +5542,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
           printf ("WARNING: Invalid mirroring type specified, using \"%d\"\n",
                   ucon64.mirror);
         }
-      b = ucon64.mirror;                        // necessary for big endian machines
+      b = (unsigned char) ucon64.mirror;        // necessary for big endian machines
       unif_chunk.data = &b;
       write_chunk (&unif_chunk, destfile);
     }
@@ -5584,7 +5584,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       unif_chunk2.id = MAPR_ID;
       if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0) // unif_chunk1 == NULL
         {
-          fprintf (stderr, "ERROR: File has no MAPR chunk, but no board name was specified\n");
+          fputs ("ERROR: File has no MAPR chunk, but no board name was specified\n", stderr);
           return -1;
         }
 
@@ -5600,7 +5600,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     }
   else                                          // MAPR chunk, but no board name specified
     {
-      printf ("WARNING: No board name specified, using old value\n");
+      puts ("WARNING: No board name specified, using old value");
       write_chunk (unif_chunk1, destfile);
     }
   free (unif_chunk1);                           // case NULL is valid
@@ -5689,7 +5689,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     {
       unif_chunk2.id = TVCI_ID;
       unif_chunk2.length = 1;
-      b = ucon64.tv_standard;                   // necessary for big endian machines
+      b = (unsigned char) ucon64.tv_standard;   // necessary for big endian machines
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
@@ -5729,7 +5729,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
                     ucon64.dump_info);
         }
       else                                      // Is this a warning or an error?
-        printf ("WARNING: No dumper info file was specified, chunk won't be written\n");
+        puts ("WARNING: No dumper info file was specified, chunk won't be written");
     }
   else if ((unif_chunk1 = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
     {
@@ -5741,7 +5741,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     {
       unif_chunk2.id = CTRL_ID;
       unif_chunk2.length = 1;
-      b = ucon64.controller;                    // necessary for big endian machines
+      b = (unsigned char) ucon64.controller;    // necessary for big endian machines
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
@@ -5859,7 +5859,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         }
       unif_chunk2.id = MIRR_ID;
       unif_chunk2.length = 1;
-      b = ucon64.mirror;                        // necessary for big endian machines
+      b = (unsigned char) ucon64.mirror;        // necessary for big endian machines
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
@@ -5883,11 +5883,11 @@ nes_unif (void)
   if (type != INES && type != UNIF)
     {
       if (type == PASOFAMI)
-        fprintf (stderr, "ERROR: Pasofami -> UNIF is currently not supported\n");
+        fputs ("ERROR: Pasofami -> UNIF is currently not supported\n", stderr);
       else if (type == FFE)
-        fprintf (stderr, "ERROR: FFE -> UNIF is currently not supported\n");
+        fputs ("ERROR: FFE -> UNIF is currently not supported\n", stderr);
       else if (type == FDS || type == FAM)
-        fprintf (stderr, "ERROR: FDS/FAM -> UNIF is currently not supported\n");
+        fputs ("ERROR: FDS/FAM -> UNIF is currently not supported\n", stderr);
       return -1;
     }
 
@@ -5962,12 +5962,12 @@ set_mapper (st_ines_header_t *header, unsigned int mapper)
     {
       if (mapper > 0xfff)
         {
-          fprintf (stderr, "ERROR: Mapper numbers greater than 4095 can't be stored\n");
+          fputs ("ERROR: Mapper numbers greater than 4095 can't be stored\n", stderr);
           exit (1);
         }
       // We can't just clear bits 0 & 1 of ctrl2, because they have their own
       //  meaning. So, a warning is in place here.
-      printf ("WARNING: Mapper number is greater than 255\n");
+      puts ("WARNING: Mapper number is greater than 255");
       header->ctrl2 |= (mapper >> 8) & 0xf;
     }
 }
@@ -6043,12 +6043,12 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
 
   // write iNES file
   if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0)
-    printf ("WARNING: No mapper number specified, using old value\n");
+    puts ("WARNING: No mapper number specified, using old value");
   else                                          // mapper specified
     set_mapper (&ines_header, strtol (ucon64.mapr, NULL, 10));
   memcpy (&ines_header.signature, INES_SIG_S, 4);
-  ines_header.prg_size = prg_size >> 14;
-  ines_header.chr_size = chr_size >> 13;
+  ines_header.prg_size = (unsigned char) (prg_size >> 14);
+  ines_header.chr_size = (unsigned char) (chr_size >> 13);
 
   ines_header.ctrl3 &= INES_TVID;               // clear undefined bits
   if (UCON64_ISSET (ucon64.tv_standard))
@@ -6168,7 +6168,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
         {
           if ((x = nes_mapper_number ((const char *) unif_chunk->data)) == -1)
             {
-              printf ("WARNING: Couldn't determine mapper number, writing \"0\"\n");
+              puts ("WARNING: Couldn't determine mapper number, writing \"0\"");
               x = 0;
             }
           set_mapper (&ines_header, x);
@@ -6176,7 +6176,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
         }
       else                                      // no MAPR chunk
         {
-          fprintf (stderr, "ERROR: File has no MAPR chunk, but no mapper number was specified\n");
+          fputs ("ERROR: File has no MAPR chunk, but no mapper number was specified\n", stderr);
           return -1;
         }
     }
@@ -6217,7 +6217,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
       else if (ucon64.mirror == 4)
         ines_header.ctrl1 |= INES_4SCREEN;
       else
-        printf ("WARNING: Invalid mirroring type specified, using \"0\"\n");
+        puts ("WARNING: Invalid mirroring type specified, using \"0\"");
     }
   else if ((unif_chunk = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
     {
@@ -6235,7 +6235,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
           ines_header.ctrl1 |= INES_4SCREEN;
           break;
         default:
-          printf ("WARNING: Unsupported value in MIRR chunk\n");
+          puts ("WARNING: Unsupported value in MIRR chunk");
           break;
         }
       free (unif_chunk);
@@ -6263,8 +6263,8 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
     }
 
   // write header
-  ines_header.prg_size = prg_size >> 14;        // # 16 kB banks
-  ines_header.chr_size = chr_size >> 13;        // # 8 kB banks
+  ines_header.prg_size = (unsigned char) (prg_size >> 14); // # 16 kB banks
+  ines_header.chr_size = (unsigned char) (chr_size >> 13); // # 8 kB banks
   fwrite (&ines_header, 1, INES_HEADER_LEN, destfile);
 
   // copy PRG data
@@ -6296,12 +6296,12 @@ nes_ines (void)
 
   if (type == FFE)
     {
-      fprintf (stderr, "ERROR: FFE -> iNES is currently not supported\n");
+      fputs ("ERROR: FFE -> iNES is currently not supported\n", stderr);
       return -1;
     }
   else if (type == FDS || type == FAM)
     {
-      fprintf (stderr, "ERROR: FDS/FAM -> iNES is not possible\n");
+      fputs ("ERROR: FDS/FAM -> iNES is not possible\n", stderr);
       return -1;
     }
 
@@ -6378,7 +6378,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
 
   if (type != INES)
     {
-      fprintf (stderr, "ERROR: Currently only iNES -> FFE is supported\n");
+      fputs ("ERROR: Currently only iNES -> FFE is supported\n", stderr);
       return -1;
     }
 
@@ -6543,7 +6543,7 @@ nes_ineshd (st_ucon64_nfo_t *rominfo)
 
   if (type != INES)
     {
-      fprintf (stderr, "ERROR: This option is only meaningful for iNES files\n");
+      fputs ("ERROR: This option is only meaningful for iNES files\n", stderr);
       return -1;
     }
 
@@ -6566,7 +6566,7 @@ nes_dint (void)
   if (type != INES)
     {
       // Do interleaved UNIF or Pasofami images exist?
-      fprintf (stderr, "ERROR: Currently only iNES images can be deinterleaved\n");
+      fputs ("ERROR: Currently only iNES images can be deinterleaved\n", stderr);
       return -1;
     }
 
@@ -6678,7 +6678,7 @@ nes_j (unsigned char **mem_image)
 
   if (type != PASOFAMI)
     {
-      fprintf (stderr, "ERROR: Only Pasofami files can be joined (for NES)\n");
+      fputs ("ERROR: Only Pasofami files can be joined (for NES)\n", stderr);
       return -1;
     }
 
@@ -6723,7 +6723,7 @@ nes_j (unsigned char **mem_image)
       else if (ucon64.mirror == 4)
         ines_header.ctrl1 |= INES_4SCREEN;
       else
-        printf ("WARNING: Invalid mirroring type specified, using \"0\"\n");
+        puts ("WARNING: Invalid mirroring type specified, using \"0\"");
     }
 
   strcpy (src_name, ucon64.fname);
@@ -6748,7 +6748,7 @@ nes_j (unsigned char **mem_image)
       prg_size = fsizeof (src_name);
       nparts++;
     }
-  ines_header.prg_size = prg_size >> 14;
+  ines_header.prg_size = (unsigned char) (prg_size >> 14);
 
   set_suffix (src_name, ".chr");
   if (access (src_name, F_OK) == 0)
@@ -6756,7 +6756,7 @@ nes_j (unsigned char **mem_image)
       chr_size = fsizeof (src_name);
       nparts++;
     }
-  ines_header.chr_size = chr_size >> 13;
+  ines_header.chr_size = (unsigned char) (chr_size >> 13);
 
   if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0)
     {                                           // maybe .PRM contained mapper
@@ -6830,7 +6830,7 @@ write_prm (st_ines_header_t *header, const char *fname)
 //    else if (ucon64.mirror == 4)
 //      header->ctrl1 |= INES_4SCREEN;
       else
-        printf ("WARNING: Invalid mirroring type specified, using \"0\"\n");
+        puts ("WARNING: Invalid mirroring type specified, using \"0\"");
     }
   if (header->ctrl1 & INES_MIRROR)              // mirroring
     prm[0] = 'V';
@@ -6887,7 +6887,7 @@ nes_s (void)
 
   if (type != INES)
     {
-      fprintf (stderr, "ERROR: Currently only iNES -> Pasofami is supported\n");
+      fputs ("ERROR: Currently only iNES -> Pasofami is supported\n", stderr);
       return -1;
     }
 
@@ -6922,7 +6922,7 @@ nes_s (void)
       if (x == 0 || x == 2 || x == 4)
         set_mapper (&ines_header, x);
       else
-        printf ("WARNING: Pasofami can only store mapper numbers 0, 2 or 4; using old value\n");
+        puts ("WARNING: Pasofami can only store mapper numbers 0, 2 or 4; using old value");
     }
 
   strcpy (dest_name, ucon64.fname);
@@ -6975,7 +6975,7 @@ nes_n (const char *name)
 {
   if (type != UNIF)
     {
-      fprintf (stderr, "ERROR: This option is only meaningful for UNIF files\n");
+      fputs ("ERROR: This option is only meaningful for UNIF files\n", stderr);
       return -1;
     }
 
@@ -7543,7 +7543,7 @@ to_func (char *s, int len, int (*func) (int))
   char *p = s;
 
   for (; len > 0; p++, len--)
-    *p = func (*p);
+    *p = (char) func (*p);
 
   return s;
 }
@@ -7596,14 +7596,14 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
       // read the disk header
       if (fread (buffer, 1, 58, srcfile) != 58)
         {
-          fprintf (stderr, "ERROR: Can't read disk header\n");
+          fputs ("ERROR: Can't read disk header\n", stderr);
           fclose (srcfile);
           return -1;
         }
 
       if (memcmp (buffer, "\x01*NINTENDO-HVC*", 15))
         {
-          fprintf (stderr, "ERROR: Invalid disk header\n");
+          fputs ("ERROR: Invalid disk header\n", stderr);
           fclose (srcfile);
           return -1;                            // should we return?
         }

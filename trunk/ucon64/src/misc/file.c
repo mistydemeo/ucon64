@@ -295,7 +295,7 @@ realpath (const char *path, char *full_path)
   if (GetFullPathName (path, FILENAME_MAX, full_path, &p) == 0)
     return NULL;
 
-  c = toupper (full_path[0]);
+  c = (char) toupper (full_path[0]);
   n = strlen (full_path) - 1;
   // Remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
@@ -364,7 +364,7 @@ dirname2 (const char *path, char *dir)
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
   if (p1 == NULL)                               // no slash, perhaps a drive?
     {
-      if ((p1 = strrchr (dir, ':')))
+      if ((p1 = strrchr (dir, ':')) != NULL)
         {
           p1[1] = '.';
           p1 += 2;
@@ -439,9 +439,9 @@ get_suffix (const char *filename)
 {
   const char *p, *s;
 
-  if (!(p = basename2 (filename)))
+  if ((p = basename2 (filename)) == NULL)
     p = filename;
-  if (!(s = strrchr (p, '.')))
+  if ((s = strrchr (p, '.')) == NULL)
     s = strchr (p, 0);                          // strchr(p, 0) and NOT "" is the
   if (s == p)                                   //  suffix of a file without suffix
     s = strchr (p, 0);                          // files can start with '.'
@@ -547,8 +547,8 @@ one_filesystem (const char *filename1, const char *filename2)
         return 0;
       if (GetFullPathName (filename2, FILENAME_MAX, path2, &p) == 0)
         return 0;
-      d1 = toupper (path1[0]);
-      d2 = toupper (path2[0]);
+      d1 = (char) toupper (path1[0]);
+      d2 = (char) toupper (path2[0]);
       if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z')
         if (strlen (path1) >= 2 && strlen (path2) >= 2)
           // We don't handle unique volume names
@@ -686,7 +686,7 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
   if (one_file (dest, src))                     // other code depends on this
     return -1;                                  //  behaviour!
 
-  if (!(output = fopen (dest, mode)))
+  if ((output = fopen (dest, mode)) == NULL)
     {
       errno = ENOENT;
       return -1;
@@ -722,14 +722,14 @@ fcopy_raw (const char *src, const char *dest)
   if (one_file (dest, src))
     return -1;
 
-  if (!(fh = fopen (src, "rb")))
+  if ((fh = fopen (src, "rb")) == NULL)
     return -1;
-  if (!(fh2 = fopen (dest, "wb")))
+  if ((fh2 = fopen (dest, "wb")) == NULL)
     {
       fclose (fh);
       return -1;
     }
-  while ((seg_len = fread (buf, 1, MAXBUFSIZE, fh)))
+  while ((seg_len = fread (buf, 1, MAXBUFSIZE, fh)) != 0)
     fwrite (buf, 1, seg_len, fh2);
 
   fclose (fh);
@@ -801,7 +801,7 @@ quick_io_c (int value, size_t pos, const char *filename, const char *mode)
   int result;
   FILE *fh;
 
-  if (!(fh = quick_io_open (filename, (const char *) mode)))
+  if ((fh = quick_io_open (filename, (const char *) mode)) == NULL)
     return -1;
 
   fseek (fh, pos, SEEK_SET);
@@ -823,7 +823,7 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
   int result;
   FILE *fh;
 
-  if (!(fh = quick_io_open (filename, (const char *) mode)))
+  if ((fh = quick_io_open (filename, (const char *) mode)) == NULL)
     return -1;
 
   fseek (fh, start, SEEK_SET);
@@ -875,17 +875,17 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
   FILE *fh = NULL;
 
   if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
-    if ((buffer = malloc (len)))                //  in their entirety
+    if ((buffer = malloc (len)) != NULL)        //  in their entirety
       buffer_maxlen = len;
   if (!buffer)
     {
-      if ((buffer = malloc (func_maxlen)))
+      if ((buffer = malloc (func_maxlen)) != NULL)
         buffer_maxlen = func_maxlen;
       else
         return -1;
     }
 
-  if (!(fh = quick_io_open (filename, (const char *) mode)))
+  if ((fh = quick_io_open (filename, (const char *) mode)) == NULL)
     {
       free (buffer);
       return -1;
@@ -898,7 +898,7 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
       if (len_done + buffer_maxlen > len)
         buffer_maxlen = len - len_done;
       
-      if (!(buffer_len = fread (buffer, 1, buffer_maxlen, fh)))
+      if ((buffer_len = fread (buffer, 1, buffer_maxlen, fh)) == 0)
         break;
 
       func_len = quick_io_func_inline (func, func_maxlen, object, buffer, buffer_len);

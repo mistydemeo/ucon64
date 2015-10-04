@@ -39,8 +39,8 @@ typedef struct st_msg_header
 #define MSG_HEADER_LEN (sizeof (st_msg_header_t))
 
 #ifdef USE_PARALLEL
-extern int msg_read_rom (const char *filename, unsigned int parport);
-extern int msg_write_rom (const char *filename, unsigned int parport);
+extern int msg_read_rom (const char *filename, unsigned short parport);
+extern int msg_write_rom (const char *filename, unsigned short parport);
 #endif
 
 #endif // MSG_H

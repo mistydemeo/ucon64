@@ -1,7 +1,7 @@
 /*
 dlopen.h - DLL support code
 
-Copyright (c) 2002 dbjh
+Copyright (c) 2002, 2015 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -21,7 +21,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef DLOPEN_H
 #define DLOPEN_H
 
+
+/*
+  The next union is a portable means to convert between function and data
+  pointers and the only way to silence Visual C++ 2012 other than
+    #pragma warning(disable: 4152)
+  That is, with /W4.
+*/
+typedef union u_func_ptr
+{
+  void (*func_ptr) (void);
+  void *void_ptr;
+} u_func_ptr_t;
+
 void *open_module (char *module_name);
 void *get_symbol (void *handle, char *symbol_name);
+void *has_symbol (void *handle, char *symbol_name);
 
 #endif // DLOPEN_H

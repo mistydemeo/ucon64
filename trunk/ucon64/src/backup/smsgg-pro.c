@@ -172,7 +172,7 @@ write_ram_by_page (int *addr, unsigned char *buf)
 
 
 int
-smsgg_read_rom (const char *filename, unsigned int parport, int size)
+smsgg_read_rom (const char *filename, unsigned short parport, int size)
 {
   FILE *file;
   unsigned char buffer[0x100];
@@ -224,7 +224,7 @@ smsgg_read_rom (const char *filename, unsigned int parport, int size)
 
 
 int
-smsgg_write_rom (const char *filename, unsigned int parport)
+smsgg_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x10];
@@ -284,7 +284,7 @@ smsgg_write_rom (const char *filename, unsigned int parport)
       else if (multi_game)
         bytesleft = SMSGG_PRO_LOADER_SIZE;      // the loader
 
-      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
+      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)) != 0)
         {
           if ((address & 0xffff) == 0)
             ttt_erase_block (address);
@@ -308,7 +308,7 @@ smsgg_write_rom (const char *filename, unsigned int parport)
 
 
 int
-smsgg_read_sram (const char *filename, unsigned int parport, int start_bank)
+smsgg_read_sram (const char *filename, unsigned short parport, int start_bank)
 {
   FILE *file;
   unsigned char buffer[0x100];
@@ -379,7 +379,7 @@ smsgg_read_sram (const char *filename, unsigned int parport, int start_bank)
 
 
 int
-smsgg_write_sram (const char *filename, unsigned int parport, int start_bank)
+smsgg_write_sram (const char *filename, unsigned short parport, int start_bank)
 {
   FILE *file;
   unsigned char buffer[0x4000];
@@ -418,7 +418,7 @@ smsgg_write_sram (const char *filename, unsigned int parport, int start_bank)
     }
 
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, 0x4000, file)))
+  while ((bytesread = fread (buffer, 1, 0x4000, file)) != 0)
     {
       write_block (&address, buffer);
       bytessend += bytesread;

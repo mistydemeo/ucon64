@@ -47,14 +47,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static void ffe_sendb (unsigned char byte);
 static unsigned char ffe_wait_while_busy (void);
 
-static int ffe_port;
+static unsigned short ffe_port;
 
 
 void
-ffe_init_io (unsigned int port)
+ffe_init_io (unsigned short port)
 /*
-  - sets global `ffe_port'. Then the send/receive functions don't need to pass `port' all
-    the way to ffe_sendb()/ffe_receiveb().
+  - sets global `ffe_port'. Then the send/receive functions don't need to pass
+    `ffe_port' all the way to ffe_sendb()/ffe_receiveb().
   - calls init_conio(). Necessary for kbhit() and DOS-like behaviour of getch().
 */
 {
@@ -85,12 +85,12 @@ ffe_deinit_io (void)
 
 
 void
-ffe_send_block (unsigned short address, unsigned char *buffer, int len)
+ffe_send_block (unsigned short address, unsigned char *buffer, unsigned short len)
 {
   int n;
   unsigned char checksum = 0x81;
 
-  ffe_send_command (0, address, (unsigned short) len);
+  ffe_send_command (0, address, len);
   for (n = 0; n < len; n++)
     {
       ffe_sendb (buffer[n]);
@@ -101,12 +101,12 @@ ffe_send_block (unsigned short address, unsigned char *buffer, int len)
 
 
 void
-ffe_send_block2 (unsigned short address, unsigned char *buffer, int len)
+ffe_send_block2 (unsigned short address, unsigned char *buffer, unsigned short len)
 {
   int n;
   unsigned char checksum = 0x81;
 
-  ffe_send_command (2, address, (unsigned short) len);
+  ffe_send_command (2, address, len);
   for (n = 0; n < len; n++)
     {
       ffe_sendb (buffer[n]);
@@ -122,7 +122,7 @@ ffe_send_command0 (unsigned short address, unsigned char byte)
 {
   ffe_send_command (0, address, 1);
   ffe_sendb (byte);
-  ffe_sendb ((unsigned char) (0x81 ^ byte));
+  ffe_sendb (0x81 ^ byte);
 }
 
 
@@ -160,16 +160,15 @@ void
 ffe_sendb (unsigned char byte)
 {
   ffe_wait_for_ready ();
-  outportb ((unsigned short) (ffe_port + PARPORT_DATA), byte);
-  outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) // invert strobe
-                                      (ffe_port + PARPORT_CONTROL)) ^ PARPORT_STROBE));
+  outportb (ffe_port + PARPORT_DATA, byte);
+  outportb (ffe_port + PARPORT_CONTROL,
+            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
   ffe_wait_for_ready ();                        // necessary if followed by ffe_receiveb()
 }
 
 
 void
-ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
+ffe_receive_block (unsigned short address, unsigned char *buffer, unsigned short len)
 {
   volatile int n;
   int n_try = 0;
@@ -178,7 +177,7 @@ ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
   do
     {
       checksum1 = 0x81;
-      ffe_send_command (1, address, (unsigned short) len);
+      ffe_send_command (1, address, len);
       for (n = 0; n < len; n++)
         {
           buffer[n] = ffe_receiveb ();
@@ -199,7 +198,7 @@ ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
 
 
 void
-ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len)
+ffe_receive_block2 (unsigned short address, unsigned char *buffer, unsigned short len)
 {
   volatile int n;
   int n_try = 0;
@@ -208,7 +207,7 @@ ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len)
   do
     {
       checksum1 = 0x81;
-      ffe_send_command (3, address, (unsigned short) len);
+      ffe_send_command (3, address, len);
       for (n = 0; n < len; n++)
         {
           buffer[n] = ffe_receiveb ();
@@ -233,14 +232,12 @@ ffe_receiveb (void)
 {
   unsigned char byte;
 
-  byte = (unsigned char) ((ffe_wait_while_busy () & PARPORT_INPUT_MASK) >> 3); // receive low nibble
-  outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) // invert strobe
-                                      (ffe_port + PARPORT_CONTROL)) ^ PARPORT_STROBE));
-  byte |= (unsigned char) ((ffe_wait_while_busy () & PARPORT_INPUT_MASK) << 1); // receive high nibble
-  outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) // invert strobe
-                                      (ffe_port + PARPORT_CONTROL)) ^ PARPORT_STROBE));
+  byte = (ffe_wait_while_busy () & PARPORT_INPUT_MASK) >> 3; // receive low nibble
+  outportb (ffe_port + PARPORT_CONTROL,
+            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
+  byte |= (ffe_wait_while_busy () & PARPORT_INPUT_MASK) << 1; // receive high nibble
+  outportb (ffe_port + PARPORT_CONTROL,
+            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE);// invert strobe
 
   return byte;
 }
@@ -254,7 +251,7 @@ ffe_wait_while_busy (void)
 
   do
     {
-      input = inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
+      input = inportb (ffe_port + PARPORT_STATUS);
       n_try++;
     }
   while (input & PARPORT_IBUSY && n_try < N_TRY_MAX);
@@ -274,7 +271,7 @@ ffe_wait_while_busy (void)
 #endif
 
   // read port again to let data settle down and to delay a little bit - JohnDie
-  return inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
+  return inportb (ffe_port + PARPORT_STATUS);
 }
 
 
@@ -286,7 +283,7 @@ ffe_wait_for_ready (void)
 
   do
     {
-      input = inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
+      input = inportb (ffe_port + PARPORT_STATUS);
       n_try++;
     }
   while (!(input & PARPORT_IBUSY) && n_try < N_TRY_MAX);

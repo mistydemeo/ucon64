@@ -25,8 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t cmc_usage[];
 
 #ifdef USE_PARALLEL
-extern int cmc_read_rom (const char *filename, unsigned int parport, int speed);
-extern int cmc_test (int test, unsigned int parport, int speed);
+extern int cmc_read_rom (const char *filename, unsigned short parport, int speed);
+extern int cmc_test (int test, unsigned short parport, int speed);
 #endif
 
 #endif

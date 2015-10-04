@@ -53,8 +53,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gba.h"
 #ifdef  USE_USB
 #include <stdarg.h>
+#ifdef  __unix__
 #include <sys/wait.h>
 #include <sys/utsname.h>
+#endif
 #include "misc/usb.h"
 #endif
 #ifdef  USE_PARALLEL
@@ -198,7 +200,7 @@ static int f2a_read_par (unsigned int start, unsigned int size,
 static int f2a_send_buffer_par (int cmd, int address,
                                 int size, const unsigned char *resource, int head,
                                 int flip, unsigned int exec, int mode);
-static int f2a_send_cmd_par (int cmd, int address, int size);
+//static int f2a_send_cmd_par (int cmd, int address, int size);
 static int f2a_exec_cmd_par (int cmd, int address, int size);
 static int f2a_receive_data_par (int cmd, int address, int size,
                                  const char *filename, int flip);
@@ -206,13 +208,13 @@ static int f2a_send_head_par (int cmd, int size);
 static int f2a_send_raw_par (unsigned char *buffer, int len);
 static int f2a_receive_raw_par (unsigned char *buffer, int len);
 static int f2a_wait_par ();
-static int parport_init (int port, int target_delay);
+static int parport_init (unsigned short port, int target_delay);
 static int parport_init_delay (int target);
 static void parport_out31 (unsigned char val);
 static void parport_out91 (unsigned char val);
 static void parport_nop ();
 
-static int f2a_pport;
+static unsigned short f2a_pport;
 #ifdef  DEBUG
 static int parport_debug = 1;
 #else
@@ -249,7 +251,8 @@ static const char *f2a_msg[] = {
 
 #ifdef  USE_USB
 
-int
+#ifdef  __unix__
+static int
 exec (const char *program, int argc, ...)
 /*
   This function is needed in order to execute a program with the same
@@ -301,6 +304,7 @@ exec (const char *program, int argc, ...)
 
   return status;
 }
+#endif // __unix__
 
 
 static int
@@ -351,12 +355,14 @@ f2a_init_usb (void)
 static int
 f2a_connect_usb (void)
 {
-  int fp, result, firmware_loaded = 0;
+  int result;
+  struct usb_bus *bus;
+  struct usb_device *dev, *f2adev = NULL;
+#ifdef  __linux__
+  int fp, firmware_loaded = 0;
   unsigned char f2afirmware[F2A_FIRM_SIZE];
   char f2afirmware_fname[FILENAME_MAX];
   const char *p = NULL;
-  struct usb_bus *bus;
-  struct usb_device *dev, *f2adev = NULL;
 
   p = get_property (ucon64.configfile, "f2afirmware", PROPERTY_MODE_FILENAME);
   strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
@@ -366,9 +372,11 @@ f2a_connect_usb (void)
       fprintf (stderr, "ERROR: Could not load F2A firmware (%s)\n", f2afirmware_fname);
       exit (1);                                 // fatal
     }
+#endif
 
   usb_init ();
   usb_find_busses ();
+#ifdef  __linux__
   usb_find_devices ();
   for (bus = usb_busses; bus; bus = bus->next) // usb_busses is present in libusb
     {
@@ -452,6 +460,7 @@ f2a_connect_usb (void)
       if (firmware_loaded)
         break;
     }
+#endif // __linux__
 
   usb_find_devices ();
   for (bus = usb_busses; bus; bus = bus->next)
@@ -596,7 +605,7 @@ f2a_read_usb (int address, int size, const char *filename)
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      //exit (1); for now, return, although registering usbport_close() is better
+//      exit (1); for now, return, although registering usbport_close() is better
       return -1;
     }
 
@@ -693,7 +702,7 @@ f2a_write_usb (int n_files, char **files, int address)
       if ((file = fopen (files[j], "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], files[j]);
-          //exit (1); for now, return, although registering usbport_close() is better
+//          exit (1); for now, return, although registering usbport_close() is better
           return -1;
         }
       clearerr (file);
@@ -707,7 +716,7 @@ f2a_write_usb (int n_files, char **files, int address)
 
       for (i = 0; i < size; i += 1024)
         {
-          //printf ("writing chunk %d\n", i);
+//          printf ("writing chunk %d\n", i);
           n = fread (buffer, 1, 1024, file);
           memset (buffer + n, 0, 1024 - n);
           if (ferror (file))
@@ -736,7 +745,7 @@ f2a_write_usb (int n_files, char **files, int address)
 #ifdef  USE_PARALLEL
 
 static int
-f2a_init_par (int parport, int parport_delay)
+f2a_init_par (unsigned short parport, int parport_delay)
 {
   char iclientp_fname[FILENAME_MAX], ilogo_fname[FILENAME_MAX];
   const char *p = NULL;
@@ -765,8 +774,8 @@ f2a_init_par (int parport, int parport_delay)
 }
 
 
-int
-parport_init (int port, int target_delay)
+static int
+parport_init (unsigned short port, int target_delay)
 {
   f2a_pport = port;
   parport_nop_cntr = parport_init_delay (target_delay);
@@ -774,12 +783,12 @@ parport_init (int port, int target_delay)
   parport_print_info ();
 
 #ifndef USE_PPDEV
-  outportb ((unsigned short) (f2a_pport + PARPORT_STATUS), 0x01); // clear EPP time flag
+  outportb (f2a_pport + PARPORT_STATUS, 0x01);  // clear EPP time flag
 #endif
 
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), 0x04);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x04);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_DATA, 0x04);
 
   parport_out91 (0x47);
   parport_out31 (0x02);
@@ -790,45 +799,45 @@ parport_init (int port, int target_delay)
   parport_out91 (0x56);
 
   // not parport_out31 (0x02), because extra write to control register
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x03);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), 0x02);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x03);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_DATA, 0x02);
 
   // not parport_out91 (0x00), because no write to data register
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x09);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x09);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x00);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x00);
 
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x02);
-  inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x06);
-  inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x02);
+  inportb (f2a_pport + PARPORT_STATUS);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x06);
+  inportb (f2a_pport + PARPORT_STATUS);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x00);
 
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x04);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x07);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_EADDRESS, 0x04);
+  outportb (f2a_pport + PARPORT_EDATA, 0x07);
 
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x02);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x12);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_EADDRESS, 0x02);
+  outportb (f2a_pport + PARPORT_EDATA, 0x12);
 
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x34);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_EADDRESS, 0x01);
+  outportb (f2a_pport + PARPORT_EDATA, 0x34);
 
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x00);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x56);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_EADDRESS, 0x00);
+  outportb (f2a_pport + PARPORT_EDATA, 0x56);
 
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x02);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
-  inportb ((unsigned short) (f2a_pport + PARPORT_EDATA));
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_EADDRESS, 0x02);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x00);
+  inportb (f2a_pport + PARPORT_EDATA);
 
   return 0;
 }
@@ -924,23 +933,23 @@ parport_nop ()
 static void
 parport_out31 (unsigned char val)
 {
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x03);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), val);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x03);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_DATA, val);
 }
 
 
 static void
 parport_out91 (unsigned char val)
 {
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x09);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), val);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x09);
+  outportb (f2a_pport + PARPORT_CONTROL, 0x01);
+  outportb (f2a_pport + PARPORT_DATA, val);
 }
 
 
-int
+static int
 f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 {
   unsigned char recv[4], iclientp[BOOT_SIZE];
@@ -987,7 +996,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 }
 
 
-int
+static int
 f2a_write_par (int n_files, char **files, unsigned int address)
 {
   int j, fsize, size, is_sram_data = address >= 0xe000000 ? 1 : 0;
@@ -1043,7 +1052,8 @@ f2a_write_par (int n_files, char **files, unsigned int address)
 }
 
 
-int
+#if 0
+static int
 f2a_erase_par (unsigned int start, unsigned int size)
 {
   int end, address;
@@ -1056,9 +1066,10 @@ f2a_erase_par (unsigned int start, unsigned int size)
     f2a_send_cmd_par (PP_CMD_ERASE, address, 1024);
   return 0;
 }
+#endif
 
 
-int
+static int
 f2a_read_par (unsigned int start, unsigned int size, const char *filename)
 {
   f2a_exec_cmd_par (CMD_READDATA, ERASE_STUB, 1024);
@@ -1089,8 +1100,8 @@ f2a_send_head_par (int cmd, int size)
   unsigned short int s;                         //  members for data streams (we don't
                                                 //  want compiler-specific stuff)
 //  memcpy (&msg_head, header, 16);             // .head
-  msg_header[16] = cmd;                         // .command
-  s = size / 1024;
+  msg_header[16] = (unsigned char) cmd;         // .command
+  s = (unsigned short) (size / 1024);
   msg_header[17] =                              // .unknown
     (trans[((s & 255) / 32)] << 4) | (((1023 - (s & 1023)) / 256) & 0x0f);
 // msg_header.unknown = 0x82;
@@ -1173,7 +1184,7 @@ f2a_receive_data_par (int cmd, int address, int size, const char *filename, int 
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      //exit (1); return, because the other code does it too...
+//      exit (1); return, because the other code does it too...
       return -1;
     }
 
@@ -1181,7 +1192,7 @@ f2a_receive_data_par (int cmd, int address, int size, const char *filename, int 
   if ((mbuffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
-      //exit (1); see comment for fopen() call
+//      exit (1); see comment for fopen() call
       return -1;
     }
   f2a_receive_raw_par (mbuffer, size);
@@ -1227,6 +1238,7 @@ f2a_receive_data_par (int cmd, int address, int size, const char *filename, int 
 }
 
 
+#if 0
 static int
 f2a_send_cmd_par (int cmd, int address, int size)
 {
@@ -1255,6 +1267,7 @@ f2a_send_cmd_par (int cmd, int address, int size)
     return -1;
   return 0;
 }
+#endif
 
 
 static int
@@ -1295,7 +1308,7 @@ f2a_send_buffer_par (int cmd, int address, int size, const unsigned char *resour
       if ((file = fopen ((char *) resource, "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], (char *) resource);
-          //exit (1); return, because the other code does it too...
+//          exit (1); return, because the other code does it too...
           return -1;
         }
       clearerr (file);
@@ -1377,13 +1390,13 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
   for (err = 0, i = 0; i < len * 2; i++)
     {
       nibble = 0;
-      outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
+      outportb (f2a_pport + PARPORT_CONTROL, 0x04);
       parport_nop ();
-      while (inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY)
+      while (inportb (f2a_pport + PARPORT_STATUS) & PARPORT_IBUSY)
         ;
-      outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x05);
-      nibble = inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
-      while (!(inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY))
+      outportb (f2a_pport + PARPORT_CONTROL, 0x05);
+      nibble = inportb (f2a_pport + PARPORT_STATUS);
+      while (!(inportb (f2a_pport + PARPORT_STATUS) & PARPORT_IBUSY))
         ;
       if (i % 2)
         {
@@ -1425,19 +1438,19 @@ f2a_send_raw_par (unsigned char *buffer, int len)
           if (!((i + 1) % 32) && i && i < len - 1)
             fprintf (stderr, "\n%04x: ", i + 1);
         }
-      outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
+      outportb (f2a_pport + PARPORT_CONTROL, 0x04);
       parport_nop ();
-      while ((inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY) &&
+      while ((inportb (f2a_pport + PARPORT_STATUS) & PARPORT_IBUSY) &&
              (timeout--) > 0)
         wait2 (1);
-      outportb ((unsigned short) (f2a_pport + PARPORT_DATA), *pc);
+      outportb (f2a_pport + PARPORT_DATA, *pc);
       parport_nop ();
-      while ((inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY) &&
+      while ((inportb (f2a_pport + PARPORT_STATUS) & PARPORT_IBUSY) &&
              (timeout--) > 0)
         wait2 (1);
-      outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x05);
+      outportb (f2a_pport + PARPORT_CONTROL, 0x05);
       parport_nop ();
-      while ((!(inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY)) &&
+      while ((!(inportb (f2a_pport + PARPORT_STATUS) & PARPORT_IBUSY)) &&
              (timeout--) > 0)
         wait2 (1);
       pc++;
@@ -1459,16 +1472,16 @@ f2a_wait_par (void)
 {
   int stat;
 
-  while (1)
+  for (;;)
     {
-      outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
+      outportb (f2a_pport + PARPORT_CONTROL, 0x04);
       parport_nop ();
-      stat = inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
+      stat = inportb (f2a_pport + PARPORT_STATUS);
       if (stat & PARPORT_IBUSY)
         break;
-      outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x05);
+      outportb (f2a_pport + PARPORT_CONTROL, 0x05);
       parport_nop ();
-      inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
+      inportb (f2a_pport + PARPORT_STATUS);
     }
   return 0;
 }
@@ -1570,7 +1583,7 @@ f2a_write_rom (const char *filename, int size)
 #ifdef  USE_PARALLEL
     {
       f2a_init_par (ucon64.parport, 10);
-      //f2a_erase_par (0x08000000, size * MBIT);
+//      f2a_erase_par (0x08000000, size * MBIT);
       f2a_write_par (n_files, files, 0x8000000 + offset * MBIT);
     }
 #endif
@@ -1628,7 +1641,8 @@ f2a_read_sram (const char *filename, int bank)
 int
 f2a_write_sram (const char *filename, int bank)
 {
-  char *files[1] = { (char *) filename };
+  char *files[1];
+  files[0] = (char *) filename;
 
   // define one bank as a 64 kilobyte unit
   if (bank == UCON64_UNKNOWN)
@@ -1656,7 +1670,7 @@ f2a_write_sram (const char *filename, int bank)
 #ifdef  USE_PARALLEL
     {
       f2a_init_par (ucon64.parport, 10);
-      //f2a_erase_par (0xe000000, size * MBIT);
+//      f2a_erase_par (0xe000000, size * MBIT);
       f2a_write_par (1, files, 0xe000000 + bank * 64 * 1024);
     }
 #endif

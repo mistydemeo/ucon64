@@ -282,8 +282,8 @@ CartTypeDetect (void)
 
   WriteFlash (_CART_START, INTEL28F_RIC);       // Read Identifier codes from flash.
   // Works for intel 28F640J3A & Sharp LH28F320BJE.
-  Manuf = ReadFlash (_CART_START);
-  Device = ReadFlash (_CART_START + _MEM_INC);
+  Manuf = (unsigned short) ReadFlash (_CART_START);
+  Device = (unsigned short) ReadFlash (_CART_START + _MEM_INC);
 
   switch (Manuf)
     {
@@ -303,13 +303,13 @@ CartTypeDetect (void)
           break;
         default:
           // Check to see if this is a Visoly "Turbo" cart
-          Device = ReadFlash (_CART_START + _MEM_INC + _MEM_INC);
+          Device = (unsigned short) ReadFlash (_CART_START + _MEM_INC + _MEM_INC);
           switch (Device)
             {
             case 0x16:         // 2 x i28F320J3A
             case 0x17:         // 2 x i28F640J3A
             case 0x18:         // 2 x i28F128J3A
-              type = Device + 0x80;
+              type = (unsigned char) (Device + 0x80);
               break;
             }
         }

@@ -164,7 +164,7 @@ write_ram_by_page (int *addr, unsigned char *buf)
 
 
 int
-sf_read_rom (const char *filename, unsigned int parport, int size)
+sf_read_rom (const char *filename, unsigned short parport, int size)
 {
   FILE *file;
   unsigned char buffer[0x100];
@@ -217,7 +217,7 @@ sf_read_rom (const char *filename, unsigned int parport, int size)
 
 
 int
-sf_write_rom (const char *filename, unsigned int parport)
+sf_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[0x80];
@@ -287,7 +287,7 @@ sf_write_rom (const char *filename, unsigned int parport)
 
       eep_reset ();
 
-      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
+      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)) != 0)
         {
           if ((address & 0x1ffff) == 0)
             ttt_erase_block (address);
@@ -302,7 +302,7 @@ sf_write_rom (const char *filename, unsigned int parport)
   fseek (file, 0, SEEK_SET);
   bytesleft = 0x8000;
   address = 0x7f8000;
-  while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
+  while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)) != 0)
     {
       write_block (&address, buffer);
       bytessend += bytesread;
@@ -318,7 +318,7 @@ sf_write_rom (const char *filename, unsigned int parport)
 
 
 int
-sf_read_sram (const char *filename, unsigned int parport)
+sf_read_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x100];
@@ -371,7 +371,7 @@ sf_read_sram (const char *filename, unsigned int parport)
 
 
 int
-sf_write_sram (const char *filename, unsigned int parport)
+sf_write_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000];
@@ -402,7 +402,7 @@ sf_write_sram (const char *filename, unsigned int parport)
   ttt_ram_enable ();
 
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, 0x4000, file)))
+  while ((bytesread = fread (buffer, 1, 0x4000, file)) != 0)
     {
       write_block (&address, buffer);           // 0x4000 bytes write
       bytessend += bytesread;

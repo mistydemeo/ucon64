@@ -654,7 +654,7 @@ write_deinterleaved_data (st_ucon64_nfo_t *rominfo, const char *src_name,
                           const char *dest_name, int size, int backup_header_len)
 {
   unsigned char *buffer;
-  if (!(buffer = (unsigned char *) malloc (size)))
+  if ((buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
@@ -702,8 +702,8 @@ snes_ffe (st_ucon64_nfo_t *rominfo, char *ext)
   ucon64_fread (&header, 0, rominfo->backup_header_len > (int) SWC_HEADER_LEN ?
                   (int) SWC_HEADER_LEN : rominfo->backup_header_len, ucon64.fname);
   reset_header (&header);
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
+  header.size_low = (unsigned char) (size / 8192);
+  header.size_high = (unsigned char) (size / 8192 >> 8);
 
   header.emulation = snes_split ? 0x40 : 0;
   header.emulation |= snes_hirom ? 0x30 : 0;
@@ -763,8 +763,8 @@ snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header)
 {
   int size = ucon64.file_size - rominfo->backup_header_len, uses_DSP;
 
-  header->size_low = size / 8192;
-  header->size_high = size / 8192 >> 8;
+  header->size_low = (unsigned char) (size / 8192);
+  header->size_high = (unsigned char) (size / 8192 >> 8);
   header->multi = snes_split ? 0x40 : 0;
   header->hirom = snes_hirom ? 0x80 : 0;
 
@@ -954,7 +954,7 @@ make_gd_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
 
           if (local_buffer)
             {
-              if (!(buffer = (unsigned char *) malloc (size)))
+              if ((buffer = (unsigned char *) malloc (size)) == NULL)
                 {
                   fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
                   exit (1);
@@ -974,9 +974,9 @@ make_gd_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
           d2 = id / (37 * 37);
           d1 = (id % (37 * 37)) / 37;
           d0 = id % 37;
-          id_str[0] = d2 == 36 ? '_' : (d2 <= 9 ? d2 + '0' : d2 + 'A' - 10);
-          id_str[1] = d1 == 36 ? '_' : (d1 <= 9 ? d1 + '0' : d1 + 'A' - 10);
-          id_str[2] = d0 == 36 ? '_' : (d0 <= 9 ? d0 + '0' : d0 + 'A' - 10);
+          id_str[0] = (char) (d2 == 36 ? '_' : (d2 <= 9 ? d2 + '0' : d2 + 'A' - 10));
+          id_str[1] = (char) (d1 == 36 ? '_' : (d1 <= 9 ? d1 + '0' : d1 + 'A' - 10));
+          id_str[2] = (char) (d0 == 36 ? '_' : (d0 <= 9 ? d0 + '0' : d0 + 'A' - 10));
           id_str[3] = 0;                        // terminate string
 
           p = id_str;
@@ -997,7 +997,7 @@ make_gd_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
         strcpy (name, p);
     }
 
-  if ((p = strrchr (name, '.')))
+  if ((p = strrchr (name, '.')) != NULL)
     *p = 0;
   strcat (name, "___");
   if (newsize < 10 * MBIT)
@@ -1025,7 +1025,7 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
   strcpy (src_name, ucon64.fname);
-  if (!(srcbuf = (unsigned char *) malloc (size)))
+  if ((srcbuf = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
@@ -1116,14 +1116,14 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
       else
         pad = 0;
 
-      if (!(dstbuf = (unsigned char *) malloc (newsize)))
+      if ((dstbuf = (unsigned char *) malloc (newsize)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], newsize);
           exit (1);
         }
       if (newsize > size)
         {
-          if (!(srcbuf = (unsigned char *) realloc (srcbuf, newsize)))
+          if ((srcbuf = (unsigned char *) realloc (srcbuf, newsize)) == NULL)
             {
               fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], newsize);
               exit (1);
@@ -1272,21 +1272,21 @@ snes_ufo (st_ucon64_nfo_t *rominfo)
                       12 * MBIT : ((size + MBIT - 1) & ~(MBIT - 1)),
           half_newsize = newsize / 2, pad = (newsize - size) / 2;
 
-      header.size_low = newsize / 8192;
-      header.size_high = newsize / 8192 >> 8;
-      header.size = newsize / MBIT;
+      header.size_low = (unsigned char) (newsize / 8192);
+      header.size_high = (unsigned char) (newsize / 8192 >> 8);
+      header.size = (unsigned char) (newsize / MBIT);
 
       if (snes_sramsize != 0)
         header.sram_a20_a21 = 0x0c;             // try 3 if game gives protection message
       header.sram_a22_a23 = 2;
       // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J) [14-17]: 0 0x0e 0 0
 
-      if (!(srcbuf = (unsigned char *) malloc (size)))
+      if ((srcbuf = (unsigned char *) malloc (size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
           exit (1);
         }
-      if (!(dstbuf = (unsigned char *) malloc (newsize)))
+      if ((dstbuf = (unsigned char *) malloc (newsize)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], newsize);
           exit (1);
@@ -1316,9 +1316,9 @@ snes_ufo (st_ucon64_nfo_t *rominfo)
     }
   else // LoROM
     {
-      header.size_low = size / 8192;
-      header.size_high = size / 8192 >> 8;
-      header.size = size / MBIT;
+      header.size_low = (unsigned char) (size / 8192);
+      header.size_high = (unsigned char) (size / 8192 >> 8);
+      header.size = (unsigned char) (size / MBIT);
 
       if (snes_sramsize == 0)
         {
@@ -1543,8 +1543,8 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
       for (n = 0; n < nparts; n++)
         {
           part_size = size_to_partsizes_ptr->list[n] * MBIT;
-          header[0] = part_size / 8192;
-          header[1] = part_size / 8192 >> 8;
+          header[0] = (char) (part_size / 8192);
+          header[1] = (char) (part_size / 8192 >> 8);
           header[2] = size_to_flags_ptr->list[n];
 
           if (surplus == 0 && n == nparts - 1)
@@ -1563,8 +1563,8 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
       nparts = size / part_size;
       surplus = size % part_size;
 
-      header[0] = part_size / 8192;
-      header[1] = part_size / 8192 >> 8;
+      header[0] = (char) (part_size / 8192);
+      header[1] = (char) (part_size / 8192 >> 8);
       header[2] |= 0x40;
 
       nbytesdone = rominfo->backup_header_len;
@@ -1584,8 +1584,8 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
 
   if (surplus != 0)
     {
-      header[0] = surplus / 8192;
-      header[1] = surplus / 8192 >> 8;
+      header[0] = (char) (surplus / 8192);
+      header[1] = (char) (surplus / 8192 >> 8);
       header[2] = 0;                            // last file -> clear bit 6
 
       ucon64_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
@@ -1611,8 +1611,8 @@ snes_split_smc (st_ucon64_nfo_t *rominfo, int size, int part_size)
   p = strrchr (dest_name, '.') + 1;
 
   ucon64_fread (header, 0, SWC_HEADER_LEN, ucon64.fname);
-  header[0] = part_size / 8192;
-  header[1] = part_size / 8192 >> 8;
+  header[0] = (char) (part_size / 8192);
+  header[1] = (char) (part_size / 8192 >> 8);
   // if header[2], bit 6 == 0 -> SWC/FIG knows this is the last file of the ROM
   header[2] |= 0x40;
 
@@ -1631,8 +1631,8 @@ snes_split_smc (st_ucon64_nfo_t *rominfo, int size, int part_size)
 
   if (surplus != 0)
     {
-      header[0] = surplus / 8192;
-      header[1] = surplus / 8192 >> 8;
+      header[0] = (char) (surplus / 8192);
+      header[1] = (char) (surplus / 8192 >> 8);
       header[2] &= ~0x40;                       // last file -> clear bit 6
 
       // don't write backups of parts, because one name is used
@@ -1933,7 +1933,7 @@ when it has been patched with -f.
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
 
-  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
+  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
       // First use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
@@ -2089,7 +2089,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
 
-  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
+  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {
       // First use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
@@ -2198,7 +2198,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
 
-  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
+  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {
       // First use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
@@ -2335,7 +2335,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
 
-  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
+  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
       // First use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
@@ -2425,11 +2425,11 @@ snes_chk (st_ucon64_nfo_t *rominfo)
                                     snes_header.checksum_high) +
                                    2 * 0xff; // + 2 * 0;
   // change inverse checksum
-  buf[0] = 0xffff - rominfo->current_internal_crc;        // low byte
-  buf[1] = (0xffff - rominfo->current_internal_crc) >> 8; // high byte
+  buf[0] = (char) (0xffff - rominfo->current_internal_crc); // low byte
+  buf[1] = (char) ((0xffff - rominfo->current_internal_crc) >> 8); // high byte
   // change checksum
-  buf[2] = rominfo->current_internal_crc;       // low byte
-  buf[3] = rominfo->current_internal_crc >> 8;  // high byte
+  buf[2] = (char) rominfo->current_internal_crc; // low byte
+  buf[3] = (char) (rominfo->current_internal_crc >> 8); // high byte
   if (rominfo->interleaved)
     header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
   else
@@ -2672,8 +2672,8 @@ snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom
             {
               for (i = 0; i < nblocks; i++)
                 {
-                  blocks[i * 2] = i + ((i < (16 * MBIT >> 16) ? 16 : 4) * MBIT >> 15);
-                  blocks[i * 2 + 1] = i;
+                  blocks[i * 2] = (unsigned char) (i + ((i < (16 * MBIT >> 16) ? 16 : 4) * MBIT >> 15));
+                  blocks[i * 2 + 1] = (unsigned char) i;
                 }
               blocksset = 1;
             }
@@ -2683,8 +2683,8 @@ snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom
               j = 32 * MBIT >> 16;
               for (i = 0; i < j; i++)
                 {
-                  blocks[i * 2] = i + j + (size2 >> 15);
-                  blocks[i * 2 + 1] = i + (size2 >> 15);
+                  blocks[i * 2] = (unsigned char) (i + j + (size2 >> 15));
+                  blocks[i * 2 + 1] = (unsigned char) (i + (size2 >> 15));
                 }
               j = size2 >> 16;
               for (; i < j + (32 * MBIT >> 16); i++)
@@ -2698,12 +2698,12 @@ snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom
       if (!blocksset)
         for (i = 0; i < nblocks; i++)
           {
-            blocks[i * 2] = i + nblocks;
-            blocks[i * 2 + 1] = i;
+            blocks[i * 2] = (unsigned char) (i + nblocks);
+            blocks[i * 2 + 1] = (unsigned char) i;
           }
     }
 
-  if (!(rom_buffer2 = (unsigned char *) malloc (rom_size)))
+  if ((rom_buffer2 = (unsigned char *) malloc (rom_size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
       exit (1);
@@ -3310,7 +3310,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
   if (ucon64.console == UCON64_SNES || (type != SMC && size <= 16 * 1024 * 1024))
     result = 0;                                 // it seems to be a SNES ROM dump
 
-  if (!(rom_buffer = (unsigned char *) malloc (size)))
+  if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;                                // don't exit(), we might've been
@@ -3741,7 +3741,7 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
       sum2 = 0;
       for (i = i_start + half_internal_rom_size; i < rom_size; i++)
         sum2 += (*rom_buffer)[i];
-      sum1 += sum2 * (half_internal_rom_size / remainder);
+      sum1 += (unsigned short) (sum2 * (half_internal_rom_size / remainder));
 //      printf ("DEBUG internal_rom_size: %d; half_internal_rom_size: %d; remainder: %d\n",
 //              internal_rom_size, half_internal_rom_size, remainder);
     }
@@ -3925,7 +3925,7 @@ snes_demirror (st_ucon64_nfo_t *rominfo)           // nice verb :-)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
 
-  if (!(buffer = (unsigned char *) malloc (size)))
+  if ((buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
@@ -3997,7 +3997,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
       if (!isprint ((int) name[n]))
         name[n] = '.';
       else
-        name[n] = toupper (name[n]);            // The Super Flash loader (SFBOTX2.GS)
+        name[n] = (unsigned char) toupper (name[n]); // The Super Flash loader (SFBOTX2.GS)
     }                                           //  only supports upper case characters
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
 
@@ -4201,7 +4201,7 @@ snes_densrt (st_ucon64_nfo_t *rominfo)
     }
 
   ucon64_fread (backup_header, 0, 512, ucon64.fname);
-  if (!(buffer = (unsigned char *) malloc (size)))
+  if ((buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
@@ -4319,7 +4319,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
           puts ("WARNING: Invalid value for controller in port 1, using \"0\"");
           x = 0;
         }
-      header[0x1ed] = x << 4;
+      header[0x1ed] = (unsigned char) (x << 4);
     }
   if (UCON64_ISSET (ucon64.controller2))
     {

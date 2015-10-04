@@ -531,20 +531,20 @@ outportw (unsigned short port, unsigned short word)
 #if     (defined __i386__ || defined __x86_64__ || defined _WIN32) && !defined USE_PPDEV
 #define DETECT_MAX_CNT 1000
 static int
-parport_probe (unsigned int port)
+parport_probe (unsigned short port)
 {
   int i = 0;
 
-  outportb ((unsigned short) port, 0xaa);
+  outportb (port, 0xaa);
   for (i = 0; i < DETECT_MAX_CNT; i++)
-    if (inportb ((unsigned short) port) == 0xaa)
+    if (inportb (port) == 0xaa)
       break;
 
   if (i < DETECT_MAX_CNT)
     {
-      outportb ((unsigned short) port, 0x55);
+      outportb (port, 0x55);
       for (i = 0; i < DETECT_MAX_CNT; i++)
-        if (inportb ((unsigned short) port) == 0x55)
+        if (inportb (port) == 0x55)
           break;
     }
 
@@ -585,8 +585,8 @@ new_exception_handler (PEXCEPTION_RECORD exception_record, void *establisher_fra
 #endif
 
 
-int
-parport_open (int port)
+unsigned short
+parport_open (unsigned short port)
 {
 #ifdef  USE_PPDEV
   struct timeval t;
@@ -773,6 +773,7 @@ parport_open (int port)
   */
   char fname[FILENAME_MAX];
   int driver_found = 0;
+  u_func_ptr_t sym;
 
   sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "dlportio.dll");
 #if 0 // We must not do this for Cygwin or access() won't "find" the file
@@ -785,14 +786,15 @@ parport_open (int port)
       driver_found = 1;
       printf ("Using %s\n", fname);
 
-      DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned short))
-                            get_symbol (io_driver, "DlPortReadPortUchar");
-      DlPortReadPortUshort = (unsigned short (__stdcall *) (unsigned short))
-                             get_symbol (io_driver, "DlPortReadPortUshort");
-      DlPortWritePortUchar = (void (__stdcall *) (unsigned short, unsigned char))
-                             get_symbol (io_driver, "DlPortWritePortUchar");
-      DlPortWritePortUshort = (void (__stdcall *) (unsigned short, unsigned short))
-                              get_symbol (io_driver, "DlPortWritePortUshort");
+      sym.void_ptr = get_symbol (io_driver, "DlPortReadPortUchar");
+      DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned short)) sym.func_ptr;
+      sym.void_ptr = get_symbol (io_driver, "DlPortReadPortUshort");
+      DlPortReadPortUshort = (unsigned short (__stdcall *) (unsigned short)) sym.func_ptr;
+      sym.void_ptr = get_symbol (io_driver, "DlPortWritePortUchar");
+      DlPortWritePortUchar = (void (__stdcall *) (unsigned short, unsigned char)) sym.func_ptr;
+      sym.void_ptr = get_symbol (io_driver, "DlPortWritePortUshort");
+      DlPortWritePortUshort = (void (__stdcall *) (unsigned short, unsigned short)) sym.func_ptr;
+
       input_byte = dlportio_input_byte;
       input_word = dlportio_input_word;
       output_byte = dlportio_output_byte;
@@ -806,21 +808,22 @@ parport_open (int port)
         {
           io_driver = open_module (fname);
 
-          IsDriverInstalled = (short int (WINAPI *) ())
-                              get_symbol (io_driver, "IsDriverInstalled");
+          sym.void_ptr = get_symbol (io_driver, "IsDriverInstalled");
+          IsDriverInstalled = (short int (WINAPI *) ()) sym.func_ptr;
           if (IsDriverInstalled ())
             {
               driver_found = 1;
               printf ("Using %s\n", fname);
 
-              PortIn = (char (WINAPI *) (short int))
-                       get_symbol (io_driver, "PortIn");
-              PortWordIn = (short int (WINAPI *) (short int))
-                           get_symbol (io_driver, "PortWordIn");
-              PortOut = (void (WINAPI *) (short int, char))
-                        get_symbol (io_driver, "PortOut");
-              PortWordOut = (void (WINAPI *) (short int, short int))
-                            get_symbol (io_driver, "PortWordOut");
+              sym.void_ptr = get_symbol (io_driver, "PortIn");
+              PortIn = (char (WINAPI *) (short int)) sym.func_ptr;
+              sym.void_ptr = get_symbol (io_driver, "PortWordIn");
+              PortWordIn = (short int (WINAPI *) (short int)) sym.func_ptr;
+              sym.void_ptr = get_symbol (io_driver, "PortOut");
+              PortOut = (void (WINAPI *) (short int, char)) sym.func_ptr;
+              sym.void_ptr = get_symbol (io_driver, "PortWordOut");
+              PortWordOut = (void (WINAPI *) (short int, short int)) sym.func_ptr;
+
               input_byte = io_input_byte;
               input_word = io_input_word;
               output_byte = io_output_byte;
@@ -845,35 +848,37 @@ parport_open (int port)
             of inpout32.dll (*signed* short return value and arguments), we
             prefer it if it is present.
           */
-          DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned short))
-                                has_symbol (io_driver, "DlPortReadPortUchar");
+          sym.void_ptr = has_symbol (io_driver, "DlPortReadPortUchar");
+          DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned short)) sym.func_ptr;
           if (DlPortReadPortUchar != (void *) -1)
             input_byte = dlportio_input_byte;
           else
             {
-              Inp32 = (short (__stdcall *) (short))
-                      get_symbol (io_driver, "Inp32");
+              sym.void_ptr = get_symbol (io_driver, "Inp32");
+              Inp32 = (short (__stdcall *) (short)) sym.func_ptr;
+
               input_byte = inpout32_input_byte;
             }
 
-          DlPortWritePortUchar = (void (__stdcall *) (unsigned short, unsigned char))
-                                 has_symbol (io_driver, "DlPortWritePortUchar");
+          sym.void_ptr = has_symbol (io_driver, "DlPortWritePortUchar");
+          DlPortWritePortUchar = (void (__stdcall *) (unsigned short, unsigned char)) sym.func_ptr;
           if (DlPortWritePortUchar != (void *) -1)
             output_byte = dlportio_output_byte;
           else
             {
-              Outp32 = (void (__stdcall *) (short, short))
-                       get_symbol (io_driver, "Out32");
+              sym.void_ptr = get_symbol (io_driver, "Out32");
+              Outp32 = (void (__stdcall *) (short, short)) sym.func_ptr;
+
               output_byte = inpout32_output_byte;
             }
 
-          DlPortReadPortUshort = (unsigned short (__stdcall *) (unsigned short))
-                                 has_symbol (io_driver, "DlPortReadPortUshort");
+          sym.void_ptr = has_symbol (io_driver, "DlPortReadPortUshort");
+          DlPortReadPortUshort = (unsigned short (__stdcall *) (unsigned short)) sym.func_ptr;
           if (DlPortReadPortUshort != (void *) -1)
             input_word = dlportio_input_word;
 
-          DlPortWritePortUshort = (void (__stdcall *) (unsigned short, unsigned short))
-                                  has_symbol (io_driver, "DlPortWritePortUshort");
+          sym.void_ptr = has_symbol (io_driver, "DlPortWritePortUshort");
+          DlPortWritePortUshort = (void (__stdcall *) (unsigned short, unsigned short)) sym.func_ptr;
           if (DlPortReadPortUshort != (void *) -1)
             output_word = dlportio_output_word;
         }
@@ -905,7 +910,7 @@ parport_open (int port)
 
   if (port == PARPORT_UNKNOWN)                  // no port specified or forced?
     {
-      unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
+      unsigned short parport_addresses[] = { 0x3bc, 0x378, 0x278 };
       int x, found = 0;
 
       for (x = 0; x < 3; x++)
@@ -929,8 +934,7 @@ parport_open (int port)
   ucon64_parport = ucon64.parport;
   ucon64.parport = port;
 #endif
-  outportb ((unsigned short) (port + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) (port + PARPORT_CONTROL)) & 0x0f));
+  outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
   // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 #ifdef  USE_PPDEV
   ucon64.parport = ucon64_parport;
@@ -963,9 +967,8 @@ close_io_port (void)
 
 
 int
-parport_close (int parport)
+parport_close (void)
 {
-  (void) parport;
 #if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
   if (unregister_func (close_io_port) == 0)     // call func only if it can be removed!
     close_io_port ();                           //  (or else it will be called twice)

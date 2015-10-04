@@ -60,7 +60,7 @@ to_func (char *s, int len, int (*func) (int))
   char *p = s;
 
   for (; len > 0; p++, len--)
-    *p = func (*p);
+    *p = (char) func (*p);
 
   return s;
 }
@@ -142,7 +142,7 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
 
   if (str)
     if (*str)
-      for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) &&
+      for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL &&
            (argc < (max_args - 1)); argc++)
         ;
 

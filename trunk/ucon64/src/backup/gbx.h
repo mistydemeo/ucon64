@@ -25,10 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t gbx_usage[];
 
 #ifdef USE_PARALLEL
-extern int gbx_read_rom (const char *filename, unsigned int parport);
-extern int gbx_write_rom (const char *filename, unsigned int parport);
-extern int gbx_read_sram (const char *filename, unsigned int parport, int bank);
-extern int gbx_write_sram (const char *filename, unsigned int parport, int bank);
+extern int gbx_read_rom (const char *filename, unsigned short parport);
+extern int gbx_write_rom (const char *filename, unsigned short parport);
+extern int gbx_read_sram (const char *filename, unsigned short parport, int bank);
+extern int gbx_write_sram (const char *filename, unsigned short parport, int bank);
 #endif
 
 #endif // GBX_H

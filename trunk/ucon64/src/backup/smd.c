@@ -116,7 +116,7 @@ smd_deinterleave (unsigned char *buffer, int size)
 
 
 int
-smd_read_rom (const char *filename, unsigned int parport)
+smd_read_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, byte;
@@ -151,7 +151,7 @@ smd_read_rom (const char *filename, unsigned int parport)
     }
 
   memset (buffer, 0, SMD_HEADER_LEN);
-  buffer[0] = blocksleft;
+  buffer[0] = (unsigned char) blocksleft;
   buffer[1] = 3;
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
@@ -189,7 +189,7 @@ smd_read_rom (const char *filename, unsigned int parport)
 
 
 int
-smd_write_rom (const char *filename, unsigned int parport)
+smd_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -221,10 +221,10 @@ smd_write_rom (const char *filename, unsigned int parport)
   printf ("Press q to abort\n\n");
 
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
       ffe_send_command (5, (unsigned short) blocksdone, 0);
-      ffe_send_block (0x8000, buffer, bytesread);
+      ffe_send_block (0x8000, buffer, (unsigned short) bytesread);
       blocksdone++;
 
       bytessend += bytesread;
@@ -244,7 +244,7 @@ smd_write_rom (const char *filename, unsigned int parport)
 
 
 int
-smd_read_sram (const char *filename, unsigned int parport)
+smd_read_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -300,7 +300,7 @@ smd_read_sram (const char *filename, unsigned int parport)
 
 
 int
-smd_write_sram (const char *filename, unsigned int parport)
+smd_write_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -331,9 +331,9 @@ smd_write_sram (const char *filename, unsigned int parport)
 
   address = 0x4000;
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
-      ffe_send_block (address, buffer, bytesread);
+      ffe_send_block (address, buffer, (unsigned short) bytesread);
       address += 0x4000;
 
       bytessend += bytesread;

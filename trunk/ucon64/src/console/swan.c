@@ -167,7 +167,7 @@ swan_init (st_ucon64_nfo_t *rominfo)
            (!OFFSET (swan_header, 1) ? "WS Monochrome" : "WS Color"));
   strcat (rominfo->misc, (const char *) buf);
 
-  if (!(rom_buffer = (unsigned char *) malloc (ucon64.file_size)))
+  if ((rom_buffer = (unsigned char *) malloc (ucon64.file_size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], ucon64.file_size);
       return -1;

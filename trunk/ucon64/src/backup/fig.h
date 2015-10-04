@@ -89,12 +89,12 @@ typedef struct st_fig_header
 #define FIG_HEADER_LEN (sizeof (st_fig_header_t))
 
 #ifdef USE_PARALLEL
-extern int fig_read_rom (const char *filename, unsigned int parport);
-extern int fig_write_rom (const char *filename, unsigned int parport);
-extern int fig_read_sram (const char *filename, unsigned int parport);
-extern int fig_write_sram (const char *filename, unsigned int parport);
-extern int fig_read_cart_sram (const char *filename, unsigned int parport);
-extern int fig_write_cart_sram (const char *filename, unsigned int parport);
+extern int fig_read_rom (const char *filename, unsigned short parport);
+extern int fig_write_rom (const char *filename, unsigned short parport);
+extern int fig_read_sram (const char *filename, unsigned short parport);
+extern int fig_write_sram (const char *filename, unsigned short parport);
+extern int fig_read_cart_sram (const char *filename, unsigned short parport);
+extern int fig_write_cart_sram (const char *filename, unsigned short parport);
 #endif
 
 #endif // FIG_H

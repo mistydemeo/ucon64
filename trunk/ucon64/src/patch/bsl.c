@@ -102,7 +102,7 @@ bsl_apply (const char *mod, const char *bslname)
         }
       while (nbytes-- >= 0)                     // yes, one byte more than the
         {                                       //  _value_ read from the BSL file
-          byte = fgetc (bslfile);
+          byte = (unsigned char) fgetc (bslfile);
           fputc (byte, modfile);
         }
     }

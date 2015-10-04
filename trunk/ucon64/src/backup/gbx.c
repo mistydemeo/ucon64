@@ -134,7 +134,7 @@ const st_getopt2_t gbx_usage[] =
 typedef enum { UNKNOWN_MBC, BUNG, ROM, MBC1, MBC2, MBC3, MBC5, CAMERA, ROCKET } mbc_t;
 typedef enum { UNKNOWN_EEPROM, WINBOND, MX, INTEL } eeprom_t;
 
-static unsigned short int port_8, port_9, port_a, port_b, port_c, rocket_game_no;
+static unsigned short port_8, port_9, port_a, port_b, port_c, rocket_game_no;
 static unsigned char buffer[32768];
 static mbc_t mbc_type;
 static eeprom_t eeprom_type;
@@ -1569,7 +1569,7 @@ test_intel (void)
 }
 
 
-static void gbx_init (unsigned int parport, int read_header);
+static void gbx_init (unsigned short parport, int read_header);
 
 static int
 verify_card_from_file (const char *filename, unsigned int parport)
@@ -1626,7 +1626,7 @@ verify_card_from_file (const char *filename, unsigned int parport)
 
 
 static void
-gbx_init (unsigned int parport, int read_header)
+gbx_init (unsigned short parport, int read_header)
 {
   int i;
 
@@ -1665,7 +1665,7 @@ gbx_init (unsigned int parport, int read_header)
 
 
 int
-gbx_read_rom (const char *filename, unsigned int parport)
+gbx_read_rom (const char *filename, unsigned short parport)
 {
   unsigned int bank, n_banks, rom_size, n_bytes = 0, totalbytes;
   time_t starttime;
@@ -1721,7 +1721,7 @@ gbx_read_rom (const char *filename, unsigned int parport)
 
 
 int
-gbx_write_rom (const char *filename, unsigned int parport)
+gbx_write_rom (const char *filename, unsigned short parport)
 {
   int bank, n_banks, n_bytes = 0, filesize;
   time_t starttime;
@@ -1852,7 +1852,7 @@ sram_size_banks (int pocket_camera, unsigned char sram_size_byte)
 
 
 int
-gbx_read_sram (const char *filename, unsigned int parport, int start_bank)
+gbx_read_sram (const char *filename, unsigned short parport, int start_bank)
 {
   int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
   time_t starttime;
@@ -1923,7 +1923,7 @@ gbx_read_sram (const char *filename, unsigned int parport, int start_bank)
 
 
 int
-gbx_write_sram (const char *filename, unsigned int parport, int start_bank)
+gbx_write_sram (const char *filename, unsigned short parport, int start_bank)
 {
   int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
   time_t starttime;

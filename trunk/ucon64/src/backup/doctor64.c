@@ -79,30 +79,30 @@ const st_getopt2_t doctor64_usage[] =
 
 
 static int
-parport_write (char src[], int len, unsigned int parport)
+parport_write (char src[], int len, unsigned short parport)
 {
   int maxwait, i;
 
   for (i = 0; i < len; i++)
     {
       maxwait = SEND_MAX_WAIT;
-      if ((inportb ((unsigned short) (parport + 2)) & 1) == 0) // check ~strobe
+      if ((inportb (parport + 2) & 1) == 0)     // check ~strobe
         {
-          while (((inportb ((unsigned short) (parport + 2)) & 2) != 0) && maxwait--)
+          while (((inportb (parport + 2) & 2) != 0) && maxwait--)
             ;                                   // wait for
           if (maxwait <= 0)
             return 1;                           // auto feed == 0
-          outportb ((unsigned short) parport, src[i]);           // write data
-          outportb ((unsigned short) (parport + 2), 5); // ~strobe = 1
+          outportb (parport, src[i]);           // write data
+          outportb (parport + 2, 5);            // ~strobe = 1
         }
       else
         {
-          while (((inportb ((unsigned short) (parport + 2)) & 2) == 0) && maxwait--)
+          while (((inportb (parport + 2) & 2) == 0) && maxwait--)
             ;                                   // wait for
           if (maxwait <= 0)
             return 1;                           // auto feed == 1
-          outportb ((unsigned short) parport, src[i]);           // write data
-          outportb ((unsigned short) (parport + 2), 4);            // ~strobe = 0
+          outportb (parport, src[i]);           // write data
+          outportb (parport + 2, 4);            // ~strobe = 0
         }
     }
   return 0;
@@ -110,68 +110,68 @@ parport_write (char src[], int len, unsigned int parport)
 
 
 static int
-parport_read (char dest[], int len, unsigned int parport)
+parport_read (char dest[], int len, unsigned short parport)
 {
   int i, maxwait;
   unsigned char c;
 
   for (i = 0; i < len; i++)
     {
-      outportb ((unsigned short) parport, REC_HIGH_NIBBLE);
+      outportb (parport, REC_HIGH_NIBBLE);
       maxwait = REC_MAX_WAIT;
-      while (((inportb ((unsigned short) (parport + 1)) & 0x80) == 0) && maxwait--)
+      while (((inportb (parport + 1) & 0x80) == 0) && maxwait--)
         ;                                       // wait for ~busy=1
       if (maxwait <= 0)
         return len - i;
-      c = (inportb ((unsigned short) (parport + 1)) >> 3) & 0x0f;  // ~ack, pe, slct, ~error
+      c = (inportb (parport + 1) >> 3) & 0x0f;  // ~ack, pe, slct, ~error
 
-      outportb ((unsigned short) parport, REC_LOW_NIBBLE);
+      outportb (parport, REC_LOW_NIBBLE);
       maxwait = REC_MAX_WAIT;
-      while (((inportb ((unsigned short) (parport + 1)) & 0x80) != 0) && maxwait--)
+      while (((inportb (parport + 1) & 0x80) != 0) && maxwait--)
         ;                                       // wait for ~busy=0
       if (maxwait <= 0)
         return len - i;
-      c |= (inportb ((unsigned short) (parport + 1)) << 1) & 0xf0; // ~ack, pe, slct, ~error
+      c |= (inportb (parport + 1) << 1) & 0xf0; // ~ack, pe, slct, ~error
 
       dest[i] = c;
     }
-  outportb ((unsigned short) parport, REC_HIGH_NIBBLE);
+  outportb (parport, REC_HIGH_NIBBLE);
   return 0;
 }
 
 
 int
-syncHeader (unsigned int baseport)
+syncHeader (unsigned short baseport)
 {
   int i = 0;
 
-  outportb ((unsigned short) baseport, 0);      // data = 00000000
-  outportb ((unsigned short) (baseport + 2), 4); // ~strobe=0
+  outportb (baseport, 0);                       // data = 00000000
+  outportb (baseport + 2, 4);                   // ~strobe=0
   while (i < SYNC_MAX_CNT)
     {
-      if ((inportb ((unsigned short) (baseport + 2)) & 8) == 0) // wait for select=0
+      if ((inportb (baseport + 2) & 8) == 0)    // wait for select=0
         {
-          outportb ((unsigned short) (baseport), 0xaa); // data = 10101010
-          outportb ((unsigned short) (baseport + 2), 0); // ~strobe=0, ~init=0
+          outportb (baseport, 0xaa);            // data = 10101010
+          outportb (baseport + 2, 0);           // ~strobe=0, ~init=0
           while (i < SYNC_MAX_CNT)
             {
-              if ((inportb ((unsigned short) (baseport + 2)) & 8) != 0) // wait for select=1
+              if ((inportb (baseport + 2) & 8) != 0) // wait for select=1
                 {
-                  outportb ((unsigned short) (baseport + 2), 4); // ~strobe=0
+                  outportb (baseport + 2, 4);   // ~strobe=0
                   while (i < SYNC_MAX_CNT)
                     {
-                      if ((inportb ((unsigned short) (baseport + 2)) & 8) == 0) // w for select=0
+                      if ((inportb (baseport + 2) & 8) == 0) // w for select=0
                         {
-                          outportb ((unsigned short) baseport, 0x55); // data = 01010101
-                          outportb ((unsigned short) (baseport + 2), 0); // ~strobe=0, ~init=0
+                          outportb (baseport, 0x55); // data = 01010101
+                          outportb (baseport + 2, 0); // ~strobe=0, ~init=0
                           while (i < SYNC_MAX_CNT)
                             {
-                              if ((inportb ((unsigned short) (baseport + 2)) & 8) != 0)    // w select=1
+                              if ((inportb (baseport + 2) & 8) != 0) // w select=1
                                 {
-                                  outportb ((unsigned short) (baseport + 2), 4); // ~strobe=0
+                                  outportb (baseport + 2, 4); // ~strobe=0
                                   while (i < SYNC_MAX_CNT)
                                     {
-                                      if ((inportb ((unsigned short) (baseport + 2)) & 8) == 0) // select=0
+                                      if ((inportb (baseport + 2) & 8) == 0) // select=0
                                         return 0;
                                       i++;
                                     }
@@ -188,13 +188,13 @@ syncHeader (unsigned int baseport)
         }
       i++;
     }
-  outportb ((unsigned short) (baseport + 2), 4);
+  outportb (baseport + 2, 4);
   return 1;
 }
 
 
 int
-initCommunication (unsigned int port)
+initCommunication (unsigned short port)
 {
   int i;
   for (i = 0; i < SYNC_MAX_TRY; i++)
@@ -209,19 +209,19 @@ initCommunication (unsigned int port)
 
 
 int
-checkSync (unsigned int baseport)
+checkSync (unsigned short baseport)
 {
   int i, j;
 
   for (i = 0; i < SYNC_MAX_CNT; i++)
     {
-      if (((inportb ((unsigned short) (baseport + 2)) & 3) == 3)
-          || ((inportb ((unsigned short) (baseport + 2)) & 3) == 0))
+      if (((inportb (baseport + 2) & 3) == 3)
+          || ((inportb (baseport + 2) & 3) == 0))
         {
-          outportb ((unsigned short) baseport, 0); // ~strobe, auto feed
+          outportb (baseport, 0);               // ~strobe, auto feed
           for (j = 0; j < SYNC_MAX_CNT; j++)
             {
-              if ((inportb ((unsigned short) (baseport + 1)) & 0x80) == 0) // wait for ~busy=0
+              if ((inportb (baseport + 1) & 0x80) == 0) // wait for ~busy=0
                 {
                   return 0;
                 }
@@ -234,7 +234,7 @@ checkSync (unsigned int baseport)
 
 
 int
-sendFilename (unsigned int baseport, char name[])
+sendFilename (unsigned short baseport, char name[])
 {
   int i;
   char *c, mname[12];
@@ -250,13 +250,13 @@ sendFilename (unsigned int baseport, char name[])
       c++;
     }
   for (i = 0; i < 8 && *c != '.' && *c != '\0'; i++, c++)
-    mname[i] = toupper (*c);
+    mname[i] = (char) toupper (*c);
   c = strrchr (c, '.');
   if (c != NULL)
     {
       c++;
       for (i = 8; i < 11 && *c != '\0'; i++, c++)
-        mname[i] = toupper (*c);
+        mname[i] = (char) toupper (*c);
     }
 
   return parport_write (mname, 11, baseport);
@@ -264,7 +264,7 @@ sendFilename (unsigned int baseport, char name[])
 
 
 int
-sendUploadHeader (unsigned int baseport, char name[], int len)
+sendUploadHeader (unsigned short baseport, char name[], int len)
 {
   char mname[12], lenbuffer[4];
   static char protocolId[] = "GD6R\1";
@@ -287,7 +287,7 @@ sendUploadHeader (unsigned int baseport, char name[], int len)
 
 
 int
-sendDownloadHeader (unsigned int baseport, int *len)
+sendDownloadHeader (unsigned short baseport, int *len)
 {
   char mname[12];
   static char protocolId[] = "GD6W";
@@ -316,7 +316,7 @@ sendDownloadHeader (unsigned int baseport, int *len)
 
 
 int
-doctor64_read (const char *filename, unsigned int parport)
+doctor64_read (const char *filename, unsigned short parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
@@ -337,7 +337,7 @@ doctor64_read (const char *filename, unsigned int parport)
       fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
       exit (1);
     }
-  if (!(fh = fopen (filename, "wb")))
+  if ((fh = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
@@ -347,22 +347,18 @@ doctor64_read (const char *filename, unsigned int parport)
   for (;;)
     {
       if (parport_read (buf, sizeof buf, parport) != 0)
-        {
-          fclose (fh);
-          return 0;
-        }
+        break;
       bytesreceived += sizeof buf;
       fwrite (buf, 1, sizeof buf, fh);
       ucon64_gauge (init_time, bytesreceived, size);
     }
-
   fclose (fh);
   return 0;
 }
 
 
 int
-doctor64_write (const char *filename, int start, int len, unsigned int parport)
+doctor64_write (const char *filename, int start, int len, unsigned short parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
@@ -385,7 +381,7 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
       exit (1);
     }
 
-  if (!(fh = fopen (filename, "rb")))
+  if ((fh = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
       exit (1);
@@ -395,7 +391,7 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
 
   for (;;)
     {
-      if (!(pos = fread (buf, 1, sizeof buf, fh)))
+      if ((pos = fread (buf, 1, sizeof buf, fh)) == 0)
         break;
       if (parport_write (buf, pos, parport) != 0)
         break;

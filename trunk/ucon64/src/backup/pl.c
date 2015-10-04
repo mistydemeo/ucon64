@@ -98,7 +98,7 @@ const st_getopt2_t pl_usage[] =
 #define TYPE_COLOR     0x01
 #define TYPE_MULTI     0x02
 
-static short int port_8, port_9, port_a, port_b, port_c;
+static unsigned short port_8, port_9, port_a, port_b, port_c;
 static parport_mode_t port_mode;
 static int current_ai;
 static unsigned char ai_value[4];
@@ -460,7 +460,7 @@ deinit_io (void)
 
 
 static void
-init_io (unsigned int port)
+init_io (unsigned short port)
 {
 #ifndef USE_PPDEV
   outportb ((unsigned short) (port_8 + 0x402), 0); // Set EPP mode for ECP chipsets
@@ -663,7 +663,7 @@ erase (void)
 
 
 int
-pl_read_rom (const char *filename, unsigned int parport)
+pl_read_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned int blocksleft, c_size, size, address = 0;
@@ -718,7 +718,7 @@ pl_read_rom (const char *filename, unsigned int parport)
 
 
 int
-pl_write_rom (const char *filename, unsigned int parport)
+pl_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned int size, bytesread, bytessent = 0, address = 0;
@@ -740,7 +740,7 @@ pl_write_rom (const char *filename, unsigned int parport)
 
   starttime = time (NULL);
 
-  while ((bytesread = fread (buffer, 1, 0x100, file)))
+  while ((bytesread = fread (buffer, 1, 0x100, file)) != 0)
     {
       if (write_block (address, buffer))
         break;                                  // write failed
@@ -757,7 +757,7 @@ pl_write_rom (const char *filename, unsigned int parport)
 
 
 int
-pl_info (unsigned int parport)
+pl_info (unsigned short parport)
 {
   unsigned int c_size, g_size;
   int g_type;

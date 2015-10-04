@@ -217,7 +217,7 @@ extern int sync (void);
 #include <io.h>
 #include <direct.h>
 #include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
-
+                                                //  come after <sys/types.h>. Yep, that's M$.
 #define S_IWUSR _S_IWRITE
 #define S_IRUSR _S_IREAD
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)

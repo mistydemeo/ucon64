@@ -52,8 +52,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
 //  uint16_t value16;
   uint8_t value8;
   char value_s[300];
-  const char track_header_magic[] = { 0, 0, 0x01, 0, 0, 0, (const char) 0xFF,
-    (const char) 0xFF, (const char) 0xFF, (const char) 0xFF};
+  const char track_header_magic[] = { 0, 0, 0x01, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF};
 
 #ifdef  DEBUG
   printf ("%lx\n", ftell(fh));
@@ -114,7 +113,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
     fseek (fh, 4, SEEK_CUR);   // [   4    0x980000 (4.x only)]
   fseek (fh, 2, SEEK_CUR);     //     2    2   (always?)
   fread (&value32, 4, 1, fh);  //     4    track->pregap_len = 0x96 (150 dec) in sectors
-  track->pregap_len = le2me_32 (value32);
+  track->pregap_len = (int16_t) le2me_32 (value32);
 #ifdef  DEBUG
   printf ("pregap: %x\n", track->pregap_len);
   fflush (stdout);
@@ -127,7 +126,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
 #endif
   fseek (fh, 6, SEEK_CUR);     // NULL
   fread (&value32, 4, 1, fh);  //     4    track_mode (0 = audio, 1 = mode1, 2 = mode2)
-  track->mode = le2me_32 (value32);
+  track->mode = (int8_t) le2me_32 (value32);
 #ifdef  DEBUG
   printf ("track mode: %d\n", track->mode);
   fflush (stdout);
@@ -136,7 +135,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
                                //     4    session_number (starting at 0)
                                //     4    track_number (in current session, starting at 0)
   fread (&value32, 4, 1, fh);  //     4    start_lba
-  track->start_lba = le2me_32 (value32);
+  track->start_lba = (int16_t) le2me_32 (value32);
   fread (&value32, 4, 1, fh);  //     4    total_length (pregap+track), less if truncated
   track->total_len = le2me_32 (value32);
 #if 1
@@ -148,7 +147,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
       fprintf (stderr, "ERROR: unsupported sector size (%u)\n", (unsigned int) value32);
       return -1;
     }
-  track->sector_size = cdi_track_modes[value32];
+  track->sector_size = (uint16_t) cdi_track_modes[value32];
 #else
   fseek (fh, 19, SEEK_CUR);    //    19    NULL
   fread (&value8, 1, 1, fh);  //     1    sector_size (0 = 2048, 1 = 2336, 2 = 2352)
@@ -229,7 +228,7 @@ cdi_init (dm_image_t *image)
   if (size < 8)
     return -1; // image file is too small
 
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return -1;
 
   fseek (fh, size - 8, SEEK_SET);

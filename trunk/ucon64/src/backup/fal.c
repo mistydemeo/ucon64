@@ -158,10 +158,10 @@ const st_getopt2_t fal_usage[] =
 //  5. If no diff get device Manuf ID for flash.
 //  6. If no Manuf ID detected then report no cart backup available.
 
-#define outpb(p, v) outportb((unsigned short) (p), (unsigned char) (v)); iodelay()
-#define inpb(p)     inportb((unsigned short) (p))
-#define outpw(p, v) outportw((unsigned short) (p), (unsigned char) (v)); iodelay()
-#define inpw(p)     inportw((unsigned short) (p))
+#define outpb(p, v) outportb ((unsigned short) (p), (unsigned char) (v)); iodelay ()
+#define inpb(p)     inportb ((unsigned short) (p))
+#define outpw(p, v) outportw ((unsigned short) (p), (unsigned char) (v)); iodelay ()
+#define inpw(p)     inportw ((unsigned short) (p))
 
 //#define HEADER_LENGTH 0xc0
 //#define OUTBUFLEN 256                   // Must be a multiple of 2! (ex:64,128,256...)
@@ -728,7 +728,7 @@ BackupROM (FILE *fp, int SizekW)
 
       for (j = 0; j < 256; j++)
         {
-          valw = PPReadWord ();
+          valw = (unsigned short) PPReadWord ();
           fputc (valw & 0xff, fp);
           fputc (valw >> 8, fp);
         }
@@ -768,7 +768,7 @@ dump (u8 BaseAdr)
           First = 0;
         }
 
-      v = PPReadWord ();
+      v = (unsigned short) PPReadWord ();
       val2 = v >> 8;
       val1 = v & 255;
 
@@ -1636,7 +1636,7 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
           fputs ("ERROR: Bank must be 1, 2, 3 or 4\n", stderr);
           exit (1);
         }
-      bank_str[0] = '0' + bank;
+      bank_str[0] = (char) ('0' + bank);
       bank_str[1] = 0;                          // terminate string
       fal_argv[fal_argc++] = bank_str;
       fal_argv[fal_argc++] = "2";               // 64 kB
@@ -1667,7 +1667,7 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
           fputs ("ERROR: Bank must be 1, 2, 3 or 4\n", stderr);
           exit (1);
         }
-      bank_str[0] = '0' + bank;
+      bank_str[0] = (char) ('0' + bank);
       bank_str[1] = 0;                          // terminate string
       fal_argv[fal_argc++] = bank_str;
     }

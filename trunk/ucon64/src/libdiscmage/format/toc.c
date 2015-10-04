@@ -88,7 +88,7 @@ dm_toc_write (const dm_image_t *image)
       set_suffix (buf, ".TOC");
 #endif
 
-      if (!(fh = fopen (buf, "wb")))
+      if ((fh = fopen (buf, "wb")) == NULL)
         {
           result = -1;
           continue;
@@ -143,7 +143,7 @@ toc_init (dm_image_t *image)
     }
 
   // missing or invalid cue? try the image itself
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return -1;
         
 #if 1

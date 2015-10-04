@@ -114,7 +114,7 @@ typedef struct
   char parport_dev[80];                         // parallel port device (e.g.
 //#endif                                          //  /dev/parport0 or parallel.device)
   int parport_needed;
-  int parport;                                  // parallel port address
+  uint16_t parport;                             // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
 #ifdef  USE_USB
   int usbport;                                  // non-zero => use usbport, 1 = USB0, 2 = USB1

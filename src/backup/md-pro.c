@@ -183,7 +183,7 @@ write_ram_by_page (int *addr, unsigned char *buf)
 
 
 int
-md_read_rom (const char *filename, unsigned int parport, int size)
+md_read_rom (const char *filename, unsigned short parport, int size)
 {
   FILE *file;
   unsigned short int id;
@@ -247,7 +247,7 @@ md_read_rom (const char *filename, unsigned int parport, int size)
 
 
 int
-md_write_rom (const char *filename, unsigned int parport)
+md_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x20];
@@ -308,7 +308,7 @@ md_write_rom (const char *filename, unsigned int parport)
       else if (multi_game)
         bytesleft = MD_PRO_LOADER_SIZE;         // the loader
 
-      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)))
+      while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)) != 0)
         {
           ucon64_bswap16_n (buffer, 0x4000);
           if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
@@ -334,7 +334,7 @@ md_write_rom (const char *filename, unsigned int parport)
 
 
 int
-md_read_sram (const char *filename, unsigned int parport, int start_bank)
+md_read_sram (const char *filename, unsigned short parport, int start_bank)
 /*
   The MD-PRO has 256 kB of SRAM. However, the SRAM dumps of all games that have
   been tested had each byte doubled. In order to make it possible to easily
@@ -426,7 +426,7 @@ md_read_sram (const char *filename, unsigned int parport, int start_bank)
 
 
 int
-md_write_sram (const char *filename, unsigned int parport, int start_bank)
+md_write_sram (const char *filename, unsigned short parport, int start_bank)
 {
   FILE *file;
   unsigned char buffer[0x4000];
@@ -465,7 +465,7 @@ md_write_sram (const char *filename, unsigned int parport, int start_bank)
     }
 
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, 0x4000, file)))
+  while ((bytesread = fread (buffer, 1, 0x4000, file)) != 0)
     {
       write_block (&address, buffer);
       bytessend += bytesread;

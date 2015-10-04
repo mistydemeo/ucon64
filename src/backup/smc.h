@@ -39,9 +39,9 @@ typedef struct st_smc_header
 #define SMC_TRAINER 0x40
 
 #ifdef USE_PARALLEL
-extern int smc_write_rom (const char *filename, unsigned int parport);
-extern int smc_read_rts (const char *filename, unsigned int parport);
-extern int smc_write_rts (const char *filename, unsigned int parport);
+extern int smc_write_rom (const char *filename, unsigned short parport);
+extern int smc_read_rts (const char *filename, unsigned short parport);
+extern int smc_write_rts (const char *filename, unsigned short parport);
 #endif
 
 #endif // SMC_H

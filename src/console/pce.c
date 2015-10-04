@@ -676,7 +676,7 @@ swapbits (unsigned char *buffer, int size)
       for (bit = 0; bit < 8; bit++)
         if (buffer[n] & (1 << bit))
           byte |= 1 << (7 - bit);
-      buffer[n] = byte;
+      buffer[n] = (unsigned char) byte;
     }
 }
 
@@ -691,14 +691,14 @@ pce_msg (st_ucon64_nfo_t *rominfo)
   int size = ucon64.file_size - rominfo->backup_header_len;
 
   if (rominfo->interleaved)
-    if (!(rom_buffer = (unsigned char *) malloc (size)))
+    if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
       {
         fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
         return -1;
       }
 
   memset (&header, 0, MSG_HEADER_LEN);
-  header.size = size / 8192;
+  header.size = (unsigned char) (size / 8192);
   header.emulation = size == 3 * MBIT ? 1 : 0;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
@@ -736,7 +736,7 @@ pce_mgd (st_ucon64_nfo_t *rominfo)
   int size = ucon64.file_size - rominfo->backup_header_len;
 
   if (!rominfo->interleaved)
-    if (!(rom_buffer = (unsigned char *) malloc (size)))
+    if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
       {
         fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
         return -1;
@@ -773,7 +773,7 @@ pce_swap (st_ucon64_nfo_t *rominfo)
   unsigned char *rom_buffer;
   int size = ucon64.file_size - rominfo->backup_header_len;
 
-  if (!(rom_buffer = (unsigned char *) malloc (size)))
+  if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;
@@ -857,7 +857,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
       if (!isprint ((int) name[n]))
         name[n] = '.';
       else
-        name[n] = toupper (name[n]);            // loader only supports upper case characters
+        name[n] = (unsigned char) toupper (name[n]); // loader only supports upper case characters
     }
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (totalsize / MBIT, destfile);           // 0x1d = bank code
@@ -1091,7 +1091,7 @@ pce_init (st_ucon64_nfo_t *rominfo)
     ucon64.backup_header_len : (ucon64.file_size > x ? x : 0);
 
   size = ucon64.file_size - rominfo->backup_header_len;
-  if (!(rom_buffer = (unsigned char *) malloc (size)))
+  if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;

@@ -495,7 +495,7 @@ get_address (void)
 
 
 int
-doctor64jr_read (const char *filename, unsigned int parport)
+doctor64jr_read (const char *filename, unsigned short parport)
 {
   (void) filename;
   (void) parport;
@@ -505,7 +505,7 @@ doctor64jr_read (const char *filename, unsigned int parport)
 
 
 int
-doctor64jr_write (const char *filename, unsigned int parport)
+doctor64jr_write (const char *filename, unsigned short parport)
 {
   unsigned int enable_write = 0, size, bytesread, bytessend = 0, n_pages;
   time_t init_time;

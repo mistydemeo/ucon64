@@ -137,7 +137,7 @@ get_blocks3 (unsigned char *header)
 
 
 int
-smc_write_rom (const char *filename, unsigned int parport)
+smc_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -194,7 +194,7 @@ smc_write_rom (const char *filename, unsigned int parport)
       ffe_send_command0 (0x4507, (unsigned char) (n + offset));
       if ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) == 0)
         break;
-      ffe_send_block (0x6000, buffer, bytesread);
+      ffe_send_block (0x6000, buffer, (unsigned short) bytesread);
 
       bytessend += bytesread;
       ucon64_gauge (starttime, bytessend, size);
@@ -206,7 +206,7 @@ smc_write_rom (const char *filename, unsigned int parport)
       ffe_send_command0 (0x4507, (unsigned char) (n + 32));
       if ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) == 0)
         break;
-      ffe_send_block (0x6000, buffer, bytesread);
+      ffe_send_block (0x6000, buffer, (unsigned short) bytesread);
 
       bytessend += bytesread;
       ucon64_gauge (starttime, bytessend, size);
@@ -223,7 +223,7 @@ smc_write_rom (const char *filename, unsigned int parport)
           ffe_send_command0 (0x42ff, 0x30);
           if ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) == 0)
             break;
-          ffe_send_block (0x6000, buffer, bytesread);
+          ffe_send_block (0x6000, buffer, (unsigned short) bytesread);
         }
       else
         {
@@ -234,7 +234,7 @@ smc_write_rom (const char *filename, unsigned int parport)
             ffe_send_command0 ((unsigned short) (0x4510 + m), (unsigned char) (n * 8 + m));
           if ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) == 0)
             break;
-          ffe_send_block2 (0, buffer, bytesread);
+          ffe_send_block2 (0, buffer, (unsigned short) bytesread);
         }
 
       bytessend += bytesread;
@@ -258,7 +258,7 @@ smc_write_rom (const char *filename, unsigned int parport)
 
 
 int
-smc_read_rts (const char *filename, unsigned int parport)
+smc_read_rts (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -338,7 +338,7 @@ smc_read_rts (const char *filename, unsigned int parport)
 
 
 int
-smc_write_rts (const char *filename, unsigned int parport)
+smc_write_rts (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;

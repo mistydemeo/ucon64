@@ -96,11 +96,11 @@ int
 dm_track_init (dm_track_t *track, FILE *fh)
 {
   int pos = 0, x = 0, identified = 0;
-  const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
-                               (const char) 0xff, (const char) 0xff,
-                               (const char) 0xff, (const char) 0xff,
-                               (const char) 0xff, (const char) 0xff,
-                               (const char) 0xff, (const char) 0xff, 0};
+  const char sync_data[] = {0, 0xff, 0xff,
+                               0xff, 0xff,
+                               0xff, 0xff,
+                               0xff, 0xff,
+                               0xff, 0xff, 0};
   char value_s[32];
   uint8_t value8 = 0;
 
@@ -166,10 +166,10 @@ dm_track_init (dm_track_t *track, FILE *fh)
       return -1;
     }
 
-  track->sector_size = track_probe[x].sector_size;
-  track->mode = track_probe[x].mode;
-  track->seek_header = track_probe[x].seek_header;
-  track->seek_ecc = track_probe[x].seek_ecc;
+  track->sector_size = (uint16_t) track_probe[x].sector_size;
+  track->mode = (int8_t) track_probe[x].mode;
+  track->seek_header = (int16_t) track_probe[x].seek_header;
+  track->seek_ecc = (int16_t) track_probe[x].seek_ecc;
   track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
   track->id = dm_get_track_mode_id (track->mode, track->sector_size);
 
@@ -246,7 +246,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 
   image->type = probe[x].type;
 
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return image;
 
   // verify header or sheet informations
@@ -297,7 +297,7 @@ dm_read (char *buffer, int track_num, int sector, const dm_image_t *image)
   dm_track_t *track = (dm_track_t *) &image->track[track_num];
   FILE *fh;
   
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return 0;
 
   if (fseek (fh, track->track_start + (track->sector_size * sector), SEEK_SET) != 0)

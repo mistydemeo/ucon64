@@ -89,7 +89,7 @@ const st_getopt2_t fig_usage[] =
 
 
 static int receive_rom_info (unsigned char *buffer);
-static int get_rom_size (unsigned char *info_block);
+static unsigned char get_rom_size (unsigned char *info_block);
 static int check1 (unsigned char *info_block, int index);
 static int check2 (unsigned char *info_block, int index, unsigned char value);
 static int check3 (unsigned char *info_block, int index1, int index2, int size);
@@ -102,16 +102,16 @@ static int hirom;
 #error receive_rom_info() and fig_read_sram() expect BUFFERSIZE to be at least \
        512 bytes.
 #endif
-int
+static int
 receive_rom_info (unsigned char *buffer)
 /*
   - returns size of ROM in Mb (128 kB) units
   - sets global `hirom'
 */
 {
-  int n, size;
+  unsigned short n;
   volatile int m;
-  unsigned char byte;
+  unsigned char byte, size;
 
   ffe_send_command0 (0xe00c, 0);
 
@@ -125,11 +125,11 @@ receive_rom_info (unsigned char *buffer)
         hirom = 1;
     }
 
-  for (n = 0; n < (int) FIG_HEADER_LEN; n++)
+  for (n = 0; n < FIG_HEADER_LEN; n++)
     {
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
-      ffe_send_command (5, (unsigned short) (0x200 + n), 0);
+      ffe_send_command (5, 0x200 + n, 0);
       buffer[n] = ffe_send_command1 (0xa0a0);
     }
 
@@ -141,7 +141,7 @@ receive_rom_info (unsigned char *buffer)
 }
 
 
-int
+static unsigned char
 get_rom_size (unsigned char *info_block)
 // returns size of ROM in Mb units
 {
@@ -194,7 +194,7 @@ get_rom_size (unsigned char *info_block)
 }
 
 
-int
+static int
 check1 (unsigned char *info_block, int index)
 {
   int n;
@@ -207,7 +207,7 @@ check1 (unsigned char *info_block, int index)
 }
 
 
-int
+static int
 check2 (unsigned char *info_block, int index, unsigned char value)
 {
   int n;
@@ -220,7 +220,7 @@ check2 (unsigned char *info_block, int index, unsigned char value)
 }
 
 
-int
+static int
 check3 (unsigned char *info_block, int index1, int index2, int size)
 {
   int n;
@@ -233,7 +233,7 @@ check3 (unsigned char *info_block, int index1, int index2, int size)
 }
 
 
-void
+static void
 handle_swc_header (unsigned char *header)
 {
   if ((header[2] & 0x10) == 0x10)
@@ -282,7 +282,7 @@ handle_swc_header (unsigned char *header)
 
 
 int
-fig_read_rom (const char *filename, unsigned int parport)
+fig_read_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -390,11 +390,11 @@ fig_read_rom (const char *filename, unsigned int parport)
 
 
 int
-fig_write_rom (const char *filename, unsigned int parport)
+fig_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread = 0, bytessend, totalblocks, blocksdone = 0, blocksleft, fsize,
+  int bytesread = 0, bytessent, totalblocks, blocksdone = 0, blocksleft, fsize,
       n, emu_mode_select;
   unsigned short address1, address2;
   time_t starttime;
@@ -424,7 +424,7 @@ fig_write_rom (const char *filename, unsigned int parport)
 
   ffe_send_command (5, 0, 0);
   ffe_send_block (0x400, buffer, FIG_HEADER_LEN); // send header
-  bytessend = FIG_HEADER_LEN;
+  bytessent = FIG_HEADER_LEN;
 
   hirom = snes_get_snes_hirom ();
   if (hirom)
@@ -443,30 +443,30 @@ fig_write_rom (const char *filename, unsigned int parport)
         for (n = 0; n < 4; n++)
           {
             bytesread = fread (buffer, 1, BUFFERSIZE, file);
-            ffe_send_command0 ((unsigned short) 0xc010, (unsigned char) (blocksdone >> 9));
+            ffe_send_command0 (0xc010, (unsigned char) (blocksdone >> 9));
             ffe_send_command (5, address1, 0);
-            ffe_send_block (0x0000, buffer, bytesread);
+            ffe_send_block (0x0000, buffer, (unsigned short) bytesread);
             address1++;
             blocksleft--;
             blocksdone++;
 
-            bytessend += bytesread;
-            ucon64_gauge (starttime, bytessend, fsize);
+            bytessent += bytesread;
+            ucon64_gauge (starttime, bytessent, fsize);
             ffe_checkabort (2);
           }
 
       for (n = 0; n < 4; n++)
         {
           bytesread = fread (buffer, 1, BUFFERSIZE, file);
-          ffe_send_command0 ((unsigned short) 0xc010, (unsigned char) (blocksdone >> 9));
+          ffe_send_command0 (0xc010, (unsigned char) (blocksdone >> 9));
           ffe_send_command (5, address2, 0);
-          ffe_send_block (0x8000, buffer, bytesread);
+          ffe_send_block (0x8000, buffer, (unsigned short) bytesread);
           address2++;
           blocksleft--;
           blocksdone++;
 
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, fsize);
+          bytessent += bytesread;
+          ucon64_gauge (starttime, bytessent, fsize);
           ffe_checkabort (2);
         }
     }
@@ -478,10 +478,9 @@ fig_write_rom (const char *filename, unsigned int parport)
   ffe_send_command (6, (unsigned short) (1 | (emu_mode_select << 8)), 0);
 
   ffe_wait_for_ready ();
-  outportb ((unsigned short) (parport + PARPORT_DATA), 0);
-  outportb ((unsigned short) (parport + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) // invert strobe
-                                      (parport + PARPORT_CONTROL)) ^ PARPORT_STROBE));
+  outportb (parport + PARPORT_DATA, 0);
+  outportb (parport + PARPORT_CONTROL,
+            inportb (parport + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
 
   free (buffer);
   fclose (file);
@@ -492,7 +491,7 @@ fig_write_rom (const char *filename, unsigned int parport)
 
 
 int
-fig_read_sram (const char *filename, unsigned int parport)
+fig_read_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -551,11 +550,11 @@ fig_read_sram (const char *filename, unsigned int parport)
 
 
 int
-fig_write_sram (const char *filename, unsigned int parport)
+fig_write_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0, size;
+  int bytesread, bytessent = 0, size;
   unsigned short address;
   time_t starttime;
 
@@ -584,14 +583,14 @@ fig_write_sram (const char *filename, unsigned int parport)
                                                 //  because if we get here q works ;-)
   address = 0x100;
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
       ffe_send_command (5, address, 0);
-      ffe_send_block (0x2000, buffer, bytesread);
+      ffe_send_block (0x2000, buffer, (unsigned short) bytesread);
       address++;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 
@@ -604,7 +603,7 @@ fig_write_sram (const char *filename, unsigned int parport)
 
 
 int
-fig_read_cart_sram (const char *filename, unsigned int parport)
+fig_read_cart_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, byte;
@@ -659,7 +658,7 @@ fig_read_cart_sram (const char *filename, unsigned int parport)
   while (bytesreceived < size)
     {
       ffe_send_command (5, address, 0);
-      ffe_receive_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, BUFFERSIZE);
+      ffe_receive_block (hirom ? 0x6000 : 0x2000, buffer, BUFFERSIZE);
       fwrite (buffer, 1, BUFFERSIZE, file);
       address += hirom ? 4 : 1;
 
@@ -677,11 +676,11 @@ fig_read_cart_sram (const char *filename, unsigned int parport)
 
 
 int
-fig_write_cart_sram (const char *filename, unsigned int parport)
+fig_write_cart_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, byte;
-  int bytesread, bytessend = 0, size;
+  int bytesread, bytessent = 0, size;
   unsigned short address;
   time_t starttime;
 
@@ -726,14 +725,14 @@ fig_write_cart_sram (const char *filename, unsigned int parport)
   address = hirom ? 0x2c3 : 0x1c0;
 
   starttime = time (NULL);
-  while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
+  while (bytessent < size && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)) != 0)
     {
       ffe_send_command (5, address, 0);
-      ffe_send_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, bytesread);
+      ffe_send_block (hirom ? 0x6000 : 0x2000, buffer, (unsigned short) bytesread);
       address += hirom ? 4 : 1;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 

@@ -49,11 +49,11 @@ static void set_addr_read (int addr);
 static void set_addr_write (int addr);
 static unsigned char get_id_byte (unsigned char addr);
 
-static short int port_8, port_9, port_a, port_b, port_c;
+static unsigned short port_8, port_9, port_a, port_b, port_c;
 
 
 void
-ttt_init_io (unsigned int port)
+ttt_init_io (unsigned short port)
 {
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
@@ -83,7 +83,7 @@ ttt_deinit_io (void)
 }
 
 
-void
+static void
 set_data_read (void)                            // original name: set_data_read
 {
   outportb (port_a, 0);                         // nastb=1,nib_sel=0,ndstb=1,nwrite=1
@@ -91,7 +91,7 @@ set_data_read (void)                            // original name: set_data_read
 
 
 #if 0
-void
+static void
 set_data_write (void)                           // original name: set_data_write
 {
   outportb (port_a, 1);                         // nastb=1,nib_sel=0,ndstb=1,nwrite=0
@@ -99,7 +99,7 @@ set_data_write (void)                           // original name: set_data_write
 #endif
 
 
-void
+static void
 set_ai (unsigned char ai)                       // original name: {epp_}set_ai
 {
   outportb (port_a, 1);                         // set_data_write ()
@@ -116,12 +116,11 @@ ttt_set_ai_data (unsigned char ai, unsigned char data) // original name: set_ai_
 }
 
 
-void
+static void
 init_port (void)                                // original name: init_port
 {
 #ifndef USE_PPDEV
-  outportb ((unsigned short) (port_8 + 0x402),
-            (unsigned char) ((inportb ((unsigned short) (port_8 + 0x402)) & 0x1f) | 0x80));
+  outportb (port_8 + 0x402, (inportb (port_8 + 0x402) & 0x1f) | 0x80);
   outportb (port_9, 1);                         // clear EPP time flag
 #endif
   ttt_set_ai_data (6, 0);                       // rst=0, wei=0(dis.), rdi=0(dis.)
@@ -129,7 +128,7 @@ init_port (void)                                // original name: init_port
 }
 
 
-void
+static void
 deinit_port (void)                              // original name: Close_end_port
 {
   outportb (port_a, 1);
@@ -138,7 +137,7 @@ deinit_port (void)                              // original name: Close_end_port
 }
 
 
-void
+static void
 end_port (void)                                 // original name: end_port
 {
   ttt_set_ai_data (6, 0);                       // rst=0, wei=0(dis.), rdi=0(dis.)
@@ -174,7 +173,7 @@ ttt_ram_disable (void)                          // original name: ramCS_off
 }
 
 
-void
+static void
 set_addr_write (int addr)                       // original name: set_Long_adrw
 {
   ttt_set_ai_data (0, (unsigned char) (addr & 0xff)); // a[7..0]
@@ -186,7 +185,7 @@ set_addr_write (int addr)                       // original name: set_Long_adrw
 }
 
 
-void
+static void
 set_addr_read (int addr)                        // original name: set_Long_adr
 {
   set_addr_write (addr);
@@ -202,7 +201,7 @@ ttt_write_mem (int addr, unsigned char b)       // original name: WriteMEMb
 }
 
 
-unsigned char
+static unsigned char
 get_id_byte (unsigned char addr)                // original name: GETID
 {
   unsigned char byte;
@@ -221,10 +220,10 @@ get_id_byte (unsigned char addr)                // original name: GETID
 }
 
 
-unsigned short int
+unsigned short
 ttt_get_id (void)                               // original name: getIDword
 {
-  unsigned short int word;
+  unsigned short word;
 
 //  eep_reset ();
   word = get_id_byte (0);                       // msg
@@ -258,9 +257,9 @@ ttt_read_rom_w (int addr, unsigned char *buf)   // original name: read_buff
   set_addr_read (addr);
   for (count = 0; count < 0x80; count++)
 #ifdef  WORDS_BIGENDIAN
-    ((unsigned short int *) buf)[count] = bswap_16 (inportw (port_c)); // read_dataw ()
+    ((unsigned short *) buf)[count] = bswap_16 (inportw (port_c)); // read_dataw ()
 #else
-    ((unsigned short int *) buf)[count] = inportw (port_c); // read_dataw ()
+    ((unsigned short *) buf)[count] = inportw (port_c); // read_dataw ()
 #endif
 }
 
@@ -287,7 +286,7 @@ ttt_read_ram_w (int addr, unsigned char *buf)   // original name: readpagerambuf
 
   set_addr_read (addr);
   for (count = 0; count < 0x80; count++)
-    ((unsigned short int *) buf)[count] = inportw (port_c);
+    ((unsigned short *) buf)[count] = inportw (port_c);
   // read_dataw (); data is doubled for MD-PRO => no problems with endianess
 }
 

@@ -482,13 +482,14 @@ psx_controller_vinit (int base, int conport, int tap, int delay)
 {
   int i, vibrate_init_string[3][11] =
     {
-      {tap, 0x43, 0x00, 0x01, 0x00, 0x01, -1},
-      {tap, 0x4d, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0x01, -1},
-      {tap, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, -1},
+      {0, 0x43, 0x00, 0x01, 0x00, 0x01, -1},
+      {0, 0x4d, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0x01, -1},
+      {0, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, -1},
     };
 
   for (i = 0; i < 3; i++)
     {
+	  vibrate_init_string[i][0] = tap;
       psx_delay (base, delay);
       psx_delay (base, delay);
       psx_delay (base, delay);
@@ -506,7 +507,10 @@ void
 psx_controller_vshock (int base, int conport, int tap, int delay, int shock,
                        int rumble)
 {
-  int dualshock_string[7] = { tap, 0x42, 0x00, shock, rumble, 0x01, -1 };
+  int dualshock_string[7] = { 0, 0x42, 0x00, 0, 0, 0x01, -1 };
+  dualshock_string[0] = tap;
+  dualshock_string[3] = shock;
+  dualshock_string[4] = rumble;
 
   psx_controller_vinit (base, conport, tap, delay);
 
@@ -527,12 +531,15 @@ psx_memcard_read_frame (int base, int conport, int tap, int delay, int frame)
 {
   int i, xor_val;
   static unsigned char data[128], c_data;
-  unsigned char cmd_rstring_hdr[4] = { (0x80 + (unsigned char) tap), 0x52, 0x00, 0x00 },
+  unsigned char cmd_rstring_hdr[4] = { 0, 0x52, 0x00, 0x00 },
                 chk_rstring_hdr[2] = { 0x5a, 0x5d },
-                cmd_rstring_adr[2] = { (frame >> 8) & 0xff, frame & 0xff },
+                cmd_rstring_adr[2],
                 chk_rstring_ack[1] = { 0x5c },
                 chk_rstring_sfl[1] = { 0x5d },
                 chk_rstring_efl[1] = { 0x47 };
+  cmd_rstring_hdr[0] = 0x80 + (tap & 0xff);
+  cmd_rstring_adr[0] = (frame >> 8) & 0xff;
+  cmd_rstring_adr[1] = frame & 0xff;
 
   psx_sendinit (base, conport, delay);
 
@@ -656,11 +663,14 @@ psx_memcard_write_frame (int base, int conport, int tap, int delay, int frame,
 {
   int i, xor_val;
   unsigned char c_data,
-                cmd_wstring_hdr[4] = { (0x80 + (unsigned char) tap), 0x57, 0x00, 0x00 },
+                cmd_wstring_hdr[4] = { 0, 0x57, 0x00, 0x00 },
                 chk_wstring_hdr[2] = { 0x5a, 0x5d },
-                cmd_wstring_adr[2] = { (frame >> 8) & 0xff, frame & 0xff },
+                cmd_wstring_adr[2],
                 chk_wstring_emk[2] = { 0x5c, 0x5d },
                 chk_wstring_efl[1] = { 0x47 };
+  cmd_wstring_hdr[0] = 0x80 + (tap & 0xff);
+  cmd_wstring_adr[0] = (frame >> 8) & 0xff;
+  cmd_wstring_adr[1] = frame & 0xff;
 
   psx_sendinit (base, conport, delay);
 

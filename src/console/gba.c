@@ -310,7 +310,7 @@ gba_chk (st_ucon64_nfo_t *rominfo)
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
-  buf = rominfo->current_internal_crc;
+  buf = (char) rominfo->current_internal_crc;
   ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->backup_header_len + 0xbd,
     buf, "r+b");
 
@@ -419,7 +419,7 @@ gba_sram (void)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (!(buffer = (unsigned char *) malloc (fsize)))
+  if ((buffer = (unsigned char *) malloc (fsize)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], fsize);
       fclose (destfile);
@@ -555,7 +555,7 @@ gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
   FILE *srcfile, *destfile;
   int bytesread, n = 0;
   char buffer[32 * 1024], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
-       replace[2], wait_time = atoi (value);
+       replace[2], wait_time = (char) atoi (value);
 
   if (wait_time % 4 != 0 || wait_time > 28 || wait_time < 0)
     {
@@ -586,7 +586,7 @@ gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
 
   replace[0] = wait_time;
   replace[1] = 0x40;
-  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
+  while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
       n += change_mem (buffer, bytesread, "\x04\x02\x00\x04\x14\x40", 6, '*', '!', replace, 1, -1);
       n += change_mem (buffer, bytesread, "\x02\x00\x04\x14\x40\x00", 6, '*', '!', replace, 1, -2);
@@ -967,7 +967,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
   unsigned char *ptr = NULL;
 
   for (ptr = buffer;
-       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch_orig, 38, 0));
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch_orig, 38, 0)) != NULL;
        ptr++)
     {
       if (ucon64.quiet < 0)
@@ -978,7 +978,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
     }  
 
   for (ptr = buffer;
-       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch2_orig, 38, 0));
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch2_orig, 38, 0)) != NULL;
        ptr++)
     {
       if (ucon64.quiet < 0)
@@ -989,7 +989,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
     }  
 
   for (ptr = buffer;
-       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch3_orig, 38, MEMMEM2_WCARD (0x3f)));
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch3_orig, 38, MEMMEM2_WCARD (0x3f))) != NULL;
        ptr++)
     {
       if (ucon64.quiet < 0)
@@ -1000,7 +1000,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
     }  
 
   for (ptr = buffer;
-       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch4_orig, 40, MEMMEM2_WCARD (0x3f)));
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch4_orig, 40, MEMMEM2_WCARD (0x3f))) != NULL;
        ptr++)
     {
       if (ucon64.quiet < 0)
@@ -1011,7 +1011,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
     }  
 
   for (ptr = buffer;
-       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch5_orig, 42, 0));
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), saver_patch5_orig, 42, 0)) != NULL;
        ptr++)
     {
       if (ucon64.quiet < 0)
@@ -1143,7 +1143,7 @@ gba_sc (void)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (!(buffer = (unsigned char *) malloc (fsize)))
+  if ((buffer = (unsigned char *) malloc (fsize)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], fsize);
       fclose (destfile);
@@ -1162,7 +1162,7 @@ gba_sc (void)
 
   // restart
   for (ptr = buffer;
-       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), sc_orig[0], 4, 0)) &&
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), sc_orig[0], 4, 0)) != NULL &&
        (ptr - buffer) < 7445976;                // seems like < 7445976 is far enough
                                                 // SONICPINBALL 64Mb (< 7445976)
                                                 // AGB KIRBY DX (< 10223404) 128Mb
@@ -1177,7 +1177,7 @@ gba_sc (void)
         }  
 
   for (ptr = buffer;
-       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), sc2_orig, 4, 0)) &&
+       (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer), sc2_orig, 4, 0)) != NULL &&
        (ptr - buffer) < 7445660;                // seems like < 7445660 is far enough
                                                 // SONICPINBALL 64 Mb (< 7445660)
                                                 // AGB KIRBY DX (< 10223428) 128Mb
@@ -1207,7 +1207,7 @@ gba_sc (void)
   printf ("Writing restart menu at offset: 0x%08x\n", fsize - padded);
 
   // there is a 52232 bytes blank before the actual menu
-  if (!(buffer = (unsigned char *) realloc (buffer, GBA_SCI_TEMPLATE_SIZE)))
+  if ((buffer = (unsigned char *) realloc (buffer, GBA_SCI_TEMPLATE_SIZE)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], GBA_SCI_TEMPLATE_SIZE);
       fclose (destfile);

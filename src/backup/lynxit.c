@@ -136,8 +136,8 @@ static int debug = FALSE, quiet = FALSE, verify = TRUE;
 
 #define  MESSAGE(body) printf body
 
-#define  INPUT(port)        inportb((unsigned short) (port))
-#define  OUTPUT(port, data) outportb((unsigned short) (port), (unsigned char) (data))
+#define  INPUT(port)        inportb ((unsigned short) (port))
+#define  OUTPUT(port, data) outportb ((unsigned short) (port), (unsigned char) (data))
 
 
 #if 0
@@ -696,8 +696,8 @@ cart_read (char *filename)
   strcpy (header.magic, MAGIC_STRING);
   strcpy (header.cartname, cartname);
   strcpy (header.manufname, manufname);
-  header.page_size_bank0 = cart_analyse (BANK0);
-  header.page_size_bank1 = cart_analyse (BANK1);
+  header.page_size_bank0 = (short) cart_analyse (BANK0);
+  header.page_size_bank1 = (short) cart_analyse (BANK1);
   header.version = FILE_FORMAT_VERSION;
 
   if ((fp = fopen (filename, "wb")) == NULL)
@@ -899,7 +899,7 @@ perform_test (char *testname)
                 }
             }
         }
-      return TRUE;
+//      return TRUE;
     }
   else
     {
@@ -940,7 +940,7 @@ lynxit_main (int argc, char **argv)
         {
 //          usage ();
           printf ("\nInvalid argument %d <%s>\n", loop, argv[loop]);
-          exit (FALSE);
+          return FALSE;
         }
 
       switch (argv[loop][1])
@@ -959,11 +959,11 @@ lynxit_main (int argc, char **argv)
           break;
         case 'H':
 //          usage ();
-          exit (FALSE);
+          return FALSE;
         default:
 //          usage ();
           printf ("\nUnrecognised argument %d <%s>\n", loop, argv[loop]);
-          exit (FALSE);
+          return FALSE;
         }
     }
 
@@ -973,7 +973,7 @@ lynxit_main (int argc, char **argv)
     {
 //      usage ();
       MESSAGE (("\nERROR    : Missing command/filename\n"));
-      exit (FALSE);
+      return FALSE;
     }
 
   // Initialise the printer port
@@ -982,7 +982,7 @@ lynxit_main (int argc, char **argv)
     {
       MESSAGE (("ERROR    : Couldn't initialise printer port LPT%d\n",
                 printer_port));
-      exit (FALSE);
+      return FALSE;
     }
 
   // Perform loopback tests to prove operation
@@ -992,7 +992,7 @@ lynxit_main (int argc, char **argv)
     {
       MESSAGE (("ERROR    : LYNXIT doesn't appear to be working ????\n"));
       MESSAGE (("ERROR    : (Check its plugged in and switched on)\n"));
-      exit (FALSE);
+      return FALSE;
     }
 
   if (strcmp (argv[loop], "READ") == 0)
@@ -1000,21 +1000,21 @@ lynxit_main (int argc, char **argv)
       if (loop + 3 >= argc)
         {
           MESSAGE (("ERROR    : Missing Cartname/Manufacturer arguments\n"));
-          exit (FALSE);
+          return FALSE;
         }
       strcpy (cartname, argv[argc - 2]);
       strcpy (manufname, argv[argc - 1]);
       if (strlen (cartname) > 32 || strlen (manufname) > 16)
         {
           MESSAGE (("ERROR    : Cartname/Manufacturer arguments too long (32/16)\n"));
-          exit (FALSE);
+          return FALSE;
         }
 
       strcpy (buf, argv[++loop]);
       if (cart_read (buf) == FALSE)
         {
           MESSAGE (("ERROR    : Cartridge read failed\n"));
-          exit (FALSE);
+          return FALSE;
         }
     }
   else if (strcmp (argv[loop], "WRITE") == 0)
@@ -1034,10 +1034,10 @@ lynxit_main (int argc, char **argv)
     {
 //      usage ();
       printf ("\nInvalid command argument - Use READ/WRITE/VERIFY/TEST\n");
-      exit (FALSE);
+      return FALSE;
     }
 
-  exit (TRUE);
+  return TRUE;
 }
 
 

@@ -41,6 +41,15 @@
 #define FILE_SEPARATOR_S "\\"
 #endif
 
+/* The next union is a portable means to convert between function and data
+ * pointers and the only way to silence Visual C++ 2012 other than
+ *   #pragma warning(disable: 4152)
+ * That is, with /W4. */
+typedef union u_func_ptr {
+	void (*func_ptr)(void);
+	void *void_ptr;
+} u_func_ptr_t;
+
 static void *io_driver = NULL;
 static int io_driver_found = 0;
 /* inpout32.dll */
@@ -590,7 +599,10 @@ static void close_module(void *handle, struct cd64_t *cd64) {
 
 static void *get_symbol(void *handle, char *symbol_name, struct cd64_t *cd64) {
 
-	void *symptr = (void *) GetProcAddress((HINSTANCE) handle, symbol_name);
+	void *symptr;
+	u_func_ptr_t sym;
+	sym.func_ptr = (void (*)(void)) GetProcAddress((HINSTANCE) handle, symbol_name);
+	symptr = sym.void_ptr;
 	if (symptr == NULL) {
 		LPTSTR strptr;
 
@@ -610,7 +622,10 @@ static void *get_symbol(void *handle, char *symbol_name, struct cd64_t *cd64) {
 
 static void *has_symbol(void *handle, char *symbol_name) {
 
-	void *symptr = (void *) GetProcAddress((HINSTANCE) handle, symbol_name);
+	void *symptr;
+	u_func_ptr_t sym;
+	sym.func_ptr = (void (*)(void)) GetProcAddress((HINSTANCE) handle, symbol_name);
+	symptr = sym.void_ptr;
 	if (symptr == NULL) symptr = (void *) -1;
 	return symptr;
 }
@@ -801,6 +816,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 #endif
 	{
 		char fname[FILENAME_MAX+1];
+		u_func_ptr_t sym;
 		io_driver_found = 0;
 
 		if (!cd64->io_driver_dir[0]) strcpy(cd64->io_driver_dir, ".");
@@ -811,10 +827,11 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 			io_driver = open_module(fname, cd64);
 
 			io_driver_found = 1;
-			DlPortReadPortUchar = (unsigned char (__stdcall *)(unsigned short))
-			                      get_symbol(io_driver, "DlPortReadPortUchar", cd64);
-			DlPortWritePortUchar = (void (__stdcall *)(unsigned short, unsigned char))
-			                       get_symbol(io_driver, "DlPortWritePortUchar", cd64);
+			sym.void_ptr = get_symbol(io_driver, "DlPortReadPortUchar", cd64);
+			DlPortReadPortUchar = (unsigned char (__stdcall *)(unsigned short)) sym.func_ptr;
+			sym.void_ptr = get_symbol(io_driver, "DlPortWritePortUchar", cd64);
+			DlPortWritePortUchar = (void (__stdcall *)(unsigned short, unsigned char)) sym.func_ptr;
+
 			input_byte = dlportio_input_byte;
 			output_byte = dlportio_output_byte;
 		}
@@ -826,14 +843,15 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 			if (access(fname, F_OK) == 0) {
 				io_driver = open_module(fname, cd64);
 
-				IsDriverInstalled = (short int (WINAPI *)())
-				                    get_symbol(io_driver, "IsDriverInstalled", cd64);
+				sym.void_ptr = get_symbol(io_driver, "IsDriverInstalled", cd64);
+				IsDriverInstalled = (short int (WINAPI *)()) sym.func_ptr;
 				if (IsDriverInstalled()) {
 					io_driver_found = 1;
-					PortIn = (char (WINAPI *)(short int))
-					         get_symbol(io_driver, "PortIn", cd64);
-					PortOut = (void (WINAPI *)(short int, char))
-					          get_symbol(io_driver, "PortOut", cd64);
+					sym.void_ptr = get_symbol(io_driver, "PortIn", cd64);
+					PortIn = (char (WINAPI *)(short int)) sym.func_ptr;
+					sym.void_ptr = get_symbol(io_driver, "PortOut", cd64);
+					PortOut = (void (WINAPI *)(short int, char)) sym.func_ptr;
+
 					input_byte = io_input_byte;
 					output_byte = io_output_byte;
 				}
@@ -852,21 +870,23 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 				 * DlPortIO.dll. Since the API of DlPortIO.dll does not have
 				 * the flaws of inpout32.dll (*signed* short return value and
 				 * arguments), we prefer it if it is present. */
-				DlPortReadPortUchar = (unsigned char (__stdcall *)(unsigned short))
-				                      has_symbol(io_driver, "DlPortReadPortUchar");
+				sym.void_ptr = has_symbol(io_driver, "DlPortReadPortUchar");
+				DlPortReadPortUchar = (unsigned char (__stdcall *)(unsigned short)) sym.func_ptr;
 				if (DlPortReadPortUchar != (void *) -1) input_byte = dlportio_input_byte;
 				else {
-					Inp32 = (short (__stdcall *)(short))
-					        get_symbol(io_driver, "Inp32", cd64);
+					sym.void_ptr = get_symbol(io_driver, "Inp32", cd64);
+					Inp32 = (short (__stdcall *)(short)) sym.func_ptr;
+
 					input_byte = inpout32_input_byte;
 				}
 
-				DlPortWritePortUchar = (void (__stdcall *)(unsigned short, unsigned char))
-				                       has_symbol(io_driver, "DlPortWritePortUchar");
+				sym.void_ptr = has_symbol(io_driver, "DlPortWritePortUchar");
+				DlPortWritePortUchar = (void (__stdcall *)(unsigned short, unsigned char)) sym.func_ptr;
 				if (DlPortWritePortUchar != (void *) -1) output_byte = dlportio_output_byte;
 				else {
-					Outp32 = (void (__stdcall *)(short, short))
-					         get_symbol(io_driver, "Out32", cd64);
+					sym.void_ptr = get_symbol(io_driver, "Out32", cd64);
+					Outp32 = (void (__stdcall *)(short, short)) sym.func_ptr;
+
 					output_byte = inpout32_output_byte;
 				}
 			}
@@ -966,7 +986,7 @@ static INLINE int cd64_wait_rawio(struct cd64_t *cd64) {
 	int i = 0;
 	int reset_tries = 0;
 	uint8_t status;
-	int dir;
+	uint8_t dir;
 	i = 0;
 
 	if (cd64->using_ppa) {
@@ -1015,7 +1035,7 @@ static INLINE int cd64_wait_rawio(struct cd64_t *cd64) {
 int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) {
 
 	uint8_t ctl;
-	int dir;
+	uint8_t dir;
 
 	if (cd64->using_ppa) {
 

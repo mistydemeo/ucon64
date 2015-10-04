@@ -24,8 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t doctor64jr_usage[];
 
 #ifdef USE_PARALLEL
-extern int doctor64jr_read (const char *filename, unsigned int parport);
-extern int doctor64jr_write (const char *filename, unsigned int parport);
+extern int doctor64jr_read (const char *filename, unsigned short parport);
+extern int doctor64jr_write (const char *filename, unsigned short parport);
 #endif
 
 #endif

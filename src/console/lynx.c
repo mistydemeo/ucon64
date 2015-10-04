@@ -152,8 +152,8 @@ lynx_lnx (st_ucon64_nfo_t *rominfo)
 
   memset (&header, 0, sizeof (st_lnx_header_t));
 
-  header.page_size_bank0 = size > 4 * MBIT ? 4 * MBIT / 256 : size / 256;
-  header.page_size_bank1 = size > 4 * MBIT ? (size - (4 * MBIT)) / 256 : 0;
+  header.page_size_bank0 = (short) (size > 4 * MBIT ? 4 * MBIT / 256 : size / 256);
+  header.page_size_bank1 = (short) (size > 4 * MBIT ? (size - (4 * MBIT)) / 256 : 0);
 #ifdef  WORDS_BIGENDIAN
   header.page_size_bank0 = bswap_16 (header.page_size_bank0);
   header.page_size_bank1 = bswap_16 (header.page_size_bank1);
@@ -183,7 +183,7 @@ lynx_lnx (st_ucon64_nfo_t *rominfo)
 
 
 static int
-lynx_rot (st_ucon64_nfo_t *rominfo, int rotation)
+lynx_rot (st_ucon64_nfo_t *rominfo, unsigned char rotation)
 {
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
@@ -196,7 +196,7 @@ lynx_rot (st_ucon64_nfo_t *rominfo, int rotation)
 
   ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.fname);
 
-  header.rotation = rotation;                   // header.rotation is an 8-bit field
+  header.rotation = rotation;
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);

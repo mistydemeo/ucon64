@@ -85,7 +85,7 @@ read_byte (FILE *file)
       fprintf (stderr, "ERROR: Unexpected end of file\n");
       exit (1);
     }
-  return byte;
+  return (unsigned char) byte;
 }
 
 
@@ -176,7 +176,7 @@ ips_apply (const char *mod, const char *ipsname)
     }
   fclose (modfile);                             // commit changes before calling truncate2()
 
-  byte = fgetc (ipsfile);                       // don't use read_byte() here;
+  byte = (unsigned char) fgetc (ipsfile);       // don't use read_byte() here;
   if (!feof (ipsfile))                          //  this part is optional
     {                                           // IPS2 stuff
       byte2 = read_byte (ipsfile);
@@ -403,10 +403,10 @@ ips_create (const char *orgname, const char *modname)
   fprintf (ipsfile, "PATCH");
 
 next_byte:
-  while (1)
+  for (;;)
     {
-      byte = fgetc (orgfile);
-      byte2 = fgetc (modfile);
+      byte = (unsigned char) fgetc (orgfile);
+      byte2 = (unsigned char) fgetc (modfile);
       filepos++;
       if (feof (modfile))
         break;

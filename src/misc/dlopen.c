@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <Errors.h>
 #endif
 
+#include "dlopen.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -220,8 +222,7 @@ open_module (char *module_name)
                      NULL, GetLastError (),
                      MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
                      (LPTSTR) &strptr, 0, NULL);
-      // Note the construct with strptr. You wouldn't believe what a bunch of
-      //  fucking morons those guys at Microsoft are!
+      // Note the construct with strptr.
       fputs (strptr, stderr);
       LocalFree (strptr);
       exit (1);
@@ -267,7 +268,9 @@ get_symbol (void *handle, char *symbol_name)
       exit (1);
     }
 #elif   defined _WIN32
-  symptr = (void *) GetProcAddress ((HINSTANCE) handle, symbol_name);
+  u_func_ptr_t sym;
+  sym.func_ptr = (void (*) (void)) GetProcAddress ((HINSTANCE) handle, symbol_name);
+  symptr = sym.void_ptr;
   if (symptr == NULL)
     {
       LPTSTR strptr;
@@ -318,7 +321,9 @@ has_symbol (void *handle, char *symbol_name)
   if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
     symptr = (void *) -1;                       //  according to the info page
 #elif   defined _WIN32
-  symptr = (void *) GetProcAddress ((HINSTANCE) handle, symbol_name);
+  u_func_ptr_t sym;
+  sym.func_ptr = (void (*) (void)) GetProcAddress ((HINSTANCE) handle, symbol_name);
+  symptr = sym.void_ptr;
   if (symptr == NULL)
     symptr = (void *) -1;
 #elif   defined __BEOS__

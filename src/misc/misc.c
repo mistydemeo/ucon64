@@ -486,14 +486,14 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
       ptr = line + strspn (line, "\t ");
       if (*ptr == '#' || *ptr == '\n' || *ptr == '\r')
         continue;
-      if ((ptr = strpbrk (line, "\n\r#")))      // text after # is comment
+      if ((ptr = strpbrk (line, "\n\r#")) != NULL) // text after # is comment
         *ptr = 0;
 
       requiredsize1 += sizeof (st_cm_pattern_t);
       if (requiredsize1 > currentsize1)
         {
           currentsize1 = requiredsize1 + 10 * sizeof (st_cm_pattern_t);
-          if (!(*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)))
+          if ((*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)) == NULL)
             {
               fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize1);
               return -1;
@@ -516,8 +516,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10;
-              if (!((*patterns)[n_codes].search =
-                   (char *) realloc ((*patterns)[n_codes].search, currentsize2)))
+              if (((*patterns)[n_codes].search =
+                   (char *) realloc ((*patterns)[n_codes].search, currentsize2)) == NULL)
                 {
                   fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free (*patterns);
@@ -528,7 +528,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           (*patterns)[n_codes].search[n] = (unsigned char) strtol (token, NULL, 16);
           n++;
         }
-      while ((token = strtok (NULL, " ")));
+      while ((token = strtok (NULL, " ")) != NULL);
       (*patterns)[n_codes].search_size = n;     // size in bytes
 
       strcpy (buffer, line);
@@ -577,8 +577,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10;
-              if (!((*patterns)[n_codes].replace =
-                   (char *) realloc ((*patterns)[n_codes].replace, currentsize2)))
+              if (((*patterns)[n_codes].replace =
+                   (char *) realloc ((*patterns)[n_codes].replace, currentsize2)) == NULL)
                 {
                   fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free ((*patterns)[n_codes].search);
@@ -590,7 +590,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           (*patterns)[n_codes].replace[n] = (unsigned char) strtol (token, NULL, 16);
           n++;
         }
-      while ((token = strtok (NULL, " ")));
+      while ((token = strtok (NULL, " ")) != NULL);
       (*patterns)[n_codes].replace_size = n;  // size in bytes
 
       strcpy (buffer, line);
@@ -641,8 +641,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10 * sizeof (st_cm_set_t);
-              if (!((*patterns)[n_codes].sets = (st_cm_set_t *)
-                    realloc ((*patterns)[n_codes].sets, currentsize2)))
+              if (((*patterns)[n_codes].sets =
+                   (st_cm_set_t *) realloc ((*patterns)[n_codes].sets, currentsize2)) == NULL)
                 {
                   fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free ((*patterns)[n_codes].replace);
@@ -664,8 +664,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
               if (requiredsize3 > currentsize3)
                 {
                   currentsize3 = requiredsize3 + 10;
-                  if (!((*patterns)[n_codes].sets[n_sets].data = (char *)
-                        realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)))
+                  if (((*patterns)[n_codes].sets[n_sets].data =
+                       (char *) realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)) == NULL)
                     {
                       fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize3);
                       free ((*patterns)[n_codes].sets);
@@ -680,7 +680,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
                 (unsigned char) strtol (token, NULL, 16);
               n++;
             }
-          while ((token = strtok (NULL, " ")));
+          while ((token = strtok (NULL, " ")) != NULL);
           (*patterns)[n_codes].sets[n_sets].size = n;
 
           if (verbose)
@@ -786,7 +786,7 @@ getenv2 (const char *variable)
             {
               char c;
               getcwd (value, FILENAME_MAX);
-              c = toupper (*value);
+              c = (char) toupper (*value);
               // if current dir is root dir strip problematic ending slash (DJGPP)
               if (c >= 'A' && c <= 'Z' &&
                   value[1] == ':' && value[2] == '/' && value[3] == 0)

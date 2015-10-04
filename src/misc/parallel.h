@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PARPORT_IBUSY  0x80
 #define PARPORT_STROBE 1
 
-#define PARPORT_UNKNOWN (-1)
+#define PARPORT_UNKNOWN ((unsigned short) -1)
 
 // DJGPP (DOS) has these, but it's better that all code uses the same functions.
 extern unsigned char inportb (unsigned short port);
@@ -47,8 +47,8 @@ extern unsigned short inportw (unsigned short port);
 extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
 
-extern int parport_open (int parport);
-extern int parport_close (int parport);
+extern unsigned short parport_open (unsigned short parport);
+extern int parport_close (void);
 extern void parport_print_info (void);
 #endif // USE_PARALLEL
 #endif // MISC_PARALLEL_H

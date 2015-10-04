@@ -30,20 +30,20 @@ extern const st_getopt2_t gd_usage[];
 // Each logical memory unit is 8 Mbit in size (internally it's 2*4 Mbit)
 
 #ifdef USE_PARALLEL
-extern int gd3_read_rom (const char *filename, unsigned int parport);
-extern int gd3_write_rom (const char *filename, unsigned int parport,
+extern int gd3_read_rom (const char *filename, unsigned short parport);
+extern int gd3_write_rom (const char *filename, unsigned short parport,
                           st_ucon64_nfo_t *rominfo);
-extern int gd6_read_rom (const char *filename, unsigned int parport);
-extern int gd6_write_rom (const char *filename, unsigned int parport,
+extern int gd6_read_rom (const char *filename, unsigned short parport);
+extern int gd6_write_rom (const char *filename, unsigned short parport,
                           st_ucon64_nfo_t *rominfo);
-extern int gd3_read_sram (const char *filename, unsigned int parport);
-extern int gd3_write_sram (const char *filename, unsigned int parport);
-extern int gd6_read_sram (const char *filename, unsigned int parport);
-extern int gd6_write_sram (const char *filename, unsigned int parport);
-extern int gd3_read_saver (const char *filename, unsigned int parport);
-extern int gd3_write_saver (const char *filename, unsigned int parport);
-extern int gd6_read_saver (const char *filename, unsigned int parport);
-extern int gd6_write_saver (const char *filename, unsigned int parport);
+extern int gd3_read_sram (const char *filename, unsigned short parport);
+extern int gd3_write_sram (const char *filename, unsigned short parport);
+extern int gd6_read_sram (const char *filename, unsigned short parport);
+extern int gd6_write_sram (const char *filename, unsigned short parport);
+extern int gd3_read_saver (const char *filename, unsigned short parport);
+extern int gd3_write_saver (const char *filename, unsigned short parport);
+extern int gd6_read_saver (const char *filename, unsigned short parport);
+extern int gd6_write_saver (const char *filename, unsigned short parport);
 #endif // USE_PARALLEL
 
 #endif // GD_H

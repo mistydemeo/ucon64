@@ -347,12 +347,12 @@ gameGenieEncodeGameBoy (const char *in, char *out)
   if (hexValue (in[0]) > 7)
     return -1;
 
-  out[0] = toupper (in[5]);
-  out[1] = toupper (in[6]);
-  out[2] = toupper (in[1]);
+  out[0] = (char) toupper (in[5]);
+  out[1] = (char) toupper (in[6]);
+  out[2] = (char) toupper (in[1]);
   out[3] = '-';
-  out[4] = toupper (in[2]);
-  out[5] = toupper (in[3]);
+  out[4] = (char) toupper (in[2]);
+  out[5] = (char) toupper (in[3]);
   out[6] = hexDigit (~hexValue (in[0]) & 0xf);
   out[7] = 0;
 
@@ -1125,12 +1125,12 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
   fputc ('\n', stdout);
-  buf[0] = ucon64_fgetc (dest_name, address + rominfo->backup_header_len);
+  buf[0] = (char) ucon64_fgetc (dest_name, address + rominfo->backup_header_len);
   dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
 
   ucon64_fputc (dest_name, address + rominfo->backup_header_len, value, "r+b");
 
-  buf[0] = value;
+  buf[0] = (char) value;
   dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
   fputc ('\n', stdout);
 

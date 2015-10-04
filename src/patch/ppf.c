@@ -360,7 +360,7 @@ ppf_create (const char *orgname, const char *modname)
   // finding changes
   fseek (orgfile, 0, SEEK_SET);
   fseek (modfile, 0, SEEK_SET);
-  while ((blocksize = fread (obuf, 1, 255, orgfile)))
+  while ((blocksize = fread (obuf, 1, 255, orgfile)) != 0)
     {
       blocksize = fread (mbuf, 1, blocksize, modfile);
 #ifdef  DIFF_FSIZE
@@ -400,7 +400,7 @@ ppf_create (const char *orgname, const char *modname)
   if (msize > osize)
     {
       pos = seekpos;
-      while ((blocksize = fread (buffer, 1, 255, modfile)))
+      while ((blocksize = fread (buffer, 1, 255, modfile)) != 0)
         {
           total_changes += blocksize;
 #ifdef  WORDS_BIGENDIAN
@@ -490,7 +490,7 @@ ppf_set_fid (const char *ppf, const char *fidname)
 
   ppfsize = fsizeof (ppfname);
   pos = ucon64_find (ppfname, 0, ppfsize, "@BEGIN_FILE_ID.DIZ", 18,
-    MEMCMP2_CASE | UCON64_FIND_QUIET);
+    (uint32_t) (MEMCMP2_CASE | UCON64_FIND_QUIET));
   if (pos == -1)
     pos = ppfsize;
   truncate (ppfname, pos);

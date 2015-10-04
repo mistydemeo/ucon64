@@ -162,26 +162,26 @@ respective owners.
  ************************/
 
 static inline void
-cyan_write_copier (unsigned char data, unsigned int parport)
+cyan_write_copier (unsigned char data, unsigned short parport)
 // write a value to the data register of the parallel port
 {
-  outportb ((unsigned short) (parport + PARPORT_DATA), data);
+  outportb (parport + PARPORT_DATA, data);
 }
 
 
 static inline unsigned char
-cyan_read_copier (unsigned int parport)
+cyan_read_copier (unsigned short parport)
 // read a value from the status register of the parallel port
 {
-  return inportb ((unsigned short) (parport + PARPORT_STATUS));
+  return inportb (parport + PARPORT_STATUS);
 }
 
 
 static inline unsigned char
-cyan_verify_copier (unsigned int parport)
+cyan_verify_copier (unsigned short parport)
 // read a value back from the data register for verification
 {
-  return inportb ((unsigned short) (parport + PARPORT_DATA));
+  return inportb (parport + PARPORT_DATA);
 }
 
 
@@ -327,7 +327,7 @@ cyan_get_address (unsigned long b)
 /**** non-hardware, indirectly accessing ****/
 
 static inline void
-cyan_delay (int speed, unsigned int parport)
+cyan_delay (int speed, unsigned short parport)
 // Delays a certain amount of time depending on speed selected. 0=long delay,
 //  used for reset and hi counter.
 {
@@ -352,7 +352,7 @@ cyan_delay (int speed, unsigned int parport)
 
 
 static void
-cyan_reset (unsigned int parport)
+cyan_reset (unsigned short parport)
 // resets the copier
 {
   cyan_delay (0, parport);
@@ -369,7 +369,7 @@ cyan_reset (unsigned int parport)
 
 
 static inline unsigned short
-cyan_get_word (int speed, unsigned int parport)
+cyan_get_word (int speed, unsigned short parport)
 // gets a byte pair from the ROM and return two bytes in big endian byte order
 {
   unsigned short value = 0;
@@ -445,7 +445,7 @@ check_exit (void)
 
 
 static unsigned char *
-cyan_read_rom (int speed, unsigned int parport, unsigned char *buffer)
+cyan_read_rom (int speed, unsigned short parport, unsigned char *buffer)
 /*
   Read the ROM and return a pointer to a 4 MB area of memory containing all ROM
   data. Designed to be used from inside cyan_copy_rom(), although it can be
@@ -510,7 +510,7 @@ cyan_read_rom (int speed, unsigned int parport, unsigned char *buffer)
 
 
 static void
-cyan_test_parport (unsigned int parport)
+cyan_test_parport (unsigned short parport)
 // Test the parallel port to see if it appears to be functioning correctly, and
 //  terminate if there's an error.
 {
@@ -612,7 +612,7 @@ cyan_test_parport (unsigned int parport)
 
 
 static int
-cyan_test_copier (int test, int speed, unsigned int parport)
+cyan_test_copier (int test, int speed, unsigned short parport)
 {
   unsigned char *buffer1, *buffer2 = NULL;
   int count = 1;
@@ -641,12 +641,12 @@ cyan_test_copier (int test, int speed, unsigned int parport)
         fputc ('\n', stdout);
       buffer1 = cyan_read_rom (speed, parport, NULL);
       if (!buffer1)                             // user abort
-        exit (0);
+        return 0;
 
       // detect if ROM is all 0x00 or 0xff and print an error if so
       cyan_calculate_rom_size (buffer1, 1);
 
-      while (1)
+      for (;;)
         {
           clear_line ();                        // remove last gauge
           printf ("   Pass %2d OK\n", count);
@@ -668,7 +668,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
           if (!buffer2)
             {
               free (buffer1);
-              exit (0);
+              return 0;
             }
           if (memcmp (buffer1, buffer2, 4 * MBYTE))
             {
@@ -698,12 +698,9 @@ cyan_test_copier (int test, int speed, unsigned int parport)
                       "Re-run the test to be sure; it's recommended that you use a lower speed\n");
               free (buffer1);
               free (buffer2);
-              exit (1);
+              return 1;
             }
         }
-
-      free (buffer1);
-      free (buffer2);
       break;
     // manual test
     case 2:
@@ -733,7 +730,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
             "If the above didn't make any sense to you, press escape or q and turn the ROM\n"
             "copier off immediately!\n"
             "This test is designed for advanced users only\n");
-      while (1)
+      for (;;)
         {
           const char *status[2] = {"* ", ". "};
 
@@ -795,7 +792,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
             {
               cyan_reset (parport);
               puts ("\nUser aborted test");
-              exit (0);
+              return 0;
             }
         }
       break;
@@ -803,12 +800,12 @@ cyan_test_copier (int test, int speed, unsigned int parport)
       fputs ("INTERNAL ERROR: Invalid test number passed to cyan_test_copier()\n", stderr);
       exit (1);
     }
-  return 0;
+//  return 0;
 }
 
 
 static int
-cyan_copy_rom (const char *filename, int speed, unsigned int parport)
+cyan_copy_rom (const char *filename, int speed, unsigned short parport)
 /*
   Copy a ROM file -- this assumes the filename is valid and the file does not
   already exist, since it will blindly try to write (overwrite) the filename you
@@ -950,7 +947,7 @@ const st_getopt2_t cmc_usage[] =
 #ifdef  USE_PARALLEL
 
 int
-cmc_read_rom (const char *filename, unsigned int parport, int speed)
+cmc_read_rom (const char *filename, unsigned short parport, int speed)
 {
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
@@ -969,7 +966,7 @@ cmc_read_rom (const char *filename, unsigned int parport, int speed)
 
 
 int
-cmc_test (int test, unsigned int parport, int speed)
+cmc_test (int test, unsigned short parport, int speed)
 {
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();

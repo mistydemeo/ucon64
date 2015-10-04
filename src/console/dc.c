@@ -571,17 +571,17 @@ descramble (const char *src, char *dst)
   uint32_t sz = 0;
   FILE *fh;
 
-  if (!(fh = fopen (src, "rb")))
+  if ((fh = fopen (src, "rb")) == NULL)
     return -1;
 
   sz = fsizeof (src);
-  if (!(ptr = (unsigned char *) malloc (sz)))
+  if ((ptr = (unsigned char *) malloc (sz)) == NULL)
     return -1;
 
   load_file (fh, ptr, sz);
   fclose (fh);
 
-  if (!(fh = fopen (dst, "wb")))
+  if ((fh = fopen (dst, "wb")) == NULL)
     return -1;
 
   if (fwrite (ptr, 1, sz, fh) != sz)
@@ -600,12 +600,12 @@ scramble (const char *src, char *dst)
   uint32_t sz = 0;
   FILE *fh;
 
-  if (!(fh = fopen (src, "rb")))
+  if ((fh = fopen (src, "rb")) == NULL)
     return -1;
 
   sz = fsizeof (src);
 
-  if (!(ptr = (unsigned char *) malloc (sz)))
+  if ((ptr = (unsigned char *) malloc (sz)) == NULL)
     return -1;
 
   if (fread (ptr, 1, sz, fh) != sz)

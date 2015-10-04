@@ -73,7 +73,7 @@ dm_cue_read (dm_image_t *image, const char *cue_file)
   int t = 0, x = 0;
   FILE *fh = NULL;
 
-  if (!(fh = fopen (cue_file, "rb")))
+  if ((fh = fopen (cue_file, "rb")) == NULL)
     return NULL; // cue_file not found
 
   for (; fgets (buf, MAXBUFSIZE, fh); t++)
@@ -157,7 +157,7 @@ dm_cue_write (const dm_image_t *image)
       set_suffix (buf, ".CUE");
 #endif
 
-      if (!(fh = fopen (buf, "wb")))
+      if ((fh = fopen (buf, "wb")) == NULL)
         {
           result = -1;
           continue;
@@ -245,7 +245,7 @@ cue_init (dm_image_t *image)
 #endif
 
   // missing or invalid cue? try the image itself
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return -1;
 
   for (t = 0; t < image->tracks; t++)

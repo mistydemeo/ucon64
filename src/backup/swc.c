@@ -144,7 +144,7 @@ const st_getopt2_t swc_usage[] =
 #define DUMP_SPC7110
 
 static int receive_rom_info (unsigned char *buffer, int io_mode);
-static int get_rom_size (unsigned char *info_block);
+static unsigned char get_rom_size (unsigned char *info_block);
 static int check1 (unsigned char *info_block, int index);
 static int check2 (unsigned char *info_block, int index, unsigned char value);
 static int check3 (unsigned char *info_block, int index1, int index2, int size);
@@ -152,17 +152,17 @@ static unsigned char get_emu_mode_select (unsigned char byte, int size);
 static void handle_fig_header (unsigned char *header);
 static void set_bank_and_page (unsigned char bank, unsigned char page);
 static void read_cartridge (unsigned int address, unsigned char *buffer,
-                            unsigned int length);
+                            unsigned short length);
 static unsigned char read_cartridge1 (unsigned int address);
 static void write_cartridge (unsigned int address, unsigned char *buffer,
-                             unsigned int length);
+                             unsigned short length);
 static void write_cartridge1 (unsigned int address, unsigned char byte);
 static void dump_rom (FILE *file, int size, int numblocks, unsigned int mask1,
                       unsigned int mask2, unsigned int address);
 static void dump_bios (FILE *file);
 static int sub (void);
-static int mram_helper (int x);
-static int mram (void);
+static int mram_helper (unsigned short x);
+static unsigned short mram (void);
 
 static int hirom;                               // `hirom' was `special'
 static int dx2_trick = 0;
@@ -185,7 +185,7 @@ static int snes_spc7110 = 0;
 #error receive_rom_info() and swc_read_sram() expect BUFFERSIZE to be at least \
        512 bytes.
 #endif
-int
+static int
 receive_rom_info (unsigned char *buffer, int io_mode)
 /*
   - returns size of ROM in Mb (128 kB) units
@@ -194,9 +194,9 @@ receive_rom_info (unsigned char *buffer, int io_mode)
   - sets global `hirom'
 */
 {
-  int n, size;
+  unsigned short n;
   volatile int m;
-  unsigned char byte;
+  unsigned char byte, size;
 
 #ifdef  DUMP_MMX2
   if (io_mode & SWC_IO_MMX2)
@@ -213,15 +213,15 @@ receive_rom_info (unsigned char *buffer, int io_mode)
       unsigned short address = 0x7f52;
       ffe_send_command0 (0xe00c, 0);
 
-      ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
-      ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
+      ffe_send_command (5, address / 0x2000, 0);
+      ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
       dumper (stdout, buffer, 8, address, DUMPER_HEX);
 
-      ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
-      ffe_send_command0 ((unsigned short) ((address & 0x1fff) + 0x2000), 0);
+      ffe_send_command (5, address / 0x2000, 0);
+      ffe_send_command0 ((address & 0x1fff) + 0x2000, 0);
 
-      ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
-      ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
+      ffe_send_command (5, address / 0x2000, 0);
+      ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
       dumper (stdout, buffer, 8, address, DUMPER_HEX);
     }
 #endif
@@ -236,11 +236,11 @@ receive_rom_info (unsigned char *buffer, int io_mode)
       hirom = ((byte & 1 && byte != 0x23) || byte == 0x3a) ? 1 : 0; // & 1 => 0x21, 0x31, 0x35
     }
 
-  for (n = 0; n < (int) SWC_HEADER_LEN; n++)
+  for (n = 0; n < SWC_HEADER_LEN; n++)
     {
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
-      ffe_send_command (5, (unsigned short) (0x200 + n), 0);
+      ffe_send_command (5, 0x200 + n, 0);
       buffer[n] = ffe_send_command1 (0xa0a0);
     }
 
@@ -332,7 +332,7 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 }
 
 
-int
+static unsigned char
 get_rom_size (unsigned char *info_block)
 // returns size of ROM in Mb units
 {
@@ -385,7 +385,7 @@ get_rom_size (unsigned char *info_block)
 }
 
 
-int
+static int
 check1 (unsigned char *info_block, int index)
 {
   int n;
@@ -398,7 +398,7 @@ check1 (unsigned char *info_block, int index)
 }
 
 
-int
+static int
 check2 (unsigned char *info_block, int index, unsigned char value)
 {
   int n;
@@ -411,7 +411,7 @@ check2 (unsigned char *info_block, int index, unsigned char value)
 }
 
 
-int
+static int
 check3 (unsigned char *info_block, int index1, int index2, int size)
 {
   int n;
@@ -424,11 +424,10 @@ check3 (unsigned char *info_block, int index1, int index2, int size)
 }
 
 
-unsigned char
+static unsigned char
 get_emu_mode_select (unsigned char byte, int size)
 {
-  int x;
-  unsigned char ems;
+  unsigned char x, ems;
 
   if (byte == 0)
     x = 0xc;
@@ -461,7 +460,7 @@ get_emu_mode_select (unsigned char byte, int size)
 }
 
 
-void
+static void
 handle_fig_header (unsigned char *header)
 {
   if ((header[4] == 0x77 && header[5] == 0x83) ||
@@ -492,7 +491,7 @@ handle_fig_header (unsigned char *header)
 
 
 void
-swc_unlock (unsigned int parport)
+swc_unlock (unsigned short parport)
 /*
   "Unlock" the SWC. However, just starting to send, then stopping with ^C,
   gives the same result.
@@ -547,7 +546,7 @@ set_spc7110_map (unsigned short chunk)
 #endif
 
 
-void
+static void
 set_bank_and_page (unsigned char bank, unsigned char page)
 {
   static unsigned char currentbank = 0, currentpage = 4; // Force update on first call
@@ -587,23 +586,22 @@ set_bank_and_page (unsigned char bank, unsigned char page)
 }
 
 
-void
-read_cartridge (unsigned int address, unsigned char *buffer, unsigned int length)
+static void
+read_cartridge (unsigned int address, unsigned char *buffer, unsigned short length)
 {
   address &= 0xffffff;
   set_bank_and_page ((unsigned char) (address >> 16),
                      (unsigned char) ((address & 0x7fff) / 0x2000));
 
   if ((address & 0x00ffff) < 0x8000)
-    ffe_receive_block ((unsigned short) (((address & 0x7fffff) < 0x400000 ?
-                         0x6000 : 0x2000) + (address & 0x001fff)), buffer, length);
+    ffe_receive_block (((address & 0x7fffff) < 0x400000 ? 0x6000 : 0x2000) +
+                       (address & 0x001fff), buffer, length);
   else
-    ffe_receive_block ((unsigned short) (0xa000 + (address & 0x001fff)),
-                       buffer, length);
+    ffe_receive_block (0xa000 + (address & 0x001fff), buffer, length);
 }
 
 
-unsigned char
+static unsigned char
 read_cartridge1 (unsigned int address)
 {
   unsigned char byte;
@@ -614,30 +612,29 @@ read_cartridge1 (unsigned int address)
 }
 
 
-void
-write_cartridge (unsigned int address, unsigned char *buffer, unsigned int length)
+static void
+write_cartridge (unsigned int address, unsigned char *buffer, unsigned short length)
 {
   address &= 0xffffff;
   set_bank_and_page ((unsigned char) (address >> 16),
                      (unsigned char) ((address & 0x7fff) / 0x2000));
 
   if ((address & 0x00ffff) < 0x8000)
-    ffe_send_block ((unsigned short) (((address & 0x7fffff) < 0x400000 ?
-                      0x6000 : 0x2000) + (address & 0x001fff)), buffer, length);
+    ffe_send_block (((address & 0x7fffff) < 0x400000 ? 0x6000 : 0x2000) +
+                    (address & 0x001fff), buffer, length);
   else
-    ffe_send_block ((unsigned short) (0xa000 + (address & 0x001fff)),
-                    buffer, length);
+    ffe_send_block (0xa000 + (address & 0x001fff), buffer, length);
 }
 
 
-void
+static void
 write_cartridge1 (unsigned int address, unsigned char byte)
 {
   write_cartridge (address, &byte, 1);
 }
 
 
-void
+static void
 dump_rom (FILE *file, int size, int numblocks, unsigned int mask1,
           unsigned int mask2, unsigned int address)
 {
@@ -690,7 +687,7 @@ dump_rom (FILE *file, int size, int numblocks, unsigned int mask1,
 }
 
 
-void
+static void
 dump_bios (FILE *file)
 {
   unsigned short int address;
@@ -721,7 +718,7 @@ dump_bios (FILE *file)
 
 
 int
-swc_read_rom (const char *filename, unsigned int parport, int io_mode)
+swc_read_rom (const char *filename, unsigned short parport, int io_mode)
 {
   FILE *file;
   unsigned char buffer[SWC_HEADER_LEN], byte;
@@ -840,11 +837,11 @@ swc_read_rom (const char *filename, unsigned int parport, int io_mode)
 
 
 int
-swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
+swc_write_rom (const char *filename, unsigned short parport, int enableRTS)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select, fsize;
+  int bytesread, bytessent, totalblocks, blocksdone = 0, emu_mode_select, fsize;
   unsigned short address;
   time_t starttime;
 
@@ -892,22 +889,22 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   ffe_send_command (5, 0, 0);
   ffe_send_block (0x400, buffer, SWC_HEADER_LEN); // send header
 #endif
-  bytessend = SWC_HEADER_LEN;
+  bytessent = SWC_HEADER_LEN;
 
   puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
   address = 0x200;                              // VGS '00 uses 0x200, VGS '96 uses 0,
   starttime = time (NULL);                      //  but then some ROMs don't work
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
-      ffe_send_command0 ((unsigned short) 0xc010, (unsigned char) (blocksdone >> 9));
+      ffe_send_command0 (0xc010, (unsigned char) (blocksdone >> 9));
       ffe_send_command (5, address, 0);
-      ffe_send_block (0x8000, buffer, bytesread);
+      ffe_send_block (0x8000, buffer, (unsigned short) bytesread);
       address++;
       blocksdone++;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, fsize);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, fsize);
       ffe_checkabort (2);
     }
 
@@ -920,10 +917,9 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   ffe_send_command (6, (unsigned short) (1 | (emu_mode_select << 8)), (unsigned short) enableRTS); // last arg = 1 enables RTS
                                                                //  mode, 0 disables it
   ffe_wait_for_ready ();
-  outportb ((unsigned short) (parport + PARPORT_DATA), 0);
-  outportb ((unsigned short) (parport + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) // invert strobe
-                                      (parport + PARPORT_CONTROL)) ^ PARPORT_STROBE));
+  outportb (parport + PARPORT_DATA, 0);
+  outportb (parport + PARPORT_CONTROL,
+            inportb (parport + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
 
   free (buffer);
   fclose (file);
@@ -934,7 +930,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
 
 
 int
-swc_read_sram (const char *filename, unsigned int parport)
+swc_read_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -993,11 +989,11 @@ swc_read_sram (const char *filename, unsigned int parport)
 
 
 int
-swc_write_sram (const char *filename, unsigned int parport)
+swc_write_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0, size;
+  int bytesread, bytessent = 0, size;
   unsigned short address;
   time_t starttime;
 
@@ -1026,14 +1022,14 @@ swc_write_sram (const char *filename, unsigned int parport)
                                                 //  because if we get here q works ;-)
   address = 0x100;
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
       ffe_send_command (5, address, 0);
-      ffe_send_block (0x2000, buffer, bytesread);
+      ffe_send_block (0x2000, buffer, (unsigned short) bytesread);
       address++;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 
@@ -1045,7 +1041,7 @@ swc_write_sram (const char *filename, unsigned int parport)
 }
 
 
-int
+static int
 sub (void)
 {
   ffe_send_command (5, 7 * 4, 0);
@@ -1063,10 +1059,10 @@ sub (void)
 }
 
 
-int
-mram_helper (int x)
+static int
+mram_helper (unsigned short x)
 {
-  ffe_send_command (5, (unsigned short) x, 0);
+  ffe_send_command (5, x, 0);
   x = ffe_send_command1 (0x8000);
   ffe_send_command0 (0x8000, (unsigned char) (x ^ 0xff));
   if (ffe_send_command1 (0x8000) != (unsigned char) (x ^ 0xff))
@@ -1077,7 +1073,7 @@ mram_helper (int x)
 }
 
 
-int
+static unsigned short
 mram (void)
 {
   if (mram_helper (0x76 * 4))
@@ -1091,7 +1087,7 @@ mram (void)
 
 
 int
-swc_read_rts (const char *filename, unsigned int parport)
+swc_read_rts (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -1160,11 +1156,11 @@ swc_read_rts (const char *filename, unsigned int parport)
 
 
 int
-swc_write_rts (const char *filename, unsigned int parport)
+swc_write_rts (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0, size;
+  int bytesread, bytessent = 0, size;
   unsigned short address1, address2;
   time_t starttime;
 
@@ -1198,16 +1194,16 @@ swc_write_rts (const char *filename, unsigned int parport)
     }
 
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
       ffe_send_command (5, address1, 0);
       if (address2 == 0x8000)
         ffe_send_command0 (0xc010, 1);
-      ffe_send_block (address2, buffer, bytesread);
+      ffe_send_block (address2, buffer, (unsigned short) bytesread);
       address1++;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
   ffe_send_command (6, 3, 0);
@@ -1221,7 +1217,7 @@ swc_write_rts (const char *filename, unsigned int parport)
 
 
 int
-swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode)
+swc_read_cart_sram (const char *filename, unsigned short parport, int io_mode)
 {
   FILE *file;
   unsigned char *buffer, byte;
@@ -1278,7 +1274,7 @@ swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode)
   while (bytesreceived < size)
     {
       set_bank_and_page ((unsigned char) (address >> 2), (unsigned char) (address & 3));
-      ffe_receive_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, BUFFERSIZE);
+      ffe_receive_block (hirom ? 0x6000 : 0x2000, buffer, BUFFERSIZE);
       fwrite (buffer, 1, BUFFERSIZE, file);
       address += hirom ? 4 : 1;
 
@@ -1296,11 +1292,11 @@ swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode)
 
 
 int
-swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
+swc_write_cart_sram (const char *filename, unsigned short parport, int io_mode)
 {
   FILE *file;
   unsigned char *buffer, byte;
-  int bytesread, bytessend = 0, size;
+  int bytesread, bytessent = 0, size;
   unsigned short address;
   time_t starttime;
 
@@ -1346,14 +1342,14 @@ swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
   address = hirom ? 0x2c3 : 0x1c0;
 
   starttime = time (NULL);
-  while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
+  while (bytessent < size && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)) != 0)
     {
       set_bank_and_page ((unsigned char) (address >> 2), (unsigned char) (address & 3));
-      ffe_send_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, bytesread);
+      ffe_send_block (hirom ? 0x6000 : 0x2000, buffer, (unsigned short) bytesread);
       address += hirom ? 4 : 1;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 

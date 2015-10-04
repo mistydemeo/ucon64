@@ -39,10 +39,10 @@ typedef struct st_smd_header
 
 
 #ifdef USE_PARALLEL
-extern int smd_read_rom (const char *filename, unsigned int parport);
-extern int smd_write_rom (const char *filename, unsigned int parport);
-extern int smd_read_sram (const char *filename, unsigned int parport);
-extern int smd_write_sram (const char *filename, unsigned int parport);
+extern int smd_read_rom (const char *filename, unsigned short parport);
+extern int smd_write_rom (const char *filename, unsigned short parport);
+extern int smd_read_sram (const char *filename, unsigned short parport);
+extern int smd_write_sram (const char *filename, unsigned short parport);
 #endif
 // the following two functions are used by non-transfer code in genesis.c and sms.c
 extern void smd_interleave (unsigned char *buffer, int size);

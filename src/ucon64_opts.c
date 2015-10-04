@@ -62,7 +62,7 @@ strtol2 (const char *str, char **tail)
 {
   long int i;
 
-  return (i = strtol (str, tail, 10)) ? i : strtol (str, tail, 16);
+  return ((i = strtol (str, tail, 10)) != 0) ? i : strtol (str, tail, 16);
 }
 
 
@@ -283,7 +283,7 @@ ucon64_switches (st_ucon64_t *p)
         }
       else
 #endif
-        ucon64.parport = strtol (optarg, NULL, 16);
+        ucon64.parport = (uint16_t) strtol (optarg, NULL, 16);
       break;
 
 #ifdef  USE_PARALLEL
@@ -368,12 +368,12 @@ ucon64_switches (st_ucon64_t *p)
         port of the parallel port can be mapped to almost any 16-bit number.
       */
 #if 0
-      if (ucon64.parport == UCON64_UNKNOWN)
+      if (ucon64.parport == (uint16_t) UCON64_UNKNOWN)
         if (ucon64.argc >= 4)
           if (access (ucon64.argv[ucon64.argc - 1], F_OK))
             // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
             //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
-            ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
+            ucon64.parport = (uint16_t) strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
 #endif
       break;
 
@@ -628,7 +628,7 @@ to_func (char *s, int len, int (*func) (int))
   char *p = s;
 
   for (; len > 0; p++, len--)
-    *p = func (*p);
+    *p = (char) func (*p);
 
   return s;
 }
@@ -765,7 +765,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
+        if ((buf[x] = (char) strtol (values[x], NULL, 16)) != '\0')
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
@@ -776,7 +776,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 16)))
+        if ((buf[x] = (char) strtol (values[x], NULL, 16)) != '\0')
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
@@ -787,7 +787,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
+        if ((buf[x] = (char) strtol (values[x], NULL, 10)) != '\0')
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
@@ -798,7 +798,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, optarg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if (!(buf[x] = (char) strtol (values[x], NULL, 10)))
+        if ((buf[x] = (char) strtol (values[x], NULL, 10)) != '\0')
           buf[x] = '?';
       buf[x] = 0;
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
@@ -1179,7 +1179,7 @@ ucon64_options (st_ucon64_t *p)
           ucon64.crc32 = 0;
           sscanf (optarg, "%x", &ucon64.crc32);
 
-          if (!(ucon64.dat = (st_ucon64_dat_t *) ucon64_dat_search (ucon64.crc32, NULL)))
+          if ((ucon64.dat = (st_ucon64_dat_t *) ucon64_dat_search (ucon64.crc32, NULL)) == NULL)
             {
               printf (ucon64_msg[DAT_NOT_FOUND], ucon64.crc32);
               printf ("TIP: Be sure to install the right DAT files in %s\n", ucon64.datdir);
@@ -1606,12 +1606,12 @@ ucon64_options (st_ucon64_t *p)
           break;
         }
       fputc ('\n', stdout);
-      buf[0] = ucon64_fgetc (dest_name, x);
+      buf[0] = (char) ucon64_fgetc (dest_name, x);
       dumper (stdout, buf, 1, x, DUMPER_HEX);
 
       ucon64_fputc (dest_name, x, value, "r+b");
 
-      buf[0] = value;
+      buf[0] = (char) value;
       dumper (stdout, buf, 1, x, DUMPER_HEX);
       fputc ('\n', stdout);
 
@@ -1800,8 +1800,8 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_XRESET:
       parport_print_info ();
       fputs ("Resetting parallel port...", stdout);
-      outportb ((unsigned short) (ucon64.parport + PARPORT_DATA), 0);
-      outportb ((unsigned short) (ucon64.parport + PARPORT_CONTROL), 0);
+      outportb (ucon64.parport + PARPORT_DATA, 0);
+      outportb (ucon64.parport + PARPORT_CONTROL, 0);
       puts ("done");
       break;
 

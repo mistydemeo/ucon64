@@ -121,7 +121,7 @@ const st_getopt2_t gd_usage[] =
 #endif
 
 
-static void init_io (unsigned int port);
+static void init_io (unsigned short port);
 static void deinit_io (void);
 static void io_error (void);
 static void gd_checkabort (int status);
@@ -138,11 +138,11 @@ static int gd6_send_prolog_bytes (unsigned char *data, int len);
 static int gd6_send_bytes (unsigned char *data, int len);
 static int gd6_receive_bytes (unsigned char *buffer, int len);
 static int gd_send_unit_prolog (int header, unsigned size);
-static int gd_write_rom (const char *filename, unsigned int parport,
+static int gd_write_rom (const char *filename, unsigned short parport,
                          st_ucon64_nfo_t *rominfo, const char *prolog_str);
-static int gd_write_sram (const char *filename, unsigned int parport,
+static int gd_write_sram (const char *filename, unsigned short parport,
                           const char *prolog_str);
-static int gd_write_saver (const char *filename, unsigned int parport,
+static int gd_write_saver (const char *filename, unsigned short parport,
                            const char *prolog_str);
 
 
@@ -157,7 +157,8 @@ static int (*gd_send_prolog_byte) (unsigned char data);
 static int (*gd_send_prolog_bytes) (unsigned char *data, int len);
 static int (*gd_send_bytes) (unsigned char *data, int len);
 static st_gd3_memory_unit_t gd3_dram_unit[GD3_MAX_UNITS];
-static int gd_port, gd_bytessend, gd_fsize, gd_name_i = 0;
+static unsigned short gd_port;
+static int gd_bytessent, gd_fsize, gd_name_i = 0;
 static time_t gd_starttime;
 static char **gd_names;
 static unsigned char gd6_send_toggle;
@@ -165,11 +166,11 @@ static const char *gd_destfname = NULL;
 static FILE *gd_destfile;
 
 
-void
-init_io (unsigned int port)
+static void
+init_io (unsigned short port)
 /*
   - sets global `gd_port'. Then the send/receive functions don't need to pass
-    `port' to all the I/O functions.
+    `gd_port' to all the I/O functions.
   - calls init_conio(). Necessary for kbhit() and DOS-like behaviour of getch().
 */
 {
@@ -190,7 +191,7 @@ init_io (unsigned int port)
 }
 
 
-void
+static void
 deinit_io (void)
 {
 // Put possible transfer cleanup stuff here
@@ -200,7 +201,7 @@ deinit_io (void)
 }
 
 
-void
+static void
 io_error (void)
 // This function could be changed to take a string argument that describes the
 //  error. Or take an integer code that we can interpret here.
@@ -214,7 +215,7 @@ io_error (void)
 }
 
 
-void
+static void
 gd_checkabort (int status)
 {
   if (((!ucon64.frontend) ? kbhit () : 0) && getch () == 'q')
@@ -238,7 +239,7 @@ remove_destfile (void)
 }
 
 
-int
+static int
 gd3_send_prolog_byte (unsigned char data)
 /*
   Prolog specific data output routine
@@ -250,21 +251,21 @@ gd3_send_prolog_byte (unsigned char data)
   // Wait until SF3 is not busy
   do
     {
-      if ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x08) == 0)
+      if ((inportb (gd_port + PARPORT_STATUS) & 0x08) == 0)
         return GD_ERROR;
     }
-  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0);
+  while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0);
 
-  outportb ((unsigned short) gd_port, data);    // set data
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
-  inportb ((unsigned short) (gd_port + PARPORT_CONTROL));     // Let data "settle down"
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+  outportb (gd_port, data);                     // Set data
+  outportb (gd_port + PARPORT_CONTROL, 5);      // Clock data out to SF3
+  inportb (gd_port + PARPORT_CONTROL);          // Let data "settle down"
+  outportb (gd_port + PARPORT_CONTROL, 4);
   
   return GD_OK;
 }
 
 
-int
+static int
 gd3_send_prolog_bytes (unsigned char *data, int len)
 {
   int i;
@@ -276,7 +277,7 @@ gd3_send_prolog_bytes (unsigned char *data, int len)
 }
 
 
-int
+static int
 gd_send_unit_prolog (int header, unsigned size)
 {
   if (gd_send_prolog_byte (0x00) == GD_ERROR)
@@ -291,7 +292,7 @@ gd_send_unit_prolog (int header, unsigned size)
 }
 
 
-void
+static void
 gd3_send_byte (unsigned char data)
 /*
   General data output routine
@@ -300,17 +301,17 @@ gd3_send_byte (unsigned char data)
 */
 {
   // Wait until SF3 is not busy
-  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
+  while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0)
     ;
 
-  outportb ((unsigned short) gd_port, data);    // set data
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
-  inportb ((unsigned short) (gd_port + PARPORT_CONTROL));     // Let data "settle down"
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+  outportb (gd_port, data);                     // Set data
+  outportb (gd_port + PARPORT_CONTROL, 5);      // Clock data out to SF3
+  inportb (gd_port + PARPORT_CONTROL);          // Let data "settle down"
+  outportb (gd_port + PARPORT_CONTROL, 4);
 }
 
 
-int
+static int
 gd3_send_bytes (unsigned char *data, int len)
 {
   int i;
@@ -318,10 +319,10 @@ gd3_send_bytes (unsigned char *data, int len)
   for (i = 0; i < len; i++)
     {
       gd3_send_byte (data[i]);
-      gd_bytessend++;
-      if ((gd_bytessend - GD_HEADER_LEN) % 8192 == 0)
+      gd_bytessent++;
+      if ((gd_bytessent - GD_HEADER_LEN) % 8192 == 0)
         {
-          ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
+          ucon64_gauge (gd_starttime, gd_bytessent, gd_fsize);
           gd_checkabort (2);                    // 2 to return something other than 1
         }
     }
@@ -329,7 +330,7 @@ gd3_send_bytes (unsigned char *data, int len)
 }
 
 
-int
+static int
 gd6_sync_hardware (void)
 // Sets the SF7 up for an SF6/SF7 protocol transfer
 {
@@ -340,42 +341,42 @@ gd6_sync_hardware (void)
     {
       timeout = GD6_TIMEOUT_ATTEMPTS;
 
-      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
-      outportb ((unsigned short) gd_port, 0);
-      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+      outportb (gd_port + PARPORT_CONTROL, 4);
+      outportb (gd_port, 0);
+      outportb (gd_port + PARPORT_CONTROL, 4);
 
       for (delay = 0x1000; delay > 0; delay--)  // A delay may not be necessary here
         ;
 
-      outportb ((unsigned short) gd_port, 0xaa);
-      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 0);
+      outportb (gd_port, 0xaa);
+      outportb (gd_port + PARPORT_CONTROL, 0);
 
-      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) == 0)
+      while ((inportb (gd_port + PARPORT_CONTROL) & 0x08) == 0)
         if (--timeout == 0)
           break;
       if (timeout == 0)
         continue;
 
-      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+      outportb (gd_port + PARPORT_CONTROL, 4);
 
-      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) != 0)
+      while ((inportb (gd_port + PARPORT_CONTROL) & 0x08) != 0)
         if (--timeout == 0)
           break;
       if (timeout == 0)
         continue;
 
-      outportb ((unsigned short) gd_port, 0x55);
-      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 0);
+      outportb (gd_port, 0x55);
+      outportb (gd_port + PARPORT_CONTROL, 0);
 
-      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) == 0)
+      while ((inportb (gd_port + PARPORT_CONTROL) & 0x08) == 0)
         if (--timeout == 0)
           break;
       if (timeout == 0)
         continue;
 
-      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+      outportb (gd_port + PARPORT_CONTROL, 4);
 
-      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) != 0)
+      while ((inportb (gd_port + PARPORT_CONTROL) & 0x08) != 0)
         if (--timeout == 0)
           break;
       if (timeout == 0)
@@ -387,26 +388,26 @@ gd6_sync_hardware (void)
 }
 
 
-int
+static int
 gd6_sync_receive_start (void)
 // Sync with the start of the received data
 {
   int timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
 
-  while (1)
+  for (;;)
     {
-      if (((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x03) == 0x03) ||
-          ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x03) == 0))
+      if (((inportb (gd_port + PARPORT_CONTROL) & 0x03) == 0x03) ||
+          ((inportb (gd_port + PARPORT_CONTROL) & 0x03) == 0))
         break;
 
       if (--timeout == 0)
         return GD_ERROR;
     }
 
-  outportb ((unsigned short) gd_port, 0);
+  outportb (gd_port, 0);
 
   timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
-  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) != 0)
+  while ((inportb (gd_port + PARPORT_STATUS) & 0x80) != 0)
     if (--timeout == 0)
       return GD_ERROR;
 
@@ -414,38 +415,38 @@ gd6_sync_receive_start (void)
 }
 
 
-inline int
+static inline int
 gd6_send_byte_helper (unsigned char data, unsigned int timeout)
 {
-  while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x02) != gd6_send_toggle)
+  while ((inportb (gd_port + PARPORT_CONTROL) & 0x02) != gd6_send_toggle)
     if (--timeout == 0)
       return GD_ERROR;
 
   gd6_send_toggle = ~gd6_send_toggle & 0x02;
-  outportb ((unsigned short) gd_port, data);
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), (unsigned char) (4 | (gd6_send_toggle >> 1)));
+  outportb (gd_port, data);
+  outportb (gd_port + PARPORT_CONTROL, 4 | (gd6_send_toggle >> 1));
 
   return GD_OK;
 }
 
 
-int
+static int
 gd6_send_prolog_byte (unsigned char data)
 {
   unsigned int timeout = 0x100000;
 
-  gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;
+  gd6_send_toggle = (inportb (gd_port + PARPORT_CONTROL) & 0x01) << 1;
   return gd6_send_byte_helper (data, timeout);
 }
 
 
-int
+static int
 gd6_send_prolog_bytes (unsigned char *data, int len)
 {
   int i;
   unsigned int timeout = 0x1e00000;
 
-  gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;
+  gd6_send_toggle = (inportb (gd_port + PARPORT_CONTROL) & 0x01) << 1;
   for (i = 0; i < len; i++)
     if (gd6_send_byte_helper (data[i], timeout) != GD_OK)
       return GD_ERROR;
@@ -453,22 +454,22 @@ gd6_send_prolog_bytes (unsigned char *data, int len)
 }
 
 
-int
+static int
 gd6_send_bytes (unsigned char *data, int len)
 {
   int i;
   unsigned int timeout = 0x1e0000;
 
-  gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;
+  gd6_send_toggle = (inportb (gd_port + PARPORT_CONTROL) & 0x01) << 1;
   for (i = 0; i < len; i++)
     {
       if (gd6_send_byte_helper (data[i], timeout) != GD_OK)
         return GD_ERROR;
 
-      gd_bytessend++;
-      if ((gd_bytessend - GD_HEADER_LEN) % 8192 == 0)
+      gd_bytessent++;
+      if ((gd_bytessent - GD_HEADER_LEN) % 8192 == 0)
         {
-          ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
+          ucon64_gauge (gd_starttime, gd_bytessent, gd_fsize);
           gd_checkabort (2);                    // 2 to return something other than 1
         }
     }
@@ -476,30 +477,30 @@ gd6_send_bytes (unsigned char *data, int len)
 }
 
 
-int
+static int
 gd6_receive_bytes (unsigned char *buffer, int len)
 {
   int i;
   unsigned char nibble1, nibble2;
   unsigned int timeout = 0x1e0000;
 
-  outportb ((unsigned short) gd_port, 0x80);    // Signal the SF6/SF7 to send the next nibble
+  outportb (gd_port, 0x80);                     // Signal the SF6/SF7 to send the next nibble
   for (i = 0; i < len; i++)
     {
-      while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
+      while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0)
         if (--timeout == 0)
           return GD_ERROR;
 
-      nibble1 = (inportb ((unsigned short) (gd_port + PARPORT_STATUS)) >> 3) & 0x0f;
-      outportb ((unsigned short) gd_port, 0x00); // Signal the SF6/SF7 to send the next nibble
+      nibble1 = (inportb (gd_port + PARPORT_STATUS) >> 3) & 0x0f;
+      outportb (gd_port, 0x00);                 // Signal the SF6/SF7 to send the next nibble
 
-      while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) != 0)
+      while ((inportb (gd_port + PARPORT_STATUS) & 0x80) != 0)
         if (--timeout == 0)
           return GD_ERROR;
 
-      nibble2 = (inportb ((unsigned short) (gd_port + PARPORT_STATUS)) << 1) & 0xf0;
+      nibble2 = (inportb (gd_port + PARPORT_STATUS) << 1) & 0xf0;
       buffer[i] = nibble2 | nibble1;
-      outportb ((unsigned short) gd_port, 0x80);
+      outportb (gd_port, 0x80);
     }
   return GD_OK;
 }
@@ -525,7 +526,7 @@ gd_add_filename (const char *filename)
 
 
 int
-gd3_read_rom (const char *filename, unsigned int parport)
+gd3_read_rom (const char *filename, unsigned short parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
@@ -534,7 +535,7 @@ gd3_read_rom (const char *filename, unsigned int parport)
 
 
 int
-gd6_read_rom (const char *filename, unsigned int parport)
+gd6_read_rom (const char *filename, unsigned short parport)
 {
 #if 0
   FILE *file;
@@ -566,7 +567,7 @@ gd6_read_rom (const char *filename, unsigned int parport)
 
 
 int
-gd3_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *rominfo)
+gd3_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo)
 {
   gd_send_prolog_byte = gd3_send_prolog_byte;   // for gd_send_unit_prolog()
   gd_send_prolog_bytes = gd3_send_prolog_bytes;
@@ -577,7 +578,7 @@ gd3_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *romi
 
 
 int
-gd6_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *rominfo)
+gd6_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo)
 {
   gd_send_prolog_byte = gd6_send_prolog_byte;   // for gd_send_unit_prolog()
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
@@ -593,8 +594,8 @@ gd6_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *romi
         resetting the SNES. You will see the Game Doctor menu has a message that
         says "LINKING.."
 */
-int
-gd_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *rominfo,
+static int
+gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo,
               const char *prolog_str)
 {
   FILE *file = NULL;
@@ -678,7 +679,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *romin
     if (gd6_sync_hardware () == GD_ERROR)
       io_error ();
   memcpy (buffer, prolog_str, 4);
-  buffer[4] = num_units;
+  buffer[4] = (unsigned char) num_units;
   if (gd_send_prolog_bytes (buffer, 5) == GD_ERROR)
     io_error ();
 
@@ -730,7 +731,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *romin
           fread (buffer, 1, GD_HEADER_LEN, file);
           if (gd_send_prolog_bytes (buffer, GD_HEADER_LEN) == GD_ERROR)
             io_error ();
-          gd_bytessend += GD_HEADER_LEN;
+          gd_bytessent += GD_HEADER_LEN;
         }
       if (split == 0)                           // Not pre-split -- have to split it ourselves
         {
@@ -757,7 +758,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_ucon64_nfo_t *romin
 
 
 int
-gd3_read_sram (const char *filename, unsigned int parport)
+gd3_read_sram (const char *filename, unsigned short parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
@@ -766,7 +767,7 @@ gd3_read_sram (const char *filename, unsigned int parport)
 
 
 int
-gd6_read_sram (const char *filename, unsigned int parport)
+gd6_read_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
@@ -848,7 +849,7 @@ gd6_read_sram (const char *filename, unsigned int parport)
 
 
 int
-gd3_write_sram (const char *filename, unsigned int parport)
+gd3_write_sram (const char *filename, unsigned short parport)
 {
   gd_send_prolog_bytes = gd3_send_prolog_bytes;
   gd_send_bytes = gd3_send_bytes;
@@ -858,7 +859,7 @@ gd3_write_sram (const char *filename, unsigned int parport)
 
 
 int
-gd6_write_sram (const char *filename, unsigned int parport)
+gd6_write_sram (const char *filename, unsigned short parport)
 {
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
   gd_send_bytes = gd6_send_bytes;
@@ -867,12 +868,12 @@ gd6_write_sram (const char *filename, unsigned int parport)
 }
 
 
-int
-gd_write_sram (const char *filename, unsigned int parport, const char *prolog_str)
+static int
+gd_write_sram (const char *filename, unsigned short parport, const char *prolog_str)
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
-  int bytesread, bytessend = 0, size, header_size;
+  int bytesread, bytessent = 0, size, header_size;
   time_t starttime;
 
   init_io (parport);
@@ -933,13 +934,13 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
   puts ("Press q to abort\n");                  // print here, NOT before first GD I/O,
                                                 //  because if we get here q works ;-)
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
       if (gd_send_bytes (buffer, bytesread) == GD_ERROR)
         io_error ();
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       gd_checkabort (2);
     }
 
@@ -952,7 +953,7 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
 
 
 int
-gd3_read_saver (const char *filename, unsigned int parport)
+gd3_read_saver (const char *filename, unsigned short parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
@@ -961,7 +962,7 @@ gd3_read_saver (const char *filename, unsigned int parport)
 
 
 int
-gd6_read_saver (const char *filename, unsigned int parport)
+gd6_read_saver (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
@@ -1046,7 +1047,7 @@ gd6_read_saver (const char *filename, unsigned int parport)
 
 
 int
-gd3_write_saver (const char *filename, unsigned int parport)
+gd3_write_saver (const char *filename, unsigned short parport)
 {
   gd_send_prolog_bytes = gd3_send_prolog_bytes;
   gd_send_bytes = gd3_send_bytes;
@@ -1056,7 +1057,7 @@ gd3_write_saver (const char *filename, unsigned int parport)
 
 
 int
-gd6_write_saver (const char *filename, unsigned int parport)
+gd6_write_saver (const char *filename, unsigned short parport)
 {
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
   gd_send_bytes = gd6_send_bytes;
@@ -1065,13 +1066,13 @@ gd6_write_saver (const char *filename, unsigned int parport)
 }
 
 
-int
-gd_write_saver (const char *filename, unsigned int parport, const char *prolog_str)
+static int
+gd_write_saver (const char *filename, unsigned short parport, const char *prolog_str)
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
   const char *p;
-  int bytesread, bytessend = 0, size, fn_length;
+  int bytesread, bytessent = 0, size, fn_length;
   time_t starttime;
 
   init_io (parport);
@@ -1147,13 +1148,13 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   puts ("Press q to abort\n");                  // print here, NOT before first GD I/O,
                                                 //  because if we get here q works ;-)
   starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
       if (gd_send_bytes (buffer, bytesread) == GD_ERROR)
         io_error ();
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       gd_checkabort (2);
     }
 

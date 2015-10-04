@@ -414,8 +414,8 @@ atari_init (st_ucon64_nfo_t * rominfo)
               }
         }
 
-      atari_rominfo.speed_hi = atari_rominfo.game_page_count / 21 + 1;
-      atari_rominfo.speed_low = atari_rominfo.game_page_count * 0x100 / 21 - (atari_rominfo.speed_hi - 1) * 0x100;
+      atari_rominfo.speed_hi = (unsigned char) (atari_rominfo.game_page_count / 21 + 1);
+      atari_rominfo.speed_low = (unsigned char) (atari_rominfo.game_page_count * 0x100 / 21 - (atari_rominfo.speed_hi - 1) * 0x100);
 
       atari_rominfo.ctrl_byte = get_bsmode_by_id (atari_rominfo.bsm)->ctrl_byte;
 

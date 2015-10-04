@@ -147,7 +147,7 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
   mgd_make_name (ucon64.fname, console, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
-  if (!(buffer = (unsigned char *) malloc (size)))
+  if ((buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
@@ -184,7 +184,7 @@ sms_smd (st_ucon64_nfo_t *rominfo)
   int size = ucon64.file_size - rominfo->backup_header_len;
 
   memset (&header, 0, SMD_HEADER_LEN);
-  header.size = size / 16384;
+  header.size = (unsigned char) (size / 16384);
   header.id0 = 1;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
@@ -195,7 +195,7 @@ sms_smd (st_ucon64_nfo_t *rominfo)
   set_suffix (dest_name, ".smd");
   ucon64_file_handler (dest_name, src_name, 0);
 
-  if (!(buffer = (unsigned char *) malloc (size)))
+  if ((buffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
@@ -257,8 +257,8 @@ sms_chk (st_ucon64_nfo_t *rominfo)
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
 
-  buf[0] = rominfo->current_internal_crc;       // low byte
-  buf[1] = rominfo->current_internal_crc >> 8;  // high byte
+  buf[0] = (char) rominfo->current_internal_crc; // low byte
+  buf[1] = (char) (rominfo->current_internal_crc >> 8); // high byte
   // change checksum
   if (rominfo->interleaved)
     {
@@ -300,7 +300,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
       if (!isprint ((int) name[n]))
         name[n] = '.';
       else
-        name[n] = toupper (name[n]);            // loader only supports upper case characters
+        name[n] = (unsigned char) toupper (name[n]); // loader only supports upper case characters
     }
   fwrite (name, 1, 0x0c, destfile);             // 0x01 - 0x0c = name
   fputc (size / 16384, destfile);               // 0x0d = ROM size (not used by loader)
@@ -315,7 +315,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
         }
       sram_page = 3;
     }
-  flags = sram_page++;
+  flags = (unsigned char) sram_page++;
   fputc (flags, destfile);                      // 0x0f = flags
 
   fseek (destfile, fpos, SEEK_SET);             // restore file pointer
@@ -340,7 +340,7 @@ sms_multi (int truncate_size, char *fname)
       fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
       return -1;
     }
-  if (!(buffer = (unsigned char *) malloc (BUFSIZE)))
+  if ((buffer = (unsigned char *) malloc (BUFSIZE)) == NULL)
     {
       fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFSIZE);
       return -1;
@@ -481,8 +481,8 @@ sms_multi (int truncate_size, char *fname)
   sms_header.checksum_range = 0x0f;             // sms_chksum() uses this variable
   n = sms_chksum (buffer, n);
 
-  buffer[SMS_HEADER_START + 10] = n;            // low byte
-  buffer[SMS_HEADER_START + 11] = n >> 8;       // high byte
+  buffer[SMS_HEADER_START + 10] = (unsigned char) n; // low byte
+  buffer[SMS_HEADER_START + 11] = (unsigned char) (n >> 8); // high byte
   fseek (destfile, SMS_HEADER_START + 10, SEEK_SET);
   fwrite (buffer + SMS_HEADER_START + 10, 1, 6, destfile);
 
@@ -655,7 +655,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       int size = ucon64.file_size - rominfo->backup_header_len;
-      if (!(rom_buffer = (unsigned char *) malloc (size)))
+      if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
           return -1;

@@ -25,9 +25,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t pl_usage[];
 
 #ifdef  USE_PARALLEL
-extern int pl_info (unsigned int parport);
-extern int pl_read_rom (const char *filename, unsigned int parport);
-extern int pl_write_rom (const char *filename, unsigned int parport);
+extern int pl_info (unsigned short parport);
+extern int pl_read_rom (const char *filename, unsigned short parport);
+extern int pl_write_rom (const char *filename, unsigned short parport);
 #endif
 
 #endif

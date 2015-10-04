@@ -63,15 +63,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef USE_PARALLEL
 
-extern void ffe_init_io (unsigned int port);
+extern void ffe_init_io (unsigned short port);
 extern void ffe_deinit_io (void);
-extern void ffe_send_block (unsigned short address, unsigned char *buffer, int len);
-extern void ffe_send_block2 (unsigned short address, unsigned char *buffer, int len);
+extern void ffe_send_block (unsigned short address, unsigned char *buffer, unsigned short len);
+extern void ffe_send_block2 (unsigned short address, unsigned char *buffer, unsigned short len);
 extern void ffe_send_command0 (unsigned short address, unsigned char byte);
 extern unsigned char ffe_send_command1 (unsigned short address);
 extern void ffe_send_command (unsigned char command_code, unsigned short a, unsigned short l);
-extern void ffe_receive_block (unsigned short address, unsigned char *buffer, int len);
-extern void ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len);
+extern void ffe_receive_block (unsigned short address, unsigned char *buffer, unsigned short len);
+extern void ffe_receive_block2 (unsigned short address, unsigned char *buffer, unsigned short len);
 extern unsigned char ffe_receiveb (void);
 extern void ffe_wait_for_ready (void);
 extern void ffe_checkabort (int status);

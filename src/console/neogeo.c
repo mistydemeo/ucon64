@@ -160,13 +160,13 @@ sam2wav (const char *filename)
 
   if (fsizeof (filename) < 16)
     return -1;
-  if (!(fh = fopen (filename, "rb")))
+  if ((fh = fopen (filename, "rb")) == NULL)
     return -1;
 
   strcpy ((char *) buf, filename);
   set_suffix ((char *) buf, ".wav");
 
-  if (!(fh2 = fopen ((char *) buf, "wb")))
+  if ((fh2 = fopen ((char *) buf, "wb")) == NULL)
     return -1;
   fread (buf, 1, 4, fh);
 

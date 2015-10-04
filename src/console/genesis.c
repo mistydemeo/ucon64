@@ -242,7 +242,7 @@ genesis_smd (st_ucon64_nfo_t *rominfo)
     return -1;
 
   memset (&header, 0, SMD_HEADER_LEN);
-  header.size = genesis_rom_size / 16384;
+  header.size = (unsigned char) (genesis_rom_size / 16384);
   header.id0 = 3;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
@@ -566,7 +566,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
       ucon64_output_fname (dest_name, 0);
       p = strrchr (dest_name, '.') + 1;
 
-      smd_header.size = part_size / 16384;
+      smd_header.size = (unsigned char) (part_size / 16384);
       smd_header.id0 = 3;
       // if smd_header.split bit 6 == 0 -> last file of the ROM
       smd_header.split |= 0x40;
@@ -585,7 +585,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
 
       if (surplus != 0)
         {
-          smd_header.size = surplus / 16384;
+          smd_header.size = (unsigned char) (surplus / 16384);
           smd_header.split &= ~0x40;            // last file -> clear bit 6
 
           // don't write backups of parts, because one name is used
@@ -604,7 +604,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
 
       mgd_make_name (ucon64.fname, UCON64_GEN, genesis_rom_size, dest_name);
       strcpy (suffix, (char *) get_suffix (dest_name));
-      if ((p = strchr (dest_name, '.')))
+      if ((p = strchr (dest_name, '.')) != NULL)
         *p = 0;
       n = strlen (dest_name);
       if (n > 7)
@@ -698,7 +698,7 @@ genesis_j (st_ucon64_nfo_t *rominfo)
 
       if (rominfo->backup_header_len)
         {                                       // fix header
-          buf[0] = total_size / 16384;          // # 16 kB blocks
+          buf[0] = (unsigned char) (total_size / 16384); // # 16 kB blocks
           buf[1] = 3;                           // ID 0
           buf[2] = 0;                           // last file -> clear bit 6
           ucon64_fwrite (buf, 0, 3, dest_name, "r+b");
@@ -847,8 +847,8 @@ genesis_chk (st_ucon64_nfo_t *rominfo)
   if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
-  rom_buffer[GENESIS_HEADER_START + 143] = rominfo->current_internal_crc;      // low byte of checksum
-  rom_buffer[GENESIS_HEADER_START + 142] = rominfo->current_internal_crc >> 8; // high byte of checksum
+  rom_buffer[GENESIS_HEADER_START + 143] = (unsigned char) rominfo->current_internal_crc; // low byte of checksum
+  rom_buffer[GENESIS_HEADER_START + 142] = (unsigned char) (rominfo->current_internal_crc >> 8); // high byte of checksum
 
   dumper (stdout, &rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e, DUMPER_HEX);
 
@@ -994,7 +994,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 
   if ((file = fopen (name, "rb")) == NULL)
     return NULL;
-  if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
+  if ((rom_buffer = (unsigned char *) malloc (genesis_rom_size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
       fclose (file);
@@ -1073,7 +1073,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
       if (!isprint ((int) name[n]))
         name[n] = '.';
       else
-        name[n] = toupper (name[n]);            // according to Leo, MDPACKU4.BIN
+        name[n] = (unsigned char) toupper (name[n]); // according to Leo, MDPACKU4.BIN
     }                                           //  only supports upper case characters
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (size / MBIT, destfile);                // 0x1d = ROM size (not used by loader)

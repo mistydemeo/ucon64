@@ -134,7 +134,7 @@ nrg_chunk_offset (const dm_image_t *image, const char *chunk_id)
   int pos = 0;
   char value_s[32];
   
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return FALSE;
     
   fseek (fh, image->header_start, SEEK_SET);
@@ -165,7 +165,7 @@ nrg_chunk_size (const dm_image_t *image, const char *chunk_id)
   if (!pos)
    return 0;
 
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return 0;
     
   fseek (fh, pos, SEEK_SET);
@@ -224,7 +224,7 @@ nrg_track_init (dm_track_t *track, FILE *fh)
   fread (&value8, 1, 1, fh); // pad byte
 
   fread (&value32, 4, 1, fh); // start_lba
-  track->start_lba = be2me_32 (value32);
+  track->start_lba = (int16_t) be2me_32 (value32);
   
   return 0;
 }
@@ -261,7 +261,7 @@ nrg_init (dm_image_t * image)
   if (size < 12)
     return -1; // image file is too small
 
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return -1;
 
   fseek (fh, -4, SEEK_END);
@@ -306,7 +306,7 @@ nrg_init (dm_image_t * image)
 
   fseek (fh, image->header_start, SEEK_SET);
 
-  if (!(result = nrg_chunk_size (image, NRG_CUEX)))
+  if ((result = nrg_chunk_size (image, NRG_CUEX)) == 0)
     {
       fclose (fh);
       return -1;

@@ -518,7 +518,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
       sprintf (p, "%s, ", dat_flags[x][1]);
   if (buf[0])
     {
-      if ((p = strrchr (buf, ',')))
+      if ((p = strrchr (buf, ',')) != NULL)
         *p = 0;
       sprintf (dat->misc, "Flags: %s", buf);
     }
@@ -566,7 +566,7 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
   char buf[MAXBUFSIZE];
 
   if (!fdat)
-    if (!(fdat = fopen (fname, "rb")))
+    if ((fdat = fopen (fname, "rb")) == NULL)
       {
         fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
 #if     defined _WIN32 || defined __CYGWIN__ || defined __MSDOS__
@@ -637,7 +637,7 @@ ucon64_dat_view (int console, int verbose)
         dat.comment,
         n_entries);
 
-      if (!(p = (unsigned char *) malloc (fsize)))
+      if ((p = (unsigned char *) malloc (fsize)) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], fsize);
           continue;
@@ -738,7 +738,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
         continue;
       fsize = fsizeof (fname_index);
 
-      if (!(p = (unsigned char *) malloc (fsize)))
+      if ((p = (unsigned char *) malloc (fsize)) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], fsize);
           closedir_ddat ();
@@ -799,8 +799,8 @@ ucon64_dat_indexer (void)
 
   warning = 1; // enable warning again for DATs with unrecognized console systems
 
-  if (!(idx_entries = (st_idx_entry_t *)
-          malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t))))
+  if ((idx_entries = (st_idx_entry_t *)
+        malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t))) == NULL)
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR],
         MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t));
@@ -857,7 +857,7 @@ ucon64_dat_indexer (void)
                 {
                   strcpy (errorfname, fname_index);
                   set_suffix (errorfname, ".err");
-                  if (!(errorfile = fopen (errorfname, "w"))) // text file for WinDOS
+                  if ((errorfile = fopen (errorfname, "w")) == NULL) // text file for WinDOS
                     {
                       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], errorfname);
                       continue;
@@ -1134,7 +1134,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             console_name = "Vectrex";
             break;
           case UCON64_XBOX:
-            console_name = "XBox";
+            console_name = "Xbox";
             break;
           default:
             fputs (ucon64_msg[CONSOLE_ERROR], stderr);
@@ -1142,8 +1142,8 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             break;
         }
 
-      if (!(ucon64_mkdat_entries = (st_mkdat_entry_t *)
-              malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t))))
+      if ((ucon64_mkdat_entries = (st_mkdat_entry_t *)
+            malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t))) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR],
             MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t));
@@ -1152,7 +1152,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
 
       strcpy (ucon64_dat_fname, dat_file_name);
       ucon64_file_handler (ucon64_dat_fname, NULL, OF_FORCE_BASENAME);
-      if (!(ucon64_datfile = fopen (ucon64_dat_fname, "wb")))
+      if ((ucon64_datfile = fopen (ucon64_dat_fname, "wb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ucon64_dat_fname);
           exit (1);
@@ -1244,7 +1244,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     archive as well, to be even more helpful :-)
   */
   x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 1);
-  if (!(ucon64_mkdat_entries[ucon64_n_files].fname = (char *) malloc (x)))
+  if ((ucon64_mkdat_entries[ucon64_n_files].fname = (char *) malloc (x)) == NULL)
     {                                                 // + 3 for " ()"
       fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);  //  + 1 for ASCII-z
       exit (1);

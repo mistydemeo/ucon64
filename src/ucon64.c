@@ -932,11 +932,11 @@ main (int argc, char **argv)
 
   p = get_property (ucon64.configfile, "parport", PROPERTY_MODE_TEXT);
   if (p)
-    sscanf (p, "%x", &ucon64.parport);
+    sscanf (p, "%hx", &ucon64.parport);
   else
     // use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
     //  a parport line
-    ucon64.parport = -1;
+    ucon64.parport = (uint16_t) -1;
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups");

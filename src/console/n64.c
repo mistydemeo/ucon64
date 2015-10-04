@@ -400,7 +400,7 @@ n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
       exit (1);
     }
 
-  if (!(usmsbuf = (char *) malloc (4 * MBIT)))
+  if ((usmsbuf = (char *) malloc (4 * MBIT)) == NULL)
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR], 4 * MBIT);
       exit (1);
@@ -617,7 +617,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
       return -1;                                // ROM is too small
     }
 
-  if (!(file = fopen (filename, "rb")))
+  if ((file = fopen (filename, "rb")) == NULL)
     return -1;
 
 #ifdef  CALC_CRC32
@@ -679,11 +679,11 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   t5 = i;
   t6 = i;
 
-  while (1)
+  for (;;)
     {
       if (rlen > 0)
         {
-          if ((n = fread (chunk, 1, MIN (sizeof (chunk), clen), file)))
+          if ((n = fread (chunk, 1, MIN (sizeof (chunk), clen), file)) != 0)
             {
 #ifdef  CALC_CRC32
               if (!rominfo->interleaved)
@@ -758,7 +758,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
       free (crc32_mem);
       crc32_mem = chunk;
     }
-  while ((n = fread (crc32_mem, 1, sizeof (chunk), file)))
+  while ((n = fread (crc32_mem, 1, sizeof (chunk), file)) != 0)
     {
       if (!rominfo->interleaved)
         {

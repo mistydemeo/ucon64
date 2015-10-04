@@ -584,9 +584,12 @@ ucon64_load_discmage (void)
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
     {
+      u_func_ptr_t sym;
+
       libdm = open_module (ucon64.discmage_path);
 
-      dm_get_version_ptr = (uint32_t (*) (void)) get_symbol (libdm, "dm_get_version");
+      sym.void_ptr = get_symbol (libdm, "dm_get_version");
+      dm_get_version_ptr = (uint32_t (*) (void)) sym.func_ptr;
       version = dm_get_version_ptr ();
       if (version < LIB_VERSION (UCON64_DM_VERSION_MAJOR,
                                  UCON64_DM_VERSION_MINOR,
@@ -604,30 +607,46 @@ ucon64_load_discmage (void)
         }
       else
         {
-          dm_get_version_s_ptr = (const char *(*) (void)) get_symbol (libdm, "dm_get_version_s");
-          dm_set_gauge_ptr = (void (*) (void (*) (int, int))) get_symbol (libdm, "dm_set_gauge");
+          u_func_ptr_t sym;
 
-          dm_open_ptr = (dm_image_t *(*) (const char *, uint32_t)) get_symbol (libdm, "dm_open");
-          dm_reopen_ptr = (dm_image_t *(*) (const char *, uint32_t, dm_image_t *))
-                      get_symbol (libdm, "dm_reopen");
-          dm_fdopen_ptr = (FILE *(*) (dm_image_t *, int, const char *))
-                      get_symbol (libdm, "dm_fdopen");
-          dm_close_ptr = (int (*) (dm_image_t *)) get_symbol (libdm, "dm_close");
-          dm_nfo_ptr = (void (*) (const dm_image_t *, int, int)) get_symbol (libdm, "dm_nfo");
+          sym.void_ptr = get_symbol (libdm, "dm_get_version_s");
+          dm_get_version_s_ptr = (const char *(*) (void)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_set_gauge");
+          dm_set_gauge_ptr = (void (*) (void (*) (int, int))) sym.func_ptr;
 
-          dm_read_ptr = (int (*) (char *, int, int, const dm_image_t *)) get_symbol (libdm, "dm_read");
-          dm_write_ptr = (int (*) (const char *, int, int, const dm_image_t *)) get_symbol (libdm, "dm_write");
+          sym.void_ptr = get_symbol (libdm, "dm_open");
+          dm_open_ptr = (dm_image_t *(*) (const char *, uint32_t)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_reopen");
+          dm_reopen_ptr = (dm_image_t *(*) (const char *, uint32_t, dm_image_t *)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_fdopen");
+          dm_fdopen_ptr = (FILE *(*) (dm_image_t *, int, const char *)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_close");
+          dm_close_ptr = (int (*) (dm_image_t *)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_nfo");
+          dm_nfo_ptr = (void (*) (const dm_image_t *, int, int)) sym.func_ptr;
 
-          dm_disc_read_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_disc_read");
-          dm_disc_write_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_disc_write");
+          sym.void_ptr = get_symbol (libdm, "dm_read");
+          dm_read_ptr = (int (*) (char *, int, int, const dm_image_t *)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_write");
+          dm_write_ptr = (int (*) (const char *, int, int, const dm_image_t *)) sym.func_ptr;
 
-          dm_toc_read_ptr = (dm_image_t *(*) (dm_image_t *, const char *)) get_symbol (libdm, "dm_toc_read");
-          dm_toc_write_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_toc_write");
+          sym.void_ptr = get_symbol (libdm, "dm_disc_read");
+          dm_disc_read_ptr = (int (*) (const dm_image_t *)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_disc_write");
+          dm_disc_write_ptr = (int (*) (const dm_image_t *)) sym.func_ptr;
 
-          dm_cue_read_ptr = (dm_image_t *(*) (dm_image_t *, const char *)) get_symbol (libdm, "dm_cue_read");
-          dm_cue_write_ptr = (int (*) (const dm_image_t *)) get_symbol (libdm, "dm_cue_write");
+          sym.void_ptr = get_symbol (libdm, "dm_toc_read");
+          dm_toc_read_ptr = (dm_image_t *(*) (dm_image_t *, const char *)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_toc_write");
+          dm_toc_write_ptr = (int (*) (const dm_image_t *)) sym.func_ptr;
 
-          dm_rip_ptr = (int (*) (const dm_image_t *, int, uint32_t)) get_symbol (libdm, "dm_rip");
+          sym.void_ptr = get_symbol (libdm, "dm_cue_read");
+          dm_cue_read_ptr = (dm_image_t *(*) (dm_image_t *, const char *)) sym.func_ptr;
+          sym.void_ptr = get_symbol (libdm, "dm_cue_write");
+          dm_cue_write_ptr = (int (*) (const dm_image_t *)) sym.func_ptr;
+
+          sym.void_ptr = get_symbol (libdm, "dm_rip");
+          dm_rip_ptr = (int (*) (const dm_image_t *, int, uint32_t)) sym.func_ptr;
 
           return 1;
         }
@@ -951,7 +970,7 @@ ucon64_testpad (const char *filename)
   if (!file)
     return -1;
 
-  while ((blocksize = fread (buffer, 1, MAXBUFSIZE, file)))
+  while ((blocksize = fread (buffer, 1, MAXBUFSIZE, file)) != 0)
     {
       if (buffer[blocksize - 1] != c)
         {
@@ -1257,7 +1276,7 @@ to_func (char *s, int len, int (*func) (int))
   char *p = s;
 
   for (; len > 0; p++, len--)
-    *p = func (*p);
+    *p = (char) func (*p);
 
   return s;
 }
@@ -1680,7 +1699,7 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
   if (rominfo->backup_header_len)                    // copy header (if present)
     {
       n = rominfo->backup_header_len;
-      while ((bytesread = fread (buffer, 1, MIN (n, PATTERN_BUFSIZE), srcfile)))
+      while ((bytesread = fread (buffer, 1, MIN (n, PATTERN_BUFSIZE), srcfile)) != 0)
         {
           fwrite (buffer, 1, bytesread, destfile);
           n -= bytesread;
@@ -1717,7 +1736,7 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
             memmove (buffer, buffer + bytesread, overlap);
           }
       }
-    while ((bytesread = fread (buffer + overlap, 1, PATTERN_BUFSIZE - overlap, srcfile)));
+    while ((bytesread = fread (buffer + overlap, 1, PATTERN_BUFSIZE - overlap, srcfile)) != 0);
   if (n != -1)
     fwrite (buffer, 1, overlap, destfile);
 
@@ -1810,7 +1829,10 @@ void
 ucon64_dump (FILE *output, const char *filename, size_t start, size_t len,
              uint32_t flags)
 {
-  st_ucon64_dump_t o = {output, start, flags};
+  st_ucon64_dump_t o;
+  o.output = output;
+  o.virtual_pos = start;
+  o.flags = flags;
 
   quick_io_func (ucon64_dump_func, MAXBUFSIZE, &o, start, len, filename, "rb");
 }
@@ -1905,7 +1927,12 @@ int
 ucon64_find (const char *filename, size_t start, size_t len,
              const char *search, int searchlen, uint32_t flags)
 {
-  st_ucon64_find_t o = { search, flags, searchlen, start, -2 };
+  st_ucon64_find_t o;
+  o.search = search;
+  o.flags = flags;
+  o.searchlen = searchlen;
+  o.pos = start;
+  o.found = -2;
   // o.found == -2 signifies a new find operation (usually for a new file)
 
   if (searchlen < 1)
@@ -2016,14 +2043,14 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *cr
       unsigned char buf[MAXBUFSIZE];
 
       sha1_end (buf, &m_sha1);
-      for (*sha1_s = i = 0; i < 20; i++, sha1_s = strchr (sha1_s, 0))
+      for (*sha1_s = 0, i = 0; i < 20; i++, sha1_s = strchr (sha1_s, 0))
         sprintf (sha1_s, "%02x", buf[i] & 0xff);
     }
 
   if (md5_s)
     {
       md5_final (&m_md5);
-      for (*md5_s = i = 0; i < 16; i++, md5_s = strchr (md5_s, 0))
+      for (*md5_s = 0, i = 0; i < 16; i++, md5_s = strchr (md5_s, 0))
         sprintf (md5_s, "%02x", m_md5.digest[i]);
     }
 
@@ -2171,13 +2198,13 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
     return;
 
 #ifdef  FILEFILE_LARGE_BUF
-  if (!(buf1 = (unsigned char *) malloc (bufsize)))
+  if ((buf1 = (unsigned char *) malloc (bufsize)) == NULL)
     {
       fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], bufsize);
       return;
     }
 
-  if (!(buf2 = (unsigned char *) malloc (bufsize)))
+  if ((buf2 = (unsigned char *) malloc (bufsize)) == NULL)
     {
       free (buf1);
       fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], bufsize);
@@ -2185,7 +2212,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
     }
 #endif
 
-  if (!(file1 = fopen (filename1, "rb")))
+  if ((file1 = fopen (filename1, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename1);
 #ifdef  FILEFILE_LARGE_BUF
@@ -2194,7 +2221,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #endif
       return ;
     }
-  if (!(file2 = fopen (filename2, "rb")))
+  if ((file2 = fopen (filename2, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename2);
       fclose (file1);

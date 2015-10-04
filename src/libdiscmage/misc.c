@@ -310,7 +310,7 @@ getopt2_usage (const st_getopt2_t *usage)
             strcpy (buf, usage[i].help);
 
             if (usage[i].name)
-              for (; (p2 = strchr (p, '\n')); p = p2 + 1)
+              for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
                 {
                   c = p2[1];
                   p2[1] = 0;
@@ -716,7 +716,7 @@ to_func (char *s, int size, int (*func) (int))
   char *p = s;
 
   for (; size > 0; p++, size--)
-    *p = func (*p);
+    *p = (char) func (*p);
 
   return s;
 }
@@ -763,9 +763,9 @@ set_suffix (char *filename, const char *suffix)
 {
   char suffix2[FILENAME_MAX], *p, *p2;
 
-  if (!(p = basename2 (filename)))
+  if ((p = basename2 (filename)) == NULL)
     p = filename;
-  if ((p2 = strrchr (p, '.')))
+  if ((p2 = strrchr (p, '.')) != NULL)
     if (p2 != p)                                // files can start with '.'
       *p2 = 0;
 
@@ -781,9 +781,9 @@ set_suffix_i (char *filename, const char *suffix)
 {
   char *p, *p2;
 
-  if (!(p = basename2 (filename)))
+  if ((p = basename2 (filename)) == NULL)
     p = filename;
-  if ((p2 = strrchr (p, '.')))
+  if ((p2 = strrchr (p, '.')) != NULL)
     if (p2 != p)                                // files can start with '.'
       *p2 = 0;
 
@@ -799,9 +799,9 @@ get_suffix (const char *filename)
 {
   char *p, *p2;
 
-  if (!(p = basename2 (filename)))
+  if ((p = basename2 (filename)) == NULL)
     p = (char *) filename;
-  if (!(p2 = strrchr (p, '.')))
+  if ((p2 = strrchr (p, '.')) == NULL)
     p2 = "";
   if (p2 == p)
     p2 = "";                                    // files can start with '.'; be
@@ -1087,7 +1087,7 @@ dirname2 (const char *path)
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
   if (p1 == NULL)                               // no slash, perhaps a drive?
     {
-      if ((p1 = strrchr (dir, ':')))
+      if ((p1 = strrchr (dir, ':')) != NULL)
         {
           p1[1] = '.';
           p1 += 2;
@@ -1311,7 +1311,7 @@ realpath (const char *path, char *full_path)
   if (GetFullPathName (path, FILENAME_MAX, full_path, &p) == 0)
     return NULL;
 
-  c = toupper (full_path[0]);
+  c = (char) toupper (full_path[0]);
   n = strlen (full_path) - 1;
   // Remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
@@ -1441,8 +1441,8 @@ one_filesystem (const char *filename1, const char *filename2)
         return 0;
       if (GetFullPathName (filename2, FILENAME_MAX, path2, &p) == 0)
         return 0;
-      d1 = toupper (path1[0]);
-      d2 = toupper (path2[0]);
+      d1 = (char) toupper (path1[0]);
+      d2 = (char) toupper (path2[0]);
       if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z')
         if (strlen (path1) >= 2 && strlen (path2) >= 2)
           // We don't handle unique volume names
@@ -1751,14 +1751,14 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
       ptr = line + strspn (line, "\t ");
       if (*ptr == '#' || *ptr == '\n' || *ptr == '\r')
         continue;
-      if ((ptr = strpbrk (line, "\n\r#")))      // text after # is comment
+      if ((ptr = strpbrk (line, "\n\r#")) != NULL) // text after # is comment
         *ptr = 0;
 
       requiredsize1 += sizeof (st_cm_pattern_t);
       if (requiredsize1 > currentsize1)
         {
           currentsize1 = requiredsize1 + 10 * sizeof (st_cm_pattern_t);
-          if (!(*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)))
+          if ((*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)) == NULL)
             {
               fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize1);
               return -1;
@@ -1781,8 +1781,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10;
-              if (!((*patterns)[n_codes].search =
-                   (char *) realloc ((*patterns)[n_codes].search, currentsize2)))
+              if (((*patterns)[n_codes].search =
+                   (char *) realloc ((*patterns)[n_codes].search, currentsize2)) == NULL)
                 {
                   fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free (*patterns);
@@ -1793,7 +1793,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           (*patterns)[n_codes].search[n] = (unsigned char) strtol (token, NULL, 16);
           n++;
         }
-      while ((token = strtok (NULL, " ")));
+      while ((token = strtok (NULL, " ")) != NULL);
       (*patterns)[n_codes].search_size = n;     // size in bytes
 
       strcpy (buffer, line);
@@ -1842,8 +1842,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10;
-              if (!((*patterns)[n_codes].replace =
-                   (char *) realloc ((*patterns)[n_codes].replace, currentsize2)))
+              if (((*patterns)[n_codes].replace =
+                   (char *) realloc ((*patterns)[n_codes].replace, currentsize2)) == NULL)
                 {
                   fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free ((*patterns)[n_codes].search);
@@ -1855,7 +1855,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           (*patterns)[n_codes].replace[n] = (unsigned char) strtol (token, NULL, 16);
           n++;
         }
-      while ((token = strtok (NULL, " ")));
+      while ((token = strtok (NULL, " ")) != NULL);
       (*patterns)[n_codes].replace_size = n;  // size in bytes
 
       strcpy (buffer, line);
@@ -1906,8 +1906,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10 * sizeof (st_cm_set_t);
-              if (!((*patterns)[n_codes].sets = (st_cm_set_t *)
-                    realloc ((*patterns)[n_codes].sets, currentsize2)))
+              if (((*patterns)[n_codes].sets =
+                   (st_cm_set_t *) realloc ((*patterns)[n_codes].sets, currentsize2)) == NULL)
                 {
                   fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free ((*patterns)[n_codes].replace);
@@ -1929,8 +1929,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
               if (requiredsize3 > currentsize3)
                 {
                   currentsize3 = requiredsize3 + 10;
-                  if (!((*patterns)[n_codes].sets[n_sets].data = (char *)
-                        realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)))
+                  if (((*patterns)[n_codes].sets[n_sets].data =
+                       (char *) realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)) == NULL)
                     {
                       fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize3);
                       free ((*patterns)[n_codes].sets);
@@ -1945,7 +1945,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
                 (unsigned char) strtol (token, NULL, 16);
               n++;
             }
-          while ((token = strtok (NULL, " ")));
+          while ((token = strtok (NULL, " ")) != NULL);
           (*patterns)[n_codes].sets[n_sets].size = n;
 
           if (verbose)
@@ -2132,7 +2132,7 @@ getenv2 (const char *variable)
             {
               char c;
               getcwd (value, FILENAME_MAX);
-              c = toupper (*value);
+              c = (char) toupper (*value);
               // if current dir is root dir strip problematic ending slash (DJGPP)
               if (c >= 'A' && c <= 'Z' &&
                   value[1] == ':' && value[2] == '/' && value[3] == 0)
@@ -2195,7 +2195,7 @@ get_property (const char *filename, const char *propname, char *buffer,
           p = line + whitespace_len;            // ignore leading whitespace
           if (*p == '#' || *p == '\n' || *p == '\r')
             continue;                           // text after # is comment
-          if ((p = strpbrk (line, "#\r\n")))    // strip *any* returns
+          if ((p = strpbrk (line, "#\r\n")) != NULL) // strip *any* returns
             *p = 0;
 
           p = strchr (line, PROPERTY_SEPARATOR);
@@ -2296,7 +2296,7 @@ set_property (const char *filename, const char *propname, const char *value,
   if (stat (filename, &fstate) != 0)
     file_size = fstate.st_size;
 
-  if (!(str = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))))
+  if ((str = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))) == NULL)
     {
       errno = ENOMEM;
       return -1;
@@ -2308,7 +2308,7 @@ set_property (const char *filename, const char *propname, const char *value,
       while (fgets (line, sizeof line, fh) != NULL)
         {
           strcpy (line2, line);
-          if ((p = strpbrk (line2, PROPERTY_SEPARATOR_S "#\r\n")))
+          if ((p = strpbrk (line2, PROPERTY_SEPARATOR_S "#\r\n")) != NULL)
             *p = 0;                             // note that this "cuts" _line2_
           for (i = strlen (line2) - 1;
                i >= 0 && (line2[i] == '\t' || line2[i] == ' ');
@@ -2750,12 +2750,12 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
   if (one_file (dest, src))                     // other code depends on this
     return -1;                                  //  behaviour!
 
-  if (!(fh = fopen (src, "rb")))
+  if ((fh = fopen (src, "rb")) == NULL)
     {
       errno = ENOENT;
       return -1;
     }
-  if (!(fh2 = fopen (dest, mode)))
+  if ((fh2 = fopen (dest, mode)) == NULL)
     {
       errno = ENOENT;
       fclose (fh);
@@ -2767,7 +2767,7 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
 
   for (; len > 0; len -= seg_len)
     {
-      if (!(seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)))
+      if ((seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)) == 0)
         break;
       fwrite (buf, 1, seg_len, fh2);
     }
@@ -2796,14 +2796,14 @@ q_rfcpy (const char *src, const char *dest)
   if (one_file (dest, src))
     return -1;
 
-  if (!(fh = fopen (src, "rb")))
+  if ((fh = fopen (src, "rb")) == NULL)
     return -1;
-  if (!(fh2 = fopen (dest, "wb")))
+  if ((fh2 = fopen (dest, "wb")) == NULL)
     {
       fclose (fh);
       return -1;
     }
-  while ((seg_len = fread (buf, 1, MAXBUFSIZE, fh)))
+  while ((seg_len = fread (buf, 1, MAXBUFSIZE, fh)) != 0)
     fwrite (buf, 1, seg_len, fh2);
 
   fclose (fh);
@@ -2835,7 +2835,7 @@ q_fswap (const char *filename, int start, int len, swap_t type)
       return -1;
     }
 
-  if (!(fh = fopen (filename, "r+b")))
+  if ((fh = fopen (filename, "r+b")) == NULL)
     {
       errno = ENOENT;
       return -1;
@@ -2845,7 +2845,7 @@ q_fswap (const char *filename, int start, int len, swap_t type)
 
   for (; len > 0; len -= seg_len)
     {
-      if (!(seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)))
+      if ((seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)) == 0)
         break;
       if (type == SWAP_BYTE)
         mem_swap_b (buf, seg_len);
@@ -2876,7 +2876,7 @@ q_fncmp (const char *filename, int start, int len, const char *search,
   FILE *fh;
   int seglen, maxsearchlen, searchpos, filepos = 0, matchlen = 0;
 
-  if (!(fh = fopen (filename, "rb")))
+  if ((fh = fopen (filename, "rb")) == NULL)
     {
       errno = ENOENT;
       return -1;
@@ -2885,7 +2885,7 @@ q_fncmp (const char *filename, int start, int len, const char *search,
   filepos = start;
 
   while ((seglen = fread (buf, 1, BUFSIZE + filepos > start + len ?
-                            start + len - filepos : BUFSIZE, fh)))
+                            start + len - filepos : BUFSIZE, fh)) != 0)
     {
       maxsearchlen = searchlen - matchlen;
       for (searchpos = 0; searchpos <= seglen; searchpos++)
@@ -3037,7 +3037,7 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
   if (!*str)
     return 0;
 
-  for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) &&
+  for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL &&
        (argc < (max_args - 1)); argc++)
     ;
 

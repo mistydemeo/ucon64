@@ -247,7 +247,7 @@ getopt2_usage (const st_getopt2_t *usage)
             strcpy (buf, usage[i].help);
 
             if (usage[i].name)
-              for (; (p2 = strchr (p, '\n')); p = p2 + 1)
+              for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
                 {
                   c = p2[1];
                   p2[1] = 0;
@@ -430,7 +430,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       char buf[FILENAME_MAX], *p;
 
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
-      char c = toupper (path[0]);
+      char c = (char) toupper (path[0]);
       if (path[strlen (path) - 1] == FILE_SEPARATOR ||
           (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == 0))
 #else

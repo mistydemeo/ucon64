@@ -83,7 +83,7 @@ dm_other_gc_init (dm_image_t *image)
       char company_long[64];
       char desc[128];
     } st_opening_bnr_t;
-  
+
   st_boot_bin_t boot_bin;
   st_opening_bnr_t opening_bnr;
   dm_track_t *track = (dm_track_t *) &image->track[0];
@@ -105,7 +105,7 @@ dm_other_gc_init (dm_image_t *image)
   memset (&boot_bin, 0, sizeof (st_boot_bin_t));
   memset (&opening_bnr, 0, sizeof (st_opening_bnr_t));
 
-  if (!(fh = fopen (image->fname, "rb")))
+  if ((fh = fopen (image->fname, "rb")) == NULL)
     return NULL;
 
   fread (&boot_bin, sizeof (st_boot_bin_t), 1, fh);
@@ -137,7 +137,7 @@ dm_other_gc_init (dm_image_t *image)
 
   return image;
 }
-    
+
 
 int
 other_init (dm_image_t *image)
@@ -170,7 +170,7 @@ other_init (dm_image_t *image)
                                  probe[x].len,
                                  probe[x].version_s, 
                                  strlen (probe[x].version_s),
-                                 0)))
+                                 0)) != 0)
       {
          image->desc = probe[x].version_long;
          probe[x].func (image);

@@ -53,12 +53,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <proto/dos.h>
 #include <proto/lowlevel.h>
 #elif   defined _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>                            // Sleep(), milliseconds
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <io.h>                                 // isatty() (MinGW)
 #endif
 
 
-#ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
+#ifdef  __CYGWIN__                              // on Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
@@ -372,16 +381,15 @@ fprintf2 (FILE *file, const char *format, ...)
 void
 clear_line (void)
 /*
-  This function is used to fix a problem when using the MinGW or Visual C++
-  port under Windows 98 (probably Windows 95 too) while ANSI.SYS is not loaded.
+  This function is used to fix a problem when using the MinGW or Visual C++ port
+  on Windows 98 (probably Windows 95 too) while ANSI.SYS is not loaded.
   If a line contains colors, printed with printf() or fprintf() (actually
   printf2() or fprintf2()), it cannot be cleared by printing spaces on the same
-  line. A solution is using SetConsoleTextAttribute().
-  The problem doesn't occur if ANSI.SYS is loaded. It also doesn't occur under
-  Windows XP, even if ANSI.SYS isn't loaded.
-  We print 79 spaces (not 80), because under command.com the cursor advances to
-  the next line if we print something on the 80th column (in 80 column mode).
-  This doesn't happen under xterm.
+  line. A solution is using SetConsoleTextAttribute(). The problem doesn't occur
+  if ANSI.SYS is loaded. It also doesn't occur on Windows XP, even if ANSI.SYS
+  isn't loaded. We print 79 spaces (not 80), because in command.com the cursor
+  advances to the next line if we print something on the 80th column (in 80
+  column mode). This doesn't happen in xterm.
 */
 {
 #if     !defined _WIN32 || !defined USE_ANSI_COLOR
@@ -549,7 +557,7 @@ kbhit (void)
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
-  tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
+  tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected on
   set_tty (&tmptty);                            //  Cygwin (define USE_POLL)
 
   if ((ch = fgetc (stdin)) != EOF)

@@ -28,12 +28,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#ifdef  _WIN32
-#include <windows.h>
 #endif
 #include "misc/misc.h"
 #include "misc/string.h"
@@ -1598,9 +1602,9 @@ ucon64_e (void)
 #if 1
   // Snes9x (Linux) for example returns a non-zero value on a normal exit
   //  (3)...
-  // under WinDOS, system() immediately returns with exit code 0 when
-  //  starting a Windows executable (as if fork() was called) it also
-  //  returns 0 when the exe could not be started
+  // on WinDOS, system() immediately returns with exit code 0 when starting a
+  //  Windows executable (as if fork() was called) it also returns 0 when the
+  //  exe could not be started
   if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
     {
       fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"

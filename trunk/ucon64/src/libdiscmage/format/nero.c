@@ -55,7 +55,14 @@ typedef struct
   unsigned char pad1;
   unsigned char unknown2;     // ? 0x01
   unsigned char tracks;
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 } st_daoi_t;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 
 typedef struct
@@ -70,7 +77,14 @@ typedef struct
 typedef struct
 {
   unsigned char pad[10];
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   int32_t sector_size;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   int32_t mode;
   int32_t offset;
   int32_t offset2;

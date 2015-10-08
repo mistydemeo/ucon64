@@ -33,7 +33,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>                           // for S_IFLNK
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
@@ -53,7 +60,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <proto/dos.h>
 #include <proto/lowlevel.h>
 #elif   defined _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>                            // Sleep(), milliseconds
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
 
 #ifdef  HAVE_INTTYPES_H
@@ -743,12 +759,12 @@ getenv2 (const char *variable)
   static char value[MAXBUFSIZE];
 #if     defined __CYGWIN__ || defined __MSDOS__
 /*
-  Under DOS and Windows the environment variables are not stored in a case
+  On DOS and Windows the environment variables are not stored in a case
   sensitive manner. The run-time systems of DJGPP and Cygwin act as if they are
   stored in upper case. Their getenv() however *is* case sensitive. We fix this
   by changing all characters of the search string (variable) to upper case.
 
-  Note that under Cygwin's Bash environment variables *are* stored in a case
+  Note that in Cygwin's Bash environment variables *are* stored in a case
   sensitive manner.
 */
   char tmp2[MAXBUFSIZE];
@@ -775,7 +791,7 @@ getenv2 (const char *variable)
             }
           else
             /*
-              Don't just use C:\\ under DOS, the user might not have write access
+              Don't just use C:\\ on DOS, the user might not have write access
               there (Windows NT DOS-box). Besides, it would make uCON64 behave
               differently on DOS than on the other platforms.
               Returning the current directory when none of the above environment

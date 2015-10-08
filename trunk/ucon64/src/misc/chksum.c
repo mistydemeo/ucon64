@@ -34,11 +34,7 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#ifdef HAVE_BYTESWAP_H
-//#include <byteswap.h>
-//#else
 #include "bswap.h"
-//#endif
 #ifdef  USE_ZLIB
 #include <zlib.h>
 #include "unzip.h"

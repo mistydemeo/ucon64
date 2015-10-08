@@ -74,7 +74,14 @@ typedef struct
   uint32_t track_end; // in bytes
 
   int16_t pregap_len; // in sectors
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   uint32_t track_len; // in sectors
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   uint32_t total_len; // in sectors; pregap_len + track_len == total_len
                            // (less if the track is truncated)
 
@@ -85,7 +92,14 @@ typedef struct
   int32_t iso_header_start; // if -1 then no iso header
 
   int8_t mode;        // 0 == AUDIO, 1 == MODE1, 2 == MODE2
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   uint16_t sector_size; // in bytes; includes seek_header + seek_ecc
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   int16_t seek_header; // in bytes
   int16_t seek_ecc;    // in bytes
 

@@ -18,12 +18,26 @@
 #include <string.h>
 #include <stdarg.h>
 #include <sys/types.h>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
 #include <sys/stat.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #if defined __unix__ || defined __BEOS__
 #include <unistd.h>
 #endif
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
 #include <sys/timeb.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #else
 #include <sys/time.h>
 #endif

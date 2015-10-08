@@ -209,8 +209,8 @@ io_error (void)
   fflush (stdout);
   fputs ("ERROR: Communication with Game Doctor failed\n", stderr);
   fflush (stderr);
-  // calling fflush() seems to be necessary under Msys in order to make the
-  //  error message be displayed before the "Removing: <filename>" message
+  // calling fflush() seems to be necessary in Msys in order to make the error
+  //  message be displayed before the "Removing: <filename>" message
   exit (1);
 }
 

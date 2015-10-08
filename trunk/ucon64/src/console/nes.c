@@ -5163,7 +5163,7 @@ remove_destfile (void)
   if (nes_destfname)
     {
       printf ("Removing: %s\n", nes_destfname);
-      fclose (nes_destfile);                    // necessary under DOS/Win9x for DJGPP port
+      fclose (nes_destfile);                    // necessary on DOS/Win9x for DJGPP port
       remove (nes_destfname);
       nes_destfname = NULL;
     }

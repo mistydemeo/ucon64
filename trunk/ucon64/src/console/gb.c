@@ -175,7 +175,14 @@ typedef struct st_gb_chksum
 {
   unsigned short value;
   unsigned char header;
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 } st_gb_chksum_t;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 static st_gb_chksum_t checksum;
 static st_gb_chksum_t gb_chksum (st_ucon64_nfo_t *rominfo);

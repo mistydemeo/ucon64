@@ -9,7 +9,7 @@ extern "C" {
 
 /* This is the only public header file for cd64lib. */
 
-#if __STDC_VERSION >= 19990L
+#if defined __STDC_VERSION && __STDC_VERSION >= 19990L
 #include <stdint.h>
 #else
 #if !(defined __MSDOS__ || defined _MSC_VER)

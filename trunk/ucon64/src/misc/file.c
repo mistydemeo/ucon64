@@ -34,7 +34,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <errno.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>                           // for S_IFLNK
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
@@ -53,7 +60,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <proto/dos.h>
 #include <proto/lowlevel.h>
 #elif   defined _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>                            // Sleep(), milliseconds
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
 
 #ifdef  HAVE_INTTYPES_H
@@ -89,9 +105,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // Visual C++ doesn't allow inline in C source code
 #define inline __inline
 #endif
-
-
-extern int errno;
 
 
 int
@@ -538,9 +551,9 @@ one_filesystem (const char *filename1, const char *filename2)
   if (fattrib1 & FILE_ATTRIBUTE_DIRECTORY || fattrib2 & FILE_ATTRIBUTE_DIRECTORY)
     /*
       We special-case directories, because we can't use
-      FILE_FLAG_BACKUP_SEMANTICS as argument to CreateFile() under
-      Windows 9x/ME. There seems to be no Win32 function other than
-      CreateFile() to obtain a handle to a directory.
+      FILE_FLAG_BACKUP_SEMANTICS as argument to CreateFile() on Windows 9x/ME.
+      There seems to be no Win32 function other than CreateFile() to obtain a
+      handle to a directory.
     */
     {
       if (GetFullPathName (filename1, FILENAME_MAX, path1, &p) == 0)

@@ -33,7 +33,7 @@
 #ifdef  USE_ZLIB
 #include "misc/archive.h"
 #endif
-#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/getopt2.h"                       /* st_getopt2_t */
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "psxpblib.h"
@@ -316,7 +316,7 @@ psx_sendbyte (int base, int conport, int delay, unsigned char byte, int wait)
 void
 psx_sendinit (int base, int conport, int delay)
 {
-//  psx_obtain_io_permission (base);// uCON64 already enabled access to I/O ports
+/*  psx_obtain_io_permission (base); */ /* uCON64 already enabled access to I/O ports */
   psx_att (base, conport, 1);   /* set att on for conport */
   psx_clk (base, conport, 1);   /* clock high */
   psx_cmd (base, conport, 1);   /* set command on for conport */
@@ -1075,4 +1075,4 @@ psx_mcb_read_info (int base, int conport, int tap, int delay, int block)
   return psx_mcb_info_merge (*mcb_info_dir, *mcb_info_dat, &mcb_info);
 }
 
-#endif // USE_PARALLEL
+#endif /* USE_PARALLEL */

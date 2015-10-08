@@ -29,7 +29,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/chksum.h"
 #include "misc/misc.h"
 #include "misc/string.h"

@@ -93,7 +93,14 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #endif // USE_ANSI_COLOR
 
 #ifndef __MINGW32__
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <io.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #define STDIN_FILENO (fileno (stdin))
 #define STDOUT_FILENO (fileno (stdout))
 #define STDERR_FILENO (fileno (stderr))

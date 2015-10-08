@@ -60,7 +60,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dos/var.h>
 #include <devices/parallel.h>
 #elif   defined _WIN32                          // AMIGA
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <conio.h>                              // inp{w}() & outp{w}()
 #include "dlopen.h"
 #elif   defined __CYGWIN__                      // _WIN32
@@ -130,7 +139,7 @@ static char (WINAPI *PortIn) (short int) = NULL;
 static short int (WINAPI *PortWordIn) (short int) = NULL;
 static void (WINAPI *PortOut) (short int, char) = NULL;
 static void (WINAPI *PortWordOut) (short int, short int) = NULL;
-static short int (WINAPI *IsDriverInstalled) () = NULL;
+static short int (WINAPI *IsDriverInstalled) (void) = NULL;
 
 static unsigned char io_input_byte (unsigned short port) { return PortIn (port); }
 static unsigned short io_input_word (unsigned short port) { return PortWordIn (port); }
@@ -150,7 +159,7 @@ static void dlportio_output_word (unsigned short port, unsigned short word) { Dl
 
 #if     defined __CYGWIN__ || defined __MINGW32__
 // default to functions which are always available (but which generate an
-//  exception under Windows NT/2000/XP without an I/O driver)
+//  exception on Windows NT/2000/XP/2003/Vista/7/8/8.1 without an I/O driver)
 static unsigned char (*input_byte) (unsigned short) = i386_input_byte;
 static unsigned short (*input_word) (unsigned short) = i386_input_word;
 static void (*output_byte) (unsigned short, unsigned char) = i386_output_byte;
@@ -164,7 +173,7 @@ static void outp_func (unsigned short port, unsigned char byte) { outp (port, by
 static void outpw_func (unsigned short port, unsigned short word) { outpw (port, word); }
 
 // default to functions which are always available (but which generate an
-//  exception under Windows NT/2000/XP without an I/O driver)
+//  exception on Windows NT/2000/XP/2003/Vista/7/8/8.1 without an I/O driver)
 static unsigned char (*input_byte) (unsigned short) = inp_func;
 static unsigned short (*input_word) (unsigned short) = inpw_func;
 static void (*output_byte) (unsigned short, unsigned char) = outp_func;
@@ -749,8 +758,8 @@ parport_open (unsigned short port)
 #endif // __linux__ && (__i386__ || __x86_64__) && !USE_PPDEV
 
 #ifdef  __OpenBSD__ // || defined __NetBSD__, add after feature request ;-)
-  // We use i386_iopl() under OpenBSD for the same reasons we use iopl() under
-  //  Linux (i386_set_ioperm() has the same limitation as ioperm()).
+  // We use i386_iopl() on OpenBSD for the same reasons we use iopl() on Linux
+  //  (i386_set_ioperm() has the same limitation as ioperm()).
   if (i386_iopl (3) == -1)
     {
       fputs ("ERROR: Could not set the I/O privilege level to 3\n"
@@ -809,7 +818,7 @@ parport_open (unsigned short port)
           io_driver = open_module (fname);
 
           sym.void_ptr = get_symbol (io_driver, "IsDriverInstalled");
-          IsDriverInstalled = (short int (WINAPI *) ()) sym.func_ptr;
+          IsDriverInstalled = (short int (WINAPI *) (void)) sym.func_ptr;
           if (IsDriverInstalled ())
             {
               driver_found = 1;

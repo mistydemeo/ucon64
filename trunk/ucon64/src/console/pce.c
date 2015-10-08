@@ -29,7 +29,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/chksum.h"
 #include "misc/misc.h"
 #include "misc/string.h"
@@ -142,7 +149,14 @@ typedef struct
 {
   uint32_t crc32;
   uint8_t maker;
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   const char *serial;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   uint32_t date;
   const char *comment;
 } st_pce_data_t;

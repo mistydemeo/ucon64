@@ -30,9 +30,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #if     defined _WIN32 || defined __MSDOS__
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/timeb.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #else
 #include <sys/time.h>
 #endif
@@ -207,12 +221,12 @@ static int f2a_receive_data_par (int cmd, int address, int size,
 static int f2a_send_head_par (int cmd, int size);
 static int f2a_send_raw_par (unsigned char *buffer, int len);
 static int f2a_receive_raw_par (unsigned char *buffer, int len);
-static int f2a_wait_par ();
+static int f2a_wait_par (void);
 static int parport_init (unsigned short port, int target_delay);
 static int parport_init_delay (int target);
 static void parport_out31 (unsigned char val);
 static void parport_out91 (unsigned char val);
-static void parport_nop ();
+static void parport_nop (void);
 
 static unsigned short f2a_pport;
 #ifdef  DEBUG
@@ -260,7 +274,7 @@ exec (const char *program, int argc, ...)
   programs that require root privileges. We cannot use system(), because it
   might drop privileges.
   argc should be the number of _arguments_ (excluding the program name itself).
-  DON'T move this function to misc.c. It's only necessary under Linux 2.5 (and
+  DON'T move this function to misc.c. It's only necessary on Linux 2.5 (and
   later) for the USB version of the F2A. It's hard to be more system dependent
   than that. - dbjh
 */
@@ -427,7 +441,7 @@ f2a_connect_usb (void)
                   int wrote, w;
 
                   // Linux kernel version 2.4 or older (2.2.16 is supported by
-                  //  the EZUSB2131 driver). It is possible to use fxload under
+                  //  the EZUSB2131 driver). It is possible to use fxload on
                   //  (later versions of?) Linux 2.4...
                   if ((fp = open (EZDEV, O_WRONLY)) == -1)
                     {
@@ -892,7 +906,7 @@ parport_init_delay (int n_micros)
 
 #ifndef DJGPP
       if (n_ticks - n_micros == 0)              // we are aiming at microsecond accuracy...
-#else // DJGPP's runtime system is quite inaccurate under Windows XP
+#else // DJGPP's run-time system is quite inaccurate on Windows XP
       n = n_ticks - n_micros;
       if (n < 0)
         n = -n;
@@ -922,7 +936,7 @@ parport_init_delay (int n_micros)
 
 
 static void
-parport_nop ()
+parport_nop (void)
 {
   volatile int i = parport_nop_cntr;            // volatile is necessary for Visual C++...
   while (i--)

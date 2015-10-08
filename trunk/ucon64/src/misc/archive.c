@@ -26,7 +26,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <zlib.h>
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>
@@ -46,9 +53,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #undef  MAXBUFSIZE
 #endif  // MAXBUFSIZE
 #define MAXBUFSIZE 32768
-
-
-extern int errno;
 
 
 int

@@ -143,8 +143,8 @@ static parport_mode_t port_mode;
 
 static void
 delay_us (int n_us)
-// Hmmm, usleep() can be used under UNIX, but default under DOS is delay() which
-//  waits for a number of milliseconds... Better use the same code on all platforms.
+// Hmmm, usleep() can be used on UNIX, but default on DOS is delay() which waits
+//  for a number of milliseconds... Better use the same code on all platforms.
 {
   volatile int n;
   int n_max;

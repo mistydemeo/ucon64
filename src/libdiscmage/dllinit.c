@@ -32,7 +32,16 @@ DECLARE_CYGWIN_DLL(DllMain);
 
 
 #if     defined __CYGWIN__ || defined _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifdef  __cplusplus
 extern "C" BOOL WINAPI DllMain (HINSTANCE h, DWORD reason, LPVOID ptr);
@@ -137,7 +146,7 @@ dxe_init (void)
   DXE less error prone. Changing st_symbol_t would also require a recompile of
   the code that uses the DXE (which is a *bad* thing).
   A symbol loading function also makes an "extension API" a bit more elegant,
-  because the extension functions needn't be hardcoded in st_symbol_t;
+  because the extension functions needn't be hardcoded in st_symbol_t.
 */
 void *
 dxe_symbol (char *symbol_name)

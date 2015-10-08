@@ -1,10 +1,13 @@
 CC=cl.exe
 
 !ifdef DEBUG
-CFLAGS=/nologo /I. /W4 /Oi /GZ /Zi /D_CRT_SECURE_NO_WARNINGS /DDEBUG /DHAVE_CONFIG_H
+CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /Oi /GZ /Zi /D_CRT_SECURE_NO_WARNINGS /DDEBUG /DHAVE_CONFIG_H
 !else
-CFLAGS=/nologo /I. /W4 /O2 /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
+CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 !endif
+# Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
+# /wd4710, 'function' : function not inlined
+# /wd4711, function 'function' selected for inline expansion
 
 DEFAULT_BUILD=1
 

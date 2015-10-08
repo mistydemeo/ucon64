@@ -19,7 +19,14 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
 #include <sys/stat.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #if defined __unix__ || defined __BEOS__ /* ioctl() */
 #include <unistd.h>
 #endif
@@ -58,7 +65,7 @@ static void (__stdcall *Outp32)(short, short) = NULL;
 /* io.dll */
 static char (WINAPI *PortIn)(short int) = NULL;
 static void (WINAPI *PortOut)(short int, char) = NULL;
-static short int (WINAPI *IsDriverInstalled)() = NULL;
+static short int (WINAPI *IsDriverInstalled)(void) = NULL;
 /* DlPortIO.dll */
 static unsigned char (__stdcall *DlPortReadPortUchar)(unsigned short) = NULL;
 static void (__stdcall *DlPortWritePortUchar)(unsigned short, unsigned char) = NULL;
@@ -811,7 +818,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		exit(1);
 	}
 #elif defined _WIN32 || defined __CYGWIN__
-#ifdef  _MSC_VER
+#ifdef _MSC_VER
 #define access  _access
 #endif
 	{
@@ -844,7 +851,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 				io_driver = open_module(fname, cd64);
 
 				sym.void_ptr = get_symbol(io_driver, "IsDriverInstalled", cd64);
-				IsDriverInstalled = (short int (WINAPI *)()) sym.func_ptr;
+				IsDriverInstalled = (short int (WINAPI *)(void)) sym.func_ptr;
 				if (IsDriverInstalled()) {
 					io_driver_found = 1;
 					sym.void_ptr = get_symbol(io_driver, "PortIn", cd64);
@@ -915,7 +922,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		SetUnhandledExceptionFilter(org_exception_filter);
 #endif
 	}
-#ifdef  _MSC_VER
+#ifdef _MSC_VER
 #undef  access
 #endif
 #endif /* _WIN32 || __CYGWIN__ */

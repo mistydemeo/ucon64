@@ -32,7 +32,14 @@ typedef struct
   uint32_t crc32;                               // "official" CRC32 checksum of the ROM
   int8_t console;                               // integer for the console system
   char name[2 * 80];                            // name of the ROM
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   const char *maker;                            // maker of the ROM
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   const char *country;                          // country of the ROM
   char misc[25 * 80];                           // miscellaneous information about the ROM
   char fname[FILENAME_MAX];                     // filename of the ROM

@@ -27,7 +27,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <ctype.h>
 #include <sys/types.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
 #endif
@@ -35,9 +42,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #ifdef  _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #ifndef __MINGW32__
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <io.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
 #define F_OK 00
 #endif
@@ -495,7 +518,7 @@ getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int fl
 }
 
 
-#if TEST
+#if defined TEST && TEST
 // compile with -DTEST to build an executable
 
 enum

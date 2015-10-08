@@ -95,7 +95,7 @@ remove_destfile (void)
   if (destfname)
     {
       printf ("Removing: %s\n", destfname);
-      fclose (destfile);                        // necessary under DOS/Win9x for DJGPP port
+      fclose (destfile);                        // necessary on DOS/Win9x for DJGPP port
       remove (destfname);
       destfname = NULL;
     }

@@ -87,11 +87,25 @@ typedef struct
   unsigned char start_low;
   unsigned char speed_hi;
   unsigned char speed_low;
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   int game_page_count;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   unsigned char empty_page[1024];
   unsigned char page_list[24];
   unsigned char multi_byte;
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 } st_atari_rominfo_t;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 
 static st_atari_rominfo_t atari_rominfo;
@@ -129,7 +143,14 @@ typedef struct
   char *bsm_s;
   uint32_t fsize;
   unsigned char ctrl_byte;
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   int start_page;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 } st_atari_bsmode_t;
 
 

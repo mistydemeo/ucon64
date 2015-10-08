@@ -26,7 +26,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <ctype.h>
 #include <time.h>
 #ifdef  HAVE_UNISTD_H

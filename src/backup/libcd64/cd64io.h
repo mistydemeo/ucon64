@@ -62,15 +62,27 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #endif
 #ifdef _MSC_VER
 #include <conio.h>                              /* inp() & outp() */
+#pragma warning(push)
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
 #include <io.h>                                 /* access() */
+#pragma warning(pop)
 #define F_OK 0
 #endif
 #ifdef __MSDOS__
 #include <pc.h>                                 /* inportb() & outportb() */
 #endif
 #if defined _WIN32 || defined __CYGWIN__
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) /* 'function' : no function prototype given: converting '()' to '(void)' */
+#pragma warning(disable: 4668) /* 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives' */
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
 #include <windows.h>                            /* defines _WIN32 (checks for   */
-#include <string.h>                             /*  __CYGWIN__ must come first) */
+#ifdef _MSC_VER                                 /*  __CYGWIN__ must come first) */
+#pragma warning(pop)
+#endif
+#include <string.h>
 #ifdef __CYGWIN__
 #include <exceptions.h>
 #include <dlfcn.h>
@@ -85,7 +97,16 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms);
 
 #if defined _WIN32 && !defined __CYGWIN__
 /* milliseconds */
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) /* 'function' : no function prototype given: converting '()' to '(void)' */
+#pragma warning(disable: 4668) /* 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives' */
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
 #include <windows.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #define USLEEP(x) Sleep(x)
 #elif defined __MSDOS__
 /* milliseconds */
@@ -101,7 +122,7 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms);
 #define USLEEP(x) usleep(x)
 #endif
 
-#if __STDC_VERSION__ >= 19990L && !defined DEBUG
+#if defined __STDC_VERSION && __STDC_VERSION >= 19990L && !defined DEBUG
 /* If DEBUG is defined the keyword inline is not recognised (syntax error). */
 #define INLINE inline
 #elif defined _MSC_VER

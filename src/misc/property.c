@@ -23,7 +23,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <string.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>                           // for struct stat
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
@@ -59,7 +66,7 @@ property_check (const char *filename, int version, int verbose)
         }
 
       if ((fh = fopen (filename, "w")) == NULL) // opening the file in text mode
-        {                                       //  avoids trouble under DOS
+        {                                       //  avoids trouble on DOS
           printf ("FAILED\n\n");
           return -1;
         }
@@ -164,7 +171,7 @@ get_property (const char *filename, const char *propname, int mode)
   const char *value_s = NULL;
 
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
-    {                                           //  avoids trouble under DOS
+    {                                           //  avoids trouble on DOS
       while (fgets (line, sizeof line, fh) != NULL)
         if ((value_s = get_property_from_string (line, propname,
                PROPERTY_SEPARATOR, PROPERTY_COMMENT)) != NULL)
@@ -243,7 +250,7 @@ set_property (const char *filename, const char *propname,
 
   *str = 0;
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
-    {                                           //  avoids trouble under DOS
+    {                                           //  avoids trouble on DOS
       // update existing properties
       while (fgets (line, sizeof line, fh) != NULL)
         {

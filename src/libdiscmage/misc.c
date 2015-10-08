@@ -35,7 +35,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <errno.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>                           // for S_IFLNK
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
@@ -55,7 +62,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <proto/dos.h>
 #include <proto/lowlevel.h>
 #elif   defined _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>                            // Sleep(), milliseconds
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
 
 #ifdef  USE_ZLIB
@@ -63,7 +79,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc.h"
 
-#ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
+#ifdef  __CYGWIN__                              // on Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
@@ -82,7 +98,6 @@ typedef struct termios tty_t;
 #endif
 #endif
 
-extern int errno;
 
 typedef struct st_func_node
 {
@@ -565,16 +580,15 @@ fprintf2 (FILE *file, const char *format, ...)
 void
 clear_line (void)
 /*
-  This function is used to fix a problem when using the MinGW or Visual C++
-  port under Windows 98 (probably Windows 95 too) while ANSI.SYS is not loaded.
+  This function is used to fix a problem when using the MinGW or Visual C++ port
+  on Windows 98 (probably Windows 95 too) while ANSI.SYS is not loaded.
   If a line contains colors, printed with printf() or fprintf() (actually
   printf2() or fprintf2()), it cannot be cleared by printing spaces on the same
-  line. A solution is using SetConsoleTextAttribute().
-  The problem doesn't occur if ANSI.SYS is loaded. It also doesn't occur under
-  Windows XP, even if ANSI.SYS isn't loaded.
-  We print 79 spaces (not 80), because under command.com the cursor advances to
-  the next line if we print something on the 80th column (in 80 column mode).
-  This doesn't happen under xterm.
+  line. A solution is using SetConsoleTextAttribute(). The problem doesn't occur
+  if ANSI.SYS is loaded. It also doesn't occur on Windows XP, even if ANSI.SYS
+  isn't loaded. We print 79 spaces (not 80), because in command.com the cursor
+  advances to the next line if we print something on the 80th column (in 80
+  column mode). This doesn't happen in xterm.
 */
 {
 #if     !defined _WIN32 || !defined USE_ANSI_COLOR
@@ -1432,9 +1446,9 @@ one_filesystem (const char *filename1, const char *filename2)
   if (fattrib1 & FILE_ATTRIBUTE_DIRECTORY || fattrib2 & FILE_ATTRIBUTE_DIRECTORY)
     /* 
       We special-case directories, because we can't use
-      FILE_FLAG_BACKUP_SEMANTICS as argument to CreateFile() under
-      Windows 9x/ME. There seems to be no Win32 function other than
-      CreateFile() to obtain a handle to a directory.
+      FILE_FLAG_BACKUP_SEMANTICS as argument to CreateFile() on Windows 9x/ME.
+      There seems to be no Win32 function other than CreateFile() to obtain a
+      handle to a directory.
     */
     {
       if (GetFullPathName (filename1, FILENAME_MAX, path1, &p) == 0)
@@ -2089,12 +2103,12 @@ getenv2 (const char *variable)
   static char value[MAXBUFSIZE];
 #if     defined __CYGWIN__ || defined __MSDOS__
 /*
-  Under DOS and Windows the environment variables are not stored in a case
+  On DOS and Windows the environment variables are not stored in a case
   sensitive manner. The run-time systems of DJGPP and Cygwin act as if they are
   stored in upper case. Their getenv() however *is* case sensitive. We fix this
   by changing all characters of the search string (variable) to upper case.
 
-  Note that under Cygwin's Bash environment variables *are* stored in a case
+  Note that in Cygwin's Bash environment variables *are* stored in a case
   sensitive manner.
 */
   char tmp2[MAXBUFSIZE];
@@ -2121,7 +2135,7 @@ getenv2 (const char *variable)
             }
           else
             /*
-              Don't just use C:\\ under DOS, the user might not have write access
+              Don't just use C:\\ on DOS, the user might not have write access
               there (Windows NT DOS-box). Besides, it would make uCON64 behave
               differently on DOS than on the other platforms.
               Returning the current directory when none of the above environment
@@ -2188,7 +2202,7 @@ get_property (const char *filename, const char *propname, char *buffer,
   int prop_found = 0, i, whitespace_len;
 
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
-    {                                           //  avoids trouble under DOS
+    {                                           //  avoids trouble on DOS
       while (fgets (line, sizeof line, fh) != NULL)
         {
           whitespace_len = strspn (line, "\t ");
@@ -2304,7 +2318,7 @@ set_property (const char *filename, const char *propname, const char *value,
   *str = 0;
 
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
-    {                                           //  avoids trouble under DOS
+    {                                           //  avoids trouble on DOS
       while (fgets (line, sizeof line, fh) != NULL)
         {
           strcpy (line2, line);
@@ -2472,7 +2486,7 @@ kbhit (void)
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
-  tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
+  tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected on
   set_tty (&tmptty);                            //  Cygwin (define USE_POLL)
 
   if ((ch = fgetc (stdin)) != EOF)

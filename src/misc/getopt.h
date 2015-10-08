@@ -24,6 +24,7 @@
 extern "C"
 {
 #endif
+
 /* For communication from `getopt' to the caller.
    When `getopt' finds an option that takes an argument,
    the argument value is returned here.
@@ -96,14 +97,14 @@ extern "C"
 #define required_argument	1
 #define optional_argument	2
 
-#if defined (__STDC__) && __STDC__
-#if defined __GNU_LIBRARY__ || defined __cplusplus
+#if defined (__STDC__) && __STDC__ || defined __GNUC__ || defined _MSC_VER
+#if defined __GNU_LIBRARY__ || defined __cplusplus || defined __GNUC__ || defined _MSC_VER
 /* Many other libraries have conflicting prototypes for getopt, with
    differences in the consts, in stdlib.h.  To avoid compilation
    errors, only prototype getopt for the GNU C library.  */
   extern int getopt (int argc, char *const *argv, const char *shortopts);
 #else				/* not __GNU_LIBRARY__ */
-  extern int getopt ();
+  extern int getopt (void);
 #endif				/* __GNU_LIBRARY__ */
   extern int getopt_long (int argc, char *const *argv, const char *shortopts,
 			  const struct option *longopts, int *longind);
@@ -117,11 +118,11 @@ extern "C"
 			       const struct option *longopts, int *longind,
 			       int long_only);
 #else				/* not __STDC__ */
-  extern int getopt ();
-  extern int getopt_long ();
-  extern int getopt_long_only ();
+  extern int getopt (void);
+  extern int getopt_long (void);
+  extern int getopt_long_only (void);
 
-  extern int _getopt_internal ();
+  extern int _getopt_internal (void);
 #endif				/* __STDC__ */
 
 #ifdef	__cplusplus

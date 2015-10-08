@@ -19,7 +19,7 @@
 #endif
 #ifdef USE_PARALLEL
 
-// outportb() and inportb() are only present in uCON64 if USE_PARALLEL is defined
+/* outportb() and inportb() are only present in uCON64 if USE_PARALLEL is defined */
 #define psx_outportb(P, B) outportb ((unsigned short) (P), (unsigned char) (B))
 #define psx_inportb(P) inportb ((unsigned short) (P))
 
@@ -106,11 +106,25 @@ typedef struct
   char filename[9];
   char code[11];
   char territory;               /* E, A or I */
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
   int bytes;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   unsigned char state;          /* PSX_MCB_STAT_* or unknown */
   unsigned char linktype;       /* PSX_MCB_LTYPE_* or unknowm */
   unsigned char next;           /* 0 to 14 */
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
 } PSX_MCB_INFO_DIR;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 typedef struct
 {
@@ -131,7 +145,14 @@ typedef struct
   char territory;
   unsigned char state;
   unsigned char blocks;
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) /* 'bytes' bytes padding added after construct 'member_name' */
+#endif
   int bytes;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   unsigned char linktype;
   unsigned char next;
   unsigned char icon_valid;
@@ -205,4 +226,4 @@ PSX_MCB_INFO *psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
 PSX_MCB_INFO *psx_mcb_read_info (int base, int conport, int tap, int delay,
                                  int block);
 
-#endif // USE_PARALLEL
+#endif /* USE_PARALLEL */

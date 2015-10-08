@@ -141,7 +141,7 @@ dc_srand (unsigned int n)
 
 
 static unsigned int
-dc_rand ()
+dc_rand (void)
 {
   seed = (seed * 2109 + 9273) & 0x7fff;
   return (seed + 0xc000) & 0xffff;

@@ -158,7 +158,14 @@ typedef struct st_cm_set
 
 typedef struct st_cm_pattern
 {
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   char *search, wildcard, escape, *replace;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   int search_size, replace_size, offset, n_sets;
   st_cm_set_t *sets;
 } st_cm_pattern_t;
@@ -214,10 +221,17 @@ extern int sync (void);
 #define popen   _popen
 #endif
 #ifndef __MINGW32__
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <io.h>
-#include <direct.h>
 #include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
-                                                //  come after <sys/types.h>. Yep, that's M$.
+#ifdef  _MSC_VER                                //  come after <sys/types.h>. Yep, that's M$.
+#pragma warning(pop)
+#endif
+#include <direct.h>
+
 #define S_IWUSR _S_IWRITE
 #define S_IRUSR _S_IREAD
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)

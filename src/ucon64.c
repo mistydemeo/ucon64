@@ -44,11 +44,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#include <sys/stat.h>
-#include <sys/types.h>
-#ifdef  _WIN32
-#include <windows.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
+#include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
+#include <sys/types.h>
 
 #ifdef  DEBUG
 #ifdef  __GNUC__

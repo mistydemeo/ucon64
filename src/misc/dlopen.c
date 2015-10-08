@@ -25,19 +25,27 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifdef  DJGPP
 #include <sys/dxe.h>
 #elif   defined __unix__ || defined __APPLE__   // Mac OS X actually; __unix__ is also
-#include <dlfcn.h>                              //  defined under Cygwin (and DJGPP)
+#include <dlfcn.h>                              //  defined on Cygwin (and DJGPP)
 #elif   defined _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #elif   defined __BEOS__
 #include <image.h>
 #include <Errors.h>
 #endif
 
-#include "dlopen.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "dlopen.h"
 
 
 #ifdef  DJGPP
@@ -199,8 +207,8 @@ open_module (char *module_name)
   handle = (void *) new_handle++;
 #elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
   /*
-    We use dlcompat under Mac OS X simply because it's there. I (dbjh) don't
-    want to add extra code only because "using the native api's is the supported
+    We use dlcompat on Mac OS X simply because it's there. I (dbjh) don't want
+    to add extra code only because "using the native api's is the supported
     method of loading dynamically on Mac OS X" (Peter O'Gorman, maintainer of
     dlcompat). Besides, dlcompat has been tested while any new code we add, not.
     RTLD_NOW is ignored by dlcompat (7-12-2003).

@@ -14,8 +14,8 @@ LIBNAME_DM=discmage
 endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
-# environment variable DJGPP can be set under Bash for people who have
-# installed both GCC (and friends) ports.
+# environment variable DJGPP can be set in Bash for people who have installed
+# both GCC (and friends) ports.
 
 GCC_WIN=0
 # test cygwin before DJGPP; OSTYPE is not exported on Cygwin
@@ -142,7 +142,7 @@ TARGET=ucon64
 ifeq ($(GCC_WIN),1)
 TARGET:=$(addsuffix .exe,$(TARGET))     # adding .exe avoids "problems" with Cygwin/MinGW
 else
-ifdef DJGPP                             # OSTYPE is not defined by default under DOS
+ifdef DJGPP                             # OSTYPE is not defined by default on DOS
 TARGET:=$(addsuffix .exe,$(TARGET))
 endif                                   # DJGPP
 endif                                   # GCC_WIN

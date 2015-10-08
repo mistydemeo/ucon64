@@ -25,7 +25,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <time.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
@@ -34,7 +41,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dirent.h>
 #endif
 #ifdef  _WIN32
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
 #include "misc/misc.h"
 #include "misc/getopt2.h"
@@ -61,7 +77,14 @@ typedef struct
   int (*compare) (const void *a, const void *b); // the function which compares the id with the filename
                                                 // compare() == 0 means success
   int8_t console;                               // UCON64_SNES, UCON64_NES, etc.
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   const st_getopt2_t *console_usage;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 } st_console_t;
 
 typedef struct

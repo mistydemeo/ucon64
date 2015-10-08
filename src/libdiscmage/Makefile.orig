@@ -28,8 +28,8 @@ LDFLAGS=-s
 endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
-# environment variable DJGPP can be set under Bash for people who have
-# installed both GCC (and friends) ports.
+# environment variable DJGPP can be set in Bash for people who have installed
+# both GCC (and friends) ports.
 
 GCC_WIN=0
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP

@@ -184,7 +184,7 @@ static void (*output_word) (unsigned short, unsigned short) = outpw_func;
 
 
 #if     defined __i386__ || defined __x86_64__  // GCC && x86
-unsigned char
+inline static unsigned char
 i386_input_byte (unsigned short port)
 {
   unsigned char byte;
@@ -197,7 +197,7 @@ i386_input_byte (unsigned short port)
 }
 
 
-unsigned short
+inline static unsigned short
 i386_input_word (unsigned short port)
 {
   unsigned short word;
@@ -210,7 +210,7 @@ i386_input_word (unsigned short port)
 }
 
 
-void
+inline static void
 i386_output_byte (unsigned short port, unsigned char byte)
 {
   __asm__ __volatile__
@@ -221,7 +221,7 @@ i386_output_byte (unsigned short port, unsigned char byte)
 }
 
 
-void
+inline static void
 i386_output_word (unsigned short port, unsigned short word)
 {
   __asm__ __volatile__
@@ -308,7 +308,7 @@ inportb (unsigned short port)
 
   /*
     The difference between using SendIO() and DoIO(), is that DoIO() handles
-    messages etc. by itself but it will not return until the IO is done.
+    messages etc. by itself but it will not return until the I/O is done.
 
     Probably have to do more error handling here :-)
 
@@ -660,7 +660,7 @@ parport_open (unsigned short port)
         {
           fputs ("ERROR: Could not open I/O port device (no driver)\n"
                  "       You can download the latest ioport driver from\n"
-                 "       http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n",
+                 "       http://ucon64.sourceforge.net\n",
                  stderr);
           exit (1);
         }
@@ -668,8 +668,7 @@ parport_open (unsigned short port)
         {                                       // print warning, but continue
           puts ("WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
                 "         might not support this driver. You can download the latest ioport\n"
-                "         driver from http://www.infernal.currantbun.com or\n"
-                "         http://ucon64.sourceforge.net\n");
+                "         driver from http://ucon64.sourceforge.net\n");
         }
     }
 #elif   defined AMIGA
@@ -954,7 +953,7 @@ parport_open (unsigned short port)
 
 
 #if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
-void
+static void
 close_io_port (void)
 {
 #ifdef  AMIGA

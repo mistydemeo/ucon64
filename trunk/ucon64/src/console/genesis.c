@@ -120,7 +120,7 @@ const st_getopt2_t genesis_usage[] =
     },
     {
       "smds", 0, 0, UCON64_SMDS,
-      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD",
+      NULL, "convert *.srm (SRAM) file to Super Magic Drive/SMD",
       NULL
     },
     {

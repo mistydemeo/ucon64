@@ -236,6 +236,7 @@ enum
   UCON64_MKI,
   UCON64_MKIP,
   UCON64_MKPPF,
+  UCON64_MKSRM,
   UCON64_MSG,
   UCON64_MULTI,
 //  UCON64_MVS,
@@ -402,8 +403,7 @@ enum
 
   WF_PROBE          probe for console type
   WF_INIT           init ROM info (ucon64_init()) necessary
-                      w/o this flag WF_NFO and WF_NFO_AFTER
-                      will be ignored
+                      w/o this flag WF_NFO will be ignored
   WF_NFO            show info output before processing rom
   WF_NO_ROM         for this option no ROM is required
   WF_NO_CRC32       no CRC32 calculation necessary for this option; this
@@ -419,11 +419,6 @@ enum
   WF_SERIAL         this option requires a serial port
   WF_NO_SPLIT       this option does not work with split ROMs
   WF_DEFAULT        same as WF_INIT | WF_PROBE | WF_NFO
-
-  example:
-  WF_NFO | WF_MFO_AFTER
-                    a ROM is required and info will be shown before and
-                    after it has been processed
 */
 #define WF_PROBE      (1)
 #define WF_INIT       (1 << 1)

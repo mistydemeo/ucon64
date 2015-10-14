@@ -91,10 +91,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static void close_io_port (void);
 #endif
 #if     defined __i386__ || defined __x86_64__  // GCC && x86
-inline static unsigned char i386_input_byte (unsigned short);
-inline static unsigned short i386_input_word (unsigned short);
-inline static void i386_output_byte (unsigned short, unsigned char);
-inline static void i386_output_word (unsigned short, unsigned short);
+static inline unsigned char i386_input_byte (unsigned short);
+static inline unsigned short i386_input_word (unsigned short);
+static inline void i386_output_byte (unsigned short, unsigned char);
+static inline void i386_output_word (unsigned short, unsigned short);
 #endif
 
 
@@ -184,7 +184,7 @@ static void (*output_word) (unsigned short, unsigned short) = outpw_func;
 
 
 #if     defined __i386__ || defined __x86_64__  // GCC && x86
-inline static unsigned char
+static inline unsigned char
 i386_input_byte (unsigned short port)
 {
   unsigned char byte;
@@ -197,7 +197,7 @@ i386_input_byte (unsigned short port)
 }
 
 
-inline static unsigned short
+static inline unsigned short
 i386_input_word (unsigned short port)
 {
   unsigned short word;
@@ -210,7 +210,7 @@ i386_input_word (unsigned short port)
 }
 
 
-inline static void
+static inline void
 i386_output_byte (unsigned short port, unsigned char byte)
 {
   __asm__ __volatile__
@@ -221,7 +221,7 @@ i386_output_byte (unsigned short port, unsigned char byte)
 }
 
 
-inline static void
+static inline void
 i386_output_word (unsigned short port, unsigned short word)
 {
   __asm__ __volatile__
@@ -706,7 +706,7 @@ parport_open (unsigned short port)
 
   if (register_func (close_io_port) == -1)
     {
-      // AbortIO ((struct IORequest *) parport_io_req); // should not be necessary with DoIO()
+//      AbortIO ((struct IORequest *) parport_io_req); // should not be necessary with DoIO()
       CloseDevice ((struct IORequest *) parport_io_req);
       DeleteExtIO (parport_io_req);
       DeletePort (parport);

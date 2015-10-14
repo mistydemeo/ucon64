@@ -1,9 +1,9 @@
 /*
 snes.h - Super NES support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2002 - 2003 John Weidman
+Copyright (c) 1999 - 2001       NoisyB
+Copyright (c) 2001 - 2004, 2015 dbjh
+Copyright (c) 2002 - 2003       John Weidman
 
 
 This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ extern snes_file_t snes_get_file_type (void);
 extern int snes_backup_header_info (st_ucon64_nfo_t *rominfo);
 extern int snes_chk (st_ucon64_nfo_t *rominfo);
 extern int snes_col (const char *color);
+extern int snes_create_sram (void);
 extern int snes_demirror (st_ucon64_nfo_t *rominfo);
 extern int snes_densrt (st_ucon64_nfo_t *rominfo);
 extern int snes_dint (st_ucon64_nfo_t *rominfo);

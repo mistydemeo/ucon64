@@ -169,21 +169,21 @@ ucon64_switches (st_ucon64_t *p)
               ucon64.configfile);
 
 #ifdef  USE_DISCMAGE
-      printf ("discmage DLL:                      ");
+      fputs ("discmage DLL:                      ", stdout);
 
 #ifdef  DLOPEN
       puts (ucon64.discmage_path);
 #else
 #if     defined __MSDOS__
-      printf ("discmage.dxe");
+      fputs ("discmage.dxe", stdout);
 #elif   defined __CYGWIN__ || defined _WIN32
-      printf ("discmage.dll");
+      fputs ("discmage.dll", stdout);
 #elif   defined __APPLE__                       // Mac OS X actually
-      printf ("discmage.dylib");
+      fputs ("discmage.dylib", stdout);
 #elif   defined __unix__ || defined __BEOS__
-      printf ("discmage.so");
+      fputs ("discmage.so", stdout);
 #else
-      printf ("unknown");
+      fputs ("unknown");
 #endif
       puts (", dynamically linked");
 #endif // DLOPEN
@@ -609,7 +609,7 @@ ucon64_switches (st_ucon64_t *p)
         ucon64.id = 0;
       else if (ucon64.id > 999)
         {
-          fprintf (stderr, "ERROR: NUM must be smaller than 999\n");
+          fputs ("ERROR: NUM must be smaller than 999\n", stderr);
           exit (1);
         }
       break;
@@ -1537,6 +1537,10 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_MGDGG:
       sms_mgd (ucon64.nfo, UCON64_GAMEGEAR);
+      break;
+
+    case UCON64_MKSRM:
+      snes_create_sram ();
       break;
 
     case UCON64_MSG:

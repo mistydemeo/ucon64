@@ -21,9 +21,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef APS_H
 #define APS_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t aps_usage[];
 
 extern int aps_apply (const char *modname, const char *apsname);
 extern int aps_create (const char *orgname, const char *modname);
 extern int aps_set_desc (const char *apsname, const char *description);
+
 #endif

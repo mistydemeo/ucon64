@@ -21,13 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "misc/itypes.h"
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64_misc.h"
-#include "console.h"
+#include "console/console.h"
 
 
 const st_getopt2_t unknown_console_usage[] =
@@ -39,6 +33,7 @@ const st_getopt2_t unknown_console_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
 
 int
 unknown_console_init (st_ucon64_nfo_t *rominfo)
@@ -360,7 +355,7 @@ const st_getopt2_t arcade_usage[] =
   };
 #if 0
 Nintendo Revolution 2006
-XBox 360
+Xbox 360
 PS3
 Microvision (Handheld)/1979 MB
 Supervision/1991 Hartung

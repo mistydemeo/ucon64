@@ -26,26 +26,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/archive.h"
 #include "misc/chksum.h"
 #include "misc/file.h"
 #include "misc/misc.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "console.h"
-#include "n64.h"
-#include "patch/ips.h"
-#include "patch/aps.h"
+#include "console/n64.h"
 #include "backup/backup.h"
+#include "backup/doctor64.h"
+#include "backup/z64.h"
 
 
 #define N64_HEADER_LEN (sizeof (st_n64_header_t))
@@ -546,11 +539,11 @@ n64_init (st_ucon64_nfo_t *rominfo)
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((n64crc.crc2 == value) ?
-                   "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
+                   "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
                  :
-                 ((n64crc.crc2 == value) ? "Ok" : "Bad"),
+                 ((n64crc.crc2 == value) ? "OK" : "Bad"),
 #else
-               (n64crc.crc2 == value) ? "Ok" : "Bad",
+               (n64crc.crc2 == value) ? "OK" : "Bad",
 #endif
                n64crc.crc2,
                (n64crc.crc2 == value) ? '=' : '!', value);
@@ -589,7 +582,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
   unsigned int i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
                rlen = (ucon64.file_size - rominfo->backup_header_len) - CHECKSUM_START,
-               n, bootcode; // using ucon64.file_size is ok for n64_init() & n64_sram()
+               n, bootcode; // using ucon64.file_size is OK for n64_init() & n64_sram()
   FILE *file;
 #ifdef  CALC_CRC32
   unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32

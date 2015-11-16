@@ -21,6 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef UCON64_OPTS_H
 #define UCON64_OPTS_H
+
 extern int ucon64_switches (st_ucon64_t *p);
 extern int ucon64_options (st_ucon64_t *p);
-#endif // UCON64_OPTS_H
+
+#endif

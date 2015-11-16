@@ -21,11 +21,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef N64_H
 #define N64_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 extern const st_getopt2_t n64_usage[];
 
 extern int n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile);
 extern int n64_chk (st_ucon64_nfo_t *rominfo);
-
 extern int n64_f (st_ucon64_nfo_t *rominfo);
 extern int n64_init (st_ucon64_nfo_t *rominfo);
 extern int n64_n (st_ucon64_nfo_t *rominfo, const char *name);

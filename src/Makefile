@@ -46,7 +46,7 @@ LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
 endif
 endif
 
-else                                    # Unix, BeOS or Mac OS X (Darwin)
+else                                    # UNIX, BeOS or Mac OS X (Darwin)
 
 ifeq ($(findstring openbsd,$(OSTYPE)),openbsd) # for example "openbsd3.4"
 # i386_iopl() is located in libi386.a
@@ -94,21 +94,21 @@ endif
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         misc/chksum.o misc/file.o misc/getopt.o misc/getopt2.o \
         misc/misc.o misc/parallel.o misc/property.o misc/string.o misc/term.o \
-        patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o \
-        console/atari.o console/coleco.o console/console.o console/dc.o console/gb.o \
-        console/gba.o console/genesis.o console/jaguar.o console/lynx.o \
-        console/n64.o console/nds.o console/neogeo.o console/nes.o \
-        console/ngp.o console/pce.o console/psx.o console/sms.o \
+        console/atari.o console/coleco.o console/console.o console/dc.o \
+        console/gb.o console/gba.o console/genesis.o console/jaguar.o \
+        console/lynx.o console/n64.o console/nds.o console/neogeo.o \
+        console/nes.o console/ngp.o console/pce.o console/psx.o console/sms.o \
         console/snes.o console/swan.o console/vboy.o \
         backup/backup.o backup/cc2.o backup/cd64.o backup/cmc.o backup/dex.o \
         backup/doctor64.o backup/doctor64jr.o backup/f2a.o backup/fal.o \
         backup/ffe.o backup/fig.o backup/gbx.o backup/gd.o \
         backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
         backup/md-pro.o backup/mgd.o backup/msg.o backup/nfc.o \
-        backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/sc.o backup/sflash.o \
-        backup/smc.o backup/smd.o backup/smsgg-pro.o backup/spsc.o \
-        backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o backup/yoko.o \
-        backup/z64.o
+        backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/sc.o \
+        backup/sflash.o backup/smc.o backup/smd.o backup/smsgg-pro.o \
+        backup/spsc.o backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o \
+        backup/yoko.o backup/z64.o \
+        patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o
 ifdef DJGPP
 OBJECTS+=misc/snprintf.o
 endif
@@ -171,7 +171,7 @@ ifdef DJGPP
 	cd ../backup/libcd64
 	$(MAKE) clean
 	cd ../..
-else                                    # Unix, BeOS or Mac OS X (Darwin)
+else                                    # UNIX, BeOS or Mac OS X (Darwin)
 	$(CLEAN_CMD)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
@@ -286,115 +286,217 @@ endif
 
 # Dependencies
 
-# Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h misc/archive.h misc/getopt2.h misc/misc.h config.h ucon64_defines.h
+ARCHIVE_H_DEPS=misc/archive.h misc/unzip.h
+BSWAP_H_DEPS=misc/bswap.h misc/itypes.h
+CHKSUM_H_DEPS=misc/chksum.h misc/itypes.h
+GETOPT2_H_DEPS=misc/getopt2.h misc/getopt.h
+MISC_H_DEPS=misc/misc.h misc/snprintf.h
+TERM_H_DEPS=misc/term.h misc/snprintf.h
+UCON64_H_DEPS=ucon64.h misc/itypes.h ucon64_defines.h
+UCON64_DAT_H_DEPS=ucon64_dat.h $(GETOPT2_H_DEPS) misc/itypes.h
+UCON64_MISC_H_DEPS=ucon64_misc.h $(GETOPT2_H_DEPS) $(UCON64_H_DEPS) \
+                   libdiscmage/libdiscmage.h
+CONSOLE_DEPS=$(GETOPT2_H_DEPS) $(UCON64_H_DEPS)
+CONSOLE_H_DEPS=console/console.h $(CONSOLE_DEPS)
+SNES_H_DEPS=console/snes.h $(CONSOLE_DEPS) backup/fig.h
+CD64LIB_H_DEPS=backup/libcd64/ultra64/host/cd64lib.h \
+               backup/libcd64/ultra64/rom.h
 
-misc/archive.o: misc/archive.h misc/map.h config.h
-misc/chksum.o: misc/chksum.h config.h
-misc/dlopen.o: misc/dlopen.h misc/dxedll_pub.h config.h
-misc/file.o: misc/file.h misc/archive.h misc/getopt.h misc/misc.h config.h
-misc/getopt.o: misc/getopt.h config.h
-misc/getopt2.o: misc/getopt2.h misc/file.h misc/getopt.h misc/string.h config.h
-misc/map.o: misc/map.h config.h
-misc/misc.o: misc/misc.h misc/archive.h config.h
-misc/parallel.o: misc/parallel.h config.h
-misc/property.o: misc/property.h misc/file.h misc/misc.h misc/string.h config.h
-misc/string.o: misc/string.h config.h
-misc/term.o: misc/term.h ucon64_defines.h config.h
-misc/usb.o: misc/usb.h config.h
-misc/unzip.o: misc/unzip.h config.h
-ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
-          console/dc.h console/gb.h console/gba.h console/genesis.h \
-          console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
+ucon64.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(GETOPT2_H_DEPS) \
+          $(MISC_H_DEPS) misc/parallel.h misc/property.h $(TERM_H_DEPS) \
+          $(UCON64_H_DEPS) $(UCON64_DAT_H_DEPS) $(UCON64_MISC_H_DEPS) \
+          ucon64_opts.h \
+          console/atari.h console/coleco.h $(CONSOLE_H_DEPS) console/dc.h \
+          console/gb.h console/gba.h console/genesis.h console/jaguar.h \
+          console/lynx.h console/n64.h console/nds.h console/neogeo.h \
           console/nes.h console/ngp.h console/pce.h console/psx.h \
-          console/sms.h console/snes.h console/swan.h \
-          backup/cd64.h backup/dex.h backup/doctor64.h backup/doctor64jr.h \
-          backup/f2a.h backup/fal.h backup/ffe.h backup/fig.h backup/gbx.h \
-          backup/gd.h backup/interceptor.h backup/lynxit.h backup/mccl.h \
-          backup/mcd.h backup/md-pro.h backup/mgd.h backup/msg.h \
-          backup/pce-pro.h backup/pl.h backup/smc.h backup/smd.h \
-          backup/smsgg-pro.h backup/ssc.h backup/swc.h backup/tototek.h \
-          backup/ufo.h backup/yoko.h backup/z64.h \
-          patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h \
-          $(UCON64_STD_H)
-ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
-ucon64_misc.o: misc/dlopen.h $(UCON64_STD_H)
-ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
+          console/sms.h $(SNES_H_DEPS) console/swan.h console/vboy.h \
+          backup/backup.h backup/cd64.h backup/cmc.h backup/dex.h \
+          backup/doctor64.h backup/doctor64jr.h backup/f2a.h backup/fal.h \
+          backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h backup/mcd.h \
+          backup/md-pro.h backup/msg.h backup/pce-pro.h backup/pl.h \
+          backup/sflash.h backup/smc.h backup/smd.h backup/smsgg-pro.h \
+          backup/swc.h \
+          patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/patch.h \
+          patch/ppf.h
+ucon64_dat.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+              misc/property.h misc/string.h $(UCON64_DAT_H_DEPS) \
+              $(UCON64_MISC_H_DEPS) \
+              console/atari.h console/coleco.h $(CONSOLE_H_DEPS) console/dc.h \
+              console/gb.h console/gba.h console/genesis.h console/jaguar.h \
+              console/lynx.h console/n64.h console/neogeo.h console/nes.h \
+              console/ngp.h console/pce.h console/sms.h $(SNES_H_DEPS) \
+              console/swan.h console/vboy.h backup/backup.h
+ucon64_misc.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
+               misc/file.h $(MISC_H_DEPS) misc/property.h misc/string.h \
+               $(TERM_H_DEPS) $(UCON64_DAT_H_DEPS) $(UCON64_MISC_H_DEPS) \
+               misc/dlopen.h
+ucon64_opts.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+               misc/parallel.h misc/string.h $(UCON64_DAT_H_DEPS) \
+               $(UCON64_MISC_H_DEPS) ucon64_opts.h \
                console/dc.h console/gb.h console/gba.h console/genesis.h \
-               console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
-               console/nes.h console/ngp.h console/pce.h console/psx.h \
-               console/sms.h console/snes.h console/swan.h \
-               backup/cd64.h backup/dex.h backup/doctor64.h \
-               backup/doctor64jr.h backup/f2a.h backup/fal.h backup/ffe.h \
-               backup/fig.h backup/gbx.h backup/gd.h backup/interceptor.h \
-               backup/lynxit.h backup/mccl.h backup/mcd.h backup/md-pro.h \
-               backup/mgd.h backup/msg.h backup/pce-pro.h backup/pl.h \
-               backup/smc.h backup/smd.h backup/smsgg-pro.h backup/ssc.h \
-               backup/swc.h backup/tototek.h backup/ufo.h backup/yoko.h \
-               backup/z64.h \
-               patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h \
-               $(UCON64_STD_H)
-console/atari.o: console/atari.h $(UCON64_STD_H)
-console/console.o: console/console.h $(UCON64_STD_H)
-console/coleco.o: console/coleco.h $(UCON64_STD_H)
-console/dc.o: console/dc.h $(UCON64_STD_H)
-console/gb.o: console/gb.h backup/mgd.h $(UCON64_STD_H)
-console/gba.o: console/gba.h $(UCON64_STD_H)
-console/genesis.o: console/genesis.h backup/smd.h backup/mgd.h \
-                   backup/md-pro.h $(UCON64_STD_H)
-console/jaguar.o: console/jaguar.h $(UCON64_STD_H)
-console/lynx.o: console/lynx.h $(UCON64_STD_H)
-console/n64.o: console/n64.h $(UCON64_STD_H)
-console/nds.o: console/nds.h $(UCON64_STD_H)
-console/neogeo.o: console/neogeo.h $(UCON64_STD_H)
-console/nes.o: console/nes.h $(UCON64_STD_H)
-console/ngp.o: console/ngp.h $(UCON64_STD_H)
-console/pce.o: console/pce.h backup/mgd.h backup/pce-pro.h $(UCON64_STD_H)
-console/psx.o: console/psx.h $(UCON64_STD_H)
-console/sms.o: console/sms.h backup/smd.h backup/mgd.h backup/smsgg-pro.h \
-               $(UCON64_STD_H)
-console/snes.o: console/snes.h backup/mgd.h $(UCON64_STD_H)
-console/swan.o: console/swan.h $(UCON64_STD_H)
-console/vboy.o: console/vboy.h $(UCON64_STD_H)
-backup/backup.o: backup/backup.h $(UCON64_STD_H)
-backup/cc2.o: backup/cc2.h $(UCON64_STD_H)
-backup/cd64.o: backup/cd64.h $(UCON64_STD_H)
-backup/cmc.o: backup/cmc.h $(UCON64_STD_H)
-backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
-backup/doctor64.o: backup/doctor64.h $(UCON64_STD_H)
-backup/doctor64jr.o: backup/doctor64jr.h $(UCON64_STD_H)
-backup/f2a.o: backup/f2a.h $(UCON64_STD_H)
-backup/fal.o: backup/fal.h backup/cartlib.c $(UCON64_STD_H)
-backup/ffe.o: backup/ffe.h $(UCON64_STD_H)
-backup/fig.o: backup/fig.h console/snes.h $(UCON64_STD_H)
-backup/gd.o: backup/gd.h console/snes.h $(UCON64_STD_H)
-backup/gbx.o: backup/gbx.h $(UCON64_STD_H)
-backup/interceptor.o: backup/interceptor.h $(UCON64_STD_H)
-backup/lynxit.o: backup/lynxit.h $(UCON64_STD_H)
-backup/mccl.o: backup/mccl.h $(UCON64_STD_H)
-backup/mcd.o: backup/mcd.h $(UCON64_STD_H)
-backup/md-pro.o: backup/md-pro.h backup/tototek.h $(UCON64_STD_H)
-backup/mgd.o: backup/mgd.h $(UCON64_STD_H)
-backup/msg.o: backup/msg.h backup/ffe.h $(UCON64_STD_H)
-backup/nfc.o: backup/nfc.h $(UCON64_STD_H)
-backup/pce-pro.o: backup/pce-pro.h backup/tototek.h $(UCON64_STD_H)
-backup/pl.o: backup/pl.h $(UCON64_STD_H)
-backup/psxpblib.o: backup/psxpblib.h $(UCON64_STD_H)
-backup/sc.o: backup/sc.h $(UCON64_STD_H)
-backup/sflash.o: backup/sflash.h backup/tototek.h $(UCON64_STD_H)
-backup/smc.o: backup/smc.h backup/ffe.h $(UCON64_STD_H)
-backup/smd.o: backup/smd.h backup/ffe.h $(UCON64_STD_H)
-backup/smsgg-pro.o: backup/smsgg-pro.h backup/tototek.h $(UCON64_STD_H)
-backup/spsc.o: backup/spsc.h $(UCON64_STD_H)
-backup/ssc.o: backup/ssc.h $(UCON64_STD_H)
-backup/swc.o: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)
-backup/tototek.o: backup/tototek.h $(UCON64_STD_H)
-backup/ufo.o: backup/ufo.h $(UCON64_STD_H)
-backup/yoko.o: backup/yoko.h $(UCON64_STD_H)
-backup/z64.o: backup/z64.h $(UCON64_STD_H)
-patch/aps.o: patch/aps.h $(UCON64_STD_H)
-patch/bsl.o: patch/bsl.h $(UCON64_STD_H)
-patch/gg.o: patch/gg.h $(UCON64_STD_H)
-patch/ips.o: patch/ips.h $(UCON64_STD_H)
-patch/patch.o: patch/patch.h $(UCON64_STD_H)
-patch/ppf.o: patch/ppf.h $(UCON64_STD_H)
+               console/lynx.h console/n64.h console/nds.h console/neogeo.h \
+               console/nes.h console/pce.h console/sms.h $(SNES_H_DEPS) \
+               console/swan.h \
+               backup/backup.h backup/cd64.h backup/cmc.h backup/dex.h \
+               backup/doctor64.h backup/doctor64jr.h backup/f2a.h backup/fal.h \
+               backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h \
+               backup/mcd.h backup/md-pro.h backup/msg.h backup/pce-pro.h \
+               backup/pl.h backup/sflash.h backup/smc.h backup/smd.h \
+               backup/smsgg-pro.h backup/swc.h \
+               patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h
+backup/backup.o: config.h backup/backup.h $(GETOPT2_H_DEPS)
+backup/cc2.o: config.h $(UCON64_H_DEPS) backup/cc2.h $(GETOPT2_H_DEPS)
+backup/cd64.o: config.h $(CD64LIB_H_DEPS) $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) \
+               misc/parallel.h $(UCON64_MISC_H_DEPS) backup/cd64.h \
+               $(GETOPT2_H_DEPS)
+backup/cmc.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/parallel.h \
+              $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) backup/cmc.h \
+              $(GETOPT2_H_DEPS)
+backup/dex.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
+              $(UCON64_MISC_H_DEPS) backup/dex.h backup/psxpblib.h \
+              $(GETOPT2_H_DEPS)
+backup/doctor64jr.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
+                     $(UCON64_MISC_H_DEPS) backup/doctor64jr.h $(GETOPT2_H_DEPS)
+backup/doctor64.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
+                   $(UCON64_MISC_H_DEPS) backup/doctor64.h $(GETOPT2_H_DEPS)
+backup/f2a.o: config.h misc/usb.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) \
+              misc/file.h $(MISC_H_DEPS) misc/parallel.h misc/property.h \
+              $(UCON64_MISC_H_DEPS) console/gba.h backup/f2a.h $(GETOPT2_H_DEPS)
+backup/fal.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
+              $(UCON64_MISC_H_DEPS) console/gba.h backup/fal.h $(GETOPT2_H_DEPS)
+backup/ffe.o: config.h misc/parallel.h $(TERM_H_DEPS) $(UCON64_H_DEPS) \
+              backup/ffe.h
+backup/fig.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+              $(SNES_H_DEPS) backup/ffe.h backup/fig.h $(GETOPT2_H_DEPS)
+backup/gbx.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+              misc/parallel.h $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) \
+              console/gb.h backup/gbx.h $(GETOPT2_H_DEPS)
+backup/gd.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+             misc/parallel.h misc/string.h $(TERM_H_DEPS) \
+             $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) backup/gd.h $(GETOPT2_H_DEPS)
+backup/interceptor.o: config.h backup/interceptor.h $(GETOPT2_H_DEPS)
+backup/lynxit.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
+                 $(UCON64_MISC_H_DEPS) console/lynx.h backup/lynxit.h \
+                 $(GETOPT2_H_DEPS)
+backup/mccl.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
+               $(UCON64_MISC_H_DEPS) backup/mccl.h $(GETOPT2_H_DEPS)
+backup/mcd.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
+              $(UCON64_MISC_H_DEPS) backup/mcd.h $(GETOPT2_H_DEPS)
+backup/md-pro.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+                 backup/tototek.h backup/md-pro.h $(GETOPT2_H_DEPS)
+backup/mgd.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \
+              $(UCON64_MISC_H_DEPS) backup/mgd.h $(GETOPT2_H_DEPS)
+backup/msg.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+              $(UCON64_MISC_H_DEPS) backup/ffe.h backup/msg.h $(GETOPT2_H_DEPS)
+backup/nfc.o: config.h backup/nfc.h $(GETOPT2_H_DEPS)
+backup/pce-pro.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+                  backup/tototek.h backup/pce-pro.h $(GETOPT2_H_DEPS)
+backup/pl.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
+             $(UCON64_MISC_H_DEPS) backup/pl.h $(GETOPT2_H_DEPS)
+backup/psxpblib.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(UCON64_H_DEPS) \
+                   backup/psxpblib.h
+backup/sc.o: config.h backup/sc.h $(GETOPT2_H_DEPS)
+backup/sflash.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+                 backup/tototek.h backup/sflash.h $(GETOPT2_H_DEPS)
+backup/smc.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_MISC_H_DEPS) backup/ffe.h \
+              backup/smc.h $(GETOPT2_H_DEPS)
+backup/smd.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+              $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smd.h $(GETOPT2_H_DEPS)
+backup/smsgg-pro.o: config.h $(ARCHIVE_H_DEPS) misc/file.h \
+                    $(UCON64_MISC_H_DEPS) backup/tototek.h backup/smsgg-pro.h \
+                    $(GETOPT2_H_DEPS)
+backup/spsc.o: config.h backup/spsc.h $(GETOPT2_H_DEPS)
+backup/ssc.o: config.h backup/ssc.h $(GETOPT2_H_DEPS)
+backup/swc.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+              $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) backup/ffe.h backup/swc.h \
+              $(GETOPT2_H_DEPS)
+backup/tototek.o: config.h $(BSWAP_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
+                  backup/tototek.h
+backup/ufo.o: config.h backup/ufo.h $(GETOPT2_H_DEPS)
+backup/yoko.o: config.h backup/yoko.h $(GETOPT2_H_DEPS)
+backup/z64.o: config.h backup/z64.h $(GETOPT2_H_DEPS)
+console/atari.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \
+                 $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) console/atari.h \
+                 backup/cc2.h backup/spsc.h backup/yoko.h $(CONSOLE_DEPS)
+console/coleco.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+                  console/coleco.h backup/backup.h $(CONSOLE_DEPS)
+console/console.o: config.h $(CONSOLE_H_DEPS)
+console/dc.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/property.h \
+              misc/string.h $(UCON64_MISC_H_DEPS) console/dc.h $(CONSOLE_DEPS)
+console/gba.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
+               $(MISC_H_DEPS) misc/property.h misc/string.h \
+               $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) console/gba.h \
+               backup/backup.h backup/fal.h $(CONSOLE_DEPS)
+console/gb.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+              misc/string.h $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) \
+              console/gb.h console/nes.h backup/backup.h backup/mgd.h \
+              backup/ssc.h $(CONSOLE_DEPS)
+console/genesis.o: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
+                   $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) console/genesis.h \
+                   backup/md-pro.h backup/mgd.h backup/smd.h $(CONSOLE_DEPS)
+console/jaguar.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+                  console/jaguar.h backup/backup.h $(CONSOLE_DEPS)
+console/lynx.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
+                $(UCON64_MISC_H_DEPS) console/lynx.h backup/backup.h \
+                $(CONSOLE_DEPS)
+console/n64.o: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
+               $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) console/n64.h \
+               backup/backup.h backup/doctor64.h backup/z64.h $(CONSOLE_DEPS)
+console/nds.o: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
+               $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) \
+               console/nds.h backup/backup.h backup/nfc.h $(CONSOLE_DEPS)
+console/neogeo.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+                  console/neogeo.h backup/backup.h $(CONSOLE_DEPS)
+console/nes.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
+               misc/file.h $(MISC_H_DEPS) misc/string.h $(UCON64_MISC_H_DEPS) \
+               console/nes.h backup/smc.h $(CONSOLE_DEPS)
+console/ngp.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+               console/ngp.h backup/backup.h backup/pl.h $(CONSOLE_DEPS)
+console/pce.o: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
+               $(MISC_H_DEPS) misc/string.h $(UCON64_MISC_H_DEPS) \
+               console/pce.h backup/mgd.h backup/msg.h backup/pce-pro.h \
+               $(CONSOLE_DEPS)
+console/psx.o: config.h console/psx.h $(CONSOLE_DEPS)
+console/sms.o: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
+               $(MISC_H_DEPS) misc/string.h $(UCON64_MISC_H_DEPS) \
+               console/sms.h backup/mgd.h backup/smd.h backup/smsgg-pro.h \
+               $(CONSOLE_DEPS)
+console/snes.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
+                misc/file.h $(MISC_H_DEPS) misc/string.h $(UCON64_MISC_H_DEPS) \
+                $(CONSOLE_H_DEPS) $(SNES_H_DEPS) backup/backup.h backup/gd.h \
+                backup/mgd.h backup/swc.h backup/ufo.h $(CONSOLE_DEPS)
+console/swan.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+                $(UCON64_MISC_H_DEPS) console/swan.h backup/backup.h \
+                $(CONSOLE_DEPS)
+console/vboy.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+                $(CONSOLE_H_DEPS) console/vboy.h backup/backup.h $(CONSOLE_DEPS)
+misc/archive.o: config.h $(ARCHIVE_H_DEPS) misc/map.h misc/unzip.h
+misc/chksum.o: config.h $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) $(MISC_H_DEPS)
+misc/dlopen.o: config.h misc/dlopen.h misc/dxedll_pub.h misc/map.h
+misc/file.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS)
+misc/getopt.o: config.h misc/getopt.h
+misc/getopt2.o: config.h misc/file.h misc/getopt.h $(GETOPT2_H_DEPS)
+misc/map.o: config.h misc/map.h
+misc/misc.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/itypes.h $(MISC_H_DEPS)
+misc/parallel.o: config.h misc/dlopen.h misc/file.h misc/parallel.h \
+                 $(UCON64_H_DEPS)
+misc/property.o: config.h misc/file.h $(MISC_H_DEPS) misc/property.h \
+                 misc/string.h
+misc/snprintf.o: config.h
+misc/string.o: config.h misc/string.h
+misc/term.o: config.h $(TERM_H_DEPS) ucon64_defines.h
+misc/unzip.o: config.h misc/unzip.h
+misc/usb.o: config.h misc/usb.h
+patch/aps.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
+             $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) patch/aps.h $(GETOPT2_H_DEPS)
+patch/bsl.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
+             patch/bsl.h $(GETOPT2_H_DEPS)
+patch/gg.o: config.h misc/file.h $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) \
+            $(SNES_H_DEPS) patch/gg.h $(GETOPT2_H_DEPS)
+patch/ips.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+             $(UCON64_MISC_H_DEPS) patch/ips.h $(GETOPT2_H_DEPS)
+patch/patch.o: config.h $(UCON64_MISC_H_DEPS) patch/patch.h $(GETOPT2_H_DEPS)
+patch/ppf.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
+             $(MISC_H_DEPS) misc/string.h $(UCON64_MISC_H_DEPS) patch/ppf.h \
+             $(GETOPT2_H_DEPS)

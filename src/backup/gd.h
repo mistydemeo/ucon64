@@ -22,14 +22,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GD_H
 #define GD_H
 
-extern const st_getopt2_t gd_usage[];
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
 
 #define GD_HEADER_START 0
 #define GD_HEADER_LEN 512
 #define GD3_MAX_UNITS 16                        // Maximum that the hardware supports
 // Each logical memory unit is 8 Mbit in size (internally it's 2*4 Mbit)
 
-#ifdef USE_PARALLEL
+extern const st_getopt2_t gd_usage[];
+
+#ifdef  USE_PARALLEL
 extern int gd3_read_rom (const char *filename, unsigned short parport);
 extern int gd3_write_rom (const char *filename, unsigned short parport,
                           st_ucon64_nfo_t *rominfo);
@@ -44,6 +50,6 @@ extern int gd3_read_saver (const char *filename, unsigned short parport);
 extern int gd3_write_saver (const char *filename, unsigned short parport);
 extern int gd6_read_saver (const char *filename, unsigned short parport);
 extern int gd6_write_saver (const char *filename, unsigned short parport);
-#endif // USE_PARALLEL
+#endif
 
-#endif // GD_H
+#endif

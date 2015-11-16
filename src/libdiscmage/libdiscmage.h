@@ -38,19 +38,16 @@ extern "C" {
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
-#ifndef _WIN32
-typedef unsigned long long int uint64_t;
-#else
-typedef unsigned __int64 uint64_t;
-#endif
 typedef signed char int8_t;
+typedef unsigned short int uint16_t;
 typedef signed short int int16_t;
+typedef unsigned int uint32_t;
 typedef signed int int32_t;
 #ifndef _WIN32
+typedef unsigned long long int uint64_t;
 typedef signed long long int int64_t;
 #else
+typedef unsigned __int64 uint64_t;
 typedef signed __int64 int64_t;
 #endif
 #endif                                          // OWN_INTTYPES

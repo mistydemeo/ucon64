@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef YOKO_H
 #define YOKO_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t yoko_usage[];
 
 #endif

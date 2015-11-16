@@ -18,23 +18,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "misc/misc.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
+#include "misc/file.h"
+#include "misc/misc.h"
 #include "ucon64_misc.h"
-#include "console.h"
+#include "console/swan.h"
 #include "backup/backup.h"
-#include "swan.h"
 
 
 static int swan_chksum (unsigned char *rom_buffer);
@@ -198,7 +188,7 @@ swan_init (st_ucon64_nfo_t *rominfo)
 }
 
 
-int
+static int
 swan_chksum (unsigned char *ptr)
 {
   unsigned int csum = 0, t;

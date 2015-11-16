@@ -21,20 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include "misc/misc.h"
-#include "misc/parallel.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/parallel.h"
 #include "misc/term.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "mcd.h"
+#include "backup/mcd.h"
 
 
 #ifdef  USE_PARALLEL
@@ -107,7 +99,7 @@ read_block (unsigned char *buffer, int size, unsigned short parport)
 
 
 int
-mcd_read_rom (const char *filename, unsigned int parport)
+mcd_read_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[BUFFERSIZE];
@@ -125,7 +117,7 @@ mcd_read_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  read_block (buffer, 1, (unsigned short) parport);
+  read_block (buffer, 1, parport);
   size = (buffer[0] + 1) * 64 * 1024;
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
   puts ("Press q to abort\n");
@@ -133,7 +125,7 @@ mcd_read_rom (const char *filename, unsigned int parport)
   starttime = time (NULL);
   while (n_bytes < size)
     {
-      read_block (buffer, BUFFERSIZE, (unsigned short) parport);
+      read_block (buffer, BUFFERSIZE, parport);
       fwrite (buffer, 1, BUFFERSIZE, file);
       n_bytes += BUFFERSIZE;
       ucon64_gauge (starttime, n_bytes, size);

@@ -23,33 +23,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#ifdef  USE_LIB_MATH
-#include <math.h>                               // sin(), floor()
-#endif
-#include "misc/itypes.h"
-#include "misc/bswap.h"
-#include "misc/misc.h"
-#include "misc/chksum.h"
-#include "misc/getopt2.h"
+#include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/string.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "ucon64.h"
-#include "ucon64_dat.h"
+#include "misc/term.h"
 #include "ucon64_misc.h"
-#include "atari.h"
-#include "backup/yoko.h"
+#include "console/atari.h"
 #include "backup/cc2.h"
 #include "backup/spsc.h"
+#include "backup/yoko.h"
 
 
 static st_ucon64_obj_t atari_obj[] =

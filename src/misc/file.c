@@ -23,17 +23,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
-#include <stddef.h>
-#include <stdlib.h>
 #include <ctype.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
-#include <time.h>
-#include <stdarg.h>                             // va_arg()
+#include <stdlib.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>                             // access()
+#endif
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -43,52 +38,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 
-#ifdef  __MSDOS__
-#include <dos.h>                                // delay(), milliseconds
-#elif   defined __unix__
-#include <unistd.h>                             // usleep(), microseconds
-#elif   defined __BEOS__
-#include <OS.h>                                 // snooze(), microseconds
-// Include OS.h before misc.h, because OS.h includes StorageDefs.h which
-//  includes param.h which unconditionally defines MIN and MAX.
-#elif   defined AMIGA
-#include <unistd.h>
-#include <fcntl.h>
-#include <dos/dos.h>
-#include <dos/var.h>
-#include <libraries/lowlevel.h>                 // GetKey()
-#include <proto/dos.h>
-#include <proto/lowlevel.h>
-#elif   defined _WIN32
+#ifdef  _WIN32
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
 #pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
-#include <windows.h>                            // Sleep(), milliseconds
+#include <io.h>                                 // access()
+#include <windows.h>                            // GetFullPathName()
 #ifdef  _MSC_VER
 #pragma warning(pop)
+
+#define F_OK 00
 #endif
 #endif
 
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32 (VC++)
-#include "itypes.h"
-#endif
-#ifdef  USE_ZLIB
-#include "archive.h"
-#endif
-#include "file.h"
-#include "misc.h"                               // getenv2()
-#include "getopt.h"                             // struct option
-
-#ifdef  DJGPP
-#ifdef  DLL
-#include "dxedll_priv.h"
-#endif
-#endif
+#include "misc/archive.h"
+#include "misc/file.h"
+#include "misc/misc.h"                          // getenv2(), implementations of truncate()
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
@@ -163,12 +131,12 @@ realpath (const char *path, char *full_path)
     {
       *new_path++ = *path++;
       *new_path++ = *path++;
-      if (*path == FILE_SEPARATOR)
+      if (*path == DIR_SEPARATOR)
         *new_path++ = *path++;
     }
   else
 #endif
-  if (*path != FILE_SEPARATOR)
+  if (*path != DIR_SEPARATOR)
     {
       getcwd (new_path, FILENAME_MAX - 1);
 #ifdef  DJGPP
@@ -177,24 +145,24 @@ realpath (const char *path, char *full_path)
         int l = strlen (new_path);
         for (n = 0; n < l; n++)
           if (new_path[n] == '/')
-            new_path[n] = FILE_SEPARATOR;
+            new_path[n] = DIR_SEPARATOR;
       }
 #endif
       new_path += strlen (new_path);
-      if (*(new_path - 1) != FILE_SEPARATOR)
-        *new_path++ = FILE_SEPARATOR;
+      if (*(new_path - 1) != DIR_SEPARATOR)
+        *new_path++ = DIR_SEPARATOR;
     }
   else
     {
-      *new_path++ = FILE_SEPARATOR;
+      *new_path++ = DIR_SEPARATOR;
       path++;
     }
 
   // Expand each (back)slash-separated pathname component
   while (*path != 0)
     {
-      // Ignore stray FILE_SEPARATOR
-      if (*path == FILE_SEPARATOR)
+      // Ignore stray DIR_SEPARATOR
+      if (*path == DIR_SEPARATOR)
         {
           path++;
           continue;
@@ -202,28 +170,28 @@ realpath (const char *path, char *full_path)
       if (*path == '.')
         {
           // Ignore "."
-          if (path[1] == 0 || path[1] == FILE_SEPARATOR)
+          if (path[1] == 0 || path[1] == DIR_SEPARATOR)
             {
               path++;
               continue;
             }
           if (path[1] == '.')
             {
-              if (path[2] == 0 || path[2] == FILE_SEPARATOR)
+              if (path[2] == 0 || path[2] == DIR_SEPARATOR)
                 {
                   path += 2;
                   // Ignore ".." at root
                   if (new_path == got_path + 1)
                     continue;
                   // Handle ".." by backing up
-                  while (*((--new_path) - 1) != FILE_SEPARATOR)
+                  while (*((--new_path) - 1) != DIR_SEPARATOR)
                     ;
                   continue;
                 }
             }
         }
       // Safely copy the next pathname component
-      while (*path != 0 && *path != FILE_SEPARATOR)
+      while (*path != 0 && *path != DIR_SEPARATOR)
         {
           if (path > max_path)
             return NULL;
@@ -258,12 +226,12 @@ realpath (const char *path, char *full_path)
         {
           // NOTE: readlink() doesn't add the null byte
           link_path[n] = 0;
-          if (*link_path == FILE_SEPARATOR)
+          if (*link_path == DIR_SEPARATOR)
             // Start over for an absolute symlink
             new_path = got_path;
           else
             // Otherwise back up over this component
-            while (*(--new_path) != FILE_SEPARATOR)
+            while (*(--new_path) != DIR_SEPARATOR)
               ;
           if (strlen (path) + n >= FILENAME_MAX - 2)
             return NULL;
@@ -273,10 +241,10 @@ realpath (const char *path, char *full_path)
           path = copy_path;
         }
 #endif // S_IFLNK
-      *new_path++ = FILE_SEPARATOR;
+      *new_path++ = DIR_SEPARATOR;
     }
   // Delete trailing slash but don't whomp a lone slash
-  if (new_path != got_path + 1 && *(new_path - 1) == FILE_SEPARATOR)
+  if (new_path != got_path + 1 && *(new_path - 1) == DIR_SEPARATOR)
     {
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       if (new_path >= got_path + 3)
@@ -312,8 +280,8 @@ realpath (const char *path, char *full_path)
   n = strlen (full_path) - 1;
   // Remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
-  if (full_path[n] == FILE_SEPARATOR &&
-      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == FILE_SEPARATOR
+  if (full_path[n] == DIR_SEPARATOR &&
+      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == DIR_SEPARATOR
     full_path[n] = 0;
 
   return full_path;
@@ -334,12 +302,12 @@ realpath2 (const char *path, char *full_path)
 
   if (path[0] == '~')
     {
-      if (path[1] == FILE_SEPARATOR
+      if (path[1] == DIR_SEPARATOR
 #ifdef  __CYGWIN__
           || path[1] == '\\'
 #endif
          )
-        sprintf (path1, "%s"FILE_SEPARATOR_S"%s", getenv2 ("HOME"), &path[2]);
+        sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
       else if (path[1] == 0)
         strcpy (path1, getenv2 ("HOME"));
       path2 = path1;
@@ -371,7 +339,7 @@ dirname2 (const char *path, char *dir)
   if (p2 > p1)                                  // use the last separator in path
     p1 = p2;
 #else
-  p1 = strrchr (dir, FILE_SEPARATOR);
+  p1 = strrchr (dir, DIR_SEPARATOR);
 #endif
 
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
@@ -391,7 +359,7 @@ dirname2 (const char *path, char *dir)
           ||
           (*(p1 - 1) == '\\' && (*p1 == '\\' || *p1 == '/'))))
 #else
-         (*(p1 - 1) == FILE_SEPARATOR && *p1 == FILE_SEPARATOR))
+         (*(p1 - 1) == DIR_SEPARATOR && *p1 == DIR_SEPARATOR))
 #endif
     p1--;
 
@@ -434,7 +402,7 @@ basename2 (const char *path)
   if (p2 > p1)                                  // use the last separator in path
     p1 = p2;
 #else
-  p1 = strrchr (path, FILE_SEPARATOR);
+  p1 = strrchr (path, DIR_SEPARATOR);
 #endif
 
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
@@ -677,7 +645,7 @@ tmpnam2 (char *temp)
 
   *temp = 0;
   while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs
-    sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, rand());
+    sprintf (temp, "%s%s%08x.tmp", p, DIR_SEPARATOR_S, rand());
 
   return temp;
 }
@@ -881,7 +849,7 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 // func() takes buffer, length and object (optional), func_maxlen is maximum
 //  length passed to func()
 {
-  // TODO: Clean this mess up. It's truly awful. - dbjh  
+  // TODO: Clean this mess up. It's truly awful. - dbjh
   void *buffer = NULL;
   int buffer_maxlen = 0, buffer_len = 0, func_len = 0;
   size_t len_done = 0;
@@ -910,7 +878,7 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
     {
       if (len_done + buffer_maxlen > len)
         buffer_maxlen = len - len_done;
-      
+
       if ((buffer_len = fread (buffer, 1, buffer_maxlen, fh)) == 0)
         break;
 
@@ -957,7 +925,7 @@ mkbak (const char *filename, backup_t type)
       remove (buf);                             // *try* to remove or rename() will fail
       if (rename (filename, buf))               // keep file attributes like date, etc.
         {
-          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
+          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
     }
@@ -971,13 +939,13 @@ mkbak (const char *filename, backup_t type)
           exit (1);
         }
       if (buf[0] != 0)
-        if (buf[strlen (buf) - 1] != FILE_SEPARATOR)
-          strcat (buf, FILE_SEPARATOR_S);
+        if (buf[strlen (buf) - 1] != DIR_SEPARATOR)
+          strcat (buf, DIR_SEPARATOR_S);
 
       strcat (buf, basename2 (tmpnam2 (buf2)));
       if (rename (filename, buf))
         {
-          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
+          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
     }
@@ -991,7 +959,7 @@ mkbak (const char *filename, backup_t type)
     default:
       if (fcopy (buf, 0, fsizeof (buf), filename, "wb"))
         {
-          fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
+          fprintf (stderr, "ERROR: Cannot open \"%s\" for writing\n", filename);
           exit (1);
         }
       return buf;

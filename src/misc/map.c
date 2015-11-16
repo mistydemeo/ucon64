@@ -21,10 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "map.h"
-#if     defined DJGPP && defined DLL
-#include "dxedll_priv.h"
-#endif
+#include "misc/map.h"
 
 
 st_map_t *
@@ -58,8 +55,8 @@ map_resize (st_map_t *map, int n_elements)
     }
   map->data = (st_map_element_t *) (((unsigned char *) map) + sizeof (st_map_t));
   if (n_elements > map->size)
-    memset(((unsigned char *) map->data) + map->size * sizeof (st_map_element_t),
-           MAP_FREE_KEY, (n_elements - map->size) * sizeof (st_map_element_t));
+    memset (((unsigned char *) map->data) + map->size * sizeof (st_map_element_t),
+            MAP_FREE_KEY, (n_elements - map->size) * sizeof (st_map_element_t));
   map->size = n_elements;
   return map;
 }

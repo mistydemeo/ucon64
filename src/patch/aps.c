@@ -23,23 +23,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/archive.h"
 #include "misc/bswap.h"
 #include "misc/file.h"
-#include "misc/misc.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
+#include "misc/misc.h"                          // truncate()
 #include "ucon64_misc.h"
-#include "aps.h"
+#include "patch/aps.h"
 
 
 #define N64APS_DESCRIPTION_LEN 50
@@ -72,10 +65,10 @@ const st_getopt2_t aps_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-char n64aps_magic[] = "APS10";
-unsigned char n64aps_patchtype = 1, n64aps_encodingmethod = 0;
-FILE *n64aps_apsfile, *n64aps_orgfile, *n64aps_modfile;
-int n64aps_changefound;
+static char n64aps_magic[] = "APS10";
+static unsigned char n64aps_patchtype = 1, n64aps_encodingmethod = 0;
+static FILE *n64aps_apsfile, *n64aps_orgfile, *n64aps_modfile;
+static int n64aps_changefound;
 
 
 static void

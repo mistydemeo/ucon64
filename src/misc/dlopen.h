@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef DLOPEN_H
 #define DLOPEN_H
 
-
 /*
   The next union is a portable means to convert between function and data
   pointers and the only way to silence Visual C++ 2012 other than

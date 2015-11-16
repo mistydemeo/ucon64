@@ -21,21 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "misc/file.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "ffe.h"
-#include "smc.h"
+#include "backup/ffe.h"
+#include "backup/smc.h"
 
 
 #ifdef  USE_PARALLEL
@@ -141,7 +132,7 @@ smc_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend, size, offset, n_blocks1, n_blocks2, n_blocks3, n;
+  int bytesread, bytessent, size, offset, n_blocks1, n_blocks2, n_blocks3, n;
   time_t starttime;
 
   ffe_init_io (parport);
@@ -172,7 +163,7 @@ smc_write_rom (const char *filename, unsigned short parport)
   printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
 
   ffe_send_block (0x5020, buffer, 8);           // send "file control block"
-  bytessend = 8;
+  bytessent = 8;
 
   if (buffer[1] >> 5 > 4)
     offset = 12;
@@ -183,7 +174,7 @@ smc_write_rom (const char *filename, unsigned short parport)
     {
       fread (buffer, 1, 512, file);
       ffe_send_block (0x600, buffer, 512);
-      bytessend += 512;
+      bytessent += 512;
     }
 
   printf ("Press q to abort\n\n");
@@ -196,8 +187,8 @@ smc_write_rom (const char *filename, unsigned short parport)
         break;
       ffe_send_block (0x6000, buffer, (unsigned short) bytesread);
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 
@@ -208,8 +199,8 @@ smc_write_rom (const char *filename, unsigned short parport)
         break;
       ffe_send_block (0x6000, buffer, (unsigned short) bytesread);
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 
@@ -237,8 +228,8 @@ smc_write_rom (const char *filename, unsigned short parport)
           ffe_send_block2 (0, buffer, (unsigned short) bytesread);
         }
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 
@@ -342,7 +333,7 @@ smc_write_rts (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytessend = 0, size, n;
+  int bytessent = 0, size, n;
   time_t starttime;
 
   ffe_init_io (parport);
@@ -367,15 +358,15 @@ smc_write_rts (const char *filename, unsigned short parport)
 
   ffe_send_command (5, 3, 0);
   ffe_send_block (0x5840, buffer + 0x100, 0x68);
-  bytessend += 0x68;
+  bytessent += 0x68;
 
   ffe_send_command0 (0x4500, 0x32);
   ffe_send_command0 (0x42ff, 0x30);
   fread (buffer, 1, BUFFERSIZE / 2, file);
   ffe_send_block (0x6000, buffer, BUFFERSIZE / 2); // 0x1000
 
-  bytessend += BUFFERSIZE / 2;
-  ucon64_gauge (starttime, bytessend, size);
+  bytessent += BUFFERSIZE / 2;
+  ucon64_gauge (starttime, bytessent, size);
   ffe_checkabort (2);
 
   for (n = 2; n <= 0x22; n += 0x20)
@@ -384,8 +375,8 @@ smc_write_rts (const char *filename, unsigned short parport)
       fread (buffer, 1, BUFFERSIZE, file);
       ffe_send_block (0x6000, buffer, BUFFERSIZE); // 0x2000
 
-      bytessend += BUFFERSIZE;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += BUFFERSIZE;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 
@@ -397,8 +388,8 @@ smc_write_rts (const char *filename, unsigned short parport)
       fread (buffer, 1, BUFFERSIZE, file);
       ffe_send_block2 (0, buffer, BUFFERSIZE); // 0x2000
 
-      bytessend += BUFFERSIZE;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += BUFFERSIZE;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 

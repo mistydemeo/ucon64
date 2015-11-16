@@ -21,20 +21,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <ultra64/host/cd64lib.h>
+#include "misc/archive.h"
 #include "misc/misc.h"
 #include "misc/parallel.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
-#include "cd64.h"
+#include "backup/cd64.h"
 
 
 #if     defined USE_PARALLEL && defined USE_LIBCD64

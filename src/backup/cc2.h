@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef CC2_H
 #define CC2_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t cc2_usage[];
 
 typedef struct st_cc2_header
@@ -30,4 +33,5 @@ typedef struct st_cc2_header
 
 #define CC2_HEADER_START 0
 #define CC2_HEADER_LEN (sizeof (st_cc2_header_t))
+
 #endif

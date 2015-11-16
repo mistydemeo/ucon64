@@ -21,11 +21,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef DOCTOR64_H
 #define DOCTOR64_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t doctor64_usage[];
 
 #ifdef  USE_PARALLEL
 extern int doctor64_read (const char *filename, unsigned short parport);
-extern int doctor64_write (const char *filename, int start, int len, unsigned short parport);
+extern int doctor64_write (const char *filename, int start, int len,
+                           unsigned short parport);
 #endif
 
 #endif

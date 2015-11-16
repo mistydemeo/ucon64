@@ -29,17 +29,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>                             // ioperm() (libc5)
 #endif
 
 #ifdef  USE_PPDEV                               // ppdev is a Linux parallel
 #include <fcntl.h>                              //  port device driver
+#include <linux/parport.h>
+#include <linux/ppdev.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
-#include <linux/ppdev.h>
-#include <linux/parport.h>
 #elif   defined __linux__ && defined __GLIBC__  // USE_PPDEV
 #ifdef  HAVE_SYS_IO_H                           // necessary for some Linux/PPC configs
 #include <sys/io.h>                             // ioperm() (glibc), in{b, w}(), out{b, w}()
@@ -47,18 +46,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #error No sys/io.h; configure with --disable-parallel
 #endif
 #elif   defined __OpenBSD__                     // __linux__ && __GLIBC__
-#include <sys/types.h>
 #include <machine/sysarch.h>
+#include <sys/types.h>
 #elif   defined __BEOS__ || defined __FreeBSD__ // __OpenBSD__
 #include <fcntl.h>
 #elif   defined AMIGA                           // __BEOS__ || __FreeBSD__
 #include <fcntl.h>
-#include <exec/types.h>
-#include <exec/io.h>
-#include <exec/ports.h>
+#include <devices/parallel.h>
 #include <dos/dos.h>
 #include <dos/var.h>
-#include <devices/parallel.h>
+#include <exec/io.h>
+#include <exec/ports.h>
+#include <exec/types.h>
 #elif   defined _WIN32                          // AMIGA
 #ifdef  _MSC_VER
 #pragma warning(push)
@@ -71,25 +70,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #include <conio.h>                              // inp{w}() & outp{w}()
-#include "dlopen.h"
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#include <io.h>                                 // access()
+#pragma warning(pop)
+#define F_OK 00
+#endif
+#include "misc/dlopen.h"
 #elif   defined __CYGWIN__                      // _WIN32
 #include <windows.h>                            // definition of WINAPI
 #undef  _WIN32
 #include <exceptions.h>
 #include <sys/cygwin.h>
-#include "dlopen.h"
+#include "misc/dlopen.h"
 #endif
-#include "misc.h"
-#include "file.h"
-#include "itypes.h"
-#include "parallel.h"
-#include "getopt2.h"
+#include "misc/file.h"                          // DIR_SEPARATOR_S
+#include "misc/parallel.h"
 #include "ucon64.h"
 
 
-#if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
-static void close_io_port (void);
-#endif
 #if     defined __i386__ || defined __x86_64__  // GCC && x86
 static inline unsigned char i386_input_byte (unsigned short);
 static inline unsigned short i386_input_word (unsigned short);
@@ -159,7 +159,7 @@ static void dlportio_output_word (unsigned short port, unsigned short word) { Dl
 
 #if     defined __CYGWIN__ || defined __MINGW32__
 // default to functions which are always available (but which generate an
-//  exception on Windows NT/2000/XP/2003/Vista/7/8/8.1 without an I/O driver)
+//  exception on Windows NT/2000/XP/2003/Vista/7/8/8.1/10 without an I/O driver)
 static unsigned char (*input_byte) (unsigned short) = i386_input_byte;
 static unsigned short (*input_word) (unsigned short) = i386_input_word;
 static void (*output_byte) (unsigned short, unsigned char) = i386_output_byte;
@@ -173,7 +173,7 @@ static void outp_func (unsigned short port, unsigned char byte) { outp (port, by
 static void outpw_func (unsigned short port, unsigned short word) { outpw (port, word); }
 
 // default to functions which are always available (but which generate an
-//  exception on Windows NT/2000/XP/2003/Vista/7/8/8.1 without an I/O driver)
+//  exception on Windows NT/2000/XP/2003/Vista/7/8/8.1/10 without an I/O driver)
 static unsigned char (*input_byte) (unsigned short) = inp_func;
 static unsigned short (*input_word) (unsigned short) = inpw_func;
 static void (*output_byte) (unsigned short, unsigned char) = outp_func;
@@ -685,7 +685,6 @@ parport_open (unsigned short port)
     {
       fputs ("ERROR: Could not create the I/O request structure\n", stderr);
       DeletePort (parport);
-      parport_io_req = NULL;
       exit (1);
     }
 
@@ -703,17 +702,6 @@ parport_open (unsigned short port)
       DeletePort (parport);
       exit (1);
     }
-
-  if (register_func (close_io_port) == -1)
-    {
-//      AbortIO ((struct IORequest *) parport_io_req); // should not be necessary with DoIO()
-      CloseDevice ((struct IORequest *) parport_io_req);
-      DeleteExtIO (parport_io_req);
-      DeletePort (parport);
-      parport_io_req = NULL;
-      fputs ("ERROR: Could not register function with register_func()\n", stderr);
-      exit (1);
-    }
 #elif   defined __FreeBSD__
   parport_io_fd = open ("/dev/io", O_RDWR);
   if (parport_io_fd == -1)
@@ -722,15 +710,6 @@ parport_open (unsigned short port)
              "       (This program needs root privileges for the requested action)\n",
              stderr);
       exit (1);
-    }
-#endif
-
-#if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__
-  if (register_func (close_io_port) == -1)
-    {
-      close (parport_io_fd);
-      fputs ("ERROR: Could not register function with register_func()\n", stderr);
-      exit(1);
     }
 #endif
 
@@ -783,7 +762,7 @@ parport_open (unsigned short port)
   int driver_found = 0;
   u_func_ptr_t sym;
 
-  sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "dlportio.dll");
+  sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "dlportio.dll");
 #if 0 // We must not do this for Cygwin or access() won't "find" the file
   change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
 #endif
@@ -811,7 +790,7 @@ parport_open (unsigned short port)
 
   if (!driver_found)
     {
-      sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "io.dll");
+      sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "io.dll");
       if (access (fname, F_OK) == 0)
         {
           io_driver = open_module (fname);
@@ -842,7 +821,7 @@ parport_open (unsigned short port)
 
   if (!driver_found)
     {
-      sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
+      sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
       if (access (fname, F_OK) == 0)
         {
           io_driver = open_module (fname);
@@ -952,41 +931,29 @@ parport_open (unsigned short port)
 }
 
 
-#if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
-static void
-close_io_port (void)
+void
+parport_close (void)
 {
-#ifdef  AMIGA
+#ifdef  USE_PPDEV
+  parport_io_mode = IEEE1284_MODE_COMPAT;
+  // We really don't want to perform IEEE 1284 negotiation, but if we don't do
+  //  it (older versions of) ppdev will do it for us...
+  ioctl (parport_io_fd, PPNEGOT, &parport_io_mode);
+  ioctl (parport_io_fd, PPRELEASE);
+  close (parport_io_fd);
+#elif   defined __BEOS__ || defined __FreeBSD__
+  close (parport_io_fd);
+#elif   defined AMIGA
   CloseDevice ((struct IORequest *) parport_io_req);
   DeleteExtIO ((struct IOExtPar *) parport_io_req);
   DeletePort (parport);
   parport_io_req = NULL;
-#elif   defined USE_PPDEV
-  parport_io_mode = IEEE1284_MODE_COMPAT;
-  // We really don't want to perform IEEE 1284 negotiation, but if we don't do
-  //  it ppdev will do it for us...
-  ioctl (parport_io_fd, PPNEGOT, &parport_io_mode);
-  ioctl (parport_io_fd, PPRELEASE);
-#else                                           // __BEOS__ || __FreeBSD__
-  close (parport_io_fd);
-#endif
-}
-#endif
-
-
-int
-parport_close (void)
-{
-#if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
-  if (unregister_func (close_io_port) == 0)     // call func only if it can be removed!
-    close_io_port ();                           //  (or else it will be called twice)
 #elif   defined _WIN32 || defined __CYGWIN__
   input_byte = NULL;
   input_word = NULL;
   output_byte = NULL;
   output_word = NULL;
 #endif
-  return 0;
 }
 
 
@@ -1001,4 +968,14 @@ parport_print_info (void)
   printf ("Using I/O port base address: 0x%x\n", ucon64.parport);
 #endif
 }
+
+#else
+
+// Define at least one symbol, so that the translation unit is not empty if
+//  USE_PARALLEL is not defined.
+void
+parport_dummy (void)
+{
+}
+
 #endif // USE_PARALLEL

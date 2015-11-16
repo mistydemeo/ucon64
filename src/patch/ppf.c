@@ -23,23 +23,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "misc/bswap.h"
-#include "misc/misc.h"
-#include "misc/file.h"
-#include "misc/string.h"                        // MEMMEM2_CASE
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
+#include "misc/bswap.h"
+#include "misc/file.h"
+#include "misc/misc.h"                          // truncate()
+#include "misc/string.h"                        // MEMCMP2_CASE
 #include "ucon64_misc.h"
-#include "ppf.h"
+#include "patch/ppf.h"
 
 
 #define MAX_ID_SIZE 3072
@@ -165,7 +159,7 @@ AREA, because it is located after the patch data!
 */
 
 
-// based on source code of ApplyPPF v2.0 for Linux/Unix by Icarus/Paradox
+// based on source code of ApplyPPF v2.0 for Linux/UNIX by Icarus/Paradox
 int
 ppf_apply (const char *mod, const char *ppfname)
 {
@@ -299,7 +293,7 @@ ppf_apply (const char *mod, const char *ppfname)
 }
 
 
-// based on sourcecode of MakePPF v2.0 Linux/Unix by Icarus/Paradox
+// based on sourcecode of MakePPF v2.0 Linux/UNIX by Icarus/Paradox
 int
 ppf_create (const char *orgname, const char *modname)
 {
@@ -416,7 +410,7 @@ ppf_create (const char *orgname, const char *modname)
     }
   else if (msize < osize)
     printf ("WARNING: %s is smaller than %s\n"
-            "         PPF can't store information about that fact\n",
+            "         PPF cannot store information about that fact\n",
             modname, orgname);
 #endif
 

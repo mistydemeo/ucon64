@@ -25,23 +25,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
-#include "misc/parallel.h"
-#include "ucon64.h"
+#include "misc/misc.h"
 #include "ucon64_misc.h"
-#include "ffe.h"
-#include "swc.h"
 #include "console/snes.h"                       // for snes_get_file_type ()
+#include "backup/ffe.h"
+#include "backup/swc.h"
 
 
 #ifdef  USE_PARALLEL
@@ -74,12 +65,12 @@ const st_getopt2_t swc_usage[] =
       &swc_obj[0]
     },
 #if 1
-/*
-  The following help text used to be hidden, because we wanted to avoid people
-  to "accidentally" create overdumps, bad dumps or report bugs that aren't bugs
-  (SA-1). However, now that ucon64.io_mode is useful for -xswcc I guess the
-  help should be complete. - dbjh
-*/
+    /*
+      The following help text used to be hidden, because we wanted to avoid people
+      to "accidentally" create overdumps, bad dumps or report bugs that aren't bugs
+      (SA-1). However, now that ucon64.io_mode is useful for -xswcc I guess the
+      help should be complete. - dbjh
+    */
     {
       "xswc-io", 1, 0, UCON64_XSWC_IO,
       "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
@@ -837,12 +828,12 @@ swc_read_rom (const char *filename, unsigned short parport, int io_mode)
 
 
 int
-swc_write_rom (const char *filename, unsigned short parport, int enableRTS)
+swc_write_rom (const char *filename, unsigned short parport, unsigned short enableRTS)
 {
   FILE *file;
-  unsigned char *buffer;
-  int bytesread, bytessent, totalblocks, blocksdone = 0, emu_mode_select, fsize;
-  unsigned short address;
+  unsigned char *buffer, emu_mode_select;
+  int bytesread, bytessent, blocksdone = 0, fsize;
+  unsigned short totalblocks, address;
   time_t starttime;
 
   ffe_init_io (parport);
@@ -912,14 +903,16 @@ swc_write_rom (const char *filename, unsigned short parport, int enableRTS)
     ffe_send_command0 (0xc010, 2);
 
   ffe_send_command (5, 0, 0);
-  totalblocks = (fsize - SWC_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
-  ffe_send_command (6, (unsigned short) (5 | (totalblocks << 8)), (unsigned short) (totalblocks >> 8)); // bytes: 6, 5, #8 K L, #8 K H, 0
-  ffe_send_command (6, (unsigned short) (1 | (emu_mode_select << 8)), (unsigned short) enableRTS); // last arg = 1 enables RTS
+  totalblocks = (unsigned short) ((fsize - SWC_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE); // round up
+  ffe_send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8 K L, #8 K H, 0
+  ffe_send_command (6, 1 | (emu_mode_select << 8), enableRTS); // last arg = 1 enables RTS
                                                                //  mode, 0 disables it
+#if 0
   ffe_wait_for_ready ();
   outportb (parport + PARPORT_DATA, 0);
   outportb (parport + PARPORT_CONTROL,
             inportb (parport + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
+#endif
 
   free (buffer);
   fclose (file);

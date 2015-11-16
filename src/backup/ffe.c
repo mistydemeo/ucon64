@@ -22,26 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include "misc/misc.h"                          // kbhit(), getch()
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/parallel.h"
 #include "misc/term.h"
 #include "ucon64.h"
-#include "ucon64_misc.h"
-#include "ffe.h"
-#include "misc/parallel.h"
+#include "backup/ffe.h"
 
 
 #ifdef  USE_PARALLEL
 
-#define N_TRY_MAX          65536                // # times to test if copier ready
+#define N_TRY_MAX 65536                         // # times to test if copier ready
 
 
 static void ffe_sendb (unsigned char byte);
@@ -152,7 +142,7 @@ ffe_send_command (unsigned char command_code, unsigned short a, unsigned short l
   ffe_sendb ((unsigned char) (a >> 8));         // high byte
   ffe_sendb ((unsigned char) l);                // low byte
   ffe_sendb ((unsigned char) (l >> 8));         // high byte
-  ffe_sendb ((unsigned char) (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8))); // check sum
+  ffe_sendb ((unsigned char) (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8))); // checksum
 }
 
 

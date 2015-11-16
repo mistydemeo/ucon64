@@ -22,13 +22,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GBX_H
 #define GBX_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t gbx_usage[];
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 extern int gbx_read_rom (const char *filename, unsigned short parport);
 extern int gbx_write_rom (const char *filename, unsigned short parport);
-extern int gbx_read_sram (const char *filename, unsigned short parport, int bank);
-extern int gbx_write_sram (const char *filename, unsigned short parport, int bank);
+extern int gbx_read_sram (const char *filename, unsigned short parport,
+                          int bank);
+extern int gbx_write_sram (const char *filename, unsigned short parport,
+                           int bank);
 #endif
 
-#endif // GBX_H
+#endif

@@ -407,7 +407,7 @@ enum
   WF_NFO            show info output before processing rom
   WF_NO_ROM         for this option no ROM is required
   WF_NO_CRC32       no CRC32 calculation necessary for this option; this
-                      overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
+                      overrides even WF_INIT and WF_NFO
   WF_STOP           a "stop" option:
                     - -multi (and -xfalmulti) takes more than one file as
                       argument, but should be executed only once.

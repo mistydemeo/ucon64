@@ -21,8 +21,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -31,15 +34,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#include <stdlib.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <ctype.h>
-#include "file.h"                               // realpath2()
-#include "property.h"
-#include "misc.h"                               // getenv2()
-#include "string.h"
+#include "misc/file.h"                          // realpath2()
+#include "misc/misc.h"                          // getenv2()
+#include "misc/property.h"
+#include "misc/string.h"
 
 
 #ifdef  MAXBUFSIZE
@@ -185,7 +183,7 @@ get_property (const char *filename, const char *propname, int mode)
     {
       if (!value_s)
         value_s = NULL;                         // value_s won't be changed
-                                                //  after this func (=ok)
+                                                //  after this func (=OK)
     }
   else
     value_s = p;

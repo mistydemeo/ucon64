@@ -21,6 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MSG_H
 #define MSG_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t msg_usage[];
 
 // For the header format, see ffe.h
@@ -38,9 +44,9 @@ typedef struct st_msg_header
 #define MSG_HEADER_START 0
 #define MSG_HEADER_LEN (sizeof (st_msg_header_t))
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 extern int msg_read_rom (const char *filename, unsigned short parport);
 extern int msg_write_rom (const char *filename, unsigned short parport);
 #endif
 
-#endif // MSG_H
+#endif

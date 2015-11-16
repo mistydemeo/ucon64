@@ -22,21 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include "misc/parallel.h"
-#include "misc/itypes.h"
-#include "misc/misc.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "tototek.h"
-#include "sflash.h"
+#include "backup/tototek.h"
+#include "backup/sflash.h"
 
 
 #ifdef  USE_PARALLEL
@@ -221,7 +212,7 @@ sf_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[0x80];
-  int game_no, size, address = 0, bytesread, bytessend = 0, bytesleft;
+  int game_no, size, address = 0, bytesread, bytessent = 0, bytesleft;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -293,8 +284,8 @@ sf_write_rom (const char *filename, unsigned short parport)
             ttt_erase_block (address);
           if (address < 0x7f8000)               // We mustn't write to the loader space
             write_block (&address, buffer);
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
+          bytessent += bytesread;
+          ucon64_gauge (starttime, bytessent, size);
           bytesleft -= 0x4000;
         }
     }
@@ -305,8 +296,8 @@ sf_write_rom (const char *filename, unsigned short parport)
   while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)) != 0)
     {
       write_block (&address, buffer);
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       bytesleft -= 0x4000;
     }
 
@@ -375,7 +366,7 @@ sf_write_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000];
-  int size, bytesread, bytessend = 0, address;
+  int size, bytesread, bytessent = 0, address;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
@@ -405,9 +396,9 @@ sf_write_sram (const char *filename, unsigned short parport)
   while ((bytesread = fread (buffer, 1, 0x4000, file)) != 0)
     {
       write_block (&address, buffer);           // 0x4000 bytes write
-      bytessend += bytesread;
+      bytessent += bytesread;
       if ((address & 0x3fff) == 0)
-        ucon64_gauge (starttime, bytessend, size);
+        ucon64_gauge (starttime, bytessent, size);
     }
 
   fclose (file);

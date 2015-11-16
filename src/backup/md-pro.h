@@ -25,15 +25,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MD_PRO_H
 #define MD_PRO_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 #define MD_PRO_LOADER_SIZE (128 * 1024)
 
 extern const st_getopt2_t mdpro_usage[];
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 extern int md_read_rom (const char *filename, unsigned short parport, int size);
 extern int md_write_rom (const char *filename, unsigned short parport);
-extern int md_read_sram (const char *filename, unsigned short parport, int start_bank);
-extern int md_write_sram (const char *filename, unsigned short parport, int start_bank);
+extern int md_read_sram (const char *filename, unsigned short parport,
+                         int start_bank);
+extern int md_write_sram (const char *filename, unsigned short parport,
+                          int start_bank);
 #endif
 
 #endif

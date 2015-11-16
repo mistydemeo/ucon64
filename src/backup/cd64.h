@@ -22,6 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef CD64_H
 #define CD64_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t cd64_usage[];
 
 #if     defined USE_PARALLEL && defined USE_LIBCD64
@@ -36,6 +42,6 @@ extern int cd64_read_eeprom(const char *filename);
 extern int cd64_write_eeprom(const char *filename);
 extern int cd64_read_mempack(const char *filename, int index);
 extern int cd64_write_mempack(const char *filename, int index);
-#endif // USE_PARALLEL && USE_LIBCD64
+#endif
 
-#endif // CD64_H
+#endif

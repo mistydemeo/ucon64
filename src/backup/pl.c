@@ -22,20 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
+#include <string.h>
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "misc/misc.h"
-#include "misc/parallel.h"
 #include "misc/file.h"
-#include "ucon64.h"
+#include "misc/parallel.h"
 #include "ucon64_misc.h"
-#include "pl.h"
+#include "backup/pl.h"
 
 
 #ifdef  USE_PARALLEL
@@ -532,14 +525,14 @@ program (unsigned int addr, unsigned char data, int retries)
     {
       unsigned char s = read_data ();
       if ((s & 128) == 0)
-        return 0;                               // ok
+        return 0;                               // OK
       if (s & 32)
         {
           int s = read_data ();
           if ((s & 128) == 0)
-            return 0;                           // ok
+            return 0;                           // OK
           if (data == read_data ())
-            return 0;                           // ok
+            return 0;                           // OK
         }
     }
 
@@ -547,7 +540,7 @@ program (unsigned int addr, unsigned char data, int retries)
   set_address (addr, 0);
   set_data_read
   if (data == read_data ())
-    return 0;                                   // ok
+    return 0;                                   // OK
   if (retries == 0)
     return 1;                                   // error
   return program (addr, data, retries - 1);
@@ -588,7 +581,7 @@ wait_erased (void)
     {
       cur_byte = read_data () & 0x40;
       if (cur_byte == prev_byte)
-        return 0;                               // ok
+        return 0;                               // OK
       prev_byte = cur_byte;
     }
   return 1;                                     // erase error

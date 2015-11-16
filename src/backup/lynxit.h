@@ -22,9 +22,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef LYNXIT_H
 #define LYNXIT_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t lynxit_usage[];
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 extern int lynxit_read_rom (const char *filename, unsigned int parport);
 #endif
 

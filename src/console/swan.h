@@ -21,7 +21,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef WSWAN_H
 #define WSWAN_H
 
-extern int swan_init (st_ucon64_nfo_t *rominfo);
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 extern const st_getopt2_t swan_usage[];
+
+extern int swan_init (st_ucon64_nfo_t *rominfo);
 extern int swan_chk (st_ucon64_nfo_t *rominfo);
+
 #endif

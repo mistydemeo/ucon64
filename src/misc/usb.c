@@ -25,8 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_USB
 #include <stdio.h>
 #include <usb.h>
-#include "usb.h"
-#include "misc.h"
+#include "misc/usb.h"
 
 
 usb_dev_handle *

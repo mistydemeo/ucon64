@@ -25,9 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -39,20 +37,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
+#include "misc/archive.h"
 #include "misc/bswap.h"
-#include "misc/misc.h"
-#include "misc/string.h"
 #include "misc/chksum.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
+#include "misc/misc.h"
+#include "misc/string.h"
 #include "ucon64_misc.h"
-#include "console.h"
-#include "snes.h"
+#include "console/console.h"
+#include "console/snes.h"
 #include "backup/backup.h"
+#include "backup/gd.h"
+#include "backup/mgd.h"
+#include "backup/swc.h"
+#include "backup/ufo.h"
 
 
 #define SNES_HEADER_LEN (sizeof (st_snes_header_t))
@@ -719,7 +717,7 @@ snes_ffe (st_ucon64_nfo_t *rominfo, char *suffix)
 
   header.emulation = snes_split ? 0x40 : 0;
   header.emulation |= snes_hirom ? 0x30 : 0;
-  // bit 3 & 2 are already ok for 32 kB SRAM size
+  // bit 3 & 2 are already OK for 32 kB SRAM size
   if (snes_sram_size == 8 * 1024)
     header.emulation |= 0x04;
   else if (snes_sram_size == 2 * 1024)
@@ -1186,7 +1184,7 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
     {
       if (total4Mbparts > 8)
         {
-          fputs ("ERROR: This ROM > 32 Mbit LoROM -- can't convert\n", stderr);
+          fputs ("ERROR: This ROM > 32 Mbit LoROM -- cannot convert\n", stderr);
           return -1;
         }
 
@@ -1261,7 +1259,7 @@ snes_ufo (st_ucon64_nfo_t *rominfo)
     header.sram_size = 2;
   else if (snes_sram_size > 0)                  // 1 - 16 kb
     header.sram_size = 1;
-  // header.sram_size is already ok for snes_sram_size == 0
+  // header.sram_size is already OK for snes_sram_size == 0
 
   header.sram_type = snes_hirom ? 0 : 3;
 
@@ -1685,7 +1683,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
     {
       if (size < 4 * MBIT && size != 2 * MBIT)
         { // "&& size != 2 * MBIT" is a fix for BS Chrono Trigger - Jet Bike Special (J)
-          puts ("NOTE: ROM size is smaller than 4 Mbit -- won't be split");
+          puts ("NOTE: ROM size is smaller than 4 Mbit -- will not be split");
           return -1;
         }
     }
@@ -1693,13 +1691,13 @@ snes_s (st_ucon64_nfo_t *rominfo)
     {
       if (size < 2 * MBIT)
         {
-          puts ("NOTE: ROM size is smaller than 2 Mbit -- won't be split");
+          puts ("NOTE: ROM size is smaller than 2 Mbit -- will not be split");
           return -1;
         }
     }
   else if (size <= part_size)
     {
-      printf ("NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",
+      printf ("NOTE: ROM size is smaller than or equal to %d Mbit -- will not be split\n",
               part_size / MBIT);
       return -1;
     }
@@ -1913,7 +1911,7 @@ when it has been patched with -f.
   strcpy (src_name, "snescopy.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" FILE_SEPARATOR_S "snescopy.txt", ucon64.configdir);
+    sprintf (src_name, "%s" DIR_SEPARATOR_S "snescopy.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -2069,7 +2067,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   strcpy (src_name, "snespal.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" FILE_SEPARATOR_S "snespal.txt", ucon64.configdir);
+    sprintf (src_name, "%s" DIR_SEPARATOR_S "snespal.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -2178,7 +2176,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   strcpy (src_name, "snesntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" FILE_SEPARATOR_S "snesntsc.txt", ucon64.configdir);
+    sprintf (src_name, "%s" DIR_SEPARATOR_S "snesntsc.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -2315,7 +2313,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   strcpy (src_name, "snesslow.txt");
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" FILE_SEPARATOR_S "snesslow.txt", ucon64.configdir);
+    sprintf (src_name, "%s" DIR_SEPARATOR_S "snesslow.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -3382,11 +3380,11 @@ snes_init (st_ucon64_nfo_t *rominfo)
                "Inverse checksum: %s, 0x%04x (calculated) %c= 0x%04x (internal)",
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
-                 ((y == x) ? "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
+                 ((y == x) ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
                  :
-                 ((y == x) ? "Ok" : "Bad"),
+                 ((y == x) ? "OK" : "Bad"),
 #else
-               (y == x) ? "Ok" : "Bad",
+               (y == x) ? "OK" : "Bad",
 #endif
                y, (y == x) ? '=' : '!', x);
       if (bs_dump == 1)                         // bs_dump == 2 for BS add-on dumps
@@ -4062,7 +4060,7 @@ snes_multi (int truncate_size, char *fname)
 
   if (truncate_size == 0)
     {
-      fputs ("ERROR: Can't make multi-game file of 0 bytes\n", stderr);
+      fputs ("ERROR: Cannot make multi-game file of 0 bytes\n", stderr);
       return -1;
     }
 

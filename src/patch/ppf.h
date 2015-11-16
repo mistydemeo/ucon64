@@ -21,9 +21,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef PPF_H
 #define PPF_H
+
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t ppf_usage[];
+
 extern int ppf_apply (const char *modname, const char *ppfname);
 extern int ppf_create (const char *orgname, const char *modname);
 extern int ppf_set_desc (const char *ppfname, const char *description);
 extern int ppf_set_fid (const char *ppfname, const char *fidname);
+
 #endif

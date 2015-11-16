@@ -18,29 +18,22 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include "misc/itypes.h"
-#include "misc/misc.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_misc.h"
-#include "cc2.h"
+#include "backup/cc2.h"
 
+
+#if 0
+static st_ucon64_obj_t cc2_obj[] =
+  {
+    {UCON64_INTELLI, WF_DEFAULT | WF_STOP | WF_NO_ROM}
+  };
+#endif
 
 const st_getopt2_t cc2_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Cuttle Card (2)",/*"2001 Shell's Electronic http://www.shells.com"*/
+      NULL, "Cuttle Card (2)",/*"2001 Schell's Electronics http://www.schells.com"*/
       NULL
     },
 #if 0
@@ -49,9 +42,8 @@ const st_getopt2_t cc2_usage[] =
       NULL, "send/receive ROM to/from Cuttle Card (2)\n"
       "actually Cuttle Card (2) backup units use audio\n"
       "input/output to transfer ROMs",
-      &ucon64_wf[WF_OBJ_ATA_STOP_NO_ROM]
+      &cc2_obj[0]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
-

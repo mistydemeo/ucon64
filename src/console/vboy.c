@@ -18,26 +18,16 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include "misc/misc.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
+#include "misc/file.h"
 #include "ucon64_misc.h"
-#include "console.h"
+#include "console/console.h"
+#include "console/vboy.h"
 #include "backup/backup.h"
-#include "vboy.h"
+
+
+#define VBOY_NAME_LEN 20
 
 
 static st_ucon64_obj_t vboy_obj[] =
@@ -60,10 +50,6 @@ const st_getopt2_t vboy_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-
-#define VBOY_NAME_LEN 20
-
-
 // the game header comes before the last 512 bytes at the end of the ROM
 typedef struct st_vboy_header
 {
@@ -75,7 +61,6 @@ typedef struct st_vboy_header
   char game_id_country;
   unsigned char version;
 } st_vboy_header_t;
-
 
 #define VBOY_HEADER_LEN (sizeof (st_vboy_header_t))
 #define VBOY_HEADER_START (ucon64.file_size - (VBOY_HEADER_LEN + 512))
@@ -90,9 +75,9 @@ vboy_init (st_ucon64_nfo_t *rominfo)
   rominfo->console_usage = vboy_usage[0].help;
   rominfo->backup_usage = unknown_backup_usage[0].help;
 
-  // It's correct to use VBOY_HEADER_START, because the header is located at a
-  //  constant offset relative to the end of the file (no need to use
-  //  ucon64.backup_header_len).
+  // It's correct to use VBOY_HEADER_START (a macro, not a constant), because
+  //  the header is located at a constant offset relative to the end of the file
+  //  (no need to use ucon64.backup_header_len).
   ucon64_fread (&vboy_header, VBOY_HEADER_START, VBOY_HEADER_LEN, ucon64.fname);
 
   if (ucon64.console == UCON64_VBOY)

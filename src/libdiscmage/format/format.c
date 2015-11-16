@@ -53,8 +53,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "nero.h"
 #include "other.h"
 #include "toc.h"
-#include "ccd.h"
-#ifdef  DJGPP                                   // DXE's are specific to DJGPP
+#ifdef  DJGPP                                   // DXEs are specific to DJGPP
 #include "../dxedll_priv.h"
 #endif
 
@@ -302,7 +301,7 @@ dm_read (char *buffer, int track_num, int sector, const dm_image_t *image)
 {
   dm_track_t *track = (dm_track_t *) &image->track[track_num];
   FILE *fh;
-  
+
   if ((fh = fopen (image->fname, "rb")) == NULL)
     return 0;
 
@@ -311,7 +310,7 @@ dm_read (char *buffer, int track_num, int sector, const dm_image_t *image)
       fclose (fh);
       return 0;
     }
-  
+
   if (fread (buffer, track->sector_size, 1, fh) != track->sector_size)
     {
       fclose (fh);

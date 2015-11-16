@@ -24,9 +24,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_MISC_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"      // USE_DISCMAGE
+#include "config.h"                             // USE_DISCMAGE
 #endif
-#include "ucon64.h"      // st_ucon64_nfo_t
+#include <time.h>
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"                             // st_ucon64_nfo_t
 
 
 /*
@@ -39,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   discmage_gauge          gauge wrapper for libdiscmage
 */
 #ifdef  USE_DISCMAGE
-#include "libdiscmage/libdiscmage.h" // dm_image_t
+#include "libdiscmage/libdiscmage.h"            // dm_image_t
 
 #define UCON64_DM_VERSION_MAJOR 0
 #define UCON64_DM_VERSION_MINOR 0

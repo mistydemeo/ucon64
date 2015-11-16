@@ -1,9 +1,9 @@
 /*
 misc.h - miscellaneous functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2004       NoisyB
+Copyright (c) 2001 - 2004, 2015 dbjh
+Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -39,8 +39,8 @@ extern "C" {
 #endif                                          // USE_ZLIB
 
 
-#ifdef __sun
-#ifdef __SVR4
+#ifdef  __sun
+#ifdef  __SVR4
 #define __solaris__
 #endif
 #endif
@@ -51,19 +51,16 @@ extern "C" {
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
-#ifndef _WIN32
-typedef unsigned long long int uint64_t;
-#else
-typedef unsigned __int64 uint64_t;
-#endif
 typedef signed char int8_t;
+typedef unsigned short int uint16_t;
 typedef signed short int int16_t;
+typedef unsigned int uint32_t;
 typedef signed int int32_t;
 #ifndef _WIN32
+typedef unsigned long long int uint64_t;
 typedef signed long long int int64_t;
 #else
+typedef unsigned __int64 uint64_t;
 typedef signed __int64 int64_t;
 #endif
 #endif                                          // OWN_INTTYPES
@@ -72,11 +69,11 @@ typedef signed __int64 int64_t;
 #if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
         defined AMIGA || defined __APPLE__      // Mac OS X actually
 // GNU/Linux, Solaris, FreeBSD, Cygwin, BeOS, Amiga, Mac (OS X)
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
+#define DIR_SEPARATOR '/'
+#define DIR_SEPARATOR_S "/"
 #else // DJGPP, Win32
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
+#define DIR_SEPARATOR '\\'
+#define DIR_SEPARATOR_S "\\"
 #endif
 
 #ifndef MAXBUFSIZE
@@ -104,12 +101,12 @@ typedef signed __int64 int64_t;
 #define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
 
 #ifdef  WORDS_BIGENDIAN
-#undef WORDS_BIGENDIAN
+#undef  WORDS_BIGENDIAN
 #endif
 
 #if     defined _LIBC || defined __GLIBC__
   #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if     __BYTE_ORDER == __BIG_ENDIAN
     #define WORDS_BIGENDIAN 1
   #endif
 #elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
@@ -123,19 +120,19 @@ typedef signed __int64 int64_t;
   #ifdef  __CYGWIN__
     #define CURRENT_OS_S "Win32 (Cygwin)"
   #elif   defined __FreeBSD__
-    #define CURRENT_OS_S "Unix (FreeBSD)"
+    #define CURRENT_OS_S "UNIX (FreeBSD)"
   #elif   defined __OpenBSD__
-    #define CURRENT_OS_S "Unix (OpenBSD)"
+    #define CURRENT_OS_S "UNIX (OpenBSD)"
   #elif   defined __linux__
-    #define CURRENT_OS_S "Unix (Linux)"
+    #define CURRENT_OS_S "UNIX (Linux)"
   #elif   defined __solaris__
-    #ifdef __sparc__
-      #define CURRENT_OS_S "Unix (Solaris/Sparc)"
+    #ifdef  __sparc__
+      #define CURRENT_OS_S "UNIX (Solaris/Sparc)"
     #else
-      #define CURRENT_OS_S "Unix (Solaris/i386)"
+      #define CURRENT_OS_S "UNIX (Solaris/i386)"
     #endif
   #else
-    #define CURRENT_OS_S "Unix"
+    #define CURRENT_OS_S "UNIX"
   #endif
 #elif   defined _WIN32
   #ifdef  __MINGW32__
@@ -144,7 +141,7 @@ typedef signed __int64 int64_t;
     #define CURRENT_OS_S "Win32 (Visual C++)"
   #endif
 #elif   defined __APPLE__
-  #if   defined __POWERPC__ || defined __ppc__
+  #if     defined __POWERPC__ || defined __ppc__
     #define CURRENT_OS_S "Apple (PPC)"
   #else
     #define CURRENT_OS_S "Apple"
@@ -152,7 +149,7 @@ typedef signed __int64 int64_t;
 #elif   defined __BEOS__
   #define CURRENT_OS_S "BeOS"
 #elif   defined AMIGA
-  #if defined __PPC__
+  #if     defined __PPC__
     #define CURRENT_OS_S "Amiga (PPC)"
   #else
     #define CURRENT_OS_S "Amiga (68K)"
@@ -490,12 +487,13 @@ extern int q_fsize (const char *filename);
 #define PROPERTY_SEPARATOR_S "="
 #define PROPERTY_COMMENT '#'
 #define PROPERTY_COMMENT_S "#"
-extern char *get_property (const char *filename, const char *propname, char *value,
-                           const char *def);
+extern char *get_property (const char *filename, const char *propname,
+                           char *value, const char *def);
 extern int32_t get_property_int (const char *filename, const char *propname);
 extern char *get_property_fname (const char *filename, const char *propname,
                                  char *buffer, const char *def);
-extern int set_property (const char *filename, const char *propname, const char *value, const char *comment);
+extern int set_property (const char *filename, const char *propname,
+                         const char *value, const char *comment);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL, NULL))
 
 
@@ -519,7 +517,7 @@ extern int set_property (const char *filename, const char *propname, const char 
         defined __APPLE__                       // Mac OS X actually
 extern void init_conio (void);
 extern void deinit_conio (void);
-#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
+#define getch getchar                           // getchar() acts like DOS getch() after init_conio()
 extern int kbhit (void);                        // may only be used after init_conio()!
 
 #elif   defined __MSDOS__
@@ -531,7 +529,7 @@ extern int kbhit (void);                        // may only be used after init_c
 
 #elif   defined AMIGA
 extern int kbhit (void);
-//#define getch           getchar
+//#define getch getchar
 // Gonna use my (Jan-Erik) fake one. Might work better and more like the real
 //  getch().
 #endif
@@ -551,11 +549,11 @@ extern int truncate (const char *path, off_t size);
 extern int sync (void);
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
-#ifndef pclose                                  // misc_z.h's definition gets higher "precedence"
-#define pclose  _pclose
+#ifndef pclose                                  // misc_z.h's definition gets higher precedence
+#define pclose _pclose
 #endif
 #ifndef popen                                   // idem
-#define popen   _popen
+#define popen _popen
 #endif
 
 #ifdef  USE_ANSI_COLOR
@@ -565,7 +563,7 @@ extern int vprintf2 (const char *format, va_list argptr);
 extern int printf2 (const char *format, ...);
 extern int fprintf2 (FILE *file, const char *format, ...);
 #define vprintf vprintf2
-#define printf  printf2
+#define printf printf2
 #define fprintf fprintf2
 #endif // USE_ANSI_COLOR
 
@@ -597,14 +595,14 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 
 #else
 #ifdef  DLL
-#define access  _access
-#define chmod   _chmod
-//#define fileno  _fileno
-#define getcwd  _getcwd
-#define isatty  _isatty
-#define rmdir   _rmdir
-#define stat    _stat
-#define strdup  _strdup
+#define access _access
+#define chmod _chmod
+//#define fileno _fileno
+#define getcwd _getcwd
+#define isatty _isatty
+#define rmdir _rmdir
+#define stat _stat
+#define strdup _strdup
 #define stricmp _stricmp
 #define strnicmp _strnicmp
 #endif // DLL
@@ -614,12 +612,13 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #elif   defined AMIGA                           // _WIN32
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
-#ifndef pclose                                  // misc_z.h's definition gets higher "precedence"
-#define pclose  _pclose
+#ifndef pclose                                  // misc_z.h's definition gets higher precedence
+#define pclose _pclose
 #endif
 #ifndef popen                                   // idem
-#define popen   _popen
+#define popen _popen
 #endif
+
 extern FILE *_popen (const char *path, const char *mode);
 extern int _pclose (FILE *stream);
 #endif                                          // AMIGA

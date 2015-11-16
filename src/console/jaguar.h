@@ -21,7 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef JAGUAR_H
 #define JAGUAR_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 extern const st_getopt2_t jaguar_usage[];
+
 extern int jaguar_init (st_ucon64_nfo_t *rominfo);
 
 #endif

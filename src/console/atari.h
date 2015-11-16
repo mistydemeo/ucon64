@@ -23,13 +23,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef ATARI_H
 #define ATARI_H
+
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-extern const st_getopt2_t atari_usage[];
-extern int atari_init (st_ucon64_nfo_t *rominfo);
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
 
+
+extern const st_getopt2_t atari_usage[];
+
+extern int atari_init (st_ucon64_nfo_t *rominfo);
 #ifdef  USE_LIB_MATH
 extern int atari_cc2 (const char *filename, int bsm);
 #endif
+
 #endif

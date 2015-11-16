@@ -22,23 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef  _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
-#endif
-#include <sys/stat.h>
-#ifdef  _MSC_VER
-#pragma warning(pop)
-#endif
-#include <time.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
+#include <stdlib.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #ifdef  _WIN32
 #ifdef  _MSC_VER
@@ -52,19 +41,41 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
+#include <sys/stat.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
+#include "misc/archive.h"
+#include "misc/file.h"
 #include "misc/misc.h"
-#include "misc/getopt2.h"
 #include "misc/property.h"
 #include "misc/string.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "ucon64.h"
-#include "ucon64_misc.h"
 #include "ucon64_dat.h"
+#include "ucon64_misc.h"
+#include "console/atari.h"
+#include "console/coleco.h"
 #include "console/console.h"
+#include "console/dc.h"
+#include "console/gb.h"
+#include "console/gba.h"
+#include "console/genesis.h"
+#include "console/jaguar.h"
+#include "console/lynx.h"
+#include "console/n64.h"
+#include "console/neogeo.h"
+#include "console/nes.h"
+#include "console/ngp.h"
+#include "console/pce.h"
+#include "console/sms.h"
+#include "console/snes.h"
+#include "console/swan.h"
+#include "console/vboy.h"
 #include "backup/backup.h"
+
 
 #define MAX_FIELDS_IN_DAT 32
 #define DAT_FIELD_SEPARATOR (0xac)
@@ -266,7 +277,7 @@ get_next_file (char *fname)
   while ((ep = readdir (ddat)) != NULL)
     if (!stricmp (get_suffix (ep->d_name), ".dat"))
       {
-        sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, ep->d_name);
+        sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.datdir, ep->d_name);
         return fname;
       }
 #else
@@ -276,7 +287,7 @@ get_next_file (char *fname)
   if (!ddat)
     {
       // Note that FindFirstFile() & FindNextFile() are case insensitive
-      sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*.dat", ucon64.datdir);
+      sprintf (search_pattern, "%s" DIR_SEPARATOR_S "*.dat", ucon64.datdir);
       if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
         {
           // Not being able to find a DAT file is not a real error
@@ -288,13 +299,13 @@ get_next_file (char *fname)
         }
       else
         {
-          sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+          sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
           return fname;
         }
     }
   while (FindNextFile (ddat, &find_data))
     {
-      sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+      sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
       return fname;
     }
 #endif
@@ -502,7 +513,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
       {"[h", "Hack"},
       {"[x", "Bad checksum"},
       {"[o", "Overdump"},
-      {"[!]", "Verified good dump"}, // [!] is ok
+      {"[!]", "Verified good dump"}, // [!] is OK
       {NULL, NULL}
     };
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE], *p = NULL;

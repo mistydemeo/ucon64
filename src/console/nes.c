@@ -23,25 +23,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>                             // va_list()
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/archive.h"
 #include "misc/bswap.h"
-#include "misc/misc.h"
-#include "misc/string.h"
 #include "misc/chksum.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
+#include "misc/misc.h"
+#include "misc/string.h"
 #include "ucon64_misc.h"
-#include "nes.h"
+#include "console/nes.h"
 #include "backup/smc.h"
 
 
@@ -5184,7 +5178,7 @@ read_block (unsigned char **data, unsigned int size, FILE *file, const char *for
     }
   real_size = fread (*data, 1, size, file);
   if (real_size != size)
-    printf ("WARNING: Couldn't read %d bytes, only %d bytes were available\n",
+    printf ("WARNING: Could not read %d bytes, only %d bytes were available\n",
       size, real_size);
 
   va_end (argptr);
@@ -5303,7 +5297,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
   <d>[<d>]{-,/}<m>[<m>]{-,/}<y><y>[<y>][<y>]{-,/}<newline>
   <string for agent>[<newline>]
 
-  <newline> can be \n (Unix), \r\n (DOS) or \r (Macintosh)
+  <newline> can be \n (UNIX), \r\n (DOS) or \r (Macintosh)
 
   examples of valid date lines:
   22-11-1975
@@ -5463,11 +5457,11 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
               write_chunk (&unif_chunk, destfile);
             }
           else
-            printf ("WARNING: Dumper info file %s does not exist, chunk won't be written\n",
+            printf ("WARNING: Dumper info file %s does not exist, chunk will not be written\n",
                     ucon64.dump_info);
         }
       else                                      // Is this a warning or an error?
-        puts ("WARNING: No dumper info file was specified, chunk won't be written");
+        puts ("WARNING: No dumper info file was specified, chunk will not be written");
     }
 
   if (UCON64_ISSET (ucon64.controller))
@@ -5572,7 +5566,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   x = me2le_32 (unif_header.revision);
   if (x > UNIF_REVISION)
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
-            "         doesn't support that revision yet. Some chunks may be discarded.\n",
+            "         does not support that revision yet. Some chunks may be discarded.\n",
             UNIF_REVISION, x);
   unif_header.revision = me2le_32 (UNIF_REVISION);
   memcpy (&unif_header.signature, UNIF_SIG_S, 4);
@@ -5725,11 +5719,11 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
               write_chunk (&unif_chunk2, destfile);
             }
           else
-            printf ("WARNING: Dumper info file %s does not exist, chunk won't be written\n",
+            printf ("WARNING: Dumper info file %s does not exist, chunk will not be written\n",
                     ucon64.dump_info);
         }
       else                                      // Is this a warning or an error?
-        puts ("WARNING: No dumper info file was specified, chunk won't be written");
+        puts ("WARNING: No dumper info file was specified, chunk will not be written");
     }
   else if ((unif_chunk1 = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
     {
@@ -5962,7 +5956,7 @@ set_mapper (st_ines_header_t *header, unsigned int mapper)
     {
       if (mapper > 0xfff)
         {
-          fputs ("ERROR: Mapper numbers greater than 4095 can't be stored\n", stderr);
+          fputs ("ERROR: Mapper numbers greater than 4095 cannot be stored\n", stderr);
           exit (1);
         }
       // We can't just clear bits 0 & 1 of ctrl2, because they have their own
@@ -6071,7 +6065,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
     {
       ines_header.ctrl1 &= ~(INES_MIRROR | INES_4SCREEN); // clear bits
       if (ucon64.mirror == 0)
-        ;                                       // default value in ctrl1 (0) is ok
+        ;                                       // default value in ctrl1 (0) is OK
       else if (ucon64.mirror == 1)
         ines_header.ctrl1 |= INES_MIRROR;
       else if (ucon64.mirror == 4)
@@ -6155,7 +6149,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   x = me2le_32 (unif_header.revision);
   if (x > UNIF_REVISION)
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
-            "         doesn't support that revision yet. Some chunks may be discarded.\n",
+            "         does not support that revision yet. Some chunks may be discarded.\n",
             UNIF_REVISION, x);
 
   // build iNES header
@@ -6168,7 +6162,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
         {
           if ((x = nes_mapper_number ((const char *) unif_chunk->data)) == -1)
             {
-              puts ("WARNING: Couldn't determine mapper number, writing \"0\"");
+              puts ("WARNING: Could not determine mapper number, writing \"0\"");
               x = 0;
             }
           set_mapper (&ines_header, x);
@@ -6211,7 +6205,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   if (UCON64_ISSET (ucon64.mirror))
     {
       if (ucon64.mirror == 0)
-        ;                                       // default value in ctrl1 (0) is ok
+        ;                                       // default value in ctrl1 (0) is OK
       else if (ucon64.mirror == 1)
         ines_header.ctrl1 |= INES_MIRROR;
       else if (ucon64.mirror == 4)
@@ -6223,7 +6217,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
     {
       switch (*((unsigned char *) unif_chunk->data))
         {
-        case 0:                                 // default value in ctrl1 (0) is ok
+        case 0:                                 // default value in ctrl1 (0) is OK
         case 2:                                 // can't express in iNES terms
         case 3:                                 // idem
         case 5:                                 // idem
@@ -6408,7 +6402,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
           smc_header.emulation2 = 0xce;
         }
       break;
-    case 2:
+    case 2:                                     // falling through
     case 71:
       /*
         Some mapper 71 games need to be patched before they work:
@@ -6717,7 +6711,7 @@ nes_j (unsigned char **mem_image)
     {
       ines_header.ctrl1 &= ~(INES_MIRROR | INES_4SCREEN); // clear bits
       if (ucon64.mirror == 0)
-        ;                                       // default value in ctrl1 (0) is ok
+        ;                                       // default value in ctrl1 (0) is OK
       else if (ucon64.mirror == 1)
         ines_header.ctrl1 |= INES_MIRROR;
       else if (ucon64.mirror == 4)
@@ -6739,7 +6733,7 @@ nes_j (unsigned char **mem_image)
     {                                           //  not for nes_init()
       if (write_file)
         {
-          fprintf (stderr, "ERROR: No %s, can't make image without it\n", src_name);
+          fprintf (stderr, "ERROR: No %s -- cannot make image without it\n", src_name);
           exit (1);
         }
     }
@@ -6823,7 +6817,7 @@ write_prm (st_ines_header_t *header, const char *fname)
     {
       header->ctrl1 &= ~(INES_MIRROR | INES_4SCREEN); // clear bits
       if (ucon64.mirror == 0)
-        ;                                       // default value in ctrl1 (0) is ok
+        ;                                       // default value in ctrl1 (0) is OK
       else if (ucon64.mirror == 1)
         header->ctrl1 |= INES_MIRROR;
 // Pasofami only stores horizontal or vertical mirroring types
@@ -7222,11 +7216,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
 #ifdef  USE_ANSI_COLOR
                   (ucon64.ansi_color ?
                     ((x == *((int *) unif_chunk2->data)) ?
-                      "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+                      "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
                     :
-                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
+                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad"));
 #else
-                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
+                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad");
 #endif
                 free (unif_chunk2);
               }
@@ -7254,11 +7248,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
 #ifdef  USE_ANSI_COLOR
                   (ucon64.ansi_color ?
                     ((x == *((int *) unif_chunk2->data)) ?
-                      "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+                      "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
                     :
-                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
+                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad"));
 #else
-                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
+                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad");
 #endif
                 free (unif_chunk2);
               }
@@ -7596,7 +7590,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
       // read the disk header
       if (fread (buffer, 1, 58, srcfile) != 58)
         {
-          fputs ("ERROR: Can't read disk header\n", stderr);
+          fputs ("ERROR: Cannot read disk header\n", stderr);
           fclose (srcfile);
           return -1;
         }

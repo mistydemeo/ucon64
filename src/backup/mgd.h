@@ -22,13 +22,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MGD_H
 #define MGD_H
 
+#include <stdio.h>
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
+#define MGD_HEADER_START 0
+#define MGD_HEADER_LEN 512
+
 extern const st_getopt2_t mgd_usage[];
 
 /*
 The MGD2 only accepts certain filenames, and these filenames
 must be specified in an index file, "MULTI-GD", otherwise the
 MGD2 will not recognize the file. In the case of multiple games
-being stored in a single disk, simply enter its corresponding
+being stored on a single disk, simply enter its corresponding
 MULTI-GD index into the "MULTI-GD" file.
 
 Thanks to acem77 for the (verified) list below.
@@ -166,9 +173,6 @@ e.g. The first 8 Mbit file of Donkey Kong Country (assuming it
 is cat. no. 475) would look like: SF32475A.078
 */
 
-#ifdef USE_PARALLEL
-#endif // USE_PARALLEL
-
 // the following four functions are used by non-transfer code in genesis.c
 extern void mgd_interleave (unsigned char **buffer, int size);
 extern void mgd_deinterleave (unsigned char **buffer, int data_size,
@@ -180,6 +184,4 @@ extern void mgd_make_name (const char *filename, int console, int size,
                            char *name);
 extern void mgd_write_index_file (void *ptr, int n_names);
 
-#define MGD_HEADER_START 0
-#define MGD_HEADER_LEN 512
-#endif // MGD_H
+#endif

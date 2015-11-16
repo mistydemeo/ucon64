@@ -131,21 +131,12 @@ void mainproc(void *arg) {
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "misc/parallel.h"
 #include "misc/file.h"
-#include "ucon64.h"
+#include "misc/parallel.h"
 #include "ucon64_misc.h"
-#include "doctor64jr.h"
+#include "backup/doctor64jr.h"
 
 
 #ifdef  USE_PARALLEL
@@ -507,7 +498,7 @@ doctor64jr_read (const char *filename, unsigned short parport)
 int
 doctor64jr_write (const char *filename, unsigned short parport)
 {
-  unsigned int enable_write = 0, size, bytesread, bytessend = 0, n_pages;
+  unsigned int enable_write = 0, size, bytesread, bytessent = 0, n_pages;
   time_t init_time;
   unsigned short int page;
   FILE *file;
@@ -575,8 +566,8 @@ doctor64jr_write (const char *filename, unsigned short parport)
           break;
         }
 
-      bytessend += bytesread;
-      ucon64_gauge (init_time, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (init_time, bytessent, size);
     }
   fputc ('\n', stdout);
 

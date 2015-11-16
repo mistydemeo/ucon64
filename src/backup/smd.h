@@ -22,6 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SMD_H
 #define SMD_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t smd_usage[];
 
 // For the header format, see ffe.h
@@ -37,8 +43,7 @@ typedef struct st_smd_header
   char pad2[501];
 } st_smd_header_t;
 
-
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 extern int smd_read_rom (const char *filename, unsigned short parport);
 extern int smd_write_rom (const char *filename, unsigned short parport);
 extern int smd_read_sram (const char *filename, unsigned short parport);
@@ -50,4 +55,4 @@ extern void smd_deinterleave (unsigned char *buffer, int size);
 
 #define SMD_HEADER_LEN (sizeof (st_smd_header_t))
 
-#endif // SMD_H
+#endif

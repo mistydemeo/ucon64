@@ -4,7 +4,7 @@ smd.c - Super Magic Drive support for uCON64
 Copyright (c) 1999 - 2001 NoisyB
 Copyright (c) 2001 - 2003 dbjh
 
-           
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -22,21 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
-#include "ucon64.h"
+#include "misc/misc.h"
 #include "ucon64_misc.h"
-#include "ffe.h"
-#include "smd.h"
+#include "backup/ffe.h"
+#include "backup/smd.h"
 
 
 #ifdef  USE_PARALLEL
@@ -193,7 +185,7 @@ smd_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend, blocksdone = 0, fsize;
+  int bytesread, bytessent, blocksdone = 0, fsize;
   time_t starttime;
 
   ffe_init_io (parport);
@@ -214,7 +206,7 @@ smd_write_rom (const char *filename, unsigned short parport)
 
   fread (buffer, 1, SMD_HEADER_LEN, file);
   ffe_send_block (0xdc00, buffer, SMD_HEADER_LEN); // send header
-  bytessend = SMD_HEADER_LEN;
+  bytessent = SMD_HEADER_LEN;
 
   ffe_send_command0 (0x2001, 0);
 
@@ -227,8 +219,8 @@ smd_write_rom (const char *filename, unsigned short parport)
       ffe_send_block (0x8000, buffer, (unsigned short) bytesread);
       blocksdone++;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, fsize);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, fsize);
       ffe_checkabort (2);
     }
 
@@ -304,7 +296,7 @@ smd_write_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0, size;
+  int bytesread, bytessent = 0, size;
   unsigned short address;
   time_t starttime;
 
@@ -336,8 +328,8 @@ smd_write_sram (const char *filename, unsigned short parport)
       ffe_send_block (address, buffer, (unsigned short) bytesread);
       address += 0x4000;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 

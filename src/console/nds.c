@@ -21,24 +21,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include "misc/misc.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/chksum.h"
-#include "ucon64.h"
+#include "misc/file.h"
+#include "misc/misc.h"
 #include "ucon64_misc.h"
+#include "console/console.h"
+#include "console/nds.h"
 #include "backup/backup.h"
-#include "console.h"
-#include "nds.h"
+#include "backup/nfc.h"
 
 
 #define NDS_NAME_LEN 12
@@ -276,10 +267,10 @@ nds_init (st_ucon64_nfo_t *rominfo)
     {
 #ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
-        pos += sprintf (rominfo->misc + pos, "\x1b[01;32mOk\x1b[0m");
+        pos += sprintf (rominfo->misc + pos, "\x1b[01;32mOK\x1b[0m");
       else
 #endif
-        pos += sprintf (rominfo->misc + pos, "Ok");
+        pos += sprintf (rominfo->misc + pos, "OK");
     }
   else
     {
@@ -309,7 +300,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
 }
 
 
-int
+static int
 nds_chksum (void)
 // Note that this function only calculates the checksum of the internal header
 {

@@ -22,11 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <ctype.h>
+#ifdef  HAVE_DIRENT_H
+#include <dirent.h>
+#endif
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <sys/types.h>
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -34,9 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #ifdef  _MSC_VER
 #pragma warning(pop)
-#endif
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
 #endif
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
@@ -52,23 +50,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#ifndef __MINGW32__
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
-#endif
 #include <io.h>
-#ifdef  _MSC_VER
 #pragma warning(pop)
-#endif
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
 #define F_OK 00
 #endif
 #endif
-#include "file.h"
-#include "getopt.h"                             // struct option
-#include "getopt2.h"
-#include "string.h"
+#include "misc/file.h"
+#include "misc/getopt.h"                        // struct option
+#include "misc/getopt2.h"
 
 
 #ifdef  MAXBUFSIZE
@@ -454,14 +447,14 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
 
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       char c = (char) toupper (path[0]);
-      if (path[strlen (path) - 1] == FILE_SEPARATOR ||
+      if (path[strlen (path) - 1] == DIR_SEPARATOR ||
           (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == 0))
 #else
-      if (path[strlen (path) - 1] == FILE_SEPARATOR)
+      if (path[strlen (path) - 1] == DIR_SEPARATOR)
 #endif
         p = "";
       else
-        p = FILE_SEPARATOR_S;
+        p = DIR_SEPARATOR_S;
 
 #ifndef _WIN32
       if ((dp = opendir (path)))

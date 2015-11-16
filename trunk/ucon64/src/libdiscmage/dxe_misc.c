@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   For a DXE they would have to be (re)defined twice if we want to be able to
   use the zlib & unzip code in misc_z.c; once to substitute the names to make
   code use the import/export "table" and once to make code use the f*2()
-  functions in miscz.c.
+  functions in misc_z.c.
 */
 
 #ifdef  HAVE_CONFIG_H

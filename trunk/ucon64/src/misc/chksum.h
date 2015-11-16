@@ -31,18 +31,16 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 */
 #ifndef MISC_CHKSUM_H
 #define MISC_CHKSUM_H
+
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
+#include "misc/itypes.h"
+
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32 (VC++)
-#include "itypes.h"
-#endif
-
 
 /*
   s_sha1_ctx_t

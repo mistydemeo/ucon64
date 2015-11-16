@@ -23,9 +23,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
-#include <string.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -34,28 +36,54 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#include <ctype.h>
-#include <time.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include "misc/misc.h"
-#include "misc/getopt2.h"
-#include "misc/file.h"
-#include "misc/string.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "ucon64.h"
-#include "ucon64_misc.h"
-#include "ucon64_dat.h"
-#include "console/console.h"
-#include "patch/patch.h"
-#include "backup/backup.h"
-#include "misc/chksum.h"
-#ifdef  USE_PARALLEL
+#include "misc/file.h"
+#include "misc/misc.h"
 #include "misc/parallel.h"
-#endif
+#include "misc/string.h"
+#include "ucon64_dat.h"
+#include "ucon64_misc.h"
+#include "ucon64_opts.h"
+#include "console/dc.h"
+#include "console/gb.h"
+#include "console/gba.h"
+#include "console/genesis.h"
+#include "console/lynx.h"
+#include "console/n64.h"
+#include "console/nds.h"
+#include "console/neogeo.h"
+#include "console/nes.h"
+#include "console/pce.h"
+#include "console/sms.h"
+#include "console/snes.h"
+#include "console/swan.h"
+#include "backup/backup.h"
+#include "backup/cd64.h"
+#include "backup/cmc.h"
+#include "backup/dex.h"
+#include "backup/doctor64.h"
+#include "backup/doctor64jr.h"
+#include "backup/f2a.h"
+#include "backup/fal.h"
+#include "backup/gbx.h"
+#include "backup/gd.h"
+#include "backup/lynxit.h"
+#include "backup/mccl.h"
+#include "backup/mcd.h"
+#include "backup/md-pro.h"
+#include "backup/msg.h"
+#include "backup/pce-pro.h"
+#include "backup/pl.h"
+#include "backup/sflash.h"
+#include "backup/smc.h"
+#include "backup/smd.h"
+#include "backup/smsgg-pro.h"
+#include "backup/swc.h"
+#include "patch/aps.h"
+#include "patch/bsl.h"
+#include "patch/gg.h"
+#include "patch/ips.h"
+#include "patch/ppf.h"
 
 
 #ifdef  _MSC_VER
@@ -495,8 +523,8 @@ ucon64_switches (st_ucon64_t *p)
           if (S_ISDIR (fstate.st_mode))
             {
               strcpy (ucon64.output_path, optarg);
-              if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
-                strcat (ucon64.output_path, FILE_SEPARATOR_S);
+              if (ucon64.output_path[strlen (ucon64.output_path) - 1] != DIR_SEPARATOR)
+                strcat (ucon64.output_path, DIR_SEPARATOR_S);
               dir = 1;
             }
 
@@ -661,7 +689,7 @@ int
 ucon64_options (st_ucon64_t *p)
 {
 #ifdef  USE_PARALLEL
-  int enableRTS = -1;                           // for UCON64_XSWC & UCON64_XSWC2
+  unsigned short enableRTS = (unsigned short) -1; // for UCON64_XSWC & UCON64_XSWC2
 #endif
   int value = 0, x = 0, padded, c = p->option;
   unsigned int checksum;
@@ -1842,7 +1870,7 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
+            fputs ("ERROR: This ROM does not seem to be interleaved but the Doctor V64 Junior only\n"
                    "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
                    stderr);
           else
@@ -1868,8 +1896,8 @@ ucon64_options (st_ucon64_t *p)
       if (!ucon64.output_path[0])
         {
           dirname2 (src_name, ucon64.output_path);
-          if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
-            strcat (ucon64.output_path, FILE_SEPARATOR_S);
+          if (ucon64.output_path[strlen (ucon64.output_path) - 1] != DIR_SEPARATOR)
+            strcat (ucon64.output_path, DIR_SEPARATOR_S);
         }
       if (gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name) == 0)
         { // Don't try to start a transfer if there was a problem
@@ -1915,7 +1943,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
+            fputs ("ERROR: This ROM seems to be interleaved but the FIG does not support\n"
                    "       interleaved ROMs. Convert to a FIG compatible format\n",
                    stderr);
           else // file exists -> send it to the copier
@@ -2033,7 +2061,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has a header. Remove it with -stp or -mgd\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM seems to be interleaved, but uCON64 doesn't support\n"
+            fputs ("ERROR: This ROM seems to be interleaved, but uCON64 does not support\n"
                    "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with -mgd\n",
                    stderr);
           else
@@ -2122,7 +2150,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM seems to be bit-swapped but the MSG doesn't support\n"
+            fputs ("ERROR: This ROM seems to be bit-swapped but the MSG does not support\n"
                    "       bit-swapped ROMs. Convert to an MSG compatible format\n",
                    stderr);
           else
@@ -2194,7 +2222,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
                    stderr);
           else if (!ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
+            fputs ("ERROR: This ROM does not seem to be interleaved but the SMD only supports\n"
                    "       interleaved ROMs. Convert to an SMD compatible format\n",
                    stderr);
           else
@@ -2222,7 +2250,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
+            fputs ("ERROR: This ROM seems to be interleaved but the SWC does not support\n"
                    "       interleaved ROMs. Convert to an SWC compatible format\n",
                    stderr);
           else
@@ -2266,7 +2294,7 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
+            fputs ("ERROR: This ROM does not seem to be interleaved but the Doctor V64 only\n"
                    "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
                    stderr);
           else

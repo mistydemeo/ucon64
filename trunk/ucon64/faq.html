@@ -44,7 +44,7 @@ Q12: <a href="#12">Some SNES games do not work on my Super Wild Card. What can
 <br>
 Q13: <a href="#13">Which backup devices are supported by uCON64?</a><br>
 <br>
-Q14: <a href="#14">I use Windows&nbsp;XP (NT/2000). When I try to run
+Q14: <a href="#14">I use Windows XP (NT/2000). When I try to run
    ucon64.exe in command.com (start -&#62; Run... -&#62; command) uCON64
    crashes. What do I do wrong?</a><br>
 <br>
@@ -74,8 +74,8 @@ Q23: <a href="#23">Where can I get that loader or "game pack" file?</a><br>
 Q24: <a href="#24">What is the meaning of the -col option (SNES)?</a><br>
 <br>
 Q25: <a href="#25">Why does uCON64 create ucon64.cfg (DOS executable) or
-   .ucon64rc (Win32 executable) files all over the place on DOS and
-   Windows&nbsp;9x (command.com)?</a><br>
+   .ucon64rc (Win32 executable) files all over the place on DOS and Windows 9x
+   (command.com)?</a><br>
 <br>
 Q26: <a href="#26">When I try to create a multi-game file on Windows I get
    the message "The system cannot execute the specified program." (or something
@@ -87,8 +87,8 @@ Q27: <a href="#27">I tried to run a Win32 executable of uCON64 but Windows gave
 <br>
 Q28: <a href="#28">How do I make uCON64 display one help screen at a time?</a><br>
 <br>
-Q29: <a href="#29">I tried to send a ROM dump to my backup unit on
-   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
+Q29: <a href="#29">I tried to send a ROM dump to my backup unit on Windows XP
+   (NT/2000), but uCON64 crashed. What is wrong?</a><br>
 <br>
 Q30: <a href="#30">I want to convert a NES ROM in iNES format to UNIF. How do I
    know what board name to use?</a><br>
@@ -181,8 +181,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    version also runs on Windows, but has some limitations. For example, the
    DOS version cannot handle long command lines. The Cygwin version does not
    have any serious limitations compared to the "normal" Win32 versions, but
-   behaves a bit more Unix-like than Windows users might want. Users accustomed
-   to Unix might prefer the Cygwin version. The Cygwin version needs some
+   behaves a bit more UNIX-like than Windows users might want. Users accustomed
+   to UNIX might prefer the Cygwin version. The Cygwin version needs some
    additional files, though. See <a href="#27">question 27</a>.<br>
    For installation instructions (for all versions) see
    <a href="#4">question 4</a>.<br>
@@ -192,9 +192,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
-   uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD, OpenBSD), DOS,
-   BeOS, Windows (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1), AmigaOS (PPC/68K) and
-   Mac OS X.<br>
+   uCON64 can be compiled for UNIX (GNU/Linux, Solaris, FreeBSD, OpenBSD,
+   Mac OS X), DOS, BeOS, Windows (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1/10) and
+   AmigaOS (PPC/68K).<br>
    To compile uCON64 you need a compiler :-) You can use either GCC (GNU
    Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
    <a href="http://www.gnu.org/order/ftp.html">
@@ -205,8 +205,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    https://www.visualstudio.com/products/visual-studio-community-vs</a>. If you
    want to compile uCON64 with this version of Visual C++, you will also have to
    download the Platform SDK, available from
-   <a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en">
-   http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en</a>.
+   <a href="http://www.microsoft.com/en-us/download/details.aspx?id=15656">
+   http://www.microsoft.com/en-us/download/details.aspx?id=15656</a>.
    In the Microsoft Platform SDK Setup Wizard, choose Custom Installation and
    disable everything except Microsoft Windows Core SDK, subsection Build
    Environment. Enable one option, for example Build Environment (x86 32-bit).
@@ -262,10 +262,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    The first way does not work in command.com or cmd.exe as these shells
    cannot (directly) execute Bash shell scripts. command.com is the default
-   shell on Windows&nbsp;9x, cmd.exe is the default shell on Windows&nbsp;XP
-   (NT/2000).<br>
+   shell on Windows 9x, cmd.exe is the default shell on Windows XP (NT/2000).<br>
    So, for DOS (DJGPP) copy config.h.orig to config.h and to
-   libdiscmage/config.h, Makefile.orig to Makefile and
+   libdiscmage/config.h, config.mak.orig to config.mak and
    libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do the same for
    Cygwin, but in Cygwin you can get the same effect much easier by just
    running the configure script.<br>
@@ -338,7 +337,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    please install the library
    <a href="http://www.opendarwin.org/projects/dlcompat/">dlcompat</a> and try
    again.<br>
-   On Unix systems other than GNU/Linux you might need to use "gmake" (GNU
+   On UNIX systems other than GNU/Linux you might need to use "gmake" (GNU
    make) instead of "make". If the last make command has been successfully
    executed you can find the executable in the directory where you ran make.
    For DOS, Cygwin and MinGW you are now ready to proceed to
@@ -346,7 +345,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    needed (or simply handy):<br>
    &nbsp;&nbsp;make install<br>
 <br>
-   On Unix this command will ask for root's password, because uCON64 needs
+   On UNIX this command will ask for root's password, because uCON64 needs
    to be setuid root for parallel port access and because regular users usually
    do not have write access in the default installation directory,
    /usr/local/bin. If you configured uCON64 without support for parallel port
@@ -357,9 +356,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    variable DESTDIR. So, in order to install uCON64 in the directory /usr/bin
    use a command like:<br>
    &nbsp;&nbsp;DESTDIR=/usr/bin make install<br>
-   This works also on Unix.<br>
+   This works also on other UNIX OSes.<br>
    "make install" also creates a configuration directory for uCON64 and copies
-   discmage.so (Unix and BeOS) or discmage.dylib (Mac OS X) to it, so you may
+   discmage.so (UNIX and BeOS) or discmage.dylib (Mac OS X) to it, so you may
    find it easier to use it.<br>
    On BeOS this command will open a dialog window. Just follow the
    instructions.<br>
@@ -385,7 +384,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    information specific for your operating system. Then continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>Unix (GNU/Linux, FreeBSD, Solaris), BeOS &amp; Mac OS X</b><br>
+   <b>UNIX (GNU/Linux, FreeBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
    Start a command line shell like Bash. Then extract the binary package.
    To extract or unpack a package in .tar.gz format use a command like this:<br>
    &nbsp;&nbsp;tar xvzf ucon64-1.9.8-1-linux-bin.tar.gz<br>
@@ -399,10 +398,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    to be done on the command line. You could also use a program with a GUI
    (Graphical User Interface) like KDE's ark or a similar program.<br>
    After you have extracted the package install uCON64 by running the install
-   script. On Unix, if you do not have root access, copy the uCON64 executable
+   script. On UNIX, if you do not have root access, copy the uCON64 executable
    to a directory in your PATH. If you do have root access (i.e., know the root
    password), run the shell script install.sh. On BeOS just run the script
-   install_beos.sh. For Unix do something like this:<br>
+   install_beos.sh. For UNIX do something like this:<br>
    &nbsp;&nbsp;cd ucon64-1.9.8-1-linux-bin<br>
    &nbsp;&nbsp;./install.sh<br>
    By default install.sh will try to copy ucon64 to /usr/local/bin. You can
@@ -432,9 +431,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    <a href="http://www.pkware.com/">PKUNZIP</a>.<br>
    We recommend to extract the package to a directory (or folder) of its own.
    The zip file contains a directory, but you need not use that directory.<br>
-   Windows&nbsp;NT/2000/XP/2003 users need a driver for backup unit I/O. You do
-   not need a driver if you use Windows&nbsp;95, 98 or ME. A driver is also not
-   needed if you will not use uCON64 to communicate with a backup unit.<br>
+   Windows NT/2000/XP/2003 users need a driver for backup unit I/O. You do not
+   need a driver if you use Windows 95, 98 or ME. A driver is also not needed if
+   you will not use uCON64 to communicate with a backup unit.<br>
    You could use a driver like UserPort, DlPortIO, io.dll or inpout32.dll.
 <!-- UserPort doesn't seem to have an official homepage. -->
    You can download DlPortIO from
@@ -459,12 +458,12 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    or inpout32.dll. If more than one I/O driver is present in the configuration
    directory, uCON64 will first try to load DLPORTIO.dll. If that fails it will
    try to load io.dll. If that also fails it will try to load inpout32.dll.<br>
-   It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
-   on Windows&nbsp;XP without UserPort. We have received reports from people
-   who were able to send and receive ROMs on Windows&nbsp;XP as a regular
-   user (no Administrator rights and not "Power Users").<br>
+   It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool on
+   Windows XP without UserPort. We have received reports from people who were
+   able to send and receive ROMs on Windows XP as a regular user (no
+   Administrator rights and not "Power Users").<br>
 <br>
-   <b>64-bit Windows (XP/2003/Vista/7/8/8.1)</b><br>
+   <b>64-bit Windows (XP/2003/Vista/7/8/8.1/10)</b><br>
    On 64-bit Windows, unpack the package with a program like
    <a href="http://www.winzip.com/">WinZip</a>,
    <a href="http://www.rarlab.com/">WinRAR</a>,
@@ -496,12 +495,13 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    information about the configuration directory.<br>
    If you choose to use the mentioned port of inpout32.dll, the first time you
    want to use uCON64 to communicate with a backup unit, you need to do so as
-   Administrator. After uCON64 was successful in communicating with a backup
-   unit, you can use uCON64 as a normal user. Using inpout32.dll on 64-bit
-   Windows is much less reliable than running uCON64 on GNU/Linux or 32-bit
-   Windows. giveio64 is better in that regard, but you need to start it as
-   Administrator at least once in every Windows session during which you want to
-   use uCON64 to communicate with a backup unit.<br>
+   Administrator (by running uCON64 from an instance of cmd.exe that was started
+   as Administrator). After uCON64 was successful in communicating with a backup
+   unit, you can use it as a normal user. Using inpout32.dll on 64-bit Windows
+   is much less reliable than running uCON64 on GNU/Linux or 32-bit Windows.
+   giveio64 is better in that regard, but you need to start it as Administrator
+   at least once in every Windows session during which you want to use uCON64 to
+   communicate with a backup unit.<br>
    uCON64 displays a message if it finds inpout32.dll before communicating with
    a backup unit. It displays this message before it displays file information,
    so you might want to use the command line switch -q. If more than one I/O
@@ -509,13 +509,14 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    load DLPORTIO.dll. If that fails it will try to load io.dll. If that also
    fails it will try to load inpout32.dll. Since DLPORTIO.dll and io.dll do not
    work on 64-bit Windows, you have to manually delete them if they are present.
-   A nice thing about the mentioned port of inpout32.dll is that it works on both
-   32-bit Windows (NT/2000/XP/2003) and 64-bit Windows (XP/2003/Vista/7/8/8.1).<br>
+   A nice thing about the mentioned port of inpout32.dll is that it works on
+   both 32-bit Windows (NT/2000/XP/2003) and 64-bit Windows
+   (XP/2003/Vista/7/8/8.1/10).<br>
 <br>
 <a name="cmdline">The command line environment<br></a>
    uCON64 is a command line program and is usually started from a program like
-   command.com (Windows&nbsp;9x/ME) or cmd.exe
-   (Windows&nbsp;NT/2000/XP/2003/Vista/7/8/8.1). You can start command.com or
+   command.com (Windows 9x/ME) or cmd.exe
+   (Windows NT/2000/XP/2003/Vista/7/8/8.1/10). You can start command.com or
    cmd.exe by choosing the option "Run..." from the start menu. You have to type
    the word command.com or cmd.exe yourself. command.com and cmd.exe are command
    line interpreters. That means that they will try to interpret any command you
@@ -532,19 +533,18 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    &nbsp;&nbsp;echo %PATH%<br>
    You could copy uCON64 to one of those directories. However, we recommend
    putting ucon64.exe in a directory of its own (on Windows). So, you should
-   modify the value of PATH. On Windows&nbsp;9x/ME you should do that in the
-   following way. Edit the file c:\autoexec.bat and add a line like:<br>
-   &nbsp;&nbsp;set PATH=%PATH%;c:\ucon64<br>
-   Replace c:\ucon64 with the drive and directory where you extracted the
-   uCON64 files to. Save the modified c:\autoexec.bat and reboot.
-   On Windows&nbsp;XP (NT/2000?) you should press the buttons or icons start
-   -&#62; Control Panel -&#62; System -&#62; Advanced -&#62; Environment
-   Variables and edit the value of path in the section System variables or
-   else in the section User variables. You have to start a new instance of
-   cmd.exe before the changes take effect.
-   After you have made your changes (and have rebooted your PC if you are using
-   Windows&nbsp;9x/ME or DOS) check the value of PATH again. It should now list
-   the directory you just added.<br>
+   modify the value of PATH. On Windows 9x/ME you should do that in the
+   following way. Edit the file C:\autoexec.bat and add a line like:<br>
+   &nbsp;&nbsp;set PATH=%PATH%;C:\ucon64<br>
+   Replace C:\ucon64 with the drive and directory where you extracted the
+   uCON64 files to. Save the modified C:\autoexec.bat and reboot.
+   On Windows XP (NT/2000?) you should press the buttons or icons start -&#62;
+   Control Panel -&#62; System -&#62; Advanced -&#62; Environment Variables and
+   edit the value of path in the section System variables or else in the section
+   User variables. You have to start a new instance of cmd.exe before the
+   changes take effect. After you have made your changes (and have rebooted your
+   PC if you are using Windows 9x/ME or DOS) check the value of PATH again. It
+   should now list the directory you just added.<br>
    For information on how to use the command line see
    <a href="#49">question 49</a>.<br>
 <br>
@@ -650,8 +650,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    versions of uCON64. To install the I/O port driver io.dll or inpout32.dll
    place it (or both) in the directory that uCON64 lists as its configuration
    directory.<br>
-   If you use DOS or Windows&nbsp;9x and do not want uCON64 to create
-   ucon64.cfg or .ucon64rc files all over the place (current directories) see
+   If you use DOS or Windows 9x and do not want uCON64 to create ucon64.cfg or
+   .ucon64rc files all over the place (current directories) see
    <a href="#25">question 25</a>.<br>
    You might also want to make use of DAT files. See
    <a href="#36">question 36</a> for more information.<br>
@@ -735,7 +735,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    with -dint and run uCON64 on the converted ROM. Luckily you will not find
    many interleaved ROM dumps that uCON64 cannot handle, probably because
    Snes9x and ZSNES often cannot handle them either.<br>
-   Perhaps "Ok" looks nicer than "Bad", but it is far more important that
+   Perhaps "OK" looks nicer than "Bad", but it is far more important that
    uCON64 displays DAT file information. If you installed a SNES DAT file (see
    <a href="#36">question 36</a>) and uCON64 does not display a line with the
    text "DAT info:" then the ROM dump could not be identified. It could be that
@@ -747,7 +747,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
 <p>
 <a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is
-   bad, but uCON64 says it is good ("Checksum: Ok"). Who is right?</a><br>
+   bad, but uCON64 says it is good ("Checksum: OK"). Who is right?</a><br>
 <b>A</b>: uCON64, probably :-)<br>
    Neither Snes9x 1.39 nor ZSNES 1.36 calculate the check sum correctly for BS
    ROMs, so you can be pretty sure the ROM is good if it is a BS ROM. See
@@ -842,7 +842,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: See <a href="hardware.html">hardware.html</a>.<br>
 <br>
 <p>
-<a name="14"><b>Q14</b>: I use Windows&nbsp;XP (NT/2000). When I try to run
+<a name="14"><b>Q14</b>: I use Windows XP (NT/2000). When I try to run
    ucon64.exe in command.com (start -&#62; Run... -&#62; command) uCON64
    crashes. What do I do wrong?</a><br>
 <b>A</b>: You should not use command, use cmd instead. However, starting from
@@ -952,29 +952,29 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    You can use a GFX or HTML editor to find an identical green color and
    write down the color values in HTML style (#RRGGBB). Now you run
    "ucon64 -col #RRGGBB" and it will calculate the hex value for the
-   corresponding SNES color. Ok? No? Then you do not need this option :-)<br>
+   corresponding SNES color. OK? No? Then you do not need this option :-)<br>
 <br>
 <p>
 <a name="25"><b>Q25</b>: Why does uCON64 create ucon64.cfg (DOS executable) or
    .ucon64rc (Win32 executable) files all over the place on DOS and
-   Windows&nbsp;9x (command.com)?</a><br>
+   Windows 9x (command.com)?</a><br>
 <b>A</b>: uCON64 needs to know where it can find the configuration file or a
    directory where it can create one. It checks the environment for a variable
    with the name UCON64_HOME, HOME, USERPROFILE or HOMEDRIVE and HOMEPATH (in
-   that order). On Unix HOME is normally set. On Windows&nbsp;XP and 2000 (NT?)
+   that order). On UNIX HOME is normally set. On Windows XP and 2000 (NT?)
    USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 cannot find
    one of those environment variables it will look for the configuration file in
    the current directory. If it cannot find a configuration file it
-   will create one. On DOS and Windows&nbsp;9x none of those environment
-   variables are usually set. So, if you run uCON64 on DOS or Windows&nbsp;9x
-   in a directory where no configuration file exists it will create one there.
-   If you do not like this behaviour you should set one of the mentioned
-   environment variables yourself. You can do that by adding the following line
-   to the end of the file c:\autoexec.bat:<br>
-   &nbsp;&nbsp;set UCON64_HOME=c:\ucon64<br>
+   will create one. On DOS and Windows 9x none of those environment variables
+   are usually set. So, if you run uCON64 on DOS or Windows 9x in a directory
+   where no configuration file exists it will create one there. If you do not
+   like this behaviour you should set one of the mentioned environment variables
+   yourself. You can do that by adding the following line to the end of the file
+   C:\autoexec.bat:<br>
+   &nbsp;&nbsp;set UCON64_HOME=C:\ucon64<br>
    and reboot. You can also type that line on the command line. The directory
-   c:\ucon64 must exist, of course. If you want uCON64 to use another directory
-   you should change c:\ucon64 to a directory of your choice. You should not
+   C:\ucon64 must exist, of course. If you want uCON64 to use another directory
+   you should change C:\ucon64 to a directory of your choice. You should not
    let the last character of the environment variable be a forward or backward
    slash.<br>
    If you have Cygwin installed, the Cygwin runtime system will create an
@@ -1026,7 +1026,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
 <p>
 <a name="29"><b>Q29</b>: I tried to send a ROM dump to my backup unit on
-   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
+   Windows XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
 <b>A</b>: If the message looks like this (for the Win32 (Cygwin) executable):<br>
    &nbsp;&nbsp;0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
    5570 [main] ucon64 356 open_stackdumpfile: Dumping stack trace to ucon64.exe.stackdump<br>
@@ -1105,15 +1105,15 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <p>
 <a name="34"><b>Q34</b>: How do I enable or disable colors in the display output
    of uCON64?</a><br>
-<b>A</b>: For the Windows and Unix executables colors are enabled by default.
-   For the DOS executable ANSI.SYS must be loaded. On DOS and Windows&nbsp;9x
-   ANSI.SYS can be loaded by adding a line to the end of c:\config.sys of the
+<b>A</b>: For the Windows and UNIX executables colors are enabled by default.
+   For the DOS executable ANSI.SYS must be loaded. On DOS and Windows 9x
+   ANSI.SYS can be loaded by adding a line to the end of C:\config.sys of the
    format "device=&#60;full path to ANSI.SYS&#62;". Say ANSI.SYS is located in
-   the directory c:\windows\command, then the line would have to look like this:<br>
-   &nbsp;&nbsp;device=c:\windows\command\ansi.sys<br>
-   Changes made to config.sys on DOS and Windows&nbsp;9x will become active only
+   the directory C:\windows\command, then the line would have to look like this:<br>
+   &nbsp;&nbsp;device=C:\windows\command\ansi.sys<br>
+   Changes made to config.sys on DOS and Windows 9x will become active only
    after a reboot.<br>
-   On Windows&nbsp;XP/NT you should add a similar line to your
+   On Windows XP/NT you should add a similar line to your
    %SystemRoot%\system32\CONFIG.NT:<br>
    &nbsp;&nbsp;device=%SystemRoot%\system32\ansi.sys<br>
    The use of color can be disabled by specifying the switch -ncol on the
@@ -1142,10 +1142,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    -version to see which configuration file uCON64 uses
    (see <a href="#25">question 25</a>). Then open that file in an editor and
    look for a line that starts with "ucon64_datdir=" (without the quotes). If
-   that line is not present add one. For example on Unix:<br>
+   that line is not present add one. For example on UNIX:<br>
    &nbsp;&nbsp;ucon64_datdir=~/.ucon64/dat<br>
    or on Windows:<br>
-   &nbsp;&nbsp;ucon64_datdir=c:\ucon64\dat<br>
+   &nbsp;&nbsp;ucon64_datdir=C:\ucon64\dat<br>
    You can use the tilde ('~') also on DOS and Windows. It will be interpreted
    by uCON64 as the "home directory". The home directory is the directory
    specified by the environment variable HOME or USERPROFILE or HOMEDRIVE and
@@ -1377,8 +1377,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    renaming files (when using the option --rename). Also make sure all the
    files have a suffix (or "extension"). Then start uCON64 with the --mkdat
    option. For example, to create a DAT file from all the SNES ROM dumps in the
-   directory c:\snesrom use a command like:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat c:\snesrom<br>
+   directory C:\snesrom use a command like:<br>
+   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat C:\snesrom<br>
    In this case a DAT file named snes-02062003.dat will be created. When you
    copy this file to uCON64's DAT directory uCON64 will use it to identify SNES
    ROMs. Note that the name ends with ".dat". uCON64 will only see DAT files if
@@ -1501,7 +1501,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    You can create a DAT file from a subset of the files in a directory by
    explicitly specifying the files on the command line:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat c:\snesrom\*.swc<br>
+   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat C:\snesrom\*.swc<br>
    uCON64 uses the first file to determine for which console a DAT file is
    meant. So, if you want to create a DAT file from a set of ROMs of several
    consoles, the first file uCON64 encounters will determine the DAT file type.
@@ -1509,9 +1509,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    resulting DAT file will be meant:<br>
    1.) Specify one extra ROM dump as first file on the command line. For
    example:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom<br>
+   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat C:\rom\mario64.v64 C:\rom<br>
    2.) Use a force recognition switch. For example:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat c:\rom --sms<br>
+   &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat C:\rom --sms<br>
 <br>
    The second option should only be used when you are sure all the files are
    for a certain console and uCON64 fails to recognise some.<br>
@@ -1529,7 +1529,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    If you had to specify a first file you could suppress the warning about a
    duplicate by using the switch -q. For example:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom -q<br>
+   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat C:\rom\mario64.v64 C:\rom -q<br>
 <br>
 <p>
 <a name="44"><b>Q44</b>: What tools do you recommend besides uCON64?</a><br>
@@ -1647,7 +1647,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: If you see lines in the display output of uCON64 that look like
    these:<br>
    &nbsp;&nbsp;Create: ntuser.idx<br>
-   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniel\ntuser.dat" for reading<br>
+   &nbsp;&nbsp;ERROR: Cannot open "C:\Documents and Settings\Daniel\ntuser.dat" for reading<br>
    you should modify the configuration file so that ucon64_datdir points to
    another directory.<br>
    By default uCON64 will use the home directory as the directory where it
@@ -1746,18 +1746,18 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    When using the command line there is something called the <i>current
    directory</i>. The current directory is like an implicit directory. Several
    commands and programs use the current directory when a directory is not
-   explicitly specified. For example, the command <b>dir</b> (Unix: <b>ls</b>)
+   explicitly specified. For example, the command <b>dir</b> (UNIX: <b>ls</b>)
    lists the contents of a directory. When you do not specify a directory it
    will list the contents of the current directory. You can change the current
    directory with the command <b>cd</b>. For example, to change the current
    directory to "roms" on drive C: type:<br>
-   &nbsp;&nbsp;cd c:\roms<br>
+   &nbsp;&nbsp;cd C:\roms<br>
    On DOS and Windows there is also a <i>current drive</i>. You can change the
    current drive by specifying the drive letter followed by a colon. For example
    to change the current drive to D: type:<br>
    &nbsp;&nbsp;d:<br>
    On DOS and Windows the current directory is a bit different than it is on
-   Unix: each drive has its own current directory. It is possible to change the
+   UNIX: each drive has its own current directory. It is possible to change the
    current directory of a drive while the current directory of the current drive
    is not changed. The first example with <b>cd</b> does just that when C: is
    not the current drive. When C: was the current drive you would not have to
@@ -1765,7 +1765,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    intended to change the current directory of C:. When a text refers to the
    current directory on DOS and Windows the author usually means the combination
    of current drive and current directory. In other words, when directed to
-   change the current directory to c:\ucon64 you actually have to change the
+   change the current directory to C:\ucon64 you actually have to change the
    current drive to C: and the current directory on C: to ucon64.<br>
    Let us assume you have the following directory structure:<br>
    &nbsp;&nbsp;C:<br>
@@ -1778,17 +1778,17 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    &nbsp;&nbsp;+--roms<br>
    &nbsp;&nbsp;&nbsp;&nbsp;+--sms<br>
 <br>
-   To change the current directory (of drive C:) to c:\roms\snes\gd3 type:<br>
-   &nbsp;&nbsp;cd c:\roms\snes\gd3<br>
+   To change the current directory (of drive C:) to C:\roms\snes\gd3 type:<br>
+   &nbsp;&nbsp;cd C:\roms\snes\gd3<br>
    You can see that each directory is separated from its parent by a backslash
-   ('\'). On Unix (or Bash on Windows) you would refer to the same directory by
-   replacing the backslashes with forward slashes and perhaps replacing "c:"
+   ('\'). On UNIX (or Bash on Windows) you would refer to the same directory by
+   replacing the backslashes with forward slashes and perhaps replacing "C:"
    with the appropriate mount point (e.g., /mnt/windows/roms/snes/gd3). Note
-   that "c:" is a valid directory name on a GNU/Linux file system.<br>
+   that "C:" is a valid directory name on a GNU/Linux file system.<br>
    You can refer to the other directories (and files) in a relative manner. Say
-   c:\roms\snes contains the file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. You can
+   C:\roms\snes contains the file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. You can
    make uCON64 display information about that file with:<br>
-   &nbsp;&nbsp;ucon64 "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
+   &nbsp;&nbsp;ucon64 "C:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
    but also with:<br>
    &nbsp;&nbsp;ucon64 "..\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
    The quotes are necessary or else uCON64 would handle Secret, of, Mana and
@@ -1798,37 +1798,37 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    "." and "..". "." refers to the current directory, ".." to the directory one
    level higher in the directory structure. For example, to see the contents of
    the directory "roms" you could type:<br>
-   &nbsp;&nbsp;dir c:\roms<br>
+   &nbsp;&nbsp;dir C:\roms<br>
    but also:<br>
    &nbsp;&nbsp;dir ..\..<br>
-   Or on Unix:<br>
+   Or on UNIX:<br>
    &nbsp;&nbsp;ls ../..<br>
-   c:\roms\snes is called a <i>path</i>. To be more specific, an <i>absolute
+   C:\roms\snes is called a <i>path</i>. To be more specific, an <i>absolute
    path</i>. It is the path to follow in the directory structure to get to the
    file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. "..\.." is a <i>relative
-   path</i>. In c:\roms\snes "..\.." refers to another directory than in
-   c:\roms\snes\gd3 (c:\ and c:\roms respectively). To change the current
-   directory to c:\roms\snes type:<br>
+   path</i>. In C:\roms\snes "..\.." refers to another directory than in
+   C:\roms\snes\gd3 (C:\ and C:\roms respectively). To change the current
+   directory to C:\roms\snes type:<br>
    &nbsp;&nbsp;cd ..<br>
    Say you want to convert Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc to Game Doctor
-   format, place the converted file in c:\roms\snes\gd3, split that file in
-   pieces, place those pieces in c:\tmp and transfer the pieces to a Game Doctor
+   format, place the converted file in C:\roms\snes\gd3, split that file in
+   pieces, place those pieces in C:\tmp and transfer the pieces to a Game Doctor
    SF7. You could type the following commands:<br>
    &nbsp;&nbsp;ucon64 -gd3 "Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" -o .\gd3<br>
-   &nbsp;&nbsp;ucon64 -s gd3\sf16Sec -o c:\tmp<br>
+   &nbsp;&nbsp;ucon64 -s gd3\sf16Sec -o C:\tmp<br>
    &nbsp;&nbsp;ucon64 -xgd3 ..\..\tmp\SF16SECA.078<br>
 <br>
-   Besides <b>dir</b> (Unix: <b>ls</b>) and <b>cd</b> there are some other
+   Besides <b>dir</b> (UNIX: <b>ls</b>) and <b>cd</b> there are some other
    commands that you may find useful:<br>
-   <b>del</b> (Unix: <b>rm</b>) to delete or remove a file<br>
-   <b>xcopy</b> (Unix: <b>cp</b>) to copy a file<br>
-   <b>md</b> (Unix (and Windows): <b>mkdir</b>) to create a directory<br>
-   <b>rd</b> (Unix (and Windows): <b>rmdir</b>) to remove a directory<br>
-   <b>set</b> (Unix (Bash): <b>export</b>) to set (and export) an environment
+   <b>del</b> (UNIX: <b>rm</b>) to delete or remove a file<br>
+   <b>xcopy</b> (UNIX: <b>cp</b>) to copy a file<br>
+   <b>md</b> (UNIX (and Windows): <b>mkdir</b>) to create a directory<br>
+   <b>rd</b> (UNIX (and Windows): <b>rmdir</b>) to remove a directory<br>
+   <b>set</b> (UNIX (Bash): <b>export</b>) to set (and export) an environment
    variable<br>
    <b>rmdir</b> cannot remove a directory if there are still files (or
    directories) in it. On DOS and Windows you can get more information about
-   these commands by using the option /?. On Unix the equivalent is --help. For
+   these commands by using the option /?. On UNIX the equivalent is --help. For
    example, if you want to get more information about <b>del</b> you could type:<br>
    &nbsp;&nbsp;del /?<br>
 <br>
@@ -1836,16 +1836,16 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    &nbsp;&nbsp;cd \<br>
    &nbsp;&nbsp;md test<br>
    &nbsp;&nbsp;cd test<br>
-   &nbsp;&nbsp;xcopy "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" mana.swc<br>
+   &nbsp;&nbsp;xcopy "C:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" mana.swc<br>
    &nbsp;&nbsp;set parport=378<br>
    &nbsp;&nbsp;ucon64 -xswc mana.swc<br>
    &nbsp;&nbsp;del mana.swc<br>
    &nbsp;&nbsp;cd ..<br>
    &nbsp;&nbsp;rd test<br>
 <br>
-   First the current directory is changed to c:\. Then the directory "test" is
+   First the current directory is changed to C:\. Then the directory "test" is
    created. Then the current directory is changed to "test". Then the file
-   c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
+   C:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
    mana.swc. Then an environment variable with the name parport is set to the
    value 378. Then uCON64 is used to transfer mana.swc to a Super Wild Card
    while using parallel port address 0x378. Then the file mana.swc is removed.

@@ -21,6 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef NGP_H
 #define NGP_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 extern const st_getopt2_t ngp_usage[];
+
 extern int ngp_init (st_ucon64_nfo_t *rominfo);
+
 #endif

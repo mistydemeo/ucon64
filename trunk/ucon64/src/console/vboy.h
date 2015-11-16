@@ -21,6 +21,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef VBOY_H
 #define VBOY_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 extern const st_getopt2_t vboy_usage[];
 
 extern int vboy_init (st_ucon64_nfo_t *rominfo);

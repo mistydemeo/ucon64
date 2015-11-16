@@ -42,10 +42,10 @@
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __CYGWIN__
-#define FILE_SEPARATOR_S "/"
+#define DIR_SEPARATOR_S "/"
 #else
 #define snprintf _snprintf
-#define FILE_SEPARATOR_S "\\"
+#define DIR_SEPARATOR_S "\\"
 #endif
 
 /* The next union is a portable means to convert between function and data
@@ -143,7 +143,7 @@ int cd64_open_ieee1284(struct cd64_t *cd64) {
 	if (cd64->ppdev || !cd64->using_ppa) return 0;
 
 	if (ieee1284_find_ports(&pplist, 0) < 0) {
-		cd64->notice_callback2("couldn't get port list\n");
+		cd64->notice_callback2("could not get port list\n");
 		return 0;
 	}
 
@@ -827,7 +827,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		io_driver_found = 0;
 
 		if (!cd64->io_driver_dir[0]) strcpy(cd64->io_driver_dir, ".");
-		snprintf(fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
+		snprintf(fname, FILENAME_MAX+1, "%s" DIR_SEPARATOR_S "%s",
 		         cd64->io_driver_dir, "dlportio.dll");
 		fname[FILENAME_MAX] = 0;
 		if (access(fname, F_OK) == 0) {
@@ -844,7 +844,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		}
 
 		if (!io_driver_found) {
-			snprintf(fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
+			snprintf(fname, FILENAME_MAX+1, "%s" DIR_SEPARATOR_S "%s",
 			         cd64->io_driver_dir, "io.dll");
 			fname[FILENAME_MAX] = 0;
 			if (access(fname, F_OK) == 0) {
@@ -866,7 +866,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		}
 
 		if (!io_driver_found) {
-			snprintf(fname, FILENAME_MAX+1, "%s" FILE_SEPARATOR_S "%s",
+			snprintf(fname, FILENAME_MAX+1, "%s" DIR_SEPARATOR_S "%s",
 			         cd64->io_driver_dir, "inpout32.dll");
 			fname[FILENAME_MAX] = 0;
 			if (access(fname, F_OK) == 0) {

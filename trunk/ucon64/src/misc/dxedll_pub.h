@@ -24,21 +24,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <ctype.h>
+#ifdef  HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+#include <dos.h>
+#include <dpmi.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <stdarg.h>
-#include <ctype.h>
-#include <dos.h>
-#include <dpmi.h>
 
 #ifdef __cplusplus
 extern "C" {

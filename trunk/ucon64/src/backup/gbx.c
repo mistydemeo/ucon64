@@ -58,25 +58,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <ctype.h>
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
+#include <stdlib.h>
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "misc/parallel.h"
 #include "misc/file.h"
+#include "misc/misc.h"
+#include "misc/parallel.h"
 #include "misc/term.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "gbx.h"
 #include "console/gb.h"                         // GB_NAME_LEN, gb_logodata,
-                                                //  rocket_logodata
+#include "backup/gbx.h"                         //  rocket_logodata
+
 
 #ifdef  USE_PARALLEL
 static st_ucon64_obj_t gbx_obj[] =
@@ -1073,7 +1065,7 @@ page_write_128 (unsigned int bank, unsigned char hi_lo, int j, int idx)
 
       // verify data
       reset_to_read ();                         // return to read mode
-      verify_ok = 1;                            // verify ok
+      verify_ok = 1;                            // verify OK
       set_bank (0x2000, (unsigned char) bank);  // for MCB1 16k bank
       if (bank)
         set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40)); // set adr[15..8]

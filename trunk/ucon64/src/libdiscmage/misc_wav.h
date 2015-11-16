@@ -33,7 +33,7 @@ extern int misc_wav_write_header (FILE *fh, int channels, int freq,
 #define misc_wav_write_header_v2(fh,c,f,bit,dl) misc_wav_write_header(fh, c, f,     (bit*c*f)/8, (bit*c)/8, bit, dl)
 #define misc_wav_write_header_v3(fh,dl) misc_wav_write_header        (fh, 2, 44100, 176400,      4,         16,  dl)
 
-                                                                                     
+
 #define SQUARE_WAVE 0
 #define SINE_WAVE 1
 extern void misc_wav_generator (unsigned char *bit, int bitLength,

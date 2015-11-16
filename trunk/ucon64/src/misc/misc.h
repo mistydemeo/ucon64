@@ -28,24 +28,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  __cplusplus
 extern "C" {
 #endif
+#include <stdio.h>
 #include <string.h>
 #include <time.h>                               // bytes_per_second() requires time()
-#include <stdio.h>
 
 
-#ifdef __sun
-#ifdef __SVR4
+#ifdef  __sun
+#ifdef  __SVR4
 #define __solaris__
 #endif
 #endif
 
 #ifdef  WORDS_BIGENDIAN
-#undef WORDS_BIGENDIAN
+#undef  WORDS_BIGENDIAN
 #endif
 
 #if     defined _LIBC || defined __GLIBC__
   #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
+    #if     __BYTE_ORDER == __BIG_ENDIAN
     #define WORDS_BIGENDIAN 1
   #endif
 #elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
@@ -59,19 +59,19 @@ extern "C" {
   #ifdef  __CYGWIN__
     #define CURRENT_OS_S "Win32 (Cygwin)"
   #elif   defined __FreeBSD__
-    #define CURRENT_OS_S "Unix (FreeBSD)"
+    #define CURRENT_OS_S "UNIX (FreeBSD)"
   #elif   defined __OpenBSD__
-    #define CURRENT_OS_S "Unix (OpenBSD)"
+    #define CURRENT_OS_S "UNIX (OpenBSD)"
   #elif   defined __linux__
-    #define CURRENT_OS_S "Unix (Linux)"
+    #define CURRENT_OS_S "UNIX (Linux)"
   #elif   defined __solaris__
-    #ifdef __sparc__
-      #define CURRENT_OS_S "Unix (Solaris/Sparc)"
+    #ifdef  __sparc__
+      #define CURRENT_OS_S "UNIX (Solaris/Sparc)"
     #else
-      #define CURRENT_OS_S "Unix (Solaris/i386)"
+      #define CURRENT_OS_S "UNIX (Solaris/i386)"
     #endif
   #else
-    #define CURRENT_OS_S "Unix"
+    #define CURRENT_OS_S "UNIX"
   #endif
 #elif   defined _WIN32
   #ifdef  __MINGW32__
@@ -80,7 +80,7 @@ extern "C" {
     #define CURRENT_OS_S "Win32 (Visual C++)"
   #endif
 #elif   defined __APPLE__
-  #if   defined __POWERPC__ || defined __ppc__
+  #if     defined __POWERPC__ || defined __ppc__
     #define CURRENT_OS_S "Apple (PPC)"
   #else
     #define CURRENT_OS_S "Apple"
@@ -88,7 +88,7 @@ extern "C" {
 #elif   defined __BEOS__
   #define CURRENT_OS_S "BeOS"
 #elif   defined AMIGA
-  #if defined __PPC__
+  #if     defined __PPC__
     #define CURRENT_OS_S "Amiga (PPC)"
   #else
     #define CURRENT_OS_S "Amiga (68K)"
@@ -214,11 +214,11 @@ extern int sync (void);
 
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
-#ifndef pclose                                  // archive.h's definition gets higher "precedence"
-#define pclose  _pclose
+#ifndef pclose                                  // archive.h's definition gets higher precedence
+#define pclose _pclose
 #endif
 #ifndef popen                                   // idem
-#define popen   _popen
+#define popen _popen
 #endif
 #ifndef __MINGW32__
 #ifdef  _MSC_VER
@@ -248,14 +248,14 @@ extern int sync (void);
 
 #else
 #ifdef  DLL
-#define access  _access
-#define chmod   _chmod
-#define fileno  _fileno
-#define getcwd  _getcwd
-#define isatty  _isatty
-#define rmdir   _rmdir
-#define stat    _stat
-#define strdup  _strdup
+#define access _access
+#define chmod _chmod
+#define fileno _fileno
+#define getcwd _getcwd
+#define isatty _isatty
+#define rmdir _rmdir
+#define stat _stat
+#define strdup _strdup
 #define stricmp _stricmp
 #define strnicmp _strnicmp
 #endif // DLL
@@ -267,19 +267,17 @@ extern int sync (void);
 
 #ifdef  AMIGA
 // The compiler used by Jan-Erik doesn't have snprintf(). - dbjh
-#include "snprintf.h"
+#include "misc/snprintf.h"
 
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
-#ifndef pclose                                  // archive.h's definition gets higher "precedence"
-#define pclose  _pclose
+#ifndef pclose                                  // archive.h's definition gets higher precedence
+#define pclose _pclose
 #endif
 #ifndef popen                                   // idem
-#define popen   _popen
-#endif
+#define popen _popen
 #endif
 
-#ifdef  AMIGA
 extern FILE *_popen (const char *path, const char *mode);
 extern int _pclose (FILE *stream);
 #endif

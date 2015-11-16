@@ -48,7 +48,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "libdiscmage.h"
 #include "libdm_misc.h"
 #include "format/format.h"
-#ifdef  DJGPP                                   // DXE's are specific to DJGPP
+#ifdef  DJGPP                                   // DXEs are specific to DJGPP
 #include "dxedll_priv.h"
 #endif
 #include "misc_wav.h"

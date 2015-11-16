@@ -22,6 +22,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SMS_H
 #define SMS_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 extern const st_getopt2_t sms_usage[];
 
 extern int sms_gg (st_ucon64_nfo_t *rominfo);
@@ -33,4 +37,5 @@ extern int sms_smd (st_ucon64_nfo_t *rominfo);
 extern int sms_smds (void);
 extern int sms_chk (st_ucon64_nfo_t *rominfo);
 extern int sms_multi (int truncate_size, char *fname);
+
 #endif

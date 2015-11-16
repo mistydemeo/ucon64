@@ -21,10 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MCD_H
 #define MCD_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t mcd_usage[];
 
-#ifdef USE_PARALLEL
-extern int mcd_read_rom (const char *filename, unsigned int parport);
+#ifdef  USE_PARALLEL
+extern int mcd_read_rom (const char *filename, unsigned short parport);
 #endif
 
 #endif

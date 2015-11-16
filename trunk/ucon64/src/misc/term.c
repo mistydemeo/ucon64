@@ -31,40 +31,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_TERMCAP
 #include <termcap.h>
 #endif
-#include "term.h"
-#include "ucon64_defines.h"
-
-
-#ifdef  __MSDOS__
-#include <dos.h>                                // delay(), milliseconds
-#elif   defined __unix__
-#include <unistd.h>                             // usleep(), microseconds
-#elif   defined __BEOS__
-#include <OS.h>                                 // snooze(), microseconds
-// Include OS.h before misc.h, because OS.h includes StorageDefs.h which
-//  includes param.h which unconditionally defines MIN and MAX.
-#elif   defined AMIGA
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
-#include <fcntl.h>
-#include <dos/dos.h>
-#include <dos/var.h>
-#include <dos/dostags.h>
-#include <libraries/lowlevel.h>                 // GetKey()
-#include <proto/dos.h>
-#include <proto/lowlevel.h>
-#elif   defined _WIN32
+#endif
+#ifdef  _WIN32
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
 #pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
-#include <windows.h>                            // Sleep(), milliseconds
+#include <io.h>                                 // isatty() (MinGW)
+#include <windows.h>                            // HANDLE, SetConsoleTextAttribute()
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#include <io.h>                                 // isatty() (MinGW)
+#endif // _WIN32
+#ifdef  DJGPP
+#include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
 #endif
+#include "misc/term.h"
+#include "ucon64_defines.h"
 
 
 #ifdef  __CYGWIN__                              // on Cygwin (gcc for Windows) we
@@ -76,14 +63,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
         defined __APPLE__                       // Mac OS X actually
 #include <termios.h>
 typedef struct termios tty_t;
-#endif
-
-
-#ifdef  DJGPP
-#include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
-#ifdef  DLL
-#include "dxedll_priv.h"
-#endif
 #endif
 
 

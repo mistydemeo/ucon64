@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UFO_H
 #define UFO_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t ufo_usage[];
 
 /*
@@ -121,6 +124,7 @@ For Tales of Phantasia or Dai Kaijyu Monogatari II
 
 0012-0017       00 ss 00 00 0E 00   (Unverified)
 */
+
 typedef struct st_ufo_header
 {
   unsigned char size_low;
@@ -141,4 +145,4 @@ typedef struct st_ufo_header
 
 #define UFO_HEADER_LEN (sizeof (st_ufo_header_t))
 
-#endif // UFO_H
+#endif

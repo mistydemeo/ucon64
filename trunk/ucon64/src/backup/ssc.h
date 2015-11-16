@@ -21,13 +21,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SCC_H
 #define SCC_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t ssc_usage[];
 
 typedef struct st_ssc_header
 {
   char pad[512];
 } st_ssc_header_t;
-
 
 #define SSC_HEADER_LEN (sizeof (st_ssc_header_t))
 

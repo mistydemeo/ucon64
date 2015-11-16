@@ -22,24 +22,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
-#include <time.h>
-#include "misc/string.h"
-#include "misc/misc.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
+#include <stdlib.h>
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/file.h"
+#include "misc/misc.h"
+#include "misc/parallel.h"
+#include "misc/string.h"
 #include "misc/term.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "gd.h"
 #include "console/snes.h"                       // for snes_make_gd_names() &
-#include "misc/parallel.h"                      //  snes_get_snes_hirom()
+#include "backup/gd.h"                          //  snes_get_snes_hirom()
 
 
 #ifdef  USE_PARALLEL
@@ -636,7 +629,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);
           exit (1);
         }
-      sprintf (filenames[i], "%s" FILE_SEPARATOR_S "%s.078", dir, names[i]); // should match with what code of -s does
+      sprintf (filenames[i], "%s" DIR_SEPARATOR_S "%s.078", dir, names[i]); // should match with what code of -s does
 
       if (split)
         {

@@ -24,9 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -38,19 +36,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#include "misc/misc.h"
+#include "misc/archive.h"
 #include "misc/chksum.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
+#include "misc/misc.h"
 #include "ucon64_misc.h"
 #include "console/genesis.h"
+#include "backup/md-pro.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
-#include "backup/md-pro.h"
 
 
 #define GENESIS_HEADER_START 256
@@ -556,7 +550,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
   if (size <= part_size)
     {
       printf (
-        "NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",
+        "NOTE: ROM size is smaller than or equal to %d Mbit -- will not be split\n",
         part_size / MBIT);
       return -1;
     }
@@ -884,7 +878,7 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
   strcpy (fname, "genpal.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
-    sprintf (fname, "%s" FILE_SEPARATOR_S "genpal.txt", ucon64.configdir);
+    sprintf (fname, "%s" DIR_SEPARATOR_S "genpal.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, fname, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -938,7 +932,7 @@ genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
   strcpy (fname, "mdntsc.txt");
   // First try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
-    sprintf (fname, "%s" FILE_SEPARATOR_S "mdntsc.txt", ucon64.configdir);
+    sprintf (fname, "%s" DIR_SEPARATOR_S "mdntsc.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, fname, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -993,7 +987,7 @@ genesis_f (st_ucon64_nfo_t *rominfo)
 }
 
 
-unsigned char *
+static unsigned char *
 load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 {
   FILE *file;
@@ -1031,7 +1025,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 }
 
 
-int
+static int
 save_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char **buffer, int size)
 {
   if (type == SMD)
@@ -1143,7 +1137,7 @@ genesis_multi (int truncate_size, char *fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      fprintf (stderr, "ERROR: Cannot make multi-game file of 0 bytes\n");
       return -1;
     }
 
@@ -1733,7 +1727,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
 }
 
 
-int
+static int
 genesis_chksum (unsigned char *rom_buffer)
 {
   int i, len = genesis_rom_size - 2;

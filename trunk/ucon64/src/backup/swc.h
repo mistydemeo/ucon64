@@ -22,6 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SWC_H
 #define SWC_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 #define SWC_IO_FORCE_32MBIT 0x001
 #define SWC_IO_ALT_ROM_SIZE 0x002
 #define SWC_IO_SUPER_FX     0x004
@@ -57,16 +63,20 @@ typedef struct st_swc_header
 #define SWC_HEADER_START 0
 #define SWC_HEADER_LEN (sizeof (st_swc_header_t))
 
-#ifdef USE_PARALLEL
-extern int swc_read_rom (const char *filename, unsigned short parport, int io_mode);
-extern int swc_write_rom (const char *filename, unsigned short parport, int enableRTS);
+#ifdef  USE_PARALLEL
+extern int swc_read_rom (const char *filename, unsigned short parport,
+                         int io_mode);
+extern int swc_write_rom (const char *filename, unsigned short parport,
+                          unsigned short enableRTS);
 extern int swc_read_sram (const char *filename, unsigned short parport);
 extern int swc_write_sram (const char *filename, unsigned short parport);
 extern int swc_read_rts (const char *filename, unsigned short parport);
 extern int swc_write_rts (const char *filename, unsigned short parport);
-extern int swc_read_cart_sram (const char *filename, unsigned short parport, int io_mode);
-extern int swc_write_cart_sram (const char *filename, unsigned short parport, int io_mode);
+extern int swc_read_cart_sram (const char *filename, unsigned short parport,
+                               int io_mode);
+extern int swc_write_cart_sram (const char *filename, unsigned short parport,
+                                int io_mode);
 extern void swc_unlock (unsigned short parport);
 #endif
 
-#endif // SWC_H
+#endif

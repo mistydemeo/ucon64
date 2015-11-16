@@ -27,7 +27,7 @@ LDFLAGS=
 else
 ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
 LDFLAGS=-nostart
-else # Unix or Win GCC
+else # UNIX or Win GCC
 LDFLAGS=-shared
 endif
 endif

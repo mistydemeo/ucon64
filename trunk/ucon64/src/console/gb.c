@@ -22,27 +22,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <string.h>
+#include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/string.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
 #include "ucon64_misc.h"
+#include "console/console.h"
+#include "console/gb.h"
+#include "console/nes.h"
 #include "backup/backup.h"
-#include "patch/patch.h"
-#include "console.h"
-#include "gb.h"
+#include "backup/mgd.h"
+#include "backup/ssc.h"
 
 
 #define GB_HEADER_START 0x100
@@ -661,10 +652,10 @@ gb_init (st_ucon64_nfo_t *rominfo)
     {
 #ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
-        strcat (rominfo->misc, "\x1b[01;32mOk\x1b[0m");
+        strcat (rominfo->misc, "\x1b[01;32mOK\x1b[0m");
       else
 #endif
-        strcat (rominfo->misc, "Ok");
+        strcat (rominfo->misc, "OK");
     }
   else
     {
@@ -692,11 +683,11 @@ gb_init (st_ucon64_nfo_t *rominfo)
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((checksum.header == x) ?
-                   "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
+                   "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
                  :
-                 ((checksum.header == x) ? "Ok" : "Bad"),
+                 ((checksum.header == x) ? "OK" : "Bad"),
 #else
-               (checksum.header == x) ? "Ok" : "Bad",
+               (checksum.header == x) ? "OK" : "Bad",
 #endif
                checksum.header, (checksum.header == x) ? '=' : '!', x);
     }

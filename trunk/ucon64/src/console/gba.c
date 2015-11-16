@@ -22,9 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -36,20 +34,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
+#include "misc/archive.h"
 #include "misc/bswap.h"
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/property.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/string.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "console.h"
-#include "gba.h"
+#include "console/console.h"
+#include "console/gba.h"
 #include "backup/backup.h"
+#include "backup/fal.h"
 
 
 #define GBA_NAME_LEN 12
@@ -692,10 +687,10 @@ gba_init (st_ucon64_nfo_t *rominfo)
     {
 #ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
-        strcat (rominfo->misc, "\x1b[01;32mOk\x1b[0m");
+        strcat (rominfo->misc, "\x1b[01;32mOK\x1b[0m");
       else
 #endif
-        strcat (rominfo->misc, "Ok");
+        strcat (rominfo->misc, "OK");
     }
   else
     {
@@ -754,7 +749,7 @@ gba_multi (int truncate_size, char *multi_fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      fprintf (stderr, "ERROR: Cannot make multi-game file of 0 bytes\n");
       return -1;
     }
 

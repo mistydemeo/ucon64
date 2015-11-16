@@ -116,7 +116,7 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms);
 /* microseconds */
 #include <OS.h>
 #define USLEEP(x) snooze(x)
-#else                                           /* Unix & Cygwin */
+#else                                           /* UNIX & Cygwin */
 /* microseconds */
 #include <unistd.h>
 #define USLEEP(x) usleep(x)

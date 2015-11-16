@@ -328,7 +328,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    determines whether or not uCON64 displays ROM information.<br>
    Then uCON64 starts scanning the command line for options. This code can be
    found in ucon64_opts.c/ucon64_options(). From this code almost all
-   operations of uCON64 are executed. On Unix this is also the point where root
+   operations of uCON64 are executed. On UNIX this is also the point where root
    privileges are given up with a call to misc.c/drop_privileges().<br>
    First uCON64 tries to find out what console system the ROM belongs to using
    for example the init function for SNES (console/snes.c/snes_init() or

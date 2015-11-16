@@ -23,7 +23,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SNES_H
 #define SNES_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
 #include "backup/fig.h"                         // for st_fig_header_t
+
 
 #define SNES_HEADER_START 0x7fb0
 #define SNES_HIROM 0x8000
@@ -51,16 +54,19 @@ extern int snes_init (st_ucon64_nfo_t *rominfo);
 extern int snes_j (st_ucon64_nfo_t *rominfo);
 extern int snes_k (st_ucon64_nfo_t *rominfo);
 extern int snes_l (st_ucon64_nfo_t *rominfo);
-extern int snes_make_gd_names (const char *filename, st_ucon64_nfo_t *rominfo, char **names);
+extern int snes_make_gd_names (const char *filename, st_ucon64_nfo_t *rominfo,
+                               char **names);
 extern int snes_mgd (st_ucon64_nfo_t *rominfo);
 extern int snes_mgh (st_ucon64_nfo_t *rominfo);
 extern int snes_multi (int truncate_size, char *fname);
 extern int snes_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int snes_s (st_ucon64_nfo_t *rominfo);
-extern void snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header);
+extern void snes_set_fig_header (st_ucon64_nfo_t *rominfo,
+                                 st_fig_header_t *header);
 extern int snes_smc (st_ucon64_nfo_t *rominfo);
 extern int snes_swc (st_ucon64_nfo_t *rominfo);
 extern int snes_swcs (st_ucon64_nfo_t *rominfo);
 extern int snes_ufo (st_ucon64_nfo_t *rominfo);
 extern int snes_ufos (st_ucon64_nfo_t *rominfo);
-#endif // SNES_H
+
+#endif

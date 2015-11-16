@@ -20,31 +20,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef CONSOLE_H
 #define CONSOLE_H
-#include "atari.h"
-#include "coleco.h"
-#include "dc.h"
-#include "gb.h"
-#include "gba.h"
-#include "genesis.h"
-#include "jaguar.h"
-#include "lynx.h"
-#include "n64.h"
-#include "nds.h"
-#include "neogeo.h"
-#include "nes.h"
-#include "ngp.h"
-#include "pce.h"
-#include "psx.h"
-#include "sms.h"
-#include "snes.h"
-#include "swan.h"
-#include "vboy.h"
+
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
 
 
 /*
   usage and init function for all unknown consoles
 */
 extern const st_getopt2_t unknown_console_usage[];
+
 extern int unknown_console_init (st_ucon64_nfo_t *rominfo);
 
 
@@ -73,5 +58,4 @@ extern const st_getopt2_t xbox_usage[];
 #define NINTENDO_MAKER_LEN 684
 extern const char *nintendo_maker[];
 
-
-#endif // CONSOLE_H
+#endif

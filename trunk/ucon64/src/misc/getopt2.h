@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  __cplusplus
 extern "C" {
 #endif
-#include "getopt.h"                       // getopt2 needs struct option from getopt1
+#include "misc/getopt.h"                        // getopt2 needs struct option from getopt1
 
 
 /*
@@ -61,7 +61,7 @@ extern "C" {
 
   callback_func()       getopt2_file() expects the callback_func to return the following
                           values:
-                          0 == ok, 1 == skip the rest/break, -1 == failure/break
+                          0 == OK, 1 == skip the rest/break, -1 == failure/break
 
   Debugging and Development
 
@@ -114,4 +114,5 @@ extern void getopt2_usage_code (const st_getopt2_t *usage);
 #ifdef  __cplusplus
 }
 #endif
+
 #endif // MISC_GETOPT2_H

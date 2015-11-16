@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 
+
 #ifdef  USE_PARALLEL
 
 #define PARPORT_DATA     0                      // output
@@ -48,7 +49,8 @@ extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
 
 extern unsigned short parport_open (unsigned short parport);
-extern int parport_close (void);
+extern void parport_close (void);
 extern void parport_print_info (void);
 #endif // USE_PARALLEL
+
 #endif // MISC_PARALLEL_H

@@ -673,7 +673,7 @@ int cd64_upload_mempak(struct cd64_t *cd64, FILE *infile, int8_t which) {
 
 	if (cd64->protocol == CD64BIOS) {
 		if (which != -1) {
-			cd64->notice_callback2("CD64 BIOS doesn't let mempak index be chosen.");
+			cd64->notice_callback2("CD64 BIOS does not let mempak index be chosen.");
 			return 0;
 		}
 		cd64->notice_callback("Choose Memory Manager->Up/Download Pak.");
@@ -921,7 +921,7 @@ int cd64_download_mempak(struct cd64_t *cd64, FILE *outfile, int8_t which) {
 
 	if (cd64->protocol == CD64BIOS) {
 		if (which != -1) {
-			cd64->notice_callback2("CD64 BIOS doesn't let mempak index be chosen.");
+			cd64->notice_callback2("CD64 BIOS does not let mempak index be chosen.");
 			return 0;
 		}
 		cd64->notice_callback("Choose Memory Manager->Up/Download Pak.");

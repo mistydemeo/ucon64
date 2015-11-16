@@ -29,6 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stdio.h>
+#include "misc/itypes.h"
 #include "ucon64_defines.h"                     // MAXBUFSIZE, etc..
 
 
@@ -149,7 +151,7 @@ typedef struct
     to check them. When adding new ones don't forget to update
     ucon64_execute_options() too.
   */
-  int backup_header_len;                             // length of backup unit header 0 == no bu hdr
+  int backup_header_len;                        // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
 
 #if 1
@@ -216,4 +218,5 @@ extern void ucon64_fname_arch (const char *fname);
 #endif
 
 extern st_ucon64_t ucon64;
+
 #endif // UCON64_H

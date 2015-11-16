@@ -25,15 +25,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SMSGG_PRO_H
 #define SMSGG_PRO_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 #define SMSGG_PRO_LOADER_SIZE (48 * 1024)
 
 extern const st_getopt2_t smsggpro_usage[];
 
-#ifdef USE_PARALLEL
-extern int smsgg_read_rom (const char *filename, unsigned short parport, int size);
+#ifdef  USE_PARALLEL
+extern int smsgg_read_rom (const char *filename, unsigned short parport,
+                           int size);
 extern int smsgg_write_rom (const char *filename, unsigned short parport);
-extern int smsgg_read_sram (const char *filename, unsigned short parport, int start_bank);
-extern int smsgg_write_sram (const char *filename, unsigned short parport, int start_bank);
+extern int smsgg_read_sram (const char *filename, unsigned short parport,
+                            int start_bank);
+extern int smsgg_write_sram (const char *filename, unsigned short parport,
+                             int start_bank);
 #endif
 
 #endif

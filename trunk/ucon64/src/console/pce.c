@@ -23,9 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -37,17 +35,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
+#include "misc/archive.h"
 #include "misc/chksum.h"
+#include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/string.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "pce.h"
+#include "console/pce.h"
 #include "backup/mgd.h"
 #include "backup/msg.h"
 #include "backup/pce-pro.h"
@@ -895,7 +889,7 @@ pce_multi (int truncate_size, char *fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      fprintf (stderr, "ERROR: Cannot make multi-game file of 0 bytes\n");
       return -1;
     }
 

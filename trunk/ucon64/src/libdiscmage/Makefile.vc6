@@ -2,7 +2,8 @@ DLOPEN=1
 #USE_ZLIB=1
 
 CC=cl.exe
-CFLAGS=/nologo /I. /W4 /Wall /wd4711 /O2 /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /DDLL /DHAVE_CONFIG_H
+CFLAGS=/nologo /I. /W4 /Wall /wd4711 /O2 /D_CRT_NONSTDC_NO_DEPRECATE \
+       /D_CRT_SECURE_NO_WARNINGS /DDLL /DHAVE_CONFIG_H
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
 # /wd4711, function 'function' selected for inline expansion
 !ifdef DLOPEN
@@ -11,17 +12,19 @@ CFLAGS=$(CFLAGS) /DDLOPEN
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.obj dllinit.obj misc.obj misc_wav.obj format/format.obj \
-        format/cdi.obj format/nero.obj format/cue.obj format/toc.obj format/other.obj
+        format/cdi.obj format/nero.obj format/cue.obj format/toc.obj \
+        format/other.obj
 !ifdef USE_ZLIB
 LIBS=zdll.lib
-OBJECTS=$(OBJECTS) unzip.obj map.obj misc_z.obj
+OBJECTS=$(OBJECTS) map.obj misc_z.obj unzip.obj
 !else
 LIBS=
 !endif
 
 
 FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=/NOLOGO /DLL $(OBJECTS) $(LIBS) /DEF:$(LIBNAME).def /OUT:$(LIBNAME).dll
+DLLFLAGS=/NOLOGO /SUBSYSTEM:CONSOLE,5.01 /DLL $(OBJECTS) $(LIBS) \
+         /DEF:$(LIBNAME).def /OUT:$(LIBNAME).dll
 
 
 all: $(FULLLIBNAME)
@@ -55,21 +58,29 @@ uninstall:
 
 
 # Dependencies
-LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h config.h
 
-libdm_misc.obj: $(LIBDM_STD_H)
-format/format.obj: $(LIBDM_STD_H)
-format/ccd.obj: format/ccd.h $(LIBDM_STD_H)
-format/cdi.obj: format/cdi.h $(LIBDM_STD_H)
-format/nero.obj: format/nero.h $(LIBDM_STD_H)
-format/cue.obj: format/cue.h $(LIBDM_STD_H)
-format/toc.obj: format/toc.h $(LIBDM_STD_H)
-format/other.obj: format/other.h $(LIBDM_STD_H)
-misc_wav.obj: $(LIBDM_STD_H)
-dllinit.obj: $(LIBDM_STD_H)
-misc.obj: misc.h dxedll_priv.h
-misc_z.obj: misc_z.h misc.h dxedll_priv.h
-dxe_misc.obj: dxedll_pub.h
-djimport.obj: libdiscmage.h dlopen.h dxedll_pub.h
-dlopen.obj: dlopen.h dxedll_pub.h
-map.obj: map.h
+MISC_Z_H_DEPS=unzip.h
+MISC_H_DEPS=misc_z.h $(MISC_Z_H_DEPS) getopt.h
+
+libdm_misc.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                format/format.h misc_wav.h
+dllinit.obj: config.h libdiscmage.h map.h
+misc.obj: config.h misc_z.h $(MISC_Z_H_DEPS) misc.h $(MISC_H_DEPS)
+misc_wav.obj: config.h misc.h $(MISC_H_DEPS) misc_wav.h
+format/format.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                   format/format.h format/cdi.h format/cue.h format/nero.h \
+                   format/other.h format/toc.h
+format/cdi.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                format/format.h
+format/nero.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                 format/format.h
+format/cue.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                format/format.h
+format/toc.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                format/format.h
+format/other.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                  format/format.h
+map.obj: config.h map.h
+misc_z.obj: config.h misc_z.h $(MISC_Z_H_DEPS) misc.h $(MISC_H_DEPS) map.h \
+            unzip.h
+unzip.obj: config.h unzip.h

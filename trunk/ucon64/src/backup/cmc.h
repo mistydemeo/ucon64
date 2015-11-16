@@ -22,10 +22,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef CMC_H
 #define CMC_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t cmc_usage[];
 
-#ifdef USE_PARALLEL
-extern int cmc_read_rom (const char *filename, unsigned short parport, int speed);
+#ifdef  USE_PARALLEL
+extern int cmc_read_rom (const char *filename, unsigned short parport,
+                         int speed);
 extern int cmc_test (int test, unsigned short parport, int speed);
 #endif
 

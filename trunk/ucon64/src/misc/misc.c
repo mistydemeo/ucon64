@@ -23,24 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
-#include <stddef.h>
-#include <stdlib.h>
 #include <ctype.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
 #include <stdarg.h>                             // va_arg()
-#ifdef  _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
-#endif
-#include <sys/stat.h>                           // for S_IFLNK
-#ifdef  _MSC_VER
-#pragma warning(pop)
-#endif
+#include <stdlib.h>
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
@@ -51,8 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which
 //  includes param.h which unconditionally defines MIN and MAX.
 #elif   defined AMIGA
-#include <unistd.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <dos/dos.h>
 #include <dos/var.h>
 #include <dos/dostags.h>
@@ -72,32 +57,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #endif
 
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32 (VC++)
-#include "itypes.h"
-#endif
-#ifdef  USE_ZLIB
-#include "archive.h"
-#endif
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined AMIGA || defined __APPLE__      // Mac OS X actually
-// GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
-#else // DJGPP, Win32
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
-#endif
-
-#include "misc.h"
-
-
-#ifdef  DJGPP
-#ifdef  DLL
-#include "dxedll_priv.h"
-#endif
-#endif
+#include "misc/archive.h"
+#include "misc/file.h"
+#include "misc/itypes.h"
+#include "misc/misc.h"
 
 
 #ifdef  MAXBUFSIZE
@@ -154,7 +117,7 @@ misc_percent (int pos, int len)
 
 #ifdef  __CYGWIN__
 /*
-  Weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is ok):
+  Weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is OK):
   When a string with "e (e with diaeresis, one character) is read from an
   environment variable, the character isn't the right character for accessing
   the file system. We fix this.
@@ -488,7 +451,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 
   if ((srcfile = fopen (src_name, "r")) == NULL) // open in text mode
     {
-      fprintf (stderr, "ERROR: Can't open \"%s\" for reading\n", src_name);
+      fprintf (stderr, "ERROR: Cannot open \"%s\" for reading\n", src_name);
       return -1;
     }
 
@@ -787,7 +750,7 @@ getenv2 (const char *variable)
             {
               strcpy (value, tmp);
               tmp = getenv ("HOMEPATH");
-              strcat (value, tmp ? tmp : FILE_SEPARATOR_S);
+              strcat (value, tmp ? tmp : DIR_SEPARATOR_S);
             }
           else
             /*
@@ -825,9 +788,9 @@ getenv2 (const char *variable)
           if (access ("\\tmp\\", R_OK | W_OK) == 0)
 #else
           // trailing file separator to force it to be a directory
-          if (access (FILE_SEPARATOR_S"tmp"FILE_SEPARATOR_S, R_OK | W_OK) == 0)
+          if (access (DIR_SEPARATOR_S "tmp" DIR_SEPARATOR_S, R_OK | W_OK) == 0)
 #endif
-            strcpy (value, FILE_SEPARATOR_S"tmp");
+            strcpy (value, DIR_SEPARATOR_S "tmp");
           else
             getcwd (value, FILENAME_MAX);
         }

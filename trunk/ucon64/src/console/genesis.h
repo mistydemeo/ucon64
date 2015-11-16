@@ -22,6 +22,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GENESIS_H
 #define GENESIS_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 typedef enum { SMD = 1, BIN, MGD_GEN } genesis_file_t;
 
 extern const st_getopt2_t genesis_usage[];
@@ -40,4 +44,5 @@ extern int genesis_mgd (st_ucon64_nfo_t *rominfo);
 extern int genesis_multi (int truncate_size, char *fname);
 extern int genesis_init (st_ucon64_nfo_t *rominfo);
 extern int genesis_f (st_ucon64_nfo_t *rominfo);
+
 #endif

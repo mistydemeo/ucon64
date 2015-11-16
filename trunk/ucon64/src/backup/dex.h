@@ -21,14 +21,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef DEX_H
 #define DEX_H
 
-extern const st_getopt2_t dex_usage[];
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+
 
 #define DEX_HEADER_START 0
 #define DEX_HEADER_LEN 0
 
-#ifdef USE_PARALLEL
-extern int dex_read_block (const char *filename, int block_num, unsigned int parport);
-extern int dex_write_block (const char *filename, int block_num, unsigned int parport);
-#endif // USE_PARALLEL
+extern const st_getopt2_t dex_usage[];
+
+#ifdef  USE_PARALLEL
+extern int dex_read_block (const char *filename, int block_num,
+                           unsigned int parport);
+extern int dex_write_block (const char *filename, int block_num,
+                            unsigned int parport);
+#endif
 
 #endif

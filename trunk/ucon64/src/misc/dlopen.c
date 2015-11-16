@@ -44,13 +44,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "dlopen.h"
+#include "misc/dlopen.h"
 
 
 #ifdef  DJGPP
-#include "dxedll_pub.h"
-#include "map.h"
+#include "misc/dxedll_pub.h"
+#include "misc/map.h"
 
 
 #define INITIAL_HANDLE 1
@@ -61,7 +60,7 @@ extern int errno;
 void
 uninit_func (void)
 {
-  fputs ("ERROR: An uninitialized member of the import/export structure was called!\n"
+  fputs ("ERROR: An uninitialized member of the import/export structure was called.\n"
          "       Update dlopen.c/open_module()\n", stderr);
   exit (1);
 }
@@ -82,13 +81,13 @@ open_module (char *module_name)
   */
   if (sym == 0)
     {
-      fprintf (stderr, "Error while loading DXE module: %s\n", module_name);
+      fprintf (stderr, "ERROR: Could not load DXE module: %s\n", module_name);
       exit (1);
     }
 
   if (sym->size != sizeof (st_symbol_t))
     {
-      fprintf (stderr, "Incompatible DXE module: %s\n", module_name);
+      fprintf (stderr, "ERROR: Incompatible DXE module: %s\n", module_name);
       exit (1);
     }
 
@@ -215,6 +214,7 @@ open_module (char *module_name)
   */
   if ((handle = dlopen (module_name, RTLD_LAZY)) == NULL)
     {
+      fputs ("ERROR: ", stderr);
       fputs (dlerror (), stderr);
       fputc ('\n', stderr);
       exit (1);
@@ -224,6 +224,7 @@ open_module (char *module_name)
     {
       LPTSTR strptr;
 
+      fputs ("ERROR: ", stderr);
       FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
                      FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -238,7 +239,7 @@ open_module (char *module_name)
 #elif   defined __BEOS__
   if ((int) (handle = (void *) load_add_on (module_name)) < B_NO_ERROR)
     {
-      fprintf (stderr, "Error while loading add-on image: %s\n", module_name);
+      fprintf (stderr, "ERROR: Could not load add-on image: %s\n", module_name);
       exit (1);
     }
 #endif
@@ -255,14 +256,14 @@ get_symbol (void *handle, char *symbol_name)
   st_symbol_t *sym = map_get (dxe_map, handle);
   if (sym == NULL)
     {
-      fprintf (stderr, "Invalid handle: %x\n", (int) handle);
+      fprintf (stderr, "ERROR: Invalid handle: %x\n", (int) handle);
       exit (1);
     }
 
   symptr = sym->dxe_symbol (symbol_name);
   if (symptr == NULL)
     {
-      fprintf (stderr, "Could not find symbol: %s\n", symbol_name);
+      fprintf (stderr, "ERROR: Could not find symbol: %s\n", symbol_name);
       exit (1);
     }
 #elif   defined __unix__ || defined __APPLE__   // Mac OS X actually, see
@@ -271,6 +272,7 @@ get_symbol (void *handle, char *symbol_name)
   symptr = dlsym (handle, symbol_name);
   if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
     {                                           //  according to the info page
+      fputs ("ERROR: ", stderr);
       fputs (strptr, stderr);
       fputc ('\n', stderr);
       exit (1);
@@ -283,6 +285,7 @@ get_symbol (void *handle, char *symbol_name)
     {
       LPTSTR strptr;
 
+      fputs ("ERROR: ", stderr);
       FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
                      FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -295,10 +298,10 @@ get_symbol (void *handle, char *symbol_name)
     }
 #elif   defined __BEOS__
   int status = get_image_symbol ((int) handle, symbol_name,
-                                 B_SYMBOL_TYPE_TEXT, &symptr); // B_SYMBOL_TYPE_DATA/B_SYMBOL_TYPE_ANY
+                                 B_SYMBOL_TYPE_ANY, &symptr); // B_SYMBOL_TYPE_TEXT/B_SYMBOL_TYPE_DATA
   if (status != B_OK)
     {
-      fprintf (stderr, "Could not find symbol: %s\n", symbol_name);
+      fprintf (stderr, "ERROR: Could not find symbol: %s\n", symbol_name);
       exit (1);
     }
 #endif
@@ -315,7 +318,7 @@ has_symbol (void *handle, char *symbol_name)
   st_symbol_t *sym = map_get (dxe_map, handle);
   if (sym == NULL)
     {
-      fprintf (stderr, "Invalid handle: %x\n", (int) handle);
+      fprintf (stderr, "ERROR: Invalid handle: %x\n", (int) handle);
       exit (1);
     }
 
@@ -336,7 +339,7 @@ has_symbol (void *handle, char *symbol_name)
     symptr = (void *) -1;
 #elif   defined __BEOS__
   int status = get_image_symbol ((int) handle, symbol_name,
-                                 B_SYMBOL_TYPE_TEXT, &symptr); // B_SYMBOL_TYPE_DATA/B_SYMBOL_TYPE_ANY
+                                 B_SYMBOL_TYPE_ANY, &symptr); // B_SYMBOL_TYPE_TEXT/B_SYMBOL_TYPE_DATA
   if (status != B_OK)
     symptr = (void *) -1;
 #endif

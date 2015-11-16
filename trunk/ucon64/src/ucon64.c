@@ -32,17 +32,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <stdarg.h>
-#include <stddef.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
 #endif
 #ifdef  _MSC_VER
 #pragma warning(push)
@@ -52,7 +44,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#include <sys/types.h>
 
 #ifdef  DEBUG
 #ifdef  __GNUC__
@@ -61,27 +52,71 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma message ("DEBUG active")
 #endif
 #endif
-#ifdef  USE_PARALLEL
-#include "misc/parallel.h"
-#endif
-#include "misc/bswap.h"
-#include "misc/misc.h"
-#include "misc/property.h"
-#include "misc/chksum.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"
-#include "misc/string.h"
+#include "misc/file.h"
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/misc.h"
+#include "misc/parallel.h"
+#include "misc/property.h"
 #include "misc/term.h"
 #include "ucon64.h"
+#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
-#include "ucon64_dat.h"
+#include "console/atari.h"
+#include "console/coleco.h"
 #include "console/console.h"
-#include "patch/patch.h"
+#include "console/dc.h"
+#include "console/gb.h"
+#include "console/gba.h"
+#include "console/genesis.h"
+#include "console/jaguar.h"
+#include "console/lynx.h"
+#include "console/n64.h"
+#include "console/nds.h"
+#include "console/neogeo.h"
+#include "console/nes.h"
+#include "console/ngp.h"
+#include "console/pce.h"
+#include "console/psx.h"
+#include "console/sms.h"
+#include "console/snes.h"
+#include "console/swan.h"
+#include "console/vboy.h"
 #include "backup/backup.h"
+#include "backup/cd64.h"
+#include "backup/cmc.h"
+#include "backup/dex.h"
+#include "backup/doctor64.h"
+#include "backup/doctor64jr.h"
+#include "backup/f2a.h"
+#include "backup/fal.h"
+#include "backup/gbx.h"
+#include "backup/gd.h"
+#include "backup/lynxit.h"
+#include "backup/mccl.h"
+#include "backup/mcd.h"
+#include "backup/md-pro.h"
+#include "backup/msg.h"
+#include "backup/pce-pro.h"
+#include "backup/pl.h"
+#include "backup/sflash.h"
+#include "backup/smc.h"
+#include "backup/smd.h"
+#include "backup/smsgg-pro.h"
+#include "backup/swc.h"
+#include "patch/aps.h"
+#include "patch/bsl.h"
+#include "patch/gg.h"
+#include "patch/ips.h"
+#include "patch/patch.h"
+#include "patch/ppf.h"
+
+
+#ifdef  _MSC_VER
+// Visual C++ doesn't allow inline in C source code
+#define inline __inline
+#endif
 
 
 static void ucon64_exit (void);
@@ -241,7 +276,7 @@ static const st_getopt2_t lf[] =
 
 
 static st_ucon64_nfo_t *
-ucon64_clear_nfo (st_ucon64_nfo_t * nfo)
+ucon64_clear_nfo (st_ucon64_nfo_t *nfo)
 {
   if (nfo)
     memset (nfo, 0, sizeof (st_ucon64_nfo_t));
@@ -808,7 +843,7 @@ ucon64_runtime_debug (void)
 #endif  // DEBUG
 
 
-void
+static void
 ucon64_exit (void)
 {
 #ifdef  USE_DISCMAGE
@@ -1085,7 +1120,14 @@ main (int argc, char **argv)
     been specified, because another switch might've been specified after -port.
   */
   if (ucon64.parport_needed == 1)
-    ucon64.parport = parport_open (ucon64.parport);
+    {
+      ucon64.parport = parport_open (ucon64.parport);
+      if (register_func (parport_close) == -1)
+        {
+          fputs ("ERROR: Could not register function with register_func()\n", stderr);
+          exit (1);
+        }
+    }
 #endif
 #if     defined __unix__ && !defined __MSDOS__
   /*
@@ -1144,7 +1186,7 @@ main (int argc, char **argv)
 }
 
 
-int
+static int
 ucon64_process_rom (const char *fname)
 {
 #ifdef  USE_ZLIB
@@ -1174,7 +1216,7 @@ ucon64_process_rom (const char *fname)
             There seems to be no other way to detect directories in ZIP files
             than by looking at the file name. Paths in ZIP files should contain
             forward slashes. ucon64_fname_arch() changes forward slashes into
-            backslashes (FILE_SEPARATORs) when uCON64 is compiled with Visual
+            backslashes (DIR_SEPARATORs) when uCON64 is compiled with Visual
             C++ or MinGW so that basename2() always produces a correct base
             name. So, if the entry in the ZIP file is a directory
             ucon64.fname_arch will be an empty string.
@@ -1209,7 +1251,7 @@ ucon64_process_rom (const char *fname)
 }
 
 
-int
+static int
 ucon64_execute_options (void)
 /*
   Execute all options for a single file.
@@ -1297,7 +1339,7 @@ ucon64_execute_options (void)
 }
 
 
-int
+static int
 ucon64_rom_handling (void)
 {
   int no_rom = 0;
@@ -1475,8 +1517,8 @@ ucon64_rom_handling (void)
 }
 
 
-st_ucon64_nfo_t *
-ucon64_probe (st_ucon64_nfo_t * nfo)
+static st_ucon64_nfo_t *
+ucon64_probe (st_ucon64_nfo_t *nfo)
 {
   typedef struct
     {
@@ -1639,7 +1681,7 @@ toprint (char c)
 }
 
 
-void
+static void
 ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 {
   unsigned int padded = ucon64_testpad (ucon64.fname),
@@ -1758,15 +1800,15 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
       printf (buf,
         ucon64.ansi_color ?
           ((nfo->current_internal_crc == nfo->internal_crc) ?
-            "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
+            "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
           :
-          ((nfo->current_internal_crc == nfo->internal_crc) ? "Ok" : "Bad"),
+          ((nfo->current_internal_crc == nfo->internal_crc) ? "OK" : "Bad"),
         nfo->current_internal_crc,
         (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
         nfo->internal_crc);
 #else
       printf (buf,
-        (nfo->current_internal_crc == nfo->internal_crc) ? "Ok" : "Bad",
+        (nfo->current_internal_crc == nfo->internal_crc) ? "OK" : "Bad",
         nfo->current_internal_crc,
         (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
         nfo->internal_crc);
@@ -1795,7 +1837,7 @@ ucon64_fname_arch (const char *fname)
     int n, l = strlen (name);
     for (n = 0; n < l; n++)
       if (name[n] == '/')
-        name[n] = FILE_SEPARATOR;
+        name[n] = DIR_SEPARATOR;
   }
 #endif
   strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX)[FILENAME_MAX - 1] = 0;

@@ -23,6 +23,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MISC_TERM_H
 #define MISC_TERM_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 extern int term_open (void);
 extern int term_close (void);
 
@@ -60,7 +65,7 @@ extern int gauge (int percent, int width, char char1, char char2, int color1, in
         defined __APPLE__                       // Mac OS X actually
 extern void init_conio (void);
 extern void deinit_conio (void);
-#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
+#define getch getchar                           // getchar() acts like DOS getch() after init_conio()
 extern int kbhit (void);                        // may only be used after init_conio()!
 #endif
 
@@ -69,7 +74,7 @@ extern int kbhit (void);                        // may only be used after init_c
 #include <pc.h>                                 // kbhit()
 // DJGPP doesn't have snprintf(). Last tested with the version that includes
 //  GCC 4.0.1. - dbjh
-#include "snprintf.h"
+#include "misc/snprintf.h"
 #endif
 
 #ifdef  _WIN32
@@ -81,30 +86,29 @@ extern int kbhit (void);                        // may only be used after init_c
 
 #ifdef  USE_ANSI_COLOR
 #include <stdarg.h>
+#include <stdio.h>
+
 
 extern int vprintf2 (const char *format, va_list argptr);
 extern int printf2 (const char *format, ...);
 extern int fprintf2 (FILE *file, const char *format, ...);
 
-
 #define vprintf vprintf2
-#define printf  printf2
+#define printf printf2
 #define fprintf fprintf2
 #endif // USE_ANSI_COLOR
 
-#ifndef __MINGW32__
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
-#endif
 #include <io.h>
-#ifdef  _MSC_VER
 #pragma warning(pop)
-#endif
+
+
 #define STDIN_FILENO (fileno (stdin))
 #define STDOUT_FILENO (fileno (stdout))
 #define STDERR_FILENO (fileno (stderr))
-#endif // !__MINGW32__
+#endif
 
 #define snprintf _snprintf
 #endif // _WIN32
@@ -112,10 +116,11 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 
 #ifdef  AMIGA
 // The compiler used by Jan-Erik doesn't have snprintf(). - dbjh
-#include "snprintf.h"
+#include "misc/snprintf.h"
+
 
 extern int kbhit (void);
-//#define getch           getchar
+//#define getch getchar
 // Gonna use my (Jan-Erik) fake one. Might work better and more like the real
 //  getch().
 #endif

@@ -1060,7 +1060,7 @@ basename2 (const char *path)
   if (p2 > p1)                                  // use the last separator in path
     p1 = p2;
 #else
-  p1 = strrchr (path, FILE_SEPARATOR);
+  p1 = strrchr (path, DIR_SEPARATOR);
 #endif
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
   if (p1 == NULL)                               // no slash, perhaps a drive?
@@ -1096,7 +1096,7 @@ dirname2 (const char *path)
   if (p2 > p1)                                  // use the last separator in path
     p1 = p2;
 #else
-  p1 = strrchr (dir, FILE_SEPARATOR);
+  p1 = strrchr (dir, DIR_SEPARATOR);
 #endif
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
   if (p1 == NULL)                               // no slash, perhaps a drive?
@@ -1115,7 +1115,7 @@ dirname2 (const char *path)
           ||
           (*(p1 - 1) == '\\' && (*p1 == '\\' || *p1 == '/'))))
 #else
-         (*(p1 - 1) == FILE_SEPARATOR && *p1 == FILE_SEPARATOR))
+         (*(p1 - 1) == DIR_SEPARATOR && *p1 == DIR_SEPARATOR))
 #endif
     p1--;
 
@@ -1180,12 +1180,12 @@ realpath (const char *path, char *full_path)
     {
       *new_path++ = *path++;
       *new_path++ = *path++;
-      if (*path == FILE_SEPARATOR)
+      if (*path == DIR_SEPARATOR)
         *new_path++ = *path++;
     }
   else
 #endif
-  if (*path != FILE_SEPARATOR)
+  if (*path != DIR_SEPARATOR)
     {
       getcwd (new_path, FILENAME_MAX - 1);
 #ifdef  DJGPP
@@ -1194,24 +1194,24 @@ realpath (const char *path, char *full_path)
         int l = strlen (new_path);
         for (n = 0; n < l; n++)
           if (new_path[n] == '/')
-            new_path[n] = FILE_SEPARATOR;
+            new_path[n] = DIR_SEPARATOR;
       }
 #endif
       new_path += strlen (new_path);
-      if (*(new_path - 1) != FILE_SEPARATOR)
-        *new_path++ = FILE_SEPARATOR;
+      if (*(new_path - 1) != DIR_SEPARATOR)
+        *new_path++ = DIR_SEPARATOR;
     }
   else
     {
-      *new_path++ = FILE_SEPARATOR;
+      *new_path++ = DIR_SEPARATOR;
       path++;
     }
 
   // Expand each (back)slash-separated pathname component
   while (*path != 0)
     {
-      // Ignore stray FILE_SEPARATOR
-      if (*path == FILE_SEPARATOR)
+      // Ignore stray DIR_SEPARATOR
+      if (*path == DIR_SEPARATOR)
         {
           path++;
           continue;
@@ -1219,28 +1219,28 @@ realpath (const char *path, char *full_path)
       if (*path == '.')
         {
           // Ignore "."
-          if (path[1] == 0 || path[1] == FILE_SEPARATOR)
+          if (path[1] == 0 || path[1] == DIR_SEPARATOR)
             {
               path++;
               continue;
             }
           if (path[1] == '.')
             {
-              if (path[2] == 0 || path[2] == FILE_SEPARATOR)
+              if (path[2] == 0 || path[2] == DIR_SEPARATOR)
                 {
                   path += 2;
                   // Ignore ".." at root
                   if (new_path == got_path + 1)
                     continue;
                   // Handle ".." by backing up
-                  while (*((--new_path) - 1) != FILE_SEPARATOR)
+                  while (*((--new_path) - 1) != DIR_SEPARATOR)
                     ;
                   continue;
                 }
             }
         }
       // Safely copy the next pathname component
-      while (*path != 0 && *path != FILE_SEPARATOR)
+      while (*path != 0 && *path != DIR_SEPARATOR)
         {
           if (path > max_path)
             return NULL;
@@ -1275,12 +1275,12 @@ realpath (const char *path, char *full_path)
         {
           // Note: readlink() doesn't add the null byte
           link_path[n] = 0;
-          if (*link_path == FILE_SEPARATOR)
+          if (*link_path == DIR_SEPARATOR)
             // Start over for an absolute symlink
             new_path = got_path;
           else
             // Otherwise back up over this component
-            while (*(--new_path) != FILE_SEPARATOR)
+            while (*(--new_path) != DIR_SEPARATOR)
               ;
           if (strlen (path) + n >= FILENAME_MAX - 2)
             return NULL;
@@ -1290,10 +1290,10 @@ realpath (const char *path, char *full_path)
           path = copy_path;
         }
 #endif // S_IFLNK
-      *new_path++ = FILE_SEPARATOR;
+      *new_path++ = DIR_SEPARATOR;
     }
   // Delete trailing slash but don't whomp a lone slash
-  if (new_path != got_path + 1 && *(new_path - 1) == FILE_SEPARATOR)
+  if (new_path != got_path + 1 && *(new_path - 1) == DIR_SEPARATOR)
     {
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       if (new_path >= got_path + 3)
@@ -1329,8 +1329,8 @@ realpath (const char *path, char *full_path)
   n = strlen (full_path) - 1;
   // Remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
-  if (full_path[n] == FILE_SEPARATOR &&
-      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == FILE_SEPARATOR
+  if (full_path[n] == DIR_SEPARATOR &&
+      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == DIR_SEPARATOR
     full_path[n] = 0;
 
   return full_path;
@@ -1351,12 +1351,12 @@ realpath2 (const char *path, char *full_path)
 
   if (path[0] == '~')
     {
-      if (path[1] == FILE_SEPARATOR
+      if (path[1] == DIR_SEPARATOR
 #ifdef  __CYGWIN__
           || path[1] == '\\'
 #endif
          )
-        sprintf (path1, "%s"FILE_SEPARATOR_S"%s", getenv2 ("HOME"), &path[2]);
+        sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
       else if (path[1] == 0)
         strcpy (path1, getenv2 ("HOME"));
       path2 = path1;
@@ -1751,7 +1751,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 
   if ((srcfile = fopen (src_name, "r")) == NULL) // open in text mode
     {
-      fprintf (stderr, "ERROR: Can't open \"%s\" for reading\n", src_name);
+      fprintf (stderr, "ERROR: Cannot open \"%s\" for reading\n", src_name);
       return -1;
     }
 
@@ -2059,7 +2059,7 @@ gauge (time_t init_time, int pos, int size)
 
 #ifdef  __CYGWIN__
 /*
-  Weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is ok):
+  Weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is OK):
   When a string with "e (e with diaeresis, one character) is read from an
   environment variable, the character isn't the right character for accessing
   the file system. We fix this.
@@ -2131,7 +2131,7 @@ getenv2 (const char *variable)
             {
               strcpy (value, tmp);
               tmp = getenv ("HOMEPATH");
-              strcat (value, tmp ? tmp : FILE_SEPARATOR_S);
+              strcat (value, tmp ? tmp : DIR_SEPARATOR_S);
             }
           else
             /*
@@ -2169,9 +2169,9 @@ getenv2 (const char *variable)
           if (access ("\\tmp\\", R_OK | W_OK) == 0)
 #else
           // trailing file separator to force it to be a directory
-          if (access (FILE_SEPARATOR_S"tmp"FILE_SEPARATOR_S, R_OK | W_OK) == 0)
+          if (access (DIR_SEPARATOR_S "tmp" DIR_SEPARATOR_S, R_OK | W_OK) == 0)
 #endif
-            strcpy (value, FILE_SEPARATOR_S"tmp");
+            strcpy (value, DIR_SEPARATOR_S "tmp");
           else
             getcwd (value, FILENAME_MAX);
         }
@@ -2254,7 +2254,7 @@ get_property (const char *filename, const char *propname, char *buffer,
             strcpy (buffer, def);
           else
             buffer = NULL;                      // buffer won't be changed
-        }                                       //  after this func (=ok)
+        }                                       //  after this func (=OK)
     }
   else
     strcpy (buffer, p);
@@ -2396,7 +2396,7 @@ tmpnam2 (char *temp)
 
   *temp = 0;
   while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs
-    sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, rand());
+    sprintf (temp, "%s%s%08x.tmp", p, DIR_SEPARATOR_S, rand());
 
   return temp;
 }
@@ -2710,7 +2710,7 @@ q_fbackup (const char *filename, int mode)
       remove (buf);                             // *try* to remove or rename() will fail
       if (rename (filename, buf))               // keep file attributes like date, etc.
         {
-          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
+          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
     }
@@ -2725,13 +2725,13 @@ q_fbackup (const char *filename, int mode)
         }
       strcpy (buf, dir);
       if (buf[0] != 0)
-        if (buf[strlen (buf) - 1] != FILE_SEPARATOR)
-          strcat (buf, FILE_SEPARATOR_S);
+        if (buf[strlen (buf) - 1] != DIR_SEPARATOR)
+          strcat (buf, DIR_SEPARATOR_S);
 
       strcat (buf, basename2 (tmpnam2 (buf2)));
       if (rename (filename, buf))
         {
-          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
+          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
       free (dir);
@@ -2746,7 +2746,7 @@ q_fbackup (const char *filename, int mode)
     default:
       if (q_fcpy (buf, 0, q_fsize (buf), filename, "wb"))
         {
-          fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
+          fprintf (stderr, "ERROR: Cannot open \"%s\" for writing\n", filename);
           exit (1);
         }
       return buf;

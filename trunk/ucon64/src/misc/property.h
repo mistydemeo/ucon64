@@ -80,21 +80,21 @@ typedef struct
                          the whole property will disappear from filename
 */
 #ifdef  __MSDOS__
-#define PROPERTY_HOME_RC(n) "~" FILE_SEPARATOR_S n ".cfg"
+#define PROPERTY_HOME_RC(n) "~" DIR_SEPARATOR_S n ".cfg"
 #else
-#define PROPERTY_HOME_RC(n) "~" FILE_SEPARATOR_S "." n "rc"
+#define PROPERTY_HOME_RC(n) "~" DIR_SEPARATOR_S "." n "rc"
 #endif
 
 #if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
-#define PROPERTY_MODE_GLOBAL_RC(n)  n ".cfg"
+#define PROPERTY_MODE_GLOBAL_RC(n) n ".cfg"
 #else
-#define PROPERTY_MODE_GLOBAL_RC(n)  FILE_SEPARATOR_S "etc" FILE_SEPARATOR_S n
+#define PROPERTY_MODE_GLOBAL_RC(n) DIR_SEPARATOR_S "etc" DIR_SEPARATOR_S n
 #endif
 
 #if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
-#define PROPERTY_MODE_DIR(n) "~" FILE_SEPARATOR_S 
+#define PROPERTY_MODE_DIR(n) "~" DIR_SEPARATOR_S 
 #elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
-#define PROPERTY_MODE_DIR(n) "~" FILE_SEPARATOR_S "." n FILE_SEPARATOR_S
+#define PROPERTY_MODE_DIR(n) "~" DIR_SEPARATOR_S "." n DIR_SEPARATOR_S
 #else
 #define PROPERTY_MODE_DIR(n) ""
 #endif

@@ -24,10 +24,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <string.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -36,32 +36,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include "misc/misc.h"
-#include "misc/string.h"
-#include "misc/property.h"
+#include "misc/archive.h"
 #include "misc/bswap.h"
 #include "misc/chksum.h"
 #include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/misc.h"
+#include "misc/property.h"
+#include "misc/string.h"
 #include "misc/term.h"
-#include "ucon64.h"
-#include "ucon64_opts.h"
-#include "ucon64_misc.h"
 #include "ucon64_dat.h"
-#include "console/console.h"
-#include "backup/backup.h"
-#include "patch/patch.h"
+#include "ucon64_misc.h"
 
 
 #ifdef  USE_DISCMAGE
 #ifdef  DLOPEN
 #include "misc/dlopen.h"
+
 
 static void *libdm;
 static uint32_t (*dm_get_version_ptr) (void) = NULL;
@@ -182,10 +172,10 @@ const char *ucon64_msg[] =
     "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
 
     "Wrote output to: %s\n",                                            // WROTE
-    "ERROR: Can't open \"%s\" for reading\n",                           // OPEN_READ_ERROR
-    "ERROR: Can't open \"%s\" for writing\n",                           // OPEN_WRITE_ERROR
-    "ERROR: Can't read from \"%s\"\n",                                  // READ_ERROR
-    "ERROR: Can't write to \"%s\"\n",                                   // WRITE_ERROR
+    "ERROR: Cannot open \"%s\" for reading\n",                          // OPEN_READ_ERROR
+    "ERROR: Cannot open \"%s\" for writing\n",                          // OPEN_WRITE_ERROR
+    "ERROR: Cannot read from \"%s\"\n",                                 // READ_ERROR
+    "ERROR: Cannot write to \"%s\"\n",                                  // WRITE_ERROR
     "ERROR: Not enough memory for buffer (%d bytes)\n",                 // BUFFER_ERROR
     "ERROR: Not enough memory for ROM buffer (%d bytes)\n",             // ROM_BUFFER_ERROR
     "ERROR: Not enough memory for file buffer (%d bytes)\n",            // FILE_BUFFER_ERROR
@@ -492,12 +482,12 @@ const st_getopt2_t ucon64_options_usage[] =
     },
 #if 0
     {
-      "xcdrw", 0, 0, UCON64_XCDRW, // obsolete
+      "xcdrw", 0, 0, UCON64_XCDRW,              // obsolete
       NULL, NULL,
       &ucon64_option_obj[4]
     },
     {
-      "cdmage", 1, 0, UCON64_CDMAGE, // obsolete
+      "cdmage", 1, 0, UCON64_CDMAGE,            // obsolete
       NULL, NULL,
       &ucon64_option_obj[1]
     },
@@ -673,7 +663,7 @@ ucon64_load_discmage (void)
     int n, l;
 
     dirname2 (ucon64.argv[0], dir);
-    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", dir, "discmage.dxe");
+    sprintf (djimport_path, "%s" DIR_SEPARATOR_S "%s", dir, "discmage.dxe");
     // this is specific to DJGPP - not necessary, but prevents confusion
     l = strlen (djimport_path);
     for (n = 0; n < l; n++)
@@ -1639,7 +1629,7 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
   realpath2 (pattern_fname, src_name);
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, pattern_fname);
+    sprintf (src_name, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, pattern_fname);
   n_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_patterns == 0)
     {
@@ -1700,7 +1690,7 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (rominfo->backup_header_len)                    // copy header (if present)
+  if (rominfo->backup_header_len)               // copy header (if present)
     {
       n = rominfo->backup_header_len;
       while ((bytesread = fread (buffer, 1, MIN (n, PATTERN_BUFSIZE), srcfile)) != 0)

@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SPSC_H
 #define SPSC_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+
+
 extern const st_getopt2_t spsc_usage[];
 
 typedef struct st_spsc_header
@@ -30,4 +33,5 @@ typedef struct st_spsc_header
 
 #define SPSC_HEADER_START 0
 #define SPSC_HEADER_LEN (sizeof (st_spsc_header_t))
+
 #endif

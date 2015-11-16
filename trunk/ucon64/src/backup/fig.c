@@ -23,23 +23,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "misc/parallel.h"
 #include "misc/file.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "ffe.h"
-#include "fig.h"
 #include "console/snes.h"                       // for snes_get_snes_hirom()
+#include "backup/ffe.h"
+#include "backup/fig.h"
 
 
 #ifdef  USE_PARALLEL
@@ -307,7 +298,7 @@ fig_read_rom (const char *filename, unsigned short parport)
   size = receive_rom_info (buffer);
   if (size == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Pro Fighter\n");
+      fputs ("ERROR: There is no cartridge present in the Pro Fighter\n", stderr);
       fclose (file);
       remove (filename);
       exit (1);
@@ -327,7 +318,7 @@ fig_read_rom (const char *filename, unsigned short parport)
   if (hirom)
     blocksleft >>= 1;
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
   address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
   address2 = 0x200;                             //  also work
@@ -393,9 +384,9 @@ int
 fig_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
-  unsigned char *buffer;
+  unsigned char *buffer, emu_mode_select;
   int bytesread = 0, bytessent, totalblocks, blocksdone = 0, blocksleft, fsize,
-      n, emu_mode_select;
+      n;
   unsigned short address1, address2;
   time_t starttime;
 
@@ -430,7 +421,7 @@ fig_write_rom (const char *filename, unsigned short parport)
   if (hirom)
     ffe_send_command0 (0xe00f, 0);              // seems to enable HiROM mode,
                                                 //  value doesn't seem to matter
-  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
   totalblocks = (fsize - FIG_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
   blocksleft = totalblocks;
@@ -475,12 +466,14 @@ fig_write_rom (const char *filename, unsigned short parport)
     ffe_send_command0 (0xc010, 2);
 
   ffe_send_command (5, 0, 0);
-  ffe_send_command (6, (unsigned short) (1 | (emu_mode_select << 8)), 0);
+  ffe_send_command (6, 1 | (emu_mode_select << 8), 0);
 
+#if 0
   ffe_wait_for_ready ();
   outportb (parport + PARPORT_DATA, 0);
   outportb (parport + PARPORT_CONTROL,
             inportb (parport + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
+#endif
 
   free (buffer);
   fclose (file);
@@ -523,7 +516,7 @@ fig_read_sram (const char *filename, unsigned short parport)
   ffe_send_command0 (0xe00d, 0);
   ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
   blocksleft = 4;                               // SRAM is 4*8 kB
   address = 0x100;
@@ -579,7 +572,7 @@ fig_write_sram (const char *filename, unsigned short parport)
   ffe_send_command0 (0xe00d, 0);
   ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
   address = 0x100;
   starttime = time (NULL);
@@ -627,7 +620,7 @@ fig_read_cart_sram (const char *filename, unsigned short parport)
   size = receive_rom_info (buffer);
   if (size == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Pro Fighter\n");
+      fputs ("ERROR: There is no cartridge present in the Pro Fighter\n", stderr);
       fclose (file);
       remove (filename);
       exit (1);
@@ -650,7 +643,7 @@ fig_read_cart_sram (const char *filename, unsigned short parport)
   ffe_send_command0 (0xe00c, 0);
 //  ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
   address = hirom ? 0x2c3 : 0x1c0;
 
@@ -700,7 +693,7 @@ fig_write_cart_sram (const char *filename, unsigned short parport)
   size = receive_rom_info (buffer);
   if (size == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Pro Fighter\n");
+      fputs ("ERROR: There is no cartridge present in the Pro Fighter\n", stderr);
       fclose (file);
       remove (filename);
       exit (1);
@@ -720,7 +713,7 @@ fig_write_cart_sram (const char *filename, unsigned short parport)
   ffe_send_command0 (0xe00c, 0);
 //  ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
   address = hirom ? 0x2c3 : 0x1c0;
 

@@ -23,23 +23,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include "misc/misc.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
-#include "ucon64_misc.h"
-#include "doctor64.h"
+#include "misc/file.h"
 #include "misc/parallel.h"
+#include "ucon64_misc.h"
+#include "backup/doctor64.h"
 
 
 #ifdef  USE_PARALLEL
@@ -240,7 +230,7 @@ sendFilename (unsigned short baseport, char name[])
   char *c, mname[12];
 
   memset (mname, ' ', 11);
-  c = (strrchr (name, FILE_SEPARATOR));
+  c = (strrchr (name, DIR_SEPARATOR));
   if (c == NULL)
     {
       c = name;
@@ -362,7 +352,7 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
-  unsigned int size, pos, bytessend = 0;
+  unsigned int size, pos, bytessent = 0;
   time_t init_time;
 
   parport_print_info ();
@@ -395,8 +385,8 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
         break;
       if (parport_write (buf, pos, parport) != 0)
         break;
-      bytessend += sizeof buf;
-      ucon64_gauge (init_time, bytessend, size);
+      bytessent += sizeof buf;
+      ucon64_gauge (init_time, bytessent, size);
     }
   fclose (fh);
   return 0;

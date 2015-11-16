@@ -21,14 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef PATCH_H
 #define PATCH_H
 
-#include "aps.h"
-#include "bsl.h"
-#include "gg.h"
-#include "ips.h"
-#include "ppf.h"
+#include "misc/getopt2.h"                       // st_getopt2_t
 
 
 extern const st_getopt2_t patch_usage[];
-
 
 #endif

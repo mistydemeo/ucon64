@@ -25,21 +25,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include "misc/parallel.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
+#include <string.h>
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
-#include "misc/misc.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "tototek.h"
-#include "smsgg-pro.h"
+#include "backup/tototek.h"
+#include "backup/smsgg-pro.h"
 
 
 #ifdef  USE_PARALLEL
@@ -228,7 +220,7 @@ smsgg_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x10];
-  int game_no, size, address = 0, bytesread, bytessend = 0, bytesleft = 0,
+  int game_no, size, address = 0, bytesread, bytessent = 0, bytesleft = 0,
       multi_game;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
@@ -290,8 +282,8 @@ smsgg_write_rom (const char *filename, unsigned short parport)
             ttt_erase_block (address);
           write_block (&address, buffer);
 
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
+          bytessent += bytesread;
+          ucon64_gauge (starttime, bytessent, size);
           bytesleft -= 0x4000;
         }
       // Games have to be aligned to a 16 kB boundary.
@@ -383,7 +375,7 @@ smsgg_write_sram (const char *filename, unsigned short parport, int start_bank)
 {
   FILE *file;
   unsigned char buffer[0x4000];
-  int size, bytesread, bytessend = 0, address;
+  int size, bytesread, bytessent = 0, address;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
@@ -421,8 +413,8 @@ smsgg_write_sram (const char *filename, unsigned short parport, int start_bank)
   while ((bytesread = fread (buffer, 1, 0x4000, file)) != 0)
     {
       write_block (&address, buffer);
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
     }
 
   fclose (file);

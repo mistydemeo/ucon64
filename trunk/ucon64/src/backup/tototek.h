@@ -21,7 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef TOTOTEK_H
 #define TOTOTEK_H
 
-#ifdef USE_PARALLEL
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#ifdef  USE_PARALLEL
 extern void ttt_init_io (unsigned short port);
 extern void ttt_deinit_io (void);
 extern void ttt_set_ai_data (unsigned char ai, unsigned char data);
@@ -42,6 +47,6 @@ extern void ttt_write_page_rom (int addr, unsigned char *buf);
 extern void ttt_write_byte_ram (int addr, unsigned char b);
 extern void ttt_write_page_ram (int addr, unsigned char *buf);
 extern void ttt_write_page_ram2 (int addr, unsigned char *buf);
-#endif // USE_PARALLEL
+#endif
 
-#endif // TOTOTEK_H
+#endif

@@ -22,6 +22,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef NES_H
 #define NES_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 typedef enum { INES = 1, UNIF, PASOFAMI, FFE, FDS, FAM } nes_file_t;
 
 extern const st_getopt2_t nes_usage[];
@@ -242,4 +246,4 @@ extern int nes_j (unsigned char **mem_image);
 extern int nes_dint (void);
 extern nes_file_t nes_get_file_type (void);
 
-#endif // NES_H
+#endif

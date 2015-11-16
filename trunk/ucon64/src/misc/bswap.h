@@ -26,16 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // HAVE_BYTESWAP_H
 #endif
 
+#include "misc/itypes.h"
+
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32 (VC++)
-#include "itypes.h"
-#endif
-
 
 /*
   bswap_16()        12             21
@@ -46,14 +42,14 @@ extern "C" {
   wswap_64()        12345678 78563412
 */
 
+#ifdef  HAVE_BYTESWAP_H
+#include <byteswap.h>
+#else
+
 #ifdef  _MSC_VER
 // Visual C++ doesn't allow inline in C source code
 #define inline __inline
 #endif
-
-#ifdef HAVE_BYTESWAP_H
-#include <byteswap.h>
-#else
 
 
 static inline uint16_t
@@ -131,7 +127,7 @@ bswap_64 (uint64_t x)
 
 #if     defined _LIBC || defined __GLIBC__
 #include <endian.h>
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if     __BYTE_ORDER == __BIG_ENDIAN
 #define WORDS_BIGENDIAN 1
 #endif
 #elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
@@ -204,4 +200,5 @@ wswap_64 (uint64_t x)
 #ifdef  __cplusplus
 }
 #endif
+
 #endif // MISC_BSWAP_H

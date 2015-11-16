@@ -25,21 +25,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include "misc/parallel.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
+#include <string.h>
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
-#include "misc/misc.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "tototek.h"
-#include "pce-pro.h"
+#include "backup/tototek.h"
+#include "backup/pce-pro.h"
 
 
 #ifdef  USE_PARALLEL
@@ -76,7 +68,7 @@ static void write_rom_by_byte (int *addr, unsigned char *buf);
 static void write_rom_by_page (int *addr, unsigned char *buf);
 
 
-void
+static void
 eep_reset (void)
 {
   ttt_rom_enable ();
@@ -86,7 +78,7 @@ eep_reset (void)
 }
 
 
-unsigned short int
+static unsigned short int
 check_card (void)
 {
   unsigned short int id;
@@ -103,7 +95,7 @@ check_card (void)
 }
 
 
-void
+static void
 write_rom_by_byte (int *addr, unsigned char *buf)
 {
   int x;
@@ -116,7 +108,7 @@ write_rom_by_byte (int *addr, unsigned char *buf)
 }
 
 
-void
+static void
 write_rom_by_page (int *addr, unsigned char *buf)
 {
   int x;
@@ -187,7 +179,7 @@ pce_write_rom (const char *filename, unsigned short parport)
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x20];
   int game_no, size, romsize = 0, startaddress, address = 0, bytesread,
-      bytessend = 0, bytesleft, multi_game;
+      bytessent = 0, bytesleft, multi_game;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -272,8 +264,8 @@ pce_write_rom (const char *filename, unsigned short parport)
           else if ((romsize == 4 * MBIT) && (address - startaddress == 4 * MBIT))
             fseek (file, -2 * MBIT, SEEK_CUR);
 
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
+          bytessent += bytesread;
+          ucon64_gauge (starttime, bytessent, size);
           bytesleft -= 0x4000;
         }
       // Games have to be aligned to a Mbit boundary.

@@ -31,16 +31,10 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "bswap.h"
-#ifdef  USE_ZLIB
-#include <zlib.h>
-#include "unzip.h"
-#endif
-#include "misc.h"
-#include "chksum.h"
+#include "misc/bswap.h"
+#include "misc/chksum.h"
+#include "misc/misc.h"
 
 
 #if     (!defined TRUE || !defined FALSE)
@@ -458,7 +452,7 @@ md5_final (s_md5_ctx_t *mdContext)
 
 void
 init_crc_table (void *table, unsigned int polynomial)
-// works for crc16 and crc32
+// works for CRC16 and CRC32
 {
   unsigned int crc, i, j;
 

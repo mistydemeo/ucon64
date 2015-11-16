@@ -26,22 +26,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stddef.h>                             // size_t (VC++)
 #include <sys/types.h>                          // off_t
-#ifdef  HAVE_INTTYPES_H
-#include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32 (VC++)
-#include "itypes.h"
-#endif
 
 
 #if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
         defined AMIGA || defined __APPLE__      // Mac OS X actually
 // GNU/Linux, Solaris, FreeBSD, OpenBSD, Cygwin, BeOS, Amiga, Mac (OS X)
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
+#define DIR_SEPARATOR '/'
+#define DIR_SEPARATOR_S "/"
 #else // DJGPP, Win32
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
+#define DIR_SEPARATOR '\\'
+#define DIR_SEPARATOR_S "\\"
 #endif
 
 
@@ -108,7 +104,7 @@ extern int fcopy (const char *src, size_t start, size_t len, const char *dest,
                   const char *dest_mode);
 extern int fcopy_raw (const char *src, const char *dest);
 #ifndef  USE_ZLIB
-// archive.h's definition gets higher "precedence"
+// archive.h's definition gets higher precedence
 extern int fsizeof (const char *filename);
 #endif
 extern int quick_io (void *buffer, size_t start, size_t len, const char *fname,

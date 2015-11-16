@@ -21,7 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
+
 #ifdef  USE_ZLIB
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,18 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #include <zlib.h>
-#ifdef  HAVE_BYTESWAP_H
-#include <byteswap.h>
-#else
-#include "bswap.h"
-#endif
-#include "archive.h"
-#include "misc.h"
-#include "map.h"
-#include "unzip.h"
-#if     defined DJGPP && defined DLL
-#include "dxedll_priv.h"
-#endif
+#include "misc/archive.h"
+#include "misc/map.h"
+#include "misc/unzip.h"
 
 
 #ifdef  MAXBUFSIZE
@@ -669,4 +662,5 @@ pclose2 (FILE *stream)
 #undef  pclose
 #define pclose  pclose2
 }
+
 #endif // USE_ZLIB

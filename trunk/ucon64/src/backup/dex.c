@@ -22,19 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include "misc/misc.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
-#include "ucon64_misc.h"
-#include "dex.h"
-#include "psxpblib.h"
+#include "misc/file.h"
 #include "misc/parallel.h"
+#include "ucon64_misc.h"
+#include "backup/dex.h"
+#include "backup/psxpblib.h"
 
 
 static st_ucon64_obj_t dex_obj[] =

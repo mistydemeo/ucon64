@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
 #include <string.h>
 /*
   String manipulation

@@ -15,29 +15,11 @@
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <fcntl.h>
-#include <ctype.h>
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include "misc/misc.h"
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       /* st_getopt2_t */
-#include "ucon64.h"
-#include "ucon64_misc.h"
-#include "psxpblib.h"
 #include "misc/parallel.h"
+#include "ucon64.h"
+#include "backup/psxpblib.h"
 
 
 #ifdef  USE_PARALLEL
@@ -489,7 +471,7 @@ psx_controller_vinit (int base, int conport, int tap, int delay)
 
   for (i = 0; i < 3; i++)
     {
-	  vibrate_init_string[i][0] = tap;
+      vibrate_init_string[i][0] = tap;
       psx_delay (base, delay);
       psx_delay (base, delay);
       psx_delay (base, delay);

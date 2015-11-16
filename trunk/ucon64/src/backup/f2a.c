@@ -24,12 +24,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/types.h>
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -50,33 +48,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #else
 #include <sys/time.h>
 #endif
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <errno.h>
-#include "misc/bswap.h"
-#include "misc/misc.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
-#include "ucon64_misc.h"
-#include "f2a.h"
-#include "console/gba.h"
 #ifdef  USE_USB
 #include <stdarg.h>
 #ifdef  __unix__
-#include <sys/wait.h>
 #include <sys/utsname.h>
+#include <sys/wait.h>
 #endif
 #include "misc/usb.h"
-#endif
-#ifdef  USE_PARALLEL
+#endif // USE_USB
+#include "misc/archive.h"
+#include "misc/bswap.h"
+#include "misc/file.h"
+#include "misc/misc.h"
 #include "misc/parallel.h"
-#endif
 #include "misc/property.h"
+#include "ucon64_misc.h"
+#include "console/gba.h"
+#include "backup/f2a.h"
 
 
 #if     defined USE_PARALLEL || defined USE_USB
@@ -256,7 +244,7 @@ enum
 static time_t starttime = 0;
 static const char *f2a_msg[] = {
   "ERROR: Upload failed\n",
-  "ERROR: Can't determine size of file \"%s\"\n",
+  "ERROR: Cannot determine size of file \"%s\"\n",
   "Uploading %s, %d kB, padded to %d kB\n",
   NULL
 };

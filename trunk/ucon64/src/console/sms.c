@@ -23,9 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -37,17 +35,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
+#include "misc/archive.h"
 #include "misc/chksum.h"
+#include "misc/file.h"
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/misc.h"
 #include "misc/string.h"
-#include "misc/file.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "sms.h"
+#include "console/sms.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
 #include "backup/smsgg-pro.h"
@@ -334,7 +329,7 @@ sms_multi (int truncate_size, char *fname)
 {
 #define BUFSIZE 0x20000
 // BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
-//  equal to 1 Mbit (for check sum calculation)
+//  equal to 1 Mbit (for checksum calculation)
   int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
       totalsize = 0, size, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
@@ -344,7 +339,7 @@ sms_multi (int truncate_size, char *fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      fprintf (stderr, "ERROR: Cannot make multi-game file of 0 bytes\n");
       return -1;
     }
   if ((buffer = (unsigned char *) malloc (BUFSIZE)) == NULL)
@@ -474,8 +469,8 @@ sms_multi (int truncate_size, char *fname)
   fwrite (buffer, 1, strlen ((char *) buffer), destfile);
 
   /*
-    The SMS requires the check sum to match the data. The ToToTEK loaders have
-    the lower nibble of the "check sum range byte" set to 0x0f. Maybe ToToTEK
+    The SMS requires the checksum to match the data. The ToToTEK loaders have
+    the lower nibble of the "checksum range byte" set to 0x0f. Maybe ToToTEK
     will change this or maybe somebody else will write a loader. To avoid extra
     code to handle those cases we just overwite the value.
     We don't handle a GG multi-game file differently, because we cannot detect
@@ -483,8 +478,8 @@ sms_multi (int truncate_size, char *fname)
     multi-game option). ToToTEK's GG loader has an SMS header.
   */
   fseek (destfile, 0, SEEK_SET);
-  n = fread (buffer, 1, 0x20000, destfile);     // 0x0f => check sum range = 0x20000
-  buffer[SMS_HEADER_START + 15] |= 0x0f;        // overwrite check sum range byte
+  n = fread (buffer, 1, 0x20000, destfile);     // 0x0f => checksum range = 0x20000
+  buffer[SMS_HEADER_START + 15] |= 0x0f;        // overwrite checksum range byte
   sms_header.checksum_range = 0x0f;             // sms_chksum() uses this variable
   n = sms_chksum (buffer, n);
 
@@ -561,8 +556,8 @@ sms_header_len (void)
             A few games contain several copies of the identification string
             (Alien 3 (UE) [!] (2 copies), Back to the Future 3 (UE) [!] (2
             copies), Sonic Spinball (UE) [!] (7 copies)). The "correct" one is
-            the last where the corresponding check sum bytes are non-zero...
-            However, finding *a* occurence is more important than the check sum
+            the last where the corresponding checksum bytes are non-zero...
+            However, finding *a* occurence is more important than the checksum
             bytes being non-zero.
           */
           while ((ptr = (char *) memmem2 (ptr, SEARCHBUFSIZE - (ptr - buffer),
@@ -703,7 +698,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
 }
 
 
-int
+static int
 sms_chksum (unsigned char *rom_buffer, int rom_size)
 {
   unsigned short int sum;

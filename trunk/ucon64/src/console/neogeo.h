@@ -21,13 +21,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef NEOGEO_H
 #define NEOGEO_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
+extern const st_getopt2_t neogeo_usage[];
+
 extern int neogeo_bios (const char *fname);
 extern int neogeo_init (st_ucon64_nfo_t *rominfo);
 extern int neogeo_mgd (void);
 extern int neogeo_mvs (void);
 extern int neogeo_s (void);
 extern int neogeo_sam (const char *fname);
-
-extern const st_getopt2_t neogeo_usage[];
 
 #endif

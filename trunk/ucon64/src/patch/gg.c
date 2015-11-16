@@ -47,27 +47,12 @@
 Portions copyright (c) 2001 - 2002 NoisyB
 Portions copyright (c) 2002        dbjh
 */
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 #include "misc/file.h"
 #include "misc/misc.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console/snes.h"
-#include "console/genesis.h"
-#include "console/nes.h"
-#include "console/sms.h"
-#include "console/gb.h"
-#include "gg.h"
+#include "patch/gg.h"
 
 
 #define GAME_GENIE_MAX_STRLEN 12

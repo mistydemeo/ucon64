@@ -21,21 +21,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include "misc/itypes.h"
-#ifdef  USE_ZLIB
 #include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/file.h"
 #include "misc/misc.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "ffe.h"
-#include "msg.h"
+#include "backup/ffe.h"
+#include "backup/msg.h"
 
 
 #ifdef  USE_PARALLEL
@@ -138,8 +130,8 @@ int
 msg_read_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
-  unsigned char *buffer, blocksleft;
-  int size, bytesreceived = 0, emu_mode_select;
+  unsigned char *buffer, blocksleft, emu_mode_select;
+  int size, bytesreceived = 0;
   time_t starttime;
   unsigned short blocksdone = 0;
 
@@ -205,8 +197,8 @@ int
 msg_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
-  unsigned char *buffer;
-  int bytesread, bytessend = 0, emu_mode_select, size;
+  unsigned char *buffer, emu_mode_select;
+  int bytesread, bytessent = 0, size;
   time_t starttime;
   unsigned short blocksdone = 0;
 
@@ -239,8 +231,8 @@ msg_write_rom (const char *filename, unsigned short parport)
       ffe_send_block (0x8000, buffer, (unsigned short) bytesread);
       blocksdone++;
 
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
+      bytessent += bytesread;
+      ucon64_gauge (starttime, bytessent, size);
       ffe_checkabort (2);
     }
 

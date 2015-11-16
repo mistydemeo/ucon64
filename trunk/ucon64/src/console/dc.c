@@ -21,23 +21,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#include <io.h>                                 // access()
+#pragma warning(pop)
+#define F_OK 00
+#endif
 #include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/archive.h"
 #include "misc/file.h"
-#include "misc/misc.h"
 #include "misc/property.h"
 #include "misc/string.h"
-#ifdef  USE_ZLIB
-#include "misc/archive.h"
-#endif
-#include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"
 #include "ucon64_misc.h"
-#include "dc.h"
+#include "console/dc.h"
 
 
 static st_ucon64_obj_t dc_obj[] =

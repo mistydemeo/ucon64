@@ -21,6 +21,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GB_H
 #define GB_H
 
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
+
+
 #define GB_LOGODATA_LEN 48
 #define GB_NAME_LEN 15                          // correct for GBC games, not
                                                 //  for {S}GB games (should be 16)

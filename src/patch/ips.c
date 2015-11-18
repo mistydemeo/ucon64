@@ -70,7 +70,7 @@ read_byte (FILE *file)
   byte = fgetc (file);
   if (byte == EOF)
     {
-      fprintf (stderr, "ERROR: Unexpected end of file\n");
+      fputs ("ERROR: Unexpected end of file\n", stderr);
       exit (1);
     }
   return (unsigned char) byte;
@@ -124,7 +124,7 @@ ips_apply (const char *mod, const char *ipsname)
       exit (1);
     }
 
-  printf ("Applying IPS patch...\n");
+  puts ("Applying IPS patch...");
   while (!feof (ipsfile))
     {
       byte = read_byte (ipsfile);
@@ -174,12 +174,12 @@ ips_apply (const char *mod, const char *ipsname)
       printf ("File truncated to %.4f MBit\n", length / (float) MBIT);
     }
 
-  printf ("Patching complete\n\n");
+  puts ("Patching complete\n");
   printf (ucon64_msg[WROTE], modname);
-  printf ("\n"
-          "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-          "      This means you must modify for example a SNES ROM with -swc or -stp or\n"
-          "      the patch will not work\n");
+  puts ("\n"
+        "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+        "      This means you must modify for example a SNES ROM with -swc or -stp or\n"
+        "      the patch will not work");
 
   unregister_func (remove_destfile);            // unregister _after_ possible padding
   fclose (ipsfile);
@@ -204,15 +204,15 @@ write_address (int new_address)
     }
   else
     {
-      fprintf (stderr, "ERROR: IPS does not support addresses greater than 16777215\n"
-                       "       Consider using another patch format\n");
+      fputs ("ERROR: IPS does not support addresses greater than 16777215\n"
+             "       Consider using another patch format\n", stderr);
       exit (1);                                 // will call remove_destfile() (indirectly)
     }
 }
 
 
 static void
-write_block (int ndiffs, unsigned char *buffer, int rle_value)
+write_block (unsigned char *buffer)
 {
   if (rle_value == NO_RLE)
     {
@@ -228,7 +228,7 @@ write_block (int ndiffs, unsigned char *buffer, int rle_value)
       fputc (ndiffs, ipsfile);
       fputc (rle_value, ipsfile);
 #ifdef  DEBUG_IPS
-      printf ("RLE ");
+      fputs ("RLE ", stdout);
 #endif
     }
 #ifdef  DEBUG_IPS
@@ -243,7 +243,7 @@ flush_diffs (unsigned char *buffer)
   if (ndiffs)
     {
       totaldiffs += ndiffs;
-      write_block (ndiffs, buffer, rle_value);
+      write_block (buffer);
       ndiffs = 0;
       rle_value = NO_RLE;
       address = -1;
@@ -261,7 +261,7 @@ rle_end (int value, unsigned char *buffer)
       fseek (orgfile, filepos, SEEK_SET);
       fseek (modfile, filepos, SEEK_SET);
 #ifdef  DEBUG_IPS
-      printf ("->normal\n");
+      puts ("->normal");
 #endif
       return 1;
     }
@@ -346,7 +346,7 @@ check_for_rle (unsigned char byte, unsigned char *buf)
             {
               rle_value = byte;
 #ifdef  DEBUG_IPS
-              printf ("->RLE\n");
+              puts ("->RLE");
 #endif
             }
         }
@@ -388,7 +388,7 @@ ips_create (const char *orgname, const char *modname)
   orgfilesize = fsizeof (orgname);
   modfilesize = fsizeof (modname);
 
-  fprintf (ipsfile, "PATCH");
+  fputs ("PATCH", ipsfile);
 
 next_byte:
   for (;;)
@@ -496,7 +496,7 @@ next_byte:
     }
 
   flush_diffs (buf);
-  fprintf (ipsfile, "EOF");
+  fputs ("EOF", ipsfile);
   if (modfilesize < orgfilesize)
     write_address (modfilesize);
 

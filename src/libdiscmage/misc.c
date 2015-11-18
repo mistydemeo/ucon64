@@ -33,12 +33,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
 #include <stdarg.h>                             // va_arg()
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
+#include <time.h>
 #include <sys/stat.h>                           // for S_IFLNK
 #ifdef  _MSC_VER
 #pragma warning(pop)

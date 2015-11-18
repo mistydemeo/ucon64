@@ -598,7 +598,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
   else if (type == MGD_GEN)
     {
       char suffix[5], *p_index, name[9], *names[16], names_mem[16][9];
-      int n, offset, size, name_i = 0;
+      int n, offset, chunk_size, name_i = 0;
 
       for (n = 0; n < 16; n++)
         names[n] = names_mem[n];
@@ -625,14 +625,15 @@ genesis_s (st_ucon64_nfo_t *rominfo)
       for (x = 0; x < nparts; x++)
         {
           offset = x * (part_size / 2);
-          size = part_size / 2;
-          if (offset + size > ucon64.file_size / 2)
-            size = ucon64.file_size / 2 - offset;
+          chunk_size = part_size / 2;
+          if (offset + chunk_size > ucon64.file_size / 2)
+            chunk_size = ucon64.file_size / 2 - offset;
           // don't write backups of parts, because one name is used
           // write first half of file
-          fcopy (ucon64.fname, offset, size, dest_name, "wb");
+          fcopy (ucon64.fname, offset, chunk_size, dest_name, "wb");
           // write second half of file; don't do: "(nparts / 2) * part_size"!
-          fcopy (ucon64.fname, ucon64.file_size / 2 + offset, size, dest_name, "ab");
+          fcopy (ucon64.fname, ucon64.file_size / 2 + offset, chunk_size,
+                 dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
           (*p)++;

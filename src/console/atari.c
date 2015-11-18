@@ -136,7 +136,7 @@ typedef struct
 } st_atari_bsmode_t;
 
 
-static st_atari_bsmode_t bsmode[] = {
+static st_atari_bsmode_t bsmodes[] = {
   {BSM_2K,   "2K",   0x800,   0xca, 7},
   {BSM_CV,   "CV",   0x800,   0xea, 7},
   {BSM_4K,   "4K",   0x1000,  0xc8, 15},
@@ -266,10 +266,10 @@ get_bsmode_by_id (int bsm)
 {
   int i = 0;
 
-  while (bsmode[i].bsm)
+  while (bsmodes[i].bsm)
     {
-      if (bsmode[i].bsm == bsm)
-        return &bsmode[i];
+      if (bsmodes[i].bsm == bsm)
+        return &bsmodes[i];
       i++;
     }
 

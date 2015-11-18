@@ -1057,19 +1057,20 @@ main (int argc, char **argv)
 
       if (x < UCON64_MAX_ARGS)
         {
-          const st_ucon64_obj_t *p = (st_ucon64_obj_t *) getopt2_get_index_by_val (options, c)->object;
+          const st_ucon64_obj_t *o =
+            (st_ucon64_obj_t *) getopt2_get_index_by_val (options, c)->object;
 
           arg[x].console = UCON64_UNKNOWN; // default
 
-          if (p)
+          if (o)
             {
-              arg[x].flags = p->flags;
-              if (p->console)
-                arg[x].console = p->console;
+              arg[x].flags = o->flags;
+              if (o->console)
+                arg[x].console = o->console;
             }
 
           arg[x].val = c;
-          arg[x++].optarg = (optarg ? optarg : NULL);
+          arg[x++].optarg = optarg ? optarg : NULL;
         }
       else
         // this shouldn't happen

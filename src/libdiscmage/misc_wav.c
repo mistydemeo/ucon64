@@ -28,6 +28,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #endif
 // TODO: replace ceil(), floor() and sin()
 
+
+#if 0
 unsigned char wav_header[3][80] = { 
   {
     'R', 'I', 'F', 'F', 0x80, 0x80, 0x80, 0x80,    // RIFF TAG
@@ -66,6 +68,7 @@ unsigned char wav_header[3][80] = {
     'd', 'a', 't', 'a', 0, 0, 0, 0, '\0'           // DATA TAG
   }
 };
+#endif
 
 
 typedef struct

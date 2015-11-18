@@ -136,12 +136,12 @@ endif
 default: all
 
 ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
-all:	libcd64.a
+all: libcd64.a
 else
 ifeq ($(GCC_WIN),1)
-all:	libcd64.a cd64.dll
+all: libcd64.a cd64.dll
 else
-all:	libcd64.a libcd64.so
+all: libcd64.a libcd64.so
 endif # GCC_WIN
 endif # DJGPP
 

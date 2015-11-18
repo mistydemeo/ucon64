@@ -27,12 +27,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
+#include <time.h>
 #include <sys/stat.h>
 #ifdef  _MSC_VER
 #pragma warning(pop)
@@ -425,8 +425,6 @@ dm_fdopen (dm_image_t *image, int track_num, const char *mode)
   fclose (fh);
   return NULL;
 }
-
-
 
 
 int

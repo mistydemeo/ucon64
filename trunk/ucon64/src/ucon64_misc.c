@@ -601,8 +601,6 @@ ucon64_load_discmage (void)
         }
       else
         {
-          u_func_ptr_t sym;
-
           sym.void_ptr = get_symbol (libdm, "dm_get_version_s");
           dm_get_version_s_ptr = (const char *(*) (void)) sym.func_ptr;
           sym.void_ptr = get_symbol (libdm, "dm_set_gauge");

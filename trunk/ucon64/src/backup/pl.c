@@ -528,7 +528,7 @@ program (unsigned int addr, unsigned char data, int retries)
         return 0;                               // OK
       if (s & 32)
         {
-          int s = read_data ();
+          s = read_data ();
           if ((s & 128) == 0)
             return 0;                           // OK
           if (data == read_data ())

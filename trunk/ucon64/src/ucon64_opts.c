@@ -105,8 +105,7 @@ int
 ucon64_switches (st_ucon64_t *p)
 {
   int x = 0;
-  int c = p->option;
-  const char *optarg = p->optarg;
+  const char *option_arg = p->optarg;
 
   /*
     Handle options or switches that cause other _options_ to be ignored except
@@ -115,7 +114,7 @@ ucon64_switches (st_ucon64_t *p)
     We have to do this here (not in ucon64_options()) or else other options
     might be executed before these.
   */
-  switch (c)
+  switch (p->option)
     {
     /*
       Many tools ignore other options if --help has been specified. We do the
@@ -123,17 +122,17 @@ ucon64_switches (st_ucon64_t *p)
     */
     case UCON64_HELP:
       x = USAGE_VIEW_LONG;
-      if (optarg)
+      if (option_arg)
         {
-          if (!strcmp (optarg, "pad"))
+          if (!strcmp (option_arg, "pad"))
             x = USAGE_VIEW_PAD;
-          else if (!strcmp (optarg, "dat"))
+          else if (!strcmp (option_arg, "dat"))
             x = USAGE_VIEW_DAT;
-          else if (!strcmp (optarg, "patch"))
+          else if (!strcmp (option_arg, "patch"))
             x = USAGE_VIEW_PATCH;
-          else if (!strcmp (optarg, "backup"))
+          else if (!strcmp (option_arg, "backup"))
             x = USAGE_VIEW_BACKUP;
-          else if (!strcmp (optarg, "disc"))
+          else if (!strcmp (option_arg, "disc"))
             x = USAGE_VIEW_DISC;
         }
       ucon64_usage (ucon64.argc, ucon64.argv, x);
@@ -279,7 +278,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_HDN:
-      ucon64.backup_header_len = strtol (optarg, NULL, 10);
+      ucon64.backup_header_len = strtol (option_arg, NULL, 10);
       break;
 
     case UCON64_NHD:
@@ -302,10 +301,10 @@ ucon64_switches (st_ucon64_t *p)
 
     case UCON64_PORT:
 #ifdef  USE_USB
-      if (!strnicmp (optarg, "usb", 3))
+      if (!strnicmp (option_arg, "usb", 3))
         {
-          if (strlen (optarg) >= 4)
-            ucon64.usbport = strtol (optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
+          if (strlen (option_arg) >= 4)
+            ucon64.usbport = strtol (option_arg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
           else                                  // we automatically detect the
             ucon64.usbport = 1;                 //  USB port in the F2A code
 
@@ -318,7 +317,7 @@ ucon64_switches (st_ucon64_t *p)
         }
       else
 #endif
-        ucon64.parport = (uint16_t) strtol (optarg, NULL, 16);
+        ucon64.parport = (uint16_t) strtol (option_arg, NULL, 16);
       break;
 
 #ifdef  USE_PARALLEL
@@ -426,12 +425,12 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_XCD64P:
-      ucon64.io_mode = strtol (optarg, NULL, 10);
+      ucon64.io_mode = strtol (option_arg, NULL, 10);
       break;
 #endif
 
     case UCON64_XCMCM:
-      ucon64.io_mode = strtol (optarg, NULL, 10);
+      ucon64.io_mode = strtol (option_arg, NULL, 10);
       break;
 
     case UCON64_XFALM:
@@ -441,7 +440,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_XSWC_IO:
-      ucon64.io_mode = strtol (optarg, NULL, 16);
+      ucon64.io_mode = strtol (option_arg, NULL, 16);
 
       if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
         puts ("WARNING: I/O mode not yet implemented");
@@ -493,7 +492,7 @@ ucon64_switches (st_ucon64_t *p)
 
     case UCON64_PATCH: // --patch and --file are the same
     case UCON64_FILE:
-      ucon64.file = optarg;
+      ucon64.file = option_arg;
       break;
 
     case UCON64_I:
@@ -509,8 +508,8 @@ ucon64_switches (st_ucon64_t *p)
 
 #if 0
     case UCON64_ROM:
-      if (optarg)
-        ucon64.fname = optarg;
+      if (option_arg)
+        ucon64.fname = option_arg;
       break;
 #endif
 
@@ -519,10 +518,10 @@ ucon64_switches (st_ucon64_t *p)
         struct stat fstate;
         int dir = 0;
 
-        if (!stat (optarg, &fstate))
+        if (!stat (option_arg, &fstate))
           if (S_ISDIR (fstate.st_mode))
             {
-              strcpy (ucon64.output_path, optarg);
+              strcpy (ucon64.output_path, option_arg);
               if (ucon64.output_path[strlen (ucon64.output_path) - 1] != DIR_SEPARATOR)
                 strcat (ucon64.output_path, DIR_SEPARATOR_S);
               dir = 1;
@@ -555,16 +554,16 @@ ucon64_switches (st_ucon64_t *p)
 
     case UCON64_CTRL:
       if (UCON64_ISSET (ucon64.controller))
-        ucon64.controller |= 1 << strtol (optarg, NULL, 10);
+        ucon64.controller |= 1 << strtol (option_arg, NULL, 10);
       else
-        ucon64.controller = 1 << strtol (optarg, NULL, 10);
+        ucon64.controller = 1 << strtol (option_arg, NULL, 10);
       break;
 
     case UCON64_CTRL2:
       if (UCON64_ISSET (ucon64.controller2))
-        ucon64.controller2 |= 1 << strtol (optarg, NULL, 10);
+        ucon64.controller2 |= 1 << strtol (option_arg, NULL, 10);
       else
-        ucon64.controller2 = 1 << strtol (optarg, NULL, 10);
+        ucon64.controller2 = 1 << strtol (option_arg, NULL, 10);
       break;
 
     case UCON64_NTSC:
@@ -598,20 +597,20 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_MIRR:
-      ucon64.mirror = strtol (optarg, NULL, 10);
+      ucon64.mirror = strtol (option_arg, NULL, 10);
       break;
 
     case UCON64_MAPR:
-      ucon64.mapr = optarg;                     // pass the _string_, it can be a
+      ucon64.mapr = option_arg;                 // pass the _string_, it can be a
       break;                                    //  board name
 
     case UCON64_CMNT:
-      ucon64.comment = optarg;
+      ucon64.comment = option_arg;
       break;
 
     case UCON64_DUMPINFO:
       ucon64.use_dump_info = 1;
-      ucon64.dump_info = optarg;
+      ucon64.dump_info = option_arg;
       break;
 
     case UCON64_Q:
@@ -624,7 +623,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_SSIZE:
-      ucon64.part_size = strtol (optarg, NULL, 10) * MBIT;
+      ucon64.part_size = strtol (option_arg, NULL, 10) * MBIT;
       break;
 
     case UCON64_ID:
@@ -632,7 +631,7 @@ ucon64_switches (st_ucon64_t *p)
       break;                                    //  UCON64_UNKNOWN and smaller than 0
 
     case UCON64_IDNUM:
-      ucon64.id = strtol (optarg, NULL, 10);
+      ucon64.id = strtol (option_arg, NULL, 10);
       if (ucon64.id < 0)
         ucon64.id = 0;
       else if (ucon64.id > 999)
@@ -643,10 +642,10 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_REGION:
-      if (optarg[1] == 0 && toupper (optarg[0]) == 'X') // be insensitive to case
+      if (option_arg[1] == 0 && toupper (option_arg[0]) == 'X') // be insensitive to case
         ucon64.region = 256;
       else
-        ucon64.region = strtol (optarg, NULL, 10);
+        ucon64.region = strtol (option_arg, NULL, 10);
       break;
 
     default:
@@ -691,7 +690,7 @@ ucon64_options (st_ucon64_t *p)
 #ifdef  USE_PARALLEL
   unsigned short enableRTS = (unsigned short) -1; // for UCON64_XSWC & UCON64_XSWC2
 #endif
-  int value = 0, x = 0, padded, c = p->option;
+  int value = 0, x = 0, padded;
   unsigned int checksum;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        *ptr = NULL, *values[UCON64_MAX_ARGS];
@@ -700,7 +699,7 @@ ucon64_options (st_ucon64_t *p)
 #endif
   static char rename_buf[FILENAME_MAX];
   struct stat fstate;
-  const char *optarg = p->optarg;
+  const char *option_arg = p->optarg;
 
   if (ucon64.fname)
     {
@@ -708,7 +707,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (dest_name, ucon64.fname);
     }
 
-  switch (c)
+  switch (p->option)
     {
     case UCON64_CRCHD:                          // deprecated
       value = UNKNOWN_BACKUP_HEADER_LEN;
@@ -751,53 +750,53 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_HEX:
       ucon64_dump (stdout, ucon64.fname,
-                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
                    ucon64.file_size, DUMPER_HEX);
       break;
 
     case UCON64_DUAL:
       ucon64_dump (stdout, ucon64.fname,
-                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
                    ucon64.file_size, DUMPER_DUAL);
       break;
 
     case UCON64_CODE:
       ucon64_dump (stdout, ucon64.fname,
-                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
                    ucon64.file_size, DUMPER_CODE);
       break;
 
     case UCON64_PRINT:
       ucon64_dump (stdout, ucon64.fname,
-                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
                    ucon64.file_size, DUMPER_PRINT);
       break;
 
     case UCON64_C:
-      ucon64_filefile (optarg, 0, ucon64.fname, 0, FALSE);
+      ucon64_filefile (option_arg, 0, ucon64.fname, 0, FALSE);
       break;
 
     case UCON64_CS:
-      ucon64_filefile (optarg, 0, ucon64.fname, 0, TRUE);
+      ucon64_filefile (option_arg, 0, ucon64.fname, 0, TRUE);
       break;
 
     case UCON64_FIND:
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
-                   strlen (optarg), MEMCMP2_WCARD ('?'));
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, option_arg,
+                   strlen (option_arg), MEMCMP2_WCARD ('?'));
       break;
 
     case UCON64_FINDR:
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg,
-                   strlen (optarg), MEMCMP2_REL);
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, option_arg,
+                   strlen (option_arg), MEMCMP2_REL);
       break;
 
     case UCON64_FINDI:
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, optarg, strlen (optarg),
-                   MEMCMP2_WCARD ('?') | MEMCMP2_CASE);
+      ucon64_find (ucon64.fname, 0, ucon64.file_size, option_arg,
+                   strlen (option_arg), MEMCMP2_WCARD ('?') | MEMCMP2_CASE);
       break;
 
     case UCON64_HFIND:
-      strcpy (buf, optarg);
+      strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
         if ((buf[x] = (char) strtol (values[x], NULL, 16)) != '\0')
@@ -808,7 +807,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_HFINDR:
-      strcpy (buf, optarg);
+      strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
         if ((buf[x] = (char) strtol (values[x], NULL, 16)) != '\0')
@@ -819,7 +818,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_DFIND:
-      strcpy (buf, optarg);
+      strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
         if ((buf[x] = (char) strtol (values[x], NULL, 10)) != '\0')
@@ -830,7 +829,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_DFINDR:
-      strcpy (buf, optarg);
+      strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
         if ((buf[x] = (char) strtol (values[x], NULL, 10)) != '\0')
@@ -849,7 +848,8 @@ ucon64_options (st_ucon64_t *p)
       ucon64_file_handler (dest_name, src_name, 0);
 
       fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-      if (truncate2 (dest_name, ucon64.file_size + (MBIT - ((ucon64.file_size - value) % MBIT))) == -1)
+      if (truncate2 (dest_name, ucon64.file_size +
+                     (MBIT - ((ucon64.file_size - value) % MBIT))) == -1)
         {
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
           exit (1);
@@ -863,8 +863,8 @@ ucon64_options (st_ucon64_t *p)
       ucon64_file_handler (dest_name, src_name, 0);
 
       fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-      if (truncate2 (dest_name, strtol (optarg, NULL, 10) +
-            (ucon64.nfo ? ucon64.nfo->backup_header_len : 0)) == -1)
+      if (truncate2 (dest_name, strtol (option_arg, NULL, 10) +
+                     (ucon64.nfo ? ucon64.nfo->backup_header_len : 0)) == -1)
         {
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
           exit (1);
@@ -887,8 +887,8 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_STRIP:
       ucon64_file_handler (dest_name, src_name, 0);
-      fcopy (src_name, 0, ucon64.file_size - strtol (optarg, NULL, 10),
-        dest_name, "wb");
+      fcopy (src_name, 0, ucon64.file_size - strtol (option_arg, NULL, 10),
+             dest_name, "wb");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;
@@ -902,7 +902,8 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_STPN:
       ucon64_file_handler (dest_name, src_name, 0);
-      fcopy (src_name, strtol (optarg, NULL, 10), ucon64.file_size, dest_name, "wb");
+      fcopy (src_name, strtol (option_arg, NULL, 10), ucon64.file_size,
+             dest_name, "wb");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;
@@ -918,7 +919,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_INSN:
       ucon64_file_handler (dest_name, src_name, 0);
-      value = strtol (optarg, NULL, 10);
+      value = strtol (option_arg, NULL, 10);
       if (value <= MAXBUFSIZE)
         {
           memset (buf, 0, value);
@@ -958,27 +959,27 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MKA:
-      aps_create (optarg, ucon64.fname);        // original, modified
+      aps_create (option_arg, ucon64.fname);    // original, modified
       break;
 
     case UCON64_MKI:
-      ips_create (optarg, ucon64.fname);        // original, modified
+      ips_create (option_arg, ucon64.fname);    // original, modified
       break;
 
     case UCON64_MKPPF:
-      ppf_create (optarg, ucon64.fname);        // original, modified
+      ppf_create (option_arg, ucon64.fname);    // original, modified
       break;
 
     case UCON64_NA:
-      aps_set_desc (ucon64.fname, optarg);
+      aps_set_desc (ucon64.fname, option_arg);
       break;
 
     case UCON64_NPPF:
-      ppf_set_desc (ucon64.fname, optarg);
+      ppf_set_desc (ucon64.fname, option_arg);
       break;
 
     case UCON64_IDPPF:
-      ppf_set_fid (ucon64.fname, optarg);
+      ppf_set_fid (ucon64.fname, option_arg);
       break;
 
     case UCON64_SCAN:
@@ -1096,7 +1097,7 @@ ucon64_options (st_ucon64_t *p)
         {
           uint32_t flags = 0;
 
-          switch (c)
+          switch (p->option)
             {
               case UCON64_BIN2ISO:
                 flags |= DM_2048; // DM_2048 read sectors and convert to 2048 Bytes
@@ -1114,7 +1115,7 @@ ucon64_options (st_ucon64_t *p)
           ucon64.image = dm_reopen (ucon64.fname, 0, (dm_image_t *) ucon64.image);
           if (ucon64.image)
             {
-              int track = strtol (optarg, NULL, 10);
+              int track = strtol (option_arg, NULL, 10);
               if (track < 1)
                 track = 1;
               track--; // decrement for dm_rip()
@@ -1137,27 +1138,27 @@ ucon64_options (st_ucon64_t *p)
         {
           if (ucon64.image)
             {
-              char buf[FILENAME_MAX];
-              strcpy (buf, ((dm_image_t *) ucon64.image)->fname);
+              char fname[FILENAME_MAX];
+              strcpy (fname, ((dm_image_t *) ucon64.image)->fname);
 
-              if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
+              if (p->option == UCON64_MKTOC || p->option == UCON64_MKSHEET)
                 {
-                  set_suffix (buf, ".toc");
-                  ucon64_file_handler (buf, NULL, 0);
+                  set_suffix (fname, ".toc");
+                  ucon64_file_handler (fname, NULL, 0);
 
                   if (!dm_toc_write ((dm_image_t *) ucon64.image))
-                    printf (ucon64_msg[WROTE], basename2 (buf));
+                    printf (ucon64_msg[WROTE], basename2 (fname));
                   else
                     fputs ("ERROR: Could not generate toc sheet\n", stderr);
                 }
 
-              if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
+              if (p->option == UCON64_MKCUE || p->option == UCON64_MKSHEET)
                 {
-                  set_suffix (buf, ".cue");
-                  ucon64_file_handler (buf, NULL, 0);
+                  set_suffix (fname, ".cue");
+                  ucon64_file_handler (fname, NULL, 0);
 
                   if (!dm_cue_write ((dm_image_t *) ucon64.image))
-                    printf (ucon64_msg[WROTE], basename2 (buf));
+                    printf (ucon64_msg[WROTE], basename2 (fname));
                   else
                     fputs ("ERROR: Could not generate cue sheet\n", stderr);
                 }
@@ -1212,12 +1213,14 @@ ucon64_options (st_ucon64_t *p)
       if (ucon64.dat_enabled)
         {
           ucon64.crc32 = 0;
-          sscanf (optarg, "%x", &ucon64.crc32);
+          sscanf (option_arg, "%x", &ucon64.crc32);
 
-          if ((ucon64.dat = (st_ucon64_dat_t *) ucon64_dat_search (ucon64.crc32, NULL)) == NULL)
+          if ((ucon64.dat = (st_ucon64_dat_t *)
+                            ucon64_dat_search (ucon64.crc32, NULL)) == NULL)
             {
               printf (ucon64_msg[DAT_NOT_FOUND], ucon64.crc32);
-              printf ("TIP: Be sure to install the right DAT files in %s\n", ucon64.datdir);
+              printf ("TIP: Be sure to install the right DAT files in %s\n",
+                      ucon64.datdir);
             }
           else
             {
@@ -1233,26 +1236,27 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MKDAT:
-      ucon64_create_dat (optarg, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
+      ucon64_create_dat (option_arg, ucon64.fname,
+                         ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
       break;
 
     case UCON64_MULTI:
       switch (ucon64.console)
         {
         case UCON64_GBA:
-          gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          gba_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
           break;
         case UCON64_GEN:
-          genesis_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          genesis_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
           break;
         case UCON64_PCE:
-          pce_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          pce_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
           break;
         case UCON64_SMS:                        // Sega Master System *and* Game Gear
-          sms_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          sms_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
           break;
         case UCON64_SNES:
-          snes_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          snes_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
           break;
         default:
           return -1;
@@ -1268,11 +1272,11 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_B0:
-      lynx_b0 (ucon64.nfo, optarg);
+      lynx_b0 (ucon64.nfo, option_arg);
       break;
 
     case UCON64_B1:
-      lynx_b1 (ucon64.nfo, optarg);
+      lynx_b1 (ucon64.nfo, option_arg);
       break;
 
     case UCON64_BIN:
@@ -1280,11 +1284,11 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_BIOS:
-      neogeo_bios (optarg);
+      neogeo_bios (option_arg);
       break;
 
     case UCON64_BOT:
-      n64_bot (ucon64.nfo, optarg);
+      n64_bot (ucon64.nfo, option_arg);
       break;
 
     case UCON64_CHK:
@@ -1322,11 +1326,11 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_COL:
-      snes_col (optarg);
+      snes_col (option_arg);
       break;
 
     case UCON64_CRP:
-      gba_crp (ucon64.nfo, optarg);
+      gba_crp (ucon64.nfo, option_arg);
       break;
 
     case UCON64_DBUH:
@@ -1435,7 +1439,7 @@ ucon64_options (st_ucon64_t *p)
         case UCON64_NES:
         case UCON64_SMS:
         case UCON64_SNES:
-          gg_apply (ucon64.nfo, optarg);
+          gg_apply (ucon64.nfo, option_arg);
           break;
         default:
           fputs ("ERROR: Cannot apply Game Genie code for this ROM/console\n", stderr);
@@ -1446,11 +1450,11 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_GGD:
-      gg_display (ucon64.nfo, optarg);
+      gg_display (ucon64.nfo, option_arg);
       break;
 
     case UCON64_GGE:
-      gg_display (ucon64.nfo, optarg);
+      gg_display (ucon64.nfo, option_arg);
       break;
 
     case UCON64_INES:
@@ -1470,7 +1474,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_PARSE:
-      dc_parse (optarg);
+      dc_parse (option_arg);
       break;
 
     case UCON64_MKIP:
@@ -1528,7 +1532,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_LSRAM:
-      n64_sram (ucon64.nfo, optarg);
+      n64_sram (ucon64.nfo, option_arg);
       break;
 
     case UCON64_LYX:
@@ -1576,33 +1580,33 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_N:
-//      if (strlen (optarg) == 0)
+//      if (strlen (option_arg) == 0)
 //        break;
       switch (ucon64.console)
         {
         case UCON64_GB:
-          gb_n (ucon64.nfo, optarg);
+          gb_n (ucon64.nfo, option_arg);
           break;
         case UCON64_GBA:
-          gba_n (ucon64.nfo, optarg);
+          gba_n (ucon64.nfo, option_arg);
           break;
         case UCON64_GEN:
-          genesis_n (ucon64.nfo, optarg);
+          genesis_n (ucon64.nfo, option_arg);
           break;
         case UCON64_LYNX:
-          lynx_n (ucon64.nfo, optarg);
+          lynx_n (ucon64.nfo, option_arg);
           break;
         case UCON64_N64:
-          n64_n (ucon64.nfo, optarg);
+          n64_n (ucon64.nfo, option_arg);
           break;
         case UCON64_NES:
-          nes_n (optarg);
+          nes_n (option_arg);
           break;
         case UCON64_SNES:
-          snes_n (ucon64.nfo, optarg);
+          snes_n (ucon64.nfo, option_arg);
           break;
         case UCON64_NDS:
-          nds_n (ucon64.nfo, optarg);
+          nds_n (ucon64.nfo, option_arg);
           break;
         default:
 // The next msg has already been printed
@@ -1612,13 +1616,13 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_N2:
-//      if (strlen (optarg) == 0)
+//      if (strlen (option_arg) == 0)
 //        break;
-      genesis_n2 (ucon64.nfo, optarg);
+      genesis_n2 (ucon64.nfo, option_arg);
       break;
 
     case UCON64_N2GB:
-      gb_n2gb (ucon64.nfo, optarg);
+      gb_n2gb (ucon64.nfo, option_arg);
       break;
 
     case UCON64_NROT:
@@ -1630,14 +1634,14 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_PATTERN:
-      ucon64_pattern (ucon64.nfo, optarg);
+      ucon64_pattern (ucon64.nfo, option_arg);
       break;
 
     case UCON64_POKE:
       ucon64_file_handler (dest_name, src_name, 0);
       fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
 
-      sscanf (optarg, "%x:%x", &x, &value);
+      sscanf (option_arg, "%x:%x", &x, &value);
       if (x >= ucon64.file_size)
         {
           fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
@@ -1689,7 +1693,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_SAM:
-      neogeo_sam (optarg);
+      neogeo_sam (option_arg);
       break;
 
     case UCON64_SCR:
@@ -1769,7 +1773,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_USMS:
-      n64_usms (ucon64.nfo, optarg);
+      n64_usms (ucon64.nfo, option_arg);
       break;
 
     case UCON64_V64:
@@ -1794,7 +1798,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_XCD64C:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
         printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
-      cd64_read_rom (ucon64.fname, strtol (optarg, NULL, 10));
+      cd64_read_rom (ucon64.fname, strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -1829,9 +1833,9 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XCD64M:
       if (access (ucon64.fname, F_OK) != 0)
-        cd64_read_mempack (ucon64.fname, strtol (optarg, NULL, 10));
+        cd64_read_mempack (ucon64.fname, strtol (option_arg, NULL, 10));
       else
-        cd64_write_mempack (ucon64.fname, strtol (optarg, NULL, 10));
+        cd64_write_mempack (ucon64.fname, strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 #endif
@@ -1852,15 +1856,17 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XCMCT:
-      cmc_test (strtol (optarg, NULL, 10), ucon64.parport, ucon64.io_mode);
+      cmc_test (strtol (option_arg, NULL, 10), ucon64.parport, ucon64.io_mode);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XDEX:
       if (access (ucon64.fname, F_OK) != 0)
-        dex_read_block (ucon64.fname, strtol (optarg, NULL, 10), ucon64.parport);
+        dex_read_block (ucon64.fname, strtol (option_arg, NULL, 10),
+                        ucon64.parport);
       else
-        dex_write_block (ucon64.fname, strtol (optarg, NULL, 10), ucon64.parport);
+        dex_write_block (ucon64.fname, strtol (option_arg, NULL, 10),
+                         ucon64.parport);
       fputc ('\n', stdout);
       break;
 
@@ -1899,7 +1905,7 @@ ucon64_options (st_ucon64_t *p)
           if (ucon64.output_path[strlen (ucon64.output_path) - 1] != DIR_SEPARATOR)
             strcat (ucon64.output_path, DIR_SEPARATOR_S);
         }
-      if (gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name) == 0)
+      if (gba_multi (strtol (option_arg, NULL, 10) * MBIT, src_name) == 0)
         { // Don't try to start a transfer if there was a problem
           fputc ('\n', stdout);
           ucon64.file_size = fsizeof (src_name);
@@ -1914,7 +1920,8 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_XFALC:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
         printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
-      fal_read_rom (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+      fal_read_rom (ucon64.fname, ucon64.parport,
+                    strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -1928,9 +1935,11 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XFALB:
       if (access (ucon64.fname, F_OK) != 0)
-        fal_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        fal_read_sram (ucon64.fname, ucon64.parport,
+                       strtol (option_arg, NULL, 10));
       else
-        fal_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        fal_write_sram (ucon64.fname, ucon64.parport,
+                        strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -1986,9 +1995,11 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XGBXB:
       if (access (ucon64.fname, F_OK) != 0)
-        gbx_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        gbx_read_sram (ucon64.fname, ucon64.parport,
+                       strtol (option_arg, NULL, 10));
       else
-        gbx_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        gbx_write_sram (ucon64.fname, ucon64.parport,
+                        strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -2080,9 +2091,11 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XGGB:
       if (access (ucon64.fname, F_OK) != 0)
-        smsgg_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        smsgg_read_sram (ucon64.fname, ucon64.parport,
+                         strtol (option_arg, NULL, 10));
       else
-        smsgg_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        smsgg_write_sram (ucon64.fname, ucon64.parport,
+                          strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -2135,9 +2148,11 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XMDB:
       if (access (ucon64.fname, F_OK) != 0)
-        md_read_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        md_read_sram (ucon64.fname, ucon64.parport,
+                      strtol (option_arg, NULL, 10));
       else
-        md_write_sram (ucon64.fname, ucon64.parport, strtol (optarg, NULL, 10));
+        md_write_sram (ucon64.fname, ucon64.parport,
+                       strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -2315,14 +2330,14 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XF2AMULTI:
-      f2a_write_rom (NULL, strtol (optarg, NULL, 10) * MBIT);
+      f2a_write_rom (NULL, strtol (option_arg, NULL, 10) * MBIT);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XF2AC:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
         printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
-      f2a_read_rom (ucon64.fname, strtol (optarg, NULL, 10));
+      f2a_read_rom (ucon64.fname, strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -2336,9 +2351,9 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XF2AB:
       if (access (ucon64.fname, F_OK) != 0)
-        f2a_read_sram (ucon64.fname, strtol (optarg, NULL, 10));
+        f2a_read_sram (ucon64.fname, strtol (option_arg, NULL, 10));
       else
-        f2a_write_sram (ucon64.fname, strtol (optarg, NULL, 10));
+        f2a_write_sram (ucon64.fname, strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
 #endif // USE_PARALLEL || USE_USB

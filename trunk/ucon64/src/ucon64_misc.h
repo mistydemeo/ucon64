@@ -26,7 +26,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_DISCMAGE
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <time.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"                             // st_ucon64_nfo_t
 

@@ -7185,14 +7185,15 @@ nes_init (st_ucon64_nfo_t *rominfo)
 #endif
       if ((unif_chunk = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
         {
-          st_dumper_info_t *info = (st_dumper_info_t *) unif_chunk->data;
+          st_dumper_info_t *dumper_info = (st_dumper_info_t *) unif_chunk->data;
           sprintf (buf, "Dump info:\n"
                         "  Dumper: %s\n"
                         "  Date: %d-%d-%02d\n"
                         "  Agent: %s\n",
-                        info->dumper_name,
-                        info->day, info->month, le2me_16 (info->year),
-                        info->dumper_agent);
+                        dumper_info->dumper_name,
+                        dumper_info->day, dumper_info->month,
+                          le2me_16 (dumper_info->year),
+                        dumper_info->dumper_agent);
           strcat (rominfo->misc, buf);
           free (unif_chunk);
         }
@@ -7487,7 +7488,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       break;
     }
 
-  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn switch was specified
+  if (UCON64_ISSET (ucon64.backup_header_len))  // -hd, -nhd or -hdn switch was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
 
   if (ucon64.crc32 == 0)

@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MISC_H
 #define MISC_H
+
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB, USE_ANSI_COLOR support
 #endif
@@ -30,7 +31,14 @@ extern "C" {
 #endif
 #include <stdio.h>
 #include <string.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <time.h>                               // bytes_per_second() requires time()
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 
 #ifdef  __sun
@@ -286,4 +294,5 @@ extern int _pclose (FILE *stream);
 #ifdef  __cplusplus
 }
 #endif
+
 #endif // MISC_H

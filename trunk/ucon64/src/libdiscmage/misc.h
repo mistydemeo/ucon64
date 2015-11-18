@@ -32,7 +32,14 @@ extern "C" {
 #endif
 
 #include <string.h>
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <time.h>                               // gauge() prototype contains time_t
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <stdio.h>
 #ifdef  USE_ZLIB
 #include "misc_z.h"

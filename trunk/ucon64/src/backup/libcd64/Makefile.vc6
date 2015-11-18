@@ -43,7 +43,7 @@ CFLAGS=$(CFLAGS) /DCD64_USE_RAWIO
 
 default: all
 
-all:	cd64.lib cd64.dll
+all: cd64.lib cd64.dll
 
 # libcd64 stuff
 

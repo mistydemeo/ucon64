@@ -1,5 +1,6 @@
-CC=cl.exe
+#WINXP_TARGETING=1
 
+CC=cl.exe
 !ifdef DEBUG
 CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /Oi /GZ /Zi \
        /D_CRT_SECURE_NO_WARNINGS /DDEBUG /DHAVE_CONFIG_H
@@ -10,6 +11,16 @@ CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /D_CRT_SECURE_NO_WARNINGS \
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
 # /wd4710, 'function' : function not inlined
 # /wd4711, function 'function' selected for inline expansion
+!ifdef WINXP_TARGETING
+CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Include" \
+       /D_USING_V110_SDK71_
+!endif
+
+LDFLAGS=/NOLOGO
+!ifdef WINXP_TARGETING
+LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
+        /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Lib"
+!endif
 
 DEFAULT_BUILD=1
 
@@ -34,7 +45,7 @@ RAWIO=1
 
 !ifdef LIBIEEE1284
 CFLAGS=$(CFLAGS) /DCD64_USE_LIBIEEE1284
-LIBS=$(LIBS) ieee1284.lib
+LDFLAGS=$(LDFLAGS) ieee1284.lib
 !endif
 
 !ifdef RAWIO
@@ -54,11 +65,10 @@ cd64lib.obj: cd64lib.c
 	$(CC) $(CFLAGS) $** /c /Fo$@
 
 cd64.lib: cd64lib.obj cd64io.obj
-	lib.exe /NOLOGO /SUBSYSTEM:CONSOLE,5.01 $** $(LIBS) /OUT:$@
+	lib.exe $(LDFLAGS) $** /OUT:$@
 
 cd64.dll: cd64lib.obj cd64io.obj
-	link.exe /NOLOGO /SUBSYSTEM:CONSOLE,5.01 /DLL $** $(LIBS) /DEF:cd64.def \
-             /IMPLIB:cd64dll.lib /OUT:$@
+	link.exe $(LDFLAGS) $** /DLL /DEF:cd64.def /IMPLIB:cd64dll.lib /OUT:$@
 
 clean:
 	del *.obj

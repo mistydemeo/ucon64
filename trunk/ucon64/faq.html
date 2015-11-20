@@ -198,35 +198,29 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    To compile uCON64 you need a compiler :-) You can use either GCC (GNU
    Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
    <a href="http://www.gnu.org/order/ftp.html">
-   http://www.gnu.org/order/ftp.html</a>.<br>
-   A free version of Visual C++, Visual Studio Community 2015, can be downloaded
-   from
+   http://www.gnu.org/order/ftp.html</a>. On Linux GCC is usually already
+   installed.<br>
+   Visual C++ is part of Visual Studio. A free version of Visual Studio, Visual
+   Studio Community 2015, can be downloaded from
    <a href="https://www.visualstudio.com/products/visual-studio-community-vs">
-   https://www.visualstudio.com/products/visual-studio-community-vs</a>. If you
-   want to compile uCON64 with this version of Visual C++, you will also have to
-   download the Platform SDK, available from
-   <a href="http://www.microsoft.com/en-us/download/details.aspx?id=15656">
-   http://www.microsoft.com/en-us/download/details.aspx?id=15656</a>.
-   In the Microsoft Platform SDK Setup Wizard, choose Custom Installation and
-   disable everything except Microsoft Windows Core SDK, subsection Build
-   Environment. Enable one option, for example Build Environment (x86 32-bit).
-   At the moment we do not support building uCON64 with Visual Studio Community
-   2015, only with Visual Studio 2012.<br>
-   <!--
-     The problem is that at least Visual C++ Toolkit 2003 doesn't come with
-     nmake.exe, lib.exe and setargv.obj. I did a test with GNU make and could
-     compile a binary with libcd64 support (DLL), but I don't feel like
-     maintaining yet another Makefile.
-     I don't know whether things have improved with Visual Studio Community
-     2015.
-   -->
+   https://www.visualstudio.com/products/visual-studio-community-vs</a>. In
+   order to compile uCON64, in the set up program of Visual Studio you need to
+   select at least Programming Languages -&#62; Visual C++ -&#62; Common Tools
+   for Visual C++ 2015. If you want to build a version of uCON64 that can run on
+   versions of Windows as old as Windows XP, also check "Windows XP Support for
+   C++" (Programming Languages -&#62; Visual C++ -&#62; Windows XP Support for
+   C++). There are many versions of Visual Studio, but we only support building
+   uCON64 with Visual Studio Community 2015.<br>
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from <a href="http://www.delorie.com/djgpp/">
    http://www.delorie.com/djgpp/</a>. A Win32 port of GCC (and many other GNU
    tools and libraries) named Cygwin is available from
    <a href="http://www.cygwin.com">http://www.cygwin.com</a>.
    Another Win32 port of GCC (and other tools) named MinGW is available from
-   <a href="http://www.mingw.org">http://www.mingw.org</a>.<br>
+   <a href="http://www.mingw.org">http://www.mingw.org</a>. We have tested the
+   MinGW-built version of uCON64 more extensively than the other Windows
+   versions. The MinGW-built version can run on versions of Windows as old as 
+   Windows 95.<br>
 <br>
    <b>Configuring uCON64</b><br>
    Some features of uCON64 are configurable (only) at compile time. They are:<br>
@@ -364,8 +358,14 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    instructions.<br>
 <br>
    <b>Visual C++</b><br>
-   Start a command shell or "prompt" and go to the correct directory. If you
-   have compiled uCON64 in the same directory before, first type:<br>
+   Start a command shell or "prompt" and go to the correct directory. In order
+   to be able to run the Visual Studio tools, first type:<br>
+   &nbsp;&nbsp;"%VS140COMNTOOLS%"\vsvars32.bat<br>
+   If you want to build a version of uCON64 that can run on versions of Windows
+   as old as Windows XP, remove the "#" in front of the line with
+   "WINXP_TARGETING=1" in Makefile.vc6, libdiscmage/Makefile.vc6 and
+   backup/libcd64/Makefile.vc6.<br>
+   If you have compiled uCON64 in the same directory before, type:<br>
    &nbsp;&nbsp;nmake /f Makefile.vc6 clean<br>
 <br>
    If you want to compile the source code including discmage, type:<br>

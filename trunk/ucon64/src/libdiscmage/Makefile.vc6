@@ -1,5 +1,6 @@
 DLOPEN=1
 #USE_ZLIB=1
+#WINXP_TARGETING=1
 
 CC=cl.exe
 CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /D_CRT_NONSTDC_NO_DEPRECATE \
@@ -10,29 +11,34 @@ CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /D_CRT_NONSTDC_NO_DEPRECATE \
 !ifdef DLOPEN
 CFLAGS=$(CFLAGS) /DDLOPEN
 !endif
+!ifdef WINXP_TARGETING
+CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Include" \
+       /D_USING_V110_SDK71_
+!endif
 
 LIBNAME=discmage
+FULLLIBNAME=$(LIBNAME).dll
+
+LDFLAGS=/NOLOGO /DLL /DEF:$(LIBNAME).def
+!ifdef WINXP_TARGETING
+LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
+        /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Lib"
+!endif
+
 OBJECTS=libdm_misc.obj dllinit.obj misc.obj misc_wav.obj format/format.obj \
         format/cdi.obj format/nero.obj format/cue.obj format/toc.obj \
         format/other.obj
 !ifdef USE_ZLIB
-LIBS=zdll.lib
+LDFLAGS=$(LDFLAGS) zdll.lib
 OBJECTS=$(OBJECTS) map.obj misc_z.obj unzip.obj
-!else
-LIBS=
 !endif
-
-
-FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=/NOLOGO /SUBSYSTEM:CONSOLE,5.01 /DLL $(OBJECTS) $(LIBS) \
-         /DEF:$(LIBNAME).def /OUT:$(LIBNAME).dll
 
 
 all: $(FULLLIBNAME)
 
 
 clean:
-	del $(LIBNAME).dll
+	del $(FULLLIBNAME)
 	del $(LIBNAME).lib
 	del *.obj
 	del format\*.obj
@@ -47,11 +53,11 @@ distclean: clean
 	$(CC) $(CFLAGS) /c $< /Fo$@
 
 
-$(LIBNAME).dll: $(OBJECTS)
-	link.exe $(DLLFLAGS)
+$(FULLLIBNAME): $(OBJECTS)
+	link.exe $(LDFLAGS) $(OBJECTS) /OUT:$(FULLLIBNAME)
 # link.exe automatically creates the import library. "/IMPLIB:filename.lib"
 #  could be used to give the import library another name
-#	lib.exe $(DLLFLAGS) /OUT:$(LIBNAME).lib
+#	lib.exe $(LDFLAGS) $(OBJECTS) /OUT:$(LIBNAME).lib
 
 install:
 

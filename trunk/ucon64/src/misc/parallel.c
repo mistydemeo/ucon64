@@ -771,7 +771,7 @@ parport_open (unsigned short port)
       io_driver = open_module (fname);
 
       driver_found = 1;
-      printf ("Using %s\n", fname);
+      printf ("Using %s\n\n", fname);
 
       sym.void_ptr = get_symbol (io_driver, "DlPortReadPortUchar");
       DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned short)) sym.func_ptr;
@@ -800,7 +800,7 @@ parport_open (unsigned short port)
           if (IsDriverInstalled ())
             {
               driver_found = 1;
-              printf ("Using %s\n", fname);
+              printf ("Using %s\n\n", fname);
 
               sym.void_ptr = get_symbol (io_driver, "PortIn");
               PortIn = (char (WINAPI *) (short int)) sym.func_ptr;
@@ -827,7 +827,7 @@ parport_open (unsigned short port)
           io_driver = open_module (fname);
 
           driver_found = 1;
-          printf ("Using %s\n", fname);
+          printf ("Using %s\n\n", fname);
 
           /*
             Newer ports of inpout32.dll also contain the API provided by

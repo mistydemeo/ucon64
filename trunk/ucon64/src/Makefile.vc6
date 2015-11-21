@@ -252,8 +252,7 @@ backup/pce-pro.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS)
                   backup/tototek.h backup/pce-pro.h $(GETOPT2_H_DEPS)
 backup/pl.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
              $(UCON64_MISC_H_DEPS) backup/pl.h $(GETOPT2_H_DEPS)
-backup/psxpblib.obj: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(UCON64_H_DEPS) \
-                   backup/psxpblib.h
+backup/psxpblib.obj: config.h misc/parallel.h $(UCON64_H_DEPS) backup/psxpblib.h
 backup/sc.obj: config.h backup/sc.h $(GETOPT2_H_DEPS)
 backup/sflash.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                  backup/tototek.h backup/sflash.h $(GETOPT2_H_DEPS)
@@ -339,8 +338,8 @@ misc/map.obj: config.h misc/map.h
 misc/misc.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/itypes.h $(MISC_H_DEPS)
 misc/parallel.obj: config.h misc/dlopen.h misc/file.h misc/parallel.h \
                  $(UCON64_H_DEPS)
-misc/property.obj: config.h misc/file.h $(MISC_H_DEPS) misc/property.h \
-                 misc/string.h
+misc/property.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+                 misc/property.h misc/string.h
 misc/snprintf.obj: config.h
 misc/string.obj: config.h misc/string.h
 misc/term.obj: config.h $(TERM_H_DEPS) ucon64_defines.h

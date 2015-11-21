@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
+#include "misc/archive.h"
 #include "misc/file.h"                          // realpath2()
 #include "misc/misc.h"                          // getenv2()
 #include "misc/property.h"

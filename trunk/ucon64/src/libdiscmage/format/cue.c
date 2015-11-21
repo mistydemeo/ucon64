@@ -50,7 +50,7 @@ static const char *
 cue_get_desc (int id)
 {
   int x = 0;
-  
+
   for (x = 0; cue_desc[x].desc; x++)
     if (id == cue_desc[x].id)
       return cue_desc[x].desc;
@@ -83,13 +83,13 @@ dm_cue_read (dm_image_t *image, const char *cue_file)
           dm_track_t *track = (dm_track_t *) &image->track[t];
 
           track->sector_size = track->mode = 0;
-            
+
           for (x = 0; cue_desc[x].desc; x++)
             if (stristr (buf, cue_desc[x].desc))
               {
                 dm_get_track_mode_by_id (cue_desc[x].id, &track->mode, &track->sector_size);
                 break;
-              }       
+              }
 
           if (!track->sector_size)
             {
@@ -228,7 +228,7 @@ cue_init (dm_image_t *image)
   FILE *fh = NULL;
 #if 0
   char buf[FILENAME_MAX];
-  
+
   strcpy (buf, image->fname);
   set_suffix (buf, ".CUE");
   if (dm_cue_read (image, buf)) // read and parse cue into dm_image_t
@@ -251,7 +251,7 @@ cue_init (dm_image_t *image)
   for (t = 0; t < image->tracks; t++)
     {
       dm_track_t *track = (dm_track_t *) &image->track[t];
-      
+
       if (!dm_track_init (track, fh))
         {
           track->track_len =

@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #endif
 
 
-const st_track_desc_t toc_desc[] = 
+const st_track_desc_t toc_desc[] =
   {
     {DM_MODE1_2048, "MODE1"}, // MODE2_FORM1
     {DM_MODE1_2352, "MODE1_RAW"},
@@ -45,7 +45,7 @@ static const char *
 toc_get_desc (int id)
 {
   int x = 0;
-  
+
   for (x = 0; toc_desc[x].desc; x++)
     if (id == toc_desc[x].id)
       return toc_desc[x].desc;
@@ -67,7 +67,7 @@ int
 dm_toc_write (const dm_image_t *image)
 {
   int result = (-1), t = 0;
-  
+
   for (t = 0; t < image->tracks; t++)
     {
 #if     FILENAME_MAX > MAXBUFSIZE
@@ -104,7 +104,7 @@ dm_toc_write (const dm_image_t *image)
           case 1: // mode1
             fprintf (fh, "CD_ROM\n\n");
             break;
-            
+
           default: // mode2
             fprintf (fh, "CD_ROM_XA\n\n");
             break;
@@ -122,7 +122,7 @@ dm_toc_write (const dm_image_t *image)
 
       fclose (fh);
     }
-    
+
   return result;
 }
 
@@ -133,7 +133,7 @@ toc_init (dm_image_t *image)
   int t = 0;
   FILE *fh = NULL;
   char buf[FILENAME_MAX];
-  
+
   strcpy (buf, image->fname);
   set_suffix (buf, ".TOC");
   if ((dm_toc_read (image, buf))) // read and parse toc into dm_image_t
@@ -145,7 +145,7 @@ toc_init (dm_image_t *image)
   // missing or invalid cue? try the image itself
   if ((fh = fopen (image->fname, "rb")) == NULL)
     return -1;
-        
+
 #if 1
   image->sessions =
   image->tracks =
@@ -155,7 +155,7 @@ toc_init (dm_image_t *image)
   for (t = 0; t < image->tracks; t++)
     {
       dm_track_t *track = (dm_track_t *) &image->track[t];
-      
+
       if (!dm_track_init (track, fh))
         {
           track->track_len =
@@ -169,9 +169,9 @@ toc_init (dm_image_t *image)
     }
 
   dm_toc_write (image); // write the missing cue
-  
+
   image->desc = "ISO/BIN track (missing TOC file created)";
-    
+
   fclose (fh);
   return 0;
 }

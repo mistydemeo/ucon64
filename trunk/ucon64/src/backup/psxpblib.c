@@ -16,7 +16,6 @@
 #include "config.h"
 #endif
 #include <string.h>
-#include "misc/archive.h"
 #include "misc/parallel.h"
 #include "ucon64.h"
 #include "backup/psxpblib.h"

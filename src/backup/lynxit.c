@@ -185,7 +185,7 @@ lynxit_shift_out_byte (unsigned char data)
 
   dbgdata = data;
 #endif
-  
+
   OUTPUT (print_data, PORT_BASE);       // Set inactive
 
   for (loop = 0; loop < 8; loop++)

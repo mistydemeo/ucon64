@@ -394,8 +394,7 @@ backup/pce-pro.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                   backup/tototek.h backup/pce-pro.h $(GETOPT2_H_DEPS)
 backup/pl.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
              $(UCON64_MISC_H_DEPS) backup/pl.h $(GETOPT2_H_DEPS)
-backup/psxpblib.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(UCON64_H_DEPS) \
-                   backup/psxpblib.h
+backup/psxpblib.o: config.h misc/parallel.h $(UCON64_H_DEPS) backup/psxpblib.h
 backup/sc.o: config.h backup/sc.h $(GETOPT2_H_DEPS)
 backup/sflash.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                  backup/tototek.h backup/sflash.h $(GETOPT2_H_DEPS)
@@ -481,8 +480,8 @@ misc/map.o: config.h misc/map.h
 misc/misc.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/itypes.h $(MISC_H_DEPS)
 misc/parallel.o: config.h misc/dlopen.h misc/file.h misc/parallel.h \
                  $(UCON64_H_DEPS)
-misc/property.o: config.h misc/file.h $(MISC_H_DEPS) misc/property.h \
-                 misc/string.h
+misc/property.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+                 misc/property.h misc/string.h
 misc/snprintf.o: config.h
 misc/string.o: config.h misc/string.h
 misc/term.o: config.h $(TERM_H_DEPS) ucon64_defines.h

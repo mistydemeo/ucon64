@@ -45,7 +45,7 @@ static unsigned char psx_sign[] = {
   0x49, 0x4F, 0x4E, 0x20, 0x20, 0x20, 0x20, 0x20
 };
 #endif
-              
+
 static uint32_t header_start = 0; //, version = 0, position = 0;
 
 #if 0
@@ -95,7 +95,7 @@ dm_other_gc_init (dm_image_t *image)
 
   image->header_start = header_start;
   image->header_len = sizeof (st_opening_bnr_t);
-  
+
   track->track_start = 0;
   track->track_len =
   track->total_len = q_fsize (image->fname);

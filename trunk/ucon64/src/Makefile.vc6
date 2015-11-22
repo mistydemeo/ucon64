@@ -6,7 +6,7 @@ USE_LIBCD64=1
 #WINXP_TARGETING=1
 
 CC=cl.exe
-CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /wd4774 /O2 \
+CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /wd4774 /O2 /MT \
        /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
 # /wd4710, 'function' : function not inlined
@@ -118,6 +118,7 @@ libdiscmage/$(FULLLIBNAME_DM):
 	cd ..
 !endif
 
+
 !ifdef USE_LIBCD64
 backup/libcd64/cd64.lib:
 	cd backup/libcd64
@@ -126,8 +127,12 @@ backup/libcd64/cd64.lib:
 !endif
 
 
+!ifdef USE_LIBCD64
+$(TARGET): backup/libcd64/cd64.lib $(OBJECTS)
+!else
 $(TARGET): $(OBJECTS)
-	link.exe $(LDFLAGS) $(OBJECTS) /OUT:$@
+!endif
+	link.exe $(OBJECTS) $(LDFLAGS) /OUT:$@
 
 
 install:

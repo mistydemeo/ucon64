@@ -225,6 +225,7 @@ endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_DISCMAGE
 
+
 ifdef USE_LIBCD64
 backup/libcd64/libcd64.a:
 ifeq ($(GCC_WIN),1)
@@ -238,9 +239,14 @@ else
 	cd backup/libcd64 && $(MAKE)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
-endif                                   # USE_DISCMAGE
+endif                                   # USE_LIBCD64
 
+
+ifdef USE_LIBCD64
+$(TARGET): backup/libcd64/libcd64.a $(OBJECTS)
+else
 $(TARGET): $(OBJECTS)
+endif                                   # USE_LIBCD64
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 

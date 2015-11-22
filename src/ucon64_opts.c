@@ -206,9 +206,9 @@ ucon64_switches (st_ucon64_t *p)
 #elif   defined __CYGWIN__ || defined _WIN32
       fputs ("discmage.dll", stdout);
 #elif   defined __APPLE__                       // Mac OS X actually
-      fputs ("discmage.dylib", stdout);
+      fputs ("libdiscmage.dylib", stdout);
 #elif   defined __unix__ || defined __BEOS__
-      fputs ("discmage.so", stdout);
+      fputs ("libdiscmage.so", stdout);
 #else
       fputs ("unknown");
 #endif

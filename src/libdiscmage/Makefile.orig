@@ -43,12 +43,10 @@ LIBNAME=discmage
 OBJECTS=libdm_misc.o dllinit.o misc.o misc_wav.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
 ifneq ($(OSTYPE),beos)
-LIBS=-lm
-else
-LIBS=
+LDFLAGS+=-lm
 endif
 ifdef USE_ZLIB
-LIBS+=-lz
+LDFLAGS+=-lz
 OBJECTS+=map.o misc_z.o unzip.o
 else
 ifeq ($(GCC_WIN),1)
@@ -62,27 +60,17 @@ endif                                   # USE_ZLIB
 
 ifeq ($(OSTYPE),msys)                   # test msys before cygwin and DJGPP
 
+FULLLIBNAME=$(LIBNAME).dll
 GCCA_DIR=/mingw/lib/gcc/mingw32/4.8.1/
-LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
+LDFLAGS+=-L$(GCCA_DIR) -lgcc -L/mingw/lib -lkernel32 -lmsvcrt --dll -e _DllMain@12
 # MSYS problem: Specifying the library directory is necessary when compiling on
 # a different filesystem than the filesystem that MinGW is installed on.
-
-FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e _DllMain@12 -o $(LIBNAME).dll
-DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
-ifndef DLOPEN
-DLLTOOLFLAGS+=-l $(LIBNAME).a
-endif
 
 else
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
+FULLLIBNAME=$(LIBNAME).dll
 GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.3.3/
-ifeq ($(CC),g++)
-LIBS+=-lstdc++
-endif
-LIBS+=-L$(GCCA_DIR) -lgcc -lcygwin -lkernel32
-# kernel32 for DLOPEN and DisableThreadLibraryCalls()
 
 ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12
@@ -90,24 +78,16 @@ else
 ENTRY=_DllMain@12
 endif
 
-FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e $(ENTRY) -o $(LIBNAME).dll
-DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
-ifndef DLOPEN
-DLLTOOLFLAGS+=-l $(LIBNAME).a
-endif
+LDFLAGS+=-L$(GCCA_DIR) -lgcc -lcygwin -lkernel32 --dll -e $(ENTRY)
+# kernel32 for DLOPEN and DisableThreadLibraryCalls()
 
 else
 ifdef DJGPP
 
-OBJECTS+=dxe_misc.o
-
-GCCA_DIR=c:/djgpp/lib/gcc/djgpp/3.43
-LIBS+=-L$(GCCA_DIR) -lgcc
-
-DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)
-# $(LDFLAGS) must come after $(OBJECTS)
 FULLLIBNAME=$(LIBNAME).dxe
+GCCA_DIR=c:/djgpp/lib/gcc/djgpp/3.43
+LDFLAGS+=-L$(GCCA_DIR) -lgcc
+OBJECTS+=dxe_misc.o
 
 else                                    # UNIX, BeOS or Mac OS X (Darwin)
 
@@ -132,8 +112,6 @@ else
 LDFLAGS+=-shared
 endif                                   # darwin
 endif                                   # beos
-
-DLLFLAGS+=$(LDFLAGS) $(OBJECTS) $(LIBS) -o $(FULLLIBNAME)
 
 endif                                   # DJGPP
 endif                                   # msys
@@ -183,10 +161,12 @@ endif                                   # GCC_WIN
 
 ifeq ($(GCC_WIN),1)
 
+DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(FULLLIBNAME)
 ifndef DLOPEN
-$(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
+DLLTOOLFLAGS+=-l $(LIBNAME).a
+$(FULLLIBNAME) $(LIBNAME).a: $(OBJECTS)
 else
-$(LIBNAME).dll: $(OBJECTS)
+$(FULLLIBNAME): $(OBJECTS)
 endif
 #	echo EXPORTS > tmp.def
 ##	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
@@ -196,19 +176,19 @@ endif
 # We don't create the .def file automatically anymore. Using nm resulted in a
 # (too large?) .def file which resulted in a non-working DLL when using Cygwin.
 
-	ld --base-file tmp.base $(DLLFLAGS)
+	ld --base-file tmp.base $(OBJECTS) $(LDFLAGS) -o $(FULLLIBNAME)
 	dlltool $(DLLTOOLFLAGS)
-	ld tmp.exp $(DLLFLAGS)
+	ld tmp.exp $(OBJECTS) $(LDFLAGS) -o $(FULLLIBNAME)
 
 else
 ifdef DJGPP
 
 ifndef DLOPEN
-$(LIBNAME).dxe $(LIBNAME).a: $(OBJECTS) djimport.o dlopen.o
+$(FULLLIBNAME) $(LIBNAME).a: $(OBJECTS) djimport.o dlopen.o
 else
-$(LIBNAME).dxe: $(OBJECTS)
+$(FULLLIBNAME): $(OBJECTS)
 endif
-	dxegen $(LIBNAME).dxe _import_export $(DLLFLAGS)
+	dxegen $(FULLLIBNAME) _import_export $(OBJECTS) $(LDFLAGS)
 ifndef DLOPEN
 # Recompile map.c, because it has to be a normal object file for the import
 # library (no references to import_export)
@@ -221,7 +201,7 @@ else                                    # UNIX, BeOS or Mac OS X (Darwin)
 # uses LD_LIBRARY_PATH, DYLD_LIBRARY_PATH and DYLD_FALLBACK_LIBRARY_PATH
 
 $(FULLLIBNAME): $(OBJECTS)
-	$(CC) $(DLLFLAGS)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $(FULLLIBNAME)
 
 endif                                   # DJGPP
 endif                                   # GCC_WIN

@@ -228,34 +228,31 @@ endif
 
 # Dependencies
 
-MISC_Z_H_DEPS=unzip.h
-MISC_H_DEPS=misc_z.h $(MISC_Z_H_DEPS) getopt.h
-DXEDLL_PRIV_H_DEPS=dxedll_pub.h
+MISC_Z_H_DEPS=misc_z.h unzip.h
+MISC_H_DEPS=misc.h $(MISC_Z_H_DEPS) getopt.h
+DXEDLL_PRIV_H_DEPS=dxedll_priv.h dxedll_pub.h
 
-libdm_misc.o: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-              format/format.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS) misc_wav.h
-dllinit.o: config.h libdiscmage.h dxedll_pub.h dxedll_priv.h \
-           $(DXEDLL_PRIV_H_DEPS) map.h
-misc.o: config.h misc_z.h $(MISC_Z_H_DEPS) misc.h $(MISC_H_DEPS) dxedll_priv.h \
-        $(DXEDLL_PRIV_H_DEPS)
-misc_wav.o: config.h misc.h $(MISC_H_DEPS) misc_wav.h
-format/format.o: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+libdm_misc.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h $(DXEDLL_PRIV_H_DEPS) misc_wav.h
+dllinit.o: config.h libdiscmage.h dxedll_pub.h $(DXEDLL_PRIV_H_DEPS) map.h
+misc.o: config.h $(MISC_Z_H_DEPS) $(MISC_H_DEPS) $(DXEDLL_PRIV_H_DEPS)
+misc_wav.o: config.h $(MISC_H_DEPS) misc_wav.h
+format/format.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
                  format/format.h format/cdi.h format/cue.h format/nero.h \
-                 format/other.h format/toc.h dxedll_priv.h \
-                 $(DXEDLL_PRIV_H_DEPS)
-format/cdi.o: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-              format/format.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS)
-format/nero.o: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-               format/format.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS)
-format/cue.o: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-              format/format.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS)
-format/toc.o: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-              format/format.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS)
-format/other.o: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-                format/format.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS)
-map.o: config.h map.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS)
-misc_z.o: config.h misc_z.h $(MISC_Z_H_DEPS) misc.h $(MISC_H_DEPS) map.h \
-          unzip.h dxedll_priv.h $(DXEDLL_PRIV_H_DEPS)
+                 format/other.h format/toc.h $(DXEDLL_PRIV_H_DEPS)
+format/cdi.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h $(DXEDLL_PRIV_H_DEPS)
+format/nero.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+               format/format.h $(DXEDLL_PRIV_H_DEPS)
+format/cue.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h $(DXEDLL_PRIV_H_DEPS)
+format/toc.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h $(DXEDLL_PRIV_H_DEPS)
+format/other.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                format/format.h $(DXEDLL_PRIV_H_DEPS)
+map.o: config.h map.h $(DXEDLL_PRIV_H_DEPS)
+misc_z.o: config.h $(MISC_Z_H_DEPS) $(MISC_H_DEPS) map.h unzip.h \
+          $(DXEDLL_PRIV_H_DEPS)
 unzip.o: config.h unzip.h
 dxe_misc.o: config.h dxedll_pub.h
 djimport.o: config.h dlopen.h dxedll_pub.h libdiscmage.h

@@ -54,10 +54,10 @@ distclean: clean
 
 
 $(FULLLIBNAME): $(OBJECTS)
-	link.exe $(LDFLAGS) $(OBJECTS) /OUT:$(FULLLIBNAME)
+	link.exe $(OBJECTS) $(LDFLAGS) /OUT:$(FULLLIBNAME)
 # link.exe automatically creates the import library. "/IMPLIB:filename.lib"
 #  could be used to give the import library another name
-#	lib.exe $(LDFLAGS) $(OBJECTS) /OUT:$(LIBNAME).lib
+#	lib.exe $(OBJECTS) $(LDFLAGS) /OUT:$(LIBNAME).lib
 
 install:
 
@@ -66,28 +66,27 @@ uninstall:
 
 # Dependencies
 
-MISC_Z_H_DEPS=unzip.h
-MISC_H_DEPS=misc_z.h $(MISC_Z_H_DEPS) getopt.h
+MISC_Z_H_DEPS=misc_z.h unzip.h
+MISC_H_DEPS=misc.h $(MISC_Z_H_DEPS) getopt.h
 
-libdm_misc.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-                format/format.h misc_wav.h
-dllinit.obj: config.h libdiscmage.h map.h
-misc.obj: config.h misc_z.h $(MISC_Z_H_DEPS) misc.h $(MISC_H_DEPS)
-misc_wav.obj: config.h misc.h $(MISC_H_DEPS) misc_wav.h
-format/format.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-                   format/format.h format/cdi.h format/cue.h format/nero.h \
-                   format/other.h format/toc.h
-format/cdi.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+libdm_misc.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h misc_wav.h
+dllinit.obj: config.h libdiscmage.h
+misc.obj: config.h $(MISC_Z_H_DEPS) $(MISC_H_DEPS)
+misc_wav.obj: config.h $(MISC_H_DEPS) misc_wav.h
+format/format.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+                 format/format.h format/cdi.h format/cue.h format/nero.h \
+                 format/other.h format/toc.h
+format/cdi.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h
+format/nero.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+               format/format.h
+format/cue.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h
+format/toc.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
+              format/format.h
+format/other.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
                 format/format.h
-format/nero.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-                 format/format.h
-format/cue.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-                format/format.h
-format/toc.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-                format/format.h
-format/other.obj: config.h misc.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
-                  format/format.h
 map.obj: config.h map.h
-misc_z.obj: config.h misc_z.h $(MISC_Z_H_DEPS) misc.h $(MISC_H_DEPS) map.h \
-            unzip.h
+misc_z.obj: config.h $(MISC_Z_H_DEPS) $(MISC_H_DEPS) map.h unzip.h
 unzip.obj: config.h unzip.h

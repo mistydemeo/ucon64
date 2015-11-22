@@ -65,10 +65,10 @@ cd64lib.obj: cd64lib.c
 	$(CC) $(CFLAGS) $** /c /Fo$@
 
 cd64.lib: cd64lib.obj cd64io.obj
-	lib.exe $(LDFLAGS) $** /OUT:$@
+	lib.exe $** $(LDFLAGS) /OUT:$@
 
 cd64.dll: cd64lib.obj cd64io.obj
-	link.exe $(LDFLAGS) $** /DLL /DEF:cd64.def /IMPLIB:cd64dll.lib /OUT:$@
+	link.exe $** $(LDFLAGS) /DLL /DEF:cd64.def /IMPLIB:cd64dll.lib /OUT:$@
 
 clean:
 	del *.obj

@@ -24,12 +24,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifndef  __CYGWIN__
+#include "misc/getopt.h"                        // getopt2 needs struct option from getopt1
+#else
+#include <getopt.h>                             // Cygwin's unistd.h unconditionally includes getopt.h
+#endif
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
-#include "misc/getopt.h"                        // getopt2 needs struct option from getopt1
-
 
 /*
   Extended getopt1(), usage and workflow handling
@@ -92,15 +95,20 @@ typedef struct
 } st_getopt2_t;
 
 extern void getopt2_usage (const st_getopt2_t *option);
-extern int getopt2_long (struct option *long_option, const st_getopt2_t *option, int n);
-extern int getopt2_long_only (struct option *long_option, const st_getopt2_t *option, int n);
-extern int getopt2_short (char *short_option, const st_getopt2_t *option, int n);
-extern const st_getopt2_t *getopt2_get_index_by_val (const st_getopt2_t *option, int val);
+extern int getopt2_long (struct option *long_option,
+                         const st_getopt2_t *option, int n);
+extern int getopt2_long_only (struct option *long_option,
+                              const st_getopt2_t *option, int n);
+extern int getopt2_short (char *short_option, const st_getopt2_t *option,
+                          int n);
+extern const st_getopt2_t *getopt2_get_index_by_val (const st_getopt2_t *option,
+                                                     int val);
 
 #define GETOPT2_FILE_FILES_ONLY     1
 #define GETOPT2_FILE_RECURSIVE      (1 << 1)
 #define GETOPT2_FILE_RECURSIVE_ONCE (1 << 2)
-extern int getopt2_file (int argc, char **argv, int (* callback_func) (const char *), int flags);
+extern int getopt2_file (int argc, char **argv,
+                         int (* callback_func) (const char *), int flags);
 
 
 #ifdef  DEBUG

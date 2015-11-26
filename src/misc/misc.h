@@ -202,16 +202,11 @@ extern int misc_digits (unsigned long value);
 /*
   Portability and Fixes
 
-  fix_character_set()  fixes some Cygwin problems with filenames
   truncate()
   sync()
   popen()
   pclose()
 */
-#ifdef  __CYGWIN__
-extern char *fix_character_set (char *str);
-#endif
-
 #ifdef  _WIN32
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.

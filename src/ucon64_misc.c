@@ -1278,7 +1278,7 @@ int
 ucon64_rename (int mode)
 {
 #define SUFFIX_MAX 80
-  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[SUFFIX_MAX];
+  char buf[FILENAME_MAX], buf2[FILENAME_MAX], suffix[SUFFIX_MAX];
   const char *p, *p2;
   unsigned int crc = 0;
   int good_name;

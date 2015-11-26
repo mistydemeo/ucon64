@@ -18,11 +18,11 @@ endif
 # both GCC (and friends) ports.
 
 GCC_WIN=0
-# test cygwin before DJGPP; OSTYPE is not exported on Cygwin
-ifeq ($(TERM),cygwin)
+# test cygwin before DJGPP; OSTYPE is not exported
+ifeq ($(OSTYPE),cygwin)
 GCC_WIN=1
 endif
-# test msys before DJGPP; MSYS, MinGW's POSIX build environment
+# test msys before DJGPP; OSTYPE is not exported; MSYS, MinGW's POSIX build environment
 ifeq ($(OSTYPE),msys)
 GCC_WIN=1
 endif
@@ -92,8 +92,8 @@ endif
 
 
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
-        misc/chksum.o misc/file.o misc/getopt.o misc/getopt2.o \
-        misc/misc.o misc/parallel.o misc/property.o misc/string.o misc/term.o \
+        misc/chksum.o misc/file.o misc/getopt2.o misc/misc.o misc/parallel.o \
+        misc/property.o misc/string.o misc/term.o \
         console/atari.o console/coleco.o console/console.o console/dc.o \
         console/gb.o console/gba.o console/genesis.o console/jaguar.o \
         console/lynx.o console/n64.o console/nds.o console/neogeo.o \
@@ -109,6 +109,9 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/spsc.o backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o \
         backup/yoko.o backup/z64.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o
+ifneq ($(OSTYPE),cygwin)
+OBJECTS+=misc/getopt.o
+endif
 ifdef DJGPP
 OBJECTS+=misc/snprintf.o
 endif
@@ -251,7 +254,7 @@ endif                                   # USE_LIBCD64
 
 
 install:
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 else
@@ -271,7 +274,7 @@ endif
 
 
 uninstall:
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 else
@@ -481,7 +484,7 @@ misc/chksum.o: config.h $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) $(MISC_H_DEPS)
 misc/dlopen.o: config.h misc/dlopen.h misc/dxedll_pub.h misc/map.h
 misc/file.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS)
 misc/getopt.o: config.h misc/getopt.h
-misc/getopt2.o: config.h misc/file.h misc/getopt.h $(GETOPT2_H_DEPS)
+misc/getopt2.o: config.h misc/file.h $(GETOPT2_H_DEPS)
 misc/map.o: config.h misc/map.h
 misc/misc.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/itypes.h $(MISC_H_DEPS)
 misc/parallel.o: config.h misc/dlopen.h misc/file.h misc/parallel.h \

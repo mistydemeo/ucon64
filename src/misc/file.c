@@ -297,7 +297,7 @@ char *
 realpath2 (const char *path, char *full_path)
 // enhanced realpath() which returns the absolute path of a file
 {
-  char path1[FILENAME_MAX + 1];
+  char path1[FILENAME_MAX];
   const char *path2;
 
   if (path[0] == '~')
@@ -315,7 +315,23 @@ realpath2 (const char *path, char *full_path)
   else
     path2 = path;
 
-  return realpath (path2, full_path);
+  if (access (path2, F_OK) == 0)
+    return realpath (path2, full_path);
+  else
+    /*
+      According to "The Open Group Base Specifications Issue 7" realpath() is
+      supposed to fail if path refers to a file that does not exist. uCON64
+      however, expects the behaviour of realpath() on Linux (which sets
+      full_path to a reasonable path for a nonexisting file).
+    */
+    {
+      if (full_path)
+        strcpy (full_path, path2);
+      else
+        full_path = strdup (path2);
+      errno = ENOENT;
+      return 0;
+    }
 }
 
 

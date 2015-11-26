@@ -82,12 +82,6 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #ifdef _MSC_VER                                 /*  __CYGWIN__ must come first) */
 #pragma warning(pop)
 #endif
-#include <string.h>
-#ifdef __CYGWIN__
-#include <exceptions.h>
-#include <dlfcn.h>
-#include <sys/cygwin.h>
-#endif
 #endif /* _WIN32 || __CYGWIN__ */
 
 int cd64_open_rawio(struct cd64_t *cd64);

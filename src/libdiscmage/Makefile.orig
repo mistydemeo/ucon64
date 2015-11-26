@@ -32,7 +32,7 @@ endif
 # both GCC (and friends) ports.
 
 GCC_WIN=0
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
 GCC_WIN=1
 endif
 ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
@@ -58,19 +58,10 @@ endif                                   # GCC_WIN
 endif                                   # USE_ZLIB
 
 
-ifeq ($(OSTYPE),msys)                   # test msys before cygwin and DJGPP
+ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
 
 FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/mingw/lib/gcc/mingw32/4.8.1/
-LDFLAGS+=-L$(GCCA_DIR) -lgcc -L/mingw/lib -lkernel32 -lmsvcrt --dll -e _DllMain@12
-# MSYS problem: Specifying the library directory is necessary when compiling on
-# a different filesystem than the filesystem that MinGW is installed on.
-
-else
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-
-FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.3.3/
+GCCA_DIR=/lib/gcc/i686-pc-cygwin/4.9.3/
 
 ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12
@@ -80,6 +71,15 @@ endif
 
 LDFLAGS+=-L$(GCCA_DIR) -lgcc -lcygwin -lkernel32 --dll -e $(ENTRY)
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
+
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+
+FULLLIBNAME=$(LIBNAME).dll
+GCCA_DIR=/mingw/lib/gcc/mingw32/4.8.1/
+LDFLAGS+=-L$(GCCA_DIR) -lgcc -L/mingw/lib -lkernel32 -lmsvcrt --dll -e _DllMain@12
+# MSYS problem: Specifying the library directory is necessary when compiling on
+# a different filesystem than the filesystem that MinGW is installed on.
 
 else
 ifdef DJGPP
@@ -123,8 +123,7 @@ all: $(FULLLIBNAME)
 
 clean:
 ifeq ($(GCC_WIN),1)
-	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
-              tmp.*
+	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o tmp.*
 else
 ifdef DJGPP
 	del $(FULLLIBNAME)

@@ -511,7 +511,6 @@ extern int set_property (const char *filename, const char *propname,
   deinit_conio()       stop console I/O
   getch()
   kbhit()
-  fix_character_set()  fixes some Cygwin problems with filenames
   truncate()
   sync()
   popen()
@@ -540,11 +539,6 @@ extern int kbhit (void);
 // Gonna use my (Jan-Erik) fake one. Might work better and more like the real
 //  getch().
 #endif
-
-#ifdef  __CYGWIN__
-extern char *fix_character_set (char *value);
-#endif
-
 
 #ifdef  _WIN32
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)

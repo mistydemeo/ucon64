@@ -180,13 +180,7 @@ get_property (const char *filename, const char *propname, int mode)
     }
 
   p = getenv2 (propname);
-  if (*p == 0)                                  // getenv2() never returns NULL
-    {
-      if (!value_s)
-        value_s = NULL;                         // value_s won't be changed
-                                                //  after this func (=OK)
-    }
-  else
+  if (*p != 0)                                  // getenv2() never returns NULL
     value_s = p;
 
   if (value_s)
@@ -194,11 +188,7 @@ get_property (const char *filename, const char *propname, int mode)
       {
         static char tmp[FILENAME_MAX];
 
-#ifdef  __CYGWIN__
-        fix_character_set (value_s);
-#endif
         realpath2 (value_s, tmp);
-
         value_s = tmp;
     }
 
@@ -218,7 +208,7 @@ get_property_int (const char *filename, const char *propname)
     value_s = "0";
 
   if (*value_s)
-    switch (tolower (*value_s))
+    switch (tolower ((int) *value_s))
       {
         case '0':                               // 0
         case 'n':                               // [Nn]o

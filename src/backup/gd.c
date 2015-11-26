@@ -1084,8 +1084,8 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
   fn_length = strlen (p);
 
   if (fn_length < 6 || fn_length > 11 // 7 ("base") + 1 (period) + 3 (extension)
-      || toupper (p[0]) != 'S' || toupper (p[1]) != 'F'
-      || p[fn_length - 4] != '.' || toupper (p[fn_length - 3]) != 'S')
+      || toupper ((int) p[0]) != 'S' || toupper ((int) p[1]) != 'F'
+      || p[fn_length - 4] != '.' || toupper ((int) p[fn_length - 3]) != 'S')
     {
       fprintf (stderr, "ERROR: Filename (%s) is not a saver filename (SF*.S##)\n", p);
       exit (1);

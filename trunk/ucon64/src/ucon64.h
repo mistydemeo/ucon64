@@ -188,8 +188,6 @@ typedef struct
 {
   int console;                                  // UCON64_SNES, etc...
   uint32_t flags;                               // WF_INIT, etc..
-//  const char *optarg;                           // pointer to optarg
-                                                // initialised with NULL and used later
 } st_ucon64_obj_t;
 
 /*

@@ -240,13 +240,13 @@ sendFilename (unsigned short baseport, char name[])
       c++;
     }
   for (i = 0; i < 8 && *c != '.' && *c != '\0'; i++, c++)
-    mname[i] = (char) toupper (*c);
+    mname[i] = (char) toupper ((int) *c);
   c = strrchr (c, '.');
   if (c != NULL)
     {
       c++;
       for (i = 8; i < 11 && *c != '\0'; i++, c++)
-        mname[i] = (char) toupper (*c);
+        mname[i] = (char) toupper ((int) *c);
     }
 
   return parport_write (mname, 11, baseport);

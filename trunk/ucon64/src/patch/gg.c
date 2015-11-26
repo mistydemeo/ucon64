@@ -218,7 +218,7 @@ hexDigit (int value)
 int
 hexValue (char digit)
 {
-  switch (toupper (digit))
+  switch (toupper ((int) digit))
     {
     case '0':
       return 0;
@@ -332,12 +332,12 @@ gameGenieEncodeGameBoy (const char *in, char *out)
   if (hexValue (in[0]) > 7)
     return -1;
 
-  out[0] = (char) toupper (in[5]);
-  out[1] = (char) toupper (in[6]);
-  out[2] = (char) toupper (in[1]);
+  out[0] = (char) toupper ((int) in[5]);
+  out[1] = (char) toupper ((int) in[6]);
+  out[2] = (char) toupper ((int) in[1]);
   out[3] = '-';
-  out[4] = (char) toupper (in[2]);
-  out[5] = (char) toupper (in[3]);
+  out[4] = (char) toupper ((int) in[2]);
+  out[5] = (char) toupper ((int) in[3]);
   out[6] = hexDigit (~hexValue (in[0]) & 0xf);
   out[7] = 0;
 
@@ -374,14 +374,14 @@ static const char genesisChars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
 int
 isGenesisChar (char c)
 {
-  return strchr (genesisChars, toupper (c)) != 0;
+  return strchr (genesisChars, toupper ((int) c)) != 0;
 }
 
 
 int
 genesisValue (char c)
 {
-  return strchr (genesisChars, toupper (c)) - genesisChars;
+  return strchr (genesisChars, toupper ((int) c)) - genesisChars;
 }
 
 
@@ -478,7 +478,7 @@ gameGenieEncodeMegadrive (const char *in, char *out)
 char
 mapNesChar (char hex)
 {
-  switch (toupper (hex))
+  switch (toupper ((int) hex))
     {
     case '0':
       return 'A';
@@ -522,7 +522,7 @@ mapNesChar (char hex)
 char
 unmapNesChar (char genie)
 {
-  switch (toupper (genie))
+  switch (toupper ((int) genie))
     {
     case 'A':
       return '0';
@@ -566,7 +566,7 @@ unmapNesChar (char genie)
 int
 isNesChar (char c)
 {
-  return strchr ("APZLGITYEOXUKSVN-", toupper (c)) != 0;
+  return strchr ("APZLGITYEOXUKSVN-", toupper ((int) c)) != 0;
 }
 
 
@@ -725,7 +725,7 @@ gameGenieEncodeNES (const char *in, char *out)
 char
 mapSnesChar (char hex)
 {
-  switch (toupper (hex))
+  switch (toupper ((int) hex))
     {
     case '0':
       return 'D';
@@ -769,7 +769,7 @@ mapSnesChar (char hex)
 char
 unmapSnesChar (char genie)
 {
-  switch (toupper (genie))
+  switch (toupper ((int) genie))
     {
     case 'D':
       return '0';

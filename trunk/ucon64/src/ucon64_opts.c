@@ -642,7 +642,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_REGION:
-      if (option_arg[1] == 0 && toupper (option_arg[0]) == 'X') // be insensitive to case
+      if (option_arg[1] == 0 && toupper ((int) option_arg[0]) == 'X') // be insensitive to case
         ucon64.region = 256;
       else
         ucon64.region = strtol (option_arg, NULL, 10);

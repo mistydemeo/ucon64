@@ -410,7 +410,8 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 	return 1;
 }
 
-#endif
+#endif /* CD64_USE_PPDEV */
+
 
 #ifdef CD64_USE_PORTDEV
 
@@ -559,13 +560,12 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 	return 1;
 }
 
-#endif
+#endif /* CD64_USE_PORTDEV */
 
 
 #ifdef CD64_USE_RAWIO
 
 #if defined _WIN32 || defined __CYGWIN__
-
 static void *open_module(char *module_name, struct cd64_t *cd64) {
 
 	void *handle = LoadLibrary(module_name);
@@ -673,9 +673,9 @@ static void dlportio_output_byte(uint8_t byte, uint16_t port) {
 #define NODRIVER_MSG "ERROR: No (working) I/O port driver\n"
 
 #ifdef __CYGWIN__
-static int new_exception_handler(PEXCEPTION_RECORD exception_record,
-                                 void *establisher_frame, PCONTEXT context_record,
-                                 void *dispatcher_context) {
+static EXCEPTION_DISPOSITION NTAPI new_exception_handler(PEXCEPTION_RECORD exception_record,
+                                                         void *establisher_frame, PCONTEXT context_record,
+                                                         void *dispatcher_context) {
 
 	(void) establisher_frame;
 	(void) context_record;
@@ -906,18 +906,26 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		 * currently have. Cygwin does something stupid which breaks
 		 * SetUnhandledExceptionFilter()... */
 #ifdef __CYGWIN__                               /* Cygwin */
-		exception_list list;
-		exception_handler *org_handler;
-		cygwin_internal(CW_INIT_EXCEPTIONS, &list);
-		org_handler = list.handler;
-		list.handler = new_exception_handler;
-		input_byte(0x378);
-		list.handler = org_handler;
+		EXCEPTION_REGISTRATION exception_registration;
+		exception_registration.handler = new_exception_handler;
+
+		__asm__ __volatile__
+		("movl %%fs:0, %0\n"
+		 "movl %1, %%fs:0"
+		  : "=a" (exception_registration.prev)
+		  : "b" (&exception_registration)
+		);
+		input_byte(0x378);                      /* 0x378 is okay */
+		/* if we get here accessing I/O port 0x378 did not cause an exception */
+		__asm__ __volatile__
+		("movl %0, %%fs:0"
+		  :
+		  : "r" (exception_registration.prev)
+		);
 #elif defined _WIN32                            /* MinGW & Visual C++ */
 		LPTOP_LEVEL_EXCEPTION_FILTER org_exception_filter =
 			SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
 		input_byte(0x378);                      /* 0x378 is okay */
-
 		/* if we get here accessing I/O port 0x378 did not cause an exception */
 		SetUnhandledExceptionFilter(org_exception_filter);
 #endif
@@ -1091,4 +1099,4 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 	return 1;
 }
 
-#endif
+#endif /* CD64_USE_RAWIO */

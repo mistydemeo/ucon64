@@ -115,39 +115,6 @@ misc_percent (int pos, int len)
 }
 
 
-#ifdef  __CYGWIN__
-/*
-  Weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is OK):
-  When a string with "e (e with diaeresis, one character) is read from an
-  environment variable, the character isn't the right character for accessing
-  the file system. We fix this.
-  TODO: fix the same problem for other non-ASCII characters (> 127).
-*/
-char *
-fix_character_set (char *str)
-{
-  int n, l = strlen (str);
-  unsigned char *ptr = (unsigned char *) str;
-
-  for (n = 0; n < l; n++)
-    {
-      if (ptr[n] == 0x89)                       // e diaeresis
-        ptr[n] = 0xeb;
-      else if (ptr[n] == 0x84)                  // a diaeresis
-        ptr[n] = 0xe4;
-      else if (ptr[n] == 0x8b)                  // i diaeresis
-        ptr[n] = 0xef;
-      else if (ptr[n] == 0x94)                  // o diaeresis
-        ptr[n] = 0xf6;
-      else if (ptr[n] == 0x81)                  // u diaeresis
-        ptr[n] = 0xfc;
-    }
-
-  return str;
-}
-#endif
-
-
 void
 wait2 (int nmillis)
 {
@@ -765,7 +732,7 @@ getenv2 (const char *variable)
             {
               char c;
               getcwd (value, FILENAME_MAX);
-              c = (char) toupper (*value);
+              c = (char) toupper ((int) *value);
               // if current dir is root dir strip problematic ending slash (DJGPP)
               if (c >= 'A' && c <= 'Z' &&
                   value[1] == ':' && value[2] == '/' && value[3] == 0)
@@ -804,11 +771,9 @@ getenv2 (const char *variable)
   */
   if (!strcmp (variable, "HOME") && !strcmp (value, "/"))
     getcwd (value, FILENAME_MAX);
-
-  return fix_character_set (value);
-#else
-  return value;
 #endif
+
+  return value;
 }
 
 

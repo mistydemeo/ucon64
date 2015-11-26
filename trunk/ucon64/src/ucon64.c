@@ -138,8 +138,7 @@ char vers[] = "$VER: uCON64 "UCON64_VERSION_S" "CURRENT_OS_S" ("__DATE__") ("__T
 typedef struct
 {
   int val;         // (st_getopt2_t->val)
-//  const
-    char *optarg;  // option argument
+  char *optarg;    // option argument
   int console;     // the console (st_getopt2_t->object)
   int flags;       // workflow flags (st_getopt2_t->object)
 } st_args_t;
@@ -1669,7 +1668,7 @@ to_func (char *s, int len, char (*func) (char))
 static inline char
 toprint (char c)
 {
-  if (isprint (c))
+  if (isprint ((int) c))
     return c;
 
   // characters that also work with printf()

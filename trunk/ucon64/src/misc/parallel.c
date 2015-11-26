@@ -81,8 +81,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #elif   defined __CYGWIN__                      // _WIN32
 #include <windows.h>                            // definition of WINAPI
 #undef  _WIN32
-#include <exceptions.h>
-#include <sys/cygwin.h>
 #include "misc/dlopen.h"
 #endif
 #include "misc/file.h"                          // DIR_SEPARATOR_S
@@ -577,7 +575,7 @@ new_exception_filter (LPEXCEPTION_POINTERS exception_pointers)
   return EXCEPTION_CONTINUE_SEARCH;
 }
 #elif   defined __CYGWIN__
-static int
+static EXCEPTION_DISPOSITION NTAPI
 new_exception_handler (PEXCEPTION_RECORD exception_record, void *establisher_frame,
                        PCONTEXT context_record, void *dispatcher_context)
 {
@@ -884,13 +882,22 @@ parport_open (unsigned short port)
     // if we get here accessing I/O port 0x378 did not cause an exception
     SetUnhandledExceptionFilter (org_exception_filter);
 #else                                           // Cygwin
-    exception_list list;
-    exception_handler *org_handler;
-    cygwin_internal (CW_INIT_EXCEPTIONS, &list);
-    org_handler = list.handler;
-    list.handler = new_exception_handler;
-    input_byte (0x378);
-    list.handler = org_handler;
+    EXCEPTION_REGISTRATION exception_registration;
+    exception_registration.handler = new_exception_handler;
+
+    __asm__ __volatile__
+    ("movl %%fs:0, %0\n"
+     "movl %1, %%fs:0"
+      : "=a" (exception_registration.prev)
+      : "b" (&exception_registration)
+    );
+    input_byte (0x378); // 0x378 is okay (don't use this function's parameter)
+    // if we get here accessing I/O port 0x378 did not cause an exception
+    __asm__ __volatile__
+    ("movl %0, %%fs:0"
+      :
+      : "r" (exception_registration.prev)
+    );
 #endif
   }
 #endif // _WIN32 || __CYGWIN__

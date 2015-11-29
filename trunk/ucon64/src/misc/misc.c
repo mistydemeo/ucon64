@@ -157,11 +157,12 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
       {
 //        fprintf (output, (flags & DUMPER_DEC_COUNT ? "%010d  " : "%08x  "),
 //          (int) (pos + virtual_start));
-        fprintf (output, "%c", isprint (*p) ||
+        int c = isprint (*p) ||
 #ifdef USE_ANSI_COLOR
-                               *p == 0x1b || // ESC
+                *p == 0x1b || // ESC
 #endif
-                               isspace (*p) ? *p : DUMPER_REPLACER);
+                isspace (*p) ? *p : DUMPER_REPLACER;
+        fputc (c, output);
       }
     else if (flags & DUMPER_DUAL)
       {
@@ -680,19 +681,19 @@ char *
 getenv2 (const char *variable)
 /*
   getenv() suitable for enviroments w/o HOME, TMP or TEMP variables.
-  The caller should copy the returned string to it's own memory, because this
+  The caller should copy the returned string to its own memory, because this
   function will overwrite that memory on the next call.
   Note that this function never returns NULL.
 */
 {
   char *tmp;
   static char value[MAXBUFSIZE];
-#if     defined __CYGWIN__ || defined __MSDOS__
+#ifdef  __MSDOS__
 /*
   On DOS and Windows the environment variables are not stored in a case
-  sensitive manner. The run-time systems of DJGPP and Cygwin act as if they are
-  stored in upper case. Their getenv() however *is* case sensitive. We fix this
-  by changing all characters of the search string (variable) to upper case.
+  sensitive manner. The run-time system of DJGPP acts as if they are stored in
+  upper case. Its getenv() however *is* case sensitive. We fix this by changing
+  all characters of the search string (variable) to upper case.
 
   Note that in Cygwin's Bash environment variables *are* stored in a case
   sensitive manner.
@@ -705,41 +706,44 @@ getenv2 (const char *variable)
 
   *value = 0;
 
-  if ((tmp = getenv (variable)) != NULL)
+  if (!strcmp (variable, "HOME"))
+    {
+      if ((tmp = getenv ("UCON64_HOME")) != NULL)
+        strcpy (value, tmp);
+      else if ((tmp = getenv ("HOME")) != NULL)
+        strcpy (value, tmp);
+      else if ((tmp = getenv ("USERPROFILE")) != NULL)
+        strcpy (value, tmp);
+      else if ((tmp = getenv ("HOMEDRIVE")) != NULL)
+        {
+          strcpy (value, tmp);
+          tmp = getenv ("HOMEPATH");
+          strcat (value, tmp ? tmp : DIR_SEPARATOR_S);
+        }
+      else
+        /*
+          Don't just use C:\\ on DOS, the user might not have write access
+          there (Windows NT DOS-box). Besides, it would make uCON64 behave
+          differently on DOS than on the other platforms.
+          Returning the current directory when none of the above environment
+          variables are set can be seen as a feature. A frontend could execute
+          uCON64 with an environment without any of the environment variables
+          set, so that the directory from where uCON64 starts will be used.
+        */
+        {
+          char c;
+          getcwd (value, FILENAME_MAX);
+          c = (char) toupper ((int) *value);
+          // if current dir is root dir strip problematic ending slash (DJGPP)
+          if (c >= 'A' && c <= 'Z' &&
+              value[1] == ':' && value[2] == '/' && value[3] == 0)
+            value[2] = 0;
+        }
+    }
+  else if ((tmp = getenv (variable)) != NULL)
     strcpy (value, tmp);
   else
     {
-      if (!strcmp (variable, "HOME"))
-        {
-          if ((tmp = getenv ("USERPROFILE")) != NULL)
-            strcpy (value, tmp);
-          else if ((tmp = getenv ("HOMEDRIVE")) != NULL)
-            {
-              strcpy (value, tmp);
-              tmp = getenv ("HOMEPATH");
-              strcat (value, tmp ? tmp : DIR_SEPARATOR_S);
-            }
-          else
-            /*
-              Don't just use C:\\ on DOS, the user might not have write access
-              there (Windows NT DOS-box). Besides, it would make uCON64 behave
-              differently on DOS than on the other platforms.
-              Returning the current directory when none of the above environment
-              variables are set can be seen as a feature. A frontend could execute
-              uCON64 with an environment without any of the environment variables
-              set, so that the directory from where uCON64 starts will be used.
-            */
-            {
-              char c;
-              getcwd (value, FILENAME_MAX);
-              c = (char) toupper ((int) *value);
-              // if current dir is root dir strip problematic ending slash (DJGPP)
-              if (c >= 'A' && c <= 'Z' &&
-                  value[1] == ':' && value[2] == '/' && value[3] == 0)
-                value[2] = 0;
-            }
-         }
-
       if (!strcmp (variable, "TEMP") || !strcmp (variable, "TMP"))
         {
 #if     defined __MSDOS__ || defined __CYGWIN__
@@ -787,13 +791,13 @@ drop_privileges (void)
   uid = getuid ();
   if (setuid (uid) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set uid\n");
+      fputs ("ERROR: Could not set uid\n", stderr);
       return 1;
     }
   gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was
-    {                                           //  used, but just in case
-      fprintf (stderr, "ERROR: Could not set gid\n"); //  (root did `chmod +s')
+  if (setgid (gid) == -1)                       //  if `make install' was used,
+    {                                           //  but just in case (root did
+      fputs ("ERROR: Could not set gid\n", stderr); //  `chmod +s')
       return 1;
     }
 

@@ -917,7 +917,8 @@ parport_open (unsigned short port)
       if (found != 1)
         {
           fputs ("ERROR: Could not find a parallel port on your system\n"
-                 "       Try to specify it by hand\n\n", stderr);
+                 "       Try to specify it on the command line or in the configuration file\n\n",
+                 stderr);
           exit (1);
         }
     }

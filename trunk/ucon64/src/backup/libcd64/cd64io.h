@@ -101,19 +101,19 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-#define USLEEP(x) Sleep(x)
+#define MSLEEP(x) Sleep(x)
 #elif defined __MSDOS__
 /* milliseconds */
 #include <dos.h>
-#define USLEEP(x) delay(x)
+#define MSLEEP(x) delay(x)
 #elif defined __BEOS__
 /* microseconds */
 #include <OS.h>
-#define USLEEP(x) snooze(x)
+#define MSLEEP(x) snooze((x) * 1000)
 #else                                           /* UNIX & Cygwin */
 /* microseconds */
 #include <unistd.h>
-#define USLEEP(x) usleep(x)
+#define MSLEEP(x) usleep((x) * 1000)
 #endif
 
 #if defined __STDC_VERSION && __STDC_VERSION >= 19990L && !defined DEBUG

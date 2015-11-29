@@ -214,7 +214,7 @@ static INLINE int cd64_wait_ieee(struct cd64_t *cd64) {
 			ieee1284_write_control(cd64->ppdev, C1284_NINIT^C1284_INVERTED);
 			reset_tries++;
 			i = 0;
-			USLEEP(1);
+			MSLEEP(1);
 		}
 		if (reset_tries > MAX_TRIES) break;
 		if (cd64->abort) return 0;
@@ -227,11 +227,11 @@ int cd64_xfer_ieee1284(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delaym
 
 	if (!cd64_wait_ieee(cd64)) { return 0; }
 
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ieee1284_data_dir(cd64->ppdev, 1);
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ieee1284_write_control(cd64->ppdev, (C1284_NINIT|C1284_NAUTOFD)^C1284_INVERTED);
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	if (rd) {
 		*rd = ieee1284_read_data(cd64->ppdev);
 #if DEBUG_LOWLEVEL
@@ -241,11 +241,11 @@ int cd64_xfer_ieee1284(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delaym
 #endif
 	}
 
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ieee1284_data_dir(cd64->ppdev, 0);
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ieee1284_write_control(cd64->ppdev, C1284_NINIT^C1284_INVERTED);
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	if (wr) {
 		ieee1284_write_data(cd64->ppdev, *wr);
 #if DEBUG_LOWLEVEL
@@ -254,9 +254,9 @@ int cd64_xfer_ieee1284(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delaym
 		printf("\n");
 #endif
 	}
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ieee1284_write_control(cd64->ppdev, (C1284_NINIT|C1284_NSTROBE)^C1284_INVERTED);
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ieee1284_write_control(cd64->ppdev, C1284_NINIT^C1284_INVERTED);
 
 	return 1;
@@ -351,7 +351,7 @@ static INLINE int cd64_wait_ppdev(struct cd64_t *cd64) {
 			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 			reset_tries++;
 			i = 0;
-			USLEEP(1);
+			MSLEEP(1);
 		}
 		if (cd64->abort) return 0;
 		if (reset_tries > MAX_TRIES) break;
@@ -369,13 +369,13 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 
 	if (!cd64_wait_ppdev(cd64)) { return 0; }
 
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	dir = 1;
 	if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) cd64->notice_callback2("PPDATADIR: %s", strerror(errno));
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT | PARPORT_CONTROL_AUTOFD;
 	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	if (rd) {
 		if (ioctl(cd64->ppdevfd, PPRDATA, rd) != 0) cd64->notice_callback2("PPRDATA: %s", strerror(errno));
 #if DEBUG_LOWLEVEL
@@ -385,13 +385,13 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 #endif
 	}
 
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	dir = 0;
 	if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) cd64->notice_callback2("PPDATADIR: %s", strerror(errno));
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT;
 	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	if (wr) {
 		if (ioctl(cd64->ppdevfd, PPWDATA, wr) != 0) cd64->notice_callback2("PPWDATA: %s", strerror(errno));
 #if DEBUG_LOWLEVEL
@@ -400,10 +400,10 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 		printf("\n");
 #endif
 	}
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT | PARPORT_CONTROL_STROBE;
 	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
-	if (delayms) USLEEP(delayms);
+	if (delayms) MSLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT;
 	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 
@@ -476,7 +476,7 @@ static INLINE int cd64_wait_portdev(struct cd64_t *cd64) {
 
 				reset_tries++;
 				i = 0;
-				USLEEP(1);
+				MSLEEP(1);
 			}
 			if (cd64->abort) return 0;
 			if (reset_tries > MAX_TRIES) {
@@ -509,12 +509,12 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 
 		if (!cd64_wait_portdev(cd64)) { return 0; }
 
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		dir = 1;
 		ctl = 0x06 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
 		write(cd64->portdevfd, &ctl, 1);
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		if (rd) {
 			lseek(cd64->portdevfd, cd64->port, SEEK_SET);
 			read(cd64->portdevfd, rd, 1);
@@ -525,12 +525,12 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #endif
 		}
 
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		dir = 0;
 		ctl = 0x04 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
 		write(cd64->portdevfd, &ctl, 1);
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		if (wr) {
 			lseek(cd64->portdevfd, cd64->port, SEEK_SET);
 			write(cd64->portdevfd, wr, 1);
@@ -540,11 +540,11 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 			printf("\n");
 #endif
 		}
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		ctl = 0x05 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
 		write(cd64->portdevfd, &ctl, 1);
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		ctl = 0x04 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
 		write(cd64->portdevfd, &ctl, 1);
@@ -674,8 +674,7 @@ static void dlportio_output_byte(uint8_t byte, uint16_t port) {
 
 #ifdef __CYGWIN__
 static EXCEPTION_DISPOSITION NTAPI new_exception_handler(PEXCEPTION_RECORD exception_record,
-                                                         void *establisher_frame, PCONTEXT context_record,
-                                                         void *dispatcher_context) {
+		void *establisher_frame, PCONTEXT context_record, void *dispatcher_context) {
 
 	(void) establisher_frame;
 	(void) context_record;
@@ -1026,7 +1025,7 @@ static INLINE int cd64_wait_rawio(struct cd64_t *cd64) {
 
 				reset_tries++;
 				i = 0;
-				USLEEP(1);
+				MSLEEP(1);
 			}
 			if (cd64->abort) return 0;
 			if (reset_tries > MAX_TRIES) {
@@ -1056,11 +1055,11 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 
 		if (!cd64_wait_rawio(cd64)) { return 0; }
 
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		dir = 1;
 		ctl = 0x06 | (dir << 5);
 		outb(ctl, (uint16_t) (cd64->port+2));
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		if (rd) {
 			*rd = inb((uint16_t) cd64->port);
 #if DEBUG_LOWLEVEL
@@ -1070,11 +1069,11 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 #endif
 		}
 
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		dir = 0;
 		ctl = 0x04 | (dir << 5);
 		outb(ctl, (uint16_t) (cd64->port+2));
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		if (wr) {
 			outb(*wr, (uint16_t) cd64->port);
 #if DEBUG_LOWLEVEL
@@ -1083,10 +1082,10 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 			printf("\n");
 #endif
 		}
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		ctl = 0x05 | (dir << 5);
 		outb(ctl, (uint16_t) (cd64->port+2));
-		if (delayms) USLEEP(delayms);
+		if (delayms) MSLEEP(delayms);
 		ctl = 0x04 | (dir << 5);
 		outb(ctl, (uint16_t) (cd64->port+2));
 	}

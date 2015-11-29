@@ -2077,19 +2077,19 @@ char *
 getenv2 (const char *variable)
 /*
   getenv() suitable for enviroments w/o HOME, TMP or TEMP variables.
-  The caller should copy the returned string to it's own memory, because this
+  The caller should copy the returned string to its own memory, because this
   function will overwrite that memory on the next call.
   Note that this function never returns NULL.
 */
 {
   char *tmp;
   static char value[MAXBUFSIZE];
-#if     defined __CYGWIN__ || defined __MSDOS__
+#ifdef  __MSDOS__
 /*
   On DOS and Windows the environment variables are not stored in a case
-  sensitive manner. The run-time systems of DJGPP and Cygwin act as if they are
-  stored in upper case. Their getenv() however *is* case sensitive. We fix this
-  by changing all characters of the search string (variable) to upper case.
+  sensitive manner. The run-time system of DJGPP acts as if they are stored in
+  upper case. Its getenv() however *is* case sensitive. We fix this by changing
+  all characters of the search string (variable) to upper case.
 
   Note that in Cygwin's Bash environment variables *are* stored in a case
   sensitive manner.
@@ -2135,7 +2135,7 @@ getenv2 (const char *variable)
                   value[1] == ':' && value[2] == '/' && value[3] == 0)
                 value[2] = 0;
             }
-         }
+        }
 
       if (!strcmp (variable, "TEMP") || !strcmp (variable, "TMP"))
         {
@@ -2518,13 +2518,13 @@ drop_privileges (void)
   uid = getuid ();
   if (setuid (uid) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set uid\n");
+      fputs ("ERROR: Could not set uid\n", stderr);
       return 1;
     }
   gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was
-    {                                           //  used, but just in case
-      fprintf (stderr, "ERROR: Could not set gid\n"); //  (root did `chmod +s')
+  if (setgid (gid) == -1)                       //  if `make install' was used,
+    {                                           //  but just in case (root did
+      fputs ("ERROR: Could not set gid\n", stderr); //  `chmod +s')
       return 1;
     }
 

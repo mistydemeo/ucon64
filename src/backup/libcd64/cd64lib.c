@@ -233,7 +233,7 @@ int cd64_bios_grab(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	/* Try to get in sync with the CD64
 	 * We use a delay here to give the PPA a chance to power up. */
 	send = 0xff;
-	cd64->xfer(cd64, &send, NULL, 1000);
+	cd64->xfer(cd64, &send, NULL, 1);
 	cd64_bios_sync(cd64);
 
 	if (elapsed != NULL) {
@@ -359,7 +359,7 @@ int cd64_bios_send(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	/* Try to get in sync with the CD64
 	 * We use a delay here to give the PPA a chance to power up. */
 	send = 0xff;
-	cd64->xfer(cd64, &send, NULL, 1000);
+	cd64->xfer(cd64, &send, NULL, 1);
 	cd64_bios_sync(cd64);
 
 	if (elapsed != NULL) {

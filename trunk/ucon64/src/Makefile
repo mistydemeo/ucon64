@@ -374,8 +374,8 @@ backup/f2a.o: config.h misc/usb.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) \
               $(UCON64_MISC_H_DEPS) console/gba.h backup/f2a.h $(GETOPT2_H_DEPS)
 backup/fal.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
               $(UCON64_MISC_H_DEPS) console/gba.h backup/fal.h $(GETOPT2_H_DEPS)
-backup/ffe.o: config.h misc/parallel.h $(TERM_H_DEPS) $(UCON64_H_DEPS) \
-              backup/ffe.h
+backup/ffe.o: config.h $(MISC_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
+              $(UCON64_H_DEPS) backup/ffe.h
 backup/fig.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
               $(SNES_H_DEPS) backup/ffe.h backup/fig.h $(GETOPT2_H_DEPS)
 backup/gbx.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
@@ -419,8 +419,8 @@ backup/ssc.o: config.h backup/ssc.h $(GETOPT2_H_DEPS)
 backup/swc.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
               $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) backup/ffe.h backup/swc.h \
               $(GETOPT2_H_DEPS)
-backup/tototek.o: config.h $(BSWAP_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
-                  backup/tototek.h
+backup/tototek.o: config.h $(BSWAP_H_DEPS) $(MISC_H_DEPS) misc/parallel.h \
+                  $(TERM_H_DEPS) backup/tototek.h
 backup/ufo.o: config.h backup/ufo.h $(GETOPT2_H_DEPS)
 backup/yoko.o: config.h backup/yoko.h $(GETOPT2_H_DEPS)
 backup/z64.o: config.h backup/z64.h $(GETOPT2_H_DEPS)

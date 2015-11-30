@@ -174,7 +174,6 @@ smd_read_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -229,7 +228,6 @@ smd_write_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -285,7 +283,6 @@ smd_read_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -335,7 +332,6 @@ smd_write_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }

@@ -183,7 +183,6 @@ smsgg_read_rom (const char *filename, unsigned short parport, int size)
 
   if (check_card () == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       remove (filename);
       exit (1);
@@ -209,7 +208,6 @@ smsgg_read_rom (const char *filename, unsigned short parport, int size)
     ttt_rom_disable ();
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }
@@ -247,7 +245,6 @@ smsgg_write_rom (const char *filename, unsigned short parport)
         {
           fputs ("ERROR: Could not read game table from file\n", stderr);
           fclose (file);
-          ttt_deinit_io ();
           return -1;
         }
     }
@@ -257,7 +254,6 @@ smsgg_write_rom (const char *filename, unsigned short parport)
 
   if (check_card () == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       exit (1);
     }
@@ -293,7 +289,6 @@ smsgg_write_rom (const char *filename, unsigned short parport)
   while (multi_game ? (game_table[game_no * 0x10] && game_no < 31) : 0);
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }
@@ -335,7 +330,6 @@ smsgg_read_sram (const char *filename, unsigned short parport, int start_bank)
 
   if (check_card () == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       remove (filename);
       exit (1);
@@ -364,7 +358,6 @@ smsgg_read_sram (const char *filename, unsigned short parport, int start_bank)
     ttt_ram_disable ();
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }
@@ -404,7 +397,6 @@ smsgg_write_sram (const char *filename, unsigned short parport, int start_bank)
 
   if (check_card () == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       exit (1);
     }
@@ -418,7 +410,6 @@ smsgg_write_sram (const char *filename, unsigned short parport, int start_bank)
     }
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }

@@ -194,7 +194,6 @@ md_read_rom (const char *filename, unsigned short parport, int size)
   id = check_card ();
   if (id == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       remove (filename);
       exit (1);
@@ -232,7 +231,6 @@ md_read_rom (const char *filename, unsigned short parport, int size)
     ttt_rom_disable ();
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }
@@ -270,7 +268,6 @@ md_write_rom (const char *filename, unsigned short parport)
         {
           fputs ("ERROR: Could not read game table from file\n", stderr);
           fclose (file);
-          ttt_deinit_io ();
           return -1;
         }
     }
@@ -281,7 +278,6 @@ md_write_rom (const char *filename, unsigned short parport)
   md_id = check_card ();
   if (md_id == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       exit (1);
     }
@@ -319,7 +315,6 @@ md_write_rom (const char *filename, unsigned short parport)
   while (multi_game ? (game_table[game_no * 0x20] && game_no < 31) : 0);
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }
@@ -375,7 +370,6 @@ md_read_sram (const char *filename, unsigned short parport, int start_bank)
 
   if (check_card () == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       remove (filename);
       exit (1);
@@ -411,7 +405,6 @@ md_read_sram (const char *filename, unsigned short parport, int start_bank)
     ttt_ram_disable ();
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }
@@ -451,7 +444,6 @@ md_write_sram (const char *filename, unsigned short parport, int start_bank)
 
   if (check_card () == 0)
     {
-      ttt_deinit_io ();
       fclose (file);
       exit (1);
     }
@@ -465,7 +457,6 @@ md_write_sram (const char *filename, unsigned short parport, int start_bank)
     }
 
   fclose (file);
-  ttt_deinit_io ();
 
   return 0;
 }

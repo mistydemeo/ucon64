@@ -187,7 +187,6 @@ msg_read_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -243,7 +242,6 @@ msg_write_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }

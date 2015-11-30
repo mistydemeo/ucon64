@@ -179,6 +179,11 @@ init_io (unsigned short port)
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
 #endif
+  if (register_func (deinit_io) == -1)
+    {
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
+      exit (1);
+    }
 
   parport_print_info ();
 }
@@ -548,7 +553,6 @@ gd6_read_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  deinit_io ();
 
   return 0;
 #else
@@ -744,7 +748,6 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   for (i = 0; i < num_units; i++)
     free (filenames[i]);
   free (buffer);
-  deinit_io ();
 
   return 0;
 }
@@ -835,7 +838,6 @@ gd6_read_sram (const char *filename, unsigned short parport)
   unregister_func (remove_destfile);
   free (buffer);
   fclose (file);
-  deinit_io ();
 
   return 0;
 }
@@ -939,7 +941,6 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
 
   free (buffer);
   fclose (file);
-  deinit_io ();
 
   return 0;
 }
@@ -1033,7 +1034,6 @@ gd6_read_saver (const char *filename, unsigned short parport)
   unregister_func (remove_destfile);
   free (buffer);
   fclose (file);
-  deinit_io ();
 
   return 0;
 }
@@ -1153,7 +1153,6 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
 
   free (buffer);
   fclose (file);
-  deinit_io ();
 
   return 0;
 }

@@ -25,7 +25,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stdlib.h>
 #include "misc/bswap.h"
+#include "misc/misc.h"
 #include "misc/parallel.h"
 #include "misc/term.h"
 #include "backup/tototek.h"
@@ -52,6 +54,11 @@ ttt_init_io (unsigned short port)
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
 #endif
+  if (register_func (ttt_deinit_io) == -1)
+    {
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
+      exit (1);
+    }
 
   port_8 = port;                                // original code used 0x378 for port_8
   port_9 = port + 1;

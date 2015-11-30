@@ -374,7 +374,6 @@ fig_read_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -477,7 +476,6 @@ fig_write_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -536,7 +534,6 @@ fig_read_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -589,7 +586,6 @@ fig_write_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -662,7 +658,6 @@ fig_read_cart_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -731,7 +726,6 @@ fig_write_cart_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }

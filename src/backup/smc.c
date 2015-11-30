@@ -242,7 +242,6 @@ smc_write_rom (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -322,7 +321,6 @@ smc_read_rts (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -398,7 +396,6 @@ smc_write_rts (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }

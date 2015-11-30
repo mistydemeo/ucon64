@@ -490,7 +490,6 @@ swc_unlock (unsigned short parport)
 {
   ffe_init_io (parport);
   ffe_send_command (6, 0, 0);
-  ffe_deinit_io ();
 }
 
 
@@ -744,7 +743,6 @@ swc_read_rom (const char *filename, unsigned short parport, int io_mode)
 
       dump_bios (file);
 
-      ffe_deinit_io ();
       fclose (file);
       return 0;                                 // skip the other code in this function
     }
@@ -821,7 +819,6 @@ swc_read_rom (const char *filename, unsigned short parport, int io_mode)
   ffe_send_command (5, 0, 0);
 
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -916,7 +913,6 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -975,7 +971,6 @@ swc_read_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -1028,7 +1023,6 @@ swc_write_sram (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -1142,7 +1136,6 @@ swc_read_rts (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -1203,7 +1196,6 @@ swc_write_rts (const char *filename, unsigned short parport)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -1278,7 +1270,6 @@ swc_read_cart_sram (const char *filename, unsigned short parport, int io_mode)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }
@@ -1348,7 +1339,6 @@ swc_write_cart_sram (const char *filename, unsigned short parport, int io_mode)
 
   free (buffer);
   fclose (file);
-  ffe_deinit_io ();
 
   return 0;
 }

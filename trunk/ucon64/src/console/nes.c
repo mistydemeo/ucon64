@@ -5905,7 +5905,7 @@ nes_unif (void)
   register_func (remove_destfile);
   /*
     Converting from UNIF to UNIF should be allowed, because the user might want
-    to change some paramaters.
+    to change some parameters.
   */
   if (type == INES)
     {

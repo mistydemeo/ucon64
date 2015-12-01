@@ -2536,17 +2536,14 @@ drop_privileges (void)
 int
 register_func (void (*func) (void))
 {
-  st_func_node_t *func_node = &func_list, *new_node;
-
-  while (func_node->next != NULL)
-    func_node = func_node->next;
+  st_func_node_t *new_node;
 
   if ((new_node = (st_func_node_t *) malloc (sizeof (st_func_node_t))) == NULL)
     return -1;
 
   new_node->func = func;
-  new_node->next = NULL;
-  func_node->next = new_node;
+  new_node->next = func_list.next;
+  func_list.next = new_node;
   return 0;
 }
 
@@ -2583,7 +2580,7 @@ handle_registered_funcs (void)
   func_list_locked = 1;
   while (func_node->next != NULL)
     {
-      func_node = func_node->next;              // first node contains no valid address
+      func_node = func_node->next;              // first node's func is NULL
       if (func_node->func != NULL)
         func_node->func ();
     }

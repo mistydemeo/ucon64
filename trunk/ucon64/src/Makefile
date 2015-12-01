@@ -359,9 +359,9 @@ backup/cc2.o: config.h $(UCON64_H_DEPS) backup/cc2.h $(GETOPT2_H_DEPS)
 backup/cd64.o: config.h $(CD64LIB_H_DEPS) $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) \
                misc/parallel.h $(UCON64_MISC_H_DEPS) backup/cd64.h \
                $(GETOPT2_H_DEPS)
-backup/cmc.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/parallel.h \
-              $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) backup/cmc.h \
-              $(GETOPT2_H_DEPS)
+backup/cmc.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(MISC_H_DEPS) \
+              misc/parallel.h $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) \
+              backup/cmc.h $(GETOPT2_H_DEPS)
 backup/dex.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
               $(UCON64_MISC_H_DEPS) backup/dex.h backup/psxpblib.h \
               $(GETOPT2_H_DEPS)
@@ -390,8 +390,9 @@ backup/lynxit.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
                  $(GETOPT2_H_DEPS)
 backup/mccl.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/parallel.h \
                $(UCON64_MISC_H_DEPS) backup/mccl.h $(GETOPT2_H_DEPS)
-backup/mcd.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
-              $(UCON64_MISC_H_DEPS) backup/mcd.h $(GETOPT2_H_DEPS)
+backup/mcd.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) misc/parallel.h \
+              $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) backup/mcd.h \
+              $(GETOPT2_H_DEPS)
 backup/md-pro.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                  backup/tototek.h backup/md-pro.h $(GETOPT2_H_DEPS)
 backup/mgd.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \

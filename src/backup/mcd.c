@@ -23,6 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdlib.h>
 #include "misc/archive.h"
+#include "misc/misc.h"
 #include "misc/parallel.h"
 #include "misc/term.h"
 #include "ucon64_misc.h"
@@ -108,6 +109,11 @@ mcd_read_rom (const char *filename, unsigned short parport)
 
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
+  if (register_func (deinit_conio) == -1)
+    {
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
+      exit (1);
+    }
 #endif
   parport_print_info ();
 
@@ -133,9 +139,6 @@ mcd_read_rom (const char *filename, unsigned short parport)
     }
 
   fclose (file);
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
-  deinit_conio ();
-#endif
 
   return 0;
 }

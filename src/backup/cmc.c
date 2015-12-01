@@ -127,6 +127,7 @@ respective owners.
 #include <string.h>
 #include "misc/archive.h"
 #include "misc/bswap.h"
+#include "misc/misc.h"
 #include "misc/parallel.h"
 #include "misc/term.h"
 #include "ucon64_misc.h"
@@ -945,15 +946,16 @@ cmc_read_rom (const char *filename, unsigned short parport, int speed)
 {
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
+  if (register_func (deinit_conio) == -1)
+    {
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
+      exit (1);
+    }
 #endif
 
   if (speed < 1 || speed > 4)
     speed = DEFAULT_SPEED;
   cyan_copy_rom (filename, speed, parport);
-
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
-  deinit_conio ();
-#endif
 
   return 0;
 }
@@ -964,6 +966,11 @@ cmc_test (int test, unsigned short parport, int speed)
 {
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
+  if (register_func (deinit_conio) == -1)
+    {
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
+      exit (1);
+    }
 #endif
 
   if (test < 1 || test > 2)
@@ -974,10 +981,6 @@ cmc_test (int test, unsigned short parport, int speed)
   if (speed < 1 || speed > 4)
     speed = DEFAULT_SPEED;
   cyan_test_copier (test, speed, parport);
-
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
-  deinit_conio ();
-#endif
 
   return 0;
 }

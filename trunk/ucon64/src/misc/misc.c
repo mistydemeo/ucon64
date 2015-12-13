@@ -231,8 +231,8 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
 
 
 int
-change_mem (char *buf, int bufsize, char *searchstr, int strsize,
-            char wc, char esc, char *newstr, int newsize, int offset, ...)
+change_mem (char *buf, int bufsize, char *searchstr, int strsize, char wc,
+            char esc, char *newstr, int newsize, int offset, ...)
 // convenience wrapper for change_mem2()
 {
   va_list argptr;
@@ -286,20 +286,24 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
   in searchstr. This makes change_mem() behave a bit more intuitive. For
   example
     char str[] = "f foobar means...";
-    change_mem (str, strlen (str), "f**bar", 6, '*', '!', "XXXXXXXX", 8, 2, NULL);
+    change_mem2 (str, strlen (str), "f**bar", 6, '*', '!', "XXXXXXXX", 8, 2, NULL);
   finds and changes "foobar means..." into "foobar XXXXXXXX", while with uCON's
   algorithm it would not (but does the job good enough for patching SNES ROMs).
 
   One example of using sets:
     char str[] = "fu-bar     is the same as foobar    ";
     st_cm_set_t sets[] = {{"o-", 2}, {"uo", 2}};
-    change_mem (str, strlen (str), "f!!", 3, '*', '!', "fighter", 7, 1, sets);
+    change_mem2 (str, strlen (str), "f!!", 3, '*', '!', "fighter", 7, 1, sets);
   This changes str into "fu-fighter is the same as foofighter".
 */
 {
   char *set;
   int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc, n_matches = 0,
       setindex = 0;
+  const char *overflow_msg =
+               "WARNING: The combination of buffer position (%d), offset (%d) and\n"
+               "         replacement size (%d) would cause a buffer overflow -- ignoring\n"
+               "         match\n";
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
     {
@@ -327,8 +331,13 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
           if (strpos == strsize - 1)            // check if we are at the end of searchstr
             {
-              memcpy (buf + bufpos + offset, newstr, newsize);
-              n_matches++;
+              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+                {
+                  memcpy (buf + bufpos + offset, newstr, newsize);
+                  n_matches++;
+                }
+              else
+                printf (overflow_msg, bufpos, offset, newsize);
               break;
             }
 
@@ -347,8 +356,13 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              memcpy (buf + bufpos + offset, newstr, newsize);
-              n_matches++;
+              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+                {
+                  memcpy (buf + bufpos + offset, newstr, newsize);
+                  n_matches++;
+                }
+              else
+                printf (overflow_msg, bufpos, offset, newsize);
               break;
             }
 
@@ -375,8 +389,13 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              memcpy (buf + bufpos + offset, newstr, newsize);
-              n_matches++;
+              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+                {
+                  memcpy (buf + bufpos + offset, newstr, newsize);
+                  n_matches++;
+                }
+              else
+                printf (overflow_msg, bufpos, offset, newsize);
               strpos = 0;
             }
           else
@@ -554,8 +573,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 
       if (verbose)
         {
-          printf ("\n"
-                  "line:         %d\n"
+          printf ("line:         %d\n"
                   "searchstring: ",
                   line_num);
           for (n = 0; n < (*patterns)[n_codes].search_size; n++)
@@ -570,7 +588,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           for (n = 0; n < (*patterns)[n_codes].replace_size; n++)
             printf ("%02x ", (unsigned char) (*patterns)[n_codes].replace[n]);
           printf ("(%d)\n"
-                  "offset:       %d\n",
+                  "offset:       %d\n"
+                  "\n",
                   (*patterns)[n_codes].replace_size,
                   (*patterns)[n_codes].offset);
         }

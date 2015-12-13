@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/file.h"
 #include "misc/misc.h"                          // truncate()
 #include "misc/string.h"                        // MEMCMP2_CASE
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "patch/ppf.h"
 

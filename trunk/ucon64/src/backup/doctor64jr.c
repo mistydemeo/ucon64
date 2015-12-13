@@ -135,6 +135,7 @@ void mainproc(void *arg) {
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/parallel.h"
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/doctor64jr.h"
 

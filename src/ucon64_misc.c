@@ -44,6 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/property.h"
 #include "misc/string.h"
 #include "misc/term.h"
+#include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 
@@ -171,7 +172,7 @@ const char *ucon64_msg[] =
     "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
     "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
 
-    "Wrote output to: %s\n",                                            // WROTE
+    "Wrote output to %s\n",                                             // WROTE
     "ERROR: Cannot open \"%s\" for reading\n",                          // OPEN_READ_ERROR
     "ERROR: Cannot open \"%s\" for writing\n",                          // OPEN_WRITE_ERROR
     "ERROR: Cannot read from \"%s\"\n",                                 // READ_ERROR
@@ -864,7 +865,7 @@ ucon64_file_handler (char *dest, char *src, int flags)
       if (src == NULL)
         {
           if (ucon64.backup)
-            printf ("Wrote backup to: %s\n", mkbak (dest, BAK_DUPE));
+            printf ("Wrote backup to %s\n", mkbak (dest, BAK_DUPE));
           return 1;
         }
 
@@ -873,7 +874,7 @@ ucon64_file_handler (char *dest, char *src, int flags)
           if (ucon64.backup)
             {                                   // case 1a
               strcpy (src, mkbak (dest, BAK_DUPE));
-              printf ("Wrote backup to: %s\n", src);
+              printf ("Wrote backup to %s\n", src);
             }
           else
             {                                   // case 1b
@@ -884,7 +885,7 @@ ucon64_file_handler (char *dest, char *src, int flags)
       else
         {                                       // case 2
           if (ucon64.backup)                    // case 2a
-            printf ("Wrote backup to: %s\n", mkbak (dest, BAK_DUPE));
+            printf ("Wrote backup to %s\n", mkbak (dest, BAK_DUPE));
         }
       return 1;
     }
@@ -897,7 +898,7 @@ remove_temp_file (void)
 {
   if (ucon64.temp_file)
     {
-      printf ("Removing: %s\n", ucon64.temp_file);
+      printf ("Removing %s\n", ucon64.temp_file);
       remove (ucon64.temp_file);
       ucon64.temp_file = NULL;
     }
@@ -1606,22 +1607,14 @@ ucon64_e (void)
 
 
 #define PATTERN_BUFSIZE (64 * 1024)
-/*
-  In order for this function to be really useful for general purposes
-  change_mem2() should be changed so that it will return detailed status
-  information. Since we don't use it for general purposes, this has not a high
-  priority. It will be updated as soon as there is a need.
-  The thing that currently goes wrong is that offsets that fall outside the
-  buffer (either positive or negative) won't result in a change. It will result
-  in memory corruption...
-*/
 int
-ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
+ucon64_pattern (const char *pattern_fname)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[PATTERN_BUFSIZE];
   FILE *srcfile, *destfile;
-  int bytesread = 0, n, n_found = 0, n_patterns, overlap = 0;
+  int bytesread = 0, totalbytesread = 0, n, n_found = 0, n_patterns,
+      overlap = 0, effective_overlap = 0;
   st_cm_pattern_t *patterns = NULL;
 
   realpath2 (pattern_fname, src_name);
@@ -1642,7 +1635,7 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
       dirname2 (src_name, dir2);
 
       fprintf (stderr, "ERROR: Could not read from %s, not in %s nor in %s\n",
-                       basename2 (pattern_fname), dir1, dir2);
+               basename2 (pattern_fname), dir1, dir2);
       // when build_cm_patterns() returns -1, cleanup_cm_patterns() should not be called
       return -1;
     }
@@ -1664,11 +1657,10 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
             }
         }
 
-      if ((patterns[n].offset < 0 && patterns[n].offset <= -patterns[n].search_size) ||
-           patterns[n].offset > 0)
+      if (patterns[n].offset <= -patterns[n].search_size || patterns[n].offset > 0)
         printf ("WARNING: The offset of pattern %d falls outside the search pattern.\n"
-                "         This can cause problems with the current implementation of --pattern.\n"
-                "         Please consider enlarging the search pattern.\n",
+                "         This can cause matches to be ignored with the current implementation\n"
+                "         of --pattern. Please consider enlarging the search pattern\n",
                 n + 1);
     }
   overlap--;
@@ -1688,49 +1680,29 @@ ucon64_pattern (st_ucon64_nfo_t *rominfo, const char *pattern_fname)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (rominfo->backup_header_len)               // copy header (if present)
-    {
-      n = rominfo->backup_header_len;
-      while ((bytesread = fread (buffer, 1, MIN (n, PATTERN_BUFSIZE), srcfile)) != 0)
-        {
-          fwrite (buffer, 1, bytesread, destfile);
-          n -= bytesread;
-        }
-    }
 
-  n = fread (buffer, 1, overlap, srcfile);      // keep bytesread set to 0
-  if (n < overlap)                              // DAMN special cases!
+  while ((bytesread = fread (buffer + effective_overlap, 1,
+                             PATTERN_BUFSIZE - effective_overlap, srcfile)) != 0)
     {
-      n_found += change_mem2 (buffer, n, patterns[n].search,
-                              patterns[n].search_size, patterns[n].wildcard,
-                              patterns[n].escape, patterns[n].replace,
-                              patterns[n].replace_size, patterns[n].offset,
-                              patterns[n].sets);
-      fwrite (buffer, 1, n, destfile);
-      n = -1;
+      for (n = 0; n < n_patterns; n++)
+        {
+          int search_overlap = patterns[n].search_size - 1;
+          char *buffer_start = buffer + (totalbytesread > 0 ? overlap - search_overlap : 0);
+          int buffer_size = bytesread + (totalbytesread > 0 ? search_overlap : 0);
+
+          n_found += change_mem2 (buffer_start, buffer_size, patterns[n].search,
+                                  patterns[n].search_size, patterns[n].wildcard,
+                                  patterns[n].escape, patterns[n].replace,
+                                  patterns[n].replace_size, patterns[n].offset,
+                                  patterns[n].sets);
+        }
+      fwrite (buffer + effective_overlap, 1, bytesread, destfile);
+
+      totalbytesread += bytesread;
+      if (totalbytesread < ucon64.file_size)
+        memmove (buffer, buffer + effective_overlap - overlap + bytesread, overlap);
+      effective_overlap = overlap;
     }
-  else
-    do
-      {
-        if (bytesread)                          // the code also works without this if
-          {
-            for (n = 0; n < n_patterns; n++)
-              {
-                int x = 1 - patterns[n].search_size;
-                n_found += change_mem2 (buffer + overlap + x,
-                                        bytesread + patterns[n].search_size - 1,
-                                        patterns[n].search, patterns[n].search_size,
-                                        patterns[n].wildcard, patterns[n].escape,
-                                        patterns[n].replace, patterns[n].replace_size,
-                                        patterns[n].offset, patterns[n].sets);
-              }
-            fwrite (buffer, 1, bytesread, destfile);
-            memmove (buffer, buffer + bytesread, overlap);
-          }
-      }
-    while ((bytesread = fread (buffer + overlap, 1, PATTERN_BUFSIZE - overlap, srcfile)) != 0);
-  if (n != -1)
-    fwrite (buffer, 1, overlap, destfile);
 
   fclose (srcfile);
   fclose (destfile);

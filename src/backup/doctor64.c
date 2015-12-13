@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/parallel.h"
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/doctor64.h"
 

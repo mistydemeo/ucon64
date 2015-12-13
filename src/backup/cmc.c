@@ -130,6 +130,7 @@ respective owners.
 #include "misc/misc.h"
 #include "misc/parallel.h"
 #include "misc/term.h"
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/cmc.h"
 

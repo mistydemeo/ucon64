@@ -723,14 +723,14 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    uCON64 says it is bad. Who is right?</a><br>
 <b>A</b>: It depends.<br>
    If uCON64 displays the text "Checksum: Bad" GoodSNES might be right.<br>
-   There may be several reasons why uCON64 reports that the check sum is bad.
+   There may be several reasons why uCON64 reports that the checksum is bad.
    It could have made a mistake while determining if the ROM is a HiROM or a
    LoROM dump. Try the switches -hi and -nhi and see if uCON64 reports the
-   check sum differently. Sometimes ROM dumps are detected as not being
+   checksum differently. Sometimes ROM dumps are detected as not being
    interleaved while they actually are. Try the switches -int and -int2 and see
    if you get better results. It could also be that uCON64 detects the ROM as
    interleaved while it is not. The switch -nint might help in that case. If
-   the check sum is reported as good it is likely that the ROM is really good.
+   the checksum is reported as good it is likely that the ROM is really good.
    Alternatively, you may want to convert the ROM to a non-interleaved format
    with -dint and run uCON64 on the converted ROM. Luckily you will not find
    many interleaved ROM dumps that uCON64 cannot handle, probably because
@@ -749,7 +749,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is
    bad, but uCON64 says it is good ("Checksum: OK"). Who is right?</a><br>
 <b>A</b>: uCON64, probably :-)<br>
-   Neither Snes9x 1.39 nor ZSNES 1.36 calculate the check sum correctly for BS
+   Neither Snes9x 1.39 nor ZSNES 1.36 calculate the checksum correctly for BS
    ROMs, so you can be pretty sure the ROM is good if it is a BS ROM. See
    previous answer.<br>
 <br>
@@ -759,12 +759,12 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    good, but GoodSNES still says it is bad. How can that be, I did fix the ROM,
    right?</a><br>
 <b>A</b>: No, you did not. When you use -chk uCON64 changes four bytes in the
-   ROM dump, so that they match with the calculated check sum. However, the ROM
+   ROM dump, so that they match with the calculated checksum. However, the ROM
    stays just as bad as it was.<br>
    Use -chk with care. -chk might be useful if you want to store a ROM
-   somewhere without using a database with its check sum. You can then later
+   somewhere without using a database with its checksum. You can then later
    check if the ROM is still the same as it was when you stored it by using the
-   check sum that is stored in the ROM.<br>
+   checksum that is stored in the ROM.<br>
    That said, it is a <i>much</i> better idea to create a DAT file from your
    ROM collection if you plan to store it somewhere. See
    <a href="#42">question 42</a> for reasons and <a href="#43">question 43</a>
@@ -779,7 +779,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    trying to run a game like Super Mario Kart (which uses a DSP chip) your
    Super Wild Card should have an extension with the correct DSP chip (or have
    the right cartridge with that chip plugged in your SWC). Then make sure you
-   are using a good dump (look at the check sum information). After you have
+   are using a good dump (look at the checksum information). After you have
    done that, check if the file is interleaved (look at the line that starts
    with "Interleaved/Swapped:"). If the file is interleaved convert it to Super
    Wild Card format (deinterleaved) by using the option -swc. Also verify that
@@ -1346,21 +1346,21 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    2.) In order to rename ROM dumps to their "official" name.<br>
    Some ROM dump formats contain enough information to identify them, but none
    of the formats supported by uCON64 can be <i>reliably</i> identified.<br>
-   The check sum algorithms that are used to calculate the internal check sum
+   The checksum algorithms that are used to calculate the internal checksum
    of the files that have one is a simple addition of a range of bytes. So,
-   several bytes can be swapped and still yield the same check sum. Even the
-   range can be different and produce the same check sum. The latter case often
+   several bytes can be swapped and still yield the same checksum. Even the
+   range can be different and produce the same checksum. The latter case often
    occurs with overdumps. Some ROM dump formats do not even use the entire file
-   for the check sum calculation...<br>
+   for the checksum calculation...<br>
    uCON64 solves these problems as it uses the CRC32 algorithm for file
-   identification. The CRC32 algorithm will produce a different check sum if
+   identification. The CRC32 algorithm will produce a different checksum if
    bytes are swapped or if the range is different. When uCON64 is run on a ROM
    dump it first calculates the CRC32 of that file and then searches in its DAT
    files for that CRC32. If the CRC32 is present uCON64 will display the
    information it found in the DAT file. If uCON64 could not find the CRC32 it
    will not display DAT information.<br>
    At the risk of labouring the obvious I might add that even if all formats
-   used a check sum algorithm like CRC32, DAT files would still be necessary as
+   used a checksum algorithm like CRC32, DAT files would still be necessary as
    it is not possible to reliably identify a file without an external
    reference.<br>
 <br>
@@ -1538,15 +1538,15 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Tools). That is, starting from version 3.0 Release Candidate 1. NSRT has some
    features that uCON64 does not have. The two most interesting features are
    arguably that it is able to fix some hacked ROM dumps and that it has an
-   internal database which is spend a lot of effort on to have it contain only
-   correct entries (as opposed to GoodSNES and the GoodSNES DAT files). What the
-   second feature is concerned let us remind you that the quality of uCON64's
-   ROM database support stands or falls with the quality of the DAT files. So,
-   if you would create a DAT file of a ROM dump collection processed with NSRT
-   uCON64 would get a SNES database that is similar to the one in NSRT. See
-   <a href="#43">question 43</a>. Another advantage NSRT has over uCON64 (as
-   seen from a SNES user's viewpoint) is that it is written only for SNES. NSRT
-   also handles some strange formats that uCON64 does not handle.<br>
+   internal database on which a lot of effort has been spent to have it contain
+   only correct entries (as opposed to GoodSNES and the GoodSNES DAT files).
+   What the second feature is concerned let us remind you that the quality of
+   uCON64's ROM database support stands or falls with the quality of the DAT
+   files. So, if you would create a DAT file of a ROM dump collection processed
+   with NSRT uCON64 would get a SNES database that is similar to the one in
+   NSRT. See <a href="#43">question 43</a>. Another advantage NSRT has over
+   uCON64 (as seen from a SNES user's viewpoint) is that it is written only for
+   SNES. NSRT also handles some strange formats that uCON64 does not handle.<br>
 <br>
 <p>
 <a name="45"><b>Q45</b>: What is an interleaved ROM?</a><br>
@@ -1599,7 +1599,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    one they all share the principle of dividing each 64 kB block in two.<br>
    SNES ROMs contain a block of 48 bytes, some call it the internal SNES
    header, that contains information about the ROM. Information like game name,
-   check sum, size and the bank type. There are two bank types, HiROM and LoROM
+   checksum, size and the bank type. There are two bank types, HiROM and LoROM
    (as far as we know these are terms not used by Nintendo). HiROM ROMs have
    banks of 64 kB, LoROM ROMs have banks of 32 kB. The first bank contains the
    internal SNES header at a fixed offset relative to the end of the bank.

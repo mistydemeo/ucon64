@@ -35,7 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #include "misc/getopt2.h"                       // st_getopt2_t
-#include "ucon64.h"                             // st_ucon64_nfo_t
 
 
 /*
@@ -120,7 +119,7 @@ extern int ucon64_testsplit (const char *filename, int (*testsplit_cb) (const ch
 extern int ucon64_set_property_array (void);
 extern int ucon64_rename (int mode);
 extern int ucon64_e (void);
-extern int ucon64_pattern (st_ucon64_nfo_t *nfo, const char *pattern_fname);
+extern int ucon64_pattern (const char *pattern_fname);
 
 
 /*

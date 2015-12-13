@@ -1,5 +1,5 @@
 /*
-ucon64_opts.c - switch()'es for all uCON64 options
+ucon64_opts.c - switches for all uCON64 options
 
 Copyright (c) 2002 - 2005       NoisyB
 Copyright (c) 2002 - 2005, 2015 dbjh
@@ -1634,7 +1634,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_PATTERN:
-      ucon64_pattern (ucon64.nfo, option_arg);
+      ucon64_pattern (option_arg);
       break;
 
     case UCON64_POKE:

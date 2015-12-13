@@ -1920,7 +1920,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 
       if (verbose)
         {
-          printf ("line:         %d\n"
+          printf ("\n"
+                  "line:         %d\n"
                   "searchstring: ",
                   line_num);
           for (n = 0; n < (*patterns)[n_codes].search_size; n++)
@@ -1935,8 +1936,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           for (n = 0; n < (*patterns)[n_codes].replace_size; n++)
             printf ("%02x ", (unsigned char) (*patterns)[n_codes].replace[n]);
           printf ("(%d)\n"
-                  "offset:       %d\n"
-                  "\n",
+                  "offset:       %d\n",
                   (*patterns)[n_codes].replace_size,
                   (*patterns)[n_codes].offset);
         }

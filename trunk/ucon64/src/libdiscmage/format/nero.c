@@ -19,6 +19,10 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#if     defined _MSC_VER && _MSC_VER >= 1900
+#pragma warning(push)
+#pragma warning(disable: 4464) // relative include path contains '..'
+#endif
 #ifdef  HAVE_CONFIG_H
 #include "../config.h"
 #endif
@@ -32,6 +36,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifdef  DJGPP
 #include "../dxedll_priv.h"
 #endif
+#if     defined _MSC_VER && _MSC_VER >= 1900
+#pragma warning(pop)
+#endif
+
 
 // nero images are big-endian
 

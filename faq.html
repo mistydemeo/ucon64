@@ -198,7 +198,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    To compile uCON64 you need a compiler :-) You can use either GCC (GNU
    Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
    <a href="http://www.gnu.org/order/ftp.html">
-   http://www.gnu.org/order/ftp.html</a>. On Linux GCC is usually already
+   http://www.gnu.org/order/ftp.html</a>. On GNU/Linux GCC is usually already
    installed.<br>
    Visual C++ is part of Visual Studio. A free version of Visual Studio, Visual
    Studio Community 2015, can be downloaded from
@@ -210,7 +210,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    versions of Windows as old as Windows XP, also check "Windows XP Support for
    C++" (Programming Languages -&#62; Visual C++ -&#62; Windows XP Support for
    C++). There are many versions of Visual Studio, but we only support building
-   uCON64 with Visual Studio Community 2015.<br>
+   uCON64 with Visual Studio Community 2015 (with Update 1).<br>
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from <a href="http://www.delorie.com/djgpp/">
    http://www.delorie.com/djgpp/</a>. A Win32 port of GCC (and many other GNU
@@ -364,7 +364,16 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    If you want to build a version of uCON64 that can run on versions of Windows
    as old as Windows XP, remove the "#" in front of the line with
    "WINXP_TARGETING=1" in Makefile.vc6, libdiscmage/Makefile.vc6 and
-   backup/libcd64/Makefile.vc6.<br>
+   backup/libcd64/Makefile.vc6. Be sure to have Windows SDK v7.1A installed or
+   else enabling WINXP_TARGETING will have no effect. The easiest way to install
+   Windows SDK v7.1A is to download the ISO of Visual Studio 2012 Update 4,
+   <a href="http://go.microsoft.com/fwlink/?LinkId=327544">VS2012.4.iso</a> from
+   <a href="https://www.microsoft.com/en-us/download/details.aspx?id=39305">
+   https://www.microsoft.com/en-us/download/details.aspx?id=39305</a>. Open
+   the ISO with a program like <a href="http://www.rarlab.com/">WinRAR</a> and
+   extract the directory packages/XPSupport/. In the extracted directory you
+   will find the file Win_XPSupport.msi. Install it by double-clicking on it.<br>
+<br>
    If you have compiled uCON64 in the same directory before, type:<br>
    &nbsp;&nbsp;nmake /f Makefile.vc6 clean<br>
 <br>
@@ -580,7 +589,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
   </tr>
   <tr>
     <td><tt>parport_dev</tt></td>
-    <td><tt>name of parallel port device (AmigaOS or Linux with ppdev)</tt></td>
+    <td><tt>name of parallel port device (AmigaOS or GNU/Linux with ppdev)</tt></td>
   </tr>
   <tr>
     <td><tt>parport</tt></td>

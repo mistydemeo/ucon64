@@ -12,7 +12,7 @@ CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /MT /DDLL \
 CFLAGS=$(CFLAGS) /DDLOPEN
 !endif
 !ifdef WINXP_TARGETING
-CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Include" \
+CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
        /D_USING_V110_SDK71_
 !endif
 
@@ -22,7 +22,7 @@ FULLLIBNAME=$(LIBNAME).dll
 LDFLAGS=/NOLOGO /DLL /DEF:$(LIBNAME).def
 !ifdef WINXP_TARGETING
 LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
-        /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Lib"
+        /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"
 !endif
 
 OBJECTS=libdm_misc.obj dllinit.obj misc.obj misc_wav.obj format/format.obj \

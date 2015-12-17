@@ -13,14 +13,14 @@ CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /wd4774 /O2 /MT \
 # /wd4711, function 'function' selected for inline expansion
 # /wd4774, 'function' : format string expected in argument 'argument' is not a string literal
 !ifdef WINXP_TARGETING
-CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Include" \
+CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
        /D_USING_V110_SDK71_
 !endif
 
 LDFLAGS=/NOLOGO /VERSION:2.0 setargv.obj
 !ifdef WINXP_TARGETING
 LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
-        /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\7.1A\Lib"
+        /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"
 !endif
 TARGETS=
 

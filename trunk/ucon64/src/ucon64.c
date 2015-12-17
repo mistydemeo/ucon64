@@ -846,9 +846,8 @@ static void
 ucon64_exit (void)
 {
 #ifdef  USE_DISCMAGE
-  if (ucon64.discmage_enabled)
-    if (ucon64.image)
-      dm_close ((dm_image_t *) ucon64.image);
+  if (ucon64.discmage_enabled && ucon64.image)
+    dm_close ((dm_image_t *) ucon64.image);
 #endif
 
   handle_registered_funcs ();
@@ -1006,24 +1005,22 @@ main (int argc, char **argv)
 #if     !defined __CYGWIN__ && !defined _WIN32
                               W_OK |
 #endif
-                              R_OK | X_OK))
-    if (!stat (ucon64.datdir, &fstate))
-      if (S_ISDIR (fstate.st_mode))
-        ucon64.dat_enabled = 1;
+                              R_OK | X_OK) &&
+      !stat (ucon64.datdir, &fstate) && S_ISDIR (fstate.st_mode))
+    ucon64.dat_enabled = 1;
 
-  if (!ucon64.dat_enabled)
-    if (!access (ucon64.configdir,
+  if (!ucon64.dat_enabled && !access (ucon64.configdir,
 #if     !defined __CYGWIN__ && !defined _WIN32
-                                   W_OK |
+                                                        W_OK |
 #endif
-                                   R_OK | X_OK))
-      if (!stat (ucon64.configdir, &fstate))
-        if (S_ISDIR (fstate.st_mode))
-          {
-//            fprintf (stderr, "Please move your DAT files from %s to %s\n\n", ucon64.configdir, ucon64.datdir);
-            strcpy (ucon64.datdir, ucon64.configdir); // use .ucon64/ instead of .ucon64/dat/
-            ucon64.dat_enabled = 1;
-          }
+                                                        R_OK | X_OK) &&
+      !stat (ucon64.configdir, &fstate) && S_ISDIR (fstate.st_mode))
+    {
+//      fprintf (stderr, "Please move your DAT files from %s to %s\n\n",
+//               ucon64.configdir, ucon64.datdir);
+      strcpy (ucon64.datdir, ucon64.configdir); // use .ucon64/ instead of .ucon64/dat/
+      ucon64.dat_enabled = 1;
+    }
 
 #ifdef  USE_DISCMAGE
   // load libdiscmage (should be done before handling the switches (--ver), but
@@ -1172,12 +1169,11 @@ main (int argc, char **argv)
           */
           int i = optind;
           for (; i < argc; i++)
-            if (!stat (argv[i], &fstate))
-              if (S_ISDIR (fstate.st_mode))
-                {
-                  flags |= GETOPT2_FILE_RECURSIVE_ONCE;
-                  break;
-                }
+            if (!stat (argv[i], &fstate) && S_ISDIR (fstate.st_mode))
+              {
+                flags |= GETOPT2_FILE_RECURSIVE_ONCE;
+                break;
+              }
         }
       getopt2_file (argc, argv, ucon64_process_rom, flags);
     }
@@ -1372,7 +1368,8 @@ ucon64_rom_handling (void)
     {
       if (!(ucon64.flags & WF_NO_ROM))
         {
-          fputs ("ERROR: This option requires a file argument (ROM/image/SRAM file/directory)\n", stderr);
+          fputs ("ERROR: This option requires a file argument (ROM/image/SRAM file/directory)\n",
+                 stderr);
           return -1;
         }
       return 0;
@@ -1430,14 +1427,14 @@ ucon64_rom_handling (void)
       Test for split files only if the console type knows about split files at
       all. However we only know the console type after probing.
     */
-    if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
-        ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
-      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.fname, NULL))
-        {
-          fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
-                   basename2 (ucon64.fname));
-          return -1;
-        }
+    if ((ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
+         ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG) &&
+        (UCON64_ISSET (ucon64.split) ? ucon64.split : ucon64_testsplit (ucon64.fname, NULL)))
+      {
+        fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
+                 basename2 (ucon64.fname));
+        return -1;
+      }
 
 
   /*
@@ -1454,10 +1451,10 @@ ucon64_rom_handling (void)
     files. For these "problematic" files, their "real" checksum is stored
     in ucon64.fcrc32.
   */
-  if (ucon64.crc32 == 0)
-    if (!ucon64.force_disc) // NOT for disc images
-      if (!(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
-        ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
+  if (ucon64.crc32 == 0 && !ucon64.force_disc && // NOT for disc images
+      !(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname,
+                   ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
 
 
   // DATabase
@@ -1620,18 +1617,17 @@ ucon64_nfo (void)
     ucon64_rom_nfo (ucon64.nfo);
 
 #ifdef  USE_DISCMAGE
-  if (ucon64.discmage_enabled)
-    if (ucon64.image)
-      {
-        dm_nfo ((dm_image_t *) ucon64.image, ucon64.quiet < 0 ? 1 : 0,
+  if (ucon64.discmage_enabled && ucon64.image)
+    {
+      dm_nfo ((dm_image_t *) ucon64.image, ucon64.quiet < 0 ? 1 : 0,
 #ifdef  USE_ANSI_COLOR
-                ucon64.ansi_color ? 1 :
+              ucon64.ansi_color ? 1 :
 #endif
-                                    0);
-        fputc ('\n', stdout);
+                                  0);
+      fputc ('\n', stdout);
 
-        return 0; // no crc calc. for disc images and therefore no DAT entry either
-      }
+      return 0; // no crc calc. for disc images and therefore no DAT entry either
+    }
 #endif
   // Use ucon64.fcrc32 for SNES, Genesis & SMS interleaved/N64 non-interleaved
   if (ucon64.fcrc32 && ucon64.crc32)
@@ -1643,9 +1639,8 @@ ucon64_nfo (void)
   // The check for the size of the file is made, so that uCON64 won't display a
   //  (nonsense) DAT info line when dumping a ROM (file doesn't exist, so
   //  ucon64.file_size is 0).
-  if (ucon64.file_size > 0 && ucon64.dat_enabled)
-    if (ucon64.dat)
-      ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
+  if (ucon64.file_size > 0 && ucon64.dat_enabled && ucon64.dat)
+    ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
 
   fputc ('\n', stdout);
 
@@ -1692,15 +1687,18 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   char buf[MAXBUFSIZE];
 
   // backup unit header
-  if (nfo->backup_header && nfo->backup_header_len && nfo->backup_header_len != UNKNOWN_BACKUP_HEADER_LEN)
+  if (nfo->backup_header && nfo->backup_header_len &&
+      nfo->backup_header_len != UNKNOWN_BACKUP_HEADER_LEN)
     {
-      dumper (stdout, nfo->backup_header, nfo->backup_header_len, nfo->backup_header_start, DUMPER_HEX);
+      dumper (stdout, nfo->backup_header, nfo->backup_header_len,
+              nfo->backup_header_start, DUMPER_HEX);
       fputc ('\n', stdout);
     }
   else
     if (nfo->backup_header_len && ucon64.quiet < 0)
       {
-        ucon64_dump (stdout, ucon64.fname, nfo->backup_header_start, nfo->backup_header_len, DUMPER_HEX);
+        ucon64_dump (stdout, ucon64.fname, nfo->backup_header_start,
+                     nfo->backup_header_len, DUMPER_HEX);
         fputc ('\n', stdout);
       }
 
@@ -1866,13 +1864,13 @@ ucon64_usage (int argc, char *argv[], int view)
     if (arg[x].console) // IS console
       for (y = 0; option[y]; y++)
         for (c = 0; option[y][c].name || option[y][c].help; c++)
-          if (option[y][c].object)
-            if (((st_ucon64_obj_t *) option[y][c].object)->console == arg[x].console)
-              {
-                getopt2_usage (option[y]);
-                single = 1;
-                break;
-              }
+          if (option[y][c].object &&
+              ((st_ucon64_obj_t *) option[y][c].object)->console == arg[x].console)
+            {
+              getopt2_usage (option[y]);
+              single = 1;
+              break;
+            }
 
   if (!single)
     switch (view)

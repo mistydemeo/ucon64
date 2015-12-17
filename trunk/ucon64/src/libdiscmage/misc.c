@@ -1920,8 +1920,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 
       if (verbose)
         {
-          printf ("\n"
-                  "line:         %d\n"
+          printf ("line:         %d\n"
                   "searchstring: ",
                   line_num);
           for (n = 0; n < (*patterns)[n_codes].search_size; n++)
@@ -2014,6 +2013,9 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
       (*patterns)[n_codes].n_sets = n_sets;
 
       n_codes++;
+
+      if (verbose)
+        fputc ('\n', stdout);
     }
   fclose (srcfile);
   return n_codes;

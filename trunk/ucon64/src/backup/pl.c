@@ -25,7 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include "misc/archive.h"
-#include "misc/file.h"
 #include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -725,7 +724,7 @@ pl_write_rom (const char *filename, unsigned short parport)
       exit (1);
     }
   init_io (parport);
-  size = fsizeof (filename);
+  size = ucon64.file_size;
 
   erase ();
   reset_read ();

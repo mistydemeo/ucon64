@@ -253,7 +253,7 @@ static const char *f2a_msg[] = {
 
 #ifdef  USE_USB
 
-#ifdef  __unix__
+#if     defined __unix__ && !defined __CYGWIN__
 static int
 exec (const char *program, int argc, ...)
 /*
@@ -315,6 +315,10 @@ f2a_init_usb (void)
   f2a_recvmsg_t rm;
   char iclientu_fname[FILENAME_MAX];
 
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4127) // conditional expression is constant
+#endif
   if (sizeof (f2a_recvmsg_t) != 64)
     {
       fprintf (stderr, "ERROR: The size of f2a_recvmsg_t is not 64 bytes.\n"
@@ -327,6 +331,9 @@ f2a_init_usb (void)
                        "       Please correct the source code or send a bug report\n");
       exit (1);
     }
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
   memset (&rm, 0, sizeof (rm));
 
@@ -485,7 +492,7 @@ f2a_connect_usb (void)
       return -1;
     }
 
-  f2a_handle = usbport_open (f2adev);
+  f2a_handle = usb_open (f2adev);
 
   result = usb_claim_interface (f2a_handle, 0x4);
   if (result == -1)

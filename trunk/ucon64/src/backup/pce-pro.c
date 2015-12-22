@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include "misc/archive.h"
-#include "misc/file.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/tototek.h"
@@ -208,7 +207,7 @@ pce_write_rom (const char *filename, unsigned short parport)
         }
     }
 
-  size = fsizeof (filename);
+  size = ucon64.file_size;
   // 4 Mbit games need the last 2 Mbit to be mirrored (so, they need 6 Mbit)
   if (multi_game)
     {
@@ -263,7 +262,7 @@ pce_write_rom (const char *filename, unsigned short parport)
 
           bytessent += bytesread;
           ucon64_gauge (starttime, bytessent, size);
-          bytesleft -= 0x4000;
+          bytesleft -= bytesread;
         }
       // Games have to be aligned to a Mbit boundary.
       address = (address + MBIT - 1) & ~(MBIT - 1);

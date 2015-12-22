@@ -235,7 +235,7 @@ sms_smds (void)
   ucon64_file_handler (dest_name, src_name, 0);
 
   ucon64_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
-  fcopy (src_name, 0, fsizeof (src_name), dest_name, "ab");
+  fcopy (src_name, 0, ucon64.file_size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -388,9 +388,9 @@ sms_multi (int truncate_size, char *fname)
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
       ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-                                       ucon64.backup_header_len : 0;
+                                        ucon64.backup_header_len : 0;
       ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-                                       ucon64.interleaved : 0;
+                                  ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (sms_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be an SMS/GG ROM\n", ucon64.fname);

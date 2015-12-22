@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdlib.h>
 #include "misc/archive.h"
-#include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -201,7 +200,7 @@ smd_write_rom (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  fsize = fsizeof (filename);
+  fsize = ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   fread (buffer, 1, SMD_HEADER_LEN, file);
@@ -311,7 +310,7 @@ smd_write_sram (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = fsizeof (filename) - SMD_HEADER_LEN;
+  size = ucon64.file_size - SMD_HEADER_LEN;
   printf ("Send: %d Bytes\n", size);
   fseek (file, SMD_HEADER_LEN, SEEK_SET);       // skip the header
 

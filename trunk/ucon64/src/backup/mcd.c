@@ -64,7 +64,7 @@ const st_getopt2_t mcd_usage[] =
 static void
 checkabort (int status)
 {
-  if (((!ucon64.frontend) ? kbhit () : 0) && getch () == 'q')
+  if ((!ucon64.frontend ? kbhit () : 0) && getch () == 'q')
     {
       puts ("\nProgram aborted");
       exit (status);

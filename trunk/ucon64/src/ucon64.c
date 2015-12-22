@@ -100,6 +100,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/msg.h"
 #include "backup/pce-pro.h"
 #include "backup/pl.h"
+#include "backup/quickdev16.h"
 #include "backup/sflash.h"
 #include "backup/smc.h"
 #include "backup/smd.h"
@@ -209,7 +210,10 @@ static const st_getopt2_t lf[] =
     gd_usage,
     fig_usage,
     sflash_usage,
-  //  mgd_usage,
+//    mgd_usage,
+#endif
+#ifdef  USE_USB
+    quickdev16_usage,
 #endif
     lf,
     neogeo_usage,
@@ -220,7 +224,7 @@ static const st_getopt2_t lf[] =
     mdpro_usage,
     mcd_usage,
     cmc_usage,
-  //  mgd_usage,
+//    mgd_usage,
 #endif
     lf,
     gb_usage,
@@ -238,7 +242,7 @@ static const st_getopt2_t lf[] =
 #ifdef  USE_PARALLEL
     msg_usage,
     pcepro_usage,
-  //  mgd_usage,
+//    mgd_usage,
 #endif
     lf,
     nes_usage,
@@ -604,6 +608,7 @@ TEST_BREAK
       {UCON64_XPL,	"ucon64 -xpl", 0},      // NO TEST: transfer code
       {UCON64_XPLI,	"ucon64 -xpli", 0},     // NO TEST: transfer code
       {UCON64_XPLM,	"ucon64 -xplm", 0},     // NO TEST: transfer code
+      {UCON64_XQD16,	"ucon64 -xqd16", 0},    // NO TEST: transfer code
       {UCON64_XRESET,	"ucon64 -xreset", 0},   // NO TEST: transfer code
       {UCON64_XSF,	"ucon64 -xsf", 0},      // NO TEST: transfer code
       {UCON64_XSFS,	"ucon64 -xsfs", 0},     // NO TEST: transfer code
@@ -1453,7 +1458,7 @@ ucon64_rom_handling (void)
   */
   if (ucon64.crc32 == 0 && !ucon64.force_disc && // NOT for disc images
       !(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
-    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname,
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.file_size,
                    ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
 
 
@@ -1920,6 +1925,7 @@ ucon64_usage (int argc, char *argv[], int view)
 //          getopt2_usage (nfc_usage);
           getopt2_usage (pcepro_usage);
           getopt2_usage (pl_usage);
+          getopt2_usage (quickdev16_usage);
 //          getopt2_usage (sc_usage);
           getopt2_usage (sflash_usage);
           getopt2_usage (smc_usage);

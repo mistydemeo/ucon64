@@ -1978,7 +1978,7 @@ ucon64_chksum_func (void *buffer, int n, void *object)
 
 int
 ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *crc16_i,
-               const char *filename, size_t start)
+               const char *filename, int file_size, size_t start)
 {
   int i = 0, result;
   s_sha1_ctx_t m_sha1;
@@ -2000,7 +2000,7 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *cr
     o.crc32 = crc32_i;
 
   result = quick_io_func (ucon64_chksum_func, MAXBUFSIZE, &o, start,
-                          fsizeof (filename) - start, filename, "rb");
+                          file_size - start, filename, "rb");
 
   if (sha1_s)
     {
@@ -2167,7 +2167,6 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
       fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], bufsize);
       return;
     }
-
   if ((buf2 = (unsigned char *) malloc (bufsize)) == NULL)
     {
       free (buf1);

@@ -155,7 +155,7 @@ extern void ucon64_dump (FILE *output, const char *filename, size_t start,
 extern int ucon64_find (const char *filename, size_t start, size_t len,
                         const char *search, int searchlen, uint32_t flags);
 extern int ucon64_chksum (char *sha1, char *md5, unsigned int *crc32, // uint16_t *crc16,
-                          const char *filename, size_t start);
+                          const char *filename, int file_size, size_t start);
 extern void ucon64_filefile (const char *filename1, int start1,
                              const char *filename2, int start2, int similar);
 #endif // #ifndef UCON64_MISC_H

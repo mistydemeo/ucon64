@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdlib.h>
 #include "misc/archive.h"
-#include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -215,7 +214,7 @@ msg_write_rom (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = fsizeof (filename) - MSG_HEADER_LEN;
+  size = ucon64.file_size - MSG_HEADER_LEN;
   printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
 
   fread (buffer, 1, MSG_HEADER_LEN, file);

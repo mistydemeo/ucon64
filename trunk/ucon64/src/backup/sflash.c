@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdlib.h>
 #include "misc/archive.h"
-#include "misc/file.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/tototek.h"
@@ -232,7 +231,7 @@ sf_write_rom (const char *filename, unsigned short parport)
       return -1;
     }
 
-  size = fsizeof (filename);
+  size = ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   if (check_card () == 0)
@@ -283,7 +282,7 @@ sf_write_rom (const char *filename, unsigned short parport)
             write_block (&address, buffer);
           bytessent += bytesread;
           ucon64_gauge (starttime, bytessent, size);
-          bytesleft -= 0x4000;
+          bytesleft -= bytesread;
         }
     }
 
@@ -295,7 +294,7 @@ sf_write_rom (const char *filename, unsigned short parport)
       write_block (&address, buffer);
       bytessent += bytesread;
       ucon64_gauge (starttime, bytessent, size);
-      bytesleft -= 0x4000;
+      bytesleft -= bytesread;
     }
 
   fclose (file);
@@ -365,7 +364,7 @@ sf_write_sram (const char *filename, unsigned short parport)
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
 
-  size = fsizeof (filename);
+  size = ucon64.file_size;
   address = 0xfe0000;
 
   if ((file = fopen (filename, "rb")) == NULL)

@@ -360,14 +360,33 @@ typedef struct st_snes_header
   unsigned char pad2[2];                        // 14
   unsigned char name[SNES_NAME_LEN];            // 16
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
-  unsigned char rom_type;                       // 38
-#define bs_month rom_type                       // release date, month
-  unsigned char rom_size;                       // 39
-#define bs_day rom_size                         // release date, day
-  unsigned char sram_size;                      // 40
-#define bs_map_type sram_size
-  unsigned char country;                        // 41
-#define bs_type country
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4201) // nonstandard extension used : nameless struct/union
+#endif
+  union
+  {
+    unsigned char rom_type;                     // 38
+    unsigned char bs_month;                     // release date, month
+  };
+  union
+  {
+    unsigned char rom_size;                     // 39
+    unsigned char bs_day;                       // release date, day
+  };
+  union
+  {
+    unsigned char sram_size;                    // 40
+    unsigned char bs_map_type;
+  };
+  union
+  {
+    unsigned char country;                      // 41
+    unsigned char bs_type;
+  };
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   unsigned char maker;                          // 42
   unsigned char version;                        // 43
   /*
@@ -4104,9 +4123,9 @@ snes_multi (int truncate_size, char *fname)
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
       ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-                                       ucon64.backup_header_len : 0;
+                                        ucon64.backup_header_len : 0;
       ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-                                       ucon64.interleaved : 0;
+                                  ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (snes_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be a SNES ROM\n", ucon64.fname);

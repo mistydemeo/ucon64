@@ -192,7 +192,7 @@ init_io (unsigned short port)
 static void
 deinit_io (void)
 {
-// Put possible transfer cleanup stuff here
+  // Put possible transfer cleanup stuff here
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   deinit_conio ();
 #endif
@@ -216,7 +216,7 @@ io_error (void)
 static void
 gd_checkabort (int status)
 {
-  if (((!ucon64.frontend) ? kbhit () : 0) && getch () == 'q')
+  if ((!ucon64.frontend ? kbhit () : 0) && getch () == 'q')
     {
       puts ("\nProgram aborted");
       exit (status);
@@ -645,8 +645,8 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
         }
       else
         {
-          if (!gd_fsize)                        // Don't call fsizeof() more
-            gd_fsize = fsizeof (filename);      //  often than necessary
+          if (!gd_fsize)
+            gd_fsize = ucon64.file_size;
           if (hirom)
             gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
           else
@@ -696,7 +696,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
             }
         }
       else
-        if (file == NULL)                     // don't open the file more than once
+        if (file == NULL)                       // don't open the file more than once
           if ((file = fopen (filename, "rb")) == NULL)
             {
               fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
@@ -795,10 +795,10 @@ gd6_read_sram (const char *filename, unsigned short parport)
 
   /*
     The BRAM (SRAM) filename doesn't have to exactly match any game loaded in
-    the SF7. It needs to match any valid Game Doctor file name AND have an
+    the SF7. It needs to match any valid Game Doctor filename AND have an
     extension of .B## (where # is a digit from 0-9)
   */
-  strcpy ((char *) gdfilename, "SF16497 B00"); // TODO: We might need to make a GD file name from the real one
+  strcpy ((char *) gdfilename, "SF16497 B00");  // TODO: We might need to make a GD filename from the real one
   if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 
@@ -884,7 +884,7 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
       exit (1);
     }
 
-  size = fsizeof (filename);                    // GD SRAM is 4*8 KB, emu SRAM often not
+  size = ucon64.file_size;                      // GD SRAM is 4*8 KB, emu SRAM often not
 
   if (size == 0x8000)
     header_size = 0;
@@ -919,10 +919,10 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
 
   /*
     The BRAM (SRAM) filename doesn't have to exactly match any game loaded in
-    the SF7. It needs to match any valid Game Doctor file name AND have an
+    the SF7. It needs to match any valid Game Doctor filename AND have an
     extension of .B## (where # is a digit from 0-9)
   */
-  strcpy ((char *) gdfilename, "SF8123  B00"); // TODO: We might need to make a GD file name from the real one
+  strcpy ((char *) gdfilename, "SF8123  B00");  // TODO: We might need to make a GD filename from the real one
   if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 
@@ -990,7 +990,7 @@ gd6_read_saver (const char *filename, unsigned short parport)
     TODO: Graceful handling of an abort because of a name error?
           Currently we fail with a generic error.
 
-    TODO: We could make a GD file name from the real one but a valid dummy name
+    TODO: We could make a GD filename from the real one but a valid dummy name
           seems to work OK here. The user must have the proper game selected in
           the SF7 menu even if the real name is used.
   */
@@ -1083,7 +1083,7 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
   p = basename2 (filename);
   fn_length = strlen (p);
 
-  if (fn_length < 6 || fn_length > 11 // 7 ("base") + 1 (period) + 3 (extension)
+  if (fn_length < 6 || fn_length > 11   // 7 ("base") + 1 (period) + 3 (extension)
       || toupper ((int) p[0]) != 'S' || toupper ((int) p[1]) != 'F'
       || p[fn_length - 4] != '.' || toupper ((int) p[fn_length - 3]) != 'S')
     {
@@ -1102,14 +1102,14 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
       exit (1);
     }
 
-  size = fsizeof (filename);
+  size = ucon64.file_size;
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
       fputs ("ERROR: GD saver file size must be 229376 bytes\n", stderr);
       exit (1);
     }
 
-  // Make a GD file name from the real one
+  // Make a GD filename from the real one
   memset (gdfilename, ' ', 11);                 // "pad" with spaces
   gdfilename[11] = 0;                           // terminate string
   memcpy (gdfilename, p, fn_length - 4);        // copy name except extension

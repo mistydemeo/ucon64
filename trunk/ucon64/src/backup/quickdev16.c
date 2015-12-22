@@ -61,7 +61,7 @@ const st_getopt2_t quickdev16_usage[] =
 #ifdef  USE_USB
     {
       "xqd16", 0, 0, UCON64_XQD16,              // send only
-      NULL, "send ROM to Quickdev16; " OPTION_LONG_S "port=PORT",
+      NULL, "send ROM to Quickdev16",
       &quickdev16_obj[0]
     },
 #endif
@@ -183,10 +183,10 @@ quickdev16_write_rom (const char *filename)
   usb_control_msg (handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
                    USB_BULK_UPLOAD_INIT, bank_shift, size / bank_size, NULL, 0, 5000);
 
-  while ((bytesread = fread (buffer, 1, READ_BUFFER_SIZE, file)) > 0 && !quit ())
+  while ((bytesread = fread (buffer, 1, READ_BUFFER_SIZE, file)) > 0)
     {
       offset = 0;
-      while (offset < bytesread)
+      while (offset < bytesread && !quit ())
         {
           numbytes = usb_control_msg (handle,
                                       USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,

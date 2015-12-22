@@ -7492,7 +7492,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
     rominfo->backup_header_len = ucon64.backup_header_len;
 
   if (ucon64.crc32 == 0)
-    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, rominfo->backup_header_len);
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.file_size,
+                   rominfo->backup_header_len);
 
   // additional info
   key.crc32 = ucon64.crc32;

@@ -933,9 +933,9 @@ pce_multi (int truncate_size, char *fname)
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
       ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-                                       ucon64.backup_header_len : 0;
+                                        ucon64.backup_header_len : 0;
       ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-                                       ucon64.interleaved : 0;
+                                  ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (pce_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be a PC-Engine ROM\n", ucon64.fname);

@@ -1,7 +1,8 @@
 /*
-dex.h - DexDrive support for uCON64
+quickdev16.h - Quickdev16 support for uCON64
 
-Copyright (c) 2002 NoisyB
+Copyright (c) 2009 david@optixx.org
+Copyright (c) 2015 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,8 +19,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef DEX_H
-#define DEX_H
+#ifndef QUICKDEV16_H
+#define QUICKDEV16_H
 
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
@@ -27,16 +28,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 
 
-#define DEX_HEADER_START 0
-#define DEX_HEADER_LEN 0
+extern const st_getopt2_t quickdev16_usage[];
 
-extern const st_getopt2_t dex_usage[];
-
-#ifdef  USE_PARALLEL
-extern int dex_read_block (const char *filename, int block_num,
-                           unsigned short parport);
-extern int dex_write_block (const char *filename, int block_num,
-                            unsigned short parport);
+#ifdef USE_USB
+extern int quickdev16_write_rom (const char *filename);
 #endif
 
 #endif

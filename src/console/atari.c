@@ -342,7 +342,7 @@ atari_init (st_ucon64_nfo_t * rominfo)
     return -1;
 
   ucon64_fread (image, 0, size, ucon64.fname);
-  ucon64_chksum (NULL, md5, &crc32, ucon64.fname, 0);
+  ucon64_chksum (NULL, md5, &crc32, ucon64.fname, ucon64.file_size, 0);
 
   bsmode = get_game_bsmode_by_crc (crc32);
   if (bsmode == -1)

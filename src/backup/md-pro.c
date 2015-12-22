@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include "misc/archive.h"
-#include "misc/file.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/tototek.h"
@@ -273,7 +272,7 @@ md_write_rom (const char *filename, unsigned short parport)
         }
     }
 
-  size = fsizeof (filename);
+  size = ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   md_id = check_card ();
@@ -307,7 +306,7 @@ md_write_rom (const char *filename, unsigned short parport)
 
           bytessent += bytesread;
           ucon64_gauge (starttime, bytessent, size);
-          bytesleft -= 0x4000;
+          bytesleft -= bytesread;
         }
       // Games have to be aligned to (start at) a 2 Mbit boundary.
       address = (address + 2 * MBIT - 1) & ~(2 * MBIT - 1);
@@ -421,7 +420,7 @@ md_write_sram (const char *filename, unsigned short parport, int start_bank)
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
 
-  size = fsizeof (filename);
+  size = ucon64.file_size;
   if (start_bank == -1)
     address = 0;
   else

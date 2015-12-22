@@ -32,10 +32,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/psxpblib.h"
 
 
+#ifdef  USE_PARALLEL
 static st_ucon64_obj_t dex_obj[] =
   {
     {0, WF_DEFAULT | WF_STOP | WF_NO_ROM}
   };
+#endif
 
 const st_getopt2_t dex_usage[] =
   {
@@ -44,17 +46,19 @@ const st_getopt2_t dex_usage[] =
       NULL, "DexDrive"/*"19XX InterAct http://www.dexdrive.de"*/,
       NULL
     },
+#ifdef  USE_PARALLEL
     {
       "xdex", 1, 0, UCON64_XDEX,
       "N", "send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
       &dex_obj[0]
     },
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 
 #define CONPORT 1
 #define TAP 1
@@ -62,7 +66,7 @@ const st_getopt2_t dex_usage[] =
 #define FRAME_SIZE 128
 #define BLOCK_SIZE (64*FRAME_SIZE)
 
-static int print_data;
+static unsigned short print_data;
 
 
 static unsigned char *
@@ -98,7 +102,7 @@ write_frame (int frame, char *data)
 
 
 int
-dex_read_block (const char *filename, int block_num, unsigned int parport)
+dex_read_block (const char *filename, int block_num, unsigned short parport)
 {
   unsigned char *data;
 
@@ -118,7 +122,7 @@ dex_read_block (const char *filename, int block_num, unsigned int parport)
 
 
 int
-dex_write_block (const char *filename, int block_num, unsigned int parport)
+dex_write_block (const char *filename, int block_num, unsigned short parport)
 {
   unsigned char data[BLOCK_SIZE];
 

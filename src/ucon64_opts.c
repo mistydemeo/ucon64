@@ -74,6 +74,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/msg.h"
 #include "backup/pce-pro.h"
 #include "backup/pl.h"
+#include "backup/quickdev16.h"
 #include "backup/sflash.h"
 #include "backup/smc.h"
 #include "backup/smd.h"
@@ -306,7 +307,7 @@ ucon64_switches (st_ucon64_t *p)
           if (strlen (option_arg) >= 4)
             ucon64.usbport = strtol (option_arg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
           else                                  // we automatically detect the
-            ucon64.usbport = 1;                 //  USB port in the F2A code
+            ucon64.usbport = 1;                 //  USB port in the F2A & Quickdev16 code
 
           /*
             We don't want to make uCON64 behave differently if --port=USB{n} is
@@ -489,6 +490,21 @@ ucon64_switches (st_ucon64_t *p)
         }
       break;
 #endif // USE_PARALLEL
+
+#ifdef  USE_USB
+    case UCON64_XQD16:
+      /*
+        It is possible to perform USB I/O without being root. However, without
+        any configuration root privileges are required. By default uCON64 will
+        be installed setuid root (on UNIX), so we just have to make sure
+        privileges will not be dropped. One way to do that is assigning a
+        non-zero value to ucon64.parport_needed. A more appropriate way for USB
+        devices is using ucon64.usbport.
+      */
+      if (!ucon64.usbport)
+        ucon64.usbport = 1;
+      break;
+#endif // USE_USB
 
     case UCON64_PATCH: // --patch and --file are the same
     case UCON64_FILE:
@@ -720,7 +736,7 @@ ucon64_options (st_ucon64_t *p)
       else
         fputc ('\n', stdout);
       checksum = 0;
-      ucon64_chksum (NULL, NULL, &checksum, ucon64.fname, value);
+      ucon64_chksum (NULL, NULL, &checksum, ucon64.fname, ucon64.file_size, value);
       printf ("Checksum (CRC32): 0x%08x\n\n", checksum);
       break;
 
@@ -732,7 +748,7 @@ ucon64_options (st_ucon64_t *p)
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
         fputc ('\n', stdout);
-      ucon64_chksum (buf, NULL, NULL, ucon64.fname, value);
+      ucon64_chksum (buf, NULL, NULL, ucon64.fname, ucon64.file_size, value);
       printf ("Checksum (SHA1): 0x%s\n\n", buf);
       break;
 
@@ -744,7 +760,7 @@ ucon64_options (st_ucon64_t *p)
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
         fputc ('\n', stdout);
-      ucon64_chksum (NULL, buf, NULL, ucon64.fname, value);
+      ucon64_chksum (NULL, buf, NULL, ucon64.fname, ucon64.file_size, value);
       printf ("Checksum (MD5): 0x%s\n\n", buf);
       break;
 
@@ -2358,11 +2374,26 @@ ucon64_options (st_ucon64_t *p)
       break;
 #endif // USE_PARALLEL || USE_USB
 
+#ifdef  USE_USB
+    case UCON64_XQD16:
+      if (!ucon64.nfo->backup_header_len)
+        fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
+               stderr);
+      else if (ucon64.nfo->interleaved)
+        fputs ("ERROR: This ROM seems to be interleaved but the Quickdev16 does not support\n"
+               "       interleaved ROMs. Convert to an SWC compatible format\n",
+               stderr);
+      else
+        quickdev16_write_rom (ucon64.fname);
+      fputc ('\n', stdout);
+      break;
+#endif // USE_USB
+
     case UCON64_Z64:
       n64_z64 (ucon64.nfo);
       break;
 
-      default:
+    default:
       break;
     }
 

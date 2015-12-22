@@ -233,7 +233,7 @@ ffe_receiveb (void)
             inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
   byte |= (ffe_wait_while_busy () & PARPORT_INPUT_MASK) << 1; // receive high nibble
   outportb (ffe_port + PARPORT_CONTROL,
-            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE);// invert strobe
+            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
 
   return byte;
 }
@@ -299,7 +299,7 @@ ffe_wait_for_ready (void)
 void
 ffe_checkabort (int status)
 {
-  if (((!ucon64.frontend) ? kbhit () : 0) && getch () == 'q')
+  if ((!ucon64.frontend ? kbhit () : 0) && getch () == 'q')
     {
 //      ffe_send_command (5, 0, 0);               // VGS: when sending/receiving a SNES ROM
       puts ("\nProgram aborted");

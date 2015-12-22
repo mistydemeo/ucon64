@@ -565,16 +565,14 @@ save_file (FILE * fh, unsigned char *ptr, uint32_t filesz)
 
 
 static int
-descramble (const char *src, char *dst)
+descramble (const char *src, uint32_t sz, char *dst)
 {
   unsigned char *ptr = NULL;
-  uint32_t sz = 0;
   FILE *fh;
 
   if ((fh = fopen (src, "rb")) == NULL)
     return -1;
 
-  sz = fsizeof (src);
   if ((ptr = (unsigned char *) malloc (sz)) == NULL)
     return -1;
 
@@ -594,16 +592,13 @@ descramble (const char *src, char *dst)
 
 
 static int
-scramble (const char *src, char *dst)
+scramble (const char *src, uint32_t sz, char *dst)
 {
   unsigned char *ptr = NULL;
-  uint32_t sz = 0;
   FILE *fh;
 
   if ((fh = fopen (src, "rb")) == NULL)
     return -1;
-
-  sz = fsizeof (src);
 
   if ((ptr = (unsigned char *) malloc (sz)) == NULL)
     return -1;
@@ -632,7 +627,7 @@ dc_scramble (void)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 
-  if (!scramble (ucon64.fname, dest_name))
+  if (!scramble (ucon64.fname, ucon64.file_size, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else
     fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name);
@@ -648,7 +643,7 @@ dc_unscramble (void)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 
-  if (!descramble (ucon64.fname, dest_name))
+  if (!descramble (ucon64.fname, ucon64.file_size, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else
     fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name);

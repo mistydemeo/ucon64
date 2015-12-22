@@ -930,7 +930,7 @@ parport_open (unsigned short port)
   ucon64.parport = port;
 #endif
   outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
-  // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
+  // bit 4 = 0 => IRQ disable for ACK, bit 5-7 unused
 #ifdef  USE_PPDEV
   ucon64.parport = ucon64_parport;
 #endif

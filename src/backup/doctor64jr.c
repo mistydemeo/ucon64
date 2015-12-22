@@ -133,7 +133,6 @@ void mainproc(void *arg) {
 #endif
 #include <stdlib.h>
 #include "misc/archive.h"
-#include "misc/file.h"
 #include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -534,7 +533,7 @@ doctor64jr_write (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = fsizeof (filename);
+  size = ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
 #if 0

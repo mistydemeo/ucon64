@@ -249,12 +249,12 @@ const st_getopt2_t ucon64_options_usage[] =
 #endif
         " PORT={"
 #ifdef  USE_USB
-        "USB0, USB1, ..."
+        "USB0, USB1, ... "
 #endif
 #ifdef  USE_PARALLEL
         "3bc, 378, 278"
 #endif
-        "} (default: auto)\n"
+        "}\n"
         "In order to connect a copier to a PC's parallel port\n"
         "you need a standard bidirectional parallel cable",
       &ucon64_option_obj[0]
@@ -264,7 +264,7 @@ const st_getopt2_t ucon64_options_usage[] =
     {
       "xreset", 0, 0, UCON64_XRESET,
       NULL, "reset parallel port",
-      &ucon64_option_obj[3]             // it's NOT a stop option
+      &ucon64_option_obj[3]                     // it's NOT a stop option
     },
 #endif
     {

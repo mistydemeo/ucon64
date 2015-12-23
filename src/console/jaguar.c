@@ -34,7 +34,7 @@ const st_getopt2_t jaguar_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"/*"1989 Flare2/1993 Atari/1995 Atari"*/,
+      NULL, "Panther(32-bit prototype)/Jaguar64/Jaguar64 CD"/*"1989 Flare2/1993 Atari/1995 Atari"*/,
       NULL
     },
     {
@@ -65,7 +65,7 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
     ucon64.backup_header_len : 0;
 
   ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
-    rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
+                  rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
   value = 0;
   for (x = 0; x < 12; x++)
     value += OFFSET (jaguar_header, x);
@@ -77,7 +77,7 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
         ucon64.backup_header_len : (int) UNKNOWN_BACKUP_HEADER_LEN;
 
       ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
-          rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
+                      rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
       value = 0;
       for (x = 0; x < 12; x++)
         value += OFFSET (jaguar_header, x);

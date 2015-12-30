@@ -1140,7 +1140,7 @@ dirname2 (const char *path)
 
 
 #ifndef HAVE_REALPATH
-#undef realpath
+#undef  realpath
 char *
 realpath (const char *path, char *full_path)
 {
@@ -1164,6 +1164,8 @@ realpath (const char *path, char *full_path)
 #endif
   int n;
 
+  memset (got_path, 0, sizeof (got_path));
+
   // Make a copy of the source path since we may need to modify it
   n = strlen (path);
   if (n >= FILENAME_MAX - 2)
@@ -1172,8 +1174,17 @@ realpath (const char *path, char *full_path)
     return NULL;
 
   strcpy (copy_path, path);
+#ifdef  DJGPP
+  // With DJGPP path can contain (forward) slashes
+  {
+    int l = strlen (copy_path);
+    for (n = 0; n < l; n++)
+      if (copy_path[n] == '/')
+        copy_path[n] = DIR_SEPARATOR;
+  }
+#endif
   path = copy_path;
-  max_path = copy_path + FILENAME_MAX - 2;
+  max_path = copy_path + FILENAME_MAX - 1;
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
   c = toupper (*path);
   if (c >= 'A' && c <= 'Z' && path[1] == ':')
@@ -1187,7 +1198,7 @@ realpath (const char *path, char *full_path)
 #endif
   if (*path != DIR_SEPARATOR)
     {
-      getcwd (new_path, FILENAME_MAX - 1);
+      getcwd (new_path, FILENAME_MAX);
 #ifdef  DJGPP
       // DJGPP's getcwd() returns a path with forward slashes
       {
@@ -1258,7 +1269,7 @@ realpath (const char *path, char *full_path)
       if (n < 0)
         {
           // EINVAL means the file exists but isn't a symlink
-          if (errno != EINVAL
+          if (errno != EINVAL && errno != ENOENT
 #ifdef  __BEOS__
               // Make this function work for a mounted ext2 fs ("/:")
               && errno != B_NAME_TOO_LONG
@@ -1273,7 +1284,7 @@ realpath (const char *path, char *full_path)
         }
       else
         {
-          // Note: readlink() doesn't add the null byte
+          // NOTE: readlink() doesn't add the null byte
           link_path[n] = 0;
           if (*link_path == DIR_SEPARATOR)
             // Start over for an absolute symlink
@@ -1378,6 +1389,16 @@ realpath2 (const char *path, char *full_path)
         strcpy (full_path, path2);
       else
         full_path = strdup (path2);
+#ifdef  DJGPP
+      // With DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
+      //  returns a path with forward slashes)
+      {
+        int n, l = strlen (full_path);
+        for (n = 0; n < l; n++)
+          if (full_path[n] == '/')
+            full_path[n] = DIR_SEPARATOR;
+      }
+#endif
       errno = ENOENT;
       return 0;
     }

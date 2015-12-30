@@ -306,7 +306,7 @@ exec (const char *program, int argc, ...)
 
   return status;
 }
-#endif // __unix__
+#endif // __unix__ && !__CYGWIN__
 
 
 static int

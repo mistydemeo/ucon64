@@ -652,7 +652,7 @@ ucon64_switches (st_ucon64_t *p)
         ucon64.id = 0;
       else if (ucon64.id > 999)
         {
-          fputs ("ERROR: NUM must be smaller than 999\n", stderr);
+          fputs ("ERROR: NUM must be smaller than or equal to 999\n", stderr);
           exit (1);
         }
       break;

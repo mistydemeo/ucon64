@@ -237,14 +237,14 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    - whether uCON64 will have support for the CD64 (default: no)<br>
    - whether uCON64 will be able to read .gz and .zip files (default: not if a
    Makefile "template" is used, see below)<br>
-   - whether uCON64 will use libusb/have support for USB backup units (default:
+   - whether uCON64 will use libusb/have support for USB devices (default:
    no)<br>
 <br>
    The presence or settings of these features is controlled by the header file
    config.h in combination with the makefiles. There are two ways to create a
    config.h and makefiles for uCON64:<br>
    (Before executing one of these steps read the section below concerning gzip
-   &amp; zip support)<br>
+   &amp; zip and USB support)<br>
    1.) Run the configure script "configure".<br>
    If you want default settings type:<br>
    &nbsp;&nbsp;./configure<br>
@@ -256,7 +256,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    The first way does not work in command.com or cmd.exe as these shells
    cannot (directly) execute Bash shell scripts. command.com is the default
-   shell on Windows 9x, cmd.exe is the default shell on Windows XP (NT/2000).<br>
+   shell on Windows 9x, cmd.exe is the default shell on Windows
+   NT/2000/XP/2003/Vista/7/8/8.1/10.<br>
    So, for DOS (DJGPP) copy config.h.orig to config.h and to
    libdiscmage/config.h, config.mak.orig to config.mak and
    libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do the same for
@@ -281,13 +282,36 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    By default gzip &amp; zip support is disabled. If you want to enable it you
    have to define the constant USE_ZLIB in config.h and libdiscmage/config.h
    (remove the "//" in front of the line that defines it) <i>and</i> in
-   Makefile and libdiscmage/Makefile (remove the "#" in front of the line that
-   defines it).<br>
+   config.mak and libdiscmage/Makefile (GCC) or Makefile.vc6 and
+   libdiscmage/Makefile.vc6 (Visual C++) (remove the "#" in front of the line
+   that defines it).<br>
+<br>
+   <b>Support for USB devices</b><br>
+   By default USB support will be disabled. For USB support you need libusb-0.1.
+   If you do not have libusb you can get it from
+   <a href="http://libusb.org/">http://libusb.org/</a>. For Windows you need
+   libusb-win32. You can get it from
+   <a href="http://libusb-win32.sourceforge.net/">
+   http://libusb-win32.sourceforge.net/</a>. There are two ways to get USB
+   support for uCON64:<br>
+   1.) When using the configure script.<br>
+   If you want to enable the feature, pass the option --with-libusb to the
+   configure script.<br>
+   For libusb-win32, starting with version 1.2.5.0 (1.2.4.6) this will not work
+   without an extra step. The configure script refers to usb.h, but since the
+   mentioned version usb.h has been renamed to lusb0_usb.h. So, to make the
+   configure script detect the presence of libusb, create a file usb.h in a
+   standard include directory that includes lusb0_usb.h.<br>
+   2.) When using config.h and Makefile "templates".<br>
+   If you want to enable it you have to define the constant USE_USB in config.h
+   (remove the "//" in front of the line that defines it) <i>and</i> in
+   config.mak (GCC) or Makefile.vc6 (Visual C++) (remove the "#" in front of the
+   line that defines it).<br>
 <br>
    If you want to change other things in config.h or the makefiles do so before
    proceeding to the next step.<br>
-   You have finished the configuration steps now. The next instructions will
-   tell you how to compile uCON64 with the settings you just made.<br>
+   You have finished the configuration steps now. The following instructions
+   will tell you how to compile uCON64 with the settings you just made.<br>
 <br>
    <b>Compiling uCON64</b><br>
    By default the library discmage will also be compiled. Discmage is used for

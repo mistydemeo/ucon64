@@ -85,7 +85,7 @@ else
 ifdef DJGPP
 
 FULLLIBNAME=$(LIBNAME).dxe
-GCCA_DIR=c:/djgpp/lib/gcc/djgpp/3.43
+GCCA_DIR=c:/djgpp/lib/gcc/djgpp/5.30
 LDFLAGS+=-L$(GCCA_DIR) -lgcc
 OBJECTS+=dxe_misc.o
 

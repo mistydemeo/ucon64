@@ -112,9 +112,6 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
 ifneq ($(OSTYPE),cygwin)
 OBJECTS+=misc/getopt.o
 endif
-ifdef DJGPP
-OBJECTS+=misc/snprintf.o
-endif
 ifdef USE_ZLIB
 LDFLAGS+=-lz
 OBJECTS+=misc/archive.o misc/map.o misc/unzip.o

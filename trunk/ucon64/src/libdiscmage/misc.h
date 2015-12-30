@@ -122,7 +122,7 @@ typedef signed __int64 int64_t;
 #endif
 
 #ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__,
-  #define CURRENT_OS_S "MSDOS"                  //  because DJGPP defines both
+  #define CURRENT_OS_S "MS-DOS"                 //  because DJGPP defines both
 #elif   defined __unix__
   #ifdef  __CYGWIN__
     #define CURRENT_OS_S "Win32 (Cygwin)"

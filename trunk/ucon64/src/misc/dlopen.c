@@ -104,14 +104,13 @@ open_module (char *module_name)
     ((void (**) (void)) sym)[n] = uninit_func;
 
   // initialize functions
-  sym->printf = printf;
-  sym->fprintf = fprintf;
+  sym->open = open;
+
   sym->vfprintf = vfprintf;
-  sym->sprintf = sprintf;
   sym->vsprintf = vsprintf;
+  sym->vsnprintf = vsnprintf;
   sym->puts = puts;
   sym->fputs = fputs;
-  sym->sscanf = sscanf;
   sym->vsscanf = vsscanf;
   sym->fopen = fopen;
   sym->fdopen = fdopen;
@@ -144,13 +143,16 @@ open_module (char *module_name)
   sym->rand = rand;
   sym->atoi = atoi;
 
+  sym->memcmp = memcmp;
   sym->memcpy = memcpy;
   sym->memset = memset;
+  sym->memchr = memchr;
   sym->strcmp = strcmp;
   sym->strcpy = strcpy;
   sym->strncpy = strncpy;
   sym->strcat = strcat;
   sym->strncat = strncat;
+  sym->stpcpy = stpcpy;
   sym->strcasecmp = strcasecmp;
   sym->strncasecmp = strncasecmp;
   sym->strchr = strchr;
@@ -173,6 +175,11 @@ open_module (char *module_name)
   sym->closedir = closedir;
 
   sym->access = access;
+  sym->read = read;
+  sym->write = write;
+  sym->close = close;
+  sym->lseek = lseek;
+  sym->readlink = readlink;
   sym->rmdir = rmdir;
   sym->isatty = isatty;
   sym->chdir = chdir;
@@ -184,7 +191,10 @@ open_module (char *module_name)
   sym->stat = stat;
   sym->chmod = chmod;
   sym->mkdir = mkdir;
+
   sym->time = time;
+  sym->difftime = difftime;
+
   sym->delay = delay;
   sym->__dpmi_int = __dpmi_int;
 

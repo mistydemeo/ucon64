@@ -72,9 +72,6 @@ extern int kbhit (void);                        // may only be used after init_c
 #ifdef  __MSDOS__
 #include <conio.h>                              // getch()
 #include <pc.h>                                 // kbhit()
-// DJGPP doesn't have snprintf(). Last tested with the version that includes
-//  GCC 4.0.1. - dbjh
-#include "misc/snprintf.h"
 #endif
 
 #ifdef  _WIN32

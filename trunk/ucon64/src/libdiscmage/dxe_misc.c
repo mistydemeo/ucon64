@@ -34,8 +34,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <stdio.h>
 #include "dxedll_pub.h"
 
+
 extern st_symbol_t import_export;
 int errno = 0; // TODO: verify how dangerous this is (is it?)
+
+
+int
+open (const char *filename, int flags, ...)
+{
+  // NOTE: We do the same as djlsr205.zip/src/libc/posix/fcntl/open.c.
+  mode_t mode = *(&flags + 1);
+  return import_export.open (filename, flags, mode);
+}
 
 
 int
@@ -85,9 +95,29 @@ sprintf (char *buffer, const char *format, ...)
 
 
 int
+snprintf (char *buffer, size_t size, const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  n_chars = import_export.vsnprintf (buffer, size, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+int
 vsprintf (char *buffer, const char *format, va_list argptr)
 {
   return import_export.vsprintf (buffer, format, argptr);
+}
+
+
+int
+vsnprintf (char *buffer, size_t size, const char *format, va_list argptr)
+{
+  return import_export.vsnprintf (buffer, size, format, argptr);
 }
 
 
@@ -203,9 +233,9 @@ fgetc (FILE *file)
 
 
 char *
-fgets (char *buffer, int maxlength, FILE *file)
+fgets (char *buffer, int size, FILE *file)
 {
-  return import_export.fgets (buffer, maxlength, file);
+  return import_export.fgets (buffer, size, file);
 }
 
 
@@ -328,6 +358,13 @@ atoi (const char *str)
 }
 
 
+int
+memcmp(const void *str1, const void *str2, size_t size)
+{
+  return import_export.memcmp (str1, str2, size);
+}
+
+
 void *
 memcpy (void *dest, const void *src, size_t size)
 {
@@ -342,10 +379,17 @@ memset (void *mem, int value, size_t size)
 }
 
 
-int
-strcmp (const char *s1, const char *s2)
+void *
+memchr (const void *str, int character, size_t size)
 {
-  return import_export.strcmp (s1, s2);
+  return import_export.memchr (str, character, size);
+}
+
+
+int
+strcmp (const char *str1, const char *str2)
+{
+  return import_export.strcmp (str1, str2);
 }
 
 
@@ -364,44 +408,51 @@ strncpy (char *dest, const char *src, size_t n)
 
 
 char *
-strcat (char *s1, const char *s2)
+strcat (char *str1, const char *str2)
 {
-  return import_export.strcat (s1, s2);
+  return import_export.strcat (str1, str2);
 }
 
 
 char *
-strncat (char *s1, const char *s2, size_t n)
+strncat (char *str1, const char *str2, size_t n)
 {
-  return import_export.strncat (s1, s2, n);
+  return import_export.strncat (str1, str2, n);
+}
+
+
+char *
+stpcpy (char *dest, const char *src)
+{
+  return import_export.stpcpy (dest, src);
 }
 
 
 int
-strcasecmp (const char *s1, const char *s2)
+strcasecmp (const char *str1, const char *str2)
 {
-  return import_export.strcasecmp (s1, s2);
+  return import_export.strcasecmp (str1, str2);
 }
 
 
 int
-strncasecmp (const char *s1, const char *s2, size_t n)
+strncasecmp (const char *str1, const char *str2, size_t n)
 {
-  return import_export.strncasecmp (s1, s2, n);
+  return import_export.strncasecmp (str1, str2, n);
 }
 
 
 char *
-strchr (const char *str, int c)
+strchr (const char *str, int character)
 {
-  return import_export.strchr (str, c);
+  return import_export.strchr (str, character);
 }
 
 
 char *
-strrchr (const char *str, int c)
+strrchr (const char *str, int character)
 {
-  return import_export.strrchr (str, c);
+  return import_export.strrchr (str, character);
 }
 
 
@@ -434,9 +485,9 @@ strlen (const char *str)
 
 
 char *
-strstr (const char *s1, const char *s2)
+strstr (const char *str1, const char *str2)
 {
-  return import_export.strstr (s1, s2);
+  return import_export.strstr (str1, str2);
 }
 
 
@@ -448,9 +499,9 @@ strdup (const char *str)
 
 
 char *
-strtok (char *s1, const char *s2)
+strtok (char *str1, const char *str2)
 {
-  return import_export.strtok (s1, s2);
+  return import_export.strtok (str1, str2);
 }
 
 
@@ -463,25 +514,25 @@ strerror (int error)
 
 #undef  tolower
 int
-tolower (int c)
+tolower (int character)
 {
-  return import_export.tolower (c);
+  return import_export.tolower (character);
 }
 
 
 #undef  toupper
 int
-toupper (int c)
+toupper (int character)
 {
-  return import_export.toupper (c);
+  return import_export.toupper (character);
 }
 
 
 #undef  isupper
 int
-isupper (int c)
+isupper (int character)
 {
-  return import_export.isupper (c);
+  return import_export.isupper (character);
 }
 
 
@@ -510,6 +561,41 @@ int
 access (const char *filename, int mode)
 {
   return import_export.access (filename, mode);
+}
+
+
+ssize_t
+read (int fd, void *buffer, size_t size)
+{
+  return import_export.read (fd, buffer, size);
+}
+
+
+ssize_t
+write (int fd, const void *buffer, size_t size)
+{
+  return import_export.write (fd, buffer, size);
+}
+
+
+int
+close (int fd)
+{
+  return import_export.close (fd);
+}
+
+
+off_t
+lseek (int fd, off_t offset, int whence)
+{
+  return import_export.lseek (fd, offset, whence);
+}
+
+
+int
+readlink (const char *filename, char *buffer, size_t size)
+{
+  return import_export.readlink (filename, buffer, size);
 }
 
 
@@ -577,9 +663,9 @@ chmod (const char *filename, mode_t mode)
 
 
 int
-mkdir (const char *path, mode_t mode)
+mkdir (const char *filename, mode_t mode)
 {
-  return import_export.mkdir (path, mode);
+  return import_export.mkdir (filename, mode);
 }
 
 
@@ -587,6 +673,13 @@ time_t
 time (time_t *t)
 {
   return import_export.time (t);
+}
+
+
+double
+difftime (time_t time1, time_t time0)
+{
+  return import_export.difftime (time1, time0);
 }
 
 

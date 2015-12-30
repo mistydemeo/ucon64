@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #endif
 #include <dos.h>
 #include <dpmi.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,14 +60,13 @@ typedef struct st_symbol
      should be listed here. That includes standard C library functions and
      variables.
   */
-  int (*printf) (const char *, ...);
-  int (*fprintf) (FILE *, const char *, ...);
+  int (*open) (const char *, int, ...);
+
   int (*vfprintf) (FILE *, const char *, va_list);
-  int (*sprintf) (char *, const char *, ...);
   int (*vsprintf) (char *, const char *, va_list);
+  int (*vsnprintf) (char *, size_t, const char *, va_list);
   int (*puts) (const char *);
   int (*fputs) (const char *, FILE *);
-  int (*sscanf) (const char *, const char *, ...);
   int (*vsscanf) (const char *, const char *, va_list);
   FILE *(*fopen) (const char *, const char *);
   FILE *(*fdopen) (int, const char *);
@@ -99,13 +99,16 @@ typedef struct st_symbol
   int (*rand) (void);
   int (*atoi) (const char *);
 
+  int (*memcmp) (const void *, const void *, size_t);
   void *(*memcpy) (void *, const void *, size_t);
   void *(*memset) (void *, int, size_t);
+  void *(*memchr) (const void *, int, size_t);
   int (*strcmp) (const char *, const char *);
   char *(*strcpy) (char *, const char *);
   char *(*strncpy) (char *, const char *, size_t);
   char *(*strcat) (char *, const char *);
   char *(*strncat) (char *, const char *, size_t);
+  char *(*stpcpy) (char *, const char *);
   int (*strcasecmp) (const char *, const char *);
   int (*strncasecmp) (const char *, const char *, size_t);
   char *(*strchr) (const char *, int);
@@ -130,6 +133,11 @@ typedef struct st_symbol
   // va_start(), va_arg() and va_end() are macros
 
   int (*access) (const char *, int);
+  ssize_t (*read) (int, void *, size_t);
+  ssize_t (*write) (int, const void *, size_t);
+  int (*close) (int);
+  off_t (*lseek) (int, off_t, int);
+  int (*readlink) (const char *, char *, size_t);
   int (*rmdir) (const char *);
   int (*isatty) (int);
   int (*chdir) (const char *);
@@ -137,11 +145,14 @@ typedef struct st_symbol
   int (*getuid) (void);
   int (*sync) (void);
   int (*truncate) (const char *, off_t);
-
+  
   int (*stat) (const char *, struct stat *);
   int (*chmod) (const char *, mode_t);
   int (*mkdir) (const char *, mode_t);
+
   time_t (*time) (time_t *);
+  double (*difftime) (time_t time1, time_t time0);
+
   void (*delay) (unsigned);
   int (*__dpmi_int) (int, __dpmi_regs *);
 

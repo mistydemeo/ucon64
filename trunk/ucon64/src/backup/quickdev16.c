@@ -106,8 +106,8 @@ static int check_quit (void)
 int
 quickdev16_write_rom (const char *filename)
 {
-  int vendor_id = 0x16c0, product_id = 0x05dd, size, bytesread, quit, numbytes,
-      bytessent = 0, offset = 0;
+  int vendor_id = 0x16c0, product_id = 0x05dd, size, bytesread, quit = 0,
+      numbytes, bytessent = 0, offset = 0;
   char vendor[] = "optixx.org", product[] = "QUICKDEV16", *buffer;
   usb_dev_handle *handle = NULL;
   FILE *file;
@@ -186,7 +186,7 @@ quickdev16_write_rom (const char *filename)
   while ((bytesread = fread (buffer, 1, READ_BUFFER_SIZE, file)) > 0)
     {
       offset = 0;
-      while (offset < bytesread && !(quit = check_quit ()))
+      while (offset < bytesread && (quit = check_quit ()) == 0)
         {
           numbytes = usb_control_msg (handle,
                                       USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,

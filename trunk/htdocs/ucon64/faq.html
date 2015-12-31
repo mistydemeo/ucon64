@@ -44,8 +44,8 @@ Q12: <a href="#12">Some SNES games do not work on my Super Wild Card. What can
 <br>
 Q13: <a href="#13">Which backup devices are supported by uCON64?</a><br>
 <br>
-Q14: <a href="#14">I use Windows&nbsp;XP (NT/2000). When I try to run
-   ucon64.exe under command.com (start -&#62; Run... -&#62; command) uCON64
+Q14: <a href="#14">I use Windows XP (NT/2000). When I try to run
+   ucon64.exe in command.com (start -&#62; Run... -&#62; command) uCON64
    crashes. What do I do wrong?</a><br>
 <br>
 Q15: <a href="#15">I do not like the command line. Are there graphical
@@ -74,10 +74,10 @@ Q23: <a href="#23">Where can I get that loader or "game pack" file?</a><br>
 Q24: <a href="#24">What is the meaning of the -col option (SNES)?</a><br>
 <br>
 Q25: <a href="#25">Why does uCON64 create ucon64.cfg (DOS executable) or
-   .ucon64rc (Win32 executable) files all over the place under DOS and
-   Windows&nbsp;9x (command.com)?</a><br>
+   .ucon64rc (Win32 executable) files all over the place on DOS and Windows 9x
+   (command.com)?</a><br>
 <br>
-Q26: <a href="#26">When I try to create a multi-game file under Windows I get
+Q26: <a href="#26">When I try to create a multi-game file on Windows I get
    the message "The system cannot execute the specified program." (or something
    similar). What does that mean?</a><br>
 <br>
@@ -87,8 +87,8 @@ Q27: <a href="#27">I tried to run a Win32 executable of uCON64 but Windows gave
 <br>
 Q28: <a href="#28">How do I make uCON64 display one help screen at a time?</a><br>
 <br>
-Q29: <a href="#29">I tried to send a ROM dump to my copier under
-   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
+Q29: <a href="#29">I tried to send a ROM dump to my backup unit on Windows XP
+   (NT/2000), but uCON64 crashed. What is wrong?</a><br>
 <br>
 Q30: <a href="#30">I want to convert a NES ROM in iNES format to UNIF. How do I
    know what board name to use?</a><br>
@@ -178,11 +178,11 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    name and DOS users a package with "dos" in its name. Windows users can
    choose any or all of the packages with "win32" or "dos" in their name.
    Normally, they should choose a package with "win32" in its name. The DOS
-   version also runs under Windows, but has some limitations. For example, the
+   version also runs on Windows, but has some limitations. For example, the
    DOS version cannot handle long command lines. The Cygwin version does not
    have any serious limitations compared to the "normal" Win32 versions, but
-   behaves a bit more Unix-like than Windows users might want. Users accustomed
-   to Unix might prefer the Cygwin version. The Cygwin version needs some
+   behaves a bit more UNIX-like than Windows users might want. Users accustomed
+   to UNIX might prefer the Cygwin version. The Cygwin version needs some
    additional files, though. See <a href="#27">question 27</a>.<br>
    For installation instructions (for all versions) see
    <a href="#4">question 4</a>.<br>
@@ -192,37 +192,35 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
-   uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD, OpenBSD), DOS,
-   BeOS, Windows (95/98/ME/NT/2000/XP), AmigaOS (PPC/68K) and Mac OS X.<br>
+   uCON64 can be compiled for UNIX (GNU/Linux, Solaris, FreeBSD, OpenBSD,
+   Mac OS X), DOS, BeOS, Windows (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1/10) and
+   AmigaOS (PPC/68K).<br>
    To compile uCON64 you need a compiler :-) You can use either GCC (GNU
    Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
    <a href="http://www.gnu.org/order/ftp.html">
-   http://www.gnu.org/order/ftp.html</a>.<br>
-   A free version of Visual C++, Microsoft Visual C++ Toolkit 2003, can be
-   downloaded from
-   <a href="http://msdn.microsoft.com/visualc/vctoolkit2003/">
-   http://msdn.microsoft.com/visualc/vctoolkit2003/</a>. If you want to compile
-   uCON64 with this version of Visual C++, you will also have to download the
-   Platform SDK, available from <a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en">
-   http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en</a>.
-   In the Microsoft Platform SDK Setup Wizard, choose Custom Installation and
-   disable everything except Microsoft Windows Core SDK, subsection Build
-   Environment. Enable one option, for example Build Environment (x86 32-bit).
-   At the moment we do not support building uCON64 with Microsoft Visual C++
-   Toolkit 2003, only with the regular versions of Visual C++, version 6 or 7.<br>
-   <!--
-     The problem is that Visual C++ Toolkit 2003 doesn't come with nmake.exe,
-     lib.exe and setargv.obj. I did a test with GNU make and could compile a
-     binary with libcd64 support (DLL), but I don't feel like maintaining yet
-     another Makefile.
-   -->
+   http://www.gnu.org/order/ftp.html</a>. On GNU/Linux GCC is usually already
+   installed.<br>
+   Visual C++ is part of Visual Studio. A free version of Visual Studio, Visual
+   Studio Community 2015, can be downloaded from
+   <a href="https://www.visualstudio.com/products/visual-studio-community-vs">
+   https://www.visualstudio.com/products/visual-studio-community-vs</a>. In
+   order to compile uCON64, in the set up program of Visual Studio you need to
+   select at least Programming Languages -&#62; Visual C++ -&#62; Common Tools
+   for Visual C++ 2015. If you want to build a version of uCON64 that can run on
+   versions of Windows as old as Windows XP, also check "Windows XP Support for
+   C++" (Programming Languages -&#62; Visual C++ -&#62; Windows XP Support for
+   C++). There are many versions of Visual Studio, but we only support building
+   uCON64 with Visual Studio Community 2015 (with Update 1).<br>
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from <a href="http://www.delorie.com/djgpp/">
    http://www.delorie.com/djgpp/</a>. A Win32 port of GCC (and many other GNU
    tools and libraries) named Cygwin is available from
    <a href="http://www.cygwin.com">http://www.cygwin.com</a>.
    Another Win32 port of GCC (and other tools) named MinGW is available from
-   <a href="http://www.mingw.org">http://www.mingw.org</a>.<br>
+   <a href="http://www.mingw.org">http://www.mingw.org</a>. We have tested the
+   MinGW-built version of uCON64 more extensively than the other Windows
+   versions. The MinGW-built version can run on versions of Windows as old as 
+   Windows 95.<br>
 <br>
    <b>Configuring uCON64</b><br>
    Some features of uCON64 are configurable (only) at compile time. They are:<br>
@@ -239,29 +237,29 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    - whether uCON64 will have support for the CD64 (default: no)<br>
    - whether uCON64 will be able to read .gz and .zip files (default: not if a
    Makefile "template" is used, see below)<br>
-   - whether uCON64 will use libusb/have support for USB backup units (default:
+   - whether uCON64 will use libusb/have support for USB devices (default:
    no)<br>
 <br>
    The presence or settings of these features is controlled by the header file
    config.h in combination with the makefiles. There are two ways to create a
    config.h and makefiles for uCON64:<br>
    (Before executing one of these steps read the section below concerning gzip
-   &amp; zip support)<br>
+   &amp; zip and USB support)<br>
    1.) Run the configure script "configure".<br>
    If you want default settings type:<br>
-   &nbsp;&nbsp; ./configure<br>
+   &nbsp;&nbsp;./configure<br>
    Otherwise you have to pass options to the configure script. To see which
    features can be controlled with the configure script, type:<br>
-   &nbsp;&nbsp; ./configure --help<br>
+   &nbsp;&nbsp;./configure --help<br>
    2.) Copy a tried-and-tested config.h "template" to a file config.h and copy
    a Makefile "template" to a file Makefile.<br>
 <br>
-   The first way does not work under command.com or cmd.exe as these shells
+   The first way does not work in command.com or cmd.exe as these shells
    cannot (directly) execute Bash shell scripts. command.com is the default
-   shell on Windows&nbsp;9x, cmd.exe is the default shell on Windows&nbsp;XP
-   (NT/2000).<br>
+   shell on Windows 9x, cmd.exe is the default shell on Windows
+   NT/2000/XP/2003/Vista/7/8/8.1/10.<br>
    So, for DOS (DJGPP) copy config.h.orig to config.h and to
-   libdiscmage/config.h, Makefile.orig to Makefile and
+   libdiscmage/config.h, config.mak.orig to config.mak and
    libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do the same for
    Cygwin, but in Cygwin you can get the same effect much easier by just
    running the configure script.<br>
@@ -284,13 +282,36 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    By default gzip &amp; zip support is disabled. If you want to enable it you
    have to define the constant USE_ZLIB in config.h and libdiscmage/config.h
    (remove the "//" in front of the line that defines it) <i>and</i> in
-   Makefile and libdiscmage/Makefile (remove the "#" in front of the line that
-   defines it).<br>
+   config.mak and libdiscmage/Makefile (GCC) or Makefile.vc6 and
+   libdiscmage/Makefile.vc6 (Visual C++) (remove the "#" in front of the line
+   that defines it).<br>
+<br>
+   <b>Support for USB devices</b><br>
+   By default USB support will be disabled. For USB support you need libusb-0.1.
+   If you do not have libusb you can get it from
+   <a href="http://libusb.org/">http://libusb.org/</a>. For Windows you need
+   libusb-win32. You can get it from
+   <a href="http://libusb-win32.sourceforge.net/">
+   http://libusb-win32.sourceforge.net/</a>. There are two ways to get USB
+   support for uCON64:<br>
+   1.) When using the configure script.<br>
+   If you want to enable the feature, pass the option --with-libusb to the
+   configure script.<br>
+   For libusb-win32, starting with version 1.2.5.0 (1.2.4.6) this will not work
+   without an extra step. The configure script refers to usb.h, but since the
+   mentioned version usb.h has been renamed to lusb0_usb.h. So, to make the
+   configure script detect the presence of libusb, create a file usb.h in a
+   standard include directory that includes lusb0_usb.h.<br>
+   2.) When using config.h and Makefile "templates".<br>
+   If you want to enable it you have to define the constant USE_USB in config.h
+   (remove the "//" in front of the line that defines it) <i>and</i> in
+   config.mak (GCC) or Makefile.vc6 (Visual C++) (remove the "#" in front of the
+   line that defines it).<br>
 <br>
    If you want to change other things in config.h or the makefiles do so before
    proceeding to the next step.<br>
-   You have finished the configuration steps now. The next instructions will
-   tell you how to compile uCON64 with the settings you just made.<br>
+   You have finished the configuration steps now. The following instructions
+   will tell you how to compile uCON64 with the settings you just made.<br>
 <br>
    <b>Compiling uCON64</b><br>
    By default the library discmage will also be compiled. Discmage is used for
@@ -317,64 +338,78 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    environment variable OSTYPE is not exported on all platforms. Because of
    that, on several platforms (like FreeBSD and Mac OS X), you have to export it
    manually before running make. You can do that with the following command:<br>
-   &nbsp;&nbsp; export OSTYPE<br>
+   &nbsp;&nbsp;export OSTYPE<br>
 <br>
    If you have compiled uCON64 in the same directory before, first type:<br>
-   &nbsp;&nbsp; make clean<br>
+   &nbsp;&nbsp;make clean<br>
 <br>
    If you want to compile the source code including discmage, type:<br>
-   &nbsp;&nbsp; make<br>
+   &nbsp;&nbsp;make<br>
    If you do not want to compile discmage the last command should look like
    this for DJGPP, Cygwin and MinGW:<br>
-   &nbsp;&nbsp; make ucon64.exe<br>
+   &nbsp;&nbsp;make ucon64.exe<br>
    Otherwise it should look like this:<br>
-   &nbsp;&nbsp; make ucon64<br>
+   &nbsp;&nbsp;make ucon64<br>
 <br>
    If you use Mac OS X and get an error message that dlfcn.h cannot be found,
    please install the library
-   <a href="http://www.opendarwin.org/projects/dlcompat/">
-   dlcompat</a> and try again.<br>
-   On Unix systems other than GNU/Linux you might need to use "gmake" (GNU
+   <a href="http://www.opendarwin.org/projects/dlcompat/">dlcompat</a> and try
+   again.<br>
+   On UNIX systems other than GNU/Linux you might need to use "gmake" (GNU
    make) instead of "make". If the last make command has been successfully
    executed you can find the executable in the directory where you ran make.
    For DOS, Cygwin and MinGW you are now ready to proceed to
    <a href="#4">question 4</a>. For the other platforms one extra command is
    needed (or simply handy):<br>
-   &nbsp;&nbsp; make install<br>
+   &nbsp;&nbsp;make install<br>
 <br>
-   Under Unix this command will ask for root's password, because uCON64 needs
+   On UNIX this command will ask for root's password, because uCON64 needs
    to be setuid root for parallel port access and because regular users usually
    do not have write access in the default installation directory,
    /usr/local/bin. If you configured uCON64 without support for parallel port
    backup units or if you configured it to use ppdev, uCON64 need not be setuid
    root. Just copy ucon64 to any directory you like.<br>
-   Under Mac OS X it is usual to install programs in /usr/bin. You can override
+   On Mac OS X it is usual to install programs in /usr/bin. You can override
    the default destination directory /usr/local/bin by setting the environment
    variable DESTDIR. So, in order to install uCON64 in the directory /usr/bin
    use a command like:<br>
-   &nbsp;&nbsp; DESTDIR=/usr/bin make install<br>
-   This works also on Unix.<br>
+   &nbsp;&nbsp;DESTDIR=/usr/bin make install<br>
+   This works also on other UNIX OSes.<br>
    "make install" also creates a configuration directory for uCON64 and copies
-   discmage.so (Unix and BeOS) or discmage.dylib (Mac OS X) to it, so you may
+   discmage.so (UNIX and BeOS) or discmage.dylib (Mac OS X) to it, so you may
    find it easier to use it.<br>
-   Under BeOS this command will open a dialog window. Just follow the
+   On BeOS this command will open a dialog window. Just follow the
    instructions.<br>
 <br>
    <b>Visual C++</b><br>
-   Start a command shell or "prompt" and go to the correct directory. If you
-   have compiled uCON64 in the same directory before, first type:<br>
-   &nbsp;&nbsp; nmake /f Makefile.vc6 clean<br>
+   Start a command shell or "prompt" and go to the correct directory. In order
+   to be able to run the Visual Studio tools, first type:<br>
+   &nbsp;&nbsp;"%VS140COMNTOOLS%"\vsvars32.bat<br>
+   If you want to build a version of uCON64 that can run on versions of Windows
+   as old as Windows XP, remove the "#" in front of the line with
+   "WINXP_TARGETING=1" in Makefile.vc6, libdiscmage/Makefile.vc6 and
+   backup/libcd64/Makefile.vc6. Be sure to have Windows SDK v7.1A installed or
+   else enabling WINXP_TARGETING will have no effect. The easiest way to install
+   Windows SDK v7.1A is to download the ISO of Visual Studio 2012 Update 4,
+   <a href="http://go.microsoft.com/fwlink/?LinkId=327544">VS2012.4.iso</a> from
+   <a href="https://www.microsoft.com/en-us/download/details.aspx?id=39305">
+   https://www.microsoft.com/en-us/download/details.aspx?id=39305</a>. Open
+   the ISO with a program like <a href="http://www.rarlab.com/">WinRAR</a> and
+   extract the directory packages/XPSupport/. In the extracted directory you
+   will find the file Win_XPSupport.msi. Install it by double-clicking on it.<br>
+<br>
+   If you have compiled uCON64 in the same directory before, type:<br>
+   &nbsp;&nbsp;nmake /f Makefile.vc6 clean<br>
 <br>
    If you want to compile the source code including discmage, type:<br>
-   &nbsp;&nbsp; nmake /f Makefile.vc6<br>
+   &nbsp;&nbsp;nmake /f Makefile.vc6<br>
    If you do not want to compile discmage the last command should look like
    this:<br>
-   &nbsp;&nbsp; nmake /f Makefile.vc6 ucon64.exe<br>
+   &nbsp;&nbsp;nmake /f Makefile.vc6 ucon64.exe<br>
 <br>
-   Under GNU/Linux, DOS and Windows you could use UPX to compress the
+   On GNU/Linux, DOS and Windows you could use UPX to compress the
    executable. UPX is available from
-   <a href="http://upx.sourceforge.net">
-   http://upx.sourceforge.net</a>.<br>
+   <a href="http://upx.sourceforge.net">http://upx.sourceforge.net</a>.<br>
 <br>
 <p>
 <a name="4"><b>Q4</b>: How do I install uCON64?</a><br>
@@ -382,68 +417,62 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    information specific for your operating system. Then continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>Unix (GNU/Linux, FreeBSD, Solaris), BeOS &amp; Mac OS X</b><br>
+   <b>UNIX (GNU/Linux, FreeBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
    Start a command line shell like Bash. Then extract the binary package.
    To extract or unpack a package in .tar.gz format use a command like this:<br>
-   &nbsp;&nbsp; tar xvzf ucon64-1.9.8-1-linux-bin.tar.gz<br>
+   &nbsp;&nbsp;tar xvzf ucon64-1.9.8-1-linux-bin.tar.gz<br>
    Old versions of tar might not support the option z. In that case use a
    command like:<br>
-   &nbsp;&nbsp; gunzip -c ucon64-1.9.8-1-linux-bin.tar.gz | tar xvf -<br>
+   &nbsp;&nbsp;gunzip -c ucon64-1.9.8-1-linux-bin.tar.gz | tar xvf -<br>
    To unzip a .zip file use a command like this:<br>
-   &nbsp;&nbsp; unzip ucon64-1.9.8-1-beos-bin.zip<br>
+   &nbsp;&nbsp;unzip ucon64-1.9.8-1-beos-bin.zip<br>
    You should replace the file name with the name of the file you downloaded
    for your operating system. Unpacking or extracting a package does not have
    to be done on the command line. You could also use a program with a GUI
    (Graphical User Interface) like KDE's ark or a similar program.<br>
    After you have extracted the package install uCON64 by running the install
-   script. On Unix, if you do not have root access, copy the uCON64 executable
+   script. On UNIX, if you do not have root access, copy the uCON64 executable
    to a directory in your PATH. If you do have root access (i.e., know the root
    password), run the shell script install.sh. On BeOS just run the script
-   install_beos.sh. For Unix do something like this:<br>
-   &nbsp;&nbsp; cd ucon64-1.9.8-1-linux-bin<br>
-   &nbsp;&nbsp; ./install.sh<br>
+   install_beos.sh. For UNIX do something like this:<br>
+   &nbsp;&nbsp;cd ucon64-1.9.8-1-linux-bin<br>
+   &nbsp;&nbsp;./install.sh<br>
    By default install.sh will try to copy ucon64 to /usr/local/bin. You can
    specify another directory by setting the environment variable DESTDIR.
    On Mac OS X programs are usually installed in the directory /usr/bin. Users
    of that OS might want to install uCON64 with a command like:<br>
-   &nbsp;&nbsp; DESTDIR=/usr/bin ./install.sh<br>
+   &nbsp;&nbsp;DESTDIR=/usr/bin ./install.sh<br>
 <br>
-   For copier I/O BeOS users will need Caz's driver inside ioport.zip or
-   available at <a href="http://www.infernal.currantbun.com">
-   http://www.infernal.currantbun.com</a>. You only need this driver if you
-   will use uCON64 for communication with a backup unit. After you have decided
-   whether to download ioport.zip continue on BeOS with:<br>
-   &nbsp;&nbsp; cd ucon64-1.9.8-1-beos-bin<br>
-   &nbsp;&nbsp; ./install_beos.sh<br>
+   For backup unit I/O BeOS users will need Caz's driver inside ioport.zip. You
+   only need this driver if you will use uCON64 for communication with a backup
+   unit. ioport.zip is included with the binary release. Continue on BeOS with:<br>
+   &nbsp;&nbsp;cd ucon64-1.9.8-1-beos-bin<br>
+   &nbsp;&nbsp;./install_beos.sh<br>
    After the last command a dialog window will come up. Simply follow the
    instructions.<br>
 <br>
    Now continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>Windows (95/98/ME/NT/2000/XP) &amp; DOS</b><br>
-   On Windows, unpack the package with a program like
+   <b>32-bit Windows (95/98/ME/NT/2000/XP/2003) &amp; DOS</b><br>
+   On 32-bit Windows, unpack the package with a program like
    <a href="http://www.winzip.com/">WinZip</a>,
    <a href="http://www.rarlab.com/">WinRAR</a>,
-   <a href="http://www.powerarchiver.com/">Power Archiver</a>
-   or a more free program like
+   <a href="http://www.powerarchiver.com/">Power Archiver</a> or
    <a href="http://www.ultimatezip.com/">UltimateZip</a>.
    On plain DOS (DOS without Windows) use a program like
    <a href="http://www.pkware.com/">PKUNZIP</a>.<br>
    We recommend to extract the package to a directory (or folder) of its own.
    The zip file contains a directory, but you need not use that directory.<br>
-   Windows&nbsp;NT/2000/XP users are likely to need a driver for copier I/O. You
-   do not need a driver if you use Windows&nbsp;95, 98 or ME. A driver is also
-   not needed when you will not use uCON64 to communicate with a backup unit.<br>
+   Windows NT/2000/XP/2003 users need a driver for backup unit I/O. You do not
+   need a driver if you use Windows 95, 98 or ME. A driver is also not needed if
+   you will not use uCON64 to communicate with a backup unit.<br>
    You could use a driver like UserPort, DlPortIO, io.dll or inpout32.dll.
 <!-- UserPort doesn't seem to have an official homepage. -->
-   You can download DlPortIO at
-   <a href="http://www.driverlinx.com/DownLoad/dnload.htm#Windows%2095/NT%20Port%20I/O%20Driver">
-   http://www.driverlinx.com/DownLoad/dnload.htm#Windows%2095/NT%20Port%20I/O%20Driver</a>, directly at
-   <a href="http://www.driverlinx.com/DownLoad/DlPortIO.htm">
-   http://www.driverlinx.com/DownLoad/DlPortIO.htm</a> or from
+   You can download DlPortIO from
    <a href="http://ucon64.sourceforge.net/">the uCON64 homepage</a>.
-   You can find io.dll in a file named io.zip at
+   You can find io.dll in a file named
+   <a href="http://www.geekhideout.com/downloads/io.zip">io.zip</a> at
    <a href="http://www.geekhideout.com/iodll.shtml">
    http://www.geekhideout.com/iodll.shtml</a> and you can find inpout32.dll in
    a file named inpout32_source_and_bins.zip at
@@ -456,56 +485,105 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    <a href="#configbin">"How to configure the uCON64 executable"</a> for more
    information about the configuration directory.<br>
    uCON64 displays a message if it finds DLPORTIO.dll, io.dll or inpout32.dll
-   before communicating with a copier. It displays this message before it
+   before communicating with a backup unit. It displays this message before it
    displays file information, so you might want to use the command line switch
    -q. Only the Windows versions of uCON64 are able to use DLPORTIO.dll, io.dll
    or inpout32.dll. If more than one I/O driver is present in the configuration
    directory, uCON64 will first try to load DLPORTIO.dll. If that fails it will
    try to load io.dll. If that also fails it will try to load inpout32.dll.<br>
-   It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
-   under Windows&nbsp;XP without UserPort. We have received reports from people
-   who were able to send and receive ROMs under Windows&nbsp;XP as a regular
-   user (no Administrator rights and not "Power Users").<br>
+   It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool on
+   Windows XP without UserPort. We have received reports from people who were
+   able to send and receive ROMs on Windows XP as a regular user (no
+   Administrator rights and not "Power Users").<br>
+<br>
+   <b>64-bit Windows (XP/2003/Vista/7/8/8.1/10)</b><br>
+   On 64-bit Windows, unpack the package with a program like
+   <a href="http://www.winzip.com/">WinZip</a>,
+   <a href="http://www.rarlab.com/">WinRAR</a>,
+   <a href="http://www.powerarchiver.com/">Power Archiver</a> or
+   <a href="http://www.ultimatezip.com/">UltimateZip</a>.
+   We recommend to extract the package to a directory (or folder) of its own.
+   The zip file contains a directory, but you need not use that directory.
+   Please note that we do not release a 64-bit version of uCON64. The 32-bit
+   Windows versions of uCON64 run fine on 64-bit Windows.<br>
+   64-bit Windows users need a driver for backup unit I/O. You do not need a
+   driver if you will not use uCON64 to communicate with a backup unit.<br>
+   You could use a driver like giveio64 or a suitable port of inpout32.dll.
+   You can download giveio64 at
+   <a href="https://www-user.tu-chemnitz.de/~ygu/">
+   https://www-user.tu-chemnitz.de/~ygu/</a>, directly at
+   <a href="https://www-user.tu-chemnitz.de/~ygu/free">
+   https://www-user.tu-chemnitz.de/~ygu/free</a>, at
+   <a href="http://www.codeproject.com/Tips/985807/Enable-I-O-Access-From-User-Mode">
+   http://www.codeproject.com/Tips/985807/Enable-I-O-Access-From-User-Mode</a>
+   or from <a href="http://ucon64.sourceforge.net/">the uCON64 homepage</a>.
+   You can find a suitable port of inpout32.dll in a file named
+   <a href="http://www.highrez.co.uk/scripts/download.asp?package=InpOutBinaries">
+   InpOutBinaries_1500.zip</a> at
+   <a href="http://www.highrez.co.uk/Downloads/InpOut32/default.htm">
+   http://www.highrez.co.uk/Downloads/InpOut32/default.htm</a>.
+   giveio64 and inpout32.dll are included with the binary release. To install
+   inpout32.dll, put it in uCON64's configuration directory. See the section
+   <a href="#configbin">"How to configure the uCON64 executable"</a> for more
+   information about the configuration directory.<br>
+   If you choose to use the mentioned port of inpout32.dll, the first time you
+   want to use uCON64 to communicate with a backup unit, you need to do so as
+   Administrator (by running uCON64 from an instance of cmd.exe that was started
+   as Administrator). After uCON64 was successful in communicating with a backup
+   unit, you can use it as a normal user. Using inpout32.dll on 64-bit Windows
+   is much less reliable than running uCON64 on GNU/Linux or 32-bit Windows.
+   giveio64 is better in that regard, but you need to start it as Administrator
+   at least once in every Windows session during which you want to use uCON64 to
+   communicate with a backup unit.<br>
+   uCON64 displays a message if it finds inpout32.dll before communicating with
+   a backup unit. It displays this message before it displays file information,
+   so you might want to use the command line switch -q. If more than one I/O
+   driver is present in the configuration directory, uCON64 will first try to
+   load DLPORTIO.dll. If that fails it will try to load io.dll. If that also
+   fails it will try to load inpout32.dll. Since DLPORTIO.dll and io.dll do not
+   work on 64-bit Windows, you have to manually delete them if they are present.
+   A nice thing about the mentioned port of inpout32.dll is that it works on
+   both 32-bit Windows (NT/2000/XP/2003) and 64-bit Windows
+   (XP/2003/Vista/7/8/8.1/10).<br>
 <br>
 <a name="cmdline">The command line environment<br></a>
    uCON64 is a command line program and is usually started from a program like
-   command.com (Windows&nbsp;9x/ME) or cmd.exe (Windows&nbsp;NT/2000/XP). You
-   can start command.com or cmd.exe by choosing the option "Run..." from the
-   start menu. You have to type the word command.com or cmd.exe yourself.
-   Command.com and cmd.exe are command line interpreters. That means that they
-   will try to interpret any command you type followed by a press on the enter
-   or return key. When you type a command, the command line interpreter will
-   first look in the current directory and if it cannot find a program file
-   with the correct name it will search the so-called "path". This means that
-   the program file of uCON64 (ucon64.exe) must either be present in the
-   current directory or in one of the directories of your path. It is really
-   comfortable to have ucon64.exe present in your path, because you can simply
-   use the name ucon64 from any directory without first having to copy
-   ucon64.exe to that directory.<br>
+   command.com (Windows 9x/ME) or cmd.exe
+   (Windows NT/2000/XP/2003/Vista/7/8/8.1/10). You can start command.com or
+   cmd.exe by choosing the option "Run..." from the start menu. You have to type
+   the word command.com or cmd.exe yourself. command.com and cmd.exe are command
+   line interpreters. That means that they will try to interpret any command you
+   type followed by a press on the enter or return key. When you type a command,
+   the command line interpreter will first look in the current directory and if
+   it cannot find a program file with the correct name it will search the
+   so-called "path". This means that the program file of uCON64 (ucon64.exe)
+   must either be present in the current directory or in one of the directories
+   of your path. It is really comfortable to have ucon64.exe present in your
+   path, because you can simply use the name ucon64 from any directory without
+   first having to copy ucon64.exe to that directory.<br>
    The path is defined by the environment variable PATH. You can check the
    current value of that variable with the command:<br>
-   &nbsp;&nbsp; echo %PATH%<br>
+   &nbsp;&nbsp;echo %PATH%<br>
    You could copy uCON64 to one of those directories. However, we recommend
    putting ucon64.exe in a directory of its own (on Windows). So, you should
-   modify the value of PATH. On Windows&nbsp;9x/ME you should do that in the
-   following way. Edit the file c:\autoexec.bat and add a line like:<br>
-   &nbsp;&nbsp; set PATH=%PATH%;c:\ucon64<br>
-   Replace c:\ucon64 with the drive and directory where you extracted the
-   uCON64 files to. Save the modified c:\autoexec.bat and reboot.
-   On Windows&nbsp;XP (NT/2000?) you should press the buttons or icons start
-   -&#62; Control Panel -&#62; System -&#62; Advanced -&#62; Environment
-   Variables and edit the value of path in the section System variables or
-   else in the section User variables. You have to start a new instance of
-   cmd.exe before the changes take effect.
-   After you have made your changes (and have rebooted your PC if you are using
-   Windows&nbsp;9x/ME or DOS) check the value of PATH again. It should now list
-   the directory you just added.<br>
+   modify the value of PATH. On Windows 9x/ME you should do that in the
+   following way. Edit the file C:\autoexec.bat and add a line like:<br>
+   &nbsp;&nbsp;set PATH=%PATH%;C:\ucon64<br>
+   Replace C:\ucon64 with the drive and directory where you extracted the
+   uCON64 files to. Save the modified C:\autoexec.bat and reboot.
+   On Windows XP (NT/2000?) you should press the buttons or icons start -&#62;
+   Control Panel -&#62; System -&#62; Advanced -&#62; Environment Variables and
+   edit the value of path in the section System variables or else in the section
+   User variables. You have to start a new instance of cmd.exe before the
+   changes take effect. After you have made your changes (and have rebooted your
+   PC if you are using Windows 9x/ME or DOS) check the value of PATH again. It
+   should now list the directory you just added.<br>
    For information on how to use the command line see
    <a href="#49">question 49</a>.<br>
 <br>
 <a name="configbin"><b>How to configure the uCON64 executable</b></a><br>
    First run uCON64 once. Use a command like:<br>
-   &nbsp;&nbsp; ucon64 -version<br>
+   &nbsp;&nbsp;ucon64 -version<br>
    If you have not run uCON64 before you should see a message that it created
    a file with a name like ucon64.cfg (DOS version) or .ucon64rc (all other
    versions). If you are using GNU/Linux and uCON64 crashes see
@@ -535,7 +613,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
   </tr>
   <tr>
     <td><tt>parport_dev</tt></td>
-    <td><tt>name of parallel port device (AmigaOS or Linux with ppdev)</tt></td>
+    <td><tt>name of parallel port device (AmigaOS or GNU/Linux with ppdev)</tt></td>
   </tr>
   <tr>
     <td><tt>parport</tt></td>
@@ -596,17 +674,17 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    configuration file sets it to 1 uCON64 will not use color. In command.com or
    cmd.exe you can set an environment variable with the command "set", in Bash
    you should do it with the command "export". For example:<br>
-   &nbsp;&nbsp; export ansi_color=0<br>
+   &nbsp;&nbsp;export ansi_color=0<br>
    Some variables can be overruled with command line switches. For example, to
    disable the use of color even if both the configuration file and the
    environment have the variable ansi_color set to 1, use the switch -ncol:<br>
-   &nbsp;&nbsp; ucon64 "Rock Fall (PD).zip" -ncol<br>
+   &nbsp;&nbsp;ucon64 "Rock Fall (PD).zip" -ncol<br>
    The variable ucon64_configdir is only really important for the Windows
    versions of uCON64. To install the I/O port driver io.dll or inpout32.dll
    place it (or both) in the directory that uCON64 lists as its configuration
    directory.<br>
-   If you use DOS or Windows&nbsp;9x and do not want uCON64 to create
-   ucon64.cfg or .ucon64rc files all over the place (current directories) see
+   If you use DOS or Windows 9x and do not want uCON64 to create ucon64.cfg or
+   .ucon64rc files all over the place (current directories) see
    <a href="#25">question 25</a>.<br>
    You might also want to make use of DAT files. See
    <a href="#36">question 36</a> for more information.<br>
@@ -625,7 +703,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    the name of the ROM as the only argument. Sometimes you will have to specify
    the console type for uCON64, because the ROM dump is damaged or simply not
    detected correctly by uCON64. For example:<br>
-   &nbsp;&nbsp; ucon64 -snes "Super Aleste (J) [t1].swc"<br>
+   &nbsp;&nbsp;ucon64 -snes "Super Aleste (J) [t1].swc"<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: I have two parallel ports in my PC and my Flash Advance
@@ -635,15 +713,15 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    first parallel port (it stops probing for a parallel port if it finds one).
    So, you should specify the address of the second parallel port on the
    command line. For example:<br>
-   &nbsp;&nbsp; ucon64 -xfal demo.gba -port 0x278<br>
+   &nbsp;&nbsp;ucon64 -xfal demo.gba -port 0x278<br>
 <br>
    The I/O address of the parallel port could be 0x3bc, 0x378 or 0x278. If you
    do not want to type the address of the parallel port every time you want to
-   transfer something to your FAL (or another copier) edit .ucon64rc or
+   transfer something to your FAL (or another backup unit) edit .ucon64rc or
    ucon64.cfg (for the DOS version) and remove the hash symbol in front of the
    line that starts with "parport=" (without the quotes). If that line is not
    present add one. You do not have to use the prefix 0x. For example:<br>
-   &nbsp;&nbsp; parport=278<br>
+   &nbsp;&nbsp;parport=278<br>
    You can also set an environment variable with the name parport to the right
    value. The value of the environment variable takes precedence over the value
    in the configuration file.<br>
@@ -678,19 +756,19 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    uCON64 says it is bad. Who is right?</a><br>
 <b>A</b>: It depends.<br>
    If uCON64 displays the text "Checksum: Bad" GoodSNES might be right.<br>
-   There may be several reasons why uCON64 reports that the check sum is bad.
+   There may be several reasons why uCON64 reports that the checksum is bad.
    It could have made a mistake while determining if the ROM is a HiROM or a
    LoROM dump. Try the switches -hi and -nhi and see if uCON64 reports the
-   check sum differently. Sometimes ROM dumps are detected as not being
+   checksum differently. Sometimes ROM dumps are detected as not being
    interleaved while they actually are. Try the switches -int and -int2 and see
    if you get better results. It could also be that uCON64 detects the ROM as
    interleaved while it is not. The switch -nint might help in that case. If
-   the check sum is reported as good it is likely that the ROM is really good.
+   the checksum is reported as good it is likely that the ROM is really good.
    Alternatively, you may want to convert the ROM to a non-interleaved format
    with -dint and run uCON64 on the converted ROM. Luckily you will not find
    many interleaved ROM dumps that uCON64 cannot handle, probably because
    Snes9x and ZSNES often cannot handle them either.<br>
-   Perhaps "Ok" looks nicer than "Bad", but it is far more important that
+   Perhaps "OK" looks nicer than "Bad", but it is far more important that
    uCON64 displays DAT file information. If you installed a SNES DAT file (see
    <a href="#36">question 36</a>) and uCON64 does not display a line with the
    text "DAT info:" then the ROM dump could not be identified. It could be that
@@ -702,9 +780,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
 <p>
 <a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is
-   bad, but uCON64 says it is good ("Checksum: Ok"). Who is right?</a><br>
+   bad, but uCON64 says it is good ("Checksum: OK"). Who is right?</a><br>
 <b>A</b>: uCON64, probably :-)<br>
-   Neither Snes9x 1.39 nor ZSNES 1.36 calculate the check sum correctly for BS
+   Neither Snes9x 1.39 nor ZSNES 1.36 calculate the checksum correctly for BS
    ROMs, so you can be pretty sure the ROM is good if it is a BS ROM. See
    previous answer.<br>
 <br>
@@ -714,12 +792,12 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    good, but GoodSNES still says it is bad. How can that be, I did fix the ROM,
    right?</a><br>
 <b>A</b>: No, you did not. When you use -chk uCON64 changes four bytes in the
-   ROM dump, so that they match with the calculated check sum. However, the ROM
+   ROM dump, so that they match with the calculated checksum. However, the ROM
    stays just as bad as it was.<br>
    Use -chk with care. -chk might be useful if you want to store a ROM
-   somewhere without using a database with its check sum. You can then later
+   somewhere without using a database with its checksum. You can then later
    check if the ROM is still the same as it was when you stored it by using the
-   check sum that is stored in the ROM.<br>
+   checksum that is stored in the ROM.<br>
    That said, it is a <i>much</i> better idea to create a DAT file from your
    ROM collection if you plan to store it somewhere. See
    <a href="#42">question 42</a> for reasons and <a href="#43">question 43</a>
@@ -734,7 +812,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    trying to run a game like Super Mario Kart (which uses a DSP chip) your
    Super Wild Card should have an extension with the correct DSP chip (or have
    the right cartridge with that chip plugged in your SWC). Then make sure you
-   are using a good dump (look at the check sum information). After you have
+   are using a good dump (look at the checksum information). After you have
    done that, check if the file is interleaved (look at the line that starts
    with "Interleaved/Swapped:"). If the file is interleaved convert it to Super
    Wild Card format (deinterleaved) by using the option -swc. Also verify that
@@ -745,7 +823,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    using one of the switches -hi or -nhi to force uCON64 to handle it as a
    HiROM or a LoROM dump. Additionally you could use one of the switches -hd,
    -nhd or -hdn to specify the backup unit header size. For example:<br>
-   &nbsp;&nbsp; ucon64 -swc -nhi -hd "Batman Revenge of the Joker (U).swc"<br>
+   &nbsp;&nbsp;ucon64 -swc -nhi -hd "Batman Revenge of the Joker (U).swc"<br>
    There are many (good) ROMs on the internet with incorrect headers, so this
    might well solve the problem.<br>
    Several games contain a copy protection that prevents them from running on
@@ -767,19 +845,19 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    in SWC format.<br>
 <br>
    Demon's Crest:<br>
-   &nbsp;&nbsp; ucon64 -stp "Demon's Crest.swc"<br>
-   &nbsp;&nbsp; cat "Demon's Crest.swc" "Demon's Crest.swc" &#62; "Demon's Crest (SWC-fix).swc"<br>
-   &nbsp;&nbsp; ucon64 -swc "Demon's Crest (SWC-fix).swc"<br>
+   &nbsp;&nbsp;ucon64 -stp "Demon's Crest.swc"<br>
+   &nbsp;&nbsp;cat "Demon's Crest.swc" "Demon's Crest.swc" &#62; "Demon's Crest (SWC-fix).swc"<br>
+   &nbsp;&nbsp;ucon64 -swc "Demon's Crest (SWC-fix).swc"<br>
 <br>
    Mega Man X:<br>
-   &nbsp;&nbsp; ucon64 -stp "Mega Man X.swc"<br>
-   &nbsp;&nbsp; ucon64 -padn=2097152 "Mega Man X.swc"<br>
-   &nbsp;&nbsp; cat "Mega Man X.swc" "Mega Man X.swc" &#62; "Mega Man X (SWC-fix).swc"<br>
-   &nbsp;&nbsp; ucon64 -swc "Mega Man X (SWC-fix).swc"<br>
+   &nbsp;&nbsp;ucon64 -stp "Mega Man X.swc"<br>
+   &nbsp;&nbsp;ucon64 -padn=2097152 "Mega Man X.swc"<br>
+   &nbsp;&nbsp;cat "Mega Man X.swc" "Mega Man X.swc" &#62; "Mega Man X (SWC-fix).swc"<br>
+   &nbsp;&nbsp;ucon64 -swc "Mega Man X (SWC-fix).swc"<br>
 <br>
    WinDOS users without the program cat should use the command copy. For
    example:<br>
-   &nbsp;&nbsp; copy /b "Mega Man X.swc" + "Mega Man X.swc" "Mega Man X (SWC-fix).swc"<br>
+   &nbsp;&nbsp;copy /b "Mega Man X.swc" + "Mega Man X.swc" "Mega Man X (SWC-fix).swc"<br>
 <br>
    However, starting from version 1.9.8beta6 the method described above is not
    necessary anymore for Demon's Crest. Use the option -k instead. For
@@ -797,11 +875,11 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: See <a href="hardware.html">hardware.html</a>.<br>
 <br>
 <p>
-<a name="14"><b>Q14</b>: I use Windows&nbsp;XP (NT/2000). When I try to run
-   ucon64.exe under command.com (start -&#62; Run... -&#62; command) uCON64
+<a name="14"><b>Q14</b>: I use Windows XP (NT/2000). When I try to run
+   ucon64.exe in command.com (start -&#62; Run... -&#62; command) uCON64
    crashes. What do I do wrong?</a><br>
 <b>A</b>: You should not use command, use cmd instead. However, starting from
-   version 1.9.8 uCON64 should run fine under command.com.<br>
+   version 1.9.8 uCON64 should run fine in command.com.<br>
 <br>
 <p>
 <a name="15"><a name="frontend"><b>Q15</b>: I do not like the command line. Are
@@ -818,8 +896,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    <tr><td><br>
    <a href="http://www.google.com/">
      <img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google" align="absmiddle">
-   </a><br><br>
-   <input type=text name=q maxlength=255 value="ppf aps ips patch"><br><br>
+   </a><br>
+<br>
+   <input type=text name=q maxlength=255 value="ppf aps ips patch"><br>
+<br>
    <input type=submit name=btnG value="Google Search"><br>
    </td></tr>
    </table>
@@ -854,9 +934,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <a name="20"><b>Q20</b>: How do I specify a bank number for the GB Xchanger?</a><br>
 <b>A</b>: Separate the bank number from the option -xgbxb with either a space or
    an equal sign. For example:<br>
-   &nbsp;&nbsp; ucon64 -xgbxb 0 "Pokemon (Green).sav"<br>
+   &nbsp;&nbsp;ucon64 -xgbxb 0 "Pokemon (Green).sav"<br>
    or:<br>
-   &nbsp;&nbsp; ucon64 -xgbxb=0 "Pokemon (Green).sav"<br>
+   &nbsp;&nbsp;ucon64 -xgbxb=0 "Pokemon (Green).sav"<br>
 <br>
 <p>
 <a name="21"><b>Q21</b>: What is the difference between the Flash Advance
@@ -866,7 +946,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    bank 1 while -xfalb &#60;n&#62; starts in bank n. For example, if you have
    Super Mario Advance 2 (J) on your flash card in "ROM bank" 4 and would like
    to save/restore SRAM bank 4 you should do something like:<br>
-   &nbsp;&nbsp; ucon64 -xfalb 4 "Super Mario Advance 2 (J).sav"<br>
+   &nbsp;&nbsp;ucon64 -xfalb 4 "Super Mario Advance 2 (J).sav"<br>
    The file size determines how many bytes are restored, even when you use
    -xfalb &#60;n&#62;. So, if the file is greater than 64 kB more than one bank
    will be written to.<br>
@@ -881,21 +961,21 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    that is larger than your flash card. Passing a smaller size is correct
    though. For example, to create a multi-game file that fits on a 128 Mb (16
    MB) card use a command like this:<br>
-   &nbsp;&nbsp; ucon64 -gba -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
+   &nbsp;&nbsp;ucon64 -gba -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
    You can also send it directly by using -xfalmulti:<br>
-   &nbsp;&nbsp; ucon64 -xfalmulti=128 rom1.gba rom2.gba rom3.gba rom4.gba<br>
+   &nbsp;&nbsp;ucon64 -xfalmulti=128 rom1.gba rom2.gba rom3.gba rom4.gba<br>
    Please note that when using -multi you have to specify a loader and the name
    of the multi-game file to create, while when using -xfalmulti you must omit
    them. -xfalmulti uses the variable gbaloader to find the loader. See
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
    Just like sometimes happens with Visoly's tool it is possible to get the
-   same message when the multi-game file is small enough. It will probably work when
-   you try again (with the same multi-game file).<br>
+   same message when the multi-game file is small enough. It will probably work
+   when you try again (with the same multi-game file).<br>
 <br>
 <p>
 <a name="23"><b>Q23</b>: Where can I get that loader or "game pack" file?</a><br>
-<b>A</b>: You can get it from <a href="http://www.visoly.com">
-   Visoly's site</a>. It is in a file with a name like
+<b>A</b>: You can get it from <a href="http://www.visoly.com">Visoly's site</a>.
+   It is in a file with a name like
    <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.
    You can find it also on the uCON64 homepage.<br>
 <br>
@@ -905,29 +985,29 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    You can use a GFX or HTML editor to find an identical green color and
    write down the color values in HTML style (#RRGGBB). Now you run
    "ucon64 -col #RRGGBB" and it will calculate the hex value for the
-   corresponding SNES color. Ok? No? Then you do not need this option :-)<br>
+   corresponding SNES color. OK? No? Then you do not need this option :-)<br>
 <br>
 <p>
 <a name="25"><b>Q25</b>: Why does uCON64 create ucon64.cfg (DOS executable) or
-   .ucon64rc (Win32 executable) files all over the place under DOS and
-   Windows&nbsp;9x (command.com)?</a><br>
+   .ucon64rc (Win32 executable) files all over the place on DOS and
+   Windows 9x (command.com)?</a><br>
 <b>A</b>: uCON64 needs to know where it can find the configuration file or a
    directory where it can create one. It checks the environment for a variable
    with the name UCON64_HOME, HOME, USERPROFILE or HOMEDRIVE and HOMEPATH (in
-   that order). Under Unix HOME is normally set. Under Windows&nbsp;XP and 2000
-   (NT?) USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 cannot
-   find one of those environment variables it will look for the configuration
-   file in the current directory. If it cannot find a configuration file it
-   will create one. Under DOS and Windows&nbsp;9x none of those environment
-   variables are usually set. So, if you run uCON64 under DOS or
-   Windows&nbsp;9x in a directory where no configuration file exists it will
-   create one there. If you do not like this behaviour you should set one of
-   the mentioned environment variables yourself. You can do that by adding the
-   following line to the end of the file c:\autoexec.bat:<br>
-   &nbsp;&nbsp; set UCON64_HOME=c:\ucon64<br>
+   that order). On UNIX HOME is normally set. On Windows XP and 2000 (NT?)
+   USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 cannot find
+   one of those environment variables it will look for the configuration file in
+   the current directory. If it cannot find a configuration file it
+   will create one. On DOS and Windows 9x none of those environment variables
+   are usually set. So, if you run uCON64 on DOS or Windows 9x in a directory
+   where no configuration file exists it will create one there. If you do not
+   like this behaviour you should set one of the mentioned environment variables
+   yourself. You can do that by adding the following line to the end of the file
+   C:\autoexec.bat:<br>
+   &nbsp;&nbsp;set UCON64_HOME=C:\ucon64<br>
    and reboot. You can also type that line on the command line. The directory
-   c:\ucon64 must exist, of course. If you want uCON64 to use another directory
-   you should change c:\ucon64 to a directory of your choice. You should not
+   C:\ucon64 must exist, of course. If you want uCON64 to use another directory
+   you should change C:\ucon64 to a directory of your choice. You should not
    let the last character of the environment variable be a forward or backward
    slash.<br>
    If you have Cygwin installed, the Cygwin runtime system will create an
@@ -939,14 +1019,13 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    -version on the command line.<br>
 <br>
 <p>
-<a name="26"><b>Q26</b>: When I try to create a multi-game file under Windows I
-   get the message "The system cannot execute the specified program." (or
-   something similar). What does that mean?</a><br>
+<a name="26"><b>Q26</b>: When I try to create a multi-game file on Windows I get
+   the message "The system cannot execute the specified program." (or something
+   similar). What does that mean?</a><br>
 <b>A</b>: You can get that message with the DOS executable if you pass more
    than 127 characters as argument to uCON64. There are two solutions:<br>
    1.) Use a Win32 executable (download one from
-   <a href="http://ucon64.sourceforge.net/">the uCON64
-   homepage</a>).<br>
+   <a href="http://ucon64.sourceforge.net/">the uCON64 homepage</a>).<br>
    2.) Rename the ROMs so that their combined names are short enough to fit
    into 127 characters.<br>
 <br>
@@ -970,35 +1049,35 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    you have to use the pipe symbol, '|'. On an international keyboard you can
    type this symbol with the same key you use for the backslash ('\'). For
    example:<br>
-   &nbsp;&nbsp; ucon64 -help|more<br>
+   &nbsp;&nbsp;ucon64 -help|more<br>
    To get only help on the options for a specific console, specify the console
    on the command line. For example, to see only the help on Game Boy Advance
    options:<br>
-   &nbsp;&nbsp; ucon64 -help -gba|more<br>
+   &nbsp;&nbsp;ucon64 -help -gba|more<br>
    Press the space bar to see the next help screen, the enter key to see the
    next line or q to quit.<br>
 <br>
 <p>
-<a name="29"><b>Q29</b>: I tried to send a ROM dump to my copier under
-   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
+<a name="29"><b>Q29</b>: I tried to send a ROM dump to my backup unit on
+   Windows XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
 <b>A</b>: If the message looks like this (for the Win32 (Cygwin) executable):<br>
-   &nbsp;&nbsp; 0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
+   &nbsp;&nbsp;0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
    5570 [main] ucon64 356 open_stackdumpfile: Dumping stack trace to ucon64.exe.stackdump<br>
    or like this:<br>
-   &nbsp;&nbsp; Illegal instruction (core dumped)<br>
+   &nbsp;&nbsp;Illegal instruction (core dumped)<br>
    then you did not install an I/O driver (correctly). In this case "install"
    means that the I/O driver is running at the time uCON64 tries to access the
    parallel port. See <a href="#4">question 4</a>.<br>
    You will also see this message (with a Windows version of uCON64) if you
-   tried to enable EPP mode for the FAL under Windows XP (NT/2000), i.e., you
-   specified the switch -xfalm, without an appropriate I/O port driver.
-   UserPort is <i>inappropriate</i> for this, because it enables access to I/O
-   ports up to 0x3ff. However, in order to enable EPP mode the FAL code tries
-   to access an I/O port with an address higher than 0x3ff. If you want to be
-   able to use EPP mode try io.dll or inpout32.dll.<br>
-   Starting with version 2.0.0 uCON64 will not crash anymore if it cannot
-   access the parallel port at start up (unless you use UserPort in combination
-   with a Windows version of uCON64).<br>
+   tried to enable EPP mode for the FAL on Windows XP (NT/2000), i.e., you
+   specified the switch -xfalm, without an appropriate I/O port driver. UserPort
+   is <i>inappropriate</i> for this, because it enables access to I/O ports up
+   to 0x3ff. However, in order to enable EPP mode the FAL code tries to access
+   an I/O port with an address higher than 0x3ff. If you want to be able to use
+   EPP mode try io.dll or inpout32.dll.<br>
+   Starting with version 2.0.0 uCON64 will not crash anymore if it cannot access
+   the parallel port at start up (unless you use UserPort in combination with a
+   Windows version of uCON64).<br>
 <br>
 <p>
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
@@ -1028,21 +1107,21 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    the cartridge was dumped. The format is dd-mm-yyyy. Instead of the hyphen
    ('-') you may also use the slash ('/'). If day or month is smaller than 10
    you may use 1 or 2 digits, for example:<br>
-   &nbsp;&nbsp; 02/02/2002<br>
+   &nbsp;&nbsp;02/02/2002<br>
    or<br>
-   &nbsp;&nbsp; 2-2-2002<br>
+   &nbsp;&nbsp;2-2-2002<br>
    The third and last line should contain information about the dumping means
    that was used. This line may also contain 99 characters at maximum. Here is
    an example info file:<br>
-   &nbsp;&nbsp; Me &#60;me@web.net&#62;<br>
-   &nbsp;&nbsp; 26-7-2002<br>
-   &nbsp;&nbsp; Custom built hardware<br>
+   &nbsp;&nbsp;Me &#60;me@web.net&#62;<br>
+   &nbsp;&nbsp;26-7-2002<br>
+   &nbsp;&nbsp;Custom built hardware<br>
    To get this information in a UNIF file, you should use the -dumpinfo switch
    in combination with the -unif option. Say you store the dumper information
    in the file info.txt. This would get the info in a UNIF file:<br>
-   &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
+   &nbsp;&nbsp;ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
    If you already have a UNIF file the command looks almost the same:<br>
-   &nbsp;&nbsp; ucon64 -unif smb.unf -dumpinfo info.txt<br>
+   &nbsp;&nbsp;ucon64 -unif smb.unf -dumpinfo info.txt<br>
    For an existing UNIF file you need not specify the board name, but you might
    want to specify it if you want to change the board name in the file.
    Afterwards run uCON64 on the newly written ROM to see if you were
@@ -1054,26 +1133,25 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: Use the -ctrl switch multiple times on the <i>same</i> command line.
    For example, to specify that a game supports the controller types "regular
    joypad" and "power pad" you should use a command like this:<br>
-   &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
+   &nbsp;&nbsp;ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
 <br>
 <p>
-<a name="34"><b>Q34</b>: How do I enable or disable colors in the display
-   output of uCON64?</a><br>
-<b>A</b>: For the Windows and Unix executables colors are enabled by default.
-   For the DOS executable ANSI.SYS must be loaded. Under DOS and
-   Windows&nbsp;9x ANSI.SYS can be loaded by adding a line to the end of
-   c:\config.sys of the format "device=&#60;full path to ANSI.SYS&#62;".
-   Say ANSI.SYS is located in the directory c:\windows\command, then the line
-   would have to look like this:<br>
-   &nbsp;&nbsp; device=c:\windows\command\ansi.sys<br>
-   Changes made to config.sys under DOS and Windows&nbsp;9x will become active
-   only after a reboot.<br>
-   Under Windows&nbsp;XP/NT you should add a similar line to your
+<a name="34"><b>Q34</b>: How do I enable or disable colors in the display output
+   of uCON64?</a><br>
+<b>A</b>: For the Windows and UNIX executables colors are enabled by default.
+   For the DOS executable ANSI.SYS must be loaded. On DOS and Windows 9x
+   ANSI.SYS can be loaded by adding a line to the end of C:\config.sys of the
+   format "device=&#60;full path to ANSI.SYS&#62;". Say ANSI.SYS is located in
+   the directory C:\windows\command, then the line would have to look like this:<br>
+   &nbsp;&nbsp;device=C:\windows\command\ansi.sys<br>
+   Changes made to config.sys on DOS and Windows 9x will become active only
+   after a reboot.<br>
+   On Windows XP/NT you should add a similar line to your
    %SystemRoot%\system32\CONFIG.NT:<br>
-   &nbsp;&nbsp; device=%SystemRoot%\system32\ansi.sys<br>
+   &nbsp;&nbsp;device=%SystemRoot%\system32\ansi.sys<br>
    The use of color can be disabled by specifying the switch -ncol on the
    command line. You can also add the following line to the configuration file:<br>
-   &nbsp;&nbsp; ansi_color=0<br>
+   &nbsp;&nbsp;ansi_color=0<br>
 <br>
 <p>
 <a name="35"><b>Q35</b>: When I try to convert a large number of files using
@@ -1081,12 +1159,12 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: No, it is not. uCON64 versions before 1.9.8beta7 just do not support
    wildcards. For example, to convert all files with the suffix (M$ speak:
    extension) .mgd to Super Wild Card format, try this in Bash:<br>
-   &nbsp;&nbsp; find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>
+   &nbsp;&nbsp;find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>
    or this in command.com or cmd.exe:<br>
-   &nbsp;&nbsp; for %f in (*.mgd) do ucon64 --snes --swc "%f"<br>
+   &nbsp;&nbsp;for %f in (*.mgd) do ucon64 --snes --swc "%f"<br>
    However, this functionality has been added to uCON64 1.9.8beta7. With that
    version you can do the same thing with:<br>
-   &nbsp;&nbsp; ucon64 --snes --swc *.mgd<br>
+   &nbsp;&nbsp;ucon64 --snes --swc *.mgd<br>
    In case something goes terribly wrong and uCON64 crashes it might still be
    necessary to use one of the previous methods, because every file will be
    processed and not only the files before the crash.<br>
@@ -1097,10 +1175,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    -version to see which configuration file uCON64 uses
    (see <a href="#25">question 25</a>). Then open that file in an editor and
    look for a line that starts with "ucon64_datdir=" (without the quotes). If
-   that line is not present add one. For example on Unix:<br>
-   &nbsp;&nbsp; ucon64_datdir=~/.ucon64/dat<br>
+   that line is not present add one. For example on UNIX:<br>
+   &nbsp;&nbsp;ucon64_datdir=~/.ucon64/dat<br>
    or on Windows:<br>
-   &nbsp;&nbsp; ucon64_datdir=c:\ucon64\dat<br>
+   &nbsp;&nbsp;ucon64_datdir=C:\ucon64\dat<br>
    You can use the tilde ('~') also on DOS and Windows. It will be interpreted
    by uCON64 as the "home directory". The home directory is the directory
    specified by the environment variable HOME or USERPROFILE or HOMEDRIVE and
@@ -1114,10 +1192,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    files from sites like
    <a href="http://emulationrealm.net/rcdat.php#Cowering_GoodTools">
    http://emulationrealm.net/</a>,
-   <a href="http://www.romcenter.com/">
-   http://www.romcenter.com/</a> or
-   <a href="http://www.rommanager.com/">
-   http://www.rommanager.com/</a>. You can also find some DAT files on
+   <a href="http://www.romcenter.com/"> http://www.romcenter.com/</a> or
+   <a href="http://www.rommanager.com/">http://www.rommanager.com/</a>. You can
+   also find some DAT files on
    <a href="http://ucon64.sourceforge.net/index.html#ucon64dat">
    the uCON64 homepage</a>.<br>
    uCON64 will automatically create index files which speed up the access to
@@ -1130,7 +1207,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    specific CRC32 value with the option -dbs. The force-console-type options
    can be used in combination with -db, -dbv and -dbs. For example, to see
    which DAT files are used to identify SNES ROM dumps, type:<br>
-   &nbsp;&nbsp; ucon64 -db -snes<br>
+   &nbsp;&nbsp;ucon64 -db -snes<br>
    If uCON64 reports that it found 0 DAT files you did not install the DAT
    file(s) correctly.<br>
 <br>
@@ -1158,10 +1235,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: You can do several things:<br>
    1.) Change the number of lines that can be displayed at once with this
    command:<br>
-   &nbsp;&nbsp; mode con lines=50<br>
+   &nbsp;&nbsp;mode con lines=50<br>
    2.) Use the program "more". See <a href="#28">question 28</a>.<br>
    3.) Redirect the output of uCON64 to a file. For example:<br>
-   &nbsp;&nbsp; ucon64 rom.swc &#62; output.txt<br>
+   &nbsp;&nbsp;ucon64 rom.swc &#62; output.txt<br>
    You can then open the file output.txt in an editor.<br>
 <br>
 <p>
@@ -1172,14 +1249,14 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    But starting with uCON64 1.9.8beta8 this is not a problem for you at all.
    The only requirement is that you are able to read and use a text editor ;-)<br>
    First visit the uCON64 homepage and from there follow a link to the
-   <a href="http://sourceforge.net/projects/ucon64">
-   uCON64 SourceForge page</a>. You should be able to find a page where you can
-   browse the CVS repository. Download the latest version of the file snes.c.
-   Open the file in an editor and search for the text snes_k. If you are
-   looking for NTSC or PAL fixes search either for snes_fix_pal_protection or
-   snes_fix_ntsc_protection, depending on what you need. For example, you will
-   have to search for snes_fix_pal_protection, if you want to fix a game so
-   that it will run on an NTSC SNES.<br>
+   <a href="http://sourceforge.net/projects/ucon64">uCON64 SourceForge page</a>.
+   You should be able to find a page where you can browse the CVS repository.
+   Download the latest version of the file snes.c. Open the file in an editor
+   and search for the text snes_k. If you are looking for NTSC or PAL fixes
+   search either for snes_fix_pal_protection or snes_fix_ntsc_protection,
+   depending on what you need. For example, you will have to search for
+   snes_fix_pal_protection, if you want to fix a game so that it will run on an
+   NTSC SNES.<br>
    Then read the comment to see what "code" your game requires. However, surely
    not every game will be mentioned in the comments. In that case search for
    the corresponding "line" a bit below. For example, for Mega Man X you will
@@ -1193,9 +1270,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Note that I did not advise to search for \x80\x40\x80, because that is what
    the sequence should be after uCON64 has cracked or fixed the game.<br>
    For Mega Man X you will find the lines:<br>
-   &nbsp;&nbsp; n += change_mem (buffer, bytesread, "!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, 0,<br>
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                 "\xaf\xbf", 2, "\xcf\xdf", 2);<br>
+   &nbsp;&nbsp;n += change_mem (buffer, bytesread, "!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, 0,<br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\xaf\xbf", 2, "\xcf\xdf", 2);<br>
    Now open the file snescopy.txt. If you are trying to get uCON64 support new
    NTSC or PAL cracks open snesntsc.txt or snespal.txt respectively. Then copy
    the parts "!*\x80\x00!*\x80\x40\xf0", '*', '!', "\x80", 0, "\xaf\xbf" and
@@ -1205,7 +1281,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Remove the double and single quotes and separate the parts by a colon. Then
    replace the prefix \x with a space. If you followed the directions the line
    will look like this:<br>
-   &nbsp;&nbsp; !* 80 00!* 80 40 f0: *: !:  80: 0:  af bf:  cf df<br>
+   &nbsp;&nbsp;!* 80 00!* 80 40 f0: *: !:  80: 0:  af bf:  cf df<br>
    You are almost done now. Only one thing has to be done. Look at what the
    "wildcard" and "escape" symbols are. They are defined by the 5th and 6th
    parameter of change_mem(), respectively. In our example the 5th parameter is
@@ -1216,7 +1292,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    values). Be sure to have at least one space between the numbers. In our
    example we could choose the values 1 and 2. In that case the finished line
    would look like this:<br>
-   &nbsp;&nbsp; 2 1 80 00 2 1 80 40 f0: 1: 2:  80: 0:  af bf:  cf df<br>
+   &nbsp;&nbsp;2 1 80 00 2 1 80 40 f0: 1: 2:  80: 0:  af bf:  cf df<br>
    If for example the 5th parameter would have been \x01, the wildcard would be
    01. In that case you would not have to change it, because it is already a
    number.<br>
@@ -1251,12 +1327,12 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    If the search pattern does not contain any escape bytes, you need not specify
    a set as it will not be used. If it does contain escape bytes you will have
    to specify a set for each one of them. Take for example the pattern:<br>
-   &nbsp;&nbsp; 01 00 01 00 42 84 ff 75 : ff : 00 : 02 03 : -6 : 22 11 : 19 75<br>
+   &nbsp;&nbsp;01 00 01 00 42 84 ff 75 : ff : 00 : 02 03 : -6 : 22 11 : 19 75<br>
    This will match amongst 1020 others with the following byte sequences:<br>
-   &nbsp;&nbsp; 01 22 01 19 42 84 19 75<br>
-   &nbsp;&nbsp; 01 11 01 19 42 84 91 75<br>
-   &nbsp;&nbsp; 01 22 01 75 42 84 00 75<br>
-   &nbsp;&nbsp; 01 11 01 75 42 84 ff 75<br>
+   &nbsp;&nbsp;01 22 01 19 42 84 19 75<br>
+   &nbsp;&nbsp;01 11 01 19 42 84 91 75<br>
+   &nbsp;&nbsp;01 22 01 75 42 84 00 75<br>
+   &nbsp;&nbsp;01 11 01 75 42 84 ff 75<br>
    A wildcard value in the search pattern matches with any value.<br>
    Using the above search pattern, uCON64 will search and replace two bytes six
    bytes "back" from the end of any matched byte sequence.
@@ -1303,21 +1379,21 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    2.) In order to rename ROM dumps to their "official" name.<br>
    Some ROM dump formats contain enough information to identify them, but none
    of the formats supported by uCON64 can be <i>reliably</i> identified.<br>
-   The check sum algorithms that are used to calculate the internal check sum
+   The checksum algorithms that are used to calculate the internal checksum
    of the files that have one is a simple addition of a range of bytes. So,
-   several bytes can be swapped and still yield the same check sum. Even the
-   range can be different and produce the same check sum. The latter case often
+   several bytes can be swapped and still yield the same checksum. Even the
+   range can be different and produce the same checksum. The latter case often
    occurs with overdumps. Some ROM dump formats do not even use the entire file
-   for the check sum calculation...<br>
+   for the checksum calculation...<br>
    uCON64 solves these problems as it uses the CRC32 algorithm for file
-   identification. The CRC32 algorithm will produce a different check sum if
+   identification. The CRC32 algorithm will produce a different checksum if
    bytes are swapped or if the range is different. When uCON64 is run on a ROM
    dump it first calculates the CRC32 of that file and then searches in its DAT
    files for that CRC32. If the CRC32 is present uCON64 will display the
    information it found in the DAT file. If uCON64 could not find the CRC32 it
    will not display DAT information.<br>
    At the risk of labouring the obvious I might add that even if all formats
-   used a check sum algorithm like CRC32, DAT files would still be necessary as
+   used a checksum algorithm like CRC32, DAT files would still be necessary as
    it is not possible to reliably identify a file without an external
    reference.<br>
 <br>
@@ -1334,8 +1410,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    renaming files (when using the option --rename). Also make sure all the
    files have a suffix (or "extension"). Then start uCON64 with the --mkdat
    option. For example, to create a DAT file from all the SNES ROM dumps in the
-   directory c:\snesrom use a command like:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat c:\snesrom<br>
+   directory C:\snesrom use a command like:<br>
+   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat C:\snesrom<br>
    In this case a DAT file named snes-02062003.dat will be created. When you
    copy this file to uCON64's DAT directory uCON64 will use it to identify SNES
    ROMs. Note that the name ends with ".dat". uCON64 will only see DAT files if
@@ -1458,7 +1534,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    You can create a DAT file from a subset of the files in a directory by
    explicitly specifying the files on the command line:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat c:\snesrom\*.swc<br>
+   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat C:\snesrom\*.swc<br>
    uCON64 uses the first file to determine for which console a DAT file is
    meant. So, if you want to create a DAT file from a set of ROMs of several
    consoles, the first file uCON64 encounters will determine the DAT file type.
@@ -1466,9 +1542,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    resulting DAT file will be meant:<br>
    1.) Specify one extra ROM dump as first file on the command line. For
    example:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom<br>
+   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat C:\rom\mario64.v64 C:\rom<br>
    2.) Use a force recognition switch. For example:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat c:\rom --sms<br>
+   &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat C:\rom --sms<br>
 <br>
    The second option should only be used when you are sure all the files are
    for a certain console and uCON64 fails to recognise some.<br>
@@ -1486,7 +1562,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    If you had to specify a first file you could suppress the warning about a
    duplicate by using the switch -q. For example:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom -q<br>
+   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat C:\rom\mario64.v64 C:\rom -q<br>
 <br>
 <p>
 <a name="44"><b>Q44</b>: What tools do you recommend besides uCON64?</a><br>
@@ -1495,15 +1571,15 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Tools). That is, starting from version 3.0 Release Candidate 1. NSRT has some
    features that uCON64 does not have. The two most interesting features are
    arguably that it is able to fix some hacked ROM dumps and that it has an
-   internal database which is spend a lot of effort on to have it contain only
-   correct entries (as opposed to GoodSNES and the GoodSNES DAT files). What the
-   second feature is concerned let us remind you that the quality of uCON64's
-   ROM database support stands or falls with the quality of the DAT files. So,
-   if you would create a DAT file of a ROM dump collection processed with NSRT
-   uCON64 would get a SNES database that is similar to the one in NSRT. See
-   <a href="#43">question 43</a>. Another advantage NSRT has over uCON64 (as
-   seen from a SNES user's viewpoint) is that it is written only for SNES. NSRT
-   also handles some strange formats that uCON64 does not handle.<br>
+   internal database on which a lot of effort has been spent to have it contain
+   only correct entries (as opposed to GoodSNES and the GoodSNES DAT files).
+   What the second feature is concerned let us remind you that the quality of
+   uCON64's ROM database support stands or falls with the quality of the DAT
+   files. So, if you would create a DAT file of a ROM dump collection processed
+   with NSRT uCON64 would get a SNES database that is similar to the one in
+   NSRT. See <a href="#43">question 43</a>. Another advantage NSRT has over
+   uCON64 (as seen from a SNES user's viewpoint) is that it is written only for
+   SNES. NSRT also handles some strange formats that uCON64 does not handle.<br>
 <br>
 <p>
 <a name="45"><b>Q45</b>: What is an interleaved ROM?</a><br>
@@ -1526,10 +1602,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    PC-Engine<br>
    Interleaved PC-Engine or TurboGrafx-16 dumps are not produced by a specific
-   copier. It depends on the HuCARD (PC-Engine/TurboGrafx-16 game cartridge).
-   American HuCARDs produce an interleaved dump, because the 8 data pins are
-   reversed compared to Japanese HuCARDs. Perhaps "bit-swapped" is a better
-   word to describe the format, but using the word interleaved prevents
+   backup unit. It depends on the HuCARD (PC-Engine/TurboGrafx-16 game
+   cartridge). American HuCARDs produce an interleaved dump, because the 8 data
+   pins are reversed compared to Japanese HuCARDs. Perhaps "bit-swapped" is a
+   better word to describe the format, but using the word interleaved prevents
    confusion (as bit-swapped implies a non bit-swapped reference).<br>
    Can be interleaved with uCON64 using the option -mgd, making the game
    suitable for a TurboGrafx-16. You can use the option -swap afterwards if you
@@ -1556,14 +1632,14 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    one they all share the principle of dividing each 64 kB block in two.<br>
    SNES ROMs contain a block of 48 bytes, some call it the internal SNES
    header, that contains information about the ROM. Information like game name,
-   check sum, size and the bank type. There are two bank types, HiROM and LoROM
+   checksum, size and the bank type. There are two bank types, HiROM and LoROM
    (as far as we know these are terms not used by Nintendo). HiROM ROMs have
    banks of 64 kB, LoROM ROMs have banks of 32 kB. The first bank contains the
    internal SNES header at a fixed offset relative to the end of the bank.
    However, because the bank sizes differ for HiROM and LoROM the absolute
    locations differ for the two in non-interleaved dumps. If dumps are
    interleaved the absolute locations are the same.<br>
-   The interleaved format was probably introduced so that a copier <i>can</i>
+   The interleaved format was probably introduced so that a backup unit <i>can</i>
    (the Game Doctor does only if the dump has no header) always check the same
    location in a dump to tell whether it should handle it as a LoROM or a HiROM
    dump.<br>
@@ -1604,7 +1680,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: If you see lines in the display output of uCON64 that look like
    these:<br>
    &nbsp;&nbsp;Create: ntuser.idx<br>
-   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniel\ntuser.dat" for reading<br>
+   &nbsp;&nbsp;ERROR: Cannot open "C:\Documents and Settings\Daniel\ntuser.dat" for reading<br>
    you should modify the configuration file so that ucon64_datdir points to
    another directory.<br>
    By default uCON64 will use the home directory as the directory where it
@@ -1686,48 +1762,44 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
 <p>
 <a name="49"><b>Q49</b>: How do I use the command line?</a><br>
-<b>A</b>: There are some commands that are very common when using uCON64. I
-   will only explain how to use those. Search the internet if you want to know
-   more.<br>
-   First read the section <a href="#cmdline">"The command line
-   environment"</a>.
-   The first principle you should understand is how the space on your
-   harddisk(s) is organised. Before an operating system is able to use a
-   harddisk it needs to have a <i>file system</i>. A harddisk can contain
-   several file systems. When you are using DOS or Windows each file system is
-   called a "<i>drive</i>" and gets assigned a drive letter. A file system can
-   store files and <i>directories</i>. Directories can be seen as special files
-   that themselves "contain" files and directories. By using directories it is
-   possible to quickly oversee the structure of a file system and keep it
-   organised. Under GNU/Linux file systems are visible in the directory
-   structure (e.g. /mnt/windows). With Windows XP it is possible to make
-   file systems visible/accessible in the same manner.<br>
+<b>A</b>: There are some commands that are very common when using uCON64. I will
+   only explain how to use those. Search the internet if you want to know more.<br>
+   First read the section <a href="#cmdline">"The command line environment"</a>.
+   The first principle you should understand is how the space on your hard
+   disk(s) is organised. Before an operating system is able to use a hard disk
+   it needs to have a <i>file system</i>. A hard disk can contain several file
+   systems. On DOS and Windows each file system is called a "<i>drive</i>" and
+   gets assigned a drive letter. A file system can store files and
+   <i>directories</i>. Directories can be seen as special files that themselves
+   "contain" files and directories. By using directories it is possible to
+   quickly oversee the structure of a file system and keep it organised. On
+   GNU/Linux file systems are visible in the directory structure (e.g.
+   /mnt/windows). With Windows XP it is possible to make file systems
+   visible/accessible in the same manner.<br>
    When using the command line there is something called the <i>current
-   directory</i>.
-   The current directory is like an implicit directory. Several commands and
-   programs use the current directory when a directory is not explicitly
-   specified. For example, the command <b>dir</b> (Unix: <b>ls</b>) lists the
-   contents of a directory. When you do not specify a directory it will list
-   the contents of the current directory. You can change the current directory
-   with the command <b>cd</b>. For example, to change the current directory to
-   "roms" on drive C: type:<br>
-   &nbsp;&nbsp;cd c:\roms<br>
+   directory</i>. The current directory is like an implicit directory. Several
+   commands and programs use the current directory when a directory is not
+   explicitly specified. For example, the command <b>dir</b> (UNIX: <b>ls</b>)
+   lists the contents of a directory. When you do not specify a directory it
+   will list the contents of the current directory. You can change the current
+   directory with the command <b>cd</b>. For example, to change the current
+   directory to "roms" on drive C: type:<br>
+   &nbsp;&nbsp;cd C:\roms<br>
    On DOS and Windows there is also a <i>current drive</i>. You can change the
-   current drive by specifying the drive letter followed by a colon. For
-   example to change the current drive to D: type:<br>
+   current drive by specifying the drive letter followed by a colon. For example
+   to change the current drive to D: type:<br>
    &nbsp;&nbsp;d:<br>
-   Under DOS and Windows the current directory is a bit different than it is on
-   Unix: each drive has its own current directory. It is possible to change the
-   current directory of a drive while the current directory of the current
-   drive is not changed. The first example with <b>cd</b> does just that when
-   C: is not the current drive. When C: was the current drive you would not
-   have to specify the drive letter as the command line interpreter would
-   assume you intended to change the current directory of C:. When a text
-   refers to the current directory under DOS and Windows the author usually
-   means the combination of current drive and current directory. In other
-   words, when directed to change the current directory to c:\ucon64 you
-   actually have to change the current drive to C: and the current directory on
-   C: to ucon64.<br>
+   On DOS and Windows the current directory is a bit different than it is on
+   UNIX: each drive has its own current directory. It is possible to change the
+   current directory of a drive while the current directory of the current drive
+   is not changed. The first example with <b>cd</b> does just that when C: is
+   not the current drive. When C: was the current drive you would not have to
+   specify the drive letter as the command line interpreter would assume you
+   intended to change the current directory of C:. When a text refers to the
+   current directory on DOS and Windows the author usually means the combination
+   of current drive and current directory. In other words, when directed to
+   change the current directory to C:\ucon64 you actually have to change the
+   current drive to C: and the current directory on C: to ucon64.<br>
    Let us assume you have the following directory structure:<br>
    &nbsp;&nbsp;C:<br>
    &nbsp;&nbsp;+--roms<br>
@@ -1739,77 +1811,74 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    &nbsp;&nbsp;+--roms<br>
    &nbsp;&nbsp;&nbsp;&nbsp;+--sms<br>
 <br>
-   To change the current directory (of drive C:) to c:\roms\snes\gd3 type:<br>
-   &nbsp;&nbsp;cd c:\roms\snes\gd3<br>
+   To change the current directory (of drive C:) to C:\roms\snes\gd3 type:<br>
+   &nbsp;&nbsp;cd C:\roms\snes\gd3<br>
    You can see that each directory is separated from its parent by a backslash
-   ('\'). Under Unix (or Bash under Windows) you would refer to the same
-   directory by replacing the backslashes with forward slashes and perhaps
-   replacing "c:" with the appropriate mount point (e.g.,
-   /mnt/windows/roms/snes/gd3). Note that "c:" is a valid directory name on a
-   GNU/Linux file system.<br>
+   ('\'). On UNIX (or Bash on Windows) you would refer to the same directory by
+   replacing the backslashes with forward slashes and perhaps replacing "C:"
+   with the appropriate mount point (e.g., /mnt/windows/roms/snes/gd3). Note
+   that "C:" is a valid directory name on a GNU/Linux file system.<br>
    You can refer to the other directories (and files) in a relative manner. Say
-   c:\roms\snes contains the file
-   Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. You can make uCON64 display
-   information about that file with:<br>
-   &nbsp;&nbsp;ucon64 "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
+   C:\roms\snes contains the file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. You can
+   make uCON64 display information about that file with:<br>
+   &nbsp;&nbsp;ucon64 "C:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
    but also with:<br>
    &nbsp;&nbsp;ucon64 "..\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
    The quotes are necessary or else uCON64 would handle Secret, of, Mana and
-   (U).swc as separate files. This is usual behaviour for command line
-   programs, it is not specific to uCON64.<br>
-   ".." is a special directory. Each directory contains two special
-   directories, "." and "..". "." refers to the current directory, ".." to the
-   directory one level higher in the directory structure. For example, to see
-   the contents of the directory "roms" you could type:<br>
-   &nbsp;&nbsp;dir c:\roms<br>
+   (U).swc as separate files. This is usual behaviour for command line programs,
+   it is not specific to uCON64.<br>
+   ".." is a special directory. Each directory contains two special directories,
+   "." and "..". "." refers to the current directory, ".." to the directory one
+   level higher in the directory structure. For example, to see the contents of
+   the directory "roms" you could type:<br>
+   &nbsp;&nbsp;dir C:\roms<br>
    but also:<br>
    &nbsp;&nbsp;dir ..\..<br>
-   Or on Unix:<br>
+   Or on UNIX:<br>
    &nbsp;&nbsp;ls ../..<br>
-   c:\roms\snes is called a <i>path</i>. To be more specific, an <i>absolute
+   C:\roms\snes is called a <i>path</i>. To be more specific, an <i>absolute
    path</i>. It is the path to follow in the directory structure to get to the
    file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. "..\.." is a <i>relative
-   path</i>. In c:\roms\snes "..\.." refers to another directory than in
-   c:\roms\snes\gd3 (c:\ and c:\roms respectively). To change the current
-   directory to c:\roms\snes type:<br>
+   path</i>. In C:\roms\snes "..\.." refers to another directory than in
+   C:\roms\snes\gd3 (C:\ and C:\roms respectively). To change the current
+   directory to C:\roms\snes type:<br>
    &nbsp;&nbsp;cd ..<br>
-   Say you want to convert Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc to
-   Game Doctor format, place the converted file in c:\roms\snes\gd3, split that
-   file in pieces, place those pieces in c:\tmp and transfer the pieces to a
-   Game Doctor SF7. You could type the following commands:<br>
+   Say you want to convert Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc to Game Doctor
+   format, place the converted file in C:\roms\snes\gd3, split that file in
+   pieces, place those pieces in C:\tmp and transfer the pieces to a Game Doctor
+   SF7. You could type the following commands:<br>
    &nbsp;&nbsp;ucon64 -gd3 "Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" -o .\gd3<br>
-   &nbsp;&nbsp;ucon64 -s gd3\sf16Sec -o c:\tmp<br>
+   &nbsp;&nbsp;ucon64 -s gd3\sf16Sec -o C:\tmp<br>
    &nbsp;&nbsp;ucon64 -xgd3 ..\..\tmp\SF16SECA.078<br>
 <br>
-   Besides <b>dir</b> (Unix: <b>ls</b>) and <b>cd</b> there are some other
+   Besides <b>dir</b> (UNIX: <b>ls</b>) and <b>cd</b> there are some other
    commands that you may find useful:<br>
-   <b>del</b> (Unix: <b>rm</b>) to delete or remove a file<br>
-   <b>xcopy</b> (Unix: <b>cp</b>) to copy a file<br>
-   <b>md</b> (Unix (and Windows): <b>mkdir</b>) to create a directory<br>
-   <b>rd</b> (Unix (and Windows): <b>rmdir</b>) to remove a directory<br>
-   <b>set</b> (Unix (Bash): <b>export</b>) to set (and export) an environment
+   <b>del</b> (UNIX: <b>rm</b>) to delete or remove a file<br>
+   <b>xcopy</b> (UNIX: <b>cp</b>) to copy a file<br>
+   <b>md</b> (UNIX (and Windows): <b>mkdir</b>) to create a directory<br>
+   <b>rd</b> (UNIX (and Windows): <b>rmdir</b>) to remove a directory<br>
+   <b>set</b> (UNIX (Bash): <b>export</b>) to set (and export) an environment
    variable<br>
    <b>rmdir</b> cannot remove a directory if there are still files (or
-   directories) in it. Under DOS and Windows you can get more information about
-   these commands by using the option /?. Under Unix the equivalent is --help.
-   For example, if you want to get more information about <b>del</b> you could
-   type:<br>
+   directories) in it. On DOS and Windows you can get more information about
+   these commands by using the option /?. On UNIX the equivalent is --help. For
+   example, if you want to get more information about <b>del</b> you could type:<br>
    &nbsp;&nbsp;del /?<br>
 <br>
    Here follows a final example that uses the commands mentioned above:<br>
    &nbsp;&nbsp;cd \<br>
    &nbsp;&nbsp;md test<br>
    &nbsp;&nbsp;cd test<br>
-   &nbsp;&nbsp;xcopy "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" mana.swc<br>
+   &nbsp;&nbsp;xcopy "C:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" mana.swc<br>
    &nbsp;&nbsp;set parport=378<br>
    &nbsp;&nbsp;ucon64 -xswc mana.swc<br>
    &nbsp;&nbsp;del mana.swc<br>
    &nbsp;&nbsp;cd ..<br>
    &nbsp;&nbsp;rd test<br>
 <br>
-   First the current directory is changed to c:\. Then the directory "test" is
+   First the current directory is changed to C:\. Then the directory "test" is
    created. Then the current directory is changed to "test". Then the file
-   c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
+   C:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
    mana.swc. Then an environment variable with the name parport is set to the
    value 378. Then uCON64 is used to transfer mana.swc to a Super Wild Card
    while using parallel port address 0x378. Then the file mana.swc is removed.
@@ -1831,8 +1900,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    units (without the executable being setuid root), but that does not mean
    <i>any</i> user can do that. It is quite common that only users in the group
    "lp" have access to /dev/parport&#60;n&#62;. So, you should add yourself to
-   that group. Say your login name is helanren. Root could use the following
-   command to give you the privilege to use /dev/parport0:<br>
+   that group. Say your login name is helanren. User root could use the
+   following command to give you the privilege to use /dev/parport0:<br>
    &nbsp;&nbsp;usermod -G `echo \`id -Gn helanren\` | sed "s/ /,/g"`,lp helanren<br>
    Explanation:<br>
    <b>usermod -G &#60;groups&#62; helanren</b> is used to make helanren a member
@@ -1840,6 +1909,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    <b>id -Gn helanren</b> lists the groups helanren is currently a member of,
    separated by spaces.<br>
    <b>sed "s/ /,/g"</b> replaces all spaces with commas.<br>
+<br>
+   You may have to log off and on again, before the changes take effect.<br>
 <br>
 <p>
 <a name="51"><b>Q51</b>: What do I need to do before I can upload files to my
@@ -1852,23 +1923,21 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    least the variable iclientp. If you want to send multiple files to your F2A,
    also set gbaloader. If you want to see a different background while
    uploading, set ilogo.<br>
-   The USB version of the F2A is currently only supported under GNU/Linux. If
-   you want to use the USB version, you should set at least the variables
-   f2afirmware and iclientu. If you want to send multiple files to your F2A, 
-   set gbaloader. Additional requirements are:<br>
+   The USB version of the F2A is currently only supported on GNU/Linux. If you
+   want to use the USB version, you should set at least the variables
+   f2afirmware and iclientu. If you want to send multiple files to your F2A, set
+   gbaloader. Additional requirements are:<br>
    - <a href="http://libusb.sourceforge.net/">libusb</a> 
    (included in recent GNU/Linux distributions)<br>
-   - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted 
-   by default, but you can do it manually with "mount -t usbdevfs none 
+   - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted by
+   default, but you can do it manually with "mount -t usbdevfs none
    /proc/bus/usb")<br>
-   - if you use Linux 2.4 or older then the EZUSB2131 firmware upload driver 
-   has to be loaded, see
-   <a href="http://ezusb2131.sourceforge.net/">
+   - if you use Linux 2.4 or older then the EZUSB2131 firmware upload driver has
+   to be loaded, see <a href="http://ezusb2131.sourceforge.net/">
    http://ezusb2131.sourceforge.net/</a><br>
    - if you use Linux 2.5 or later fxload should be present in /sbin<br>
-   - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so 
-   you have to run uCON64 as root (or setuid root) for the USB version of the 
-   F2A<br>
+   - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so you
+   have to run uCON64 as root (or setuid root) for the USB version of the F2A<br>
 <br>
    By default, uCON64 tries to access a parallel port to communicate with an
    F2A. In order to make uCON64 communicate with an F2A connected to a USB 

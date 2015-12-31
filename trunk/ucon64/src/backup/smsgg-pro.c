@@ -234,7 +234,7 @@ smsgg_write_rom (const char *filename, unsigned short parport)
   fseek (file, 0x21f4, SEEK_SET);
   buffer[0] = 0;
   fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
-  // currently we ignore the version string (full string is "uCON64 2.0.1")
+  // currently we ignore the version string (full string is "uCON64 2.0.2")
   multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
 
   if (multi_game)

@@ -171,8 +171,8 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
     1MBIT: .040, 2MBIT: .040, 4MBIT: .058, 8MBIT: .058
   */
   if (size <= 4 * MBIT)
-    printf ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
-            "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.\n");
+    puts ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
+          "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.");
   return 0;
 }
 
@@ -251,7 +251,7 @@ sms_chk (st_ucon64_nfo_t *rominfo)
 
   if (is_gamegear)
     {
-      fprintf (stderr, "ERROR: This option works only for SMS (not Game Gear) files\n");
+      fputs ("ERROR: This option works only for SMS (not Game Gear) files\n", stderr);
       return -1;
     }
 
@@ -339,7 +339,7 @@ sms_multi (int truncate_size, char *fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Cannot make multi-game file of 0 bytes\n");
+      fputs ("ERROR: Cannot make multi-game file of 0 bytes\n", stderr);
       return -1;
     }
   if ((buffer = (unsigned char *) malloc (BUFSIZE)) == NULL)
@@ -378,8 +378,8 @@ sms_multi (int truncate_size, char *fname)
         continue;
       if (file_no == 32)                        // loader + 31 games
         {
-          printf ("WARNING: A multi-game file can contain a maximum of 31 games. The other files\n"
-                  "         are ignored.\n");
+          puts ("WARNING: A multi-game file can contain a maximum of 31 games. The other files\n"
+                "         are ignored.");
           break;
         }
 

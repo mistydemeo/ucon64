@@ -145,7 +145,7 @@ typedef struct st_symbol
   int (*getuid) (void);
   int (*sync) (void);
   int (*truncate) (const char *, off_t);
-  
+
   int (*stat) (const char *, struct stat *);
   int (*chmod) (const char *, mode_t);
   int (*mkdir) (const char *, mode_t);

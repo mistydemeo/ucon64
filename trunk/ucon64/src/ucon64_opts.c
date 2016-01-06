@@ -403,12 +403,11 @@ ucon64_switches (st_ucon64_t *p)
         port of the parallel port can be mapped to almost any 16-bit number.
       */
 #if 0
-      if (ucon64.parport == (uint16_t) UCON64_UNKNOWN)
-        if (ucon64.argc >= 4)
-          if (access (ucon64.argv[ucon64.argc - 1], F_OK))
-            // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
-            //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
-            ucon64.parport = (uint16_t) strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
+      if (ucon64.parport == (uint16_t) UCON64_UNKNOWN && ucon64.argc >= 4 &&
+          access (ucon64.argv[ucon64.argc - 1], F_OK))
+        // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
+        //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
+        ucon64.parport = (uint16_t) strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
 #endif
       break;
 
@@ -534,14 +533,13 @@ ucon64_switches (st_ucon64_t *p)
         struct stat fstate;
         int dir = 0;
 
-        if (!stat (option_arg, &fstate))
-          if (S_ISDIR (fstate.st_mode))
-            {
-              strcpy (ucon64.output_path, option_arg);
-              if (ucon64.output_path[strlen (ucon64.output_path) - 1] != DIR_SEPARATOR)
-                strcat (ucon64.output_path, DIR_SEPARATOR_S);
-              dir = 1;
-            }
+        if (!stat (option_arg, &fstate) && S_ISDIR (fstate.st_mode))
+          {
+            strcpy (ucon64.output_path, option_arg);
+            if (ucon64.output_path[strlen (ucon64.output_path) - 1] != DIR_SEPARATOR)
+              strcat (ucon64.output_path, DIR_SEPARATOR_S);
+            dir = 1;
+          }
 
         if (!dir)
           puts ("WARNING: Argument for -o must be a directory. Using current directory instead");
@@ -730,7 +728,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_CRC:
       if (!value)
         value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
-      fputs (basename2 (ucon64.fname), stdout);
+      fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
@@ -743,7 +741,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_SHA1:
       if (!value)
         value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
-      fputs (basename2 (ucon64.fname), stdout);
+      fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
@@ -755,7 +753,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_MD5:
       if (!value)
         value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
-      fputs (basename2 (ucon64.fname), stdout);
+      fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
@@ -1004,7 +1002,7 @@ ucon64_options (st_ucon64_t *p)
         {
           if (ucon64.crc32)
             {
-              fputs (basename2 (ucon64.fname), stdout);
+              fputs (ucon64.fname, stdout);
               if (ucon64.fname_arch[0])
                 printf (" (%s)\n", basename2 (ucon64.fname_arch));
               else
@@ -1037,19 +1035,18 @@ ucon64_options (st_ucon64_t *p)
             ptr = ((st_ucon64_dat_t *) ucon64.dat)->name;
         }
 
-      if (ptr)
-        if (ptr[0])
-          {
-            if (stat (ucon64.fname, &fstate) != 0)
-              break;
-            strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
-            printf ("%-31.31s %10d %s %s", to_func (ptr, strlen (ptr), toprint),
-                    ucon64.file_size, buf, basename2 (ucon64.fname));
-            if (ucon64.fname_arch[0])
-              printf (" (%s)\n", basename2 (ucon64.fname_arch));
-            else
-              fputc ('\n', stdout);
-          }
+      if (ptr && ptr[0])
+        {
+          if (stat (ucon64.fname, &fstate) != 0)
+            break;
+          strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
+          printf ("%-31.31s %10d %s %s", to_func (ptr, strlen (ptr), toprint),
+                  ucon64.file_size, buf, basename2 (ucon64.fname));
+          if (ucon64.fname_arch[0])
+            printf (" (%s)\n", basename2 (ucon64.fname_arch));
+          else
+            fputc ('\n', stdout);
+        }
       break;
 
     case UCON64_RDAT:
@@ -1150,34 +1147,31 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_MKTOC:
     case UCON64_MKCUE:
     case UCON64_MKSHEET:
-      if (ucon64.discmage_enabled)
+      if (ucon64.discmage_enabled && ucon64.image)
         {
-          if (ucon64.image)
+          char fname[FILENAME_MAX];
+          strcpy (fname, ((dm_image_t *) ucon64.image)->fname);
+
+          if (p->option == UCON64_MKTOC || p->option == UCON64_MKSHEET)
             {
-              char fname[FILENAME_MAX];
-              strcpy (fname, ((dm_image_t *) ucon64.image)->fname);
+              set_suffix (fname, ".toc");
+              ucon64_file_handler (fname, NULL, 0);
 
-              if (p->option == UCON64_MKTOC || p->option == UCON64_MKSHEET)
-                {
-                  set_suffix (fname, ".toc");
-                  ucon64_file_handler (fname, NULL, 0);
+              if (!dm_toc_write ((dm_image_t *) ucon64.image))
+                printf (ucon64_msg[WROTE], basename2 (fname));
+              else
+                fputs ("ERROR: Could not generate toc sheet\n", stderr);
+            }
 
-                  if (!dm_toc_write ((dm_image_t *) ucon64.image))
-                    printf (ucon64_msg[WROTE], basename2 (fname));
-                  else
-                    fputs ("ERROR: Could not generate toc sheet\n", stderr);
-                }
+          if (p->option == UCON64_MKCUE || p->option == UCON64_MKSHEET)
+            {
+              set_suffix (fname, ".cue");
+              ucon64_file_handler (fname, NULL, 0);
 
-              if (p->option == UCON64_MKCUE || p->option == UCON64_MKSHEET)
-                {
-                  set_suffix (fname, ".cue");
-                  ucon64_file_handler (fname, NULL, 0);
-
-                  if (!dm_cue_write ((dm_image_t *) ucon64.image))
-                    printf (ucon64_msg[WROTE], basename2 (fname));
-                  else
-                    fputs ("ERROR: Could not generate cue sheet\n", stderr);
-                }
+              if (!dm_cue_write ((dm_image_t *) ucon64.image))
+                printf (ucon64_msg[WROTE], basename2 (fname));
+              else
+                fputs ("ERROR: Could not generate cue sheet\n", stderr);
             }
         }
       else

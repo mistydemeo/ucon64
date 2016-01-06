@@ -300,7 +300,8 @@ MISC_H_DEPS=misc/misc.h misc/snprintf.h
 TERM_H_DEPS=misc/term.h misc/snprintf.h
 UCON64_H_DEPS=ucon64.h misc/itypes.h ucon64_defines.h
 UCON64_DAT_H_DEPS=ucon64_dat.h $(GETOPT2_H_DEPS) misc/itypes.h
-UCON64_MISC_H_DEPS=ucon64_misc.h $(GETOPT2_H_DEPS) libdiscmage/libdiscmage.h
+UCON64_MISC_H_DEPS=ucon64_misc.h $(GETOPT2_H_DEPS) misc/itypes.h \
+                   libdiscmage/libdiscmage.h
 UCON64_OPTS_H_DEPS=ucon64_opts.h $(UCON64_H_DEPS)
 CONSOLE_DEPS=$(GETOPT2_H_DEPS) $(UCON64_H_DEPS)
 CONSOLE_H_DEPS=console/console.h $(CONSOLE_DEPS)

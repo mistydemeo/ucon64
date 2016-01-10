@@ -1036,7 +1036,7 @@ int
 ucon64_gauge (time_t start_time, int pos, int size)
 {
   int bps, percentage, col1, col2;
-        
+
   if (pos > size || !size)
     return -1;
 
@@ -1290,38 +1290,35 @@ ucon64_rename (int mode)
   switch (mode)
     {
     case UCON64_RROM:
-      if (ucon64.nfo)
-        if (ucon64.nfo->name)
-          {
-            strcpy (buf, ucon64.nfo->name);
-            strtriml (strtrimr (buf));
-          }
+      if (ucon64.nfo && ucon64.nfo->name)
+        {
+          strcpy (buf, ucon64.nfo->name);
+          strtriml (strtrimr (buf));
+        }
       break;
 
     case UCON64_RDAT:                           // GoodXXXX style rename
-      if (ucon64.dat)
-        if (((st_ucon64_dat_t *) ucon64.dat)->fname)
-          {
-            p = (char *) get_suffix (((st_ucon64_dat_t *) ucon64.dat)->fname);
-            strcpy (buf, ((st_ucon64_dat_t *) ucon64.dat)->fname);
+      if (ucon64.dat && ((st_ucon64_dat_t *) ucon64.dat)->fname)
+        {
+          p = (char *) get_suffix (((st_ucon64_dat_t *) ucon64.dat)->fname);
+          strcpy (buf, ((st_ucon64_dat_t *) ucon64.dat)->fname);
 
-            // get_suffix() never returns NULL
-            if (p[0])
-              if (strlen (p) < 5)
-                if (!(stricmp (p, ".nes") &&    // NES
-                      stricmp (p, ".fds") &&    // NES FDS
-                      stricmp (p, ".gb") &&     // Game Boy
-                      stricmp (p, ".gbc") &&    // Game Boy Color
-                      stricmp (p, ".gba") &&    // Game Boy Advance
-                      stricmp (p, ".smc") &&    // SNES
-                      stricmp (p, ".sc") &&     // Sega Master System
-                      stricmp (p, ".sg") &&     // Sega Master System
-                      stricmp (p, ".sms") &&    // Sega Master System
-                      stricmp (p, ".gg") &&     // Game Gear
-                      stricmp (p, ".smd") &&    // Genesis
-                      stricmp (p, ".v64")))     // Nintendo 64
-                  buf[strlen (buf) - strlen (p)] = 0;
-          }
+          // get_suffix() never returns NULL
+          if (p[0] && strlen (p) < 5)
+            if (!(stricmp (p, ".nes") &&        // NES
+                  stricmp (p, ".fds") &&        // NES FDS
+                  stricmp (p, ".gb") &&         // Game Boy
+                  stricmp (p, ".gbc") &&        // Game Boy Color
+                  stricmp (p, ".gba") &&        // Game Boy Advance
+                  stricmp (p, ".smc") &&        // SNES
+                  stricmp (p, ".sc") &&         // Sega Master System
+                  stricmp (p, ".sg") &&         // Sega Master System
+                  stricmp (p, ".sms") &&        // Sega Master System
+                  stricmp (p, ".gg") &&         // Game Gear
+                  stricmp (p, ".smd") &&        // Genesis
+                  stricmp (p, ".v64")))         // Nintendo 64
+              buf[strlen (buf) - strlen (p)] = 0;
+        }
       break;
 
     case UCON64_RJOLIET:
@@ -1484,7 +1481,7 @@ ucon64_rename (int mode)
   else
     printf ("Moving \"%s\"\n", p);
 #ifndef DEBUG
-  if (rename2 (ucon64.fname, buf2) == -1)         // rename_2_() must be used!
+  if (rename2 (ucon64.fname, buf2) == -1)       // rename_2_() must be used!
     {
       fprintf (stderr, "ERROR: Could not rename \"%s\"\n", p);
       return -1;
@@ -1508,41 +1505,42 @@ ucon64_e (void)
     int id;
     const char *s;
   } st_strings_t;
-  st_strings_t s[] = {
-    {UCON64_3DO,      "emulate_" UCON64_3DO_S},
-    {UCON64_ATA,      "emulate_" UCON64_ATA_S},
-    {UCON64_CD32,     "emulate_" UCON64_CD32_S},
-    {UCON64_CDI,      "emulate_" UCON64_CDI_S},
-    {UCON64_COLECO,   "emulate_" UCON64_COLECO_S},
-    {UCON64_DC,       "emulate_" UCON64_DC_S},
-    {UCON64_GB,       "emulate_" UCON64_GB_S},
-    {UCON64_GBA,      "emulate_" UCON64_GBA_S},
-    {UCON64_GC,       "emulate_" UCON64_GC_S},
-    {UCON64_GEN,      "emulate_" UCON64_GEN_S},
-    {UCON64_GP32,     "emulate_" UCON64_GP32_S},
-    {UCON64_INTELLI,  "emulate_" UCON64_INTELLI_S},
-    {UCON64_JAG,      "emulate_" UCON64_JAG_S},
-    {UCON64_LYNX,     "emulate_" UCON64_LYNX_S},
-    {UCON64_ARCADE,   "emulate_" UCON64_ARCADE_S},
-    {UCON64_N64,      "emulate_" UCON64_N64_S},
-    {UCON64_NDS,      "emulate_" UCON64_NDS_S},
-    {UCON64_NES,      "emulate_" UCON64_NES_S},
-    {UCON64_NG,       "emulate_" UCON64_NG_S},
-    {UCON64_NGP,      "emulate_" UCON64_NGP_S},
-    {UCON64_PCE,      "emulate_" UCON64_PCE_S},
-    {UCON64_PS2,      "emulate_" UCON64_PS2_S},
-    {UCON64_PSX,      "emulate_" UCON64_PSX_S},
-    {UCON64_S16,      "emulate_" UCON64_S16_S},
-    {UCON64_SAT,      "emulate_" UCON64_SAT_S},
-    {UCON64_SMS,      "emulate_" UCON64_SMS_S},
-    {UCON64_GAMEGEAR, "emulate_" UCON64_GAMEGEAR_S},
-    {UCON64_SNES,     "emulate_" UCON64_SNES_S},
-    {UCON64_SWAN,     "emulate_" UCON64_SWAN_S},
-    {UCON64_VBOY,     "emulate_" UCON64_VBOY_S},
-    {UCON64_VEC,      "emulate_" UCON64_VEC_S},
-    {UCON64_XBOX,     "emulate_" UCON64_XBOX_S},
-    {0,               NULL}
-  };
+  st_strings_t s[] =
+    {
+      {UCON64_3DO,      "emulate_" UCON64_3DO_S},
+      {UCON64_ATA,      "emulate_" UCON64_ATA_S},
+      {UCON64_CD32,     "emulate_" UCON64_CD32_S},
+      {UCON64_CDI,      "emulate_" UCON64_CDI_S},
+      {UCON64_COLECO,   "emulate_" UCON64_COLECO_S},
+      {UCON64_DC,       "emulate_" UCON64_DC_S},
+      {UCON64_GB,       "emulate_" UCON64_GB_S},
+      {UCON64_GBA,      "emulate_" UCON64_GBA_S},
+      {UCON64_GC,       "emulate_" UCON64_GC_S},
+      {UCON64_GEN,      "emulate_" UCON64_GEN_S},
+      {UCON64_GP32,     "emulate_" UCON64_GP32_S},
+      {UCON64_INTELLI,  "emulate_" UCON64_INTELLI_S},
+      {UCON64_JAG,      "emulate_" UCON64_JAG_S},
+      {UCON64_LYNX,     "emulate_" UCON64_LYNX_S},
+      {UCON64_ARCADE,   "emulate_" UCON64_ARCADE_S},
+      {UCON64_N64,      "emulate_" UCON64_N64_S},
+      {UCON64_NDS,      "emulate_" UCON64_NDS_S},
+      {UCON64_NES,      "emulate_" UCON64_NES_S},
+      {UCON64_NG,       "emulate_" UCON64_NG_S},
+      {UCON64_NGP,      "emulate_" UCON64_NGP_S},
+      {UCON64_PCE,      "emulate_" UCON64_PCE_S},
+      {UCON64_PS2,      "emulate_" UCON64_PS2_S},
+      {UCON64_PSX,      "emulate_" UCON64_PSX_S},
+      {UCON64_S16,      "emulate_" UCON64_S16_S},
+      {UCON64_SAT,      "emulate_" UCON64_SAT_S},
+      {UCON64_SMS,      "emulate_" UCON64_SMS_S},
+      {UCON64_GAMEGEAR, "emulate_" UCON64_GAMEGEAR_S},
+      {UCON64_SNES,     "emulate_" UCON64_SNES_S},
+      {UCON64_SWAN,     "emulate_" UCON64_SWAN_S},
+      {UCON64_VBOY,     "emulate_" UCON64_VBOY_S},
+      {UCON64_VEC,      "emulate_" UCON64_VEC_S},
+      {UCON64_XBOX,     "emulate_" UCON64_XBOX_S},
+      {0,               NULL}
+    };
 
   if (access (ucon64.configfile, F_OK) != 0)
     {

@@ -14,17 +14,15 @@ INSTALL_DATA=@INSTALL_DATA@
 #RANLIB=@RANLIB@
 
 CC=@CC@
-CFLAGS0=-I. -Wall -W -O3 @DEFS@
+CFLAGS0:=$(CFLAGS) -I. -Wall -W -O3 @DEFS@
 CFLAGS=$(CFLAGS0) -DDLL
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
-ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+ifneq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
 # On Mac OS X using -s gives the following warning:
 # /usr/bin/libtool: -static not specified, -s invalid
-LDFLAGS=
-else
-LDFLAGS=-s
+LDFLAGS+=-s
 endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the

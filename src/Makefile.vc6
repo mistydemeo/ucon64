@@ -6,7 +6,7 @@ USE_LIBCD64=1
 #WINXP_TARGETING=1
 
 CC=cl.exe
-CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /wd4774 /O2 /MT \
+CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /wd4774 /O2 /MT \
        /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
 # /wd4710, 'function' : function not inlined
@@ -17,7 +17,7 @@ CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
        /D_USING_V110_SDK71_
 !endif
 
-LDFLAGS=/NOLOGO /VERSION:2.0 setargv.obj
+LDFLAGS=$(LDFLAGS) /NOLOGO /VERSION:2.0 setargv.obj
 !ifdef WINXP_TARGETING
 LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
         /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"

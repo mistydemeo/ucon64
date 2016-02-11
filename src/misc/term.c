@@ -54,7 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 
 
-#ifdef  __CYGWIN__                              // on Cygwin (gcc for Windows) we
+#ifdef  __CYGWIN__                              // On Cygwin (GCC for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
@@ -71,8 +71,8 @@ typedef struct
 #if     defined _WIN32 && !defined __CYGWIN__
   HANDLE Console_Handle;
 #endif
-  int w;                        // display width
-  int h;                        // display height
+  int w;                                        // display width
+  int h;                                        // display height
   char up[10];
   char clreoln[10];
   char emph[10];
@@ -138,7 +138,7 @@ term_open (void)
   tp = tgetstr ("me", &tp);
   if (tp)
     strcpy (t->norm, tp);
-#endif  // USE_TERMCAP
+#endif // USE_TERMCAP
 
   return 0;
 }
@@ -428,7 +428,7 @@ gauge (int percent, int width, char char1, char char2, int color1, int color2)
   buf[x] = 0;
 
   if (x < width) // percent < 100
-    { 
+    {
       if (color1 != -1 && color2 != -1)
         sprintf (&buf[x], "\x1b[3%d;4%dm", color1, color1);
 
@@ -532,13 +532,21 @@ kbhit (void)
   fd.revents = 0;
 
   return poll (&fd, 1, 0) > 0;
+#elif   defined __APPLE__                       // Mac OS X actually
+  struct timeval timeout = { 0L, 0L };
+  fd_set fds;
+
+  FD_ZERO (&fds);
+  FD_SET (STDIN_FILENO, &fds);
+
+  return select (1, &fds, NULL, NULL, &timeout) > 0;
 #else
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected on
-  set_tty (&tmptty);                            //  Cygwin (define USE_POLL)
-
+  set_tty (&tmptty);                            //  Cygwin (define USE_POLL) or
+                                                //  Mac OS X
   if ((ch = fgetc (stdin)) != EOF)
     {
       key_pressed = 1;
@@ -580,7 +588,6 @@ getch (void)
 #endif                                          // AMIGA
 
 
-
 //#define TEST
 #ifdef  TEST
 int
@@ -589,4 +596,4 @@ main (int argc, char **argv)
   term_open ();
   printf ("%s%s%s%s%s%s", term_up (), term_up (), term_up (), term_up (), term_up (), term_up ());
 }
-#endif  // TEST
+#endif // TEST

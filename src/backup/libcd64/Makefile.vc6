@@ -2,10 +2,10 @@
 
 CC=cl.exe
 !ifdef DEBUG
-CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /Oi /MT /GZ /Zi \
+CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /Oi /MT /GZ /Zi \
        /DDEBUG /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 !else
-CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /MT \
+CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /MT \
        /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 !endif
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
@@ -16,7 +16,7 @@ CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
        /D_USING_V110_SDK71_
 !endif
 
-LDFLAGS=/NOLOGO
+LDFLAGS=$(LDFLAGS) /NOLOGO
 !ifdef WINXP_TARGETING
 LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
         /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"

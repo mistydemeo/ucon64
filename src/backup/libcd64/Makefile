@@ -2,9 +2,9 @@ CC=gcc
 
 ifdef DEBUG
 # I think we only use gnu99 instead of c99 due to va_args extensions.
-CFLAGS=-I. -Wall -W -pg -g -pedantic -ansi -DDEBUG
+CFLAGS+=-I. -Wall -W -pg -g -pedantic -ansi -DDEBUG
 else
-CFLAGS=-I. -Wall -W -O6 -funroll-loops -fexpensive-optimizations
+CFLAGS+=-I. -Wall -W -O6 -funroll-loops -fexpensive-optimizations
 endif
 
 ifndef DJGPP
@@ -23,12 +23,11 @@ GCC_WIN=1
 endif
 
 ifdef DJGPP
-LDFLAGS=
 else
 ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
-LDFLAGS=-nostart
+LDFLAGS+=-nostart
 else # UNIX or Win GCC
-LDFLAGS=-shared
+LDFLAGS+=-shared
 endif
 endif
 

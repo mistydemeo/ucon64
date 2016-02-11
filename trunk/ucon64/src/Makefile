@@ -1,8 +1,12 @@
 .PHONY: all clean distclean install uninstall
 
 CC=gcc
-CFLAGS=-I. -Wall -W -O3
-LDFLAGS=-s
+CFLAGS+=-I. -Wall -W -O3
+ifneq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+# On Mac OS X using -s gives the following warning:
+# ld: warning: option -s is obsolete and being ignored
+LDFLAGS+=-s
+endif
 TARGETS=
 
 

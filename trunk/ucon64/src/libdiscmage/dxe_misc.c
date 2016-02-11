@@ -359,7 +359,7 @@ atoi (const char *str)
 
 
 int
-memcmp(const void *str1, const void *str2, size_t size)
+memcmp (const void *str1, const void *str2, size_t size)
 {
   return import_export.memcmp (str1, str2, size);
 }

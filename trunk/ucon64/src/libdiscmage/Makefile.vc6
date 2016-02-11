@@ -3,7 +3,7 @@ DLOPEN=1
 #WINXP_TARGETING=1
 
 CC=cl.exe
-CFLAGS=/nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /MT /DDLL \
+CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /MT /DDLL \
        /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
 # /wd4710, 'function' : function not inlined
@@ -19,7 +19,7 @@ CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
 LIBNAME=discmage
 FULLLIBNAME=$(LIBNAME).dll
 
-LDFLAGS=/NOLOGO /DLL /DEF:$(LIBNAME).def
+LDFLAGS=$(LDFLAGS) /NOLOGO /DLL /DEF:$(LIBNAME).def
 !ifdef WINXP_TARGETING
 LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
         /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"

@@ -54,14 +54,13 @@ extern int pclose2 (FILE *stream);
 
 extern int fsizeof2 (const char *filename);
 
-#undef  feof                                    // necessary on (at least) Cygwin
-
 #define fopen(FILE, MODE) fopen2(FILE, MODE)
 #define fclose(FILE) fclose2(FILE)
 #define fseek(FILE, OFFSET, MODE) fseek2(FILE, OFFSET, MODE)
 #define fread(BUF, SIZE, NUM, FILE) fread2(BUF, SIZE, NUM, FILE)
 #define fgetc(FILE) fgetc2(FILE)
 #define fgets(BUF, MAXLEN, FILE) fgets2(BUF, MAXLEN, FILE)
+#undef  feof                                    // necessary on (at least) Cygwin
 #define feof(FILE) feof2(FILE)
 #define fwrite(BUF, SIZE, NUM, FILE) fwrite2(BUF, SIZE, NUM, FILE)
 #define fputc(CHAR, FILE) fputc2(CHAR, FILE)

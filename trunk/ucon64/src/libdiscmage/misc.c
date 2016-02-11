@@ -79,7 +79,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc.h"
 
-#ifdef  __CYGWIN__                              // on Cygwin (gcc for Windows) we
+#ifdef  __CYGWIN__                              // On Cygwin (GCC for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
@@ -2501,13 +2501,21 @@ kbhit (void)
   fd.revents = 0;
 
   return poll (&fd, 1, 0) > 0;
+#elif   defined __APPLE__                       // Mac OS X actually
+  struct timeval timeout = { 0L, 0L };
+  fd_set fds;
+
+  FD_ZERO (&fds);
+  FD_SET (STDIN_FILENO, &fds);
+
+  return select (1, &fds, NULL, NULL, &timeout) > 0;
 #else
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected on
-  set_tty (&tmptty);                            //  Cygwin (define USE_POLL)
-
+  set_tty (&tmptty);                            //  Cygwin (define USE_POLL) or
+                                                //  Mac OS X
   if ((ch = fgetc (stdin)) != EOF)
     {
       key_pressed = 1;

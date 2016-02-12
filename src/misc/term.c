@@ -54,14 +54,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 
 
-#ifdef  __CYGWIN__                              // On Cygwin (GCC for Windows) we
-#define USE_POLL                                //  need poll() for kbhit(). poll()
-#include <sys/poll.h>                           //  is available on Linux, not on
-#endif                                          //  BeOS. DOS already has kbhit()
-
 #if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
         defined __APPLE__                       // Mac OS X actually
 #include <termios.h>
+#ifndef __BEOS__                                // select() in BeOS only works on sockets
+#include <sys/select.h>
+#endif
+
 typedef struct termios tty_t;
 #endif
 
@@ -205,14 +204,6 @@ term_norm (void)
   st_term_t *t = &term;
   return t->norm;
 }
-
-
-static int misc_ansi_color = 0;
-
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined __APPLE__                       // Mac OS X actually
-static void set_tty (tty_t *param);
-#endif
 
 
 #if     defined _WIN32 && defined USE_ANSI_COLOR
@@ -404,8 +395,6 @@ ansi_init (void)
     }
 #endif
 
-  misc_ansi_color = result;
-
   return result;
 }
 
@@ -452,16 +441,16 @@ gauge (int percent, int width, char char1, char char2, int color1, int color2)
 
 #if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
         defined __APPLE__                       // Mac OS X actually
-static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
+static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a TTY, 0 => it's not
 static tty_t oldtty, newtty;
 
 
-void
+static void
 set_tty (tty_t *param)
 {
   if (stdin_tty && tcsetattr (STDIN_FILENO, TCSANOW, param) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set tty parameters\n");
+      fprintf (stderr, "ERROR: Could not set TTY parameters\n");
       exit (100);
     }
 }
@@ -478,12 +467,12 @@ init_conio (void)
   if (!isatty (STDIN_FILENO))
     {
       stdin_tty = 0;
-      return;                                   // rest is nonsense if not a tty
+      return;                                   // rest is nonsense if not a TTY
     }
 
   if (tcgetattr (STDIN_FILENO, &oldtty) == -1)
     {
-      fprintf (stderr, "ERROR: Could not get tty parameters\n");
+      fprintf (stderr, "ERROR: Could not get TTY parameters\n");
       exit (101);
     }
   oldtty_set = 1;
@@ -499,7 +488,7 @@ init_conio (void)
   newtty = oldtty;
   newtty.c_lflag &= ~(ICANON | ECHO);
   newtty.c_lflag |= ISIG;
-  newtty.c_cc[VMIN] = 1;                        // if VMIN != 0, read calls
+  newtty.c_cc[VMIN] = 1;                        // if VMIN != 0, read() calls
   newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
 
   set_tty (&newtty);
@@ -517,36 +506,18 @@ deinit_conio (void)
 }
 
 
-#if     defined __CYGWIN__ && !defined USE_POLL
-#warning kbhit() does not work properly in Cygwin executable if USE_POLL is not defined
-#endif
 // this kbhit() conflicts with DJGPP's one
 int
 kbhit (void)
 {
-#ifdef  USE_POLL
-  struct pollfd fd;
-
-  fd.fd = STDIN_FILENO;
-  fd.events = POLLIN;
-  fd.revents = 0;
-
-  return poll (&fd, 1, 0) > 0;
-#elif   defined __APPLE__                       // Mac OS X actually
-  struct timeval timeout = { 0L, 0L };
-  fd_set fds;
-
-  FD_ZERO (&fds);
-  FD_SET (STDIN_FILENO, &fds);
-
-  return select (1, &fds, NULL, NULL, &timeout) > 0;
-#else
+#ifdef  __BEOS__
+  // select() in BeOS only works on sockets
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected on
-  set_tty (&tmptty);                            //  Cygwin (define USE_POLL) or
-                                                //  Mac OS X
+  set_tty (&tmptty);                            //  Mac OS X
+
   if ((ch = fgetc (stdin)) != EOF)
     {
       key_pressed = 1;
@@ -558,10 +529,20 @@ kbhit (void)
   set_tty (&newtty);
 
   return key_pressed;
+#else
+  struct timeval timeout = { 0L, 0L };
+  fd_set fds;
+
+  FD_ZERO (&fds);
+  FD_SET (STDIN_FILENO, &fds);
+
+  return select (1, &fds, NULL, NULL, &timeout) > 0;
 #endif
 }
+
+
 #elif   defined AMIGA                           // (__unix__ && !__MSDOS__) ||
-int                                             //  __BEOS__ ||__APPLE__
+int                                             //  __BEOS__ || __APPLE__
 kbhit (void)
 {
   return GetKey () != 0xff ? 1 : 0;

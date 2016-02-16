@@ -223,6 +223,17 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
     {
       if (pos & 15)
         {
+          // align ASCII columns by inserting spaces
+          int n;
+          for (n = 16 - (pos % 16); n > 0; n--)
+            {
+              fputs ("   ", output);
+              if (n % 4 == 0)
+                fputc (' ', output);
+            }
+          if ((16 - (pos % 16)) % 4 != 0)
+            fputc (' ', output);
+
           *(buf + (pos & 15)) = 0;
           fprintf (output, "%s\n", buf);
         }

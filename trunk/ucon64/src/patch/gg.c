@@ -404,7 +404,6 @@ gameGenieDecodeMegadrive (const char *in, char *out)
   for (i = 5; i < 9; ++i)
     data[i - 1] = genesisValue (in[i]);
 
-  address = 0;
   address |= (data[3] & 0x0f) << 20;
   address |= (data[4] & 0x1e) << 15;
   address |= (data[1] & 0x03) << 14;
@@ -598,7 +597,6 @@ gameGenieDecodeNES (const char *in, char *out)
       data[7] = hexValue (unmapNesChar (in[7]));
     }
 
-  address = 0x8000;             /* force high bit on */
   decodeNES (address, 1, 8, 4);
   decodeNES (address, 2, 7, 4);
   decodeNES (address, 3, 7, 12);
@@ -613,7 +611,7 @@ gameGenieDecodeNES (const char *in, char *out)
       decodeNES (value, 1, 7, 4);
       decodeNES (value, 7, 8, 0);
       decodeNES (check, 6, 7, 0);
-      decodeNES (check, 6, 8, 0);
+//      decodeNES (check, 6, 8, 0);
       decodeNES (check, 6, 8, 4);
       decodeNES (check, 7, 7, 4);
     }
@@ -637,7 +635,7 @@ gameGenieDecodeNES (const char *in, char *out)
 int
 gameGenieEncodeNES (const char *in, char *out)
 {
-  int address = 0x8000;
+  int address = 0;
   int value = 0;
   int check = 0;
   int haveCheck = 0;
@@ -677,7 +675,7 @@ gameGenieEncodeNES (const char *in, char *out)
       encodeNES (value, 1, 7, 4);
       encodeNES (value, 7, 8, 0);
       encodeNES (check, 6, 7, 0);
-      encodeNES (check, 6, 8, 0);
+//      encodeNES (check, 6, 8, 0);
       encodeNES (check, 6, 8, 4);
       encodeNES (check, 7, 7, 4);
     }
@@ -989,21 +987,21 @@ gg_main (int argc, const char **argv)
             }
         }
       if (result != 0)
-        printf ("%-12s is badly formed\n", argv[i]);
+        printf ("%s is badly formed\n", argv[i]);
       else
         {
           if (CPUaddress != -1)                 // SNES decode specific
-            printf ("%-12s = %s (CPU address: %06X)\n", argv[i], buffer, CPUaddress);
+            printf ("%s = %s (CPU address: %06X)\n", argv[i], buffer, CPUaddress);
           else
-            printf ("%-12s = %s\n", argv[i], buffer);
+            printf ("%s = %s\n", argv[i], buffer);
         }
     }
   return 0;
 }
 
 
-int gg_argc;
-const char *gg_argv[128];
+static int gg_argc;
+static const char *gg_argv[128];
 
 
 int
@@ -1039,7 +1037,7 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
   gg_argv[2] = code;
   gg_argc = 3;
 
-  if (ucon64.file_size > 0)                     // check if rominfo contains valid ROM info
+  if (rominfo && ucon64.file_size > 0)          // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
   else
     gg_rominfo = 0;
@@ -1053,11 +1051,12 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 int
 gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
-  int size = ucon64.file_size - rominfo->backup_header_len, address, value,
-      result = -1;
+  int size = ucon64.file_size - rominfo->backup_header_len, offset, address,
+      value, check = -1, result = -1, writefile;
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
+  FILE *destfile;
 
-  if (ucon64.file_size > 0)                     // check if rominfo contains valid ROM info
+  if (rominfo && ucon64.file_size > 0)          // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
   else
     {
@@ -1094,10 +1093,10 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
     }
 
   if (CPUaddress != -1)                         // SNES decode specific
-    printf ("%-12s = %s (CPU address: %06X)\n", code, buf, CPUaddress);
+    printf ("%s = %s (CPU address: %06X)\n", code, buf, CPUaddress);
   else
-    printf ("%-12s = %s\n", code, buf);
-  sscanf (buf, "%x:%x:*", &address, &value);
+    printf ("%s = %s\n", code, buf);
+  sscanf (buf, "%x:%x:%x", &address, &value, &check);
 
   if (address >= size)
     {
@@ -1106,19 +1105,88 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
     }
 
   strcpy (dest_name, ucon64.fname);
-  ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
+  writefile = !(ucon64.console == UCON64_NES && check == -1);
 
-  fputc ('\n', stdout);
-  buf[0] = (char) ucon64_fgetc (dest_name, address + rominfo->backup_header_len);
-  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
+  if (writefile)
+    {
+      ucon64_file_handler (dest_name, NULL, 0);
 
-  ucon64_fputc (dest_name, address + rominfo->backup_header_len, value, "r+b");
+      if ((destfile = fopen (dest_name, "r+b")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+          return -1;
+        }
+    }
+  else
+    {
+      puts ("NOTE: A 6 digit code is too generic. File will not be modified.\n"
+            "      Listing possible 8 digit codes");
+      if ((destfile = fopen (dest_name, "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], dest_name);
+          return -1;
+        }
+    }
 
-  buf[0] = (char) value;
-  dumper (stdout, buf, 1, address + rominfo->backup_header_len, DUMPER_HEX);
-  fputc ('\n', stdout);
+  offset = address + rominfo->backup_header_len;
+  if (ucon64.console == UCON64_NES)
+    {
+      while (offset < ucon64.file_size)
+        {
+          fseek (destfile, offset, SEEK_SET);
+          buf[0] = (char) fgetc (destfile);
 
-  printf (ucon64_msg[WROTE], dest_name);
+          if (check != -1)
+            { // 8 digit code
+              if (buf[0] == (char) check)
+                {
+                  fputc ('\n', stdout);
+                  dumper (stdout, buf, 1, offset, DUMPER_HEX);
+
+                  fseek (destfile, offset, SEEK_SET);
+                  fputc (value, destfile);
+
+                  buf[0] = (char) value;
+                  dumper (stdout, buf, 1, offset, DUMPER_HEX);
+                }
+            }
+          else
+            { // 6 digit code => display the corresponding 8 digit code(s)
+              char longcode[9];
+
+              fputc ('\n', stdout);
+              dumper (stdout, buf, 1, offset, DUMPER_HEX);
+
+              address = offset - rominfo->backup_header_len;
+              sprintf (buf, "%04X:%02X:%02X", address & 0xffff, value,
+                       (unsigned char) buf[0]);
+              gameGenieEncodeNES (buf, longcode);
+              printf ("%s = %s\n", buf, longcode);
+            }
+
+          offset += 8 * 1024;
+        }
+    }
+  else
+    {
+      fseek (destfile, offset, SEEK_SET);
+      buf[0] = (char) fgetc (destfile);
+
+      fputc ('\n', stdout);
+      dumper (stdout, buf, 1, offset, DUMPER_HEX);
+
+      fseek (destfile, offset, SEEK_SET);
+      fputc (value, destfile);
+
+      buf[0] = (char) value;
+      dumper (stdout, buf, 1, offset, DUMPER_HEX);
+    }
+
+  fclose (destfile);
+  if (writefile)
+    {
+      fputc ('\n', stdout);
+      printf (ucon64_msg[WROTE], dest_name);
+    }
   return 0;
 }

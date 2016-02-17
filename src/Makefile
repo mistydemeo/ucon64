@@ -514,8 +514,8 @@ patch/aps.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
              $(GETOPT2_H_DEPS)
 patch/bsl.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_H_DEPS) \
              $(UCON64_MISC_H_DEPS) patch/bsl.h $(GETOPT2_H_DEPS)
-patch/gg.o: config.h misc/file.h $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) \
-            $(SNES_H_DEPS) patch/gg.h $(GETOPT2_H_DEPS)
+patch/gg.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
+            $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) patch/gg.h $(GETOPT2_H_DEPS)
 patch/ips.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
              $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) patch/ips.h \
              $(GETOPT2_H_DEPS)

@@ -48,6 +48,7 @@ Portions copyright (c) 2001 - 2002 NoisyB
 Portions copyright (c) 2002        dbjh
 */
 #include <ctype.h>
+#include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64_misc.h"
@@ -1110,6 +1111,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
   if (writefile)
     {
       ucon64_file_handler (dest_name, NULL, 0);
+      fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
       if ((destfile = fopen (dest_name, "r+b")) == NULL)
         {
@@ -1166,6 +1168,23 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 
           offset += 8 * 1024;
         }
+    }
+  else if (ucon64.console == UCON64_GEN)
+    {
+      fseek (destfile, offset, SEEK_SET);
+      buf[0] = (char) fgetc (destfile);
+      buf[1] = (char) fgetc (destfile);
+
+      fputc ('\n', stdout);
+      dumper (stdout, buf, 2, offset, DUMPER_HEX);
+
+      fseek (destfile, offset, SEEK_SET);
+      fputc (value, destfile);
+      fputc (value >> 8, destfile);
+
+      buf[0] = (char) value;
+      buf[1] = (char) (value >> 8);
+      dumper (stdout, buf, 2, offset, DUMPER_HEX);
     }
   else
     {

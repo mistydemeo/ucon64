@@ -45,7 +45,7 @@
  */
 /*
 Portions copyright (c) 2001 - 2002 NoisyB
-Portions copyright (c) 2002        dbjh
+Portions copyright (c) 2002, 2016  dbjh
 */
 #include <ctype.h>
 #include "misc/archive.h"
@@ -56,7 +56,12 @@ Portions copyright (c) 2002        dbjh
 #include "patch/gg.h"
 
 
-#define GAME_GENIE_MAX_STRLEN 12
+#define GAME_GENIE_MAX_STRLEN 12 // longest string is "XXX-XXX-XXX"
+
+#define encodeNES(v, n, m, s) data[n] |= (v >> s) & m
+#define decodeNES(v, n, m, s) v |= (data[n] & m) << s
+#define encodeSNES(x, y) transposed |= (((address & (0xc00000 >> (2*y))) << (2*y)) >> (2*x))
+#define decodeSNES(x, y) address |= (((transposed & (0xc00000 >> (2*x))) << (2*x)) >> (2*y))
 
 
 static st_ucon64_obj_t gg_obj[] =
@@ -113,65 +118,12 @@ const st_getopt2_t gg_usage[] =
 
 static st_ucon64_nfo_t *gg_rominfo;
 static int CPUaddress;
+static int gg_argc;
+static const char *gg_argv[128];
+static const char genesisChars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
 
 
-/*********************************************************************
- *
- * GAME BOY / GAME GEAR  ROUTINES
- *
- *********************************************************************/
-
-static int gameGenieDecodeGameBoy (const char *in, char *out);
-static int gameGenieEncodeGameBoy (const char *in, char *out);
-
-/*********************************************************************
- *
- * MEGADRIVE  ROUTINES
- *
- *********************************************************************/
-
-static int isGenesisChar (char c);
-static int genesisValue (char c);
-static int gameGenieDecodeMegadrive (const char *in, char *out);
-static int gameGenieEncodeMegadrive (const char *in, char *out);
-
-/*********************************************************************
- *
- * NES ROUTINES
- *
- ********************************************************************/
-
-#define encodeNES(v, n, m, s) data[n] |= (v >> s) & m
-#define decodeNES(v, n, m, s) v |= (data[n] & m) << s
-
-static char mapNesChar (char hex);
-static char unmapNesChar (char genie);
-static int isNesChar (char c);
-static int gameGenieDecodeNES (const char *in, char *out);
-static int gameGenieEncodeNES (const char *in, char *out);
-
-/*********************************************************************
- *
- * SNES ROUTINES
- *
- ********************************************************************/
-
-#define encodeSNES(x, y) transposed |= (((address & (0xc00000 >> (2*y))) << (2*y)) >> (2*x))
-#define decodeSNES(x, y) address |= (((transposed & (0xc00000 >> (2*x))) << (2*x)) >> (2*y))
-
-static char mapSnesChar (char hex);
-static char unmapSnesChar (char genie);
-static int gameGenieDecodeSNES (const char *in, char *out);
-static int gameGenieEncodeSNES (const char *in, char *out);
-
-
-/*********************************************************************
- *
- * UTILITY ROUTINES
- *
- ********************************************************************/
-
-char
+static char
 hexDigit (int value)
 {
   switch (toupper (value))
@@ -216,7 +168,7 @@ hexDigit (int value)
 }
 
 
-int
+static int
 hexValue (char digit)
 {
   switch (toupper ((int) digit))
@@ -260,20 +212,14 @@ hexValue (char digit)
 }
 
 
-int
+static int
 hexByteValue (char x, char y)
 {
   return (hexValue (x) << 4) + hexValue (y);
 }
 
 
-/*********************************************************************
- *
- * GAME BOY / GAME GEAR  ROUTINES
- *
- *********************************************************************/
-
-int
+static int
 gameGenieDecodeGameBoy (const char *in, char *out)
 {
   int address = 0;
@@ -314,7 +260,7 @@ gameGenieDecodeGameBoy (const char *in, char *out)
 }
 
 
-int
+static int
 gameGenieEncodeGameBoy (const char *in, char *out)
 {
   int check = 0;
@@ -363,30 +309,21 @@ gameGenieEncodeGameBoy (const char *in, char *out)
 }
 
 
-/*********************************************************************
- *
- * MEGADRIVE  ROUTINES
- *
- *********************************************************************/
-
-static const char genesisChars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
-
-
-int
+static int
 isGenesisChar (char c)
 {
   return strchr (genesisChars, toupper ((int) c)) != 0;
 }
 
 
-int
+static int
 genesisValue (char c)
 {
   return strchr (genesisChars, toupper ((int) c)) - genesisChars;
 }
 
 
-int
+static int
 gameGenieDecodeMegadrive (const char *in, char *out)
 {
   int address = 0;
@@ -413,13 +350,12 @@ gameGenieDecodeMegadrive (const char *in, char *out)
   address |= (data[6] & 0x07) << 5;
   address |= (data[7] & 0x1f);
 
-  value = 0;
   value |= (data[5] & 0x01) << 15;
   value |= (data[6] & 0x18) << 10;
   value |= (data[4] & 0x01) << 12;
   value |= (data[5] & 0x1e) << 7;
   value |= (data[0] & 0x1f) << 3;
-  value |= (data[1] & 0x16) >> 2;
+  value |= (data[1] & 0x1c) >> 2;
 
   sprintf (out, "%06X:%04X", address, value);
 
@@ -427,7 +363,7 @@ gameGenieDecodeMegadrive (const char *in, char *out)
 }
 
 
-int
+static int
 gameGenieEncodeMegadrive (const char *in, char *out)
 {
   int address = 0;
@@ -456,7 +392,7 @@ gameGenieEncodeMegadrive (const char *in, char *out)
   data[4] |= (value >> 12) & 0x01;
   data[5] |= (value >> 7) & 0x1e;
   data[0] |= (value >> 3) & 0x1f;
-  data[1] |= (value << 2) & 0x16;
+  data[1] |= (value << 2) & 0x1c;
 
   for (i = 0; i < 4; ++i)
     out[i] = genesisChars[data[i]];
@@ -469,13 +405,7 @@ gameGenieEncodeMegadrive (const char *in, char *out)
 }
 
 
-/*********************************************************************
- *
- * NES ROUTINES
- *
- ********************************************************************/
-
-char
+static char
 mapNesChar (char hex)
 {
   switch (toupper ((int) hex))
@@ -519,7 +449,7 @@ mapNesChar (char hex)
 }
 
 
-char
+static char
 unmapNesChar (char genie)
 {
   switch (toupper ((int) genie))
@@ -563,14 +493,14 @@ unmapNesChar (char genie)
 }
 
 
-int
+static int
 isNesChar (char c)
 {
   return strchr ("APZLGITYEOXUKSVN-", toupper ((int) c)) != 0;
 }
 
 
-int
+static int
 gameGenieDecodeNES (const char *in, char *out)
 {
   int address = 0;
@@ -633,7 +563,7 @@ gameGenieDecodeNES (const char *in, char *out)
 }
 
 
-int
+static int
 gameGenieEncodeNES (const char *in, char *out)
 {
   int address = 0;
@@ -715,13 +645,7 @@ gameGenieEncodeNES (const char *in, char *out)
 }
 
 
-/*********************************************************************
- *
- * SNES ROUTINES
- *
- ********************************************************************/
-
-char
+static char
 mapSnesChar (char hex)
 {
   switch (toupper ((int) hex))
@@ -765,7 +689,7 @@ mapSnesChar (char hex)
 }
 
 
-char
+static char
 unmapSnesChar (char genie)
 {
   switch (toupper ((int) genie))
@@ -809,7 +733,7 @@ unmapSnesChar (char genie)
 }
 
 
-int
+static int
 gameGenieDecodeSNES (const char *in, char *out)
 {
   int value, hirom, address, transposed;
@@ -879,7 +803,7 @@ gameGenieDecodeSNES (const char *in, char *out)
 }
 
 
-int
+static int
 gameGenieEncodeSNES (const char *in, char *out)
 {
   int value, address, transposed;
@@ -935,7 +859,7 @@ usage (void)
 #endif
 
 
-int
+static int
 gg_main (int argc, const char **argv)
 {
   char buffer[GAME_GENIE_MAX_STRLEN];
@@ -1001,8 +925,18 @@ gg_main (int argc, const char **argv)
 }
 
 
-static int gg_argc;
-static const char *gg_argv[128];
+static void
+apply_code (FILE *destfile, int offset, char *bufold, int bufoldsize,
+            char *bufnew, int bufnewsize)
+{
+  fputc ('\n', stdout);
+  dumper (stdout, bufold, bufoldsize, offset, DUMPER_HEX);
+
+  fseek (destfile, offset, SEEK_SET);
+  fwrite (bufnew, 1, bufnewsize, destfile);
+
+  dumper (stdout, bufnew, bufnewsize, offset, DUMPER_HEX);
+}
 
 
 int
@@ -1054,7 +988,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
   int size = ucon64.file_size - rominfo->backup_header_len, offset, address,
       value, check = -1, result = -1, writefile;
-  char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
+  char buf[GAME_GENIE_MAX_STRLEN], buf2[GAME_GENIE_MAX_STRLEN], dest_name[FILENAME_MAX];
   FILE *destfile;
 
   if (rominfo && ucon64.file_size > 0)          // check if rominfo contains valid ROM info
@@ -1142,14 +1076,8 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
             { // 8 digit code
               if (buf[0] == (char) check)
                 {
-                  fputc ('\n', stdout);
-                  dumper (stdout, buf, 1, offset, DUMPER_HEX);
-
-                  fseek (destfile, offset, SEEK_SET);
-                  fputc (value, destfile);
-
-                  buf[0] = (char) value;
-                  dumper (stdout, buf, 1, offset, DUMPER_HEX);
+                  buf2[0] = (char) value;
+                  apply_code (destfile, offset, buf, 1, buf2, 1);
                 }
             }
           else
@@ -1169,36 +1097,42 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
           offset += 8 * 1024;
         }
     }
+  else if (ucon64.console == UCON64_SMS || ucon64.console == UCON64_GB)
+    {
+      fseek (destfile, offset, SEEK_SET);
+      buf[0] = (char) fgetc (destfile);
+
+      if (check != -1)
+        { // 8 digit code
+          if (buf[0] == (char) check)
+            {
+              buf2[0] = (char) value;
+              apply_code (destfile, offset, buf, 1, buf2, 1);
+            }
+        }
+      else
+        {
+          buf2[0] = (char) value;
+          apply_code (destfile, offset, buf, 1, buf2, 1);
+        }
+    }
   else if (ucon64.console == UCON64_GEN)
     {
       fseek (destfile, offset, SEEK_SET);
       buf[0] = (char) fgetc (destfile);
       buf[1] = (char) fgetc (destfile);
 
-      fputc ('\n', stdout);
-      dumper (stdout, buf, 2, offset, DUMPER_HEX);
-
-      fseek (destfile, offset, SEEK_SET);
-      fputc (value, destfile);
-      fputc (value >> 8, destfile);
-
-      buf[0] = (char) value;
-      buf[1] = (char) (value >> 8);
-      dumper (stdout, buf, 2, offset, DUMPER_HEX);
+      buf2[0] = (char) (value >> 8);
+      buf2[1] = (char) value;
+      apply_code (destfile, offset, buf, 2, buf2, 2);
     }
   else
     {
       fseek (destfile, offset, SEEK_SET);
       buf[0] = (char) fgetc (destfile);
 
-      fputc ('\n', stdout);
-      dumper (stdout, buf, 1, offset, DUMPER_HEX);
-
-      fseek (destfile, offset, SEEK_SET);
-      fputc (value, destfile);
-
-      buf[0] = (char) value;
-      dumper (stdout, buf, 1, offset, DUMPER_HEX);
+      buf2[0] = (char) value;
+      apply_code (destfile, offset, buf, 1, buf2, 1);
     }
 
   fclose (destfile);

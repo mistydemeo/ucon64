@@ -1002,8 +1002,6 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
   CPUaddress = -1;
   switch (ucon64.console)
     {
-      // interleaved images (GD3 (SNES) & SMD (Genesis)) should be allowed to
-      //  be patched
       case UCON64_GB:
       case UCON64_SMS:
         result = gameGenieDecodeGameBoy (code, buf);
@@ -1102,15 +1100,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
       fseek (destfile, offset, SEEK_SET);
       buf[0] = (char) fgetc (destfile);
 
-      if (check != -1)
-        { // 8 digit code
-          if (buf[0] == (char) check)
-            {
-              buf2[0] = (char) value;
-              apply_code (destfile, offset, buf, 1, buf2, 1);
-            }
-        }
-      else
+      if ((check != -1 && buf[0] == (char) check) || check == -1)
         {
           buf2[0] = (char) value;
           apply_code (destfile, offset, buf, 1, buf2, 1);

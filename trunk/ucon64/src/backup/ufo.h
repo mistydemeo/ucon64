@@ -99,7 +99,7 @@ The SRAM mapping I would try first for LoROM games is:
 0Kb LoROM DSP
 0012-0017       01 00 01 0C 00 03
 
-Note: LoROM DSPs with SRAM don't seem to work on the Super UFO
+NOTE: LoROM DSPs with SRAM don't seem to work on the Super UFO
       (For reference, no LoROM DSP carts work on the SWC DX2)
 
 Non 0 SRAM - default map (map low halves of banks 7x to SRAM)

@@ -269,8 +269,7 @@ backup/pl.obj: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(UCON64_H_DEPS) \
 backup/psxpblib.obj: config.h misc/parallel.h $(UCON64_H_DEPS) backup/psxpblib.h
 backup/quickdev16.obj: config.h $(ARCHIVE_H_DEPS) misc/itypes.h $(MISC_H_DEPS) \
                      $(TERM_H_DEPS) misc/usb.h $(UCON64_H_DEPS) \
-                     $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) backup/quickdev16.h \
-                     backup/swc.h
+                     $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) backup/quickdev16.h
 backup/sc.obj: config.h backup/sc.h $(GETOPT2_H_DEPS)
 backup/sflash.obj: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
                  $(UCON64_MISC_H_DEPS) backup/tototek.h backup/sflash.h \

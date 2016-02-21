@@ -618,7 +618,7 @@ cyan_test_copier (int test, int speed, unsigned short parport)
 
   switch (test)
     {
-    // reliability test -- note: this test may be required to run for 8 hours or more
+    // reliability test -- NOTE: this test may be required to run for 8 hours or more
     case 1:
       printf ("Reliability test mode selected, speed %d\n", speed);
       cyan_test_parport (parport);

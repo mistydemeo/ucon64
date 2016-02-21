@@ -586,7 +586,7 @@ gd6_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *ro
 
 
 /*
-  Note: On most Game Doctor's the way you enter link mode to be able to upload
+  NOTE: On most Game Doctor's the way you enter link mode to be able to upload
         the ROM to the unit is to hold down the R key on the controller while
         resetting the SNES. You will see the Game Doctor menu has a message that
         says "LINKING.."

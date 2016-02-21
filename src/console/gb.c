@@ -143,7 +143,7 @@ typedef struct st_gb_header
 } st_gb_header_t;
 
 static st_gb_header_t gb_header;
-const unsigned char gb_logodata[] =             // Note: not a static variable
+const unsigned char gb_logodata[] =             // NOTE: not a static variable
   {
     0xce, 0xed, 0x66, 0x66, 0xcc, 0x0d, 0x00, 0x0b,
     0x03, 0x73, 0x00, 0x83, 0x00, 0x0c, 0x00, 0x0d,

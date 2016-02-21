@@ -186,7 +186,7 @@ const st_getopt2_t snes_usage[] =
       &snes_obj[8]
     },
 #if 0
-// the next switch remains undocumented until we know of a good checksum algorithm
+    // the next switch remains undocumented until we know of a good checksum algorithm
     {
       "id", 0, 0, UCON64_ID,
       NULL, "force -gd3 to produce a unique file name",
@@ -700,7 +700,7 @@ snes_dint (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   int backup_header_len = rominfo->backup_header_len > (int) SWC_HEADER_LEN ?
-                       (int) SWC_HEADER_LEN : rominfo->backup_header_len;
+                            (int) SWC_HEADER_LEN : rominfo->backup_header_len;
 
   puts ("Converting to deinterleaved format...");
 
@@ -988,7 +988,7 @@ make_gd_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
                   fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
                   exit (1);
                 }
-              ucon64_fread (buffer, ucon64.nfo->backup_header_len, size, dest_name);
+              ucon64_fread (buffer, rominfo->backup_header_len, size, dest_name);
               if (rominfo->interleaved)
                 snes_deinterleave (rominfo, &buffer, size);
             }
@@ -1466,7 +1466,7 @@ snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
           sprintf (dest_name, "%s.078", names[name_i++]);
           ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
           fcopy (ucon64.fname, n * 8 * MBIT + (n ? rominfo->backup_header_len : 0),
-                    8 * MBIT + (n ? 0 : rominfo->backup_header_len), dest_name, "wb");
+                 8 * MBIT + (n ? 0 : rominfo->backup_header_len), dest_name, "wb");
           printf (ucon64_msg[WROTE], dest_name);
         }
 
@@ -1476,7 +1476,7 @@ snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
           sprintf (dest_name, "%s.078", names[name_i++]);
           ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
           fcopy (ucon64.fname, n * 8 * MBIT + (n ? rominfo->backup_header_len : 0),
-                    surplus + (n ? 0 : rominfo->backup_header_len), dest_name, "wb");
+                 surplus + (n ? 0 : rominfo->backup_header_len), dest_name, "wb");
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
@@ -1523,22 +1523,22 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
 
       st_value_list_t size_to_partsizes[5] =
         {
-          { 2, 2, {1, 1} },
-          { 4, 2, {2, 2} },
-          { 12, 4, {4, 2, 4, 2} },              // 10 Mbit files are padded by snes_ufo()
-          { 20, 6, {4, 4, 2, 4, 4, 2} },
-          { 32, 8, {4, 4, 4, 4, 4, 4, 4, 4} }
+          { 2, 2, { 1, 1 } },
+          { 4, 2, { 2, 2 } },
+          { 12, 4, { 4, 2, 4, 2 } },            // 10 Mbit files are padded by snes_ufo()
+          { 20, 6, { 4, 4, 2, 4, 4, 2 } },
+          { 32, 8, { 4, 4, 4, 4, 4, 4, 4, 4 } }
         }, *size_to_partsizes_ptr = NULL;
       st_value_list_t size_to_flags[8] =
         {
-          { 2, 2, {0x10, 0} },
-          { 4, 2, {0x10, 0} },
-          { 8, 2, {0x10, 0} },
-          { 12, 4, {0x40, 0x10, 0x10, 0} },
-          { 16, 4, {0x40, 0x10, 0x10, 0} },
-          { 20, 6, {0x40, 0x40, 0x10, 0x10, 0x10, 0} },
-          { 24, 6, {0x40, 0x40, 0x10, 0x10, 0x10, 0} },
-          { 32, 8, {0x40, 0x40, 0x40, 0x10, 0x10, 0x10, 0x10, 0} }
+          { 2, 2, { 0x10, 0 } },
+          { 4, 2, { 0x10, 0 } },
+          { 8, 2, { 0x10, 0 } },
+          { 12, 4, { 0x40, 0x10, 0x10, 0 } },
+          { 16, 4, { 0x40, 0x10, 0x10, 0 } },
+          { 20, 6, { 0x40, 0x40, 0x10, 0x10, 0x10, 0 } },
+          { 24, 6, { 0x40, 0x40, 0x10, 0x10, 0x10, 0 } },
+          { 32, 8, { 0x40, 0x40, 0x40, 0x10, 0x10, 0x10, 0x10, 0 } }
         }, *size_to_flags_ptr = NULL;
       int x = size / MBIT;
 
@@ -2772,11 +2772,11 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
   else
     {
       printf ("Backup unit header info (%s)\n\n",
-        type == SWC ? "SWC" :
-        type == FIG ? "FIG" :
-        type == GD3 ? "GD3" :
-        type == UFO ? "UFO" :
-        "unknown header type, but interpreted as SWC");
+              type == SWC ? "SWC" :
+              type == FIG ? "FIG" :
+              type == GD3 ? "GD3" :
+              type == UFO ? "UFO" :
+              "unknown header type, but interpreted as SWC");
       if (type == SMC)
         type = SWC;
     }
@@ -2790,13 +2790,13 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       x = ucon64.file_size - rominfo->backup_header_len;
       y = (header[0] + (header[1] << 8)) * 8 * 1024;
       printf ("[0-1]    File size: %d Bytes (%.4f Mb) => %s\n",
-        y, TOMBIT_F (y), matches_deviates (x == y));
+              y, TOMBIT_F (y), matches_deviates (x == y));
     }
 
   if (type == SWC || type == SMC)
     {
       int z;
-      unsigned char sram_sizes[] = {0, 2, 8, 32};
+      unsigned char sram_sizes[] = { 0, 2, 8, 32 };
 
       if (header[2] & 0x80)                     // bit 7 has higher precedence
         z = 0;                                  //  than bit 1
@@ -2813,20 +2813,20 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 
       y = header[2] & 0x40 ? 1 : 0;
       printf ("[2:6]    Split: %s => %s\n",
-        y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
+              y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
 
       x = snes_hirom ? 1 : 0;
       y = header[2] & 0x20 ? 1 : 0;
       printf ("[2:5]    SRAM mapping mode: %s => %s\n",
-        y ? "HiROM" : "LoROM", matches_deviates (x == y));
+              y ? "HiROM" : "LoROM", matches_deviates (x == y));
 
       y = header[2] & 0x10 ? 1 : 0;
       printf ("[2:4]    DRAM mapping mode: %s => %s\n",
-        y ? "HiROM" : "LoROM", matches_deviates (x == y));
+              y ? "HiROM" : "LoROM", matches_deviates (x == y));
 
       y = sram_sizes[(~header[2] & 0x0c) >> 2]; // 32 => 12, 8 => 8, 2 => 4, 0 => 0
       printf ("[2:3-2]  SRAM size: %d kB => %s\n",
-        y, matches_deviates (snes_sram_size == y * 1024));
+              y, matches_deviates (snes_sram_size == y * 1024));
 
       printf ("[2:1]    Run program in mode: %d", z);
       if (z == 0)
@@ -2835,17 +2835,17 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
         fputc ('\n', stdout);
 
       printf ("[2:0]    External cartridge memory: %s\n",
-        header[2] & 0x01 ? "Enabled" : "Disabled");
+              header[2] & 0x01 ? "Enabled" : "Disabled");
     }
   else if (type == FIG)
     {
       y = header[2] & 0x40 ? 1 : 0;
       printf ("[2]      Split: %s => %s\n",
-        y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
+              y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
 
       y = header[3] & 0x80 ? 1 : 0;
       printf ("[3]      Memory mapping mode: %s => %s\n",
-        y ? "HiROM" : "LoROM", matches_deviates ((snes_hirom ? 1 : 0) == y));
+              y ? "HiROM" : "LoROM", matches_deviates ((snes_hirom ? 1 : 0) == y));
 
       y = -1;
       if (snes_hirom)
@@ -2873,33 +2873,33 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 
       if (y == 8 * 1024)
         printf ("[4-5]    SRAM size: 2 kB / 8 kB => %s\n",
-          matches_deviates (snes_sram_size == 2 * 1024 ||
-                            snes_sram_size == 8 * 1024));
+                matches_deviates (snes_sram_size == 2 * 1024 ||
+                                  snes_sram_size == 8 * 1024));
       else
         printf ("[4-5]    SRAM size: %d kB => %s\n",
-          y / 1024, matches_deviates (snes_sram_size == y));
+                y / 1024, matches_deviates (snes_sram_size == y));
     }
   else if (type == UFO)
     {
-      unsigned char sram_sizes[] = {0, 2, 8, 32};
+      unsigned char sram_sizes[] = { 0, 2, 8, 32 };
       int z;
 
       y = header[2] ? 1 : 0;
       printf ("[2]      Split: %s => %s\n",
-        y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
+              y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
 
       x = ucon64.file_size - rominfo->backup_header_len;
       y = header[0x11] * MBIT;
       printf ("[11]     ROM size: %d Bytes (%d.0000 Mb) => %s\n",
-        y, y / MBIT, matches_deviates (x == y));
+              y, y / MBIT, matches_deviates (x == y));
 
       y = header[0x12] & 1;
       printf ("[12]     DRAM mapping mode: %s => %s\n",
-        y ? "LoROM" : "HiROM", matches_deviates ((snes_hirom ? 0 : 1) == y));
+              y ? "LoROM" : "HiROM", matches_deviates ((snes_hirom ? 0 : 1) == y));
 
       y = (header[0x13] <= 3 ? sram_sizes[header[0x13]] : 128) * 1024;
       printf ("[13]     SRAM size: %d kB => %s\n",
-        y / 1024, matches_deviates (snes_sram_size == y));
+              y / 1024, matches_deviates (snes_sram_size == y));
 
       y = header[0x14];
       if (y)
@@ -2920,13 +2920,13 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
             }
           if (y != 1)
             printf ("[%x:%d-%d] A%d=%s selects SRAM\n",
-              0x15 + x / 2, z + 1, z, 20 + x, y == 0 ? "x" : y == 2 ? "0" : "1");
+                    0x15 + x / 2, z + 1, z, 20 + x, y == 0 ? "x" : y == 2 ? "0" : "1");
         }
 
       y = header[0x17];
       printf ("[17]     SRAM mapping mode: %s => %s\n",
-        y == 3 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
-        matches_deviates ((snes_hirom ? 0 : 3) == y));
+              y == 3 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
+              matches_deviates ((snes_hirom ? 0 : 3) == y));
     }
   else if (type == GD3)
     {
@@ -2939,10 +2939,10 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
         y = 32 * 1024; // or 0
       if (y == 32 * 1024)
         printf ("[10]     SRAM size: 0 kB / 32 kB => %s\n",
-          matches_deviates (snes_sram_size == 0 || snes_sram_size == 32 * 1024));
+                matches_deviates (snes_sram_size == 0 || snes_sram_size == 32 * 1024));
       else
         printf ("[10]     SRAM size: %d kB => %s\n",
-          y / 1024, matches_deviates (snes_sram_size == y));
+                y / 1024, matches_deviates (snes_sram_size == y));
     }
 
   type = org_type;
@@ -3301,7 +3301,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
     4. - snes_testinterleaved()
   */
 
-  snes_handle_backup_header (rominfo, &header);      // step 1. & first part of step 2.
+  snes_handle_backup_header (rominfo, &header); // step 1. & first part of step 2.
 
   if (UCON64_ISSET (ucon64.split))
     snes_split = ucon64.split;
@@ -4122,10 +4122,6 @@ snes_multi (int truncate_size, char *fname)
       ucon64.fname = ucon64.argv[n];
       ucon64.file_size = fsizeof (ucon64.fname);
       // DON'T use fstate.st_size, because file could be compressed
-      ucon64.nfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-                                        ucon64.backup_header_len : 0;
-      ucon64.nfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-                                  ucon64.interleaved : 0;
       ucon64.do_not_calc_crc = 1;
       if (snes_init (ucon64.nfo) != 0)
         printf ("WARNING: %s does not appear to be a SNES ROM\n", ucon64.fname);
@@ -4321,7 +4317,7 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
 
       header[0x1d0] = bs_dump ? 0 : snes_header.country;
       if (rominfo->header_start == SNES_EROM + SNES_HEADER_START + SNES_HIROM)
-        header[0x1d0] |= 0x30;                  // Note: Extended LoROM is not supported
+        header[0x1d0] |= 0x30;                  // NOTE: Extended LoROM is not supported
       else
         header[0x1d0] |= snes_hirom ? 0x20 : 0x10;
 

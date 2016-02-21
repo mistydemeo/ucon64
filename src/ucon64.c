@@ -1499,8 +1499,8 @@ ucon64_rom_handling (void)
                   strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
                 else if (ucon64.console == UCON64_NES)
                   { // override the three-character FDS or FAM name
-                    int t = nes_get_file_type ();
-                    if (t == FDS || t == FAM)
+                    nes_file_t type = nes_get_file_type ();
+                    if (type == FDS || type == FAM)
                       strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
                   }
 

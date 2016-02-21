@@ -1449,7 +1449,17 @@ ucon64_options (st_ucon64_t *p)
         case UCON64_NES:
         case UCON64_SMS:
         case UCON64_SNES:
-          gg_apply (ucon64.nfo, option_arg);
+          // ROM images for SNES (GD3) and Genesis (SMD) can be interleaved
+          if (ucon64.nfo->interleaved)
+            fputs ("ERROR: This ROM seems to be interleaved, but uCON64 will only apply a Game\n"
+                   "       Genie patch to non-interleaved ROMs. Convert to a non-interleaved\n"
+                   "       format\n", stderr);
+          else if (ucon64.console == UCON64_NES &&
+                   nes_get_file_type () != INES && nes_get_file_type () != FFE)
+            fputs ("ERROR: This NES ROM is in a format that uCON64 cannot apply a Game Genie patch\n"
+                   "       to. Convert to iNES\n", stderr);
+          else
+            gg_apply (ucon64.nfo, option_arg);
           break;
         default:
           fputs ("ERROR: Cannot apply Game Genie code for this ROM/console\n", stderr);
@@ -1886,7 +1896,7 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM does not seem to be interleaved but the Doctor V64 Junior only\n"
+            fputs ("ERROR: This ROM does not seem to be interleaved, but the Doctor V64 Junior only\n"
                    "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
                    stderr);
           else
@@ -1962,7 +1972,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM seems to be interleaved but the FIG does not support\n"
+            fputs ("ERROR: This ROM seems to be interleaved, but the FIG does not support\n"
                    "       interleaved ROMs. Convert to a FIG compatible format\n",
                    stderr);
           else // file exists -> send it to the copier
@@ -2175,7 +2185,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM seems to be bit-swapped but the MSG does not support\n"
+            fputs ("ERROR: This ROM seems to be bit-swapped, but the MSG does not support\n"
                    "       bit-swapped ROMs. Convert to an MSG compatible format\n",
                    stderr);
           else
@@ -2247,7 +2257,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
                    stderr);
           else if (!ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM does not seem to be interleaved but the SMD only supports\n"
+            fputs ("ERROR: This ROM does not seem to be interleaved, but the SMD only supports\n"
                    "       interleaved ROMs. Convert to an SMD compatible format\n",
                    stderr);
           else
@@ -2275,7 +2285,7 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM seems to be interleaved but the SWC does not support\n"
+            fputs ("ERROR: This ROM seems to be interleaved, but the SWC does not support\n"
                    "       interleaved ROMs. Convert to an SWC compatible format\n",
                    stderr);
           else
@@ -2319,7 +2329,7 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->interleaved)
-            fputs ("ERROR: This ROM does not seem to be interleaved but the Doctor V64 only\n"
+            fputs ("ERROR: This ROM does not seem to be interleaved, but the Doctor V64 only\n"
                    "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
                    stderr);
           else
@@ -2370,11 +2380,8 @@ ucon64_options (st_ucon64_t *p)
 
 #ifdef  USE_USB
     case UCON64_XQD16:
-      if (!ucon64.nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
-               stderr);
-      else if (ucon64.nfo->interleaved)
-        fputs ("ERROR: This ROM seems to be interleaved but the Quickdev16 does not support\n"
+      if (ucon64.nfo->interleaved)
+        fputs ("ERROR: This ROM seems to be interleaved, but the Quickdev16 does not support\n"
                "       interleaved ROMs. Convert to an SWC compatible format\n",
                stderr);
       else

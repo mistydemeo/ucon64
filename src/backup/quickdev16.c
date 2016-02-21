@@ -41,7 +41,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "console/snes.h"
 #include "backup/quickdev16.h"
-#include "backup/swc.h"
 
 
 #ifdef  USE_USB
@@ -170,8 +169,8 @@ quickdev16_write_rom (const char *filename)
       bank_size = 1 << SNES_LOROM_SHIFT;
     }
 
-  size = ucon64.file_size - SWC_HEADER_LEN;
-  fseek (file, SWC_HEADER_LEN, SEEK_SET);
+  size = ucon64.file_size - ucon64.nfo->backup_header_len;
+  fseek (file, ucon64.nfo->backup_header_len, SEEK_SET);
 
   printf ("Send: %d Bytes\n", size);
   puts ("Press q to abort\n");

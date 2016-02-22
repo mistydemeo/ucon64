@@ -164,7 +164,6 @@ hexDigit (int value)
       break;
     }
   return '?';
-
 }
 
 
@@ -542,7 +541,7 @@ gameGenieDecodeNES (const char *in, char *out)
       decodeNES (value, 1, 7, 4);
       decodeNES (value, 7, 8, 0);
       decodeNES (check, 6, 7, 0);
-//      decodeNES (check, 6, 8, 0);
+      decodeNES (check, 5, 8, 0);
       decodeNES (check, 6, 8, 4);
       decodeNES (check, 7, 7, 4);
     }
@@ -606,7 +605,7 @@ gameGenieEncodeNES (const char *in, char *out)
       encodeNES (value, 1, 7, 4);
       encodeNES (value, 7, 8, 0);
       encodeNES (check, 6, 7, 0);
-//      encodeNES (check, 6, 8, 0);
+      encodeNES (check, 5, 8, 0);
       encodeNES (check, 6, 8, 4);
       encodeNES (check, 7, 7, 4);
     }
@@ -926,16 +925,15 @@ gg_main (int argc, const char **argv)
 
 
 static void
-apply_code (FILE *destfile, int offset, char *bufold, int bufoldsize,
-            char *bufnew, int bufnewsize)
+apply_code (FILE *destfile, int offset, char *bufold, char *bufnew, int size)
 {
   fputc ('\n', stdout);
-  dumper (stdout, bufold, bufoldsize, offset, DUMPER_HEX);
+  dumper (stdout, bufold, size, offset, DUMPER_HEX);
 
   fseek (destfile, offset, SEEK_SET);
-  fwrite (bufnew, 1, bufnewsize, destfile);
+  fwrite (bufnew, 1, size, destfile);
 
-  dumper (stdout, bufnew, bufnewsize, offset, DUMPER_HEX);
+  dumper (stdout, bufnew, size, offset, DUMPER_HEX);
 }
 
 
@@ -1075,7 +1073,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
               if (buf[0] == (char) check)
                 {
                   buf2[0] = (char) value;
-                  apply_code (destfile, offset, buf, 1, buf2, 1);
+                  apply_code (destfile, offset, buf, buf2, 1);
                 }
             }
           else
@@ -1103,7 +1101,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
       if ((check != -1 && buf[0] == (char) check) || check == -1)
         {
           buf2[0] = (char) value;
-          apply_code (destfile, offset, buf, 1, buf2, 1);
+          apply_code (destfile, offset, buf, buf2, 1);
         }
     }
   else if (ucon64.console == UCON64_GEN)
@@ -1114,7 +1112,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 
       buf2[0] = (char) (value >> 8);
       buf2[1] = (char) value;
-      apply_code (destfile, offset, buf, 2, buf2, 2);
+      apply_code (destfile, offset, buf, buf2, 2);
     }
   else
     {
@@ -1122,7 +1120,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
       buf[0] = (char) fgetc (destfile);
 
       buf2[0] = (char) value;
-      apply_code (destfile, offset, buf, 1, buf2, 1);
+      apply_code (destfile, offset, buf, buf2, 1);
     }
 
   fclose (destfile);

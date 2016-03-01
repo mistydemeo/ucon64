@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
+#include <stdio.h>
 #include <time.h>
 #ifdef  _MSC_VER
 #pragma warning(pop)

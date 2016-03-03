@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  USE_ZLIB
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -39,7 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <zlib.h>
 #include "misc/archive.h"
 #include "misc/map.h"
-#include "misc/unzip.h"
 
 
 #ifdef  MAXBUFSIZE

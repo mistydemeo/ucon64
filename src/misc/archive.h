@@ -34,7 +34,6 @@ extern "C" {
 //#warning USE_ZLIB is defined
 
 #include <stdio.h>
-#include <zlib.h>
 #include "misc/unzip.h"
 
 

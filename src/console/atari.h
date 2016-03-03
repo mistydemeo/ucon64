@@ -1,7 +1,7 @@
 /*
 atari.h - Atari 2600/5200/7800 support for uCON64
 
-Copyright (c) 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 NoisyB
 
 Inspired by code from makewav v4.1 and MakeBin v1.0, written by Bob Colbert
   <rcolbert1@home.com>

@@ -1,7 +1,7 @@
 /*
 spsc.h - (Starpath) Supercharger support for uCON64
 
-Copyright (c) 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 NoisyB
 
 
 This program is free software; you can redistribute it and/or modify

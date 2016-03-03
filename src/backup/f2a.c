@@ -26,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>

@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <getopt.h>                             // struct option
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>                             // va_arg()

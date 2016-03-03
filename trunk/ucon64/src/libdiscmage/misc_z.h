@@ -34,8 +34,8 @@ extern "C" {
 //#warning USE_ZLIB is defined
 
 #include <stdio.h>
-#include <zlib.h>
 #include "unzip.h"
+
 
 extern FILE *fopen2 (const char *filename, const char *mode);
 extern int fclose2 (FILE *file);

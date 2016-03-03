@@ -22,7 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // USE_ZLIB
 #endif
 #ifdef  USE_ZLIB
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -38,7 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc_z.h"
 #include "misc.h"
 #include "map.h"
-#include "unzip.h"
 #if     defined DJGPP && defined DLL
 #include "dxedll_priv.h"
 #endif

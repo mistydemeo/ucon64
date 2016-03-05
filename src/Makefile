@@ -86,7 +86,9 @@ endif
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 
+ifdef USE_DISCMAGE
 TARGETS+=libdiscmage/$(FULLLIBNAME_DM)
+endif
 
 
 ifdef USE_LIBCD64
@@ -490,7 +492,7 @@ console/swan.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(CONSOLE_DEPS)
 console/vboy.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                 $(CONSOLE_H_DEPS) console/vboy.h backup/backup.h
-misc/archive.o: config.h $(ARCHIVE_H_DEPS) misc/map.h misc/unzip.h
+misc/archive.o: config.h $(ARCHIVE_H_DEPS) misc/map.h
 misc/chksum.o: config.h $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) $(MISC_H_DEPS)
 misc/dlopen.o: config.h misc/dlopen.h misc/dxedll_pub.h misc/map.h
 misc/file.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS)

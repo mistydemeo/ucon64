@@ -88,5 +88,5 @@ format/toc.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
 format/other.obj: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
                 format/format.h
 map.obj: config.h map.h
-misc_z.obj: config.h $(MISC_Z_H_DEPS) $(MISC_H_DEPS) map.h unzip.h
+misc_z.obj: config.h $(MISC_Z_H_DEPS) $(MISC_H_DEPS) map.h
 unzip.obj: config.h crypt.h ioapi.h unzip.h

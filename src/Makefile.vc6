@@ -372,7 +372,7 @@ console/swan.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(CONSOLE_DEPS)
 console/vboy.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                 $(CONSOLE_H_DEPS) console/vboy.h backup/backup.h
-misc/archive.obj: config.h $(ARCHIVE_H_DEPS) misc/map.h misc/unzip.h
+misc/archive.obj: config.h $(ARCHIVE_H_DEPS) misc/map.h
 misc/chksum.obj: config.h $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) $(MISC_H_DEPS)
 misc/dlopen.obj: config.h misc/dlopen.h misc/dxedll_pub.h misc/map.h
 misc/file.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS)

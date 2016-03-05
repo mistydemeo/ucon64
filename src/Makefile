@@ -2,7 +2,7 @@
 
 CC=gcc
 CFLAGS+=-I. -Wall -W -O3
-ifneq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+ifeq ($(findstring darwin,$(OSTYPE)),) # false if OSTYPE contains "darwin"
 # On Mac OS X using -s gives the following warning:
 # ld: warning: option -s is obsolete and being ignored
 LDFLAGS+=-s
@@ -91,7 +91,6 @@ TARGETS+=libdiscmage/$(FULLLIBNAME_DM)
 
 ifdef USE_LIBCD64
 LDFLAGS+=backup/libcd64/libcd64.a
-TARGETS+=backup/libcd64/libcd64.a
 endif
 
 
@@ -118,7 +117,7 @@ OBJECTS+=misc/getopt.o
 endif
 ifdef USE_ZLIB
 LDFLAGS+=-lz
-OBJECTS+=misc/archive.o misc/map.o misc/unzip.o
+OBJECTS+=misc/archive.o misc/ioapi.o misc/map.o misc/unzip.o
 endif
 ifdef USE_USB
 LDFLAGS+=-lusb
@@ -506,7 +505,7 @@ misc/property.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
 misc/snprintf.o: config.h
 misc/string.o: config.h misc/string.h
 misc/term.o: config.h $(TERM_H_DEPS) ucon64_defines.h
-misc/unzip.o: config.h misc/unzip.h
+misc/unzip.o: config.h misc/crypt.h misc/ioapi.h misc/unzip.h
 misc/usb.o: config.h misc/usb.h
 patch/aps.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
              $(MISC_H_DEPS) $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) patch/aps.h \

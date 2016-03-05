@@ -5,6 +5,32 @@ USE_DISCMAGE=1
 USE_LIBCD64=1
 #WINXP_TARGETING=1
 
+TARGETS=
+
+!ifdef USE_DISCMAGE
+LIBNAME_DM=discmage
+FULLLIBNAME_DM=$(LIBNAME_DM).dll
+TARGETS=$(TARGETS) libdiscmage/$(FULLLIBNAME_DM)
+!endif
+
+TARGET=ucon64.exe
+TARGETS=$(TARGETS) $(TARGET)
+
+all: save_flags $(TARGETS)
+
+
+!ifdef CFLAGS
+CFLAGS_SET=1
+!endif
+!ifdef LDFLAGS
+LDFLAGS_SET=1
+!endif
+
+save_flags:
+	@set CFLAGS0=$(CFLAGS)
+	@set LDFLAGS0=$(LDFLAGS)
+
+
 CC=cl.exe
 CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /wd4774 /O2 /MT \
        /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
@@ -22,27 +48,24 @@ LDFLAGS=$(LDFLAGS) /NOLOGO /VERSION:2.0 setargv.obj
 LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
         /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"
 !endif
-TARGETS=
 
 !ifdef USE_DISCMAGE
-LIBNAME_DM=discmage
-!endif
-
-!ifdef USE_DISCMAGE
-FULLLIBNAME_DM=$(LIBNAME_DM).dll
 !ifndef DLOPEN
 LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
 !endif
 !endif
 
-TARGETS=$(TARGETS) libdiscmage/$(FULLLIBNAME_DM)
-
-
 !ifdef USE_LIBCD64
 LDFLAGS=$(LDFLAGS) backup/libcd64/cd64.lib
-TARGETS=$(TARGETS) backup/libcd64/cd64.lib
 !endif
 
+!ifdef USE_ZLIB
+LDFLAGS=$(LDFLAGS) zdll.lib
+!endif
+
+!ifdef USE_USB
+LDFLAGS=$(LDFLAGS) libusb.lib
+!endif
 
 OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         misc/chksum.obj misc/file.obj misc/getopt.obj misc/getopt2.obj \
@@ -66,19 +89,11 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/patch.obj \
         patch/ppf.obj
 !ifdef USE_ZLIB
-LDFLAGS=$(LDFLAGS) zdll.lib
-OBJECTS=$(OBJECTS) misc/archive.obj misc/map.obj misc/unzip.obj
+OBJECTS=$(OBJECTS) misc/archive.obj misc/ioapi.obj misc/map.obj misc/unzip.obj
 !endif
 !ifdef USE_USB
-LDFLAGS=$(LDFLAGS) libusb.lib
 OBJECTS=$(OBJECTS) misc/usb.obj
 !endif
-
-
-TARGET=ucon64.exe
-TARGETS=$(TARGETS) $(TARGET)
-
-all: $(TARGETS)
 
 
 clean:
@@ -115,6 +130,12 @@ backup/cd64.obj:
 !ifdef USE_DISCMAGE
 libdiscmage/$(FULLLIBNAME_DM):
 	cd libdiscmage
+!ifdef CFLAGS_SET
+	@set CFLAGS=%%CFLAGS0%%
+!endif
+!ifdef LDFLAGS_SET
+	@set LDFLAGS=%%LDFLAGS0%%
+!endif
 	$(MAKE) /NOLOGO /f Makefile.vc6
 	cd ..
 !endif
@@ -123,6 +144,12 @@ libdiscmage/$(FULLLIBNAME_DM):
 !ifdef USE_LIBCD64
 backup/libcd64/cd64.lib:
 	cd backup/libcd64
+!ifdef CFLAGS_SET
+	@set CFLAGS=%%CFLAGS0%%
+!endif
+!ifdef LDFLAGS_SET
+	@set LDFLAGS=%%LDFLAGS0%%
+!endif
 	$(MAKE) /NOLOGO /f Makefile.vc6
 	cd ../..
 !endif
@@ -360,7 +387,7 @@ misc/property.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
 misc/snprintf.obj: config.h
 misc/string.obj: config.h misc/string.h
 misc/term.obj: config.h $(TERM_H_DEPS) ucon64_defines.h
-misc/unzip.obj: config.h misc/unzip.h
+misc/unzip.obj: config.h misc/crypt.h misc/ioapi.h misc/unzip.h
 misc/usb.obj: config.h misc/usb.h
 patch/aps.obj: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
              $(MISC_H_DEPS) $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) patch/aps.h \

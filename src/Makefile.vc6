@@ -364,9 +364,10 @@ console/sms.obj: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
                console/sms.h backup/mgd.h backup/smd.h backup/smsgg-pro.h \
                $(CONSOLE_DEPS)
 console/snes.obj: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
-                misc/file.h $(MISC_H_DEPS) misc/string.h $(UCON64_MISC_H_DEPS) \
-                $(CONSOLE_H_DEPS) $(SNES_H_DEPS) backup/backup.h backup/gd.h \
-                backup/mgd.h backup/swc.h backup/ufo.h
+                misc/file.h $(MISC_H_DEPS) misc/string.h $(TERM_H_DEPS) \
+                $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) $(SNES_H_DEPS) \
+                backup/backup.h backup/gd.h backup/mgd.h backup/swc.h \
+                backup/ufo.h
 console/swan.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) console/swan.h backup/backup.h \
                 $(CONSOLE_DEPS)

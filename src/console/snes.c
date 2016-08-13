@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/string.h"
+#include "misc/term.h"
 #include "ucon64_misc.h"
 #include "console/console.h"
 #include "console/snes.h"
@@ -588,7 +589,7 @@ snes_convert_sramfile (int org_header_len, const void *new_header)
       sprintf (dest_name, "SF8%.3s", basename2 (ucon64.fname));
       strupr (dest_name);
       // avoid trouble with filenames containing spaces
-      for (n = 3; n < 6; n++)                       // skip "SF" and first digit
+      for (n = 3; n < 6; n++)                   // skip "SF" and first digit
         if (dest_name[n] == ' ')
           dest_name[n] = '_';
       set_suffix (dest_name, ".B00");
@@ -1721,7 +1722,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
       return -1;
     }
 
-  if (!rominfo->backup_header_len || type == GD3)    // GD3 format
+  if (!rominfo->backup_header_len || type == GD3) // GD3 format
     {
       if (UCON64_ISSET (ucon64.part_size))
         puts ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize");
@@ -3093,12 +3094,10 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
             rominfo->backup_header_len = SWC_HEADER_LEN;
         }
     }
-  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn switch was specified
-    {
-      rominfo->backup_header_len = ucon64.backup_header_len;
-      if (type == MGD_SNES && rominfo->backup_header_len)
-        type = SMC;
-    }
+  if (UCON64_ISSET (ucon64.backup_header_len))  // -hd, -nhd or -hdn switch was specified
+    rominfo->backup_header_len = ucon64.backup_header_len;
+  if (type == MGD_SNES && rominfo->backup_header_len)
+    type = SMC;
 
   if (rominfo->backup_header_len && !memcmp ((unsigned char *) header + 0x1e8, "NSRT", 4))
     nsrt_header = 1;
@@ -3211,7 +3210,7 @@ snes_set_bs_dump (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, int size)
 int
 snes_init (st_ucon64_nfo_t *rominfo)
 {
-  int x, y, size, calc_checksums, pos, result = -1;  // it's no SNES ROM dump until detected otherwise
+  int x, y, size, calc_checksums, pos, result = -1; // it's no SNES ROM dump until detected otherwise
   unsigned char *rom_buffer;
   st_unknown_backup_header_t header = { 0, 0, 0, 0, 0, 0, { 0 }, 0, 0, 0, { 0 } };
   char *str;
@@ -4235,7 +4234,7 @@ snes_densrt (st_ucon64_nfo_t *rominfo)
   else
     header_start = rominfo->header_start;
   get_nsrt_info (buffer, header_start, backup_header);
-  memset (backup_header + 0x1d0, 0, 32);             // remove NSRT header
+  memset (backup_header + 0x1d0, 0, 32);        // remove NSRT header
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);

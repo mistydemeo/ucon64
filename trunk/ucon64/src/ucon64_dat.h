@@ -77,5 +77,5 @@ extern int ucon64_dat_indexer (void);
 extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version);
 extern int ucon64_create_dat (const char *dat_file_name, const char *filename,
                               int backup_header_len);
-                   
+
 #endif // UCON64_DAT_H

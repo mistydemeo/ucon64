@@ -26,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/string.h"
-#include "misc/term.h"
 #include "ucon64_misc.h"
 #include "console/atari.h"
 #include "backup/cc2.h"

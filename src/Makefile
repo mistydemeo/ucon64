@@ -444,8 +444,8 @@ backup/ufo.o: config.h backup/ufo.h $(GETOPT2_H_DEPS)
 backup/yoko.o: config.h backup/yoko.h $(GETOPT2_H_DEPS)
 backup/z64.o: config.h backup/z64.h $(GETOPT2_H_DEPS)
 console/atari.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \
-                 $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) console/atari.h \
-                 backup/cc2.h backup/spsc.h backup/yoko.h $(CONSOLE_DEPS)
+                 $(UCON64_MISC_H_DEPS) console/atari.h backup/cc2.h \
+                 backup/spsc.h backup/yoko.h $(CONSOLE_DEPS)
 console/coleco.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                   console/coleco.h backup/backup.h $(CONSOLE_DEPS)
 console/console.o: config.h $(CONSOLE_H_DEPS)

@@ -224,7 +224,8 @@ nds_init (st_ucon64_nfo_t *rominfo)
 
   // identify the ROM by the zero area
   memset (&buf, 0, 144);
-  if (!memcmp (nds_header.zero, buf, 144))
+  if (!memcmp (nds_header.zero, buf, 144) &&
+      nds_header.application_end_offset > 0)
     result = 0;
   else
     result = -1;
@@ -267,7 +268,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
   pos += sprintf (rominfo->misc + pos, "Device type: 0x%02x\n",
                   nds_header.devicetype);
   pos += sprintf (rominfo->misc + pos, "Device capacity: %d Mb\n",
-                  1 < nds_header.devicecap);
+                  1 << nds_header.devicecap);
 
   pos += sprintf (rominfo->misc + pos, "Logo data: ");
   if (memcmp (nds_header.logo, nds_logodata, NDS_LOGODATA_LEN) == 0)

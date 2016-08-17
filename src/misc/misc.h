@@ -89,9 +89,9 @@ extern "C" {
   #endif
 #elif   defined __APPLE__
   #if     defined __POWERPC__ || defined __ppc__
-    #define CURRENT_OS_S "Apple (PPC)"
+    #define CURRENT_OS_S "Mac OS X (PPC)"
   #else
-    #define CURRENT_OS_S "Apple"
+    #define CURRENT_OS_S "Mac OS X"
   #endif
 #elif   defined __BEOS__
   #define CURRENT_OS_S "BeOS"

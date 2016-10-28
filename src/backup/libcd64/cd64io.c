@@ -833,6 +833,8 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 			io_driver = open_module(fname, cd64);
 
 			io_driver_found = 1;
+			cd64->notice_callback("Using %s\n", fname);
+
 			sym.void_ptr = get_symbol(io_driver, "DlPortReadPortUchar", cd64);
 			DlPortReadPortUchar = (unsigned char (__stdcall *)(unsigned short)) sym.func_ptr;
 			sym.void_ptr = get_symbol(io_driver, "DlPortWritePortUchar", cd64);
@@ -853,6 +855,8 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 				IsDriverInstalled = (short int (WINAPI *)(void)) sym.func_ptr;
 				if (IsDriverInstalled()) {
 					io_driver_found = 1;
+					cd64->notice_callback("Using %s\n", fname);
+
 					sym.void_ptr = get_symbol(io_driver, "PortIn", cd64);
 					PortIn = (char (WINAPI *)(short int)) sym.func_ptr;
 					sym.void_ptr = get_symbol(io_driver, "PortOut", cd64);
@@ -872,6 +876,8 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 				io_driver = open_module(fname, cd64);
 
 				io_driver_found = 1;
+				cd64->notice_callback("Using %s\n", fname);
+
 				/* Newer ports of inpout32.dll also contain the API provided by
 				 * DlPortIO.dll. Since the API of DlPortIO.dll does not have
 				 * the flaws of inpout32.dll (*signed* short return value and

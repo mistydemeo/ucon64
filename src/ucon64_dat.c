@@ -403,14 +403,13 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
       {"NGP", custom_strnicmp, UCON64_NGP, ngp_usage},
       {"GoodVBOY", custom_strnicmp, UCON64_VBOY, vboy_usage},
       {"VBOY", custom_strnicmp, UCON64_VBOY, vboy_usage},
-      
       {"Neo-Geo", custom_strnicmp, UCON64_NG, neogeo_usage},
       {"MAME", custom_stristr, UCON64_ARCADE, arcade_usage},
       {"Dreamcast", custom_stristr, UCON64_DC, dc_usage},
       {"Saturn", custom_stristr, UCON64_SAT, sat_usage},
       {"3do", custom_stristr, UCON64_3DO, real3do_usage},
       {"CDi", custom_stristr, UCON64_CDI, cdi_usage},
-      {"XBox", custom_stristr, UCON64_XBOX, xbox_usage},
+      {"Xbox", custom_stristr, UCON64_XBOX, xbox_usage},
       {"CD32", custom_stristr, UCON64_CD32, cd32_usage},
 /* TODO:
       {"psx", custom_stristr, UCON64_PSX, psx_usage},
@@ -1076,104 +1075,104 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
       console = ucon64.console;
       switch (ucon64.console)
         {
-          case UCON64_3DO:
-            console_name = "3DO";
-            break;
-          case UCON64_ATA:
-            console_name = "NES";
-            break;
-          case UCON64_CD32:
-            console_name = "CD32";
-            break;
-          case UCON64_CDI:
-            console_name = "CD-i";
-            break;
-          case UCON64_COLECO:
-            console_name = "Coleco";
-            break;
-          case UCON64_DC:
-            console_name = "Dreamcast";
-            break;
-          case UCON64_GB:
-            console_name = "Game Boy";
-            break;
-          case UCON64_GBA:
-            console_name = "Game Boy Advance";
-            break;
-          case UCON64_GC:
-            console_name = "Game Cube";
-            break;
-          case UCON64_GEN:
-            console_name = "Genesis/Mega Drive";
-            plugin = "genesis.dll";
-            break;
-          case UCON64_INTELLI:
-            console_name = "Intellivision";
-            break;
-          case UCON64_JAG:
-            console_name = "Jaguar";
-            break;
-          case UCON64_LYNX:
-            console_name = "Lynx";
-            break;
-          case UCON64_ARCADE:
-            console_name = "M.A.M.E.";
-            plugin = "arcade.dll";
-            break;
-          case UCON64_N64:
-            console_name = "Nintendo 64";
-            plugin = "n64.dll";
-            break;
-          case UCON64_NES:
-            console_name = "NES";
-            plugin = "nes.dll";
-            break;
-          case UCON64_NG:
-            console_name = "Neo Geo";
-            plugin = "arcade.dll";
-            break;
-          case UCON64_NGP:
-            console_name = "Neo Geo Pocket";
-            break;
-          case UCON64_PCE:
-            console_name = "PC-Engine";
-            break;
-          case UCON64_PS2:
-            console_name = "Playstation 2";
-            break;
-          case UCON64_PSX:
-            console_name = "Playstation";
-            break;
-          case UCON64_S16:
-            console_name = "S16";
-            break;
-          case UCON64_SAT:
-            console_name = "Saturn";
-            break;
-          case UCON64_SMS:
-            console_name = "SMS/Game Gear";
-            plugin = "sms.dll";         // change this to gg.dll (in DAT file) for GG ROMs
-            break;
-          case UCON64_SNES:
-            console_name = "SNES";
-            plugin = "snes.dll";        // be sure to use the new SNES plug-in (RC 2.62)
-            break;
-          case UCON64_SWAN:
-            console_name = "Wonderswan";
-            break;
-          case UCON64_VBOY:
-            console_name = "Virtual Boy";
-            break;
-          case UCON64_VEC:
-            console_name = "Vectrex";
-            break;
-          case UCON64_XBOX:
-            console_name = "Xbox";
-            break;
-          default:
-            fputs (ucon64_msg[CONSOLE_ERROR], stderr);
-            exit (1);
-            break;
+        case UCON64_3DO:
+          console_name = "3DO";
+          break;
+        case UCON64_ATA:
+          console_name = "NES";
+          break;
+        case UCON64_CD32:
+          console_name = "CD32";
+          break;
+        case UCON64_CDI:
+          console_name = "CD-i";
+          break;
+        case UCON64_COLECO:
+          console_name = "Coleco";
+          break;
+        case UCON64_DC:
+          console_name = "Dreamcast";
+          break;
+        case UCON64_GB:
+          console_name = "Game Boy";
+          break;
+        case UCON64_GBA:
+          console_name = "Game Boy Advance";
+          break;
+        case UCON64_GC:
+          console_name = "Game Cube";
+          break;
+        case UCON64_GEN:
+          console_name = "Genesis/Mega Drive";
+          plugin = "genesis.dll";
+          break;
+        case UCON64_INTELLI:
+          console_name = "Intellivision";
+          break;
+        case UCON64_JAG:
+          console_name = "Jaguar";
+          break;
+        case UCON64_LYNX:
+          console_name = "Lynx";
+          break;
+        case UCON64_ARCADE:
+          console_name = "M.A.M.E.";
+          plugin = "arcade.dll";
+          break;
+        case UCON64_N64:
+          console_name = "Nintendo 64";
+          plugin = "n64.dll";
+          break;
+        case UCON64_NES:
+          console_name = "NES";
+          plugin = "nes.dll";
+          break;
+        case UCON64_NG:
+          console_name = "Neo Geo";
+          plugin = "arcade.dll";
+          break;
+        case UCON64_NGP:
+          console_name = "Neo Geo Pocket";
+          break;
+        case UCON64_PCE:
+          console_name = "PC-Engine";
+          break;
+        case UCON64_PS2:
+          console_name = "Playstation 2";
+          break;
+        case UCON64_PSX:
+          console_name = "Playstation";
+          break;
+        case UCON64_S16:
+          console_name = "S16";
+          break;
+        case UCON64_SAT:
+          console_name = "Saturn";
+          break;
+        case UCON64_SMS:
+          console_name = "SMS/Game Gear";
+          plugin = "sms.dll";           // change this to gg.dll (in DAT file) for GG ROMs
+          break;
+        case UCON64_SNES:
+          console_name = "SNES";
+          plugin = "snes.dll";          // be sure to use the new SNES plug-in (RC 2.62)
+          break;
+        case UCON64_SWAN:
+          console_name = "Wonderswan";
+          break;
+        case UCON64_VBOY:
+          console_name = "Virtual Boy";
+          break;
+        case UCON64_VEC:
+          console_name = "Vectrex";
+          break;
+        case UCON64_XBOX:
+          console_name = "Xbox";
+          break;
+        default:
+          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          exit (1);
+          break;
         }
 
       if ((ucon64_mkdat_entries = (st_mkdat_entry_t *)

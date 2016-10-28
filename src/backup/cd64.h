@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t cd64_usage[];
 
-#if     defined USE_PARALLEL && defined USE_LIBCD64
+#ifdef  USE_LIBCD64
 extern int cd64_read_rom(const char *filename, int size);
 extern int cd64_write_rom(const char *filename);
 extern int cd64_write_bootemu (const char *filename);

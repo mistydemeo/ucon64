@@ -198,9 +198,11 @@ static const st_getopt2_t lf[] =
 #ifdef  USE_PARALLEL
     doctor64_usage,
     doctor64jr_usage,
+#endif
 #ifdef  USE_LIBCD64
     cd64_usage,
 #endif
+#ifdef  USE_PARALLEL
     dex_usage,
 #endif // USE_PARALLEL
     lf,
@@ -1135,9 +1137,10 @@ main (int argc, char **argv)
   /*
     We can drop privileges after we have set up parallel port access. We cannot
     drop privileges if the user wants to communicate with the USB version of the
-    F2A.
-    SECURITY WARNING: We stay in root mode if the user specified an F2A option!
-    We could of course drop privileges which requires the user to run uCON64 as
+    F2A or with a CD64. However, for the CD64 privileges will be dropped by
+    cd64_init().
+    SECURITY WARNING: We stay in root mode if the user specified a USB port! We
+    could of course drop privileges which requires the user to run uCON64 as
     root (not setuid root), but we want to be user friendly. Besides, doing
     things as root is bad anyway (from a security viewpoint).
   */
@@ -1277,7 +1280,7 @@ ucon64_execute_options (void)
   ucon64.fcrc32 = 0;
 
   ucon64.console = ucon64.org_console;
-  
+
   for (x = 0; arg[x].val; x++)
     if (!(arg[x].flags & WF_SWITCH))
       {
@@ -1880,74 +1883,74 @@ ucon64_usage (int argc, char *argv[], int view)
   if (!single)
     switch (view)
       {
-        case USAGE_VIEW_LONG:
-          getopt2_usage (options);
-          break;
+      case USAGE_VIEW_LONG:
+        getopt2_usage (options);
+        break;
 
-        case USAGE_VIEW_PAD:
-          getopt2_usage (ucon64_padding_usage);
-          break;
+      case USAGE_VIEW_PAD:
+        getopt2_usage (ucon64_padding_usage);
+        break;
 
-        case USAGE_VIEW_DAT:
-          getopt2_usage (ucon64_dat_usage);
-          break;
+      case USAGE_VIEW_DAT:
+        getopt2_usage (ucon64_dat_usage);
+        break;
 
-        case USAGE_VIEW_PATCH:
-          getopt2_usage (patch_usage);
-          getopt2_usage (bsl_usage);
-          getopt2_usage (ips_usage);
-          getopt2_usage (aps_usage);
-          getopt2_usage (ppf_usage);
-          getopt2_usage (gg_usage);
-          break;
+      case USAGE_VIEW_PATCH:
+        getopt2_usage (patch_usage);
+        getopt2_usage (bsl_usage);
+        getopt2_usage (ips_usage);
+        getopt2_usage (aps_usage);
+        getopt2_usage (ppf_usage);
+        getopt2_usage (gg_usage);
+        break;
 
-        case USAGE_VIEW_BACKUP:
-//          getopt2_usage (cc2_usage);
+      case USAGE_VIEW_BACKUP:
+//        getopt2_usage (cc2_usage);
 #ifdef  USE_LIBCD64
-          getopt2_usage (cd64_usage);
+        getopt2_usage (cd64_usage);
 #endif
-          getopt2_usage (cmc_usage);
-          getopt2_usage (dex_usage);
-          getopt2_usage (doctor64_usage);
-          getopt2_usage (doctor64jr_usage);
-          getopt2_usage (f2a_usage);
-          getopt2_usage (fal_usage);
-          getopt2_usage (fig_usage);
-          getopt2_usage (gbx_usage);
-          getopt2_usage (gd_usage);
-//          getopt2_usage (interceptor_usage);
-          getopt2_usage (lynxit_usage);
-          getopt2_usage (mccl_usage);
-          getopt2_usage (mcd_usage);
-          getopt2_usage (mdpro_usage);
-//          getopt2_usage (mgd_usage);
-          getopt2_usage (msg_usage);
-//          getopt2_usage (nfc_usage);
-          getopt2_usage (pcepro_usage);
-          getopt2_usage (pl_usage);
-          getopt2_usage (quickdev16_usage);
-//          getopt2_usage (sc_usage);
-          getopt2_usage (sflash_usage);
-          getopt2_usage (smc_usage);
-          getopt2_usage (smd_usage);
-          getopt2_usage (smsggpro_usage);
-//          getopt2_usage (spsc_usage);
-//          getopt2_usage (ssc_usage);
-          getopt2_usage (swc_usage);
-//          getopt2_usage (ufo_usage);
-//          getopt2_usage (yoko_usage);
-//          getopt2_usage (z64_usage);
-          break;
+        getopt2_usage (cmc_usage);
+        getopt2_usage (dex_usage);
+        getopt2_usage (doctor64_usage);
+        getopt2_usage (doctor64jr_usage);
+        getopt2_usage (f2a_usage);
+        getopt2_usage (fal_usage);
+        getopt2_usage (fig_usage);
+        getopt2_usage (gbx_usage);
+        getopt2_usage (gd_usage);
+//        getopt2_usage (interceptor_usage);
+        getopt2_usage (lynxit_usage);
+        getopt2_usage (mccl_usage);
+        getopt2_usage (mcd_usage);
+        getopt2_usage (mdpro_usage);
+//        getopt2_usage (mgd_usage);
+        getopt2_usage (msg_usage);
+//        getopt2_usage (nfc_usage);
+        getopt2_usage (pcepro_usage);
+        getopt2_usage (pl_usage);
+        getopt2_usage (quickdev16_usage);
+//        getopt2_usage (sc_usage);
+        getopt2_usage (sflash_usage);
+        getopt2_usage (smc_usage);
+        getopt2_usage (smd_usage);
+        getopt2_usage (smsggpro_usage);
+//        getopt2_usage (spsc_usage);
+//        getopt2_usage (ssc_usage);
+        getopt2_usage (swc_usage);
+//        getopt2_usage (ufo_usage);
+//        getopt2_usage (yoko_usage);
+//        getopt2_usage (z64_usage);
+        break;
 
 #ifdef  USE_DISCMAGE
-        case USAGE_VIEW_DISC:
-          getopt2_usage (discmage_usage);
-          break;
+      case USAGE_VIEW_DISC:
+        getopt2_usage (discmage_usage);
+        break;
 #endif
 
-        case USAGE_VIEW_SHORT:
-        default:
-          getopt2_usage (ucon64_options_usage);
+      case USAGE_VIEW_SHORT:
+      default:
+        getopt2_usage (ucon64_options_usage);
       }
 
   fputc ('\n', stdout);

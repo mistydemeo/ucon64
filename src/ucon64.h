@@ -87,7 +87,6 @@ typedef struct
   const char *optarg;                           // ptr to current options optarg
   char *temp_file;                              // global temp_file
 
-
   const char *fname;                            // ROM (cmdline) with path
   int recursive;
 

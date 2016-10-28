@@ -410,6 +410,7 @@ ucon64_switches (st_ucon64_t *p)
         ucon64.parport = (uint16_t) strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
 #endif
       break;
+#endif // USE_PARALLEL 
 
 #ifdef  USE_LIBCD64
     case UCON64_XCD64:
@@ -429,6 +430,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 #endif
 
+#ifdef  USE_PARALLEL
     case UCON64_XCMCM:
       ucon64.io_mode = strtol (option_arg, NULL, 10);
       break;
@@ -1112,17 +1114,17 @@ ucon64_options (st_ucon64_t *p)
 
           switch (p->option)
             {
-              case UCON64_BIN2ISO:
-                flags |= DM_2048; // DM_2048 read sectors and convert to 2048 Bytes
-                break;
+            case UCON64_BIN2ISO:
+              flags |= DM_2048; // DM_2048 read sectors and convert to 2048 Bytes
+              break;
 
-              case UCON64_ISOFIX:
-                flags |= DM_FIX; // DM_FIX read sectors and fix (if needed/possible)
-                break;
+            case UCON64_ISOFIX:
+              flags |= DM_FIX; // DM_FIX read sectors and fix (if needed/possible)
+              break;
 
-              case UCON64_CDMAGE:
-//                flags |= DM_CDMAGE;
-                break;
+            case UCON64_CDMAGE:
+//              flags |= DM_CDMAGE;
+              break;
             }
 
           ucon64.image = dm_reopen (ucon64.fname, 0, (dm_image_t *) ucon64.image);
@@ -1535,19 +1537,19 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_LOGO:
       switch (ucon64.console)
         {
-          case UCON64_GB:
-            gb_logo (ucon64.nfo);
-            break;
-          case UCON64_GBA:
-            gba_logo (ucon64.nfo);
-            break;
-          case UCON64_NDS:
-            nds_logo (ucon64.nfo);
-            break;
-          default:
+        case UCON64_GB:
+          gb_logo (ucon64.nfo);
+          break;
+        case UCON64_GBA:
+          gba_logo (ucon64.nfo);
+          break;
+        case UCON64_NDS:
+          nds_logo (ucon64.nfo);
+          break;
+        default:
 // The next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
-            return -1;
+          return -1;
         }
       break;
 
@@ -1800,7 +1802,6 @@ ucon64_options (st_ucon64_t *p)
       n64_v64 (ucon64.nfo);
       break;
 
-#ifdef  USE_PARALLEL
     /*
       It doesn't make sense to continue after executing a (send) backup option
       ("multizip"). Don't return, but use break instead. ucon64_execute_options()
@@ -1858,8 +1859,9 @@ ucon64_options (st_ucon64_t *p)
         cd64_write_mempack (ucon64.fname, strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
-#endif
+#endif // USE_LIBCD64
 
+#ifdef  USE_PARALLEL
     case UCON64_XRESET:
       parport_print_info ();
       fputs ("Resetting parallel port...", stdout);

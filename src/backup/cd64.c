@@ -26,13 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ultra64/host/cd64lib.h>
 #include "misc/archive.h"
 #include "misc/misc.h"
-#include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/cd64.h"
 
 
-#if     defined USE_PARALLEL && defined USE_LIBCD64
+#ifdef  USE_LIBCD64
 static st_ucon64_obj_t cd64_obj[] =
   {
     {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM},
@@ -49,7 +48,7 @@ const st_getopt2_t cd64_usage[] =
       NULL, "CD64"/*"19XX UFO http://www.cd64.com"*/,
       NULL
     },
-#if     defined USE_PARALLEL && defined USE_LIBCD64
+#ifdef  USE_LIBCD64
     {
       "xcd64", 0, 0, UCON64_XCD64,
       NULL, "send/receive ROM to/from CD64; " OPTION_LONG_S "port=PORT\n"
@@ -99,12 +98,12 @@ const st_getopt2_t cd64_usage[] =
       "PROT=2 UltraLink",
       &cd64_obj[3]
     },
-#endif // USE_PARALLEL && USE_LIBCD64
+#endif // USE_LIBCD64
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
-#if     defined USE_PARALLEL && defined USE_LIBCD64
+#ifdef  USE_LIBCD64
 
 static time_t cd64_starttime;
 
@@ -187,6 +186,19 @@ fseek_wrapper (void *io_id, int32_t offset, int whence)
 }
 
 
+static void
+cd64_port_print_info (void)
+{
+#ifdef  USE_PPDEV
+  printf ("Using parallel port device: %s\n", ucon64.parport_dev);
+#elif   defined AMIGA
+  printf ("Using parallel port device: %s, port %d\n", ucon64.parport_dev, ucon64.parport);
+#else
+  printf ("Using I/O port base address: 0x%x\n", ucon64.parport);
+#endif
+}
+
+
 static struct cd64_t *
 cd64_init (void)
 {
@@ -233,10 +245,6 @@ cd64_init (void)
   cd64->progress_callback = cd64_progress;
   strcpy (cd64->io_driver_dir, ucon64.configdir);
 
-  // parport_print_info() displays a reasonable message (even if we're using a
-  //  comms link)
-  parport_print_info ();
-
   if (!cd64->devopen (cd64))
     {
       fputs ("ERROR: Could not open I/O device for CD64\n", stderr);
@@ -245,6 +253,8 @@ cd64_init (void)
 #if     defined __unix__ && !defined __MSDOS__
   drop_privileges ();
 #endif
+
+  cd64_port_print_info ();
 
   return cd64;
 }
@@ -506,4 +516,4 @@ cd64_write_mempack (const char *filename, int index)
   return 0;
 }
 
-#endif // USE_PARALLEL && USE_LIBCD64
+#endif // USE_LIBCD64

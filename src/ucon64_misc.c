@@ -234,7 +234,7 @@ const st_getopt2_t ucon64_options_usage[] =
       &ucon64_option_obj[0]
     },
 #endif
-#if     defined USE_PARALLEL || defined USE_USB
+#if     defined USE_PARALLEL || defined USE_USB || defined USE_LIBCD64
     {
       "port", 1, 0, UCON64_PORT,
       "PORT", "specify "
@@ -244,14 +244,14 @@ const st_getopt2_t ucon64_options_usage[] =
 #if     defined USE_PARALLEL && defined USE_USB
         " or "
 #endif
-#ifdef  USE_PARALLEL
+#if     defined USE_PARALLEL || defined USE_LIBCD64
         "parallel"
 #endif
         " PORT={"
 #ifdef  USE_USB
         "USB0, USB1, ... "
 #endif
-#ifdef  USE_PARALLEL
+#if     defined USE_PARALLEL || defined USE_LIBCD64
         "3bc, 378, 278"
 #endif
         "}\n"

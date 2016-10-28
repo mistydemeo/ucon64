@@ -240,8 +240,8 @@ ucon64_opts.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
 backup/backup.obj: config.h backup/backup.h $(GETOPT2_H_DEPS)
 backup/cc2.obj: config.h $(UCON64_H_DEPS) backup/cc2.h $(GETOPT2_H_DEPS)
 backup/cd64.obj: config.h $(CD64LIB_H_DEPS) $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) \
-               misc/parallel.h $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) \
-               backup/cd64.h $(GETOPT2_H_DEPS)
+               $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) backup/cd64.h \
+               $(GETOPT2_H_DEPS)
 backup/cmc.obj: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(MISC_H_DEPS) \
               misc/parallel.h $(TERM_H_DEPS) $(UCON64_H_DEPS) \
               $(UCON64_MISC_H_DEPS) backup/cmc.h $(GETOPT2_H_DEPS)
@@ -318,8 +318,8 @@ backup/ufo.obj: config.h backup/ufo.h $(GETOPT2_H_DEPS)
 backup/yoko.obj: config.h backup/yoko.h $(GETOPT2_H_DEPS)
 backup/z64.obj: config.h backup/z64.h $(GETOPT2_H_DEPS)
 console/atari.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \
-                 $(UCON64_MISC_H_DEPS) console/atari.h backup/cc2.h \
-                 backup/spsc.h backup/yoko.h $(CONSOLE_DEPS)
+                 $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) console/atari.h \
+                 backup/cc2.h backup/spsc.h backup/yoko.h $(CONSOLE_DEPS)
 console/coleco.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                   console/coleco.h backup/backup.h $(CONSOLE_DEPS)
 console/console.obj: config.h $(CONSOLE_H_DEPS)

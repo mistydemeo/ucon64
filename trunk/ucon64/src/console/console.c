@@ -189,7 +189,7 @@ const st_getopt2_t xbox_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "XBox"
+      NULL, "Xbox"
       /*"2001 Microsoft http://www.xbox.com"*/,
       NULL
     },

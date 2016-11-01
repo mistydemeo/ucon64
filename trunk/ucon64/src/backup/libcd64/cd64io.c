@@ -42,6 +42,8 @@
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __CYGWIN__
+#include <dlfcn.h>
+
 #define DIR_SEPARATOR_S "/"
 #else
 #define snprintf _snprintf
@@ -568,72 +570,104 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #if defined _WIN32 || defined __CYGWIN__
 static void *open_module(char *module_name, struct cd64_t *cd64) {
 
-	void *handle = LoadLibrary(module_name);
-	if (handle == NULL) {
+	void *handle;
+#ifdef __CYGWIN__
+  if ((handle = dlopen(module_name, RTLD_LAZY)) == NULL) {
+		cd64->notice_callback2("dlopen: %s", dlerror());
+		exit(1);
+	}
+#else
+	if ((handle = LoadLibrary(module_name)) == NULL) {
+		DWORD errorcode = GetLastError();
 		LPTSTR strptr;
 
 		cd64->notice_callback2("LoadLibrary: %s", strerror(errno));
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		              FORMAT_MESSAGE_FROM_SYSTEM |
 		              FORMAT_MESSAGE_IGNORE_INSERTS,
-		              NULL, GetLastError(),
+		              NULL, errorcode,
 		              MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
 		              (LPTSTR) &strptr, 0, NULL);
-		cd64->notice_callback2(strptr);
+		cd64->notice_callback2("LoadLibrary: %s", strptr);
 		LocalFree(strptr);
 		exit(1);
 	}
+#endif
 	return handle;
 }
 
 static void close_module(void *handle, struct cd64_t *cd64) {
 
+#ifdef __CYGWIN__
+	if (dlclose(handle)) {
+		cd64->notice_callback2("dlclose: %s", dlerror());
+		exit(1);
+	}
+#else
 	if (!FreeLibrary((HINSTANCE) handle)) {
+		DWORD errorcode = GetLastError();
 		LPTSTR strptr;
 
 		cd64->notice_callback2("FreeLibrary: %s", strerror(errno));
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		              FORMAT_MESSAGE_FROM_SYSTEM |
 		              FORMAT_MESSAGE_IGNORE_INSERTS,
-		              NULL, GetLastError(),
+		              NULL, errorcode,
 		              MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
 		              (LPTSTR) &strptr, 0, NULL);
-		cd64->notice_callback2(strptr);
+		cd64->notice_callback2("FreeLibrary: %s", strptr);
 		LocalFree(strptr);
 		exit(1);
 	}
+#endif
 }
 
 static void *get_symbol(void *handle, char *symbol_name, struct cd64_t *cd64) {
 
 	void *symptr;
+#ifdef __CYGWIN__
+	char *strptr;
+
+	symptr = dlsym(handle, symbol_name);
+	if ((strptr = dlerror()) != NULL) {            /* this is "the correct way" */
+		cd64->notice_callback2("dlsym: %s", strptr); /*  according to the info page */
+		exit(1);
+	}
+#else
 	u_func_ptr_t sym;
 	sym.func_ptr = (void (*)(void)) GetProcAddress((HINSTANCE) handle, symbol_name);
 	symptr = sym.void_ptr;
 	if (symptr == NULL) {
+		DWORD errorcode = GetLastError();
 		LPTSTR strptr;
 
 		cd64->notice_callback2("GetProcAddress: %s", strerror(errno));
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		              FORMAT_MESSAGE_FROM_SYSTEM |
 		              FORMAT_MESSAGE_IGNORE_INSERTS,
-		              NULL, GetLastError(),
+		              NULL, errorcode,
 		              MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
 		              (LPTSTR) &strptr, 0, NULL);
-		cd64->notice_callback2(strptr);
+		cd64->notice_callback2("GetProcAddress: %s", strptr);
 		LocalFree(strptr);
 		exit(1);
 	}
+#endif
 	return symptr;
 }
 
 static void *has_symbol(void *handle, char *symbol_name) {
 
 	void *symptr;
+#ifdef __CYGWIN__
+	symptr = dlsym(handle, symbol_name);
+	if (dlerror() != NULL) symptr = (void *) -1;  /* this is "the correct way" */
+#else                                           /*  according to the info page */
 	u_func_ptr_t sym;
 	sym.func_ptr = (void (*)(void)) GetProcAddress((HINSTANCE) handle, symbol_name);
 	symptr = sym.void_ptr;
 	if (symptr == NULL) symptr = (void *) -1;
+#endif
 	return symptr;
 }
 

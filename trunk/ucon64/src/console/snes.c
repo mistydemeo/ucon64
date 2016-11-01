@@ -197,7 +197,7 @@ const st_getopt2_t snes_usage[] =
     {
       "idnum", 1, 0, UCON64_IDNUM,
       "NUM", "make -gd3 produce file names where first file has numerical\n"
-      "identifier NUM, next NUM + 1, etc. ",
+      "identifier NUM, next NUM + 1, etc.",
       &snes_obj[6]
     },
     {
@@ -2952,7 +2952,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 }
 
 
-static unsigned short int 
+static unsigned short int
 get_internal_sums (st_ucon64_nfo_t *rominfo)
 /*
   Returns the sum of the internal checksum and the internal inverse checksum

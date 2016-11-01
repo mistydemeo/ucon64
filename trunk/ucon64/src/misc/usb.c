@@ -49,7 +49,7 @@ usb_get_string_ascii (usb_dev_handle *dev, int index, char *buf, int buflen)
   if ((unsigned char) buffer[0] < rval)
     rval = (unsigned char) buffer[0];
   rval /= 2;
-  // lossy conversion to ISO Latin1 
+  // lossy conversion to ISO Latin1
   for (i = 1; i < rval; i++)
     {
       if (i > buflen)                           // destination buffer overflow

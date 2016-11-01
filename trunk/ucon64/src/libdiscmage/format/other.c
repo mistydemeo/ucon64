@@ -130,10 +130,10 @@ dm_other_gc_init (dm_image_t *image)
   fflush (stdout);
 #endif
 
-  opening_bnr.name[sizeof (opening_bnr.name) - 1] = 
-  opening_bnr.company[sizeof (opening_bnr.company) - 1] = 
-  opening_bnr.name_long[sizeof (opening_bnr.name_long) - 1] = 
-  opening_bnr.company_long[sizeof (opening_bnr.company_long) - 1] = 
+  opening_bnr.name[sizeof (opening_bnr.name) - 1] =
+  opening_bnr.company[sizeof (opening_bnr.company) - 1] =
+  opening_bnr.name_long[sizeof (opening_bnr.name_long) - 1] =
+  opening_bnr.company_long[sizeof (opening_bnr.company_long) - 1] =
   opening_bnr.desc[sizeof (opening_bnr.desc) - 1] = 0;
 
   sprintf (image->misc, "Misc: %s\n      %s\n      %s\n      %s\n      %s",
@@ -176,7 +176,7 @@ other_init (dm_image_t *image)
     if ((header_start = q_fncmp (image->fname,
                                  probe[x].start,
                                  probe[x].len,
-                                 probe[x].version_s, 
+                                 probe[x].version_s,
                                  strlen (probe[x].version_s),
                                  0)) != 0)
       {

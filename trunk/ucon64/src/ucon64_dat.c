@@ -193,7 +193,7 @@ const st_getopt2_t ucon64_dat_usage[] =
     {
       "rl", 0, 0, UCON64_RL,
       NULL, "rename to lowercase",
-      &ucon64_dat_obj[3] 
+      &ucon64_dat_obj[3]
     },
     {
       "ru", 0, 0, UCON64_RU,

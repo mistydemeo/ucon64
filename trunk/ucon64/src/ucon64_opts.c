@@ -410,7 +410,7 @@ ucon64_switches (st_ucon64_t *p)
         ucon64.parport = (uint16_t) strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
 #endif
       break;
-#endif // USE_PARALLEL 
+#endif // USE_PARALLEL
 
 #ifdef  USE_LIBCD64
     case UCON64_XCD64:

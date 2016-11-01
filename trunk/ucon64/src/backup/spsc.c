@@ -61,7 +61,7 @@ Example:  1010101010....10100
 
 Section: Data Header
 
-Contents: 
+Contents:
    byte # Description
    ------ -----------
    1      Start Address Lo-Byte

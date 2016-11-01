@@ -707,7 +707,7 @@ BackupROM (FILE *fp, int SizekW)
   time_t starttime;
 
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
-  
+
   WriteFlash (0, INTEL28F_READARRAY);   // Set flash (intel 28F640J3A) Read Mode
 
   starttime = time (NULL);

@@ -499,7 +499,7 @@ set_address (unsigned int addr, int inc)
   set_ai_data (2, 0x02);                        // latch chip select
   set_ai_data (3, (unsigned char) ~(1 << (addr >> 21))); // a[23..21]
   set_ai_data (2, (unsigned char) ((((addr >> 16) & 0x0f) << 2) | // a[20..16], auto-increment
-                                   (((addr >> 20) & 0x01) << 7) | 
+                                   (((addr >> 20) & 0x01) << 7) |
                                    (inc ? 0x01 : 0x00)));
   set_ai (3);
 }

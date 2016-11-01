@@ -988,7 +988,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
       fseek (destfile, ptr - buffer, SEEK_SET);
       fwrite (saver_patch_repl, 1, 38, destfile);
       found++;
-    }  
+    }
 
   for (ptr = buffer;
        (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer),
@@ -1000,7 +1000,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
       fseek (destfile, ptr - buffer, SEEK_SET);
       fwrite (saver_patch2_repl, 1, 38, destfile);
       found++;
-    }  
+    }
 
   for (ptr = buffer;
        (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer),
@@ -1012,7 +1012,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
       fseek (destfile, ptr - buffer, SEEK_SET);
       fwrite (saver_patch3_repl, 1, 38, destfile);
       found++;
-    }  
+    }
 
   for (ptr = buffer;
        (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer),
@@ -1024,7 +1024,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
       fseek (destfile, ptr - buffer, SEEK_SET);
       fwrite (saver_patch4_repl, 1, 40, destfile);
       found++;
-    }  
+    }
 
   for (ptr = buffer;
        (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer),
@@ -1036,7 +1036,7 @@ gba_saver_patch (FILE *destfile, unsigned char *buffer, unsigned int fsize)
       fseek (destfile, ptr - buffer, SEEK_SET);
       fwrite (saver_patch5_repl, 1, 42, destfile);
       found++;
-    }  
+    }
 
   fprintf (stdout, "%d saver patches applied\n", found);
 
@@ -1055,27 +1055,27 @@ int
 gba_sc (void)
 /*
   reverse engineered from SuperCard.exe
-  
+
   BOND EON only?
   a0 7f 00 03 00 80 00 03
   a0 7f 00 03 f0 7f 00 03
-  
+
   0e 48 39 68  01 60 0e 48 -> 00 48 00 47  01 fb 7f 08
   0003756c  0a 1c 02 80  0e 48 39 68  01 60 0e 48  79 68 01 60 TONY HAWK 2!
   0003756c  0a 1c 02 80  00 48 00 47  01 fb 7f 08  79 68 01 60
-      
+
   d0 -> e0
   00037842  7f 08 27 e0  d0 20 00 05  01 88 01 22 TONY HAWK 2!
   00037842  7f 08 27 e0  e0 20 00 05  01 88 01 22
-  
+
   08 80 -> c0 46
   00039870  08 88 07 48  08 80 00 f0  e5 f8 01 f0  a9 f8 01 f0 PINOBEE only?
   00039870  08 88 07 48  c0 46 00 f0  e5 f8 01 f0  a9 f8 01 f0
-  
+
   08 80 -> c0 46
   00000238  3a 4c 20 1c  08 80 3a 49  3a 48 08 60  4a 60 3a 48 PINOBEE
   00000238  3a 4c 20 1c  c0 46 3a 49  3a 48 08 60  4a 60 3a 48
-  
+
   01 60 -> c0 46
   000000fa  09 02 14 31  01 60 27 49  28 48 08 60  40 21 09 03 CT SPECIAL F only?
   000000fa  09 02 14 31  c0 46 27 49  28 48 08 60  40 21 09 03
@@ -1153,7 +1153,7 @@ gba_sc (void)
   unsigned char *buffer, *ptr = NULL;
   const char *p = NULL;
   FILE *destfile;
-  
+
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
@@ -1195,7 +1195,7 @@ gba_sc (void)
             printf ("offset: 0x%08x\n", (int) (ptr - buffer));
           fseek (destfile, ptr - buffer, SEEK_SET);
           fwrite (sc_repl, 1, 4, destfile);
-        }  
+        }
 
   for (ptr = buffer;
        (ptr = (unsigned char *) memmem2 (ptr, fsize - (ptr - buffer),
@@ -1209,7 +1209,7 @@ gba_sc (void)
         printf ("offset: 0x%08x\n", (int) (ptr - buffer));
       fseek (destfile, ptr - buffer, SEEK_SET);
       fputc (sc2_repl, destfile);
-    }  
+    }
 
   if (!memcmp (buffer + 0xee, &sc3_orig, 92))
     {
@@ -1217,7 +1217,7 @@ gba_sc (void)
         printf ("offset: 0x%08x\n", 0xee);
       fseek (destfile, 0xee, SEEK_SET);
       fwrite (sc3_repl, 1, 92, destfile);
-    }  
+    }
 
   // write menu (intro) at end of ROM
   // SuperCard.exe ignores padding with anything else than 0xff Bytes

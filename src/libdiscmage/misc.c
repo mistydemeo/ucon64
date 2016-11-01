@@ -1474,7 +1474,7 @@ one_filesystem (const char *filename1, const char *filename2)
   if ((fattrib2 = GetFileAttributes (filename2)) == (DWORD) -1)
     return 0;
   if (fattrib1 & FILE_ATTRIBUTE_DIRECTORY || fattrib2 & FILE_ATTRIBUTE_DIRECTORY)
-    /* 
+    /*
       We special-case directories, because we can't use
       FILE_FLAG_BACKUP_SEMANTICS as argument to CreateFile() on Windows 9x/ME.
       There seems to be no Win32 function other than CreateFile() to obtain a

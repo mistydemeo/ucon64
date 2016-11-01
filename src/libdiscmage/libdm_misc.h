@@ -87,7 +87,7 @@ enum {
 
 
 /*
-  dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
+  dm_get_track_desc() returns a string like "MODE1/2352" depending on the
                       mode and sector_size specified; if cue == FALSE
                       it will return the string in TOC format
 */

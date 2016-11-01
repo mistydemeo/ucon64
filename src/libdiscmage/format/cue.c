@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #endif
 
 
-const st_track_desc_t cue_desc[] = 
+const st_track_desc_t cue_desc[] =
   {
     {DM_MODE1_2048, "MODE1/2048"}, // CD-ROM Mode1 Data (cooked)
     {DM_MODE1_2352, "MODE1/2352"}, // CD-ROM Mode1 Data (raw)

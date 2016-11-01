@@ -1,5 +1,5 @@
 /*
-backup.h - backup support for uCON64 
+backup.h - backup support for uCON64
 
 Copyright (c) 2003 NoisyB
 

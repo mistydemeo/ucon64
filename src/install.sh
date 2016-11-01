@@ -14,7 +14,7 @@ echo "Give root's password:"
 su root -c "
 echo Continuing installation.
 chown root ucon64
-chmod 4775 ucon64
+chmod 4755 ucon64
 cp -p ucon64 $DESTDIR
 "
 if [ ! -e $HOME/.ucon64 ]; then

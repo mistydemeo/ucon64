@@ -58,7 +58,7 @@ property_check (const char *filename, int version, int verbose)
     {
       FILE *fh = NULL;
 
-      if (verbose) 
+      if (verbose)
         {
           fprintf (stderr, "NOTE: %s not found: creating...", filename);
           fflush (stderr);

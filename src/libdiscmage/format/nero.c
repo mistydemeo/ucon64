@@ -340,7 +340,7 @@ nrg_init (dm_image_t * image)
 
   for (s = 0; s < image->sessions; s++)
     for (t = 0; t < image->tracks; t++)
-      { 
+      {
         if (!nrg_track_init (&image->track[t], fh))
           {
             image->session[s]++; // # of tracks for this session

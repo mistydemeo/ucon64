@@ -110,7 +110,7 @@ char cartname[32], manufname[16];
 #define    CTRL_INACTIVE   (CTRL_BANK0B|CTRL_BANK1B|CTRL_CTR_CLKB)
 
 
-// Make cart strobes inactive & counter clock & reset inactive 
+// Make cart strobes inactive & counter clock & reset inactive
 
 unsigned char control_register = CTRL_INACTIVE;
 static void lynxit_write_control (unsigned char data);
@@ -1048,7 +1048,7 @@ lynxit_read_rom (const char *filename, unsigned int parport)
       fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
       exit (1);
     }
-  
+
   return 0;
 }
 

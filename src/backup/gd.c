@@ -258,7 +258,7 @@ gd3_send_prolog_byte (unsigned char data)
   outportb (gd_port + PARPORT_CONTROL, 5);      // Clock data out to SF3
   inportb (gd_port + PARPORT_CONTROL);          // Let data "settle down"
   outportb (gd_port + PARPORT_CONTROL, 4);
-  
+
   return GD_OK;
 }
 

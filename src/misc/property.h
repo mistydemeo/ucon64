@@ -92,7 +92,7 @@ typedef struct
 #endif
 
 #if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
-#define PROPERTY_MODE_DIR(n) "~" DIR_SEPARATOR_S 
+#define PROPERTY_MODE_DIR(n) "~" DIR_SEPARATOR_S
 #elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
 #define PROPERTY_MODE_DIR(n) "~" DIR_SEPARATOR_S "." n DIR_SEPARATOR_S
 #else

@@ -232,13 +232,14 @@ open_module (char *module_name)
 #elif   defined _WIN32
   if ((handle = LoadLibrary (module_name)) == NULL)
     {
+      DWORD errorcode = GetLastError ();
       LPTSTR strptr;
 
       fputs ("ERROR: ", stderr);
       FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
                      FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS,
-                     NULL, GetLastError (),
+                     NULL, errorcode,
                      MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
                      (LPTSTR) &strptr, 0, NULL);
       // Note the construct with strptr.
@@ -293,13 +294,14 @@ get_symbol (void *handle, char *symbol_name)
   symptr = sym.void_ptr;
   if (symptr == NULL)
     {
+      DWORD errorcode = GetLastError ();
       LPTSTR strptr;
 
       fputs ("ERROR: ", stderr);
       FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
                      FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS,
-                     NULL, GetLastError (),
+                     NULL, errorcode,
                      MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
                      (LPTSTR) &strptr, 0, NULL);
       fputs (strptr, stderr);
@@ -336,10 +338,8 @@ has_symbol (void *handle, char *symbol_name)
   if (symptr == NULL)
     symptr = (void *) -1;
 #elif   defined __unix__ || defined __APPLE__   // Mac OS X actually, see
-  char *strptr;                                 //  comment in open_module()
-
-  symptr = dlsym (handle, symbol_name);
-  if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
+  symptr = dlsym (handle, symbol_name);         //  comment in open_module()
+  if (dlerror () != NULL)                       // this is "the correct way"
     symptr = (void *) -1;                       //  according to the info page
 #elif   defined _WIN32
   u_func_ptr_t sym;

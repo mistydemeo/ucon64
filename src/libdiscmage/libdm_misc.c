@@ -110,7 +110,7 @@ typedef struct
 
 /*
  * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336,
- * 2340, or 2352 bytes long.  
+ * 2340, or 2352 bytes long.
 
 *         Sector types of the standard CD-ROM data formats:
  *
@@ -144,7 +144,7 @@ typedef struct
 
 /*
   from CDmage
-  
+
   m1_2048=iso
   m1_2352=tao
   m2_2336=mm2
@@ -490,7 +490,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   if (track->pregap_len != 150) // 0x96
     fprintf (stderr, "WARNING: track seems to have a non-standard pregap (%d Bytes)\n",
              track->pregap_len);
- 
+
 #if 0
   if (image->pregap && track->mode == 0 && remaining_tracks > 1) // quick hack to save next track pregap (audio tracks only)
     track->track_len += pregap_length;       // if this isn't last track in current session
@@ -560,9 +560,9 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
       if (!(x % 100))
         dm_gauge (x * track->sector_size, track->track_len * track->sector_size);
     }
-                  
+
   dm_gauge (x * track->sector_size, track->track_len * track->sector_size);
-                        
+
 //  fseek (fh, track->total_len * track->sector_size, SEEK_CUR);
 
   fclose (fh);
@@ -585,7 +585,7 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
   FILE *dest = NULL, *src = NULL, *boot = NULL, *header = NULL;
   int mac = FALSE;
   const char sub_header[] = {0, 0, 0x08, 0, 0, 0, 0x08, 0};
-  
+
   if (start_lba <= 0)
     {
       fprintf (stderr, "ERROR: Bad LBA value");
@@ -594,7 +594,7 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
 
   if (!track)
     return -1;
-  
+
   mac = (track->sector_size == 2056 ? TRUE : FALSE);
 
   if (!(src = fopen (image->fname, "rb")))
@@ -814,7 +814,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
             printf ("\x1b[0m] ");
           else
 #endif
-          printf ("] "); 
+          printf ("] ");
         }
 
       fputc ('\n', stdout);

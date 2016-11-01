@@ -7086,7 +7086,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       sprintf (buf, "Television standard: %s\n",
         ines_header.ctrl3 & INES_TVID ? "PAL" : "NTSC");
       strcat (rominfo->misc, buf);
-      
+
       if (ines_header.ctrl1 & INES_MIRROR)
         str = "Vertical";
       else if (ines_header.ctrl1 & INES_4SCREEN)

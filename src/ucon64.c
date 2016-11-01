@@ -294,7 +294,7 @@ ucon64_clear_nfo (st_ucon64_nfo_t *nfo)
 }
 
 
-//#define TEST 
+//#define TEST
 #ifdef  TEST
 typedef struct
 {
@@ -711,7 +711,7 @@ TEST_BREAK
 
       sprintf (strchr (buf, 0), "%5s (%s)\n", state, test[x].cmdline);
 
-      printf (buf); 
+      printf (buf);
       fflush (stdout);
 
       if (test[x].crc32 != TEST_BUG && test[x].crc32 != TEST_TODO)
@@ -1159,7 +1159,7 @@ main (int argc, char **argv)
       int flags = GETOPT2_FILE_FILES_ONLY;
       if (ucon64.recursive)
         flags |= GETOPT2_FILE_RECURSIVE;
-      else 
+      else
         {
           /*
             Check if one of the parameters is a directory and if so, set the

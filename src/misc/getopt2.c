@@ -415,7 +415,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
                    GETOPT2_FILE_RECURSIVE_ONCE)) :
         1)                                      // everything else: call callback
     {
-      int result = 0; 
+      int result = 0;
 
 #ifdef  DEBUG
       printf ("callback_func() == %s\n", path);
@@ -433,7 +433,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
   if (S_ISDIR (fstate.st_mode) &&
       (flags & (GETOPT2_FILE_RECURSIVE | GETOPT2_FILE_RECURSIVE_ONCE)))
     {
-      int result = 0; 
+      int result = 0;
 #ifndef _WIN32
       struct dirent *ep;
       DIR *dp;

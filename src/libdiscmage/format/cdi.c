@@ -177,14 +177,14 @@ cdi_track_init (dm_track_t *track, FILE *fh)
                                //    20    NULL
   if (version != CDI_V2)
     {
-      fseek (fh, 5, SEEK_CUR); 
+      fseek (fh, 5, SEEK_CUR);
       fread (&value32, 4, 1, fh); //     9    unknown data           3.0 only (build 780+: 00FFFFFFFFFFFFFFFF)
       if (le2me_32 (value32) == 0xffffffff)
         fseek (fh, 78, SEEK_CUR); //    78    unknown data      3.00.780 only (not NULL)
     }
 
   fseek (fh, (version == CDI_V2 ? 12 : 13), SEEK_CUR); // skip session
-  
+
 #ifdef  DEBUG
   printf ("%lx\n", ftell(fh));
   fflush (stdout);

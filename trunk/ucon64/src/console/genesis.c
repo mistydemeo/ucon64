@@ -130,22 +130,22 @@ const st_getopt2_t genesis_usage[] =
 #if 0
     {
       "gf", 0, 0, UCON64_GF,
-      NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE",
+      NULL, "convert Sega CD country code to Europe; ROM" OPTARG_S "$CD_IMAGE",
       NULL
     },
     {
       "ga", 0, 0, UCON64_GA,
-      NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE",
+      NULL, "convert Sega CD country code to U.S.A.; ROM" OPTARG_S "$CD_IMAGE",
       NULL
     },
     {
       "gym", 0, 0, UCON64_GYM,
-      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE",
+      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "ROM" OPTARG_S "GYMFILE",
       NULL
     },
     {
       "cym", 0, 0, UCON64_CYM,
-      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE",
+      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "ROM" OPTARG_S "CYMFILE",
       NULL
     },
 #endif
@@ -195,7 +195,7 @@ const st_getopt2_t genesis_usage[] =
     },
     {
       "region", 1, 0, UCON64_REGION,
-      "CODE", "enable region function; use with -multi\n"
+      "CODE", "enable region function; use with " OPTION_LONG_S "multi\n"
       "CODE=0 force NTSC/Japan for all games\n"
       "CODE=1 force NTSC/U.S.A. for all games\n"
       "CODE=2 force PAL for all games\n"

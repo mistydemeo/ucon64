@@ -166,13 +166,13 @@ const st_getopt2_t ucon64_dat_usage[] =
     },
     {
       "mkdat", 1, 0, UCON64_MKDAT,
-      "DATFILE", "create DAT file; use -o to specify an output directory",
+      "DATFILE", "create DAT file; use " OPTION_S "o to specify an output directory",
       &ucon64_dat_obj[2]
     },
     {
       "rdat", 0, 0, UCON64_RDAT,
       NULL, "rename ROMs to their DATabase names\n"
-      "use -o to specify an output directory",
+      "use " OPTION_S "o to specify an output directory",
       &ucon64_dat_obj[4]
     },
     {

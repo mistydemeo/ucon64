@@ -93,9 +93,9 @@ const st_getopt2_t cd64_usage[] =
     {
       "xcd64p", 1, 0, UCON64_XCD64P,
       "PROT", "use protocol PROT when communicating with CD64; " OPTION_LONG_S "port=PORT\n"
-      "PROT=0 CD64 BIOS\n"
-      "PROT=1 Ghemor\n"
-      "PROT=2 UltraLink",
+      "PROT" OPTARG_S "0 CD64 BIOS\n"
+      "PROT" OPTARG_S "1 Ghemor\n"
+      "PROT" OPTARG_S "2 UltraLink",
       &cd64_obj[3]
     },
 #endif // USE_LIBCD64

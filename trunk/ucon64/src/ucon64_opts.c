@@ -815,9 +815,9 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if ((buf[x] = (char) strtol (values[x], NULL, 16)) != '\0')
-          buf[x] = '?';
-      buf[x] = 0;
+        buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
+          '?' : (char) strtol (values[x], NULL, 16);
+      buf[x] = '\0';
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
                    value, MEMCMP2_WCARD ('?'));
       break;
@@ -826,9 +826,9 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if ((buf[x] = (char) strtol (values[x], NULL, 16)) != '\0')
-          buf[x] = '?';
-      buf[x] = 0;
+        buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
+          '?' : (char) strtol (values[x], NULL, 16);
+      buf[x] = '\0';
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
                    value, MEMCMP2_REL);
       break;
@@ -837,9 +837,9 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if ((buf[x] = (char) strtol (values[x], NULL, 10)) != '\0')
-          buf[x] = '?';
-      buf[x] = 0;
+        buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
+          '?' : (char) strtol (values[x], NULL, 10);
+      buf[x] = '\0';
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
                    value, MEMCMP2_WCARD ('?'));
       break;
@@ -848,9 +848,9 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        if ((buf[x] = (char) strtol (values[x], NULL, 10)) != '\0')
-          buf[x] = '?';
-      buf[x] = 0;
+        buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
+          '?' : (char) strtol (values[x], NULL, 10);
+      buf[x] = '\0';
       ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
                    value, MEMCMP2_REL);
       break;

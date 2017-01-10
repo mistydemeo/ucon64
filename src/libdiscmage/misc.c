@@ -1653,7 +1653,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
   One example of using sets:
     char str[] = "fu-bar     is the same as foobar    ";
-    st_cm_set_t sets[] = {{"o-", 2}, {"uo", 2}};
+    st_cm_set_t sets[] = {{"uo", 2}, {"o-", 2}};
     change_mem2 (str, strlen (str), "f!!", 3, '*', '!', "fighter", 7, 1, sets);
   This changes str into "fu-fighter is the same as foofighter".
 */

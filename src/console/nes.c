@@ -121,12 +121,12 @@ const st_getopt2_t nes_usage[] =
     {
       "ctrl", 1, 0, UCON64_CTRL,
       "TYPE", "specify controller type (UNIF only)\n"
-      "TYPE=0 regular joypad\n"
-      "TYPE=1 zapper\n"
-      "TYPE=2 R.O.B.\n"
-      "TYPE=3 Arkanoid controller\n"
-      "TYPE=4 powerpad\n"
-      "TYPE=5 four-score adapter",
+      "TYPE" OPTARG_S "0 regular joypad\n"
+      "TYPE" OPTARG_S "1 zapper\n"
+      "TYPE" OPTARG_S "2 R.O.B.\n"
+      "TYPE" OPTARG_S "3 Arkanoid controller\n"
+      "TYPE" OPTARG_S "4 powerpad\n"
+      "TYPE" OPTARG_S "5 four-score adapter",
       &nes_obj[0]
     },
     {
@@ -162,12 +162,12 @@ const st_getopt2_t nes_usage[] =
     {
       "mirr", 1, 0, UCON64_MIRR,
       "MTYPE", "specify mirroring type\n"
-      "MTYPE=0 horizontal mirroring\n"
-      "MTYPE=1 vertical mirroring\n"
-      "MTYPE=2 mirror all pages from $2000 (UNIF only)\n"
-      "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
-      "MTYPE=4 four screens of VRAM\n"
-      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)",
+      "MTYPE" OPTARG_S "0 horizontal mirroring\n"
+      "MTYPE" OPTARG_S "1 vertical mirroring\n"
+      "MTYPE" OPTARG_S "2 mirror all pages from $2000 (UNIF only)\n"
+      "MTYPE" OPTARG_S "3 mirror all pages from $2400 (UNIF only)\n"
+      "MTYPE" OPTARG_S "4 four screens of VRAM\n"
+      "MTYPE" OPTARG_S "5 mirroring controlled by mapper hardware (UNIF only)",
       &nes_obj[5]
     },
 #if     UNIF_REVISION > 7
@@ -205,7 +205,7 @@ const st_getopt2_t nes_usage[] =
     },
     {
       "nfs", 0, 0, UCON64_NFS,
-      NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE",
+      NULL, "convert NFS sound to WAV; " OPTION_LONG_S "ROM" OPTARG_S "NFSFILE",
       NULL
     },
 #endif

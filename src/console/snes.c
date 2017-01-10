@@ -121,7 +121,7 @@ const st_getopt2_t snes_usage[] =
     },
     {
       "erom", 0, 0, UCON64_EROM,
-      NULL, "force ROM is \"Extended\" (combine with -hi for Extended HiROM)",
+      NULL, "force ROM is \"Extended\" (combine with " OPTION_LONG_S "hi for Extended HiROM)",
       &snes_obj[6]
     },
 #if 0
@@ -190,13 +190,13 @@ const st_getopt2_t snes_usage[] =
     // the next switch remains undocumented until we know of a good checksum algorithm
     {
       "id", 0, 0, UCON64_ID,
-      NULL, "force -gd3 to produce a unique file name",
+      NULL, "force " OPTION_LONG_S "gd3 to produce a unique file name",
       &snes_obj[0]
     },
 #endif
     {
       "idnum", 1, 0, UCON64_IDNUM,
-      "NUM", "make -gd3 produce file names where first file has numerical\n"
+      "NUM", "make " OPTION_LONG_S "gd3 produce file names where first file has numerical\n"
       "identifier NUM, next NUM + 1, etc.",
       &snes_obj[6]
     },
@@ -238,23 +238,23 @@ const st_getopt2_t snes_usage[] =
     {
       "ctrl", 1, 0, UCON64_CTRL,
       "TYPE", "specify type of controller in port 1 for emu when converting\n"
-      "TYPE=0 gamepad\n"
-      "TYPE=1 mouse\n"
-      "TYPE=2 mouse / gamepad\n"
-      "TYPE=6 multitap",
+      "TYPE" OPTARG_S "0 gamepad\n"
+      "TYPE" OPTARG_S "1 mouse\n"
+      "TYPE" OPTARG_S "2 mouse / gamepad\n"
+      "TYPE" OPTARG_S "6 multitap",
       &snes_obj[0]
     },
     {
       "ctrl2", 1, 0, UCON64_CTRL2,
       "TYPE", "specify type of controller in port 2 for emu when converting\n"
-      "TYPE=0 gamepad\n"
-      "TYPE=1 mouse\n"
-      "TYPE=2 mouse / gamepad\n"
-      "TYPE=3 super scope\n"
-      "TYPE=4 super scope / gamepad\n"
-      "TYPE=5 Konami's justifier\n"
-      "TYPE=6 multitap\n"
-      "TYPE=7 mouse / super scope / gamepad",
+      "TYPE" OPTARG_S "0 gamepad\n"
+      "TYPE" OPTARG_S "1 mouse\n"
+      "TYPE" OPTARG_S "2 mouse / gamepad\n"
+      "TYPE" OPTARG_S "3 super scope\n"
+      "TYPE" OPTARG_S "4 super scope / gamepad\n"
+      "TYPE" OPTARG_S "5 Konami's justifier\n"
+      "TYPE" OPTARG_S "6 multitap\n"
+      "TYPE" OPTARG_S "7 mouse / super scope / gamepad",
       &snes_obj[6]
     },
     {

@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <ctype.h>
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
@@ -163,7 +164,7 @@ const char *ucon64_msg[] =
     "TIP:   Check cables and connection\n"
     "       Turn the backup unit off and on\n"
 //    "       Split ROMs must be joined first\n" // handled with WF_NO_SPLIT
-    "       Use " OPTION_LONG_S "port={3bc, 378, 278, ...} to specify a parallel port address\n"
+    "       Use " OPTION_LONG_S "port" OPTARG_S "{3bc, 378, 278, ...} to specify a parallel port address\n"
     "       Set the port to SPP (standard, normal) mode in your BIOS as some backup\n"
     "         units do not support EPP and ECP style parallel ports\n"
     "       Read the backup unit's manual\n",
@@ -247,7 +248,7 @@ const st_getopt2_t ucon64_options_usage[] =
 #if     defined USE_PARALLEL || defined USE_LIBCD64
         "parallel"
 #endif
-        " PORT={"
+        " PORT" OPTARG_S "{"
 #ifdef  USE_USB
         "USB0, USB1, ... "
 #endif
@@ -274,7 +275,7 @@ const st_getopt2_t ucon64_options_usage[] =
     },
     {
       "hd", 0, 0, UCON64_HD,
-      NULL, "same as " OPTION_LONG_S "hdn=512\n"
+      NULL, "same as " OPTION_LONG_S "hdn" OPTARG_S "512\n"
       "most backup units use a header with a size of 512 Bytes",
       &ucon64_option_obj[0]
     },
@@ -357,7 +358,7 @@ const st_getopt2_t ucon64_options_usage[] =
     },
     {
       "hfind", 1, 0, UCON64_HFIND,
-      "HEX", "find HEX codes in ROM; use quotation " OPTION_LONG_S "hfind=\"75 ? 4f 4e\"\n"
+      "HEX", "find HEX codes in ROM; use quotation " OPTION_LONG_S "hfind" OPTARG_S "\"75 ? 4f 4e\"\n"
              "(wildcard: '?')",
       &ucon64_option_obj[6]
     },
@@ -369,7 +370,7 @@ const st_getopt2_t ucon64_options_usage[] =
     },
     {
       "dfind", 1, 0, UCON64_DFIND,
-      "DEC", "find DEC values in ROM; use quotation " OPTION_LONG_S "dfind=\"117 ? 79 78\"\n"
+      "DEC", "find DEC values in ROM; use quotation " OPTION_LONG_S "dfind" OPTARG_S "\"117 ? 79 78\"\n"
              "(wildcard: '?')",
       &ucon64_option_obj[6]
     },
@@ -392,13 +393,13 @@ const st_getopt2_t ucon64_options_usage[] =
     {
       "help", 2, 0, UCON64_HELP,
       "WHAT", "display help and exit\n"
-              "WHAT=\"long\"   show long help (default)\n"
-              "WHAT=\"pad\"    show help for padding ROMs\n"
-              "WHAT=\"dat\"    show help for DAT support\n"
-              "WHAT=\"patch\"  show help for patching ROMs\n"
-              "WHAT=\"backup\" show help for backup units\n"
+              "WHAT" OPTARG_S "\"long\"   show long help (default)\n"
+              "WHAT" OPTARG_S "\"pad\"    show help for padding ROMs\n"
+              "WHAT" OPTARG_S "\"dat\"    show help for DAT support\n"
+              "WHAT" OPTARG_S "\"patch\"  show help for patching ROMs\n"
+              "WHAT" OPTARG_S "\"backup\" show help for backup units\n"
 #ifdef  USE_DISCMAGE
-              "WHAT=\"disc\"   show help for DISC image support\n"
+              "WHAT" OPTARG_S "\"disc\"   show help for DISC image support\n"
 #endif
               OPTION_LONG_S "help " OPTION_LONG_S "snes would show only SNES related help",
       &ucon64_option_obj[2]
@@ -543,7 +544,7 @@ const st_getopt2_t ucon64_padding_usage[] =
     },
     {
       "stp", 0, 0, UCON64_STP,
-      NULL, "same as " OPTION_LONG_S "stpn=512\n"
+      NULL, "same as " OPTION_LONG_S "stpn" OPTARG_S "512\n"
       "most backup units use a header with a size of 512 Bytes",
       NULL
     },
@@ -554,7 +555,7 @@ const st_getopt2_t ucon64_padding_usage[] =
     },
     {
       "ins", 0, 0, UCON64_INS,
-      NULL, "same as " OPTION_LONG_S "insn=512\n"
+      NULL, "same as " OPTION_LONG_S "insn" OPTARG_S "512\n"
       "most backup units use a header with a size of 512 Bytes",
       NULL
     },
@@ -1836,9 +1837,8 @@ ucon64_find_func (void *buffer, int n, void *object)
           o->found = o->pos - matchlen;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, compare,
-                MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0 + 1)),
-                o->found, DUMPER_HEX);
+              dumper (stdout, compare, (o->searchlen + 0x0f) & ~0x0f, o->found,
+                      DUMPER_HEX);
               fputc ('\n', stdout);
             }
         }
@@ -1854,8 +1854,8 @@ ucon64_find_func (void *buffer, int n, void *object)
           if (!(o->flags & UCON64_FIND_QUIET))
             {
               dumper (stdout, ptr1,
-                MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0 + 1)),
-                o->found, DUMPER_HEX);
+                      MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0)),
+                      o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
           ptr1++;
@@ -1871,11 +1871,6 @@ ucon64_find_func (void *buffer, int n, void *object)
                 matchlen = o->searchlen - m;
                 break;
               }
-          if (!matchlen)                          // && o->flags & MEMMEM2_REL
-            {
-              match[0] = ptr0[n - 1];             // we must not split the string
-              matchlen = 1;                       //  for a relative search
-            }
           break;
         }
     }
@@ -1899,15 +1894,14 @@ ucon64_find (const char *filename, size_t start, size_t len,
 
   if (searchlen < 1)
     {
-      fprintf (stderr, "ERROR: No search string specified\n");
+      fputs ("ERROR: No search string specified\n", stderr);
       exit (1);
     }
-  else if (flags & MEMCMP2_REL)
-    if (searchlen < 2)
-      {
-        fprintf (stderr, "ERROR: Search string must be longer than 1 character for a relative search\n");
-        exit (1);
-      }
+  else if (flags & MEMCMP2_REL && searchlen < 2)
+    {
+      fputs ("ERROR: Search string must be longer than 1 character for a relative search\n", stderr);
+      exit (1);
+    }
   if (searchlen > MAXBUFSIZE)
     {
       fprintf (stderr, "ERROR: Search string must be <= %d characters\n", MAXBUFSIZE);
@@ -1916,26 +1910,47 @@ ucon64_find (const char *filename, size_t start, size_t len,
 
   if (!(flags & UCON64_FIND_QUIET))
     {
+      char *display_search;
+      int n;
+
       fputs (basename2 (filename), stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
         fputc ('\n', stdout);
 
-    // TODO: display "b?a" as "b" "a"
-    if (!(flags & (MEMCMP2_CASE | MEMCMP2_REL)))
-      printf ("Searching: \"%s\"\n\n", search);
-    else if (flags & MEMCMP2_CASE)
-      printf ("Case insensitive searching: \"%s\"\n\n", search);
-    else if (flags & MEMCMP2_REL)
-      {
-        char *p = (char *) search;
+      if ((display_search = (char *) malloc (searchlen + 1)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], searchlen + 1);
+          exit (1);
+        }
+      memcpy (display_search, search, searchlen);
+      for (n = 0; n < searchlen; n++)
+        if (!isprint ((int) display_search[n])) // we can't use mkprint(), because it skips \n
+          display_search[n] = '.';
+      display_search[searchlen] = '\0';         // terminate string
 
-        printf ("Relative searching: \"%s\"\n\n", search);
-        for (; *(p + 1); p++)
-          printf ("'%c' - '%c' = %d\n", *p, *(p + 1), *p - *(p + 1));
-        printf ("\n");
-      }
+      if (!(flags & (MEMCMP2_CASE | MEMCMP2_REL)))
+        printf ("Searching: \"%s\"\n\n", display_search);
+      else if (flags & MEMCMP2_CASE)
+        printf ("Case insensitive searching: \"%s\"\n\n", display_search);
+      else if (flags & MEMCMP2_REL)
+        {
+          printf ("Relative searching: \"%s\"\n\n", display_search);
+          for (n = 0; n + 1 < searchlen; n++)
+            {
+              char format[80];
+
+              sprintf (format, "%s - %s = %%d\n",
+                       isprint ((int) search[n]) ? "'%c'" : "%u",
+                       isprint ((int) search[n + 1]) ? "'%c'" : "%u");
+              printf (format, search[n] & 0xff, search[n + 1] & 0xff,
+                      (unsigned char) search[n] - (unsigned char) search[n + 1]);
+            }
+          fputc ('\n', stdout);
+        }
+
+      free (display_search);
     }
 
   quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len, filename, "rb");

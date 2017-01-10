@@ -72,17 +72,17 @@ const st_getopt2_t swc_usage[] =
     */
     {
       "xswc-io", 1, 0, UCON64_XSWC_IO,
-      "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
-      "MODE=0x001 force 32 Mbit dump\n"
-      "MODE=0x002 use alternative method for determining ROM size\n"
-      "MODE=0x004 Super FX\n"
-      "MODE=0x008 S-DD1\n"
-      "MODE=0x010 SA-1\n"
-      "MODE=0x020 SPC7110\n"
-      "MODE=0x040 DX2 trick (might work with other SWC models)\n"
-      "MODE=0x080 Mega Man X 2\n"
-      "MODE=0x100 dump BIOS\n"
-      "It is possible to combine flags. MODE=0x44 makes it possible\n"
+      "MODE", "specify SWC I/O mode; use with " OPTION_LONG_S "xswc or " OPTION_LONG_S "xswcc\n"
+      "MODE" OPTARG_S "0x001 force 32 Mbit dump\n"
+      "MODE" OPTARG_S "0x002 use alternative method for determining ROM size\n"
+      "MODE" OPTARG_S "0x004 Super FX\n"
+      "MODE" OPTARG_S "0x008 S-DD1\n"
+      "MODE" OPTARG_S "0x010 SA-1\n"
+      "MODE" OPTARG_S "0x020 SPC7110\n"
+      "MODE" OPTARG_S "0x040 DX2 trick (might work with other SWC models)\n"
+      "MODE" OPTARG_S "0x080 Mega Man X 2\n"
+      "MODE" OPTARG_S "0x100 dump BIOS\n"
+      "It is possible to combine flags. MODE" OPTARG_S "0x44 makes it possible\n"
       "to dump for example Yoshi's Island",
       &swc_obj[2]
     },

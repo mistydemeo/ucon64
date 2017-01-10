@@ -81,12 +81,12 @@ const st_getopt2_t lynx_usage[] =
     },
     {
       "b0", 1, 0, UCON64_B0,
-      "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)",
+      "N", "change Bank0 kBytes size to N" OPTARG_S "{0,64,128,256,512} (LNX only)",
       &lynx_obj[2]
     },
     {
       "b1", 1, 0, UCON64_B1,
-      "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)",
+      "N", "change Bank1 kBytes size to N" OPTARG_S "{0,64,128,256,512} (LNX only)",
       &lynx_obj[2]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}

@@ -572,7 +572,7 @@ static void *open_module(char *module_name, struct cd64_t *cd64) {
 
 	void *handle;
 #ifdef __CYGWIN__
-  if ((handle = dlopen(module_name, RTLD_LAZY)) == NULL) {
+	if ((handle = dlopen(module_name, RTLD_LAZY)) == NULL) {
 		cd64->notice_callback2("dlopen: %s", dlerror());
 		exit(1);
 	}

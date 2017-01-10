@@ -112,14 +112,14 @@ const st_getopt2_t gba_usage[] =
     {
       "crp", 1, 0, UCON64_CRP,
       "WAIT_TIME", "slow down ROM access (\"crash patch\");\n"
-      "WAIT_TIME=0  default in most crash patches\n"
-      "WAIT_TIME=4  faster than 0, slower than 8\n"
-      "WAIT_TIME=8  faster than 4, slower than 28\n"
-      "WAIT_TIME=12 slowest cartridge access speed\n"
-      "WAIT_TIME=16 faster than 28, but slower than 20\n"
-      "WAIT_TIME=20 default in most original cartridges\n"
-      "WAIT_TIME=24 fastest cartridge access speed\n"
-      "WAIT_TIME=28 faster than 8 but slower than 16",
+      "WAIT_TIME" OPTARG_S "0  default in most crash patches\n"
+      "WAIT_TIME" OPTARG_S "4  faster than 0, slower than 8\n"
+      "WAIT_TIME" OPTARG_S "8  faster than 4, slower than 28\n"
+      "WAIT_TIME" OPTARG_S "12 slowest cartridge access speed\n"
+      "WAIT_TIME" OPTARG_S "16 faster than 28, but slower than 20\n"
+      "WAIT_TIME" OPTARG_S "20 default in most original cartridges\n"
+      "WAIT_TIME" OPTARG_S "24 fastest cartridge access speed\n"
+      "WAIT_TIME" OPTARG_S "28 faster than 8 but slower than 16",
       &gba_obj[3]
     },
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"

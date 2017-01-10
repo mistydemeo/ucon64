@@ -922,17 +922,17 @@ const st_getopt2_t cmc_usage[] =
     {
       "xcmct", 1, 0, UCON64_XCMCT,
       "TEST", "run test TEST\n"
-      "TEST=1 burn-in reliability test (specify speed)\n"
-      "TEST=2 testbench mode (experts only)",
+      "TEST" OPTARG_S "1 burn-in reliability test (specify speed)\n"
+      "TEST" OPTARG_S "2 testbench mode (experts only)",
       &cmc_obj[0]
     },
     {
       "xcmcm", 1, 0, UCON64_XCMCM,
       "SPEED", "specify transfer speed\n"
-      "SPEED=1 slow (debug)\n"
-      "SPEED=2 medium\n"
-      "SPEED=3 fast (default)\n"                // verify with value of DEFAULT_SPEED
-      "SPEED=4 full speed (risky)",
+      "SPEED" OPTARG_S "1 slow (debug)\n"
+      "SPEED" OPTARG_S "2 medium\n"
+      "SPEED" OPTARG_S "3 fast (default)\n"     // verify with value of DEFAULT_SPEED
+      "SPEED" OPTARG_S "4 full speed (risky)",
       &cmc_obj[1]
     },
 #endif // USE_PARALLEL

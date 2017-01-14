@@ -1827,23 +1827,33 @@ ucon64_find_func (void *buffer, int n, void *object)
       matchlen = 0;
     }
 
+  if (o->searchlen > n + matchlen)
+  {
+    o->pos += n;
+    return n;
+  }
+
   // check if we can match the search string across the buffer boundary
   for (m = 0; matchlen; matchlen--)
     {
+      int len = MIN (n, ((o->searchlen + 0x0f) & ~0x0f) - matchlen);
+
+      if (len + matchlen < o->searchlen)
+        break;
       memcpy (compare, match + m++, matchlen);
-      memcpy (compare + matchlen, ptr1, ((o->searchlen + 0x0f) & ~0x0f) - matchlen);
+      memcpy (compare + matchlen, ptr1, len);
       if (memcmp2 (compare, o->search, o->searchlen, o->flags) == 0)
         {
           o->found = o->pos - matchlen;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, compare, (o->searchlen + 0x0f) & ~0x0f, o->found,
-                      DUMPER_HEX);
+              dumper (stdout, compare, len + matchlen, o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
         }
     }
-
+  matchlen = 0;
+	
   while (ptr1 - ptr0 < n)
     {
       ptr1 = (char *) memmem2 (ptr1, n - (ptr1 - ptr0), o->search, o->searchlen,
@@ -1854,7 +1864,7 @@ ucon64_find_func (void *buffer, int n, void *object)
           if (!(o->flags & UCON64_FIND_QUIET))
             {
               dumper (stdout, ptr1,
-                      MIN ((o->searchlen + 0x0f) & ~0x0f, n - (ptr1 - ptr0)),
+                      MIN (n - (ptr1 - ptr0), (o->searchlen + 0x0f) & ~0x0f),
                       o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
@@ -1863,14 +1873,27 @@ ucon64_find_func (void *buffer, int n, void *object)
       else
         {
           // try to find a partial match at the end of buffer
-          ptr1 = ptr0 + n - o->searchlen;
-          for (m = 1; m < o->searchlen; m++)
-            if (memcmp2 (ptr1 + m, o->search, o->searchlen - m, o->flags) == 0)
+          int len = MIN (n, o->searchlen);
+
+          ptr1 = ptr0 + n - len;
+          for (m = 1; m < len; m++)
+            if (o->searchlen - m <= len &&
+                memcmp2 (ptr1 + m, o->search, o->searchlen - m, o->flags) == 0)
               {
                 memcpy (match, ptr1 + m, o->searchlen - m);
                 matchlen = o->searchlen - m;
                 break;
               }
+          /*
+            A relative search is undefined for a search string with a length of
+            1, so we have to handle that case by copying a possibly matching
+            byte to the array match.
+          */
+          if (!matchlen && o->flags & MEMMEM2_REL)
+            {
+              match[0] = ptr0[n - 1];
+              matchlen = 1;
+            }
           break;
         }
     }

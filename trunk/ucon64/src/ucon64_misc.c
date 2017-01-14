@@ -1853,7 +1853,7 @@ ucon64_find_func (void *buffer, int n, void *object)
         }
     }
   matchlen = 0;
-	
+
   while (ptr1 - ptr0 < n)
     {
       ptr1 = (char *) memmem2 (ptr1, n - (ptr1 - ptr0), o->search, o->searchlen,

@@ -863,8 +863,6 @@ static inline int
 quick_io_func_inline (int (*func) (void *, int, void *), int func_maxlen,
                       void *object, void *buffer, int buffer_len)
 {
-  // TODO: Clean this mess up. It hurts my brain. Code like this needs a
-  //       thorough explanation. - dbjh
   int i = 0, func_size = MIN (func_maxlen, buffer_len), func_result = 0;
 
   while (i < buffer_len)
@@ -886,7 +884,6 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 // func() takes buffer, length and object (optional), func_maxlen is maximum
 //  length passed to func()
 {
-  // TODO: Clean this mess up. It's truly awful. - dbjh
   void *buffer = NULL;
   int buffer_maxlen = 0, buffer_len = 0, func_len = 0;
   size_t len_done = 0;
@@ -929,7 +926,7 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
           fseek (fh, -buffer_len, SEEK_CUR);
           fwrite (buffer, 1, buffer_len, fh);
           /*
-            This appears to be a bug in DJGPP and Solaris (for ecample, when
+            This appears to be a bug in DJGPP and Solaris (for example, when
             called from ucon64_fbswap16()). Without an extra call to fseek() a
             part of the file won't be written (DJGPP: after 8 MB, Solaris: after
             12 MB).

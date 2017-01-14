@@ -875,7 +875,7 @@ main (int argc, char **argv)
   if (argc == 1)
     ucon64_test ();
 #else
-  printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2016\n"
+  printf ("uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2017\n"
     "Uses code from various people. See 'developers.html' for more!\n"
     "This may be freely redistributed under the terms of the GNU Public License\n\n");
 #endif

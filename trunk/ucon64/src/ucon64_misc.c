@@ -1877,11 +1877,10 @@ ucon64_find_func (void *buffer, int n, void *object)
 
           ptr1 = ptr0 + n - len;
           for (m = 1; m < len; m++)
-            if (o->searchlen - m <= len &&
-                memcmp2 (ptr1 + m, o->search, o->searchlen - m, o->flags) == 0)
+            if (memcmp2 (ptr1 + m, o->search, len - m, o->flags) == 0)
               {
-                memcpy (match, ptr1 + m, o->searchlen - m);
-                matchlen = o->searchlen - m;
+                memcpy (match, ptr1 + m, len - m);
+                matchlen = len - m;
                 break;
               }
           /*

@@ -52,19 +52,19 @@ const st_getopt2_t fig_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xfig", 0, 0, UCON64_XFIG,
-      NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist",
       &fig_obj[0]
     },
     {
       "xfigs", 0, 0, UCON64_XFIGS,
-      NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &fig_obj[1]
     },
     {
       "xfigc", 0, 0, UCON64_XFIGC, NULL,
-      "send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;\n" OPTION_LONG_S "port=PORT\n"
+      "send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
 //      "Press q to abort; ^C might cause invalid state of backup unit"
       &fig_obj[1]

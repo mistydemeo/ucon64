@@ -48,13 +48,13 @@ const st_getopt2_t sflash_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xsf", 0, 0, UCON64_XSF,
-      NULL, "send/receive ROM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (64 Mbits) when ROM does not exist",
       &sflash_obj[0]
     },
     {
       "xsfs", 0, 0, UCON64_XSFS,
-      NULL, "send/receive SRAM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &sflash_obj[1]
     },

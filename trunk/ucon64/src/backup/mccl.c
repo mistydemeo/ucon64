@@ -88,7 +88,7 @@ const st_getopt2_t mccl_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xmccl", 0, 0, UCON64_XMCCL,
-      NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT",
+      NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &mccl_obj[0]
     },
 #endif

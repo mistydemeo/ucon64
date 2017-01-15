@@ -50,8 +50,8 @@ const st_getopt2_t lynxit_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xlit", 0, 0, UCON64_XLIT,
-      NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT",
-//    "                  receives automatically when ROM does not exist\n"
+      NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port" OPTARG_S "PORT",
+//      "receives automatically when ROM does not exist",
       &lynxit_obj[0]
     },
 #endif
@@ -855,7 +855,7 @@ perform_test (char *testname)
       int stepmode = TRUE;
 
       MESSAGE (("\nPress <space> key to step counter U5\n\n"));
-      MESSAGE (("  'q' - Quit to DOS\n"));
+      MESSAGE (("  'q' - Quit\n"));
       MESSAGE (("  's' - Step mode (default)\n"));
       MESSAGE (("  'r' - Run mode\n"));
       MESSAGE (("  'c' - Clear counter\n\n"));

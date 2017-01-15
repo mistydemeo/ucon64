@@ -51,7 +51,7 @@ const st_getopt2_t pcepro_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xpce", 0, 0, UCON64_XPCE,
-      NULL, "send/receive ROM to/from PCE-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from PCE-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
       &pcepro_obj[0]
     },

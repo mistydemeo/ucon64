@@ -156,13 +156,13 @@ const st_getopt2_t doctor64jr_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xdjr", 0, 0, UCON64_XDJR,
-      NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT",
+      NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &doctor64jr_obj[0]
     },
 #if 0
     {
       "xdjrs", 0, 0, UCON64_XDJRS,
-      NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &doctor64jr_obj[0]
     },

@@ -51,48 +51,48 @@ const st_getopt2_t cd64_usage[] =
 #ifdef  USE_LIBCD64
     {
       "xcd64", 0, 0, UCON64_XCD64,
-      NULL, "send/receive ROM to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from CD64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (64 Mbits) when ROM does not exist",
       &cd64_obj[0]
     },
     {
       "xcd64c", 1, 0, UCON64_XCD64C,
-      "N", "receive N Mbits of ROM from CD64; " OPTION_LONG_S "port=PORT",
+      "N", "receive N Mbits of ROM from CD64; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &cd64_obj[1]
     },
     {
       "xcd64b", 0, 0, UCON64_XCD64B,
-      NULL, "send boot emu to CD64; " OPTION_LONG_S "port=PORT",
+      NULL, "send boot emu to CD64; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &cd64_obj[2]
     },
     {
       "xcd64s", 0, 0, UCON64_XCD64S,
-      NULL, "send/receive SRAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from CD64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM file does not exist",
       &cd64_obj[1]
     },
     {
       "xcd64f", 0, 0, UCON64_XCD64F,
-      NULL, "send/receive flash RAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive flash RAM to/from CD64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when flash RAM file does not exist",
       &cd64_obj[1]
     },
     {
       "xcd64e", 0, 0, UCON64_XCD64E,
-      NULL, "send/receive EEPROM data to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive EEPROM data to/from CD64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when EEPROM file does not exist",
       &cd64_obj[1]
     },
     {
       "xcd64m", 1, 0, UCON64_XCD64M,
-      "INDEX", "send/receive memory pack data to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      "INDEX", "send/receive memory pack data to/from CD64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "INDEX is ignored for CD64 BIOS protocol\n"
       "receives automatically when memory pack file does not exist",
       &cd64_obj[1]
     },
     {
       "xcd64p", 1, 0, UCON64_XCD64P,
-      "PROT", "use protocol PROT when communicating with CD64; " OPTION_LONG_S "port=PORT\n"
+      "PROT", "use protocol PROT when communicating with CD64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "PROT" OPTARG_S "0 CD64 BIOS\n"
       "PROT" OPTARG_S "1 Ghemor\n"
       "PROT" OPTARG_S "2 UltraLink",

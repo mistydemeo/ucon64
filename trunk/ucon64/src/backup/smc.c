@@ -48,12 +48,12 @@ const st_getopt2_t smc_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xsmc", 0, 0, UCON64_XSMC, // send only
-      NULL, "send ROM (in FFE format) to Super Magic Card; " OPTION_LONG_S "port=PORT",
+      NULL, "send ROM (in FFE format) to Super Magic Card; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &smc_obj[0]
     },
     {
       "xsmcr", 0, 0, UCON64_XSMCR,
-      NULL, "send/receive RTS data to/from Super Magic Card; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive RTS data to/from Super Magic Card; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when RTS file does not exist",
       &smc_obj[1]
     },

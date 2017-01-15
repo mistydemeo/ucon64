@@ -140,12 +140,12 @@ const st_getopt2_t genesis_usage[] =
     },
     {
       "gym", 0, 0, UCON64_GYM,
-      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "ROM" OPTARG_S "GYMFILE",
+      NULL, "convert GYM (Genecyst) sound to WAV; ROM" OPTARG_S "GYMFILE",
       NULL
     },
     {
       "cym", 0, 0, UCON64_CYM,
-      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "ROM" OPTARG_S "CYMFILE",
+      NULL, "convert CYM (Callus emulator) sound to WAV; ROM" OPTARG_S "CYMFILE",
       NULL
     },
 #endif
@@ -196,10 +196,10 @@ const st_getopt2_t genesis_usage[] =
     {
       "region", 1, 0, UCON64_REGION,
       "CODE", "enable region function; use with " OPTION_LONG_S "multi\n"
-      "CODE=0 force NTSC/Japan for all games\n"
-      "CODE=1 force NTSC/U.S.A. for all games\n"
-      "CODE=2 force PAL for all games\n"
-      "CODE=x use whatever setting games expect",
+      "CODE" OPTARG_S "0 force NTSC/Japan for all games\n"
+      "CODE" OPTARG_S "1 force NTSC/U.S.A. for all games\n"
+      "CODE" OPTARG_S "2 force PAL for all games\n"
+      "CODE" OPTARG_S "x use whatever setting games expect",
       &genesis_obj[5]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}

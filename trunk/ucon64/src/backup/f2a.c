@@ -88,31 +88,31 @@ const st_getopt2_t f2a_usage[] =
 #if     defined USE_PARALLEL || defined USE_USB
     {
       "xf2a", 0, 0, UCON64_XF2A,
-      NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
       &f2a_obj[0]
     },
     {
       "xf2amulti", 1, 0, UCON64_XF2AMULTI, // send only
       "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
-      "loader in the configuration file; " OPTION_LONG_S "port=PORT",
+      "loader in the configuration file; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &f2a_obj[1]
     },
     {
       "xf2ac", 1, 0, UCON64_XF2AC,
-      "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n" OPTION_LONG_S "port=PORT",
+      "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n" OPTION_LONG_S "port" OPTARG_S "PORT",
       &f2a_obj[2]
     },
     {
       "xf2as", 0, 0, UCON64_XF2AS,
-      NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &f2a_obj[2]
     },
     {
       "xf2ab", 1, 0, UCON64_XF2AB,
       "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
-      "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
+      "BANK should be a number >= 1; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &f2a_obj[2]
     },

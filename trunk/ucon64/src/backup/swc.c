@@ -54,7 +54,7 @@ const st_getopt2_t swc_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xswc", 0, 0, UCON64_XSWC,
-      NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist",
       &swc_obj[0]
     },
@@ -90,19 +90,19 @@ const st_getopt2_t swc_usage[] =
     {
       "xswcs", 0, 0, UCON64_XSWCS,
       NULL,
-      "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+      "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &swc_obj[1]
     },
     {
       "xswcc", 0, 0, UCON64_XSWCC,
       NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
-      OPTION_LONG_S "port=PORT\n" "receives automatically when SRAM does not exist",
+      OPTION_LONG_S "port" OPTARG_S "PORT\n" "receives automatically when SRAM does not exist",
       &swc_obj[1]
     },
     {
       "xswcr", 0, 0, UCON64_XSWCR,
-      NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when RTS file does not exist",
       &swc_obj[1]
     },

@@ -47,7 +47,7 @@ const st_getopt2_t msg_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xmsg", 0, 0, UCON64_XMSG,
-      NULL, "send/receive ROM to/from Magic Super Griffin/MSG; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Magic Super Griffin/MSG; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist",
       &msg_obj[0]
     },

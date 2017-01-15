@@ -89,20 +89,20 @@ const st_getopt2_t gbx_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xgbx", 0, 0, UCON64_XGBX,
-      NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist",
       &gbx_obj[0]
     },
     {
       "xgbxs", 0, 0, UCON64_XGBXS,
-      NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &gbx_obj[1]
     },
     {
       "xgbxb", 1, 0, UCON64_XGBXB,
       "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
-      "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
+      "BANK can be a number from 0 to 15; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist",
       &gbx_obj[1]
     },

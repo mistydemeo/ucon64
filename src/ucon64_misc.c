@@ -1828,10 +1828,10 @@ ucon64_find_func (void *buffer, int n, void *object)
     }
 
   if (o->searchlen > n + matchlen)
-  {
-    o->pos += n;
-    return n;
-  }
+    {
+      o->pos += n;
+      return n;
+    }
 
   // check if we can match the search string across the buffer boundary
   for (m = 0; matchlen; matchlen--)

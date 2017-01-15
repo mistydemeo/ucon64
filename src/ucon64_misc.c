@@ -256,7 +256,7 @@ const st_getopt2_t ucon64_options_usage[] =
         "3bc, 378, 278"
 #endif
         "}\n"
-        "In order to connect a copier to a PC's parallel port\n"
+        "In order to connect a backup unit to a PC's parallel port\n"
         "you need a standard bidirectional parallel cable",
       &ucon64_option_obj[0]
     },

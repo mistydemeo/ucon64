@@ -53,16 +53,16 @@ const st_getopt2_t gd_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xgd3", 0, 0, UCON64_XGD3, // supports split files
-      NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "this option uses the Game Doctor SF3 protocol",
       &gd_obj[0]
     },
     {
       "xgd6", 0, 0, UCON64_XGD6,
 #if 1 // dumping is not yet supported
-      NULL, "send ROM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n" // supports split files
+      NULL, "send ROM to Game Doctor SF6/SF7; " OPTION_LONG_S "port" OPTARG_S "PORT\n" // supports split files
 #else
-      NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist\n"
 #endif
       "this option uses the Game Doctor SF6 protocol",
@@ -70,7 +70,7 @@ const st_getopt2_t gd_usage[] =
     },
     {
       "xgd3s", 0, 0, UCON64_XGD3S,
-      NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT",
+      NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &gd_obj[1]
     },
     // --xgd3r should remain hidden until receiving works
@@ -81,13 +81,13 @@ const st_getopt2_t gd_usage[] =
     },
     {
       "xgd6s", 0, 0, UCON64_XGD6S,
-      NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &gd_obj[1]
     },
     {
       "xgd6r", 0, 0, UCON64_XGD6R,
-      NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when saver file does not exist",
       &gd_obj[1]
     },

@@ -52,20 +52,20 @@ const st_getopt2_t smsggpro_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xgg", 0, 0, UCON64_XGG,
-      NULL, "send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
       &smsggpro_obj[0]
     },
     {
       "xggs", 0, 0, UCON64_XGGS,
-      NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &smsggpro_obj[1]
     },
     {
       "xggb", 1, 0, UCON64_XGGB,
       "BANK", "send/receive SRAM to/from SMS-PRO/GG-PRO BANK\n"
-      "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
+      "BANK can be a number from 1 to 4; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &smsggpro_obj[1]
     },

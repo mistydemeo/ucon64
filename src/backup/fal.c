@@ -53,7 +53,7 @@ const st_getopt2_t fal_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xfal", 0, 0, UCON64_XFAL,
-      NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
       &fal_obj[0]
     },
@@ -61,25 +61,25 @@ const st_getopt2_t fal_usage[] =
       "xfalmulti", 1, 0, UCON64_XFALMULTI, // send only
       "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
       "multi-game file truncated to SIZE Mbit); specify a loader in\n"
-      "the configuration file; " OPTION_LONG_S "port=PORT",
+      "the configuration file; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &fal_obj[1]
     },
     {
       "xfalc", 1, 0, UCON64_XFALC,
-      "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+      "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "N can be 8, 16, 32, 64, 128 or 256",
       &fal_obj[2]
     },
     {
       "xfals", 0, 0, UCON64_XFALS,
-      NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &fal_obj[2]
     },
     {
       "xfalb", 1, 0, UCON64_XFALB,
       "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
-      "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
+      "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &fal_obj[2]
     },

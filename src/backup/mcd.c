@@ -48,7 +48,7 @@ const st_getopt2_t mcd_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xmcd", 0, 0, UCON64_XMCD,
-      NULL, "receive ROM from Genesis/Sega CD; " OPTION_LONG_S "port=PORT",
+      NULL, "receive ROM from Genesis/Sega CD; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &mcd_obj[0]
     },
 #endif

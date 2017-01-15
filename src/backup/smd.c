@@ -49,13 +49,13 @@ const st_getopt2_t smd_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xsmd", 0, 0, UCON64_XSMD,
-      NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist",
       &smd_obj[0]
     },
     {
       "xsmds", 0, 0, UCON64_XSMDS,
-      NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &smd_obj[1]
     },

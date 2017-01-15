@@ -53,20 +53,20 @@ const st_getopt2_t mdpro_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xmd", 0, 0, UCON64_XMD,
-      NULL, "send/receive ROM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32/64 Mbits) when ROM does not exist",
       &mdpro_obj[0]
     },
     {
       "xmds", 0, 0, UCON64_XMDS,
-      NULL, "send/receive SRAM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &mdpro_obj[1]
     },
     {
       "xmdb", 1, 0, UCON64_XMDB,
       "BANK", "send/receive SRAM to/from MD-PRO BANK\n"
-      "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
+      "BANK can be a number from 1 to 4; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &mdpro_obj[1]
     },

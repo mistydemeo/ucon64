@@ -49,7 +49,7 @@ const st_getopt2_t dex_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xdex", 1, 0, UCON64_XDEX,
-      "N", "send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
+      "N", "send/receive Block N to/from DexDrive; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &dex_obj[0]
     },

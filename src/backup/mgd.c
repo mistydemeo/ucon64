@@ -39,7 +39,7 @@ const st_getopt2_t mgd_usage[] =
 #if 0
     {
       "xmgd", 0, 0, UCON64_XMGD,
-      NULL, "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port=PORT\n"
+      NULL, "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when " OPTION_LONG_S "rom does not exist",
       NULL
     },

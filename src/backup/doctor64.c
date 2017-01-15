@@ -50,7 +50,7 @@ const st_getopt2_t doctor64_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xv64", 0, 0, UCON64_XV64,
-      NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when ROM does not exist",
       &doctor64_obj[0]
     },

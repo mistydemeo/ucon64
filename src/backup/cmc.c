@@ -916,7 +916,7 @@ const st_getopt2_t cmc_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xcmc", 0, 0, UCON64_XCMC,
-      NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT",
+      NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port" OPTARG_S "PORT",
       &cmc_obj[0]
     },
     {

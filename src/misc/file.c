@@ -884,21 +884,13 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 // func() takes buffer, length and object (optional), func_maxlen is maximum
 //  length passed to func()
 {
-  void *buffer = NULL;
-  int buffer_maxlen = 0, buffer_len = 0, func_len = 0;
+  void *buffer;
+  int buffer_len, func_len = 0;
   size_t len_done = 0;
-  FILE *fh = NULL;
+  FILE *fh;
 
-  if (len <= 5 * 1024 * 1024)                   // files up to 5 MB are loaded
-    if ((buffer = malloc (len)) != NULL)        //  in their entirety
-      buffer_maxlen = len;
-  if (!buffer)
-    {
-      if ((buffer = malloc (func_maxlen)) != NULL)
-        buffer_maxlen = func_maxlen;
-      else
-        return -1;
-    }
+  if ((buffer = malloc (func_maxlen)) == NULL)
+    return -1;
 
   if ((fh = quick_io_open (filename, (const char *) mode)) == NULL)
     {
@@ -910,10 +902,10 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 
   for (len_done = 0; len_done < len; len_done += buffer_len)
     {
-      if (len_done + buffer_maxlen > len)
-        buffer_maxlen = len - len_done;
+      if (len_done + func_maxlen > len)
+        func_maxlen = len - len_done;
 
-      if ((buffer_len = fread (buffer, 1, buffer_maxlen, fh)) == 0)
+      if ((buffer_len = fread (buffer, 1, func_maxlen, fh)) == 0)
         break;
 
       func_len = quick_io_func_inline (func, func_maxlen, object, buffer, buffer_len);
@@ -940,7 +932,7 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
   free (buffer);
 
   // returns total bytes processed or if (func() < 0) it returns that error value
-  return func_len < 0 ? func_len : ((int) len_done + func_len);
+  return func_len < 0 ? func_len : (int) len_done + func_len;
 }
 
 

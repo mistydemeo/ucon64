@@ -136,8 +136,8 @@ Screenshots: <a href="images/ucon64_ss1.png">1</a>|<a href="images/ucon64_ss2.pn
 To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3">this</a><br>
 <br>
 <b>Sources</b><br><font size="-1">
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.2/ucon64-2.0.2-src.tar.gz/download">ucon64-2.0.2-src.tar.gz</a><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.2/ucon64-2.0.2-src.zip/download">ucon64-2.0.2-src.zip</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-src.tar.gz/download">ucon64-2.0.3-src.tar.gz</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-src.zip/download">ucon64-2.0.3-src.zip</a><br>
 <br>
 <b>Binaries</b><br><font size="-1">
 <br><img src="images/linux.png"><br>

@@ -808,9 +808,25 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   8 digit codes instead when given a 6 digit code (by dbjh)<br>
 - updated (Genesis) --gg modifies 2 bytes instead of 1 (by dbjh; thanks to
   eadmaster for reporting the issue and testing)<br>
-- updated (Genesis) --ggd, --gge and --gg correctly handle Genesis addresses (by
-  dbjh; thanks to eadmaster for reporting the issue and testing)<br>
+- updated (Genesis) --ggd, --gge and --gg correctly handle Genesis patch values
+  (by dbjh; thanks to eadmaster for reporting the issue and testing)<br>
 - updated (SMS/Game Gear/GB) --gg can use the check byte (by dbjh)<br>
+<p>
+<a name="203">2.0.3</a><br>
+- updated (NDS) fixed stupid mistake in reported device capacity (by dbjh)<br>
+- updated (NDS) fixed issue that caused ROMs with an incorrect SNES backup unit
+  header to be detected as Nintendo DS ROM dumps (by dbjh)<br>
+- updated (SNES) MinGW and Visual C++ ports can display colors again for --dbuh
+  (instead of ANSI escape sequences) (by dbjh)<br>
+- updated (SNES) fixed edge case in code of --dbuh for headered ROMs that are
+  not recognised as being for a specific backup unit (by dbjh)<br>
+- updated (all) upgraded unzip to version 1.01e. Did the same for libdiscmage
+  (by dbjh)<br>
+- updated (N64) fixed problem in Cygwin port of libcd64 with loading I/O drivers
+  (by dbjh)<br>
+- updated (all) fixed --hfind, --hfindr, --dfind and --dfindr, which I broke in
+  2.0.1. Also, 0 is no longer a wildcard and can be properly searched for.
+  Improved handling of non-printable characters (by dbjh)<br>
 <br>
 <br>
 <br>

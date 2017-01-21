@@ -219,7 +219,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Another Win32 port of GCC (and other tools) named MinGW is available from
    <a href="http://www.mingw.org">http://www.mingw.org</a>. We have tested the
    MinGW-built version of uCON64 more extensively than the other Windows
-   versions. The MinGW-built version can run on versions of Windows as old as 
+   versions. The MinGW-built version can run on versions of Windows as old as
    Windows 95.<br>
 <br>
    <b>Configuring uCON64</b><br>
@@ -1927,7 +1927,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    want to use the USB version, you should set at least the variables
    f2afirmware and iclientu. If you want to send multiple files to your F2A, set
    gbaloader. Additional requirements are:<br>
-   - <a href="http://libusb.sourceforge.net/">libusb</a> 
+   - <a href="http://libusb.sourceforge.net/">libusb</a>
    (included in recent GNU/Linux distributions)<br>
    - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted by
    default, but you can do it manually with "mount -t usbdevfs none
@@ -1940,7 +1940,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    have to run uCON64 as root (or setuid root) for the USB version of the F2A<br>
 <br>
    By default, uCON64 tries to access a parallel port to communicate with an
-   F2A. In order to make uCON64 communicate with an F2A connected to a USB 
+   F2A. In order to make uCON64 communicate with an F2A connected to a USB
    port, use the switch -port. For example:<br>
    &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb<br>
    uCON64 detects to which USB port the F2A is connected, so you do not have to
@@ -1954,16 +1954,16 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    latch-up).<br>
    Before running uCON64, power is sometimes present on the parallel port. If
    power is present and you connect a device that is not switched on, power
-   will "back-feed" into the device from the parallel port, potentially 
+   will "back-feed" into the device from the parallel port, potentially
    damaging the device and the PC.<br>
    By using the --xreset command <i>before</i> attaching your device, power is
    removed from the parallel port, eliminating the hazard.<br>
-   Likewise, a danger exists when you have finished using your device and 
+   Likewise, a danger exists when you have finished using your device and
    switch the power off.<br>
    Normally, uCON64 will remove power from the parallel port when the transfer
    has finished, but if you abort uCON64 part-way, power may still be present.
    In this case, use --xreset before switching the device off.<br>
-   Additionally, after switching the device off, aim to disconnect it as soon 
+   Additionally, after switching the device off, aim to disconnect it as soon
    as possible. Printing, rebooting, and running certain applications may cause
    power to be re-applied to the parallel port -- a back-feed hazard.<br>
 <br>

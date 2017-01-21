@@ -1,7 +1,7 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - ReadMe</title></head><body bgcolor="#ffffff"><tt><pre>
-uCON64 2.0.2 UNIX (Linux) 1999-2016
+uCON64 2.0.3 UNIX (Linux) 1999-2017
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -13,7 +13,7 @@ Options
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
   --port=PORT   specify USB or parallel PORT={USB0, USB1, ... 3bc, 378, 278}
-                  In order to connect a copier to a PC's parallel port
+                  In order to connect a backup unit to a PC's parallel port
                   you need a standard bidirectional parallel cable
   --xreset      reset parallel port
   --hdn=N       force ROM has backup unit/emulator header with size of N Bytes
@@ -260,7 +260,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --snes        force recognition
   --hi          force ROM is HiROM
   --nhi         force ROM is not HiROM
-  --erom        force ROM is "Extended" (combine with -hi for Extended HiROM)
+  --erom        force ROM is "Extended" (combine with --hi for Extended HiROM)
   --int         force ROM is in interleaved format (GD3/UFO)
   --int2        force ROM is in interleaved format 2 (SFX)
   --nint        force ROM is not in interleaved format
@@ -270,8 +270,8 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --fig         convert to *Pro Fighter*/FIG
   --figs        convert *.srm (SRAM) file to *Pro Fighter*/FIG
   --gd3         convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
-  --idnum=NUM   make -gd3 produce file names where first file has numerical
-                  identifier NUM, next NUM + 1, etc. 
+  --idnum=NUM   make --gd3 produce file names where first file has numerical
+                  identifier NUM, next NUM + 1, etc.
   --gd3s        convert *.srm (SRAM) file to GD SF3(SF6/SF7)/Professor SF*
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
   --smc         convert to Super Magicom/SMC
@@ -315,7 +315,7 @@ Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC
   --xswc        send/receive ROM to/from Super Wild Card*/SWC; --port=PORT
                   receives automatically when ROM does not exist
   --xswc2       same as --xswc, but enables Real Time Save mode (SWC only)
-  --xswc-io=MODE specify SWC I/O mode; use with -xswc or -xswcc
+  --xswc-io=MODE specify SWC I/O mode; use with --xswc or --xswcc
                   MODE=0x001 force 32 Mbit dump
                   MODE=0x002 use alternative method for determining ROM size
                   MODE=0x004 Super FX
@@ -391,7 +391,7 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --multi=SIZE  make multi-game file for use with MD-PRO flash card, truncated
                   to SIZE Mbit; file with loader must be specified first, then
                   all the ROMs, multi-game file to create last
-  --region=CODE enable region function; use with -multi
+  --region=CODE enable region function; use with --multi
                   CODE=0 force NTSC/Japan for all games
                   CODE=1 force NTSC/U.S.A. for all games
                   CODE=2 force PAL for all games

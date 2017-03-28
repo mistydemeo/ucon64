@@ -5,8 +5,8 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2005       NoisyB
-Copyright (c) 2001 - 2005, 2015 dbjh
+Copyright (c) 1999 - 2005              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -523,6 +523,8 @@ ucon64_test (void)
       {UCON64_SWCS,	"ucon64 -swcs", TEST_TODO},
       {UCON64_UFO,	"ucon64 -ufo", TEST_TODO},
       {UCON64_UFOS,	"ucon64 -ufos", TEST_TODO},
+      {UCON64_UFOSD,	"ucon64 -ufosd", TEST_TODO},
+      {UCON64_UFOSDS,	"ucon64 -ufosds", TEST_TODO},
       {UCON64_UNIF,	"ucon64 -unif /tmp/test/test.nes", TEST_BUG},
       {UCON64_UNSCR,	"ucon64 -unscr", TEST_TODO},
       {UCON64_USMS,	"ucon64 -usms", TEST_TODO},
@@ -1495,7 +1497,7 @@ ucon64_rom_handling (void)
 
           default:
             // Use ucon64.dat instead of ucon64.dat_enabled in case the index
-            //  file could not be created/opened -> no segmentation fault
+            //  file could not be created/opened => no segmentation fault
             if (ucon64.dat && ucon64.nfo)
               {
                 if (!ucon64.nfo->name[0])
@@ -1735,7 +1737,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
     nfo->data_size :
     ucon64.file_size - nfo->backup_header_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
-          // some ROMs have a name with control chars in it -> replace control chars
+          // some ROMs have a name with control chars in it => replace control chars
           to_func (buf, strlen (buf), toprint),
           NULL_TO_EMPTY (nfo->maker),
           NULL_TO_EMPTY (nfo->country),
@@ -1776,7 +1778,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
     {
       printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
       // nes.c calculates the correct checksum for split ROMs (=Pasofami
-      // format), so there is no need to join the files
+      //  format), so there is no need to join the files
       if (ucon64.console != UCON64_NES)
         puts ("NOTE: To get the correct checksum the ROM parts must be joined");
     }
@@ -1793,7 +1795,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
     {
       char *fstr;
 
-      // the internal checksum of GBA ROMS stores only the checksum of the
+      // the internal checksum of GBA ROMs stores only the checksum of the
       //  internal header
       if (ucon64.console != UCON64_GBA)
         fstr = "Checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)\n";
@@ -1938,6 +1940,7 @@ ucon64_usage (int argc, char *argv[], int view)
 //        getopt2_usage (ssc_usage);
         getopt2_usage (swc_usage);
 //        getopt2_usage (ufo_usage);
+//        getopt2_usage (ufosd_usage);
 //        getopt2_usage (yoko_usage);
 //        getopt2_usage (z64_usage);
         break;

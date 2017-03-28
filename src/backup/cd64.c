@@ -1,7 +1,7 @@
 /*
 cd64.c - CD64 support for uCON64
 
-Copyright (c) 2004 dbjh
+Copyright (c) 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -222,7 +222,7 @@ cd64_init (void)
   if (ucon64.parport == (uint16_t) UCON64_UNKNOWN)
     {
       fputs ("ERROR: No port or invalid port specified\n"
-             "TIP:   Specify one with --port or in the configuration file\n", stderr);
+             "TIP:   Specify one with " OPTION_LONG_S "port or in the configuration file\n", stderr);
       exit (1);
     }
   if (port >= 0x300 && port <= 0x330)

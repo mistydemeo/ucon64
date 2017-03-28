@@ -1,10 +1,10 @@
 /*
 snes.c - Super NES support for uCON64
 
-Copyright (c) 1999 - 2002       NoisyB
-Copyright (c) 2001 - 2005, 2015 dbjh
-Copyright (c) 2002 - 2003       John Weidman
-Copyright (c) 2004              JohnDie
+Copyright (c) 1999 - 2002              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2003              John Weidman
+Copyright (c) 2004                     JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -52,6 +52,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/mgd.h"
 #include "backup/swc.h"
 #include "backup/ufo.h"
+#include "backup/ufosd.h"
 
 
 #define SNES_HEADER_LEN (sizeof (st_snes_header_t))
@@ -236,6 +237,18 @@ const st_getopt2_t snes_usage[] =
       &snes_obj[10]
     },
     {
+      "ufosd", 0, 0, UCON64_UFOSD,
+      NULL, "convert to Super UFO Pro 8 SD",
+      &snes_obj[8]
+    },
+#if 0 // TODO: We need information about Super UFO Pro 8 SD SRAM files
+    {
+      "ufosds", 0, 0, UCON64_UFOSDS,
+      NULL, "convert *.srm (SRAM) file to Super UFO Pro 8 SD",
+      &snes_obj[10]
+    },
+#endif
+    {
       "ctrl", 1, 0, UCON64_CTRL,
       "TYPE", "specify type of controller in port 1 for emu when converting\n"
       "TYPE" OPTARG_S "0 gamepad\n"
@@ -287,7 +300,7 @@ const st_getopt2_t snes_usage[] =
     },
     {
       "s", 0, 0, UCON64_S,
-      NULL, "split ROM; default part size is 8 Mb",
+      NULL, "split ROM (not for UFO Pro 8 SD); default part size is 8 Mb",
       &snes_obj[2]
     },
     {
@@ -663,10 +676,22 @@ snes_figs (st_ucon64_nfo_t *rominfo)
 int
 snes_ufos (st_ucon64_nfo_t *rominfo)
 {
-  unsigned char header[SWC_HEADER_LEN];
+  st_ufo_header_t header;
 
-  memset (&header, 0, SWC_HEADER_LEN);
-  memcpy (&header[8], "SUPERUFO", 8);
+  memset (&header, 0, UFO_HEADER_LEN);
+  memcpy (&header.id, "SUPERUFO", 8);
+
+  return snes_convert_sramfile (rominfo->backup_header_len, &header);
+}
+
+
+int
+snes_ufosds (st_ucon64_nfo_t *rominfo)
+{
+  st_ufosd_header_t header;
+
+  memset (&header, 0, UFOSD_HEADER_LEN);
+  memcpy (&header.id, "SFCUFOSD", 8);
 
   return snes_convert_sramfile (rominfo->backup_header_len, &header);
 }
@@ -1381,6 +1406,109 @@ snes_ufo (st_ucon64_nfo_t *rominfo)
 }
 
 
+// header format is specified in src/backup/ufosd.h
+int
+snes_ufosd (st_ucon64_nfo_t *rominfo)
+{
+  st_ufosd_header_t header;
+  int size = ucon64.file_size - rominfo->backup_header_len;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+
+  ucon64_fread (&header, 0, rominfo->backup_header_len > (int) UFOSD_HEADER_LEN ?
+                  (int) UFOSD_HEADER_LEN : rominfo->backup_header_len, ucon64.fname);
+  reset_header (&header);
+  header.size = (unsigned char) (size / MBIT);
+  header.banktype = snes_hirom ? 0 : 1;
+  memcpy (header.id, "SFCUFOSD", 8);
+  header.internal_size = !bs_dump ?
+                           1 << (snes_header.rom_size - 7) :
+                           8 - (snes_header.bs_type >> (4 + 1)) * 4;
+
+  if (snes_header.rom_type == 3 || snes_header.rom_type == 5 || // DSP
+      snes_header.rom_type == 0x13 ||           // SRAM + Super FX (Mario Chip 1)
+      snes_header.rom_type == 0x1a ||           // Super FX
+      snes_header.rom_type == 0x14 || snes_header.rom_type == 0x15 || // Super FX (2)
+      snes_header.rom_type == 0x25 ||           // OBC1
+      snes_header.rom_type == 0x34 || snes_header.rom_type == 0x35 || // SA-1
+      snes_header.rom_type == 0x43 || snes_header.rom_type == 0x45 || // S-DD1
+      snes_header.rom_type == 0x55 ||           // S-RTC
+      snes_header.rom_type == 0xe3 ||           // Game Boy data
+      snes_header.rom_type == 0xf3 ||           // C4
+      snes_header.rom_type == 0xf5 ||           // Seta RISC / SPC7110
+      snes_header.rom_type == 0xf6 ||           // Seta DSP
+      snes_header.rom_type == 0xf9)             // SPC7110 + RTC
+    header.special_chip = 0xff;
+  else
+    {
+      if (snes_sram_size > 16 * 1024)
+        header.sram_size = 7;
+      else if (snes_sram_size > 8 * 1024)           // 64 kb < size <= 128 kb
+        header.sram_size = 3;
+      else if (snes_sram_size > 2 * 1024)           // 16 kb < size <= 64 kb
+        header.sram_size = 2;
+      else if (snes_sram_size > 0)                  // 1 - 16 kb
+        header.sram_size = 1;
+      // header.sram_size is already OK for snes_sram_size == 0
+    }
+
+  if (snes_hirom)
+    {
+      if ((size == 20 * MBIT || size == 24 * MBIT) && snes_sram_size == 0)
+        memcpy (header.unknown, "\xf5\x00\x00\x00", 4);
+      else if (size == 32 * MBIT)
+        memcpy (header.unknown, snes_sram_size ? "\x55\x00\x80\x2c" : "\x55\x00\x80\x00", 4);
+    }
+  else
+    {
+      if (snes_sram_size)
+        {
+          if (size == 4 * MBIT)
+            memcpy (header.unknown, "\x05\x2a\x10\x3f", 4);
+          else if (size == 8 * MBIT)
+            memcpy (header.unknown, header.special_chip ? "\x55\x00\x40\x00" : "\x55\x00\x50\xbf", 4);
+          else if (size == 20 * MBIT || size == 24 * MBIT)
+            memcpy (header.unknown, "\x55\x00\x60\xbf", 4);
+          else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
+            memcpy (header.unknown, "\x55\x20\x20\x3f", 4);
+        }
+      else
+        {
+          if (size == 4 * MBIT)
+            memcpy (header.unknown, "\x05\x2a\x00\x00", 4);
+          else if (size == 8 * MBIT)
+            memcpy (header.unknown, "\x15\x28\x00\x00", 4);
+          else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
+            memcpy (header.unknown, "\x55\x20\x00\x00", 4);
+        }
+    }
+  if (header.unknown[0] == '\0')
+    puts ("WARNING: Conversion of this ROM is not yet fully supported by uCON64 and the\n"
+          "         output might not work correctly on a Super UFO Pro 8 SD");
+
+  header.sram_type = snes_hirom ? 0 : 1;
+
+  // copy 2nd half of internal header to backup unit header
+  memcpy (header.internal_header_data, snes_header.name, 32);
+
+  set_nsrt_info (rominfo, (unsigned char *) &header);
+
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
+  set_suffix (dest_name, ".ufo");
+  ucon64_file_handler (dest_name, src_name, 0);
+
+  ucon64_fwrite (&header, 0, UFOSD_HEADER_LEN, dest_name, "wb");
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, src_name, dest_name, size, UFOSD_HEADER_LEN);
+  else
+    fcopy (src_name, rominfo->backup_header_len, size, dest_name, "ab");
+
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return 0;
+}
+
+
 int
 snes_make_gd_names (const char *filename, st_ucon64_nfo_t *rominfo, char **names)
 {
@@ -1503,7 +1631,7 @@ snes_split_ufo (st_ucon64_nfo_t *rominfo, int size, int part_size)
           return;
         }
       if (UCON64_ISSET (ucon64.part_size))
-        puts ("WARNING: Splitting Super UFO HiROM, ignoring switch "OPTION_LONG_S"ssize");
+        puts ("WARNING: Splitting Super UFO HiROM, ignoring switch " OPTION_LONG_S "ssize");
     }
 
   strcpy (dest_name, ucon64.fname);
@@ -1675,7 +1803,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
 {
   int size = ucon64.file_size - rominfo->backup_header_len, part_size;
 
-  if (UCON64_ISSET (ucon64.part_size) && !(type == GD3 || type == UFO))
+  if (UCON64_ISSET (ucon64.part_size) && !(type == GD3 || type == UFO || type == UFOSD))
     {
       part_size = ucon64.part_size;
       /*
@@ -1715,6 +1843,11 @@ snes_s (st_ucon64_nfo_t *rominfo)
           return -1;
         }
     }
+  else if (type == UFOSD)
+    {
+      puts ("NOTE: ROM is in Super UFO Pro 8 SD format -- will not be split");
+      return -1;
+    }
   else if (size <= part_size)
     {
       printf ("NOTE: ROM size is smaller than or equal to %d Mbit -- will not be split\n",
@@ -1725,7 +1858,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
   if (!rominfo->backup_header_len || type == GD3) // GD3 format
     {
       if (UCON64_ISSET (ucon64.part_size))
-        puts ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize");
+        puts ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch " OPTION_LONG_S "ssize");
       snes_split_gd3 (rominfo, size);
     }
   else if (type == UFO)
@@ -2762,7 +2895,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 // -dbuh
 {
   unsigned char header[512];
-  int x, y;
+  int x = 0, y;
   snes_file_t org_type = type;
 
   if (rominfo->backup_header_len == 0) // type == MGD_SNES
@@ -2777,13 +2910,14 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
               type == FIG ? "FIG" :
               type == GD3 ? "GD3" :
               type == UFO ? "UFO" :
+              type == UFOSD ? "UFOSD" :
               "unknown header type, but interpreted as SWC");
       if (type == SMC)
         type = SWC;
     }
 
   ucon64_fread (&header, 0, 512, ucon64.fname);
-  dumper (stdout, header, 48, 0, DUMPER_HEX);   // show only the part that is
+  dumper (stdout, header, 64, 0, DUMPER_HEX);   // show only the part that is
   fputc ('\n', stdout);                         //  interpreted by copier
 
   if (type == SWC || type == FIG || type == SMC || type == UFO)
@@ -2791,6 +2925,13 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       x = ucon64.file_size - rominfo->backup_header_len;
       y = (header[0] + (header[1] << 8)) * 8 * 1024;
       printf ("[0-1]    File size: %d Bytes (%.4f Mb) => %s\n",
+              y, TOMBIT_F (y), matches_deviates (x == y));
+    }
+  else if (type == UFOSD)
+    {
+      x = ucon64.file_size - rominfo->backup_header_len;
+      y = header[0] * MBIT;
+      printf ("[0]      File size: %d Bytes (%.4f Mb) => %s\n",
               y, TOMBIT_F (y), matches_deviates (x == y));
     }
 
@@ -2856,9 +2997,9 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
             y = 0;
           else if ((header[4] == 0xfd && header[5] == 0x82) ||
                    (header[4] == 0xdd && header[5] == 0x82))
-            y = 8 * 1024; // or 2 * 1024
+            y = 8; // or 2
           else if (header[4] == 0xdd && header[5] == 0x02)
-            y = 32 * 1024;
+            y = 32;
         }
       else
         {
@@ -2866,19 +3007,19 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
               (header[4] == 0x47 && header[5] == 0x83))
             y = 0;
           else if (header[4] == 0x00 && header[5] == 0x80)
-            y = 8 * 1024; // or 2 * 1024
+            y = 8; // or 2
           else if ((header[4] == 0x00 && header[5] == 0x00) ||
                    (header[4] == 0x11 && header[5] == 0x02))
-            y = 32 * 1024;
+            y = 32;
         }
 
-      if (y == 8 * 1024)
+      if (y == 8)
         printf ("[4-5]    SRAM size: 2 kB / 8 kB => %s\n",
                 matches_deviates (snes_sram_size == 2 * 1024 ||
                                   snes_sram_size == 8 * 1024));
       else
         printf ("[4-5]    SRAM size: %d kB => %s\n",
-                y / 1024, matches_deviates (snes_sram_size == y));
+                y, matches_deviates (snes_sram_size == y * 1024));
     }
   else if (type == UFO)
     {
@@ -2889,18 +3030,18 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       printf ("[2]      Split: %s => %s\n",
               y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
 
-      x = ucon64.file_size - rominfo->backup_header_len;
       y = header[0x11] * MBIT;
       printf ("[11]     ROM size: %d Bytes (%d.0000 Mb) => %s\n",
               y, y / MBIT, matches_deviates (x == y));
 
-      y = header[0x12] & 1;
+      y = header[0x12];
       printf ("[12]     DRAM mapping mode: %s => %s\n",
-              y ? "LoROM" : "HiROM", matches_deviates ((snes_hirom ? 0 : 1) == y));
+              y == 1 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
+              matches_deviates ((snes_hirom ? 0 : 1) == y));
 
-      y = (header[0x13] <= 3 ? sram_sizes[header[0x13]] : 128) * 1024;
+      y = header[0x13] <= 3 ? sram_sizes[header[0x13]] : 128;
       printf ("[13]     SRAM size: %d kB => %s\n",
-              y / 1024, matches_deviates (snes_sram_size == y));
+              y, matches_deviates (snes_sram_size == y * 1024));
 
       y = header[0x14];
       if (y)
@@ -2928,6 +3069,32 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       printf ("[17]     SRAM mapping mode: %s => %s\n",
               y == 3 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
               matches_deviates ((snes_hirom ? 0 : 3) == y));
+    }
+  else if (type == UFOSD)
+    {
+      unsigned char sram_sizes[] = { 0, 2, 8, 16 };
+
+      y = header[2];
+      printf ("[2]      DRAM mapping mode: %s => %s\n",
+              y == 1 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
+              matches_deviates ((snes_hirom ? 0 : 1) == y));
+
+      x = !bs_dump ?
+            1 << (snes_header.rom_size - 7) : 8 - (snes_header.bs_type >> (4 + 1)) * 4;
+      y = header[0x11];
+      printf ("[11]     Internal size: %d Mb => %s\n", y, matches_deviates (x == y));
+
+      y = header[0x12] <= 3 ? sram_sizes[header[0x12]] : 128;
+      printf ("[12]     SRAM size: %d kB => %s\n",
+              y, matches_deviates (snes_sram_size == y * 1024));
+
+      y = header[0x17];
+      printf ("[17]     SRAM mapping mode: %s => %s\n",
+              y == 1 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
+              matches_deviates ((snes_hirom ? 0 : 1) == y));
+
+      printf ("[20-3f]  Copy of second half of internal header => %s\n",
+              matches_deviates (memcmp (snes_header.name, &header[0x20], 32) == 0));
     }
   else if (type == GD3)
     {
@@ -3031,6 +3198,8 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
     type = GD3;
   else if (!strncmp ((char *) header + 8, "SUPERUFO", 8))
     type = UFO;
+  else if (!strncmp ((char *) header + 8, "SFCUFOSD", 8))
+    type = UFOSD;
   else if ((header->hirom == 0x80 &&            // HiROM
              ((header->emulation1 == 0x77 && header->emulation2 == 0x83) ||
               (header->emulation1 == 0xdd && header->emulation2 == 0x82) ||
@@ -3090,7 +3259,7 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
             rominfo->backup_header_len = surplus;
           // special case for Infinity Demo (PD)... (has odd size, but SWC
           //  header). Don't add "|| type == FIG" as it is too unreliable
-          else if (type == SWC || type == GD3 || type == UFO)
+          else if (type == SWC || type == GD3 || type == UFO || type == UFOSD)
             rominfo->backup_header_len = SWC_HEADER_LEN;
         }
     }
@@ -3259,8 +3428,14 @@ snes_init (st_ucon64_nfo_t *rominfo)
     x = SWC;
   else if (!strncmp ((char *) &header + 8, "SUPERUFO", 8))
     x = UFO;
+  else if (!strncmp ((char *) &header + 8, "SFCUFOSD", 8))
+    x = UFOSD;
   if ((x == SWC && (header.type == 5 || header.type == 8)) ||
-      (x == UFO && (OFFSET (header, 0x10) == 0)))
+      (x == UFO && (OFFSET (header, 0x10) == 0))
+#if 0 // TODO: We need information about Super UFO Pro 8 SD SRAM files
+      || (x == UFOSD && (OFFSET (header, ?) == ?))
+#endif
+     )
     {
       rominfo->backup_header_len = SWC_HEADER_LEN;
       strcpy (rominfo->name, "Name: N/A");
@@ -3284,6 +3459,12 @@ snes_init (st_ucon64_nfo_t *rominfo)
           type = UFO;
           pos += sprintf (rominfo->misc + pos, "Type: Super UFO SRAM file\n");
         }
+      else if (x == UFOSD)
+        {
+          rominfo->backup_usage = ufosd_usage[0].help;
+          type = UFOSD;
+          pos += sprintf (rominfo->misc + pos, "Type: Super UFO Pro 8 SD SRAM file\n");
+        }
       return 0;                                 // rest is nonsense for SRAM/RTS file
     }
 
@@ -3304,6 +3485,8 @@ snes_init (st_ucon64_nfo_t *rominfo)
 
   if (UCON64_ISSET (ucon64.split))
     snes_split = ucon64.split;
+  else if (type == UFOSD)
+    snes_split = ucon64.split = 0;
   else
     {
       if (type == SWC || type == FIG || type == UFO)
@@ -3448,6 +3631,9 @@ snes_init (st_ucon64_nfo_t *rominfo)
           break;
         case UFO:
           rominfo->backup_usage = ufo_usage[0].help;
+          break;
+        case UFOSD:
+          rominfo->backup_usage = ufosd_usage[0].help;
           break;
         case FIG:
           rominfo->backup_usage = fig_usage[0].help;
@@ -4453,7 +4639,7 @@ snes_create_sram (void)
   if (size == 0)
     {
       if (ucon64.quiet < 1)
-        puts ("WARNING: ROM does not use SRAM -- no file has been written");
+        puts ("NOTE: ROM does not use SRAM -- no file has been written");
       return 1;
     }
 

@@ -25,11 +25,15 @@ LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
         /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"
 !endif
 
+!ifdef USE_ZLIB
+LDFLAGS=$(LDFLAGS) zdll.lib
+!endif
+
+
 OBJECTS=libdm_misc.obj dllinit.obj misc.obj misc_wav.obj format/format.obj \
         format/cdi.obj format/nero.obj format/cue.obj format/toc.obj \
         format/other.obj
 !ifdef USE_ZLIB
-LDFLAGS=$(LDFLAGS) zdll.lib
 OBJECTS=$(OBJECTS) ioapi.obj map.obj misc_z.obj unzip.obj
 !endif
 

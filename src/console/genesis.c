@@ -1,8 +1,8 @@
 /*
 genesis.c - Sega Genesis/Mega Drive support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 1999 - 2001              NoisyB
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -130,22 +130,22 @@ const st_getopt2_t genesis_usage[] =
 #if 0
     {
       "gf", 0, 0, UCON64_GF,
-      NULL, "convert Sega CD country code to Europe; ROM" OPTARG_S "$CD_IMAGE",
+      NULL, "convert Sega CD country code to Europe; ROM=CD_IMAGE",
       NULL
     },
     {
       "ga", 0, 0, UCON64_GA,
-      NULL, "convert Sega CD country code to U.S.A.; ROM" OPTARG_S "$CD_IMAGE",
+      NULL, "convert Sega CD country code to U.S.A.; ROM=CD_IMAGE",
       NULL
     },
     {
       "gym", 0, 0, UCON64_GYM,
-      NULL, "convert GYM (Genecyst) sound to WAV; ROM" OPTARG_S "GYMFILE",
+      NULL, "convert GYM (Genecyst) sound to WAV; ROM=GYMFILE",
       NULL
     },
     {
       "cym", 0, 0, UCON64_CYM,
-      NULL, "convert CYM (Callus emulator) sound to WAV; ROM" OPTARG_S "CYMFILE",
+      NULL, "convert CYM (Callus emulator) sound to WAV; ROM=CYMFILE",
       NULL
     },
 #endif

@@ -1,7 +1,7 @@
 /*
-ufo.h - Super UFO for uCON64
+ufo.h - Super UFO support for uCON64
 
-Copyright (c) 2003 dbjh
+Copyright (c) 2003, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ Byte-Offset  Function
                           0x10 == more work to figure this out -- maybe interleave info
                           0x00 == This is the last chunk.
 03-07        0x00
-08-0F        53 55 50 45 52 55 46 4F  (SUPERUFO)
+08-0F        53 55 50 45 52 55 46 4F  ("SUPERUFO")
 10           0x01 == This file is a ROM image file
 11           ROM size: 04 == 4 Mb, 0x18 == 24 Mb, 0x20 == 32 Mb, etc.
 12           ROM format:  00 == HiROM,  01 == LoROM
@@ -131,7 +131,7 @@ typedef struct st_ufo_header
   unsigned char size_high;
   unsigned char multi;
   unsigned char pad[5];
-  unsigned char id[8];                          // "SUPERUFO"
+  unsigned char id[8];
   unsigned char isrom;
   unsigned char size;
   unsigned char banktype;

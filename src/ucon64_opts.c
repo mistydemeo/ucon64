@@ -1,9 +1,9 @@
 /*
 ucon64_opts.c - switches for all uCON64 options
 
-Copyright (c) 2002 - 2005       NoisyB
-Copyright (c) 2002 - 2005, 2015 dbjh
-Copyright (c) 2005              Jan-Erik Karlsson (Amiga)
+Copyright (c) 2002 - 2005              NoisyB
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2005                     Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1784,6 +1784,14 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_UFOS:
       snes_ufos (ucon64.nfo);
+      break;
+
+    case UCON64_UFOSD:
+      snes_ufosd (ucon64.nfo);
+      break;
+
+    case UCON64_UFOSDS:
+      snes_ufosds (ucon64.nfo);
       break;
 
     case UCON64_UNIF:

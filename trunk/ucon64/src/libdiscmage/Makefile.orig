@@ -19,10 +19,18 @@ CFLAGS=$(CFLAGS0) -DDLL
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
+
 ifeq ($(findstring darwin,$(OSTYPE)),)  # for example "darwin7.0"
 # On Mac OS X using -s gives the following warning:
 # /usr/bin/libtool: -static not specified, -s invalid
 LDFLAGS+=-s
+endif
+ifneq ($(OSTYPE),beos)
+LDFLAGS+=-lm
+endif
+
+ifdef USE_ZLIB
+LDFLAGS+=-lz
 endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
@@ -37,14 +45,12 @@ ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) b
 GCC_WIN=1
 endif
 
+
 LIBNAME=discmage
+
 OBJECTS=libdm_misc.o dllinit.o misc.o misc_wav.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
-ifneq ($(OSTYPE),beos)
-LDFLAGS+=-lm
-endif
 ifdef USE_ZLIB
-LDFLAGS+=-lz
 OBJECTS+=ioapi.o map.o misc_z.o unzip.o
 else
 ifeq ($(GCC_WIN),1)
@@ -59,7 +65,7 @@ endif                                   # USE_ZLIB
 ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
 
 FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/lib/gcc/i686-pc-cygwin/4.9.3/
+GCCA_DIR=/lib/gcc/i686-pc-cygwin/6.3.0/
 
 ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12
@@ -74,7 +80,7 @@ else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/mingw/lib/gcc/mingw32/4.8.1/
+GCCA_DIR=/mingw/lib/gcc/mingw32/5.3.0/
 LDFLAGS+=-L$(GCCA_DIR) -lgcc -L/mingw/lib -lkernel32 -lmsvcrt --dll -e _DllMain@12
 # MSYS problem: Specifying the library directory is necessary when compiling on
 # a different filesystem than the filesystem that MinGW is installed on.

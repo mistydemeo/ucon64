@@ -1,10 +1,10 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-Copyright (c) 1999 - 2006       NoisyB
-Copyright (c) 2001 - 2005, 2015 dbjh
-Copyright (c) 2001              Caz
-Copyright (c) 2002 - 2003       Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2006              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001                     Caz
+Copyright (c) 2002 - 2003              Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1659,7 +1659,7 @@ ucon64_pattern (const char *pattern_fname)
       if (patterns[n].offset <= -patterns[n].search_size || patterns[n].offset > 0)
         printf ("WARNING: The offset of pattern %d falls outside the search pattern.\n"
                 "         This can cause matches to be ignored with the current implementation\n"
-                "         of --pattern. Please consider enlarging the search pattern\n",
+                "         of " OPTION_LONG_S "pattern. Please consider enlarging the search pattern\n",
                 n + 1);
     }
   overlap--;

@@ -97,6 +97,14 @@ ifdef USE_LIBCD64
 LDFLAGS+=backup/libcd64/libcd64.a
 endif
 
+ifdef USE_ZLIB
+LDFLAGS+=-lz
+endif
+
+ifdef USE_USB
+LDFLAGS+=-lusb
+endif
+
 
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         misc/chksum.o misc/file.o misc/getopt2.o misc/misc.o misc/parallel.o \
@@ -114,17 +122,16 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/quickdev16.o \
         backup/sc.o backup/sflash.o backup/smc.o backup/smd.o \
         backup/smsgg-pro.o backup/spsc.o backup/ssc.o backup/swc.o \
-        backup/tototek.o backup/ufo.o backup/yoko.o backup/z64.o \
+        backup/tototek.o backup/ufo.o backup/ufosd.o backup/yoko.o \
+        backup/z64.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o
 ifneq ($(OSTYPE),cygwin)
 OBJECTS+=misc/getopt.o
 endif
 ifdef USE_ZLIB
-LDFLAGS+=-lz
 OBJECTS+=misc/archive.o misc/ioapi.o misc/map.o misc/unzip.o
 endif
 ifdef USE_USB
-LDFLAGS+=-lusb
 OBJECTS+=misc/usb.o
 endif
 
@@ -441,6 +448,7 @@ backup/swc.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) \
 backup/tototek.o: config.h $(BSWAP_H_DEPS) $(MISC_H_DEPS) misc/parallel.h \
                   $(TERM_H_DEPS) backup/tototek.h
 backup/ufo.o: config.h backup/ufo.h $(GETOPT2_H_DEPS)
+backup/ufosd.o: config.h backup/ufosd.h $(GETOPT2_H_DEPS)
 backup/yoko.o: config.h backup/yoko.h $(GETOPT2_H_DEPS)
 backup/z64.o: config.h backup/z64.h $(GETOPT2_H_DEPS)
 console/atari.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \
@@ -493,7 +501,7 @@ console/snes.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
                 misc/file.h $(MISC_H_DEPS) misc/string.h $(TERM_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) $(SNES_H_DEPS) \
                 backup/backup.h backup/gd.h backup/mgd.h backup/swc.h \
-                backup/ufo.h
+                backup/ufo.h backup/ufosd.h
 console/swan.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) console/swan.h backup/backup.h \
                 $(CONSOLE_DEPS)

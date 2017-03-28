@@ -1,7 +1,7 @@
 /*
 ffe.h - General Front Far East copier routines for uCON64
 
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 2002 - 2005, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -39,8 +39,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                  x             : 0 = Last file of the ROM dump (multi-file)
                                : 1 = Multi-file (there is another file to follow)
                    x           : SWC & SMC:
-                                   0 = SRAM mapping mode 1 (LoROM)
-                                   1 = mode 2 (HiROM)
+                                   0 = SRAM mapping mode 20 (LoROM)
+                                   1 = mode 21 (HiROM)
                      x         : SWC & SMC:
                                    0 = DRAM mapping mode 20 (LoROM)
                                    1 = mode 21 (HiROM)
@@ -50,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                                    0 = Run in mode 3
                                    1 = Run in mode 2 (JMP RESET)
                              x : 0 = Disable, 1 = Enable external cartridge memory
-                                 image at bank 20-5F,A0-DF in system mode 2/3)
+                                 image at bank 20-5F, A0-DF in system mode 2/3
   3-7    - 0, reserved
   8      - File ID code 1 (0xaa)
   9      - File ID code 2 (0xbb)
@@ -59,10 +59,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
            2 : Magic Griffin program (PC-Engine)
            3 : Magic Griffin SRAM data
            4 : SNES program
-           5 : SWC & SMC password, SRAM data
+           5 : SWC & SMC SRAM data
            6 : Mega Drive program
            7 : SMD SRAM data
-           8 : SWC & SMC saver (RTS) data
+           8 : SWC & SMC real-time save data
   11-511 - 0, reserved
 */
 

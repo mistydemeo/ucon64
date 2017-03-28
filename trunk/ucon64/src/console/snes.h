@@ -1,9 +1,9 @@
 /*
 snes.h - Super NES support for uCON64
 
-Copyright (c) 1999 - 2001       NoisyB
-Copyright (c) 2001 - 2004, 2015 dbjh
-Copyright (c) 2002 - 2003       John Weidman
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
+Copyright (c) 2002 - 2003             John Weidman
 
 
 This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_HIROM 0x8000
 #define SNES_EROM 0x400000                      // "Extended" ROM, Hi or Lo
 
-typedef enum { SWC = 1, GD3, UFO, FIG, MGD_SNES, SMC } snes_file_t;
+typedef enum { SWC = 1, GD3, UFO, UFOSD, FIG, MGD_SNES, SMC } snes_file_t;
 
 extern const st_getopt2_t snes_usage[];
 
@@ -68,5 +68,7 @@ extern int snes_swc (st_ucon64_nfo_t *rominfo);
 extern int snes_swcs (st_ucon64_nfo_t *rominfo);
 extern int snes_ufo (st_ucon64_nfo_t *rominfo);
 extern int snes_ufos (st_ucon64_nfo_t *rominfo);
+extern int snes_ufosd (st_ucon64_nfo_t *rominfo);
+extern int snes_ufosds (st_ucon64_nfo_t *rominfo);
 
 #endif

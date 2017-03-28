@@ -1,8 +1,8 @@
 /*
 ucon64_defines.h - definitions for uCON64
 
-Copyright (c) 2002 - 2005 NoisyB
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 2002 - 2005              NoisyB
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -308,6 +308,8 @@ enum
   UCON64_TEST,
   UCON64_UFO,
   UCON64_UFOS,
+  UCON64_UFOSD,
+  UCON64_UFOSDS,
   UCON64_UNIF,
   UCON64_UNSCR,
   UCON64_USMS,

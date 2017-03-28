@@ -67,6 +67,7 @@ LDFLAGS=$(LDFLAGS) zdll.lib
 LDFLAGS=$(LDFLAGS) libusb.lib
 !endif
 
+
 OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         misc/chksum.obj misc/file.obj misc/getopt.obj misc/getopt2.obj \
         misc/misc.obj misc/parallel.obj misc/property.obj misc/string.obj \
@@ -84,8 +85,8 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         backup/nfc.obj backup/pce-pro.obj backup/pl.obj backup/psxpblib.obj \
         backup/quickdev16.obj backup/sc.obj backup/sflash.obj backup/smc.obj \
         backup/smd.obj backup/smsgg-pro.obj backup/spsc.obj backup/ssc.obj \
-        backup/swc.obj backup/tototek.obj backup/ufo.obj backup/yoko.obj \
-        backup/z64.obj \
+        backup/swc.obj backup/tototek.obj backup/ufo.obj backup/ufosd.obj \
+        backup/yoko.obj backup/z64.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/patch.obj \
         patch/ppf.obj
 !ifdef USE_ZLIB
@@ -315,6 +316,7 @@ backup/swc.obj: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) 
 backup/tototek.obj: config.h $(BSWAP_H_DEPS) $(MISC_H_DEPS) misc/parallel.h \
                   $(TERM_H_DEPS) backup/tototek.h
 backup/ufo.obj: config.h backup/ufo.h $(GETOPT2_H_DEPS)
+backup/ufosd.obj: config.h backup/ufosd.h $(GETOPT2_H_DEPS)
 backup/yoko.obj: config.h backup/yoko.h $(GETOPT2_H_DEPS)
 backup/z64.obj: config.h backup/z64.h $(GETOPT2_H_DEPS)
 console/atari.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \
@@ -367,7 +369,7 @@ console/snes.obj: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
                 misc/file.h $(MISC_H_DEPS) misc/string.h $(TERM_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) $(SNES_H_DEPS) \
                 backup/backup.h backup/gd.h backup/mgd.h backup/swc.h \
-                backup/ufo.h
+                backup/ufo.h backup/ufosd.h
 console/swan.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) console/swan.h backup/backup.h \
                 $(CONSOLE_DEPS)

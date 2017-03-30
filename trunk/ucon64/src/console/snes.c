@@ -1442,11 +1442,11 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
     {
       if (snes_sram_size > 16 * 1024)
         header.sram_size = 7;
-      else if (snes_sram_size > 8 * 1024)           // 64 kb < size <= 128 kb
+      else if (snes_sram_size > 8 * 1024)       // 64 kb < size <= 128 kb
         header.sram_size = 3;
-      else if (snes_sram_size > 2 * 1024)           // 16 kb < size <= 64 kb
+      else if (snes_sram_size > 2 * 1024)       // 16 kb < size <= 64 kb
         header.sram_size = 2;
-      else if (snes_sram_size > 0)                  // 1 - 16 kb
+      else if (snes_sram_size > 0)              // 1 - 16 kb
         header.sram_size = 1;
       // header.sram_size is already OK for snes_sram_size == 0
     }
@@ -1454,36 +1454,38 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
   if (snes_hirom)
     {
       if ((size == 20 * MBIT || size == 24 * MBIT) && snes_sram_size == 0)
-        memcpy (header.unknown, "\xf5\x00\x00\x00", 4);
+        memcpy (header.map_control, "\xf5\x00\x00\x00", 4);
       else if (size == 32 * MBIT)
-        memcpy (header.unknown, snes_sram_size ? "\x55\x00\x80\x2c" : "\x55\x00\x80\x00", 4);
+        memcpy (header.map_control, snes_sram_size ? "\x55\x00\x80\x2c" : "\x55\x00\x80\x00", 4);
     }
   else
     {
       if (snes_sram_size)
         {
           if (size == 4 * MBIT)
-            memcpy (header.unknown, "\x05\x2a\x10\x3f", 4);
+            memcpy (header.map_control, "\x05\x2a\x10\x3f", 4);
           else if (size == 8 * MBIT)
-            memcpy (header.unknown, header.special_chip ? "\x55\x00\x40\x00" : "\x55\x00\x50\xbf", 4);
+            memcpy (header.map_control, header.special_chip ? "\x55\x00\x40\x00" : "\x55\x00\x50\xbf", 4);
           else if (size == 20 * MBIT || size == 24 * MBIT)
-            memcpy (header.unknown, "\x55\x00\x60\xbf", 4);
+            memcpy (header.map_control, "\x55\x00\x60\xbf", 4);
           else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
-            memcpy (header.unknown, "\x55\x20\x20\x3f", 4);
+            memcpy (header.map_control, "\x55\x20\x20\x3f", 4);
         }
       else
         {
           if (size == 4 * MBIT)
-            memcpy (header.unknown, "\x05\x2a\x00\x00", 4);
+            memcpy (header.map_control, "\x05\x2a\x00\x00", 4);
           else if (size == 8 * MBIT)
-            memcpy (header.unknown, "\x15\x28\x00\x00", 4);
+            memcpy (header.map_control, "\x15\x28\x00\x00", 4);
           else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
-            memcpy (header.unknown, "\x55\x20\x00\x00", 4);
+            memcpy (header.map_control, "\x55\x20\x00\x00", 4);
         }
     }
-  if (header.unknown[0] == '\0')
+  if (header.map_control[0] == '\0')
     puts ("WARNING: Conversion of this ROM is not yet fully supported by uCON64 and the\n"
-          "         output might not work correctly on a Super UFO Pro 8 SD");
+          "         output will not work on a Super UFO Pro 8 SD unless you set the bytes\n"
+          "         at offsets 0x13-0x16 to the right values\n"
+          "         Check with " OPTION_LONG_S "dbuh, modify with " OPTION_LONG_S "poke");
 
   header.sram_type = snes_hirom ? 0 : 1;
 
@@ -3052,17 +3054,18 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
         {
           if (x & 1)
             {
-              y = header[0x15 + x / 2] >> 2;
-              z = 2;
+              y = header[0x15 + x / 2] & 3;
+              z = 0;
             }
           else
             {
-              y = header[0x15 + x / 2] & 0x3;
-              z = 0;
+              y = header[0x15 + x / 2] >> 2;
+              z = 2;
             }
           if (y != 1)
             printf ("[%x:%d-%d] A%d=%s selects SRAM\n",
-                    0x15 + x / 2, z + 1, z, 20 + x, y == 0 ? "x" : y == 2 ? "0" : "1");
+                    0x15 + x / 2, z + 1, z, 20 + (x | 1) - (x & 1),
+                    y == 0 ? "x" : y == 2 ? "0" : "1");
         }
 
       y = header[0x17];
@@ -3087,6 +3090,23 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       y = header[0x12] <= 3 ? sram_sizes[header[0x12]] : 128;
       printf ("[12]     SRAM size: %d kB => %s\n",
               y, matches_deviates (snes_sram_size == y * 1024));
+
+      y = header[0x15];
+      if (y == 0 || y == 0x10 || y == 0x20 || y == 0x30)
+        {
+          if (y)
+            printf ("[15]     A15=%s selects SRAM\n", y == 0x10 ? "x" : y == 0x20 ? "0" : "1");
+          else
+            puts ("[15]     A15 not used for SRAM control");
+        }
+      for (x = 0; x < 4; x++)
+        {
+          int shift = 6 - x * 2;
+          y = (header[0x16] & (3 << shift)) >> shift;
+          if (y != 1)
+            printf ("[16:%d-%d] A%d=%s selects SRAM\n",
+                    shift + 1, shift, 23 - x, y == 0 ? "x" : y == 2 ? "0" : "1");
+        }
 
       y = header[0x17];
       printf ("[17]     SRAM mapping mode: %s => %s\n",

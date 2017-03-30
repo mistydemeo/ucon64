@@ -1,11 +1,11 @@
 /*
 swc.c - Super Wild Card support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2001        Caz
-Copyright (c) 2003        John Weidman
-Copyright (c) 2004        JohnDie
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2001 - 2005, 2015, 2017 dbjh
+Copyright (c) 2001                    Caz
+Copyright (c) 2003                    John Weidman
+Copyright (c) 2004                    JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -493,7 +493,7 @@ swc_unlock (unsigned short parport)
 
 
 #ifdef  DUMP_SA1
-void
+static void
 set_sa1_map (unsigned short chunk)
 {
   volatile int m;
@@ -507,7 +507,7 @@ set_sa1_map (unsigned short chunk)
 
 
 #ifdef  DUMP_SDD1
-void
+static void
 set_sdd1_map (unsigned short chunk)
 {
   volatile int m;
@@ -521,7 +521,7 @@ set_sdd1_map (unsigned short chunk)
 
 
 #ifdef  DUMP_SPC7110
-void
+static void
 set_spc7110_map (unsigned short chunk)
 {
   volatile int m;
@@ -856,7 +856,7 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
 #if 1
   /*
     0x0c == no SRAM & LoROM; we use the header, so that the user can override this
-    bit 4 == 0 => DRAM mode 20 (LoROM); disable SRAM by setting SRAM mem map mode 2
+    bit 4 == 0 => DRAM mode 20 (LoROM); disable SRAM by setting SRAM mem map mode 21
   */
   if ((buffer[2] & 0x1c) == 0x0c)
     buffer[2] |= 0x20;
@@ -865,9 +865,9 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
   if ((buffer[2] & 0x0c) == 0x0c)               // 0x0c == no SRAM; we use the header, so
     {                                           //  that the user can override this
       if (buffer[2] & 0x10)                     // bit 4 == 1 => DRAM mode 21 (HiROM)
-        buffer[2] &= ~0x20;                     // disable SRAM by setting SRAM mem map mode 1
+        buffer[2] &= ~0x20;                     // disable SRAM by setting SRAM mem map mode 20
       else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
-        buffer[2] |= 0x20;                      // disable SRAM by setting SRAM mem map mode 2
+        buffer[2] |= 0x20;                      // disable SRAM by setting SRAM mem map mode 21
     }
 #endif
   emu_mode_select = buffer[2];                  // this byte is needed later

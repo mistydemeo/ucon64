@@ -45,7 +45,9 @@ Offset       Content
              4 Mbit, 0/2 kB SRAM: [0x13] = 05, [0x14] = 2A
                0 kB SRAM: [0x15] = 0, [0x16] = 0
                2 kB SRAM: [0x15] = 10, [0x16] = 3F
-             8 Mbit, 0 kB SRAM: [0x13] = 15, [0x14] = 28, [0x15] = 0, [0x16] = 0
+             8 Mbit, 0/2 kB SRAM: [0x13] = 15, [0x14] = 28
+               0 kB SRAM: [0x15] = 0, [0x16] = 0
+               2 kB SRAM: [0x15] = 20, [0x16] = 3F
              8/10/16/24 Mbit, 0/2/8 kB SRAM (not: 8 Mbit, 0 kB SRAM): [0x13] = 55
                8/24 Mbit, 8/32 kB SRAM: [0x14] = 0
                  8 Mbit, 32 kB SRAM (Star Fox (U) (V1.0)): [0x15] = 40, [0x16] = 0

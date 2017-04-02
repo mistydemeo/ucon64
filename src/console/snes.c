@@ -241,13 +241,11 @@ const st_getopt2_t snes_usage[] =
       NULL, "convert to Super UFO Pro 8 SD",
       &snes_obj[8]
     },
-#if 0 // TODO: We need information about Super UFO Pro 8 SD SRAM files
     {
       "ufosds", 0, 0, UCON64_UFOSDS,
       NULL, "convert *.srm (SRAM) file to Super UFO Pro 8 SD",
       &snes_obj[10]
     },
-#endif
     {
       "ctrl", 1, 0, UCON64_CTRL,
       "TYPE", "specify type of controller in port 1 for emu when converting\n"
@@ -584,7 +582,7 @@ static int
 snes_convert_sramfile (int org_header_len, const void *new_header)
 {
   FILE *srcfile, *destfile;
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buf[32 * 1024];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buffer[32 * 1024];
   unsigned int blocksize, byteswritten, new_header_len;
 
   strcpy (src_name, ucon64.fname);
@@ -622,20 +620,18 @@ snes_convert_sramfile (int org_header_len, const void *new_header)
 
   fseek (srcfile, org_header_len, SEEK_SET);
   if (new_header)
-    {
-      fwrite (new_header, 1, new_header_len, destfile); // write header
-      byteswritten = new_header_len;
-    }
+    byteswritten = fwrite (new_header, 1, new_header_len, destfile); // write header
   else
     byteswritten = 0;
 
-  blocksize = fread (buf, 1, 32 * 1024, srcfile); // read 32 kB at max
+  blocksize = fread (buffer, 1, 32 * 1024, srcfile); // read 32 kB at max
   while (byteswritten < 32 * 1024 + new_header_len)
     {
       // Pad SRAM data to 32 kB by repeating it. At least the SWC DX2 does
       //  something similar.
-      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + new_header_len ?
-                blocksize : 32 * 1024 + new_header_len - byteswritten, destfile);
+      if (byteswritten + blocksize > 32 * 1024 + new_header_len)
+        blocksize = 32 * 1024 + new_header_len - byteswritten;
+      fwrite (buffer, 1, blocksize, destfile);
       byteswritten += blocksize;
     }
 
@@ -685,15 +681,86 @@ snes_ufos (st_ucon64_nfo_t *rominfo)
 }
 
 
+static void
+set_ufosd_sram_pattern (char *buffer, int size)
+// Fill buffer with the pattern that the Super UFO Pro 8 SD uses to pad SRAM
+//  files. The pattern repeats after 128 bytes.
+{
+  uint32_t pattern;
+  char *pattern_ptr = (char *) &pattern;
+  int n = 0;
+
+  pattern_ptr[0] = 0;
+  pattern_ptr[1] = 0x5a;
+  pattern_ptr[2] = 0xfc;
+  pattern_ptr[3] = 0x5e;
+  while (n < size / 4)
+    {
+      ((uint32_t *) buffer)[n] = pattern;
+      pattern_ptr[0] -= 8;
+      pattern_ptr[1] -= 8;
+      pattern_ptr[2] -= 8;
+      pattern_ptr[3] -= 8;
+      n++;
+      if (n % 8 == 0)
+        {
+          pattern_ptr[1] -= 0x40;
+          pattern_ptr[3] -= 0x40;
+        }
+      else if (n % 4 == 0)
+        {
+          pattern_ptr[1] += 0x40;
+          pattern_ptr[3] += 0x40;
+        }
+    }
+}
+
+
 int
 snes_ufosds (st_ucon64_nfo_t *rominfo)
 {
-  st_ufosd_header_t header;
+  FILE *srcfile, *destfile;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buffer[32 * 1024];
+  unsigned int byteswritten = 0, n;
 
-  memset (&header, 0, UFOSD_HEADER_LEN);
-  memcpy (&header.id, "SFCUFOSD", 8);
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
+  set_suffix (dest_name, ".sav");
+  ucon64_file_handler (dest_name, src_name, 0);
 
-  return snes_convert_sramfile (rominfo->backup_header_len, &header);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+
+  fseek (srcfile, rominfo->backup_header_len, SEEK_SET);
+  while ((n = fread (buffer, 1, sizeof buffer, srcfile)) != 0)
+    byteswritten += fwrite (buffer, 1, n, destfile);
+
+  // fill buffer with pattern
+  set_ufosd_sram_pattern (buffer, sizeof buffer);
+
+  // pad file to 128 kB with pattern
+  n = sizeof buffer;
+  while (byteswritten < MBIT)
+    {
+      if (byteswritten + n > MBIT)
+        n = MBIT - byteswritten;
+      fwrite (buffer, 1, n, destfile);
+      byteswritten += n;
+    }
+
+  fclose (srcfile);
+  fclose (destfile);
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return 0;
 }
 
 
@@ -1465,7 +1532,9 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
           if (size == 4 * MBIT)
             memcpy (header.map_control, "\x05\x2a\x10\x3f", 4);
           else if (size == 8 * MBIT)
-            memcpy (header.map_control, header.special_chip ? "\x55\x00\x40\x00" : "\x55\x00\x50\xbf", 4);
+            memcpy (header.map_control, header.special_chip ?
+                      "\x55\x00\x40\x00" : snes_sram_size == 2 * 1024 ?
+                        "\x15\x28\x20\x3f" : "\x55\x00\x50\xbf", 4);
           else if (size == 20 * MBIT || size == 24 * MBIT)
             memcpy (header.map_control, "\x55\x00\x60\xbf", 4);
           else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
@@ -3442,7 +3511,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
   st_dump = 0;                                  // idem
   pos = strlen (rominfo->misc);
 
-  x = 0;
+  x = y = 0;
   ucon64_fread (&header, UNKNOWN_BACKUP_HEADER_START, UNKNOWN_BACKUP_HEADER_LEN, ucon64.fname);
   if (header.id1 == 0xaa && header.id2 == 0xbb)
     x = SWC;
@@ -3450,14 +3519,65 @@ snes_init (st_ucon64_nfo_t *rominfo)
     x = UFO;
   else if (!strncmp ((char *) &header + 8, "SFCUFOSD", 8))
     x = UFOSD;
-  if ((x == SWC && (header.type == 5 || header.type == 8)) ||
-      (x == UFO && (OFFSET (header, 0x10) == 0))
-#if 0 // TODO: We need information about Super UFO Pro 8 SD SRAM files
-      || (x == UFOSD && (OFFSET (header, ?) == ?))
-#endif
-     )
+  else if (ucon64.file_size == MBIT)            // Super UFO Pro 8 SD SRAM file?
     {
-      rominfo->backup_header_len = SWC_HEADER_LEN;
+      FILE *file;
+      char buffer[32 * 1024], pattern[128];
+
+      if ((file = fopen (ucon64.fname, "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
+          return -1;
+        }
+      set_ufosd_sram_pattern (pattern, sizeof pattern);
+
+      fseek (file, ucon64.file_size - sizeof pattern, SEEK_SET);
+      fread (buffer, 1, sizeof pattern, file);
+      if (memcmp (buffer, pattern, sizeof pattern) == 0)
+        {
+          unsigned int next_step = 0, n;
+          
+          do
+            {
+              fseek (file, y, SEEK_SET);
+              fread (buffer, 1, sizeof pattern, file);
+              if (memcmp (buffer, pattern, sizeof pattern) != 0)
+                y += 1024;
+              else
+                next_step = 1;
+            }
+          while (!next_step);
+
+          if (y > 0)
+            {
+              while ((n = fread (buffer, 1, sizeof buffer, file)) != 0)
+                {
+                  unsigned int m = 0, blocksize = sizeof pattern <= n ? sizeof pattern : n;
+                  while (memcmp (buffer + m, pattern, blocksize) == 0)
+                    {
+                      m += blocksize;
+                      if (m == n)
+                        break;
+                      if (m + blocksize > n)
+                        blocksize = n - m;
+                    }
+                  if (m < n)
+                    {
+                      next_step = 0;
+                      break;
+                    }
+                }
+
+              if (next_step)
+                x = UFOSD;                      // Super UFO Pro 8 SD SRAM file
+            }
+        }
+      fclose (file);
+    }
+  if ((x == SWC && (header.type == 5 || header.type == 8)) ||
+      (x == UFO && OFFSET (header, 0x10) == 0) ||
+      (x == UFOSD && y > 0))
+    {
       strcpy (rominfo->name, "Name: N/A");
       rominfo->console_usage = NULL;
       rominfo->maker = "Publisher: You?";
@@ -3466,6 +3586,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
       ucon64.split = 0;                         // SRAM & RTS files are never split
       if (x == SWC)
         {
+          rominfo->backup_header_len = SWC_HEADER_LEN;
           rominfo->backup_usage = swc_usage[0].help;
           type = SWC;
           if (header.type == 5)
@@ -3475,15 +3596,18 @@ snes_init (st_ucon64_nfo_t *rominfo)
         }
       else if (x == UFO)
         {
+          rominfo->backup_header_len = UFO_HEADER_LEN;
           rominfo->backup_usage = ufo_usage[0].help;
           type = UFO;
           pos += sprintf (rominfo->misc + pos, "Type: Super UFO SRAM file\n");
         }
       else if (x == UFOSD)
         {
+          rominfo->backup_header_len = 0;
           rominfo->backup_usage = ufosd_usage[0].help;
           type = UFOSD;
           pos += sprintf (rominfo->misc + pos, "Type: Super UFO Pro 8 SD SRAM file\n");
+          pos += sprintf (rominfo->misc + pos, "SRAM size: %d kBytes\n", y / 1024);
         }
       return 0;                                 // rest is nonsense for SRAM/RTS file
     }

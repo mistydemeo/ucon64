@@ -30,7 +30,7 @@ extern const st_getopt2_t ufosd_usage[];
 Super UFO Pro 8 SD Header Format
 
 Offset       Content
------------- ---------------------------------------------------
+------------ -------------------------------------------------------------------
   0          Size in Mbit
   1          0
   2          Bank type: 0 = HiROM, 1 = LoROM
@@ -69,7 +69,7 @@ Offset       Content
                     10 = A15=x selects SRAM
                     20 = A15=0 selects SRAM
                     30 = A15=1 selects SRAM
-                    40/50/60/80 = ? (see LoROM 8/16/24 Mbit, SRAM & HiROM 32 Mbit, 2 kB SRAM)
+                    40/50/60/80 = ? (see LoROM 8/24 Mbit, SRAM & HiROM 32 Mbit)
              0x16 SRAM A20 - A23 control:
                   Bits 7 6 5 4 3 2 1 0
                        x x             : A23
@@ -82,9 +82,9 @@ Offset       Content
                                          11 = Address bit = 1 selects SRAM
   0x17       SRAM type: 0 = HiROM, 1 = LoROM
   0x18       0
-  0x19       For non-special chip cartridges: 0. For Star Fox (U) (V1.0): 0xFF.
+  0x19       For non-special chip cartridges: 0; for Star Fox (U) (V1.0): 0xFF
   0x1A-0x1F  0
-  0x20-0x3F  Copy of second half of internal ROM header.
+  0x20-0x3F  Copy of second half of internal ROM header
   0x40-0x1FF 0
 */
 

@@ -3536,7 +3536,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
       if (memcmp (buffer, pattern, sizeof pattern) == 0)
         {
           unsigned int next_step = 0, n;
-          
+
           do
             {
               fseek (file, y, SEEK_SET);

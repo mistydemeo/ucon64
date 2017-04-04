@@ -3517,8 +3517,6 @@ snes_init (st_ucon64_nfo_t *rominfo)
     x = SWC;
   else if (!strncmp ((char *) &header + 8, "SUPERUFO", 8))
     x = UFO;
-  else if (!strncmp ((char *) &header + 8, "SFCUFOSD", 8))
-    x = UFOSD;
   else if (ucon64.file_size == MBIT)            // Super UFO Pro 8 SD SRAM file?
     {
       FILE *file;

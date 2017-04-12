@@ -691,9 +691,9 @@ set_ufosd_sram_pattern (char *buffer, int size)
   int n = 0;
 
   pattern_ptr[0] = 0;
-  pattern_ptr[1] = 0x5a;
-  pattern_ptr[2] = 0xfc;
-  pattern_ptr[3] = 0x5e;
+  pattern_ptr[1] = 0x5a;                        // 0101 1010
+  pattern_ptr[2] = 0 - 4;
+  pattern_ptr[3] = 0x5a + 4;
   while (n < size / 4)
     {
       ((uint32_t *) buffer)[n] = pattern;
@@ -740,7 +740,8 @@ snes_ufosds (st_ucon64_nfo_t *rominfo)
     }
 
   fseek (srcfile, rominfo->backup_header_len, SEEK_SET);
-  while ((n = fread (buffer, 1, sizeof buffer, srcfile)) != 0)
+  while (byteswritten < MBIT &&
+         (n = fread (buffer, 1, sizeof buffer, srcfile)) != 0)
     byteswritten += fwrite (buffer, 1, n, destfile);
 
   // fill buffer with pattern
@@ -1189,11 +1190,11 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
       if (snes_sram_size == 8 * 1024)
-        header[0x10] = (unsigned char) 0x81;    // 64 kb
+        header[0x10] = 0x81;                    // 64 kb
       else if (snes_sram_size == 2 * 1024)
-        header[0x10] = (unsigned char) 0x82;    // 16 kb
+        header[0x10] = 0x82;                    // 16 kb
       else
-        header[0x10] = (unsigned char) 0x80;    // 0 kb or 256 kb
+        header[0x10] = 0x80;                    // 0 kb or 256 kb
 
       if (total4Mbparts <= 2)
         memcpy (&header[0x11], gd3_hirom_8mb_map, GD3_HEADER_MAPSIZE);
@@ -1222,7 +1223,7 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
             }
         }
       // Adjust sram map for exceptions - a couple of 10-12 Mb HiROM games
-      //  (Liberty or Death, Brandish). May not be necessary
+      //  (Liberty or Death, Brandish). May not be necessary.
 
       // interleave the image
       if (n4Mbparts)
@@ -1306,11 +1307,11 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
       if (snes_sram_size == 8 * 1024)
-        header[0x10] = (unsigned char) 0x81;    // 64 kb
+        header[0x10] = 0x81;                    // 64 kb
       else if (snes_sram_size == 2 * 1024)
-        header[0x10] = (unsigned char) 0x82;    // 16 kb
+        header[0x10] = 0x82;                    // 16 kb
       else
-        header[0x10] = (unsigned char) 0x80;    // 0 kb or 256 kb
+        header[0x10] = 0x80;                    // 0 kb or 256 kb
 
       if (total4Mbparts <= 1)
         memcpy (&header[0x11], gd3_lorom_4mb_map, GD3_HEADER_MAPSIZE);
@@ -1586,7 +1587,7 @@ snes_make_gd_names (const char *filename, st_ucon64_nfo_t *rominfo, char **names
   char dest_name[FILENAME_MAX];
   int nparts, surplus, n, n_names = 0, size = ucon64.file_size - rominfo->backup_header_len;
 
-  // Don't use PARTSIZE here, because the Game Doctor doesn't support
+  // don't use PARTSIZE here, because the Game Doctor doesn't support
   //  arbitrary part sizes
   nparts = size / (8 * MBIT);
   surplus = size % (8 * MBIT);
@@ -1633,12 +1634,12 @@ snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
        names_mem[GD3_MAX_UNITS][9];
   int nparts, surplus, n, half_size, name_i = 0;
 
-  // Don't use part_size here, because the Game Doctor doesn't support
+  // don't use part_size here, because the Game Doctor doesn't support
   //  arbitrary part sizes
   nparts = size / (8 * MBIT);
   surplus = size % (8 * MBIT);
 
-  // We don't want to malloc() ridiculously small chunks (of 9 bytes)
+  // we don't want to malloc() ridiculously small chunks (of 9 bytes)
   for (n = 0; n < GD3_MAX_UNITS; n++)
     names[n] = names_mem[n];
   snes_make_gd_names (ucon64.fname, rominfo, (char **) names);
@@ -1960,7 +1961,7 @@ snes_j (st_ucon64_nfo_t *rominfo)
   else
     (type == GD3 || type == MGD_SNES) ? p-- : p++;
 
-  // Split GD3 files don't have a header _except_ the first one
+  // split GD3 files don't have a header _except_ the first one
   block_size = fsizeof (src_name) - header_len;
   while (fcopy (src_name, header_len, block_size, dest_name, "ab") != -1)
     {
@@ -2133,7 +2134,7 @@ when it has been patched with -f.
   st_cm_pattern_t *patterns = NULL;
 
   strcpy (src_name, "snescopy.txt");
-  // First try the current directory, then the configuration directory
+  // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
     sprintf (src_name, "%s" DIR_SEPARATOR_S "snescopy.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
@@ -2165,7 +2166,7 @@ when it has been patched with -f.
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
-      // First use the extra patterns, so that their precedence is higher than
+      // first use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
       for (n2 = 0; n2 < n_extra_patterns; n2++)
         n += change_mem2 (buffer, bytesread,
@@ -2289,7 +2290,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   st_cm_pattern_t *patterns = NULL;
 
   strcpy (src_name, "snespal.txt");
-  // First try the current directory, then the configuration directory
+  // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
     sprintf (src_name, "%s" DIR_SEPARATOR_S "snespal.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
@@ -2321,7 +2322,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {
-      // First use the extra patterns, so that their precedence is higher than
+      // first use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
       for (n2 = 0; n2 < n_extra_patterns; n2++)
         n += change_mem2 (buffer, bytesread,
@@ -2398,7 +2399,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   st_cm_pattern_t *patterns = NULL;
 
   strcpy (src_name, "snesntsc.txt");
-  // First try the current directory, then the configuration directory
+  // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
     sprintf (src_name, "%s" DIR_SEPARATOR_S "snesntsc.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
@@ -2430,7 +2431,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {
-      // First use the extra patterns, so that their precedence is higher than
+      // first use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
       for (n2 = 0; n2 < n_extra_patterns; n2++)
         n += change_mem2 (buffer, bytesread,
@@ -2535,7 +2536,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   st_cm_pattern_t *patterns = NULL;
 
   strcpy (src_name, "snesslow.txt");
-  // First try the current directory, then the configuration directory
+  // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
     sprintf (src_name, "%s" DIR_SEPARATOR_S "snesslow.txt", ucon64.configdir);
   n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
@@ -2567,7 +2568,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)) != 0)
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
-      // First use the extra patterns, so that their precedence is higher than
+      // first use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
       for (n2 = 0; n2 < n_extra_patterns; n2++)
         n += change_mem2 (buffer, bytesread,
@@ -3301,7 +3302,7 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
               (header->emulation1 == 0x00 && header->emulation2 == 0x80) ||
 #if 1
               // This makes NES FFE ROMs & Game Boy ROMs be detected as SNES
-              //  ROMs, see src/console/nes.c & src/console/gb.c
+              //  ROMs, see src/console/nes.c & src/console/gb.c.
               (header->emulation1 == 0x00 && header->emulation2 == 0x00) ||
 #endif
               (header->emulation1 == 0x47 && header->emulation2 == 0x83) ||
@@ -3346,8 +3347,8 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
                    surplus < (int) (15 * SWC_HEADER_LEN) &&
                    ucon64.file_size > surplus)
             rominfo->backup_header_len = surplus;
-          // special case for Infinity Demo (PD)... (has odd size, but SWC
-          //  header). Don't add "|| type == FIG" as it is too unreliable
+          // Special case for Infinity Demo (PD)... (has odd size, but SWC
+          //  header). Don't add "|| type == FIG" as it is too unreliable.
           else if (type == SWC || type == GD3 || type == UFO || type == UFOSD)
             rominfo->backup_header_len = SWC_HEADER_LEN;
         }
@@ -3429,7 +3430,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
       snes_header_base = ucon64.snes_header_base;
       if (snes_header_base &&
           size < (int) (snes_header_base + SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
-        snes_header_base = 0;                   // Don't let -erom crash on a too small ROM
+        snes_header_base = 0;                   // don't let -erom crash on a too small ROM
     }
 
   return x;
@@ -3529,9 +3530,9 @@ snes_init (st_ucon64_nfo_t *rominfo)
         }
       set_ufosd_sram_pattern (pattern, sizeof pattern);
 
-      fseek (file, ucon64.file_size - sizeof pattern, SEEK_SET);
+      fseek (file, ucon64.file_size - 64 * 1024, SEEK_SET);
       fread (buffer, 1, sizeof pattern, file);
-      if (memcmp (buffer, pattern, sizeof pattern) == 0)
+      if (memcmp (buffer, pattern, sizeof pattern) == 0) // pattern at 64 kB?
         {
           unsigned int next_step = 0, n;
 
@@ -3540,7 +3541,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
               fseek (file, y, SEEK_SET);
               fread (buffer, 1, sizeof pattern, file);
               if (memcmp (buffer, pattern, sizeof pattern) != 0)
-                y += 1024;
+                y = y ? y * 2 : 2 * 1024; // check offsets 0, 2, 4, 8, 16, 32 and 64 kB
               else
                 next_step = 1;
             }
@@ -4104,7 +4105,7 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 #else
 static int
 snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
-// Calculate the checksum of a SNES ROM
+// Calculate the checksum of a SNES ROM.
 {
   int i, internal_rom_size;
   unsigned short int sum;
@@ -4350,7 +4351,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
       if (!isprint ((int) name[n]))
         name[n] = '.';
       else
-        name[n] = (unsigned char) toupper (name[n]); // The Super Flash loader (SFBOTX2.GS)
+        name[n] = (unsigned char) toupper (name[n]); // the Super Flash loader (SFBOTX2.GS)
     }                                           //  only supports upper case characters
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
 
@@ -4362,18 +4363,18 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
         flags2 = 0x10;
       else if (snes_sram_size == 32 * 1024)
         flags2 = 0x20;
-      else // if (snes_sram_size == 128 * 1024) // Default to 1024 kbit SRAM
+      else // if (snes_sram_size == 128 * 1024) // default to 1024 kbit SRAM
         flags2 = 0x30;
     }
   else
     flags2 = 0x40;
 
-  if (snes_header_base == SNES_EROM)            // Enable Extended Map for >32 Mbit ROMs
+  if (snes_header_base == SNES_EROM)            // enable Extended Map for >32 Mbit ROMs
     flags2 |= 0x80;
 
   flags1 = snes_hirom ? 0x10 : 0x00;
 
-  if (!snes_hirom && uses_DSP)                  // Set LoROM DSP flag if necessary
+  if (!snes_hirom && uses_DSP)                  // set LoROM DSP flag if necessary
     flags1 |= 0x01;
 
   if (slot == 0)
@@ -4441,7 +4442,7 @@ snes_multi (int truncate_size, char *fname)
       if (file_no == 5)                         // loader + 4 games
         {
           puts ("WARNING: A multi-game file can contain a maximum of 4 games. The other files\n"
-                "         are ignored.");
+                "         are ignored");
           break;
         }
 

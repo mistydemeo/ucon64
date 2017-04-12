@@ -1,8 +1,8 @@
 /*
 sms.c - Sega Master System/Game Gear support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2003 - 2005 dbjh
+Copyright (c) 1999 - 2001              NoisyB
+Copyright (c) 2003 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -166,13 +166,9 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
 
   mgd_write_index_file ((char *) basename2 (dest_name), 1);
 
-  /*
-    Not sure if this is correct (taken from a mgd converter script):
-    1MBIT: .040, 2MBIT: .040, 4MBIT: .058, 8MBIT: .058
-  */
   if (size <= 4 * MBIT)
     puts ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
-          "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.");
+          "      on an MGD2. You could try suffixes like .040, .050, .058, .068 or .070");
   return 0;
 }
 
@@ -304,8 +300,10 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
       else
         name[n] = (unsigned char) toupper (name[n]); // loader only supports upper case characters
     }
+  // See comment in genesis.c/write_game_table_entry() why string is terminated.
+  name[0x0b] = '\0';
   fwrite (name, 1, 0x0c, destfile);             // 0x01 - 0x0c = name
-  fputc (size / 16384, destfile);               // 0x0d = ROM size (not used by loader)
+  fputc (size / 16384, destfile);               // 0x0d = ROM size (not used by loader, but by us)
   fputc (totalsize / 16384, destfile);          // 0x0e = bank code
 
   if (sram_page > 3)
@@ -379,7 +377,7 @@ sms_multi (int truncate_size, char *fname)
       if (file_no == 32)                        // loader + 31 games
         {
           puts ("WARNING: A multi-game file can contain a maximum of 31 games. The other files\n"
-                "         are ignored.");
+                "         are ignored");
           break;
         }
 
@@ -457,8 +455,8 @@ sms_multi (int truncate_size, char *fname)
   fseek (destfile, 0x2000 + (file_no - 1) * 0x10, SEEK_SET);
   fputc (0, destfile);                          // indicate no next game
 
-  // Make it possible for smsgg_write_rom() to detect that the file is a
-  //  multi-game file.
+  // make it possible for smsgg_write_rom() to detect that the file is a
+  //  multi-game file
   fseek (destfile, 0x21f4, SEEK_SET);
   strncpy ((char *) buffer, "uCON64 " UCON64_VERSION_S, 12);
   buffer[12] = 0;
@@ -615,9 +613,9 @@ sms_init (st_ucon64_nfo_t *rominfo)
   rominfo->header = &sms_header;
 
   ucon64_fread (buf, 0, 11, ucon64.fname);
-  // Note that the identification bytes are the same as for Genesis SMD files
+  // Note that the identification bytes are the same as for Genesis SMD files.
   //  The init function for Genesis files is called before this function so it
-  //  is alright to set result to 0
+  //  is alright to set result to 0.
   if ((buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6) ||
       !(memcmp (sms_header.signature, "TMR SEGA", 8) &&  // SMS or GG
         memcmp (sms_header.signature, "TMR ALVS", 8) &&  // SMS

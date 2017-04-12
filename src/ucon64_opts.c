@@ -1660,16 +1660,16 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_POKE:
-      ucon64_file_handler (dest_name, src_name, 0);
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-
       sscanf (option_arg, "%x:%x", &x, &value);
       if (x >= ucon64.file_size)
         {
           fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
-          remove (dest_name);
           break;
         }
+
+      ucon64_file_handler (dest_name, src_name, 0);
+      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+
       fputc ('\n', stdout);
       buf[0] = (char) ucon64_fgetc (dest_name, x);
       dumper (stdout, buf, 1, x, DUMPER_HEX);

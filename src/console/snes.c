@@ -1559,7 +1559,7 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
 
   header.sram_type = snes_hirom ? 0 : 1;
 
-  // copy 2nd half of internal header to backup unit header
+  // copy last 32 bytes of internal header to backup unit header
   memcpy (header.internal_header_data, snes_header.name, 32);
 
   set_nsrt_info (rominfo, (unsigned char *) &header);
@@ -3183,7 +3183,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
               y == 1 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
               matches_deviates ((snes_hirom ? 0 : 1) == y));
 
-      printf ("[20-3f]  Copy of second half of internal header => %s\n",
+      printf ("[20-3f]  Copy of last 32 bytes of internal header => %s\n",
               matches_deviates (memcmp (snes_header.name, &header[0x20], 32) == 0));
     }
   else if (type == GD3)
@@ -4390,7 +4390,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
 
   fputc (flags1, destfile);                     // 0x1d = mapping flags
   fputc (flags2, destfile);                     // 0x1e = SRAM flags
-  fputc (size / 0x8000, destfile);              // 0x1f = ROM size (not used by loader)
+  fputc (size / 0x8000, destfile);              // 0x1f = ROM size (not used by loader, but by us)
 }
 
 

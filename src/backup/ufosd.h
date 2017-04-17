@@ -84,7 +84,7 @@ Offset       Content
   0x18       0
   0x19       For non-special chip cartridges: 0; for Star Fox (U) (V1.0): 0xFF
   0x1A-0x1F  0
-  0x20-0x3F  Copy of second half of internal ROM header
+  0x20-0x3F  Copy of last 32 bytes of internal ROM header
   0x40-0x1FF 0
 */
 

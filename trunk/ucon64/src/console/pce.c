@@ -869,7 +869,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
     }
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (totalsize / MBIT, destfile);           // 0x1d = bank code
-  fputc (size / MBIT, destfile);                // 0x1e = ROM size (not used by loader)
+  fputc (size / MBIT, destfile);                // 0x1e = ROM size (not used by loader, but by us)
   fputc (0, destfile);                          // 0x1f = flags (x, D (reserved), x, x, x, x, x, x)
 
   fseek (destfile, fpos, SEEK_SET);             // restore file pointer

@@ -171,7 +171,7 @@ const char *ucon64_msg[] =
 
     "ERROR: Could not auto detect the right ROM/IMAGE/console type\n"   // CONSOLE_ERROR
     "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
-    "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+    "       For example, the force recognition switch for SNES is " OPTION_LONG_S "snes\n",
 
     "Wrote output to %s\n",                                             // WROTE
     "ERROR: Cannot open \"%s\" for reading\n",                          // OPEN_READ_ERROR
@@ -859,7 +859,7 @@ ucon64_file_handler (char *dest, char *src, int flags)
   if (!access (dest, F_OK))
     {
       stat (dest, &dest_info);
-      // *Trying* to make dest writable here avoids having to change all code
+      // *trying* to make dest writable here avoids having to change all code
       //  that might (try to) operate on a read-only file
       chmod (dest, dest_info.st_mode | S_IWUSR);
 
@@ -1365,8 +1365,8 @@ ucon64_rename (int mode)
             suffix[len2] = 0;
           }
         // NOTE: The implementation of snprintf() in glibc 2.3.5-10 (FC4)
-        //  terminates the string. So, a size argument of 4 results in 3
-        //  characters plus a string terminator.
+        //       terminates the string. So, a size argument of 4 results in 3
+        //       characters plus a string terminator.
         snprintf (buf + len, 4, "%0x", crc);
         buf[len + 3] = 0;
       }
@@ -1571,7 +1571,7 @@ ucon64_e (void)
       fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
                "       %s\n"
                "TIP:   If the wrong console was detected you might try to force recognition\n"
-               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+               "       For example, the force recognition switch for SNES is " OPTION_LONG_S "snes\n",
                name, ucon64.configfile);
       return -1;
     }
@@ -1583,7 +1583,7 @@ ucon64_e (void)
 
   result = system (buf)
 #if     !(defined __MSDOS__ || defined _WIN32)
-           >> 8                                 // the exit code is coded in bits 8-15
+           >> 8                                 // the exit code is encoded in bits 8-15
 #endif                                          //  (does not apply to DJGPP, MinGW & VC++)
            ;
 
@@ -1597,7 +1597,7 @@ ucon64_e (void)
     {
       fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"
                        "TIP:   If the wrong emulator was used you might try to force recognition\n"
-                       "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+                       "       For example, the force recognition switch for SNES is " OPTION_LONG_S "snes\n",
                result);
     }
 #endif
@@ -2076,6 +2076,8 @@ typedef struct
   unsigned char *buffer;
   const char *fname0;
   const char *fname;
+  const char *fname_arch;
+  int fsize;
   int found;
 } st_ucon64_filefile_t;
 
@@ -2084,12 +2086,12 @@ static inline int
 ucon64_filefile_func (void *buffer, int n, void *object)
 {
   st_ucon64_filefile_t *o = (st_ucon64_filefile_t *) object;
-  int i = 0, j = 0, len = MIN (FILEFILE_LARGE_BUF, fsizeof (o->fname) - o->pos);
-  char *b = (char *) buffer;
+  int i, j, len = MIN (FILEFILE_LARGE_BUF, o->fsize - o->pos);
+  unsigned char *b = (unsigned char *) buffer;
 
   ucon64_fread (o->buffer, o->pos, len, o->fname);
 
-  for (; i < n; i++)
+  for (i = 0; i < n; i++)
     if (o->similar == TRUE ?                    // find start
         *(b + i) == *(o->buffer + i) :
         *(b + i) != *(o->buffer + i))
@@ -2101,15 +2103,18 @@ ucon64_filefile_func (void *buffer, int n, void *object)
             break;
 
         fprintf (o->output, "%s:\n", o->fname0);
-        dumper (o->output, &b[i], j, o->pos0 + i, DUMPER_HEX);
+        dumper (o->output, b + i, j, o->pos0 + i, DUMPER_HEX);
 
-        fprintf (o->output, "%s:\n", o->fname);
-        dumper (o->output, &o->buffer[i], j, o->pos + i, DUMPER_HEX);
+        fprintf (o->output, "%s", o->fname);
+        if (o->fname_arch)
+          fprintf (o->output, " (%s)", o->fname_arch);
+        fputs (":\n", o->output);
+        dumper (o->output, o->buffer + i, j, o->pos + i, DUMPER_HEX);
 
         fputc ('\n', o->output);
 
         i += j;
-        o->found++;
+        o->found += j;
       }
 
   return n;
@@ -2117,60 +2122,63 @@ ucon64_filefile_func (void *buffer, int n, void *object)
 
 
 void
-ucon64_filefile (const char *filename1, int start1, const char *filename2,
-                 int start2, int similar)
+ucon64_filefile (const char *filename1, int start1, int start2, int similar)
 {
+  int fsize1;
   st_ucon64_filefile_t o;
 
-  printf ("Comparing %s", basename2 (ucon64.fname));
+  printf ("Comparing %s with %s", filename1, ucon64.fname);
   if (ucon64.fname_arch[0])
-    printf (" (%s)", basename2 (ucon64.fname_arch));
-  printf (" with %s\n", filename1);
+    printf (" (%s)", ucon64.fname_arch);
+  fputc ('\n', stdout);
 
-  if (one_file (filename1, filename2))
+  if (one_file (filename1, ucon64.fname))
     {
-      printf ("%s and %s refer to one file\n", filename1, filename2);
+      printf ("%s and %s refer to the same file\n", filename1, ucon64.fname);
       return;
     }
 
-  if (fsizeof (filename1) < start1 || fsizeof (filename2) < start2)
+  fsize1 = fsizeof (filename1);
+  if (fsize1 < start1 || ucon64.file_size < start2)
     return;
 
-  if (!(o.buffer = (unsigned char *) malloc (FILEFILE_LARGE_BUF)))
+  if ((o.buffer = (unsigned char *) malloc (FILEFILE_LARGE_BUF)) == NULL)
     {
-      fputs ("ERROR: File not found/out of memory\n", stderr);
-      return;                            // it's logical to stop for this file
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], FILEFILE_LARGE_BUF);
+      return;
     }
 
   o.fname0 = filename1;
   o.pos0 = start1;
 
-  o.fname = filename2;
+  o.fname = ucon64.fname;
+  o.fname_arch = ucon64.fname_arch[0] ? ucon64.fname_arch : NULL;
   o.pos = start2;
+  o.fsize = ucon64.file_size;
+
   o.output = stdout;
   o.similar = similar;
-
   o.found = 0;
 
-  quick_io_func (ucon64_filefile_func, FILEFILE_LARGE_BUF, &o, start1,
-                 fsizeof (filename1), filename1, "rb");
+  quick_io_func (ucon64_filefile_func, FILEFILE_LARGE_BUF, &o, start1, fsize1,
+                 filename1, "rb");
 
-  if (o.found)
-    printf ("Found %d %s\n",
-      o.found,
-      similar ? (o.found == 1 ? "similarity" : "similarities") :
-                (o.found == 1 ? "difference" : "differences"));
+  free (o.buffer);
+
+  printf ("Found %d %s\n\n",
+          o.found,
+          similar ? (o.found == 1 ? "similarity" : "similarities") :
+                    (o.found == 1 ? "difference" : "differences"));
 }
 #else
 #define FILEFILE_LARGE_BUF
 // When verifying if the code produces the same output when FILEFILE_LARGE_BUF
 //  is defined as when it's not, be sure to use the same buffer size
 void
-ucon64_filefile (const char *filename1, int start1, const char *filename2,
-                 int start2, int similar)
+ucon64_filefile (const char *filename1, int start1, int start2, int similar)
 {
-  int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
-      bytesread1, bytesread2, bytesleft1, bytesleft2, n_bytes = 0;
+  int base, fsize1, len, chunksize1, chunksize2, readok = 1, bytesread1,
+      bytesread2, bytesleft1, bytesleft2, n_bytes = 0;
 #ifdef  FILEFILE_LARGE_BUF
   int bufsize = 1024 * 1024;
   unsigned char *buf1, *buf2;
@@ -2180,20 +2188,19 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #endif
   FILE *file1, *file2;
 
-  printf ("Comparing %s", basename2 (ucon64.fname));
+  printf ("Comparing %s with %s", filename1, ucon64.fname);
   if (ucon64.fname_arch[0])
-    printf (" (%s)", basename2 (ucon64.fname_arch));
-  printf (" with %s\n", filename1);
+    printf (" (%s)", ucon64.fname_arch);
+  fputc ('\n', stdout);
 
-  if (one_file (filename1, filename2))
+  if (one_file (filename1, ucon64.fname))
     {
-      printf ("%s and %s refer to one file\n\n", filename1, filename2);
+      printf ("%s and %s refer to the same file\n\n", filename1, ucon64.fname);
       return;
     }
 
   fsize1 = fsizeof (filename1);                 // fsizeof() returns size in bytes
-  fsize2 = fsizeof (filename2);
-  if (fsize1 < start1 || fsize2 < start2)
+  if (fsize1 < start1 || ucon64.file_size < start2)
     return;
 
 #ifdef  FILEFILE_LARGE_BUF
@@ -2219,9 +2226,9 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #endif
       return ;
     }
-  if ((file2 = fopen (filename2, "rb")) == NULL)
+  if ((file2 = fopen (ucon64.fname, "rb")) == NULL)
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename2);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
       fclose (file1);
 #ifdef  FILEFILE_LARGE_BUF
       free (buf1);
@@ -2234,10 +2241,10 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
   fseek (file2, start2, SEEK_SET);
   bytesleft1 = fsize1;
   bytesread1 = 0;
-  bytesleft2 = fsize2;
+  bytesleft2 = ucon64.file_size;
   bytesread2 = 0;
 
-  while (bytesleft1 > 0 && bytesread1 < fsize2 && readok)
+  while (bytesleft1 > 0 && bytesread1 < ucon64.file_size && readok)
     {
       chunksize1 = fread (buf1, 1, bufsize, file1);
       if (chunksize1 == 0)
@@ -2270,9 +2277,15 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 
                       printf ("%s:\n", filename1);
                       dumper (stdout, &buf1[base], len, start1 + base + bytesread2, DUMPER_HEX);
-                      printf ("%s:\n", filename2);
+
+                      printf ("%s", ucon64.fname);
+                      if (ucon64.fname_arch[0])
+                        printf (" (%s)", ucon64.fname_arch);
+                      puts (":");
                       dumper (stdout, &buf2[base], len, start2 + base + bytesread2, DUMPER_HEX);
+
                       fputc ('\n', stdout);
+
                       base += len;
                       n_bytes += len;
                     }

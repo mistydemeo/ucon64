@@ -963,8 +963,8 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 
     default:
       fprintf (stderr,
-           "ERROR: You must specify a ROM or force the console type\n"
-           "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n");
+               "ERROR: You must specify a ROM or force the console type\n"
+               "       For example, the force recognition switch for SNES is " OPTION_LONG_S "snes\n");
       return -1;
     }
   gg_argv[2] = code;
@@ -1093,17 +1093,6 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
           offset += 8 * 1024;
         }
     }
-  else if (ucon64.console == UCON64_SMS || ucon64.console == UCON64_GB)
-    {
-      fseek (destfile, offset, SEEK_SET);
-      buf[0] = (char) fgetc (destfile);
-
-      if ((check != -1 && buf[0] == (char) check) || check == -1)
-        {
-          buf2[0] = (char) value;
-          apply_code (destfile, offset, buf, buf2, 1);
-        }
-    }
   else if (ucon64.console == UCON64_GEN)
     {
       fseek (destfile, offset, SEEK_SET);
@@ -1114,13 +1103,17 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
       buf2[1] = (char) value;
       apply_code (destfile, offset, buf, buf2, 2);
     }
-  else
+  else // UCON64_SNES || UCON64_SMS || UCON64_GB
     {
       fseek (destfile, offset, SEEK_SET);
       buf[0] = (char) fgetc (destfile);
 
-      buf2[0] = (char) value;
-      apply_code (destfile, offset, buf, buf2, 1);
+      // for SNES check is always -1
+      if (check == -1 || buf[0] == (char) check)
+        {
+          buf2[0] = (char) value;
+          apply_code (destfile, offset, buf, buf2, 1);
+        }
     }
 
   fclose (destfile);

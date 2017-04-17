@@ -544,7 +544,7 @@ ucon64_switches (st_ucon64_t *p)
           }
 
         if (!dir)
-          puts ("WARNING: Argument for -o must be a directory. Using current directory instead");
+          puts ("WARNING: Argument for " OPTION_S "o must be a directory. Using current directory instead");
       }
       break;
 
@@ -789,11 +789,11 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_C:
-      ucon64_filefile (option_arg, 0, ucon64.fname, 0, FALSE);
+      ucon64_filefile (option_arg, 0, 0, FALSE);
       break;
 
     case UCON64_CS:
-      ucon64_filefile (option_arg, 0, ucon64.fname, 0, TRUE);
+      ucon64_filefile (option_arg, 0, 0, TRUE);
       break;
 
     case UCON64_FIND:
@@ -1009,7 +1009,7 @@ ucon64_options (st_ucon64_t *p)
                 printf (" (%s)\n", basename2 (ucon64.fname_arch));
               else
                 fputc ('\n', stdout);
-              // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
+              // use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
               printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ?
                       ucon64.fcrc32 : ucon64.crc32);
               ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
@@ -1331,7 +1331,7 @@ ucon64_options (st_ucon64_t *p)
           nds_chk (ucon64.nfo);
           break;
         default:
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1405,7 +1405,7 @@ ucon64_options (st_ucon64_t *p)
           snes_f (ucon64.nfo);
           break;
         default:
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1465,7 +1465,7 @@ ucon64_options (st_ucon64_t *p)
           break;
         default:
           fputs ("ERROR: Cannot apply Game Genie code for this ROM/console\n", stderr);
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1516,7 +1516,7 @@ ucon64_options (st_ucon64_t *p)
           snes_j (ucon64.nfo);
           break;
         default:
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1547,7 +1547,7 @@ ucon64_options (st_ucon64_t *p)
           nds_logo (ucon64.nfo);
           break;
         default:
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1583,7 +1583,7 @@ ucon64_options (st_ucon64_t *p)
           snes_mgd (ucon64.nfo);
           break;
         default:
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1631,7 +1631,7 @@ ucon64_options (st_ucon64_t *p)
           nds_n (ucon64.nfo, option_arg);
           break;
         default:
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1708,7 +1708,7 @@ ucon64_options (st_ucon64_t *p)
           snes_s (ucon64.nfo);
           break;
         default:
-// The next msg has already been printed
+// the next msg has already been printed
 //          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
@@ -1936,7 +1936,7 @@ ucon64_options (st_ucon64_t *p)
             strcat (ucon64.output_path, DIR_SEPARATOR_S);
         }
       if (gba_multi (strtol (option_arg, NULL, 10) * MBIT, src_name) == 0)
-        { // Don't try to start a transfer if there was a problem
+        { // don't try to start a transfer if there was a problem
           fputc ('\n', stdout);
           ucon64.file_size = fsizeof (src_name);
           fal_write_rom (src_name, ucon64.parport);
@@ -1974,7 +1974,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XFIG:
-      if (access (ucon64.fname, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.fname, F_OK) != 0)       // file does not exist => dump cartridge
         fig_read_rom (ucon64.fname, ucon64.parport);
       else
         {
@@ -1985,32 +1985,32 @@ ucon64_options (st_ucon64_t *p)
             fputs ("ERROR: This ROM seems to be interleaved, but the FIG does not support\n"
                    "       interleaved ROMs. Convert to a FIG compatible format\n",
                    stderr);
-          else // file exists -> send it to the copier
+          else // file exists => send it to the copier
             fig_write_rom (ucon64.fname, ucon64.parport);
         }
       fputc ('\n', stdout);
       break;
 
     case UCON64_XFIGS:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump SRAM contents
         fig_read_sram (ucon64.fname, ucon64.parport);
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         fig_write_sram (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XFIGC:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cart SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump cart SRAM contents
         fig_read_cart_sram (ucon64.fname, ucon64.parport);
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         fig_write_cart_sram (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XGBX:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge/flash card
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump cartridge/flash card
         gbx_read_rom (ucon64.fname, ucon64.parport);
-      else                                      // file exists -> send it to the programmer
+      else                                      // file exists => send it to the programmer
         gbx_write_rom (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
@@ -2034,23 +2034,23 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XGD3:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump cartridge
         gd3_read_rom (ucon64.fname, ucon64.parport); // dumping is not yet supported
       else
         {
           if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
                    stderr);
-          else                                  // file exists -> send it to the copier
+          else                                  // file exists => send it to the copier
             gd3_write_rom (ucon64.fname, ucon64.parport, ucon64.nfo);
         }
       fputc ('\n', stdout);
       break;
 
     case UCON64_XGD3S:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump SRAM contents
         gd3_read_sram (ucon64.fname, ucon64.parport); // dumping is not yet supported
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         gd3_write_sram (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
@@ -2099,11 +2099,11 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has a header. Remove it with -stp or -mgd\n",
+            fputs ("ERROR: This ROM has a header. Remove it with " OPTION_LONG_S "stp or " OPTION_LONG_S "mgd\n",
                    stderr);
           else if (ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM seems to be interleaved, but uCON64 does not support\n"
-                   "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with -mgd\n",
+                   "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with " OPTION_LONG_S "mgd\n",
                    stderr);
           else
             smsgg_write_rom (ucon64.fname, ucon64.parport);
@@ -2151,16 +2151,16 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XMD:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump flash card
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump flash card
         md_read_rom (ucon64.fname, ucon64.parport, 64 * MBIT); // reads 32 Mbit if Sharp card
-      else                                      // file exists -> send it to the MD-PRO
+      else                                      // file exists => send it to the MD-PRO
         {
           if (ucon64.nfo->backup_header_len)    // binary with header is possible
-            fputs ("ERROR: This ROM has a header. Remove it with -stp or -bin\n",
+            fputs ("ERROR: This ROM has a header. Remove it with " OPTION_LONG_S "stp or " OPTION_LONG_S "bin\n",
                    stderr);
           else if (genesis_get_file_type () != BIN)
             fputs ("ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
-                   "       binary files to the MD-PRO. Convert ROM with -bin\n",
+                   "       binary files to the MD-PRO. Convert ROM with " OPTION_LONG_S "bin\n",
                    stderr);
           else
             md_write_rom (ucon64.fname, ucon64.parport);
@@ -2169,9 +2169,9 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XMDS:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump SRAM contents
         md_read_sram (ucon64.fname, ucon64.parport, -1);
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         md_write_sram (ucon64.fname, ucon64.parport, -1);
       fputc ('\n', stdout);
       break;
@@ -2226,24 +2226,24 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSF:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump flash card
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump flash card
         sf_read_rom (ucon64.fname, ucon64.parport, 64 * MBIT);
-      else                                      // file exists -> send it to the Super Flash
+      else                                      // file exists => send it to the Super Flash
         sf_write_rom (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XSFS:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump SRAM contents
         sf_read_sram (ucon64.fname, ucon64.parport);
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         sf_write_sram (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XSMC: // we don't use WF_NO_ROM => no need to check for file
       if (!ucon64.nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n",
+        fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with " OPTION_LONG_S "ffe\n",
                stderr);
       else
         smc_write_rom (ucon64.fname, ucon64.parport);
@@ -2259,9 +2259,9 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSMD:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump cartridge
         smd_read_rom (ucon64.fname, ucon64.parport);
-      else                                      // file exists -> send it to the copier
+      else                                      // file exists => send it to the copier
         {
           if (!ucon64.nfo->backup_header_len)
             fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
@@ -2277,9 +2277,9 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSMDS:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump SRAM contents
         smd_read_sram (ucon64.fname, ucon64.parport);
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         smd_write_sram (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
@@ -2287,7 +2287,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_XSWC:
       enableRTS = 0;                            // falling through
     case UCON64_XSWC2:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump cartridge
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump cartridge
         swc_read_rom (ucon64.fname, ucon64.parport, ucon64.io_mode);
       else
         {
@@ -2302,7 +2302,7 @@ ucon64_options (st_ucon64_t *p)
             {
               if (enableRTS != 0)
                 enableRTS = 1;
-              // file exists -> send it to the copier
+              // file exists => send it to the copier
               swc_write_rom (ucon64.fname, ucon64.parport, enableRTS);
             }
         }
@@ -2310,17 +2310,17 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XSWCS:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump SRAM contents
         swc_read_sram (ucon64.fname, ucon64.parport);
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         swc_write_sram (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XSWCC:
-      if (access (ucon64.fname, F_OK) != 0)     // file does not exist -> dump SRAM contents
+      if (access (ucon64.fname, F_OK) != 0)     // file does not exist => dump SRAM contents
         swc_read_cart_sram (ucon64.fname, ucon64.parport, ucon64.io_mode);
-      else                                      // file exists -> restore SRAM
+      else                                      // file exists => restore SRAM
         swc_write_cart_sram (ucon64.fname, ucon64.parport, ucon64.io_mode);
       fputc ('\n', stdout);
       break;

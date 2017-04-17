@@ -1,9 +1,9 @@
 /*
 ucon64_misc.h - miscellaneous functions for uCON64
 
-Copyright (c) 1999 - 2006 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2001        Caz
+Copyright (c) 1999 - 2006              NoisyB
+Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
+Copyright (c) 2001                     Caz
 
 
 This program is free software; you can redistribute it and/or modify
@@ -140,7 +140,7 @@ extern int ucon64_pattern (const char *pattern_fname);
   ucon64_find()     file oriented wrapper for memsearch() (uses the same flags)
   ucon64_chksum()   file oriented wrapper for chksum()
                       if (!sha1) {sha1 won't be calculated!}
-  ucon64_filefile() compare two files for similarities or differencies
+  ucon64_filefile() compare file with ucon64.fname for similarities or differencies
 */
 #define ucon64_fgetc(f, p)           (quick_io_c(0, p, f, "rb"))
 #define ucon64_fputc(f, p, b, m)     (quick_io_c(b, p, f, m))
@@ -158,6 +158,6 @@ extern int ucon64_find (const char *filename, size_t start, size_t len,
                         const char *search, int searchlen, uint32_t flags);
 extern int ucon64_chksum (char *sha1, char *md5, unsigned int *crc32, // uint16_t *crc16,
                           const char *filename, int file_size, size_t start);
-extern void ucon64_filefile (const char *filename1, int start1,
-                             const char *filename2, int start2, int similar);
+extern void ucon64_filefile (const char *filename1, int start1, int start2,
+                             int similar);
 #endif // #ifndef UCON64_MISC_H

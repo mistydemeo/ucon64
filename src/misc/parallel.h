@@ -1,8 +1,8 @@
 /*
 parallel.h - miscellaneous parallel port functions
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -32,8 +32,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PARPORT_DATA     0                      // output
 #define PARPORT_STATUS   1                      // input
 #define PARPORT_CONTROL  2
-#define PARPORT_EADDRESS 3                      // EPP/ECP address
-#define PARPORT_EDATA    4                      // EPP/ECP output/input
+#define PARPORT_EADDRESS 3                      // EPP address
+#define PARPORT_EDATA    4                      // EPP output/input
 
 #define PARPORT_INPUT_MASK 0x78
 
@@ -42,14 +42,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define PARPORT_UNKNOWN ((unsigned short) -1)
 
+typedef enum { PPMODE_SPP, PPMODE_SPP_BIDIR, PPMODE_EPP } parport_mode_t;
+
 // DJGPP (DOS) has these, but it's better that all code uses the same functions.
 extern unsigned char inportb (unsigned short port);
 extern unsigned short inportw (unsigned short port);
 extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
 
-extern unsigned short parport_open (unsigned short parport);
+extern unsigned short parport_open (unsigned short port);
 extern void parport_close (void);
+extern parport_mode_t parport_setup (unsigned short port, parport_mode_t mode);
+extern void parport_reset_timeout (unsigned short port);
 extern void parport_print_info (void);
 #endif // USE_PARALLEL
 

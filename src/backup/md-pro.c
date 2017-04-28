@@ -1,8 +1,8 @@
 /*
-md-pro.c - MD-PRO flash card programmer support for uCON64
+md-pro.c - MD-PRO support for uCON64
 
-Copyright (c) 2003 - 2005 dbjh
-Copyright (c) 2003        NoisyB
+Copyright (c) 2003 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2003                     NoisyB
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -47,19 +47,19 @@ const st_getopt2_t mdpro_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "MD-PRO flash card programmer"/*"2003 ToToTEK Multi Media http://www.tototek.com"*/,
+      NULL, "MD-PRO"/*"2003 ToToTEK Multi Media http://www.tototek.com"*/,
       NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xmd", 0, 0, UCON64_XMD,
-      NULL, "send/receive ROM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "send/receive ROM to/from MD-PRO; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32/64 Mbits) when ROM does not exist",
       &mdpro_obj[0]
     },
     {
       "xmds", 0, 0, UCON64_XMDS,
-      NULL, "send/receive SRAM to/from MD-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "send/receive SRAM to/from MD-PRO; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &mdpro_obj[1]
     },
@@ -108,7 +108,7 @@ check_card (void)
   id = ttt_get_id ();
   if ((id != 0xb0d0) && (id != 0x8916) && (id != 0x8917)) // Sharp 32M, Intel 64J3
     {
-      fprintf (stderr, "ERROR: MD-PRO flash card (programmer) not detected (ID: 0x%02hx)\n", id);
+      fprintf (stderr, "ERROR: MD-PRO (flash card) not detected (ID: 0x%02hx)\n", id);
       return 0;
     }
   else
@@ -257,7 +257,7 @@ md_write_rom (const char *filename, unsigned short parport)
   fseek (file, 0x83f4, SEEK_SET);
   buffer[0] = 0;
   fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
-  // currently we ignore the version string (full string is "uCON64 2.0.4")
+  // currently we ignore the version string (full string is "uCON64 2.1.0")
   multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
 
   if (multi_game)

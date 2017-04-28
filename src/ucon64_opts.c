@@ -331,7 +331,9 @@ ucon64_switches (st_ucon64_t *p)
     */
     case UCON64_XCMC:
     case UCON64_XCMCT:
-    case UCON64_XDEX:
+    case UCON64_XMCCL:
+    case UCON64_XMCD:
+      ucon64.parport_mode = PPMODE_SPP_BIDIR;
     case UCON64_XDJR:
     case UCON64_XF2A:                           // could be for USB version
     case UCON64_XF2AMULTI:                      // idem
@@ -343,34 +345,35 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XFALC:
     case UCON64_XFALS:
     case UCON64_XFALB:
-    case UCON64_XFIG:
-    case UCON64_XFIGS:
-    case UCON64_XFIGC:
     case UCON64_XGBX:
     case UCON64_XGBXS:
     case UCON64_XGBXB:
+    case UCON64_XGG:
+    case UCON64_XGGS:
+    case UCON64_XGGB:
+    case UCON64_XMD:
+    case UCON64_XMDS:
+    case UCON64_XMDB:
+    case UCON64_XPCE:
+    case UCON64_XPL:
+    case UCON64_XPLI:
+    case UCON64_XSF:
+    case UCON64_XSFS:
+      if (ucon64.parport_mode == (parport_mode_t) UCON64_UNKNOWN)
+        ucon64.parport_mode = PPMODE_EPP;
+    case UCON64_XDEX:
+    case UCON64_XFIG:
+    case UCON64_XFIGS:
+    case UCON64_XFIGC:
     case UCON64_XGD3:
     case UCON64_XGD3R:
     case UCON64_XGD3S:
     case UCON64_XGD6:
     case UCON64_XGD6R:
     case UCON64_XGD6S:
-    case UCON64_XGG:
-    case UCON64_XGGS:
-    case UCON64_XGGB:
     case UCON64_XLIT:
-    case UCON64_XMCCL:
-    case UCON64_XMCD:
-    case UCON64_XMD:
-    case UCON64_XMDS:
-    case UCON64_XMDB:
     case UCON64_XMSG:
-    case UCON64_XPCE:
-    case UCON64_XPL:
-    case UCON64_XPLI:
     case UCON64_XRESET:
-    case UCON64_XSF:
-    case UCON64_XSFS:
     case UCON64_XSMC:
     case UCON64_XSMCR:
     case UCON64_XSMD:
@@ -381,34 +384,12 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XSWCS:
     case UCON64_XSWCC:
     case UCON64_XV64:
+      if (ucon64.parport_mode == (parport_mode_t) UCON64_UNKNOWN)
+        ucon64.parport_mode = PPMODE_SPP;
 #ifdef  USE_USB
       if (!ucon64.usbport)                      // no pport I/O if F2A option and USB F2A
 #endif
       ucon64.parport_needed = 1;
-      /*
-        We want to make this possible:
-          1.) ucon64 <transfer option> <rom>
-          2.) ucon64 <transfer option> <rom> --port=<parallel port address>
-        The above works "automatically". The following type of command used to
-        be possible, but has been deprecated:
-          3.) ucon64 <transfer option> <rom> <parallel port address>
-        It has been removed, because it caused problems when specifying additional
-        switches without specifying the parallel port address. For example:
-          ucon64 -xfal -xfalm <rom>
-        This would be interpreted as:
-          ucon64 -xfal -xfalm <rom as file> <rom as parallel port address>
-        If <rom> has a name that starts with a number an I/O port associated
-        with that number will be accessed which might well have unwanted
-        results. We cannot check for valid I/O port numbers, because the I/O
-        port of the parallel port can be mapped to almost any 16-bit number.
-      */
-#if 0
-      if (ucon64.parport == (uint16_t) UCON64_UNKNOWN && ucon64.argc >= 4 &&
-          access (ucon64.argv[ucon64.argc - 1], F_OK))
-        // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
-        //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
-        ucon64.parport = (uint16_t) strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
-#endif
       break;
 #endif // USE_PARALLEL
 
@@ -420,6 +401,9 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XCD64F:
     case UCON64_XCD64M:
     case UCON64_XCD64S:
+#ifdef  USE_PARALLEL
+      ucon64.parport_mode = PPMODE_SPP_BIDIR;
+#endif
       // We don't really need the parallel port. We just have to make sure that
       //  privileges aren't dropped.
       ucon64.parport_needed = 2;
@@ -428,7 +412,7 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XCD64P:
       ucon64.io_mode = strtol (option_arg, NULL, 10);
       break;
-#endif
+#endif // USE_LIBCD64
 
 #ifdef  USE_PARALLEL
     case UCON64_XCMCM:
@@ -438,7 +422,7 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XFALM:
     case UCON64_XGBXM:
     case UCON64_XPLM:
-      ucon64.parport_mode = UCON64_EPP;
+      ucon64.parport_mode = PPMODE_SPP_BIDIR;
       break;
 
     case UCON64_XSWC_IO:
@@ -1874,7 +1858,10 @@ ucon64_options (st_ucon64_t *p)
       parport_print_info ();
       fputs ("Resetting parallel port...", stdout);
       outportb (ucon64.parport + PARPORT_DATA, 0);
-      outportb (ucon64.parport + PARPORT_CONTROL, 0);
+      // Strobe, Auto Linefeed and Select Printer are hardware inverted, so we
+      //  have to write a 1 to bring the associated pins in a low state (0v).
+      outportb (ucon64.parport + PARPORT_CONTROL,
+                (inportb (ucon64.parport + PARPORT_CONTROL) & 0xf0) | 0x0b);
       puts ("done");
       break;
 

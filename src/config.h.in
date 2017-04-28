@@ -81,19 +81,22 @@
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* enable usage of color (default: yes) */
+/* enable the use of color (default: yes) */
 #undef USE_ANSI_COLOR
 
-/* enable libdiscmage (default: yes) */
+/* build with libdiscmage support (default: yes) */
 #undef USE_DISCMAGE
 
-/* enable libcd64 (default: no) */
+/* build with libcd64 support (default: no) */
 #undef USE_LIBCD64
 
 /* enable support for parallel port backup units (default: yes) */
@@ -102,7 +105,7 @@
 /* use ppdev for parallel port I/O (default: no) */
 #undef USE_PPDEV
 
-/* build with (lib)usb support (default: no) */
+/* build with libusb support (default: no) */
 #undef USE_USB
 
 /* build with gzip and zip support (default: yes) */
@@ -114,14 +117,16 @@
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
 
-/* Define as `__inline' if that's what the C compiler calls it, or to nothing
-   if it is not supported. */
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
 #undef inline
+#endif
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
 
-/* Define to `unsigned' if <sys/types.h> does not define. */
+/* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
 
 /* Define to `int' if <sys/types.h> doesn't define. */

@@ -1,8 +1,8 @@
 /*
 dex.c - DexDrive support for uCON64
 
-Copyright (c) 2002 NoisyB
-Copyright (c) 2004 dbjh
+Copyright (c) 2002             NoisyB
+Copyright (c) 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include "misc/archive.h"
 #include "misc/file.h"
-#include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/dex.h"

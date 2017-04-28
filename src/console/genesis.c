@@ -1072,8 +1072,8 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
 
   fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0xff, destfile);                       // 0x0 = 0xff
-  memcpy (name, rominfo->name, 0x1c);
-  for (n = 0; n < 0x1c; n++)
+  memcpy (name, rominfo->name, 0x1b);
+  for (n = 0; n < 0x1b; n++)
     {
       if (!isprint ((int) name[n]))
         name[n] = '.';
@@ -1081,17 +1081,11 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
         name[n] = (unsigned char) toupper (name[n]); // according to Leo, MDPACKU4.BIN
     }                                           //  only supports upper case characters
   /*
-    NOTE: uCON64 2.0.0 wrote 0 at offset 0x1d. That code has been successfully
-          tested. uCON64 2.0.1 repurposed offset 0x1d for the ROM size. That
-          has not been specifically tested for MD-PRO, but it has, successfully
-          for PCE-PRO. However, according to NoisyB (in a comment in a previous
-          version of this function) the byte at offset 0x1d is used as string
-          terminator. I have not heared of a bug report that not terminating
-          the string causes problems for MD-PRO and if it is necessary it
-          is just plain silly (it is unnecessary for Super Flash and PCE-PRO).
-          However, I want to leave this code in a state that is most likely to
-          work as I cannot test it myself. So, I terminate the string at offset
-          0x1c while retaining the later function of offset 0x1d. - dbjh
+    NOTE: uCON64 2.0.0 wrote 0 at offset 0x1d. uCON64 2.0.1 repurposed offset
+          0x1d for the ROM size. However, the byte at offset 0x1d was used as
+          string terminator, which is plain silly. Compare with Super Flash and
+          PCE-PRO multi-game creation code. So, now I terminate the string at
+          offset 0x1c while retaining the later function of offset 0x1d. - dbjh
   */
   name[0x1b] = '\0';
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name

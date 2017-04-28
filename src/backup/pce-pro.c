@@ -1,7 +1,7 @@
 /*
-pce-pro.c - PCE-PRO flash card programmer support for uCON64
+pce-pro.c - PCE-PRO support for uCON64
 
-Copyright (c) 2004 - 2005 dbjh
+Copyright (c) 2004 - 2005, 2015 - 2017 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -45,13 +45,13 @@ const st_getopt2_t pcepro_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "PCE-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
+      NULL, "PCE-PRO"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
       NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xpce", 0, 0, UCON64_XPCE,
-      NULL, "send/receive ROM to/from PCE-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "send/receive ROM to/from PCE-PRO; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
       &pcepro_obj[0]
     },
@@ -87,7 +87,7 @@ check_card (void)
   id = ttt_get_id ();
   if (id != 0xb0d0)
     {
-      fprintf (stderr, "ERROR: PCE-PRO flash card (programmer) not detected (ID: 0x%02hx)\n", id);
+      fprintf (stderr, "ERROR: PCE-PRO (flash card) not detected (ID: 0x%02hx)\n", id);
       return 0;
     }
   else
@@ -192,7 +192,7 @@ pce_write_rom (const char *filename, unsigned short parport)
   fseek (file, 0xb3f4, SEEK_SET);
   buffer[0] = 0;
   fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
-  // currently we ignore the version string (full string is "uCON64 2.0.4")
+  // currently we ignore the version string (full string is "uCON64 2.1.0")
   multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
 
   if (multi_game)

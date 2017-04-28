@@ -1,10 +1,10 @@
 /*
 parallel.c - miscellaneous parallel port functions
 
-Copyright (c) 1999 - 2004       NoisyB
-Copyright (c) 2001 - 2004, 2015 dbjh
-Copyright (c) 2001              Caz (original BeOS code)
-Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2004             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
+Copyright (c) 2001                    Caz (original BeOS code)
+Copyright (c) 2002 - 2004             Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -84,7 +84,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/dlopen.h"
 #endif
 #include "misc/file.h"                          // DIR_SEPARATOR_S
-#include "misc/parallel.h"
+#include "misc/property.h"
 #include "ucon64.h"
 
 
@@ -129,8 +129,8 @@ static void *io_driver;
 static short (__stdcall *Inp32) (short) = NULL;
 static void (__stdcall *Outp32) (short, short) = NULL;
 
-static unsigned char inpout32_input_byte (unsigned short port) { return (unsigned char) Inp32 ((short) port); }
-static void inpout32_output_byte (unsigned short port, unsigned char byte) { Outp32 ((short) port, (short) byte); }
+static unsigned char inpout32_input_byte (unsigned short port) { return Inp32 (port); }
+static void inpout32_output_byte (unsigned short port, unsigned char byte) { Outp32 (port, byte); }
 
 // io.dll has more functions then the ones we refer to here, but we don't need them
 static char (WINAPI *PortIn) (short int) = NULL;
@@ -254,7 +254,7 @@ inportb (unsigned short port)
     case 2:                                     // control
       ioctl (parport_io_fd, PPRCONTROL, &byte);
       break;
-    case 3:                                     // EPP/ECP address
+    case 3:                                     // EPP address
       if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
           parport_io_mode |= IEEE1284_ADDR;
@@ -262,17 +262,13 @@ inportb (unsigned short port)
         }
       read (parport_io_fd, &byte, 1);
       break;
-    case 4:                                     // EPP/ECP data
+    case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
         {
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
       read (parport_io_fd, &byte, 1);
-      break;
-    case 0x402:                                 // ECP register
-      puts ("WARNING: Ignored read from ECP register, returning 0");
-      byte = 0;
       break;
     default:
       fprintf (stderr,
@@ -340,7 +336,7 @@ inportw (unsigned short port)
 
   switch (ppreg)
     {
-    case 3:                                     // EPP/ECP address
+    case 3:                                     // EPP address
       if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
           parport_io_mode |= IEEE1284_ADDR;
@@ -348,7 +344,7 @@ inportw (unsigned short port)
         }
       read (parport_io_fd, buf, 2);
       break;
-    case 4:                                     // EPP/ECP data
+    case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
         {
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
@@ -356,7 +352,6 @@ inportw (unsigned short port)
         }
       read (parport_io_fd, buf, 2);
       break;
-    // the data, status, control and ECP registers should only be accessed in "8-bit mode"
     default:
       fprintf (stderr,
                "ERROR: inportw() tried to read from an unsupported port (0x%x)\n",
@@ -415,7 +410,7 @@ outportb (unsigned short port, unsigned char byte)
     case 2:                                     // control
       ioctl (parport_io_fd, PPWCONTROL, &byte);
       break;
-    case 3:                                     // EPP/ECP address
+    case 3:                                     // EPP address
       if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
           parport_io_mode |= IEEE1284_ADDR;
@@ -423,16 +418,13 @@ outportb (unsigned short port, unsigned char byte)
         }
       write (parport_io_fd, &byte, 1);
       break;
-    case 4:                                     // EPP/ECP data
+    case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
         {
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
       write (parport_io_fd, &byte, 1);
-      break;
-    case 0x402:                                 // ECP register
-      puts ("WARNING: Ignored write to ECP register");
       break;
     default:
       fprintf (stderr,
@@ -482,7 +474,7 @@ outportw (unsigned short port, unsigned short word)
   buf[1] = word >> 8;
   switch (ppreg)
     {
-    case 3:                                     // EPP/ECP address
+    case 3:                                     // EPP address
       if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
           parport_io_mode |= IEEE1284_ADDR;
@@ -490,7 +482,7 @@ outportw (unsigned short port, unsigned short word)
         }
       write (parport_io_fd, buf, 2);
       break;
-    case 4:                                     // EPP/ECP data
+    case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
         {
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
@@ -498,7 +490,6 @@ outportw (unsigned short port, unsigned short word)
         }
       write (parport_io_fd, buf, 2);
       break;
-    // the data, control and ECP registers should only be accessed in "8-bit mode"
     default:
       fprintf (stderr,
                "ERROR: outportw() tried to write to an unsupported port (0x%x)\n",
@@ -597,7 +588,7 @@ parport_open (unsigned short port)
 {
 #ifdef  USE_PPDEV
   struct timeval t;
-  int capabilities = 0, ucon64_parport, x;
+  int x;
 
   if (port == PARPORT_UNKNOWN)
     port = 0;
@@ -619,30 +610,14 @@ parport_open (unsigned short port)
                ucon64.parport_dev);
       exit (1);
     }
+
   t.tv_sec = 0;
   t.tv_usec = 500 * 1000;                       // set time-out to 500 milliseconds
   ioctl (parport_io_fd, PPSETTIME, &t);
 /*
   ioctl (parport_io_fd, PPGETTIME, &t);
   printf ("Current time-out value: %ld microseconds\n", t.tv_usec);
-*/
-
-  ioctl (parport_io_fd, PPGETMODES, &capabilities);
-//  printf ("Capabilities: %x\n", capabilities);
-
-  if (ucon64.parport_mode == UCON64_EPP || ucon64.parport_mode == UCON64_ECP)
-    if ((capabilities & (PARPORT_MODE_EPP | PARPORT_MODE_ECP)) == 0)
-      puts ("WARNING: EPP or ECP mode was requested, but not available");
-
-  // set mode for read() and write()
-  if (capabilities & PARPORT_MODE_ECP)
-    parport_io_mode = IEEE1284_MODE_ECP;
-  else if (capabilities & PARPORT_MODE_EPP)
-    parport_io_mode = IEEE1284_MODE_EPP;
-  else
-    parport_io_mode = IEEE1284_MODE_BYTE;
-  parport_io_mode |= IEEE1284_DATA;             // default to EPP/ECP data reg
-  ioctl (parport_io_fd, PPSETMODE, &parport_io_mode); //  (IEEE1284_DATA is 0...)
+//*/
 
   x = PP_FASTREAD | PP_FASTWRITE;               // enable 16-bit transfers
   ioctl (parport_io_fd, PPSETFLAGS, &x);
@@ -653,21 +628,11 @@ parport_open (unsigned short port)
   parport_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
   if (parport_io_fd == -1)
     {
-      parport_io_fd = open ("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
-      if (parport_io_fd == -1)
-        {
-          fputs ("ERROR: Could not open I/O port device (no driver)\n"
-                 "       You can download the latest ioport driver from\n"
-                 "       http://ucon64.sourceforge.net\n",
-                 stderr);
-          exit (1);
-        }
-      else
-        {                                       // print warning, but continue
-          puts ("WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
-                "         might not support this driver. You can download the latest ioport\n"
-                "         driver from http://ucon64.sourceforge.net\n");
-        }
+      fputs ("ERROR: Could not open I/O port device (no driver)\n"
+             "       You can download the latest ioport driver from\n"
+             "       http://ucon64.sourceforge.net\n",
+             stderr);
+      exit (1);
     }
 #elif   defined AMIGA
   int x;
@@ -750,11 +715,9 @@ parport_open (unsigned short port)
 #if     defined _WIN32 || defined __CYGWIN__
   /*
     We support the I/O port drivers inpout32.dll, io.dll and dlportio.dll,
-    because using them is way easier than using UserPort or GiveIO. The drivers
-    are also more reliable and seem to enable access to all I/O ports
-    (dlportio.dll enables access to ports > 0x100). The downsides of
-    inpout32.dll are that it's almost two times slower than UserPort and that
-    it only has functions for byte-sized I/O.
+    because using them is way easier than using GiveIO. The drivers are also
+    more reliable and seem to enable access to all I/O ports (dlportio.dll
+    enables access to ports >= 0x100).
   */
   char fname[FILENAME_MAX];
   int driver_found = 0;
@@ -878,7 +841,7 @@ parport_open (unsigned short port)
 #ifdef  _WIN32                                  // MinGW & Visual C++
     LPTOP_LEVEL_EXCEPTION_FILTER org_exception_filter =
       SetUnhandledExceptionFilter ((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
-    input_byte (0x378); // 0x378 is okay (don't use this function's parameter)
+    input_byte (0x378 + 0x402); // 0x378 + 0x402 is okay (don't use "port")
     // if we get here accessing I/O port 0x378 did not cause an exception
     SetUnhandledExceptionFilter (org_exception_filter);
 #else                                           // Cygwin
@@ -891,7 +854,7 @@ parport_open (unsigned short port)
       : "=a" (exception_registration.prev)
       : "b" (&exception_registration)
     );
-    input_byte (0x378); // 0x378 is okay (don't use this function's parameter)
+    input_byte (0x378 + 0x402); // 0x378 + 0x402 is okay (don't use "port")
     // if we get here accessing I/O port 0x378 did not cause an exception
     __asm__ __volatile__
     ("movl %0, %%fs:0"
@@ -922,30 +885,138 @@ parport_open (unsigned short port)
           exit (1);
         }
     }
-#endif // (__i386__ || __x86_64__ || _WIN32) && !USE_PPDEV
 
-#ifdef  USE_PPDEV
-  // the following two calls need a valid value for ucon64.parport
-  ucon64_parport = ucon64.parport;
-  ucon64.parport = port;
-#endif
-  outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
-  // bit 4 = 0 => IRQ disable for ACK, bit 5-7 unused
-#ifdef  USE_PPDEV
-  ucon64.parport = ucon64_parport;
-#endif
+  if (port < 0x100)
+    {
+      printf ("WARNING: Specified port (0x%hx) < 0x100. Using 0x100\n", port);
+      port = 0x100;
+    }
+#endif // (__i386__ || __x86_64__ || _WIN32) && !USE_PPDEV
 
   return port;
 }
 
 
+parport_mode_t
+parport_setup (unsigned short port, parport_mode_t mode)
+{
+#ifdef  USE_PPDEV
+  if (mode == PPMODE_SPP)
+    parport_io_mode = IEEE1284_MODE_COMPAT | IEEE1284_DATA;
+  else if (mode == PPMODE_SPP_BIDIR)
+    parport_io_mode = IEEE1284_MODE_BYTE | IEEE1284_DATA;
+  else if (mode == PPMODE_EPP)
+    {
+      int capabilities = 0;
+
+      ioctl (parport_io_fd, PPGETMODES, &capabilities);
+//      printf ("Capabilities: %x\n", capabilities);
+      if ((capabilities & PARPORT_MODE_EPP) == 0)
+        {
+          puts ("WARNING: EPP mode was requested, but not available");
+          mode = PPMODE_SPP_BIDIR;
+          parport_io_mode = IEEE1284_MODE_BYTE | IEEE1284_DATA;
+        }
+      else
+        parport_io_mode = IEEE1284_MODE_EPP | IEEE1284_DATA;
+    }
+  // set mode for read() and write(); IEEE1284_DATA is 0...
+  ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
+#elif   (defined __i386__ || defined __x86_64__ || defined _WIN32)
+  unsigned char ecr; 
+  const char *p = get_property (ucon64.configfile, "ecr_offset", PROPERTY_MODE_TEXT);
+
+  if (p)
+    sscanf (p, "%hx", &ucon64.ecr_offset);
+  else
+    ucon64.ecr_offset = 0x402;
+  if ((uint16_t) (port + ucon64.ecr_offset) < 0x100)
+    ucon64.ecr_offset = 0xffff - port;
+/*
+  printf ("ecr_offset: 0x%hx, ECR address: 0x%hx\n", ucon64.ecr_offset,
+          port + ucon64.ecr_offset);
+//*/
+
+  /*
+    "If you are using SPP, then set the port to Standard Mode as the first
+    thing you do. Don't assume that the port will already be in Standard (SPP)
+    mode.
+
+    Under some of the modes, the *SPP registers may disappear or not work
+    correctly*." - "Interfacing the Standard Parallel Port", page 17.
+  */
+  if (port != 0x3bc) // The ECP registers are not available if port is 0x3bc.
+    {
+      ecr = inportb (port + ucon64.ecr_offset) & 0x1f;
+      if (mode == PPMODE_SPP)
+        outportb (port + ucon64.ecr_offset, ecr);
+      else if (mode == PPMODE_SPP_BIDIR)
+        outportb (port + ucon64.ecr_offset, ecr | 0x20);
+      else if (mode == PPMODE_EPP)
+        outportb (port + ucon64.ecr_offset, ecr | 0x80);
+    }
+  else if (mode == PPMODE_EPP)
+    mode = PPMODE_SPP_BIDIR;
+/*
+  printf ("Parallel port mode: %s\n", mode == PPMODE_EPP ?
+            "EPP" : mode == PPMODE_SPP_BIDIR ?
+              "SPP bidirectional" : mode == PPMODE_SPP ?
+                "SPP" : "unknown");
+//*/
+  /*
+    "In the idle state, an EPP port should have it's [sic] nAddress Strobe,
+    nDataStrobe, nWrite and nReset lines inactive, high." - "Interfacing the
+    Enhanced Parallel Port", page 6.
+    The SPP names of those pins are respectively nSelect Printer/nSelect In,
+    nAuto Linefeed, nStrobe and nInitialize. Strobe, Auto Linefeed and Select
+    Printer/Select In are hardware inverted, so we have to write a 0 to bring
+    the associated pins in a high state.
+
+    "On some cards, if the Parallel Port is placed in reverse mode, a EPP Write
+    cycle cannot be performed. Therefore it is also wise to place the Parallel
+    Port in forward mode before using EPP." - "Interfacing the Enhanced
+    Parallel Port", page 6.
+
+    The bits in the Control register are (starting with bit 0) Strobe, Auto
+    Linefeed, Initialize (Printer), Select Printer, Enable IRQ Via Ack Line,
+    Enable Bidirectional Port. Bits 6 and 7 are reserved.
+  */
+  outportb (port + PARPORT_CONTROL, 0x04);
+
+  // On some chipsets EPP Time-out will even block SPP cycles.
+  parport_reset_timeout (port);
+#else
+  (void) port;
+  (void) mode;
+#endif
+  return mode;
+}
+
+
+void
+parport_reset_timeout (unsigned short port)
+// reset EPP Time-out bit
+{
+#if     (defined __i386__ || defined __x86_64__ || defined _WIN32) && !defined USE_PPDEV
+  if ((inportb (port + PARPORT_STATUS) & 0x01) != 0)
+    { // some reset by reading twice, others by writing 1, others by writing 0
+      unsigned char status = inportb (port + PARPORT_STATUS);
+      outportb (port + PARPORT_STATUS, status | 0x01);
+      outportb (port + PARPORT_STATUS, status & 0xfe);
+    }
+#else
+  (void) port;
+#endif
+}
+
+ 
 void
 parport_close (void)
 {
 #ifdef  USE_PPDEV
   parport_io_mode = IEEE1284_MODE_COMPAT;
   // We really don't want to perform IEEE 1284 negotiation, but if we don't do
-  //  it (older versions of) ppdev will do it for us...
+  //  it ppdev will do it for us...
   ioctl (parport_io_fd, PPNEGOT, &parport_io_mode);
   ioctl (parport_io_fd, PPRELEASE);
   close (parport_io_fd);
@@ -975,15 +1046,6 @@ parport_print_info (void)
 #else
   printf ("Using I/O port base address: 0x%x\n", ucon64.parport);
 #endif
-}
-
-#else
-
-// Define at least one symbol, so that the translation unit is not empty if
-//  USE_PARALLEL is not defined.
-void
-parport_dummy (void)
-{
 }
 
 #endif // USE_PARALLEL

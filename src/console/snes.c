@@ -1999,6 +1999,13 @@ games. However, newer copiers like the SWC DX2 get around this detection by
 limiting the SRAM size for the game to the size specified in the backup unit
 header.
 
+If you want to add patterns for games for which we already have one or more
+patterns, please add them to snescopy.txt, not this function. The patches
+resulting from the old (built-in) and new patterns may interfere. Either add
+them disabled or make sure you don't use snescopy.txt when using -k. The best
+way to test a new pattern in isolation is --pattern:
+  ucon64 --pattern=snescopy.txt copyprotectedgame.swc
+
 (original uCON)
    8f/9f XX YY 70 cf/df XX YY 70 d0
 => 8f/9f XX YY 70 cf/df XX YY 70 ea ea          if snes_sram_size == 64 kbits
@@ -2116,7 +2123,7 @@ I don't know what this does, but it isn't necessary to start the game.
 => 10 f8 38 ea a9 00 00 80
 Same here.
 
-- Dixie Kong's Double Trouble E. U version looks like it already has been "patched"
+- Dixie Kong's Double Trouble (E). U version looks like it already has been "patched"
    a9 c3 80 dd ff ff f0 6c
 => a9 c3 f0 cc ff ff 80 7d
 
@@ -4345,14 +4352,12 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
 
   fseek (destfile, 0x4000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0xff, destfile);                       // 0x0 = 0xff
-  memcpy (name, rominfo->name, 0x1c);
+  n = strlen (rominfo->name);
+  memcpy (name, rominfo->name, n);              // name is max 21 chars (< 28)
+  memset (name + n, ' ', 0x1c - n);
   for (n = 0; n < 0x1c; n++)
-    {
-      if (!isprint ((int) name[n]))
-        name[n] = '.';
-      else
-        name[n] = (unsigned char) toupper (name[n]); // the Super Flash loader (SFBOTX2.GS)
-    }                                           //  only supports upper case characters
+    name[n] = (unsigned char) toupper (name[n]);// the Super Flash loader (SFBOTX2.GS)
+                                                //  only supports upper case characters
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
 
   if (snes_sram_size)

@@ -1,7 +1,7 @@
 /*
 tototek.c - General ToToTEK flash card programmer routines for uCON64
 
-Copyright (c) 2004 dbjh
+Copyright (c) 2004, 2015, 2017 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -120,10 +120,6 @@ ttt_set_ai_data (unsigned char ai, unsigned char data) // original name: set_ai_
 static void
 init_port (void)                                // original name: init_port
 {
-#ifndef USE_PPDEV
-  outportb (port_8 + 0x402, (inportb (port_8 + 0x402) & 0x1f) | 0x80);
-  outportb (port_9, 1);                         // clear EPP time flag
-#endif
   ttt_set_ai_data (6, 0);                       // rst=0, wei=0(dis.), rdi=0(dis.)
   ttt_set_ai_data (6, 0x84);                    // rst=1, wei=0(dis.), rdi=0(dis.)
 }

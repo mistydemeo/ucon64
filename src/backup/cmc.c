@@ -1,7 +1,8 @@
 /*
 cmc.c - Cyan's Megadrive ROM copier support for uCON64
 
-Copyright (c) 1999 - 2004 Cyan Helkaraxe
+Copyright (c) 1999 - 2004                Cyan Helkaraxe
+Portions copyright (c) 2004, 2015 - 2017 dbjh
 
 Special thanks to dbjh for helping with the uCON64 integration
 of this software, and providing the wrapping code.
@@ -128,7 +129,6 @@ respective owners.
 #include "misc/archive.h"
 #include "misc/bswap.h"
 #include "misc/misc.h"
-#include "misc/parallel.h"
 #include "misc/term.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"

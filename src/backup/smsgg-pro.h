@@ -1,7 +1,7 @@
 /*
-smsgg-pro.h - SMS-PRO/GG-PRO flash card programmer support for uCON64
+smsgg-pro.h - SMS-PRO/GG-PRO support for uCON64
 
-Copyright (c) 2004 - 2005 dbjh
+Copyright (c) 2004 - 2005, 2015, 2017 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly

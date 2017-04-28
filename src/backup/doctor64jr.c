@@ -1,8 +1,8 @@
 /*
 doctor64jr.c - Bung Doctor V64 Junior support for uCON64
 
-Copyright (c) 1999 - 2002 NoisyB
-Copyright (c) 2004, 2015  dbjh
+Copyright (c) 1999 - 2002      NoisyB
+Copyright (c) 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -133,7 +133,6 @@ void mainproc(void *arg) {
 #endif
 #include <stdlib.h>
 #include "misc/archive.h"
-#include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/doctor64jr.h"
@@ -205,9 +204,6 @@ set_ai_data (unsigned char ai, unsigned char data)
 static void
 init_port (int enable_write)
 {
-#ifndef USE_PPDEV
-  outportb (port_9, 1);                         // clear EPP time flag
-#endif
   set_ai_data (6, 0x0a);
   set_ai_data (7, 0x05);                        // 6==0x0a, 7==0x05 is pc_control mode
 //  set_ai (5);

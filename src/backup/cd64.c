@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#ifdef  USE_LIBCD64
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ultra64/host/cd64lib.h>
@@ -31,7 +34,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/cd64.h"
 
 
-#ifdef  USE_LIBCD64
 static st_ucon64_obj_t cd64_obj[] =
   {
     {UCON64_N64, WF_DEFAULT | WF_STOP | WF_NO_ROM},
@@ -39,7 +41,6 @@ static st_ucon64_obj_t cd64_obj[] =
     {UCON64_N64, WF_DEFAULT | WF_STOP},
     {UCON64_N64, WF_SWITCH}
   };
-#endif
 
 const st_getopt2_t cd64_usage[] =
   {
@@ -48,7 +49,6 @@ const st_getopt2_t cd64_usage[] =
       NULL, "CD64"/*"19XX UFO http://www.cd64.com"*/,
       NULL
     },
-#ifdef  USE_LIBCD64
     {
       "xcd64", 0, 0, UCON64_XCD64,
       NULL, "send/receive ROM to/from CD64; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
@@ -98,12 +98,8 @@ const st_getopt2_t cd64_usage[] =
       "PROT" OPTARG_S "2 UltraLink",
       &cd64_obj[3]
     },
-#endif // USE_LIBCD64
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
-
-
-#ifdef  USE_LIBCD64
 
 static time_t cd64_starttime;
 
@@ -227,6 +223,20 @@ cd64_init (void)
     }
   if (port >= 0x300 && port <= 0x330)
     is_parallel = 0;
+#endif
+
+#ifdef  USE_PARALLEL
+  /*
+    I will not copy the following functionality to libcd64. Just do not
+    configure with --disable-parallel, if you need the functionality
+    parport_setup() provides. - dbjh
+  */
+  if (is_parallel)
+    {
+      port = parport_open (ucon64.parport);
+      ucon64.parport_mode = parport_setup (port, ucon64.parport_mode);
+      parport_close ();
+    }
 #endif
 
   cd64->notice_callback = cd64_notice;

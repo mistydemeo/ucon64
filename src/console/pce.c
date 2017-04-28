@@ -853,13 +853,12 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
   fseek (destfile, 0xb000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0xff, destfile);                       // 0x0 = 0xff (= valid entry)
-
-  memset (name, ' ', 0x1c);
   p = basename2 (ucon64.fname);
   n = strlen (p);
   if (n > 0x1c)
     n = 0x1c;
   memcpy (name, p, n);
+  memset (name + n, ' ', 0x1c - n);
   for (n = 0; n < 0x1c; n++)
     {
       if (!isprint ((int) name[n]))

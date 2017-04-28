@@ -1,9 +1,9 @@
 /*
 fig.c - Super PRO Fighter support for uCON64
 
-Copyright (c) 1999 - 2002 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2003 - 2004 JohnDie
+Copyright (c) 1999 - 2002             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
+Copyright (c) 2003 - 2004             JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "console/snes.h"                       // for snes_get_snes_hirom()
 #include "backup/ffe.h"
-#include "backup/fig.h"
 
 
 #ifdef  USE_PARALLEL
@@ -74,7 +73,7 @@ const st_getopt2_t fig_usage[] =
   };
 
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
@@ -89,7 +88,7 @@ static void handle_swc_header (unsigned char *header);
 static int hirom;
 
 
-#if BUFFERSIZE < 512
+#if     BUFFERSIZE < 512
 #error receive_rom_info() and fig_read_sram() expect BUFFERSIZE to be at least \
        512 bytes.
 #endif
@@ -505,7 +504,7 @@ fig_read_sram (const char *filename, unsigned short parport)
 
   printf ("Receive: %d Bytes\n", 32 * 1024);
   memset (buffer, 0, FIG_HEADER_LEN);
-#if 0 // Not needed for FIG, as size is always 4 blocks
+#if 0 // not needed for FIG, as size is always 4 blocks
   buffer[0] = 4;                                // 32 kB == 4*8 kB, "size_high" is already 0
 #endif
   fwrite (buffer, 1, FIG_HEADER_LEN, file);

@@ -1,8 +1,8 @@
 /*
 ffe.c - General Front Far East copier routines for uCON64
 
-Copyright (c) 2002 - 2004 dbjh
-Copyright (c) 2003        JohnDie
+Copyright (c) 2002 - 2004, 2015, 2017 dbjh
+Copyright (c) 2003                    JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdlib.h>
 #include "misc/misc.h"
-#include "misc/parallel.h"
 #include "misc/term.h"
 #include "ucon64.h"
 #include "backup/ffe.h"

@@ -1,8 +1,8 @@
 /*
-sflash.h - Super Flash flash card programmer support for uCON64
+sflash.h - Super Flash support for uCON64
 
-Copyright (c) 2004 JohnDie
-Copyright (c) 2005 dbjh
+Copyright (c) 2004             JohnDie
+Copyright (c) 2005, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -42,19 +42,19 @@ const st_getopt2_t sflash_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Flash flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
+      NULL, "Super Flash"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
       NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xsf", 0, 0, UCON64_XSF,
-      NULL, "send/receive ROM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "send/receive ROM to/from Super Flash; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (64 Mbits) when ROM does not exist",
       &sflash_obj[0]
     },
     {
       "xsfs", 0, 0, UCON64_XSFS,
-      NULL, "send/receive SRAM to/from Super Flash flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "send/receive SRAM to/from Super Flash; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &sflash_obj[1]
     },
@@ -94,7 +94,7 @@ check_card (void)
   id = ttt_get_id ();
   if (id != 0x8917)                             // Intel 64J3
     {
-      fprintf (stderr, "ERROR: Super Flash flash card (programmer) not detected (ID: %02hx)\n", id);
+      fprintf (stderr, "ERROR: Super Flash (flash card) not detected (ID: 0x%02hx)\n", id);
       return 0;
     }
   else

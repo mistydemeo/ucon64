@@ -1,7 +1,8 @@
 /*
 mccl.c - Mad Catz Camera Link (Game Boy Camera) support for uCON64
 
-Copyright (c) 2002 NoisyB
+Copyright (c) 2002       NoisyB
+Copyright (c) 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -65,7 +66,6 @@ Data Read Procedure:
 #include <string.h>
 #include "misc/archive.h"
 #include "misc/file.h"
-#include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/mccl.h"
@@ -102,6 +102,26 @@ const st_getopt2_t mccl_usage[] =
 #define STATUS ((unsigned short) (parport + PARPORT_STATUS))
 #define CONTROL ((unsigned short) (parport + PARPORT_CONTROL))
 
+#ifdef  _MSC_VER
+// Visual C++ doesn't allow inline in C source code
+#define inline __inline
+#endif
+
+
+static inline unsigned short
+inportw2 (unsigned short port)
+{
+#ifdef  USE_PPDEV
+  // Using the ppdev implementation of inportw() will certainly not work here.
+  //  This should work though.
+  unsigned short word = inportb (port);
+  word |= inportb (port + 1) << 8;
+  return word;
+#else
+  return inportw (port);
+#endif
+}
+
 
 int
 mccl_read (const char *filename, unsigned int parport)
@@ -119,7 +139,7 @@ mccl_read (const char *filename, unsigned int parport)
       while ((inportb (STATUS) & 0x20) == 0)
         ;
     }
-  while ((inportw (DATA) & 0xf) != 4);
+  while ((inportw2 (DATA) & 0xf) != 4);
   outportb (CONTROL, 0x22);
   while ((inportb (STATUS) & 0x20) != 0)
     ;
@@ -132,14 +152,14 @@ mccl_read (const char *filename, unsigned int parport)
       outportb (CONTROL, 0x26);
       while ((inportb (STATUS) & 0x20) == 0)
         ;
-      inbyte = (unsigned char) (inportw (DATA) & 0xf);
+      inbyte = (unsigned char) (inportw2 (DATA) & 0xf);
       outportb (CONTROL, 0x22);
       while ((inportb (STATUS) & 0x20) != 0)
         ;
       outportb (CONTROL, 0x26);
       while ((inportb (STATUS) & 0x20) == 0)
         ;
-      inbyte |= (unsigned char) ((inportw (DATA) & 0xf) << 4);
+      inbyte |= (unsigned char) ((inportw2 (DATA) & 0xf) << 4);
       outportb (CONTROL, 0x22);
       while ((inportb (STATUS) & 0x20) != 0)
         ;

@@ -828,13 +828,31 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   2.0.1. Also, 0 is no longer a wildcard and can be properly searched for.
   Improved handling of non-printable characters (by dbjh)<br>
 <p>
-<a name="204">2.0.4</a><br>
+<a name="210">2.1.0</a><br> <!-- 2.0.4 -->
 - added (SNES) preliminary support for native Super UFO Pro 8 SD file format.
   Use --ufosd to convert a file to Super UFO Pro 8 SD format. More information
   is required for a full implementation and any help will be appreciated (by
   dbjh; thanks to cage for his help)<br>
 - added (SNES) --ufosds convert *.srm (SRAM) file to Super UFO Pro 8 SD (by
   dbjh; thanks to cage for the SRAM files)<br>
+- updated (SNES) added crack for Diddy's Kong Quest &amp; Dixie Kong's Double
+  Trouble that makes those games run properly on the Super Flash. It has been
+  added to snescopy.txt, not to the internal cracks, because it may interfere
+  with the already present cracks of those games. Apply it with --pattern (by
+  dbjh, based on post by Tomy of ToToTEK on ToToTEK's Help &amp; Support Forum)<br>
+- updated (all) fixed --xreset to really remove power from all programmable
+  pins (by dbjh)<br>
+- added (all) support for EPP when using a PCI parallel port card that has its
+  ECP Extended Control register at a non-standard offset, i.e., most PCI
+  parallel port cards. Specify the offset in the configuration file by changing
+  the line that starts with ecr_offset=. See the FAQ (question 53 and 54) for a
+  more elaborate explanation (by dbjh)<br>
+- updated (all) fixed several mistakes in how different pieces of code tried to
+  enable EPP or simply relied on a BIOS to have configured it right. As a
+  result the meaning of the switches --xfalm, --xgbxm and --xplm has been
+  reversed (the associated options use EPP mode by default and use SPP as
+  fallback). Another consequence is that UserPort can no longer be used as I/O
+  driver (by dbjh)<br>
 <br>
 <br>
 <br>

@@ -1,7 +1,7 @@
 /*
-smsgg-pro.c - SMS-PRO/GG-PRO flash card programmer support for uCON64
+smsgg-pro.c - SMS-PRO/GG-PRO support for uCON64
 
-Copyright (c) 2004 - 2005 dbjh
+Copyright (c) 2004 - 2005, 2015 - 2017 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -46,19 +46,19 @@ const st_getopt2_t smsggpro_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "SMS-PRO/GG-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
+      NULL, "SMS-PRO/GG-PRO"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
       NULL
     },
 #ifdef  USE_PARALLEL
     {
       "xgg", 0, 0, UCON64_XGG,
-      NULL, "send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "send/receive ROM to/from SMS-PRO/GG-PRO; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
       &smsggpro_obj[0]
     },
     {
       "xggs", 0, 0, UCON64_XGGS,
-      NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when SRAM does not exist",
       &smsggpro_obj[1]
     },
@@ -103,7 +103,7 @@ check_card (void)
   id = ttt_get_id ();
   if (id != 0xb0d0)
     {
-      fprintf (stderr, "ERROR: SMS-PRO/GG-PRO flash card (programmer) not detected (ID: 0x%02hx)\n", id);
+      fprintf (stderr, "ERROR: SMS-PRO/GG-PRO (flash card) not detected (ID: 0x%02hx)\n", id);
       return 0;
     }
   else
@@ -234,7 +234,7 @@ smsgg_write_rom (const char *filename, unsigned short parport)
   fseek (file, 0x21f4, SEEK_SET);
   buffer[0] = 0;
   fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
-  // currently we ignore the version string (full string is "uCON64 2.0.4")
+  // currently we ignore the version string (full string is "uCON64 2.1.0")
   multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
 
   if (multi_game)

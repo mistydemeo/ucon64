@@ -1,8 +1,8 @@
 /*
 gbx.c - Game Boy Xchanger/GBDoctor support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
 Based on gbt15.c - Copyright (c) Bung Enterprises
 
 
@@ -108,7 +108,7 @@ const st_getopt2_t gbx_usage[] =
     },
     {
       "xgbxm", 0, 0, UCON64_XGBXM,
-      NULL, "try to enable EPP mode, default is SPP mode",
+      NULL, "use SPP mode, default is EPP mode",
       &gbx_obj[2]
     },
 #endif
@@ -130,7 +130,6 @@ static unsigned short port_8, port_9, port_a, port_b, port_c, rocket_game_no;
 static unsigned char buffer[32768];
 static mbc_t mbc_type;
 static eeprom_t eeprom_type;
-static parport_mode_t port_mode;
 
 
 static void
@@ -225,7 +224,7 @@ static void
 set_ai (unsigned char ai)
 {
   set_data_write
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     spp_set_ai (ai);
   else
     epp_set_ai (ai);
@@ -235,7 +234,7 @@ set_ai (unsigned char ai)
 static void
 set_ai_data (unsigned char ai, unsigned char data)
 {
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     spp_set_ai_data (ai, data);                 // SPP mode
   else
     epp_set_ai_data (ai, data);                 // EPP mode
@@ -245,7 +244,7 @@ set_ai_data (unsigned char ai, unsigned char data)
 static void
 write_data (unsigned char data)
 {
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     spp_write_data (data);                      // SPP write data
   else
     outportb (port_c, data);                    // EPP write data
@@ -255,7 +254,7 @@ write_data (unsigned char data)
 static unsigned char
 read_data (void)
 {
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     return spp_read_data ();                    // SPP read data
   else
     return inportb (port_c);                    // EPP read data
@@ -265,9 +264,7 @@ read_data (void)
 static void
 init_port (void)
 {
-#ifndef USE_PPDEV
-  outportb (port_9, 1);                         // clear EPP time flag
-#endif
+  parport_reset_timeout (port_8);
   set_ai_data ((unsigned char) 2, 0);           // rst=0, wei=0(dis.), rdi=0(dis.)
   set_ai_data ((unsigned char) 2, 0x80);        // rst=1, wei=0(dis.), rdi=0(dis.)
 }
@@ -491,7 +488,7 @@ wait_status (void)
 
   while ((temp & 0xfc) != 0x80)
     {
-      if ((temp & 0x20) == 0x20 && port_mode == UCON64_SPP)
+      if ((temp & 0x20) == 0x20 && ucon64.parport_mode != PPMODE_EPP)
         {
           fputs ("\nERROR: Erase failed\n", stderr);
           return -1;
@@ -1315,14 +1312,9 @@ check_port_mode (void)
 static int
 check_port (void)
 {
-  if (ucon64.parport_mode == UCON64_EPP && port_8 != 0x3bc)
-    port_mode = UCON64_EPP;                     // if port == 0x3bc => no EPP available
-  else
-    port_mode = UCON64_SPP;
-
   if (check_port_mode ())
     {
-      port_mode = UCON64_SPP;
+      ucon64.parport_mode = parport_setup (port_8, PPMODE_SPP);
       if (check_port_mode ())
         return 1;
       else
@@ -1330,7 +1322,7 @@ check_port (void)
     }
 
   // If we get here, a GBX was detected
-  if (port_mode == UCON64_EPP)
+  if (ucon64.parport_mode == PPMODE_EPP)
     puts ("GBX found. EPP found");
   else
     puts ("GBX found. EPP not found or not enabled - SPP used");

@@ -1,7 +1,7 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - ReadMe</title></head><body bgcolor="#ffffff"><tt><pre>
-uCON64 2.0.4 UNIX (Linux) 1999-2017
+uCON64 2.1.0 UNIX (Linux) 1999-2017
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -200,7 +200,7 @@ Flash Advance Linker
   --xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK
                   BANK can be 1, 2, 3 or 4; --port=PORT
                   receives automatically when SRAM does not exist
-  --xfalm       try to enable EPP mode, default is SPP mode
+  --xfalm       use SPP mode, default is EPP mode
 
 Nintendo DS
   --nds         force recognition
@@ -355,12 +355,10 @@ Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)
   --xfigc       send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;
                   --port=PORT
                   receives automatically when SRAM does not exist
-Super Flash flash card programmer
-  --xsf         send/receive ROM to/from Super Flash flash card programmer
-                  --port=PORT
+Super Flash
+  --xsf         send/receive ROM to/from Super Flash; --port=PORT
                   receives automatically (64 Mbits) when ROM does not exist
-  --xsfs        send/receive SRAM to/from Super Flash flash card programmer
-                  --port=PORT
+  --xsfs        send/receive SRAM to/from Super Flash; --port=PORT
                   receives automatically when SRAM does not exist
 Quickdev16
   --xqd16       send ROM to Quickdev16
@@ -403,12 +401,10 @@ Super Com Pro/Super Magic Drive/SMD
                   receives automatically when ROM does not exist
   --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when SRAM does not exist
-MD-PRO flash card programmer
-  --xmd         send/receive ROM to/from MD-PRO flash card programmer
-                  --port=PORT
+MD-PRO
+  --xmd         send/receive ROM to/from MD-PRO; --port=PORT
                   receives automatically (32/64 Mbits) when ROM does not exist
-  --xmds        send/receive SRAM to/from MD-PRO flash card programmer
-                  --port=PORT
+  --xmds        send/receive SRAM to/from MD-PRO; --port=PORT
                   receives automatically when SRAM does not exist
   --xmdb=BANK   send/receive SRAM to/from MD-PRO BANK
                   BANK can be a number from 1 to 4; --port=PORT
@@ -446,7 +442,7 @@ Game Boy Xchanger/GBDoctor
   --xgbxb=BANK  send/receive 64 kbits SRAM to/from GB Xchanger BANK
                   BANK can be a number from 0 to 15; --port=PORT
                   receives automatically when ROM does not exist
-  --xgbxm       try to enable EPP mode, default is SPP mode
+  --xgbxm       use SPP mode, default is EPP mode
 Mad Catz Camera Link (Game Boy Camera)
   --xmccl       receives from Mad Catz Camera Link; --port=PORT
 
@@ -479,9 +475,8 @@ Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
 Magic Super Griffin/MSG
   --xmsg        send/receive ROM to/from Magic Super Griffin/MSG; --port=PORT
                   receives automatically when ROM does not exist
-PCE-PRO flash card programmer
-  --xpce        send/receive ROM to/from PCE-PRO flash card programmer
-                  --port=PORT
+PCE-PRO
+  --xpce        send/receive ROM to/from PCE-PRO; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
 
 Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
@@ -539,12 +534,10 @@ Sega Master System(II/III)/Game Gear (Handheld)
   --multi=SIZE  make multi-game file for use with SMS-PRO/GG-PRO flash card,
                   truncated to SIZE Mbit; file with loader must be specified
                   first, then all the ROMs, multi-game file to create last
-SMS-PRO/GG-PRO flash card programmer
-  --xgg         send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer
-                  --port=PORT
+SMS-PRO/GG-PRO
+  --xgg         send/receive ROM to/from SMS-PRO/GG-PRO; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
-  --xggs        send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer
-                  --port=PORT
+  --xggs        send/receive SRAM to/from SMS-PRO/GG-PRO; --port=PORT
                   receives automatically when SRAM does not exist
   --xggb=BANK   send/receive SRAM to/from SMS-PRO/GG-PRO BANK
                   BANK can be a number from 1 to 4; --port=PORT
@@ -563,7 +556,7 @@ Pocket Linker
   --xpl         send/receive ROM to/from Pocket Linker; --port=PORT
                   receives automatically when ROM does not exist
   --xpli        show information about inserted cartridge; --port=PORT
-  --xplm        try to enable EPP mode, default is SPP mode
+  --xplm        use SPP mode, default is EPP mode
 
 Atari VCS 2600/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
   --ata         force recognition

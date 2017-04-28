@@ -44,8 +44,8 @@
  * or the equivalent for your platform.
  */
 /*
-Portions copyright (c) 2001 - 2002 NoisyB
-Portions copyright (c) 2002, 2016  dbjh
+Portions copyright (c) 2001 - 2002       NoisyB
+Portions copyright (c) 2002, 2016 - 2017 dbjh
 */
 #include <ctype.h>
 #include "misc/archive.h"

@@ -1,8 +1,8 @@
 /*
 string.c - some string functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2004             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <ctype.h>
 #include "misc/string.h"
+#ifdef  DEBUG
+#include <stdio.h>
+#endif
 
 
 #ifdef  _MSC_VER

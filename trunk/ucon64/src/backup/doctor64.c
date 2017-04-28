@@ -2,7 +2,7 @@
 doctor64.c - Bung Doctor V64 support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2015        dbjh
+Copyright (c) 2015, 2017  dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "misc/archive.h"
 #include "misc/file.h"
-#include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/doctor64.h"
@@ -67,6 +66,8 @@ const st_getopt2_t doctor64_usage[] =
 #define REC_HIGH_NIBBLE 0x80
 #define REC_LOW_NIBBLE 0x00
 #define REC_MAX_WAIT SEND_MAX_WAIT
+
+#define STOCKPPDEV_MSG "WARNING: This will not work with a stock ppdev. Please see the FAQ, question 55"
 
 
 static int
@@ -314,6 +315,10 @@ doctor64_read (const char *filename, unsigned short parport)
   int size, bytesreceived = 0;
   time_t init_time;
 
+#ifdef  USE_PPDEV
+  puts (STOCKPPDEV_MSG);
+#endif
+
   parport_print_info ();
   if (initCommunication (parport) == -1)
     {
@@ -355,6 +360,10 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
   FILE *fh;
   unsigned int size, pos, bytessent = 0;
   time_t init_time;
+
+#ifdef  USE_PPDEV
+  puts (STOCKPPDEV_MSG);
+#endif
 
   parport_print_info ();
   size = len - start;

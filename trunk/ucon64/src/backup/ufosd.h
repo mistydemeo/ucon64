@@ -71,15 +71,15 @@ Offset       Content
                     30 = A15=1 selects SRAM
                     40/50/60/80 = ? (see LoROM 8/24 Mbit, SRAM & HiROM 32 Mbit)
              0x16 SRAM A20 - A23 control:
-                  Bits 7 6 5 4 3 2 1 0
-                       x x             : A23
-                           x x         : A22
-                               x x     : A21
-                                   x x : A20
-                                         00 = Address bit = x selects SRAM
-                                         01 = Not used
-                                         10 = Address bit = 0 selects SRAM
-                                         11 = Address bit = 1 selects SRAM
+                  Bit 7 6 5 4 3 2 1 0
+                      x x             : A23
+                          x x         : A22
+                              x x     : A21
+                                  x x : A20
+                                        00 = Address bit = x selects SRAM
+                                        01 = Not used
+                                        10 = Address bit = 0 selects SRAM
+                                        11 = Address bit = 1 selects SRAM
   0x17       SRAM type: 0 = HiROM, 1 = LoROM
   0x18       0
   0x19       For non-special chip cartridges: 0; for Star Fox (U) (V1.0): 0xFF

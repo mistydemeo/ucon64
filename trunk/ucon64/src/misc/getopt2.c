@@ -1,8 +1,8 @@
 /*
 getopt2.c - getopt1() extension
 
-Copyright (c) 2004 - 2005 NoisyB
-Copyright (c) 2005        dbjh
+Copyright (c) 2004 - 2005       NoisyB
+Copyright (c) 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc/file.h"
 #include "misc/getopt2.h"
-
+#ifdef  DEBUG
+#include "misc/string.h"
+// TODO: The dependency on ucon64.h has to go. Do *not* update the Makefile
+//       dependency list for this hideous backward dependency.
+#include "ucon64.h"
+#endif
 
 #ifdef  MAXBUFSIZE
 #undef  MAXBUFSIZE
@@ -85,7 +90,7 @@ getopt2_get_index_by_val (const st_getopt2_t *option, int val)
 
 #ifdef  DEBUG
 void
-getopt2_sanity_check_output (st_getopt2_t *p)
+getopt2_sanity_check_output (const st_getopt2_t *p)
 {
   printf ("{\"%s\", %d, 0, %d, \"%s\", \"%s\", %d}, // console: %d workflow: %d\n",
     p->name,
@@ -140,14 +145,13 @@ getopt2_parse_usage (const char *usage_output)
 
       memset (&usage, 0, sizeof (st_getopt2_t));
 
-#ifdef  DEBUG
-      printf (buf);
-#endif
+      fputs (buf, stdout);
       s = d = buf;
       d = strstr (s, " " OPTION_S);
       if (d && (d - s) < 10)
         {
-          s = (d + strspn (++d, OPTION_S));
+          s = d;
+          s += strspn (++d, OPTION_S);
 
           for (i = 0; s[i] && s[i] != ' '; i++)
             if (s[i] == OPTARG)
@@ -180,7 +184,7 @@ getopt2_parse_usage (const char *usage_output)
           if (usage.arg_name)
             printf ("1, \"%s\", ", usage.arg_name);
           else
-            printf ("0, NULL, ");
+            fputs ("0, NULL, ", stdout);
 
           printf ("\"%s\", NULL},", strtrimr (strtriml (strtok (NULL, "\n"))));
 
@@ -196,15 +200,40 @@ getopt2_parse_usage (const char *usage_output)
 }
 
 
+static char *
+string_code (char *d, const char *s)
+{
+  char *p = d;
+
+  *p = 0;
+  for (; *s; s++)
+    switch (*s)
+      {
+      case '\n':
+        strcat (p, "\\n\"\n  \"");
+        break;
+
+      case '\"':
+        strcat (p, "\\\"");
+        break;
+
+      default:
+        p = strchr (p, 0);
+        *p = *s;
+        *(++p) = 0;
+      }
+
+  return d;
+}
+
+
 void
 getopt2_usage_code (const st_getopt2_t *usage)
 {
   int i = 0;
   char buf[MAXBUFSIZE];
 
-#ifdef  DEBUG
   getopt2_sanity_check (usage);
-#endif
 
   for (; usage[i].name || usage[i].help; i++)
     {

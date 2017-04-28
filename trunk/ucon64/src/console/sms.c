@@ -286,21 +286,20 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
   fseek (destfile, 0x2000 + (file_no - 1) * 0x10, SEEK_SET);
   fputc (0xff, destfile);                       // 0x0 = 0xff
-
-  memset (name, ' ', 0x0c);
   p = basename2 (ucon64.fname);
   n = strlen (p);
-  if (n > 0x0c)
-    n = 0x0c;
+  if (n > 0x0b)
+    n = 0x0b;
   memcpy (name, p, n);
-  for (n = 0; n < 0x0c; n++)
+  memset (name + n, ' ', 0x0b - n);
+  for (n = 0; n < 0x0b; n++)
     {
       if (!isprint ((int) name[n]))
         name[n] = '.';
       else
         name[n] = (unsigned char) toupper (name[n]); // loader only supports upper case characters
     }
-  // See comment in genesis.c/write_game_table_entry() why string is terminated.
+  // See comment in genesis.c/write_game_table_entry(). Avoid possible silliness.
   name[0x0b] = '\0';
   fwrite (name, 1, 0x0c, destfile);             // 0x01 - 0x0c = name
   fputc (size / 16384, destfile);               // 0x0d = ROM size (not used by loader, but by us)

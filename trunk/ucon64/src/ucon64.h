@@ -5,8 +5,8 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2004       NoisyB
-Copyright (c) 2001 - 2004, 2015 dbjh
+Copyright (c) 1999 - 2004              NoisyB
+Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -31,13 +31,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include "misc/itypes.h"
+#include "misc/parallel.h"
 #include "ucon64_defines.h"                     // MAXBUFSIZE, etc..
 
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
 
-
-typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
 
 /*
   st_ucon64_nfo_t this struct contains very specific informations only
@@ -111,19 +110,22 @@ typedef struct
 #ifdef  USE_DISCMAGE
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 #endif
-//#if     defined USE_PPDEV || defined AMIGA
+#if     defined USE_PPDEV || defined AMIGA
   char parport_dev[80];                         // parallel port device (e.g.
-//#endif                                          //  /dev/parport0 or parallel.device)
+#endif                                          //  /dev/parport0 or parallel.device)
   int parport_needed;
-  uint16_t parport;                             // parallel port address
+  uint16_t parport;                             // (parallel) port address
+#ifdef  USE_PARALLEL
+  uint16_t ecr_offset;                          // offset of ECP Extended Control Register from parport
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
-  parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
+  parport_mode_t parport_mode;                  // parallel port mode: SPP, bidirectional SPP, EPP
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
+#endif // USE_PARALLEL
 #ifdef  USE_USB
   int usbport;                                  // non-zero => use usbport, 1 = USB0, 2 = USB1
   char usbport_dev[80];                         // usb port device (e.g. /dev/usb/hiddev0)

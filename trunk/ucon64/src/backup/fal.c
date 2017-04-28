@@ -1,9 +1,9 @@
 /*
 fal.c - Flash Linker Advance support for uCON64
 
-Copyright (c) 2001        Jeff Frohwein
-Copyright (c) 2001        NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2001                     Jeff Frohwein
+Copyright (c) 2001                     NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -85,7 +85,7 @@ const st_getopt2_t fal_usage[] =
     },
     {
       "xfalm", 0, 0, UCON64_XFALM,
-      NULL, "try to enable EPP mode, default is SPP mode",
+      NULL, "use SPP mode, default is EPP mode",
       &fal_obj[3]
     },
 #endif // USE_PARALLEL
@@ -505,9 +505,7 @@ ReadFlash (int addr)
 void
 l402684 (void)
 {
-#ifndef USE_PPDEV
-  outpb (SPPStatPort, 1);                       // clear EPP time flag
-#endif
+  parport_reset_timeout (SPPDataPort);
   l40226c ();
 }
 
@@ -544,26 +542,8 @@ LinkerInit (void)               // 4027c4
 {
   int linker_found = 0;
 
-  /*
-    uCON64 comment:
-    Accessing I/O ports with addresses higher than 0x3ff causes an access
-    violation on Windows XP (NT/2000) for _Windows_ executables without the use
-    of an appropriate I/O port driver. UserPort is an example of an
-    *inappropriate* I/O port driver, because it enables access to I/O ports up
-    to 0x3ff. For some (ridiculous) reason, DOS executables are allowed to
-    _access_ at least the ECP register this code uses. That doesn't mean it will
-    result in the expected behaviour like enabling EPP.
-  */
   if (EPPMode)
     {
-      /*
-        Writing to the ECP register seems to have no effect on my PC (which
-        supports ECP, used appropriate BIOS setting). Tested on Windows XP with
-        Windows executables (Cygwin, VC++ and MinGW) - dbjh
-      */
-#ifndef USE_PPDEV
-      outpb (ECPRegECR, 4);                     // set EPP mode for ECP chipsets
-#endif
       if (LookForLinker ())
         {
           // Linker found using EPP mode.
@@ -578,10 +558,7 @@ LinkerInit (void)               // 4027c4
   if (!linker_found)
     {
       // Look for linker in SPP mode.
-#ifndef USE_PPDEV
-      if (EPPMode)
-        outpb (ECPRegECR, 0);                   // set SPP mode for ECP chipsets
-#endif
+      ucon64.parport_mode = parport_setup (SPPDataPort, PPMODE_SPP);
 
       EPPMode = 0;
       if (LookForLinker ())
@@ -1042,7 +1019,7 @@ ProgramNonTurboIntelFlash (FILE *fp)
         }
 
       clear_line ();                            // remove last gauge
-      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize); // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1159,7 +1136,7 @@ ProgramTurboIntelFlash (FILE *fp)
         }
 
       clear_line ();                            // remove last gauge
-      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize); // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
       WriteFlash (1, INTEL28F_READARRAY);
@@ -1226,7 +1203,7 @@ ProgramSharpFlash (FILE *fp)
         }
 
       clear_line ();                            // remove last gauge
-      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize); // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
     }
@@ -1329,7 +1306,7 @@ fal_main (int argc, char **argv)
 
   debug = 0;
   verbose = 1;
-  EPPMode = 0;                                  // uCON64 comment: use the most compatible setting as default
+  EPPMode = 1;
   DataSize16 = 0;
   WaitDelay = 0;
   VisolyTurbo = 0;
@@ -1430,9 +1407,7 @@ fal_main (int argc, char **argv)
           port = i;
           break;
         case 'm':
-          // uCON64 comment: See comment in LinkerInit(). Note that we reverse
-          //  the meaning compared to the original code.
-          EPPMode = 1;                          // Set EPP mode
+          EPPMode = 0;                          // Set SPP mode
           break;
         case 'n':
           // Don't repair header
@@ -1561,7 +1536,7 @@ fal_args (unsigned int parport)
   sprintf (parport_str, "%d", parport); // don't use %x, as Jeff Frohwein uses atoi()
   fal_argv[fal_argc++] = parport_str;
 
-  if (ucon64.parport_mode == UCON64_EPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     fal_argv[fal_argc++] = "-m";
 }
 

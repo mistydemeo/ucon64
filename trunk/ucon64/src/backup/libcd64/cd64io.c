@@ -954,7 +954,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		  : "=a" (exception_registration.prev)
 		  : "b" (&exception_registration)
 		);
-		input_byte(0x378);                      /* 0x378 is okay */
+		input_byte(0x378 + 0x402);                  /* 0x378 + 0x402 is okay */
 		/* if we get here accessing I/O port 0x378 did not cause an exception */
 		__asm__ __volatile__
 		("movl %0, %%fs:0"
@@ -964,7 +964,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 #elif defined _WIN32                            /* MinGW & Visual C++ */
 		LPTOP_LEVEL_EXCEPTION_FILTER org_exception_filter =
 			SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
-		input_byte(0x378);                      /* 0x378 is okay */
+		input_byte(0x378 + 0x402);                  /* 0x378 + 0x402 is okay */
 		/* if we get here accessing I/O port 0x378 did not cause an exception */
 		SetUnhandledExceptionFilter(org_exception_filter);
 #endif

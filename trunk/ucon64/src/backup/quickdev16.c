@@ -1,8 +1,8 @@
 /*
 quickdev16.c - Quickdev16 support for uCON64
 
-Copyright (c) 2009 david@optixx.org
-Copyright (c) 2015 dbjh
+Copyright (c) 2009        david@optixx.org
+Copyright (c) 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/misc.h"
 #include "misc/term.h"
 #include "misc/usb.h"
-#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "console/snes.h"
 #include "backup/quickdev16.h"
@@ -94,6 +93,7 @@ const st_getopt2_t quickdev16_usage[] =
 #define SNES_HIROM_SHIFT 16
 #define SNES_LOROM_SHIFT 15
 
+#define TARGET (USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT)
 
 static int
 check_quit (void)
@@ -175,20 +175,18 @@ quickdev16_write_rom (const char *filename)
   puts ("Press q to abort\n");
   starttime = time (NULL);
 
-  usb_control_msg (handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
-                   USB_MODE_AVR, 0, 0, NULL, 0, 5000);
+  usb_control_msg (handle, TARGET, USB_MODE_AVR, 0, 0, NULL, 0, 5000);
   // wait for the loader to depack
   wait2 (500);
-  usb_control_msg (handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
-                   USB_BULK_UPLOAD_INIT, bank_shift, size / bank_size, NULL, 0, 5000);
+  usb_control_msg (handle, TARGET, USB_BULK_UPLOAD_INIT, bank_shift,
+                   size / bank_size, NULL, 0, 5000);
 
   while ((bytesread = fread (buffer, 1, READ_BUFFER_SIZE, file)) > 0)
     {
       offset = 0;
       while (offset < bytesread && (quit = check_quit ()) == 0)
         {
-          numbytes = usb_control_msg (handle,
-                                      USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
+          numbytes = usb_control_msg (handle, TARGET,
                                       address ? USB_BULK_UPLOAD_NEXT : USB_BULK_UPLOAD_ADDR,
                                       (address >> 16) & 0x00ff, address & 0xffff,
                                       buffer + offset,
@@ -214,10 +212,8 @@ quickdev16_write_rom (const char *filename)
         }
     }
 
-  usb_control_msg (handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
-                   USB_BULK_UPLOAD_END, 0, 0, NULL, 0, 5000);
-  usb_control_msg (handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
-                   USB_MODE_SNES, 0, 0, NULL, 0, 5000);
+  usb_control_msg (handle, TARGET, USB_BULK_UPLOAD_END, 0, 0, NULL, 0, 5000);
+  usb_control_msg (handle, TARGET, USB_MODE_SNES, 0, 0, NULL, 0, 5000);
 
   free (buffer);
   fclose (file);

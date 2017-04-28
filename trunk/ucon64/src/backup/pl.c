@@ -1,8 +1,9 @@
 /*
 pl.c - Pocket Linker support for uCON64
 
-Copyright (c) 2004 Walter van Niftrik <w.f.b.w.v.niftrik@stud.tue.nl>
-Partly based on PokeLink - Copyright (c) Dark Fader / BlackThunder
+Copyright (c) 2004                              Walter van Niftrik <w.f.b.w.v.niftrik@stud.tue.nl>
+Partly based on PokeLink - Copyright (c)        Dark Fader / BlackThunder
+Portions copyright (c) 2004 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -25,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include "misc/archive.h"
-#include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/pl.h"
@@ -61,7 +61,7 @@ const st_getopt2_t pl_usage[] =
     },
     {
       "xplm", 0, 0, UCON64_XPLM,
-      NULL, "try to enable EPP mode, default is SPP mode",
+      NULL, "use SPP mode, default is EPP mode",
       &pl_obj[2]
     },
 #endif // USE_PARALLEL
@@ -81,7 +81,6 @@ const st_getopt2_t pl_usage[] =
 #define set_data_read outportb (port_a, 0);
 #define set_data_write outportb (port_a, 1);
 #define reset_port outportb (port_a, 4);
-#define clear_timeout outportb (port_9, 1);
 
 #define CMD_READ       0xf0
 #define CMD_INFO       0x90
@@ -92,7 +91,6 @@ const st_getopt2_t pl_usage[] =
 #define TYPE_MULTI     0x02
 
 static unsigned short port_8, port_9, port_a, port_b, port_c;
-static parport_mode_t port_mode;
 static int current_ai;
 static unsigned char ai_value[4];
 
@@ -117,7 +115,7 @@ static void
 write_data (unsigned char data)
 {
   ai_value[current_ai] = data;
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     spp_write_data (data);
   else
     epp_write_data (data);
@@ -149,7 +147,7 @@ spp_read_data (void)
 static unsigned char
 read_data (void)
 {
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     return spp_read_data ();
   else
     return epp_read_data ();
@@ -177,7 +175,7 @@ spp_set_ai (unsigned char ai)
 static void
 set_ai (unsigned char ai)
 {
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     spp_set_ai (ai);
   else
     epp_set_ai (ai);
@@ -203,7 +201,7 @@ spp_set_ai_data (unsigned char ai, unsigned char data)
 static void
 set_ai_data (unsigned char ai, unsigned char data)
 {
-  if (port_mode == UCON64_SPP)
+  if (ucon64.parport_mode != PPMODE_EPP)
     spp_set_ai_data (ai, data);
   else
     epp_set_ai_data (ai, data);
@@ -213,9 +211,7 @@ set_ai_data (unsigned char ai, unsigned char data)
 static void
 init_port (void)
 {
-#ifndef USE_PPDEV
-  clear_timeout
-#endif
+  parport_reset_timeout (port_8);
   set_data_write
   set_ai_data (2, 0);
 }
@@ -455,10 +451,6 @@ deinit_io (void)
 static void
 init_io (unsigned short port)
 {
-#ifndef USE_PPDEV
-  outportb ((unsigned short) (port_8 + 0x402), 0); // Set EPP mode for ECP chipsets
-#endif
-
   port_8 = port;
   port_9 = port + 1;
   port_a = port + 2;
@@ -467,14 +459,9 @@ init_io (unsigned short port)
 
   parport_print_info ();
 
-  if (ucon64.parport_mode == UCON64_EPP && port_8 != 0x3bc)
-    port_mode = UCON64_EPP;                     // if port == 0x3bc => no EPP available
-  else
-    port_mode = UCON64_SPP;
-
   if (!detect_linker ())
     {
-      port_mode = UCON64_SPP;
+      ucon64.parport_mode = parport_setup (port_8, PPMODE_SPP);
       if (!detect_linker ())
         {
           fputs ("ERROR: Pocket Linker not found or not turned on\n", stderr);
@@ -484,7 +471,7 @@ init_io (unsigned short port)
     }
 
   // If we get here, a Pocket Linker was detected
-  if (port_mode == UCON64_EPP)
+  if (ucon64.parport_mode == PPMODE_EPP)
     puts ("Pocket Linker found. EPP found");
   else
     puts ("Pocket Linker found. EPP not found or not enabled - SPP used");

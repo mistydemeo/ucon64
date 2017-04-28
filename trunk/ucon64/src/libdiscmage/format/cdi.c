@@ -59,7 +59,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
   uint32_t value32;
 //  uint16_t value16;
   uint8_t value8;
-  char value_s[300];
+  char value_s[256];
   const char track_header_magic[] = { 0, 0, 0x01, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF};
 
 #ifdef  DEBUG
@@ -103,12 +103,9 @@ cdi_track_init (dm_track_t *track, FILE *fh)
   fread (&value8, 1, 1, fh);    //     1    filename_lenght
   fread (&value_s, 1, value8, fh); //  [fl]    [filename]
 #ifdef  DEBUG
-  if (value8 < sizeof (value_s))
-    {
-      value_s[value8] = 0;
-      puts (value_s);
-      fflush (stdout);
-    }
+  value_s[value8] = 0;
+  puts (value_s);
+  fflush (stdout);
 #endif
   fseek (fh, 19, SEEK_CUR);    //     1    NULL
                                //    10    NULL  (ISRC?)

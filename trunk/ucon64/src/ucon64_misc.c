@@ -152,21 +152,15 @@ const st_getopt2_t discmage_usage[] =
 #endif // USE_DISCMAGE
 
 
-/*
-  This is a string pool. gcc 2.9x generates something like this itself, but it
-  seems gcc 3.x does not. By using a string pool the executable will be
-  smaller than without it.
-  It's also handy in order to be consistent with messages.
-*/
 const char *ucon64_msg[] =
   {
     "ERROR: Communication with backup unit failed\n"                    // PARPORT_ERROR
     "TIP:   Check cables and connection\n"
     "       Turn the backup unit off and on\n"
 //    "       Split ROMs must be joined first\n" // handled with WF_NO_SPLIT
-    "       Use " OPTION_LONG_S "port" OPTARG_S "{3bc, 378, 278, ...} to specify a parallel port address\n"
-    "       Set the port to SPP (standard, normal) mode in your BIOS as some backup\n"
-    "         units do not support EPP and ECP style parallel ports\n"
+    "       Use " OPTION_LONG_S "port to specify a (different) parallel port address\n"
+    "       Try different settings for the parallel port in the BIOS, UEFI or\n"
+    "         setup software. \"ECP and EPP 1.9\" should give the best results\n"
     "       Read the backup unit's manual\n",
 
     "ERROR: Could not auto detect the right ROM/IMAGE/console type\n"   // CONSOLE_ERROR
@@ -181,10 +175,10 @@ const char *ucon64_msg[] =
     "ERROR: Not enough memory for buffer (%d bytes)\n",                 // BUFFER_ERROR
     "ERROR: Not enough memory for ROM buffer (%d bytes)\n",             // ROM_BUFFER_ERROR
     "ERROR: Not enough memory for file buffer (%d bytes)\n",            // FILE_BUFFER_ERROR
-    "DAT info: No ROM with 0x%08x as checksum found\n",                 // DAT_NOT_FOUND
+    "DAT info: No ROM found with checksum 0x%08x\n",                    // DAT_NOT_FOUND
     "WARNING: Support for DAT files is disabled, because \"ucon64_datdir\" (either\n" // DAT_NOT_ENABLED
     "         in the configuration file or the environment) points to an incorrect\n"
-    "         directory. Read the FAQ for more information.\n",
+    "         directory. Read the FAQ for more information\n",
     "Reading config file %s\n",                                         // READ_CONFIG_FILE
     "NOTE: %s not found or too old, support for discmage disabled\n",   // NO_LIB
     NULL
@@ -1166,10 +1160,14 @@ ucon64_set_property_array (void)
 #else
       {
         "parport", "378",
-        "parallel port"
+        "(parallel) port"
+      },
+#ifdef  USE_PARALLEL
+      {
+        "ecr_offset", "402",
+        "offset of ECP Extended Control Register relative to Data register (parport)"
       },
 #endif
-#ifdef  USE_USB
 #endif
       {
         "discmage_path",
@@ -2134,7 +2132,7 @@ ucon64_filefile (const char *filename1, int start1, int start2, int similar)
 
   if (one_file (filename1, ucon64.fname))
     {
-      printf ("%s and %s refer to the same file\n", filename1, ucon64.fname);
+      printf ("%s and %s refer to the same file\n\n", filename1, ucon64.fname);
       return;
     }
 

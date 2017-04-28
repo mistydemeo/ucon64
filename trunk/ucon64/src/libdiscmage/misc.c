@@ -1,9 +1,9 @@
 /*
 misc.c - miscellaneous functions
 
-Copyright (c) 1999 - 2004       NoisyB
-Copyright (c) 2001 - 2004, 2015 dbjh
-Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2004              NoisyB
+Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2004              Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -164,14 +164,13 @@ getopt2_parse_usage (const char *usage_output)
 
       memset (&usage, 0, sizeof (st_getopt2_t));
 
-#ifdef  DEBUG
-      printf (buf);
-#endif
+      fputs (buf, stdout);
       s = d = buf;
       d = strstr (s, " " OPTION_S);
       if (d && (d - s) < 10)
         {
-          s = (d + strspn (++d, OPTION_S));
+          s = d;
+          s += strspn (++d, OPTION_S);
 
           for (i = 0; s[i] && s[i] != ' '; i++)
             if (s[i] == OPTARG)
@@ -204,7 +203,7 @@ getopt2_parse_usage (const char *usage_output)
           if (usage.arg_name)
             printf ("1, \"%s\", ", usage.arg_name);
           else
-            printf ("0, NULL, ");
+            fputs ("0, NULL, ", stdout);
 
           printf ("\"%s\", NULL},", strtrim (strtok (NULL, "\n")));
 
@@ -218,10 +217,8 @@ getopt2_parse_usage (const char *usage_output)
       fputc ('\n', stdout);
     }
 }
-#endif // DEBUG
 
 
-#ifdef  DEBUG
 static char *
 string_code (char *d, const char *s)
 {
@@ -255,9 +252,7 @@ getopt2_usage_code (const st_getopt2_t *usage)
   int i = 0;
   char buf[MAXBUFSIZE];
 
-#ifdef  DEBUG
   getopt2_sanity_check (usage);
-#endif
 
   for (; usage[i].name || usage[i].help; i++)
     {

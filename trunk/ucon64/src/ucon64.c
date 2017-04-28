@@ -54,12 +54,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc/archive.h"
 #include "misc/file.h"
-#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/misc.h"
-#include "misc/parallel.h"
 #include "misc/property.h"
 #include "misc/term.h"
-#include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
@@ -1092,6 +1089,9 @@ main (int argc, char **argv)
 #endif
 
   // switches
+#ifdef  USE_PARALLEL
+  ucon64.parport_mode = UCON64_UNKNOWN;
+#endif
   for (x = 0; arg[x].val; x++)
     {
       if (arg[x].console != UCON64_UNKNOWN)
@@ -1133,6 +1133,7 @@ main (int argc, char **argv)
           fputs ("ERROR: Could not register function with register_func()\n", stderr);
           exit (1);
         }
+      ucon64.parport_mode = parport_setup (ucon64.parport, ucon64.parport_mode);
     }
 #endif
 #if     defined __unix__ && !defined __MSDOS__

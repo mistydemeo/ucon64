@@ -66,10 +66,11 @@ Q21: <a href="#21">What is the difference between the Flash Advance Linker
    options -xfals and -xfalb &#60;n&#62;?</a><br>
 <br>
 Q22: <a href="#22">uCON64 exits with the message "ERROR: Flash card erase
-   failed" when I try to write a multi-game file to my flash card. What is
-   wrong?</a><br>
+   failed" when I try to write a multi-game file to my Flash Advance Linker
+   flash card. What is wrong?</a><br>
 <br>
-Q23: <a href="#23">Where can I get that loader or "game pack" file?</a><br>
+Q23: <a href="#23">Where can I get that Flash Advance Linker loader or "game
+   pack" file?</a><br>
 <br>
 Q24: <a href="#24">What is the meaning of the -col option (SNES)?</a><br>
 <br>
@@ -153,6 +154,17 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
 Q52: <a href="#52">What is the option --xreset for? In what case should it be
    used?</a><br>
 <br>
+Q53: <a href="#53">I am trying to use a PCI parallel port card, but while
+   uCON64 can communicate with an older backup unit like my Super Wild Card it
+   cannot communicate with my MD-PRO, which requires EPP. Can this be solved?</a><br>
+<br>
+Q54: <a href="#54">My PCI parallel port card has its Extended Control Register
+   at a lower I/O address than its Data register. How do I specify a negative
+   Extended Control Register offset in the configuration file?</a><br>
+<br>
+Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
+   Game Doctor SF6/SF7?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -182,8 +194,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    DOS version cannot handle long command lines. The Cygwin version does not
    have any serious limitations compared to the "normal" Win32 versions, but
    behaves a bit more UNIX-like than Windows users might want. Users accustomed
-   to UNIX might prefer the Cygwin version. The Cygwin version needs some
-   additional files, though. See <a href="#27">question 27</a>.<br>
+   to UNIX might prefer the Cygwin version.<br>
    For installation instructions (for all versions) see
    <a href="#4">question 4</a>.<br>
 <br>
@@ -389,14 +400,17 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    as old as Windows XP, remove the "#" in front of the line with
    "WINXP_TARGETING=1" in Makefile.vc6, libdiscmage/Makefile.vc6 and
    backup/libcd64/Makefile.vc6. Be sure to have Windows SDK v7.1A installed or
-   else enabling WINXP_TARGETING will have no effect. The easiest way to install
-   Windows SDK v7.1A is to download the ISO of Visual Studio 2012 Update 4,
-   <a href="http://go.microsoft.com/fwlink/?LinkId=327544">VS2012.4.iso</a> from
+   else enabling WINXP_TARGETING will have no effect. The easiest way to
+   install Windows SDK v7.1A is to download the ISO image of Visual Studio 2012
+   Update 4,
+   <a href="http://go.microsoft.com/fwlink/?LinkId=327544">VS2012.4.iso</a>
+   from
    <a href="https://www.microsoft.com/en-us/download/details.aspx?id=39305">
    https://www.microsoft.com/en-us/download/details.aspx?id=39305</a>. Open
-   the ISO with a program like <a href="http://www.rarlab.com/">WinRAR</a> and
-   extract the directory packages/XPSupport/. In the extracted directory you
-   will find the file Win_XPSupport.msi. Install it by double-clicking on it.<br>
+   the ISO image with a program like <a href="http://www.rarlab.com/">WinRAR</a>
+   and extract the directory packages/XPSupport/. In the extracted directory
+   you will find the file Win_XPSupport.msi. Install it by double-clicking on
+   it.<br>
 <br>
    If you have compiled uCON64 in the same directory before, type:<br>
    &nbsp;&nbsp;nmake /f Makefile.vc6 clean<br>
@@ -454,7 +468,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Now continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>32-bit Windows (95/98/ME/NT/2000/XP/2003) &amp; DOS</b><br>
+   <b>32-bit Windows (95/98/ME/NT/2000/XP/2003/Vista/7) &amp; DOS</b><br>
    On 32-bit Windows, unpack the package with a program like
    <a href="http://www.winzip.com/">WinZip</a>,
    <a href="http://www.rarlab.com/">WinRAR</a>,
@@ -464,12 +478,11 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    <a href="http://www.pkware.com/">PKUNZIP</a>.<br>
    We recommend to extract the package to a directory (or folder) of its own.
    The zip file contains a directory, but you need not use that directory.<br>
-   Windows NT/2000/XP/2003 users need a driver for backup unit I/O. You do not
-   need a driver if you use Windows 95, 98 or ME. A driver is also not needed if
-   you will not use uCON64 to communicate with a backup unit.<br>
-   You could use a driver like UserPort, DlPortIO, io.dll or inpout32.dll.
-<!-- UserPort doesn't seem to have an official homepage. -->
-   You can download DlPortIO from
+   Windows NT/2000/XP/2003/Vista/7 users need a driver for backup unit I/O. You
+   do not need a driver if you use Windows 95, 98 or ME. A driver is also not
+   needed if you will not use uCON64 to communicate with a backup unit.<br>
+   You could use a driver like DlPortIO, io.dll or inpout32.dll. You can
+   download DlPortIO from
    <a href="http://ucon64.sourceforge.net/">the uCON64 homepage</a>.
    You can find io.dll in a file named
    <a href="http://www.geekhideout.com/downloads/io.zip">io.zip</a> at
@@ -477,8 +490,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    http://www.geekhideout.com/iodll.shtml</a> and you can find inpout32.dll in
    a file named inpout32_source_and_bins.zip at
    <a href="http://www.logix4u.net">http://www.logix4u.net</a>.
-   UserPort and io.dll are included with the binary release. We recommend
-   DlPortIO and io.dll. To install DlPortIO simply start port95nt.exe. After the
+   io.dll is included with the binary release. We recommend DlPortIO and
+   io.dll. To install DlPortIO simply start port95nt.exe. After the
    installation is completed, copy DLPORTIO.dll from the Windows system(32)
    directory to uCON64's configuration directory. To install io.dll or
    inpout32.dll, put them in uCON64's configuration directory. See the section
@@ -492,8 +505,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    directory, uCON64 will first try to load DLPORTIO.dll. If that fails it will
    try to load io.dll. If that also fails it will try to load inpout32.dll.<br>
    It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool on
-   Windows XP without UserPort. We have received reports from people who were
-   able to send and receive ROMs on Windows XP as a regular user (no
+   Windows XP without an I/O driver. We have received reports from people who
+   were able to send and receive ROMs on Windows XP as a regular user (no
    Administrator rights and not "Power Users").<br>
 <br>
    <b>64-bit Windows (XP/2003/Vista/7/8/8.1/10)</b><br>
@@ -510,10 +523,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    driver if you will not use uCON64 to communicate with a backup unit.<br>
    You could use a driver like giveio64 or a suitable port of inpout32.dll.
    You can download giveio64 at
-   <a href="https://www-user.tu-chemnitz.de/~ygu/">
-   https://www-user.tu-chemnitz.de/~ygu/</a>, directly at
-   <a href="https://www-user.tu-chemnitz.de/~ygu/free">
-   https://www-user.tu-chemnitz.de/~ygu/free</a>, at
+   <a href="https://www-user.tu-chemnitz.de/~heha/">
+   https://www-user.tu-chemnitz.de/~heha/</a>, directly at
+   <a href="https://www-user.tu-chemnitz.de/~heha/hs/free.var">
+   https://www-user.tu-chemnitz.de/~heha/hs/free.var</a>, at
    <a href="http://www.codeproject.com/Tips/985807/Enable-I-O-Access-From-User-Mode">
    http://www.codeproject.com/Tips/985807/Enable-I-O-Access-From-User-Mode</a>
    or from <a href="http://ucon64.sourceforge.net/">the uCON64 homepage</a>.
@@ -618,6 +631,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
   <tr>
     <td><tt>parport</tt></td>
     <td><tt>hardware address of parallel port (AmigaOS: port number)</tt></td>
+  </tr>
+  <tr>
+    <td><tt>ecr_offset</tt></td>
+    <td><tt>offset of ECP Extended Control Register relative to Data register (parport)</tt></td>
   </tr>
   <tr>
     <td><tt>discmage_path</tt></td>
@@ -732,24 +749,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    wrong?</a><br>
 <b>A</b>: You should not use an interlink cable, but a standard bidirectional
    parallel cable, i.e., a cable with male DB-25 connectors at both ends where
-   the pins are connected in the following way:<br>
-   pin 1&nbsp; &#60;-&#62; pin 1<br>
-   pin 2&nbsp; &#60;-&#62; pin 2<br>
-   pin 3&nbsp; &#60;-&#62; pin 3<br>
-   pin 4&nbsp; &#60;-&#62; pin 4<br>
-   pin 5&nbsp; &#60;-&#62; pin 5<br>
-   pin 6&nbsp; &#60;-&#62; pin 6<br>
-   pin 7&nbsp; &#60;-&#62; pin 7<br>
-   pin 8&nbsp; &#60;-&#62; pin 8<br>
-   pin 9&nbsp; &#60;-&#62; pin 9<br>
-   pin 10 &#60;-&#62; pin 10<br>
-   pin 11 &#60;-&#62; pin 11<br>
-   pin 12 &#60;-&#62; pin 12<br>
-   pin 13 &#60;-&#62; pin 13<br>
-   pin 15 &#60;-&#62; pin 15<br>
-   pin 25 &#60;-&#62; pin 25<br>
-   The other pins may be left unconnected. Pins 2-9 are used for output, pins
-   10-13 &amp; 15 for input and pin 25 is ground.<br>
+   the pins are connected in such a way that pin 1 on one end is connected to
+   pin 1 on the other, pin 2 on one end to pin 2 on the other and so forth, for
+   all 25 pins. Pins 2-9 are used for output, pins 10, 12, 13 &amp; 15 for
+   input, pins 1, 11, 14, 16 &amp; 17 for protocol and pins 18-25 are ground.<br>
 <br>
 <p>
 <a name="9"><b>Q9</b>: I have a SNES ROM of which GoodSNES says it is good, but
@@ -859,7 +862,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    example:<br>
    &nbsp;&nbsp;copy /b "Mega Man X.swc" + "Mega Man X.swc" "Mega Man X (SWC-fix).swc"<br>
 <br>
-   However, starting from version 1.9.8beta6 the method described above is not
+   However, starting with version 1.9.8beta6 the method described above is not
    necessary anymore for Demon's Crest. Use the option -k instead. For
    Mega Man X you will need version 1.9.8beta7 or later.<br>
 <br>
@@ -878,7 +881,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <a name="14"><b>Q14</b>: I use Windows XP (NT/2000). When I try to run
    ucon64.exe in command.com (start -&#62; Run... -&#62; command) uCON64
    crashes. What do I do wrong?</a><br>
-<b>A</b>: You should not use command, use cmd instead. However, starting from
+<b>A</b>: You should not use command, use cmd instead. However, starting with
    version 1.9.8 uCON64 should run fine in command.com.<br>
 <br>
 <p>
@@ -953,8 +956,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
 <p>
 <a name="22"><b>Q22</b>: uCON64 exits with the message "ERROR: Flash card erase
-   failed" when I try to write a multi-game file to my flash card. What is
-   wrong?</a><br>
+   failed" when I try to write a multi-game file to my Flash Advance Linker
+   flash card. What is wrong?</a><br>
 <b>A</b>: The multi-game file you created is too large for your flash card. When
    you make a multi-game file do not forget that the loader or "game pack" file
    also needs some space (32 kB) on the flash card. Do not pass a size to -multi
@@ -973,11 +976,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    when you try again (with the same multi-game file).<br>
 <br>
 <p>
-<a name="23"><b>Q23</b>: Where can I get that loader or "game pack" file?</a><br>
-<b>A</b>: You can get it from <a href="http://www.visoly.com">Visoly's site</a>.
-   It is in a file with a name like
-   <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.
-   You can find it also on the uCON64 homepage.<br>
+<a name="23"><b>Q23</b>: Where can I get that Flash Advance Linker loader or
+   "game pack" file?</a><br>
+<b>A</b>: It is in a file named preboot32.zip and you can find it on the uCON64
+   homepage.<br>
 <br>
 <p>
 <a name="24"><b>Q24</b>: What is the meaning of the -col option (SNES)?</a><br>
@@ -1039,6 +1041,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    <a href="http://ucon64.sourceforge.net/">the uCON64 homepage</a>.
    Copy the file(s) to the same directory as the uCON64 executable or to a
    directory in your PATH.<br>
+   Starting with version 2.0.1 all files necessary to run uCON64 are included
+   with the binary packages.<br>
 <br>
 <p>
 <a name="28"><b>Q28</b>: How do I make uCON64 display one help screen at a
@@ -1070,14 +1074,23 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    parallel port. See <a href="#4">question 4</a>.<br>
    You will also see this message (with a Windows version of uCON64) if you
    tried to enable EPP mode for the FAL on Windows XP (NT/2000), i.e., you
-   specified the switch -xfalm, without an appropriate I/O port driver. UserPort
-   is <i>inappropriate</i> for this, because it enables access to I/O ports up
-   to 0x3ff. However, in order to enable EPP mode the FAL code tries to access
-   an I/O port with an address higher than 0x3ff. If you want to be able to use
-   EPP mode try io.dll or inpout32.dll.<br>
+   specified the switch -xfalm, without an appropriate I/O port driver.
+   UserPort is <i>inappropriate</i> for this, because it enables access to I/O
+   ports up to 0x3ff. However, in order to enable EPP mode the FAL code tries
+   to access an I/O port with an address higher than 0x3ff. If you want to be
+   able to use EPP mode try io.dll or inpout32.dll.<br>
    Starting with version 2.0.0 uCON64 will not crash anymore if it cannot access
    the parallel port at start up (unless you use UserPort in combination with a
    Windows version of uCON64).<br>
+   Starting with version 2.1.0 uCON64 will by default try to use EPP for
+   options that can use it. So, UserPort can no longer be used (uCON64 will
+   display an error message and exit cleanly when using UserPort). Also, the
+   meaning of the switches -xfalm, -xgbxm and -xplm has been reversed.<br>
+<!--
+   This was no arbitrary reversal of defaults. To be certain of *any* parallel
+   port mode we have to access the ECP Extended Control register, which is
+   always mapped to an I/O port above 0x3ff (its default *offset* is 0x402).
+-->
 <br>
 <p>
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
@@ -1568,7 +1581,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <a name="44"><b>Q44</b>: What tools do you recommend besides uCON64?</a><br>
 <b>A</b>: For SNES, only
    <a href="http://nsrt.nachsoftware.org/files.php">NSRT</a> (Nach's SNES ROM
-   Tools). That is, starting from version 3.0 Release Candidate 1. NSRT has some
+   Tools). That is, starting with version 3.0 Release Candidate 1. NSRT has some
    features that uCON64 does not have. The two most interesting features are
    arguably that it is able to fix some hacked ROM dumps and that it has an
    internal database on which a lot of effort has been spent to have it contain
@@ -1588,8 +1601,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    The meaning of "interleaved" depends on the console type. Interleaved
    formats exist for NES, PC-Engine, Genesis, SNES and Nintendo 64.<br>
    Deinterleaving is the opposite of interleaving a ROM dump. It is the process
-   of converting the data to "binary" format. Binary in the sense as how the
-   data (in a cartridge) is presented to the CPU.<br>
+   of converting the data to "binary" format. Binary in the sense that each
+   successive byte in the ROM dump will be mapped to a higher address in the
+   console.<br>
    ROM dumps can be interleaved (not for NES) and deinterleaved with uCON64.<br>
 <br>
    NES<br>
@@ -1645,9 +1659,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    dump.<br>
    Can be interleaved with uCON64 using the option -gd3 or -ufo.<br>
    Can be deinterleaved with uCON64 using the option -dint, but it is
-   better to use one of the regular conversion options -smc, -swc, -fig or
-   -mgd. Some SNES tools erroneously interleave LoROM dumps. These dumps
-   can be deinterleaved with the options -gd3 and -ufo as well as with the
+   better to use one of the regular conversion options -smc, -swc, -fig, -ufosd
+   or -mgd. Some SNES tools erroneously interleave LoROM dumps. These dumps can
+   be deinterleaved with the options -gd3 and -ufo as well as with the
    aformentioned (SNES) options.<br>
 <br>
    Nintendo 64<br>
@@ -1966,6 +1980,62 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    Additionally, after switching the device off, aim to disconnect it as soon
    as possible. Printing, rebooting, and running certain applications may cause
    power to be re-applied to the parallel port -- a back-feed hazard.<br>
+<br>
+<p>
+<a name="53"><b>Q53</b>: I am trying to use a PCI parallel port card, but while
+   uCON64 can communicate with an older backup unit like my Super Wild Card it
+   cannot communicate with my MD-PRO, which requires EPP. Can this be solved?</a><br>
+<b>A</b>: If you are using ppdev on GNU/Linux then it looks like your PCI
+   parallel port card is not fully supported by the version of GNU/Linux you
+   are using. Fortunately, starting with uCON64 2.1.0 this problem can be
+   solved for all supported platforms on which the parallel port can be
+   accessed directly. So, GNU/Linux, all Windows versions (including Windows
+   10), MS-DOS, FreeBSD, OpenBSD and BeOS. First determine the offset of the
+   Extended Control register relative to the Data register.<br>
+   On GNU/Linux use lspci -v to find out what I/O ports are being used by your
+   PCI parallel port card. On Windows you can use Device Manager. You should
+   see two I/O ranges. One of them should start with the I/O port you specified
+   when communicating with your Super Wild Card. That is the I/O address of the
+   Data register. The other starts with the I/O port of the first ECP
+   configuration register. Add 2 to get the I/O address of the Extended Control
+   register. To get the offset subtract the I/O address of the Data register
+   from the I/O address of the ECP Extended Control register, <u>in that order</u>.<br>
+   Find the line starting with ecr_offset= in the configuration file and update
+   it with the value you just calculated.<br>
+   Finally, make sure EPP is enabled for your PCI parallel port card. You may
+   have to enable both EPP and ECP, before uCON64 can communicate with your
+   MD-PRO.<br>
+<br>
+<p>
+<a name="54"><b>Q54</b>: My PCI parallel port card has its Extended Control
+   register at a lower I/O address than its Data register. How do I specify a
+   negative Extended Control register offset in the configuration file?</a><br>
+<b>A</b>: See <a href="#53">question 53</a>. Use a calculator and set it to
+   hexadecimal (base 16). After you subtract the I/O address of the Data
+   register from the I/O address of the ECP Extended Control register you will
+   see a lot of leading Fs ending in different characters, probably 02. Note
+   the last 4 digits. Find the line with ecr_offset=402 in the configuration
+   file and replace 402 with the 4 digits.<br>
+<br>
+<p>
+<a name="55"><b>Q55</b>: Why is uCON64 unable to communicate with my Doctor V64
+   or Game Doctor SF6/SF7?</a><br>
+<b>A</b>: The communication protocols of the Doctor V64 and Game Doctor SF6/SF7
+   involve reading specific values from the parallel port Control register.
+   However, the Control register was intended as a write only register. Many
+   parallel ports support input from this register, but some do not. You may
+   happen to have a parallel port that does not support using the Control
+   register for input.<br>
+   Another possibility may be that you configured uCON64 to use ppdev. The
+   developers of ppdev decided to target the lowest common denominator and to
+   not support reading from the Control register, which is unhelpful to say the
+   least. So, even if your parallel port supports using the Control register
+   for input, ppdev will not let you. This means that you cannot use ppdev in
+   combination with a Doctor V64, unless you modify ppdev (which is not
+   difficult). For the Game Doctor SF6/SF7 a workaround exists by using the
+   Game Doctor SF3 protocol, but you will lose the saver (RTS) transfer
+   functionality. Of course, you can also avoid this by not configuring uCON64
+   to use ppdev.<br>
 <br>
 <p>
 <br>

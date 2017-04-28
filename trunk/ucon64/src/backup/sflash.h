@@ -1,7 +1,8 @@
 /*
-sflash.h - Super Flash flash card programmer support for uCON64
+sflash.h - Super Flash support for uCON64
 
-Copyright (c) 2004 JohnDie
+Copyright (c) 2004       JohnDie
+Copyright (c) 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

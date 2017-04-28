@@ -1,10 +1,10 @@
 /*
 f2a.c - Flash 2 Advance support for uCON64
 
-Copyright (c) 2003              Ulrich Hecht <uli@emulinks.de>
-Copyright (c) 2003 - 2004       David Voswinkel <d.voswinkel@netcologne.de>
-Copyright (c) 2004              NoisyB
-Copyright (c) 2004 - 2005, 2015 dbjh
+Copyright (c) 2003                     Ulrich Hecht <uli@emulinks.de>
+Copyright (c) 2003 - 2004              David Voswinkel <d.voswinkel@netcologne.de>
+Copyright (c) 2004                     NoisyB
+Copyright (c) 2004 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -792,10 +792,6 @@ parport_init (unsigned short port, int target_delay)
   parport_nop_cntr = parport_init_delay (target_delay);
 
   parport_print_info ();
-
-#ifndef USE_PPDEV
-  outportb (f2a_pport + PARPORT_STATUS, 0x01);  // clear EPP time flag
-#endif
 
   outportb (f2a_pport + PARPORT_CONTROL, 0x04);
   outportb (f2a_pport + PARPORT_CONTROL, 0x01);

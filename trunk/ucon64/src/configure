@@ -3373,11 +3373,36 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
+  usb_h=yes
+else
+  usb_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+else
+  usb_h=no
+fi
+if test $with_libusb = yes; then
+  if test $usb_h = yes; then
+    with_libusb=yes
+  else
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <lusb0_usb.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
   with_libusb=yes
 else
   with_libusb=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
 fi
 if test $with_libusb = yes; then
 
@@ -3691,6 +3716,7 @@ fi
 done
 
 
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for an ANSI C-conforming const" >&5
 $as_echo_n "checking for an ANSI C-conforming const... " >&6; }
 if ${ac_cv_c_const+:} false; then :
@@ -3865,6 +3891,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 fi
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working memcmp" >&5
@@ -4228,6 +4255,7 @@ test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
 test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
+
 
 
 ac_config_files="$ac_config_files config.mak libdiscmage/Makefile"

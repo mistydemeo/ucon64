@@ -254,7 +254,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    The presence or settings of these features is controlled by the header file
    config.h in combination with the makefiles. There are two ways to create a
    config.h and makefiles for uCON64:<br>
-   (Before executing one of these steps read the section below concerning gzip
+   (Before executing one of these steps read the sections below concerning gzip
    &amp; zip and USB support)<br>
    1.) Run the configure script "configure".<br>
    If you want default settings type:<br>
@@ -308,11 +308,17 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    1.) When using the configure script.<br>
    If you want to enable the feature, pass the option --with-libusb to the
    configure script.<br>
+<!--
    For libusb-win32, starting with version 1.2.5.0 (1.2.4.6) this will not work
    without an extra step. The configure script refers to usb.h, but since the
    mentioned version usb.h has been renamed to lusb0_usb.h. So, to make the
    configure script detect the presence of libusb, create a file usb.h in a
    standard include directory that includes lusb0_usb.h.<br>
+   Startng with uCON64 2.1.0 the configure script detects lusb0_usb.h directly,
+   but on Cygwin not because there is no usb.h, but because
+   /usr/include/w32api/usb.h causes (many) compilation errors. To speed up
+   configure, the trick with a redirecting usb.h can still be useful.
+-->
    2.) When using config.h and Makefile "templates".<br>
    If you want to enable it you have to define the constant USE_USB in config.h
    (remove the "//" in front of the line that defines it) <i>and</i> in
@@ -1047,12 +1053,11 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
 <p>
 <a name="28"><b>Q28</b>: How do I make uCON64 display one help screen at a
    time?</a><br>
-<b>A</b>: Just as is stated in the last few lines of the help, pass the output
-   of uCON64 to a program that waits for a key after one screen of text. You
-   could use the program "more". In order to pass the output of uCON64 to more
-   you have to use the pipe symbol, '|'. On an international keyboard you can
-   type this symbol with the same key you use for the backslash ('\'). For
-   example:<br>
+<b>A</b>: Pass the output of uCON64 to a program that waits for a key after one
+   screen of text. You could use the program "more" or "less". In order to pass
+   the output of uCON64 to more you have to use the pipe symbol, '|'. On an
+   international keyboard you can type this symbol with the same key you use
+   for the backslash ('\'). For example:<br>
    &nbsp;&nbsp;ucon64 -help|more<br>
    To get only help on the options for a specific console, specify the console
    on the command line. For example, to see only the help on Game Boy Advance

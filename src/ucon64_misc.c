@@ -229,14 +229,14 @@ const st_getopt2_t ucon64_options_usage[] =
       &ucon64_option_obj[0]
     },
 #endif
-#if     defined USE_PARALLEL || defined USE_USB || defined USE_LIBCD64
+#if     defined USE_PARALLEL || defined USE_LIBCD64 || defined USE_USB
     {
       "port", 1, 0, UCON64_PORT,
       "PORT", "specify "
 #ifdef  USE_USB
         "USB"
 #endif
-#if     defined USE_PARALLEL && defined USE_USB
+#if     (defined USE_PARALLEL || defined USE_LIBCD64) && defined USE_USB
         " or "
 #endif
 #if     defined USE_PARALLEL || defined USE_LIBCD64
@@ -244,17 +244,24 @@ const st_getopt2_t ucon64_options_usage[] =
 #endif
         " PORT" OPTARG_S "{"
 #ifdef  USE_USB
-        "USB0, USB1, ... "
+        "USB0,USB1,..."
+#endif
+#if     (defined USE_PARALLEL || defined USE_LIBCD64) && defined USE_USB
+        " "
 #endif
 #if     defined USE_PARALLEL || defined USE_LIBCD64
-        "3bc, 378, 278"
+        "3bc,378,278,..."
 #endif
-        "}\n"
+        "}"
+#if     defined USE_PARALLEL || defined USE_LIBCD64
+        "\n"
         "In order to connect a backup unit to a PC's parallel port\n"
-        "you need a standard bidirectional parallel cable",
+        "you need a standard bidirectional parallel cable"
+#endif
+        ,
       &ucon64_option_obj[0]
     },
-#endif // defined USE_PARALLEL || defined USE_USB
+#endif // defined USE_PARALLEL || defined USE_LIBCD64 || defined USE_USB
 #ifdef  USE_PARALLEL
     {
       "xreset", 0, 0, UCON64_XRESET,

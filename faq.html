@@ -158,9 +158,9 @@ Q53: <a href="#53">I am trying to use a PCI parallel port card, but while
    uCON64 can communicate with an older backup unit like my Super Wild Card it
    cannot communicate with my MD-PRO, which requires EPP. Can this be solved?</a><br>
 <br>
-Q54: <a href="#54">My PCI parallel port card has its Extended Control Register
+Q54: <a href="#54">My PCI parallel port card has its Extended Control register
    at a lower I/O address than its Data register. How do I specify a negative
-   Extended Control Register offset in the configuration file?</a><br>
+   Extended Control register offset in the configuration file?</a><br>
 <br>
 Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    Game Doctor SF6/SF7?</a><br>
@@ -314,7 +314,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    mentioned version usb.h has been renamed to lusb0_usb.h. So, to make the
    configure script detect the presence of libusb, create a file usb.h in a
    standard include directory that includes lusb0_usb.h.<br>
-   Startng with uCON64 2.1.0 the configure script detects lusb0_usb.h directly,
+   Starting with uCON64 2.1.0 the configure script detects lusb0_usb.h directly,
    but on Cygwin not because there is no usb.h, but because
    /usr/include/w32api/usb.h causes (many) compilation errors. To speed up
    configure, the trick with a redirecting usb.h can still be useful.
@@ -640,7 +640,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
   </tr>
   <tr>
     <td><tt>ecr_offset</tt></td>
-    <td><tt>offset of ECP Extended Control Register relative to Data register (parport)</tt></td>
+    <td><tt>offset of ECP Extended Control register relative to Data register (parport)</tt></td>
   </tr>
   <tr>
     <td><tt>discmage_path</tt></td>

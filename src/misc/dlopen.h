@@ -1,7 +1,7 @@
 /*
 dlopen.h - DLL support code
 
-Copyright (c) 2002, 2015 dbjh
+Copyright (c) 2002, 2015, 2017 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -34,6 +34,7 @@ typedef union u_func_ptr
 } u_func_ptr_t;
 
 void *open_module (char *module_name);
+void close_module (void *handle);
 void *get_symbol (void *handle, char *symbol_name);
 void *has_symbol (void *handle, char *symbol_name);
 

@@ -1,7 +1,7 @@
 /*
 dlopen.c - DLL support code
 
-Copyright (c) 2002 - 2005, 2015 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -57,7 +57,7 @@ static st_map_t *dxe_map;
 extern int errno;
 
 
-void
+static void
 uninit_func (void)
 {
   fputs ("ERROR: An uninitialized member of the import/export structure was called.\n"
@@ -224,9 +224,7 @@ open_module (char *module_name)
   */
   if ((handle = dlopen (module_name, RTLD_LAZY)) == NULL)
     {
-      fputs ("ERROR: ", stderr);
-      fputs (dlerror (), stderr);
-      fputc ('\n', stderr);
+      fprintf (stderr, "ERROR: dlopen(): %s\n", dlerror ());
       exit (1);
     }
 #elif   defined _WIN32
@@ -235,7 +233,7 @@ open_module (char *module_name)
       DWORD errorcode = GetLastError ();
       LPTSTR strptr;
 
-      fputs ("ERROR: ", stderr);
+      fputs ("ERROR: LoadLibrary(): ", stderr);
       FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
                      FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -256,6 +254,37 @@ open_module (char *module_name)
 #endif
 
   return handle;
+}
+
+
+void
+close_module (void *handle)
+{
+#ifdef  DJGPP
+  (void) handle;                                // DXEs cannot be unloaded
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually, see
+  if (dlclose (handle))                         //  comment in open_module()
+    printf ("WARNING: dlclose(): %s\n", dlerror ());
+#elif   defined _WIN32
+  if (!FreeLibrary ((HINSTANCE) handle))
+    {
+      DWORD errorcode = GetLastError ();
+      LPTSTR strptr;
+
+      fputs ("WARNING: FreeLibrary():", stdout);
+      FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                     FORMAT_MESSAGE_FROM_SYSTEM |
+                     FORMAT_MESSAGE_IGNORE_INSERTS,
+                     NULL, errorcode,
+                     MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                     (LPTSTR) &strptr, 0, NULL);
+      fputs (strptr, stdout);
+      LocalFree (strptr);
+    }
+#elif   defined __BEOS__
+  if (unload_add_on ((int) handle) < B_NO_ERROR)
+    puts ("WARNING: Could not unload add-on image");
+#endif
 }
 
 
@@ -283,9 +312,7 @@ get_symbol (void *handle, char *symbol_name)
   symptr = dlsym (handle, symbol_name);
   if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
     {                                           //  according to the info page
-      fputs ("ERROR: ", stderr);
-      fputs (strptr, stderr);
-      fputc ('\n', stderr);
+      fprintf (stderr, "ERROR: dlsym(): %s\n", strptr);
       exit (1);
     }
 #elif   defined _WIN32
@@ -297,7 +324,7 @@ get_symbol (void *handle, char *symbol_name)
       DWORD errorcode = GetLastError ();
       LPTSTR strptr;
 
-      fputs ("ERROR: ", stderr);
+      fputs ("ERROR: GetProcAddress():", stderr);
       FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
                      FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -309,9 +336,8 @@ get_symbol (void *handle, char *symbol_name)
       exit (1);
     }
 #elif   defined __BEOS__
-  int status = get_image_symbol ((int) handle, symbol_name,
-                                 B_SYMBOL_TYPE_ANY, &symptr); // B_SYMBOL_TYPE_TEXT/B_SYMBOL_TYPE_DATA
-  if (status != B_OK)
+  if (get_image_symbol ((int) handle, symbol_name, B_SYMBOL_TYPE_ANY,
+                        &symptr) < B_NO_ERROR) // B_SYMBOL_TYPE_TEXT/B_SYMBOL_TYPE_DATA
     {
       fprintf (stderr, "ERROR: Could not find symbol: %s\n", symbol_name);
       exit (1);
@@ -348,9 +374,8 @@ has_symbol (void *handle, char *symbol_name)
   if (symptr == NULL)
     symptr = (void *) -1;
 #elif   defined __BEOS__
-  int status = get_image_symbol ((int) handle, symbol_name,
-                                 B_SYMBOL_TYPE_ANY, &symptr); // B_SYMBOL_TYPE_TEXT/B_SYMBOL_TYPE_DATA
-  if (status != B_OK)
+  if (get_image_symbol ((int) handle, symbol_name, B_SYMBOL_TYPE_ANY,
+                        &symptr) < B_NO_ERROR) // B_SYMBOL_TYPE_TEXT/B_SYMBOL_TYPE_DATA
     symptr = (void *) -1;
 #endif
 

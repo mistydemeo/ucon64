@@ -123,7 +123,7 @@ static struct MsgPort *parport;
 
 #define NODRIVER_MSG "ERROR: No (working) I/O port driver. Please see the FAQ, question 4\n"
 
-static void *io_driver;
+static void *io_driver = NULL;
 
 // The original inpout32.dll only has I/O functions for byte-sized I/O
 static short (__stdcall *Inp32) (short) = NULL;
@@ -723,6 +723,8 @@ parport_open (unsigned short port)
   int driver_found = 0;
   u_func_ptr_t sym;
 
+  io_driver = NULL;
+
   sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "dlportio.dll");
 #if 0 // We must not do this for Cygwin or access() won't "find" the file
   change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
@@ -923,7 +925,6 @@ parport_setup (unsigned short port, parport_mode_t mode)
   // set mode for read() and write(); IEEE1284_DATA is 0...
   ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
 #elif   (defined __i386__ || defined __x86_64__ || defined _WIN32)
-  unsigned char ecr; 
   const char *p = get_property (ucon64.configfile, "ecr_offset", PROPERTY_MODE_TEXT);
 
   if (p)
@@ -947,7 +948,7 @@ parport_setup (unsigned short port, parport_mode_t mode)
   */
   if (port != 0x3bc) // The ECP registers are not available if port is 0x3bc.
     {
-      ecr = inportb (port + ucon64.ecr_offset) & 0x1f;
+      unsigned char ecr = inportb (port + ucon64.ecr_offset) & 0x1f;
       if (mode == PPMODE_SPP)
         outportb (port + ucon64.ecr_offset, ecr);
       else if (mode == PPMODE_SPP_BIDIR)
@@ -1028,11 +1029,23 @@ parport_close (void)
   DeletePort (parport);
   parport_io_req = NULL;
 #elif   defined _WIN32 || defined __CYGWIN__
-  input_byte = NULL;
-  input_word = NULL;
-  output_byte = NULL;
-  output_word = NULL;
+  if (io_driver)
+    {
+      close_module (io_driver);
+      io_driver = NULL;
+    }
+#if     defined __CYGWIN__ || defined __MINGW32__
+  input_byte = i386_input_byte;
+  input_word = i386_input_word;
+  output_byte = i386_output_byte;
+  output_word = i386_output_word;
+#elif   defined _WIN32
+  input_byte = inp_func;
+  input_word = inpw_func;
+  output_byte = outp_func;
+  output_word = outpw_func;
 #endif
+#endif // _WIN32 || __CYGWIN__
 }
 
 

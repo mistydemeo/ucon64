@@ -111,12 +111,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "patch/ppf.h"
 
 
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
-
-
 static void ucon64_exit (void);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_ucon64_nfo_t *nfo);

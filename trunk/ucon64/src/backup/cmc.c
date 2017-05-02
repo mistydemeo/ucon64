@@ -147,11 +147,6 @@ respective owners.
 #define MBYTE (1024 * 1024)
 #define DEFAULT_SPEED 3
 
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
-
 
 /************************
  *  Internal functions  *

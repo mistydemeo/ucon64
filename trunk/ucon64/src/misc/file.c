@@ -1,9 +1,9 @@
 /*
 file.c - miscellaneous file functions
 
-Copyright (c) 1999 - 2004       NoisyB
-Copyright (c) 2001 - 2005, 2015 dbjh
-Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2004             NoisyB
+Copyright (c) 2001 - 2005, 2015, 2017 dbjh
+Copyright (c) 2002 - 2004             Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // USE_ZLIB
+#include "config.h"
 #endif
 #include <ctype.h>
 #include <errno.h>
@@ -67,11 +67,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #ifndef MIN
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
 #endif
 
 

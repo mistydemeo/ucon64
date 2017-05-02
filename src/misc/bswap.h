@@ -1,8 +1,8 @@
 /*
-bswap.h - bswap functions
+bswap.h - byte swap functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2004             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -45,11 +45,6 @@ extern "C" {
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else
-
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
 
 
 static inline uint16_t

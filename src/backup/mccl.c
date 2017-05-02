@@ -1,8 +1,8 @@
 /*
 mccl.c - Mad Catz Camera Link (Game Boy Camera) support for uCON64
 
-Copyright (c) 2002       NoisyB
-Copyright (c) 2015, 2017 dbjh
+Copyright (c) 2002             NoisyB
+Copyright (c) 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -101,11 +101,6 @@ const st_getopt2_t mccl_usage[] =
 #define DATA ((unsigned short) (parport + PARPORT_DATA))
 #define STATUS ((unsigned short) (parport + PARPORT_STATUS))
 #define CONTROL ((unsigned short) (parport + PARPORT_CONTROL))
-
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
 
 
 static inline unsigned short

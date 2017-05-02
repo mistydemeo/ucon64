@@ -87,12 +87,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "patch/ppf.h"
 
 
-#ifdef  _MSC_VER
-// Visual C++ doesn't allow inline in C source code
-#define inline __inline
-#endif
-
-
 static long int
 strtol2 (const char *str, char **tail)
 {

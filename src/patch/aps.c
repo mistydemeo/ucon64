@@ -1,9 +1,9 @@
 /*
 aps.c - Advanced Patch System support for uCON64
 
-Copyright (c) 1998        Silo/BlackBag
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 1998                    Silo/BlackBag
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2002 - 2005, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,13 +24,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <stdlib.h>
+#include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include "misc/archive.h"
 #include "misc/bswap.h"
 #include "misc/file.h"
-#include "misc/misc.h"                          // truncate()
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "patch/aps.h"

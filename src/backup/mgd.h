@@ -1,8 +1,8 @@
 /*
 mgd.h - Multi Game Doctor/Hunter support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2002 - 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ MGD2 will not recognize the file. In the case of multiple games
 being stored on a single disk, simply enter its corresponding
 MULTI-GD index into the "MULTI-GD" file.
 
-Thanks to acem77 for the (verified) list below.
+Thanks to acem77 for the (mostly verified) list below.
 
 Super Famicom:
 
@@ -53,27 +53,27 @@ game size       # of files      names           MULTI-GD
                 2               SF8XXXxA.078    SF8XXXxA
                                 SF8XXXxB.078    SF8XXXxB
 10M             1               SF10XXX#.078    SF10XXX#
-                2               SF10XXX#.078    SF10XXX#
-                                SF10XXX#.078    SF10XXX#
+                2               SF10XXXA.078    SF10XXXA
+                                SF10XXXB.078    SF10XXXB
 12M             1               SF12XXX#.078    SF12XXX#
-                2               SF12XXX#A.078   SF12XXX#B
-                                SF12XXX#B.078   SF12XXX#A
+                2               SF12XXXA.078    SF12XXXB
+                                SF12XXXB.078    SF12XXXA
 16M             1               SF16XXX#.078    SF16XXX#
-16M             2               SF16XXX#A.078   SF16XXX#A
-                                SF16XXX#B.078   SF16XXX#B
+16M             2               SF16XXXA.078    SF16XXXA
+                                SF16XXXB.078    SF16XXXB
 20M             1               SF20XXX#.078    SF20XXX#
-                3               SF20XXX#A.078   SF20XXX#A
-                                SF20XXX#B.078   SF20XXX#B
-                                SF20XXX#C.078   SF20XXX#C
+                3               SF20XXXA.078    SF20XXXA
+                                SF20XXXB.078    SF20XXXB
+                                SF20XXXC.078    SF20XXXC
 24M             1               SF24XXX#.078    SF24XXX#
-24M             3               SF24XXX#A.078   SF24XXX#A
-                                SF24XXX#B.078   SF24XXX#B
-                                SF24XXX#C.078   SF24XXX#C
+24M             3               SF24XXXA.078    SF24XXXA
+                                SF24XXXB.078    SF24XXXB
+                                SF24XXXC.078    SF24XXXC
 32M             1               SF32XXX#.078    SF32XXX#
-32M             4               SF32XXX#A.078   SF32XXX#A
-                                SF32XXX#B.078   SF32XXX#B
-                                SF32XXX#C.078   SF32XXX#C
-                                SF32XXX#D.078   SF32XXX#D
+32M             4               SF32XXXA.078    SF32XXXA
+                                SF32XXXB.078    SF32XXXB
+                                SF32XXXC.078    SF32XXXC
+                                SF32XXXD.078    SF32XXXD
 
 Mega Drive:
 
@@ -83,18 +83,18 @@ game size       # of files      names           MULTI-GD
 2M              1               MD2XXX#.000     MD2XXX#
 4M              1               MD4XXX#.000     MD4XXX#
 8M              1               MD8XXX#.008     MD8XXX#
-16M             2               MD16XXX#A.018   MD16XXX#A
-                                MD16XXX#B.018   MD16XXX#B
-20M             3               MD20XXX#A.038   MD20XXX#A
-                                MD20XXX#B.038   MD20XXX#B
-                                MD20XXX#C.038   MD20XXX#C
-24M             3               MD24XXX#A.038   MD24XXX#A
-                                MD24XXX#B.038   MD24XXX#B
-                                MD24XXX#C.038   MD24XXX#C
-32M             4               MD32XXX#A.038   MD32XXX#A
-                                MD32XXX#B.038   MD32XXX#B
-                                MD32XXX#C.038   MD32XXX#C
-                                MD32XXX#D.038   MD32XXX#D
+16M             2               MD16XXXA.018    MD16XXXA
+                                MD16XXXB.018    MD16XXXB
+20M             3               MD20XXXA.038    MD20XXXA
+                                MD20XXXB.038    MD20XXXB
+                                MD20XXXC.038    MD20XXXC
+24M             3               MD24XXXA.038    MD24XXXA
+                                MD24XXXB.038    MD24XXXB
+                                MD24XXXC.038    MD24XXXC
+32M             4               MD32XXXA.038    MD32XXXA
+                                MD32XXXB.038    MD32XXXB
+                                MD32XXXC.038    MD32XXXC
+                                MD32XXXD.038    MD32XXXD
 
 PC-Engine:
 
@@ -180,8 +180,8 @@ extern void mgd_deinterleave (unsigned char **buffer, int data_size,
 extern int fread_mgd (void *buffer, size_t size, size_t number, FILE *fh);
 extern int q_fread_mgd (void *buffer, size_t start, size_t len,
                         const char *filename);
-extern void mgd_make_name (const char *filename, int console, int size,
-                           char *name);
+extern void mgd_make_name (const char *filename, int console, unsigned int size,
+                           char *name, int add_suffix);
 extern void mgd_write_index_file (void *ptr, int n_names);
 
 #endif

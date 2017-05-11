@@ -270,10 +270,12 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --fig         convert to *Pro Fighter*/FIG
   --figs        convert *.srm (SRAM) file to *Pro Fighter*/FIG
   --gd3         convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
-  --idnum=NUM   make --gd3 produce file names where first file has numerical
+  --id          force --gd3 to produce a unique filename
+  --idnum=NUM   make --gd3 produce filenames where first file has numerical
                   identifier NUM, next NUM + 1, etc.
   --gd3s        convert *.srm (SRAM) file to GD SF3(SF6/SF7)/Professor SF*
-  --mgd         convert to Multi Game*/MGD2/MGH/RAW
+  --mgd         convert to Multi Game Doctor*/MGD/RAW
+  --mgh         convert to Multi Game Hunter/MGH
   --smc         convert to Super Magicom/SMC
   --swc         convert to Super Wild Card*/SWC
   --swcs        convert *.srm (SRAM) file to Super Wild Card*/SWC
@@ -302,7 +304,8 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --col=0xCOLOR convert 0xRRGGBB (HTML) &#60;-&#62; 0xXXXX (SNES)
    -j           join split ROM
    -s           split ROM (not for UFO Pro 8 SD); default part size is 8 Mb
-  --ssize=SIZE  specify split part size in Mbit (not for Game Doctor SF3)
+  --smgh        split ROM for Multi Game Hunter/MGH
+  --ssize=SIZE  specify split part size in Mbit (not for GD SF3 or MGH)
    -k           remove protection (crack)
    -f           remove NTSC/PAL protection
    -l           remove SlowROM checks

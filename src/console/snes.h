@@ -54,13 +54,14 @@ extern int snes_init (st_ucon64_nfo_t *rominfo);
 extern int snes_j (st_ucon64_nfo_t *rominfo);
 extern int snes_k (st_ucon64_nfo_t *rominfo);
 extern int snes_l (st_ucon64_nfo_t *rominfo);
-extern int snes_make_gd_names (const char *filename, st_ucon64_nfo_t *rominfo,
+extern int snes_gd_make_names (const char *filename, st_ucon64_nfo_t *rominfo,
                                char **names);
 extern int snes_mgd (st_ucon64_nfo_t *rominfo);
 extern int snes_mgh (st_ucon64_nfo_t *rominfo);
-extern int snes_multi (int truncate_size, char *fname);
+extern int snes_multi (unsigned int truncate_size, char *fname);
 extern int snes_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int snes_s (st_ucon64_nfo_t *rominfo);
+extern int snes_smgh (st_ucon64_nfo_t *rominfo);
 extern void snes_set_fig_header (st_ucon64_nfo_t *rominfo,
                                  st_fig_header_t *header);
 extern int snes_smc (st_ucon64_nfo_t *rominfo);

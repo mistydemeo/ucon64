@@ -139,10 +139,11 @@ swan_init (st_ucon64_nfo_t *rominfo)
       "NMC", NULL, NULL
     };
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                 ucon64.backup_header_len : 0;
 
   ucon64_fread (&swan_header, SWAN_HEADER_START + rominfo->backup_header_len,
-           SWAN_HEADER_LEN, ucon64.fname);
+                SWAN_HEADER_LEN, ucon64.fname);
 
   rominfo->header = &swan_header;
   rominfo->header_start = SWAN_HEADER_START;

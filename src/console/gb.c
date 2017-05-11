@@ -1,8 +1,8 @@
 /*
 gb.c - Game Boy support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2001              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -203,7 +203,7 @@ gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
 {
 #define EMULATOR_LEN 0x10000
   st_ines_header_t ines_header;
-  int n = 0, crc = 0;
+  unsigned int n = 0, crc = 0;
   unsigned char *buf;
   char dest_name[FILENAME_MAX];
 
@@ -238,7 +238,7 @@ gb_n2gb (st_ucon64_nfo_t *rominfo, const char *nesrom)
 
   for (n = 0; n < ucon64.file_size - rominfo->backup_header_len; n++)
     {
-      if ((n == GB_HEADER_START + 0x4e) || (n == GB_HEADER_START + 0x4f))
+      if (n == GB_HEADER_START + 0x4e || n == GB_HEADER_START + 0x4f)
         continue;
       else
         crc += buf[rominfo->backup_header_len + n];
@@ -262,7 +262,7 @@ gb_convert_data (st_ucon64_nfo_t *rominfo, unsigned char *conversion_table,
 {
   char dest_name[FILENAME_MAX], src_name[FILENAME_MAX];
   unsigned char buf[MAXBUFSIZE];
-  int x, n, n_bytes;
+  unsigned int x, n, n_bytes;
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);
@@ -419,10 +419,10 @@ gb_mgd (st_ucon64_nfo_t *rominfo)
 // TODO: convert the ROM data
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
 
   strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, UCON64_GB, size, dest_name);
+  mgd_make_name (ucon64.fname, UCON64_GB, size, dest_name, 1);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   fcopy (src_name, rominfo->backup_header_len, size, dest_name, "wb");
@@ -442,7 +442,7 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
   st_unknown_backup_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   const char *p = NULL;
-  int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
 
   memset (&header, 0, UNKNOWN_BACKUP_HEADER_LEN);
 
@@ -527,10 +527,11 @@ gb_init (st_ucon64_nfo_t *rominfo)
     },
     *str;
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                 ucon64.backup_header_len : 0;
 
   if (ucon64.file_size <
-      (int) (rominfo->backup_header_len + GB_HEADER_START + GB_HEADER_LEN))
+        rominfo->backup_header_len + GB_HEADER_START + GB_HEADER_LEN)
     return -1;                                  // Don't continue if it makes no sense
 
   ucon64_fread (&gb_header, rominfo->backup_header_len + GB_HEADER_START,
@@ -539,8 +540,8 @@ gb_init (st_ucon64_nfo_t *rominfo)
     result = 0;
   else
     {
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-        ucon64.backup_header_len : (int) SSC_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                     ucon64.backup_header_len : SSC_HEADER_LEN;
 
       ucon64_fread (&gb_header, rominfo->backup_header_len + GB_HEADER_START,
                     GB_HEADER_LEN, ucon64.fname);
@@ -590,7 +591,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
   rominfo->country = gb_header.country == 0 ? "Japan" : "U.S.A. & Europe";
 
   // misc stuff
-  // Don't move division by 4 to shift parameter (gb_header.rom_size can be < 2)
+  // don't move division by 4 to shift parameter (gb_header.rom_size can be < 2)
   sprintf (buf, "Internal size: %.4f Mb\n", (1 << gb_header.rom_size) / 4.0f);
   strcat (rominfo->misc, buf);
 
@@ -704,7 +705,7 @@ gb_chksum (st_ucon64_nfo_t *rominfo)
 {
   st_gb_chksum_t sum = { 0, 0 };
   unsigned char *rom_buffer;
-  int size = ucon64.file_size - rominfo->backup_header_len, i;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len, i;
 
   if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
     {

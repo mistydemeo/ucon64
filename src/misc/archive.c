@@ -1,7 +1,7 @@
 /*
 archive.c - g(un)zip and unzip support
 
-Copyright (c) 2001 - 2004, 2015 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,9 +24,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  USE_ZLIB
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -46,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXBUFSIZE 32768
 
 
-int
+off_t
 fsizeof (const char *filename)
 // If USE_ZLIB is defined this function is very slow. Please avoid to use
 //  it much.
@@ -54,14 +54,12 @@ fsizeof (const char *filename)
   FILE *file;
   unsigned char magic[4] = { 0 };
 
+  errno = 0;
 #undef  fopen
 #undef  fread
 #undef  fclose
   if ((file = fopen (filename, "rb")) == NULL)
-    {
-      errno = ENOENT;
-      return -1;
-    }
+    return -1;
   fread (magic, 1, sizeof (magic), file);
   fclose (file);
 #define fopen   fopen2
@@ -70,19 +68,17 @@ fsizeof (const char *filename)
 
   if (magic[0] == 0x1f && magic[1] == 0x8b && magic[2] == 0x08)
     {                                   // ID1, ID2 and CM. gzip uses Compression Method 8
-      int size = 0;
+      z_off_t size = 0;
 
+      // shouldn't fail because we could open it with fopen()
       if ((file = (FILE *) gzopen (filename, "rb")) == NULL)
-        { // Shouldn't fail because we could open it with fopen()
-          errno = ENOENT;
-          return -1;
-        }
+        return -1;
 #if 1
-      // This is not much faster than the method below
+      // this is not much faster than the method below
       while (!gzeof ((gzFile) file))
         {
           gzseek ((gzFile) file, 1024 * 1024, SEEK_CUR);
-          gzgetc ((gzFile) file); // necessary in order to set EOF (zlib 1.2.8)
+          gzgetc ((gzFile) file);       // necessary in order to set EOF (zlib 1.2.8)
         }
 #else
       // Is there a more efficient way to determine the uncompressed size?
@@ -100,7 +96,7 @@ fsizeof (const char *filename)
 
       if ((file = (FILE *) unzOpen (filename)) == NULL)
         {
-          errno = ENOENT;
+          errno = ENOENT;               // unzOpen() does not set errno
           return -1;
         }
       unzip_goto_file (file, unzip_current_file_nr);
@@ -116,7 +112,6 @@ fsizeof (const char *filename)
       if (!stat (filename, &fstate))
         return fstate.st_size;
 
-      errno = ENOENT;
       return -1;
     }
 }
@@ -414,7 +409,7 @@ fseek2 (FILE *file, long offset, int mode)
     {
       if (mode == SEEK_END)                     // zlib doesn't support SEEK_END
         {
-          // Note that this is _slow_...
+          // note that this is _slow_...
           unsigned char buf[MAXBUFSIZE];
           while (gzread ((gzFile) file, buf, MAXBUFSIZE) > 0)
             ;

@@ -639,7 +639,7 @@ RestoreSRAM (FILE *fp, int StartOS)
   int byteswritten = 0;
   time_t starttime;
 
-  printf ("Send: %d Bytes (%.4f Mb)\n\n", ucon64.file_size,
+  printf ("Send: %u Bytes (%.4f Mb)\n\n", (unsigned int) ucon64.file_size,
           (float) ucon64.file_size / MBIT);
 
   starttime = time (NULL);

@@ -610,10 +610,12 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_Q:
     case UCON64_QQ:                             // for now -qq is equivalent to -q
       ucon64.quiet = 1;
+      cm_verbose = 0;
       break;
 
     case UCON64_V:
       ucon64.quiet = -1;
+      cm_verbose = 1;
       break;
 
     case UCON64_SSIZE:
@@ -1020,8 +1022,8 @@ ucon64_options (st_ucon64_t *p)
           if (stat (ucon64.fname, &fstate) != 0)
             break;
           strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
-          printf ("%-31.31s %10d %s %s", to_func (ptr, strlen (ptr), toprint),
-                  ucon64.file_size, buf, basename2 (ucon64.fname));
+          printf ("%-31.31s %10u %s %s", to_func (ptr, strlen (ptr), toprint),
+                  (unsigned int) ucon64.file_size, buf, basename2 (ucon64.fname));
           if (ucon64.fname_arch[0])
             printf (" (%s)\n", basename2 (ucon64.fname_arch));
           else
@@ -1465,14 +1467,6 @@ ucon64_options (st_ucon64_t *p)
       nes_ineshd (ucon64.nfo);
       break;
 
-#if 0
-    case UCON64_IP:
-      break;
-#endif
-
-    case UCON64_VMS:
-      break;
-
     case UCON64_PARSE:
       dc_parse (option_arg);
       break;
@@ -1571,6 +1565,10 @@ ucon64_options (st_ucon64_t *p)
       sms_mgd (ucon64.nfo, UCON64_GAMEGEAR);
       break;
 
+    case UCON64_MGH:
+      snes_mgh (ucon64.nfo);
+      break;
+
     case UCON64_MKSRM:
       snes_create_sram ();
       break;
@@ -1639,7 +1637,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_POKE:
       sscanf (option_arg, "%x:%x", &x, &value);
-      if (x >= ucon64.file_size)
+      if ((unsigned int) x >= ucon64.file_size)
         {
           fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
           break;
@@ -1734,6 +1732,10 @@ ucon64_options (st_ucon64_t *p)
         default:
           return -1;
         }
+      break;
+
+    case UCON64_SMGH:
+      snes_smgh (ucon64.nfo);
       break;
 
     case UCON64_SRAM:

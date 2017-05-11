@@ -56,7 +56,7 @@ Portions copyright (c) 2002, 2016 - 2017 dbjh
 #include "patch/gg.h"
 
 
-#define GAME_GENIE_MAX_STRLEN 12 // longest string is "XXX-XXX-XXX"
+#define GAME_GENIE_MAX_STRLEN 12 /* longest string is "XXX-XXX-XXX" */
 
 #define encodeNES(v, n, m, s) data[n] |= (v >> s) & m
 #define decodeNES(v, n, m, s) v |= (data[n] & m) << s
@@ -767,16 +767,16 @@ gameGenieDecodeSNES (const char *in, char *out)
   decodeSNES (10, 3);
   decodeSNES (11, 6);
 
-  // if a ROM was specified snes.c will handle ucon64.snes_hirom
-  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi option was specified
+  /* if a ROM was specified snes.c will handle ucon64.snes_hirom */
+  if (UCON64_ISSET (ucon64.snes_hirom))         /* -hi or -nhi switch was specified */
     hirom = ucon64.snes_hirom;
-  // if only a ROM was specified (not -hi or -nhi) the next if will fail for a
-  //  handful of ROMs, namely Sufami Turbo ROMs and Extended ROMs
+  /* if only a ROM was specified (not -hi or -nhi) the next if will fail for a
+      handful of ROMs, namely Sufami Turbo ROMs and Extended ROMs */
   else if (gg_rominfo != 0)
     hirom = gg_rominfo->header_start > SNES_HEADER_START ? 1 : 0;
   else
-    hirom = 1;                                  // I am less sure about the LoROM
-                                                //  CPU -> ROM address conversion
+    hirom = 1;                                  /* I am less sure about the LoROM */
+                                                /*  CPU -> ROM address conversion */
   CPUaddress = address;
   if (hirom)
     {
@@ -914,7 +914,7 @@ gg_main (int argc, const char **argv)
         printf ("%s is badly formed\n", argv[i]);
       else
         {
-          if (CPUaddress != -1)                 // SNES decode specific
+          if (CPUaddress != -1)                 /* SNES decode specific */
             printf ("%s = %s (CPU address: %06X)\n", argv[i], buffer, CPUaddress);
           else
             printf ("%s = %s\n", argv[i], buffer);
@@ -970,7 +970,7 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
   gg_argv[2] = code;
   gg_argc = 3;
 
-  if (rominfo && ucon64.file_size > 0)          // check if rominfo contains valid ROM info
+  if (rominfo && ucon64.file_size > 0)          /* check if rominfo contains valid ROM info */
     gg_rominfo = rominfo;
   else
     gg_rominfo = 0;
@@ -984,12 +984,13 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 int
 gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
-  int size = ucon64.file_size - rominfo->backup_header_len, offset, address,
-      value, check = -1, result = -1, writefile;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len, offset,
+               address, value, writefile;
+  int check = -1, result = -1;
   char buf[GAME_GENIE_MAX_STRLEN], buf2[GAME_GENIE_MAX_STRLEN], dest_name[FILENAME_MAX];
   FILE *destfile;
 
-  if (rominfo && ucon64.file_size > 0)          // check if rominfo contains valid ROM info
+  if (rominfo && ucon64.file_size > 0)          /* check if rominfo contains valid ROM info */
     gg_rominfo = rominfo;
   else
     {
@@ -1023,7 +1024,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
       return -1;
     }
 
-  if (CPUaddress != -1)                         // SNES decode specific
+  if (CPUaddress != -1)                         /* SNES decode specific */
     printf ("%s = %s (CPU address: %06X)\n", code, buf, CPUaddress);
   else
     printf ("%s = %s\n", code, buf);
@@ -1041,7 +1042,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
   if (writefile)
     {
       ucon64_file_handler (dest_name, NULL, 0);
-      fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
+      fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); /* no copy if one file */
 
       if ((destfile = fopen (dest_name, "r+b")) == NULL)
         {
@@ -1069,7 +1070,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
           buf[0] = (char) fgetc (destfile);
 
           if (check != -1)
-            { // 8 digit code
+            { /* 8 digit code */
               if (buf[0] == (char) check)
                 {
                   buf2[0] = (char) value;
@@ -1077,7 +1078,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
                 }
             }
           else
-            { // 6 digit code => display the corresponding 8 digit code(s)
+            { /* 6 digit code => display the corresponding 8 digit code(s) */
               char longcode[9];
 
               fputc ('\n', stdout);
@@ -1103,12 +1104,12 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
       buf2[1] = (char) value;
       apply_code (destfile, offset, buf, buf2, 2);
     }
-  else // UCON64_SNES || UCON64_SMS || UCON64_GB
+  else /* UCON64_SNES || UCON64_SMS || UCON64_GB */
     {
       fseek (destfile, offset, SEEK_SET);
       buf[0] = (char) fgetc (destfile);
 
-      // for SNES check is always -1
+      /* for SNES check is always -1 */
       if (check == -1 || buf[0] == (char) check)
         {
           buf2[0] = (char) value;

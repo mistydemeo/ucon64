@@ -1,7 +1,7 @@
 /*
 archive.h - g(un)zip and unzip support
 
-Copyright (c) 2001 - 2003 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@ extern void rewind2 (FILE *file);
 extern FILE *popen2 (const char *command, const char *mode);
 extern int pclose2 (FILE *stream);
 
-extern int fsizeof2 (const char *filename);
+extern off_t fsizeof2 (const char *filename);
 
 #define fopen(FILE, MODE) fopen2(FILE, MODE)
 #define fclose(FILE) fclose2(FILE)

@@ -1,8 +1,8 @@
 /*
 nes.c - Nintendo Entertainment System support for uCON64
 
-Copyright (c) 1999 - 2003 NoisyB
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 1999 - 2003              NoisyB
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -6367,8 +6367,9 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
 {
   st_smc_header_t smc_header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  int size = ucon64.file_size - rominfo->backup_header_len, mapper,
-      prg_size, chr_size, new_prg_size = -1;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len, mapper,
+               prg_size, chr_size;
+  int new_prg_size = -1;
 
   if (type != INES)
     {
@@ -6519,7 +6520,7 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
 
       // copy CHR block
       fcopy (src_name, rominfo->backup_header_len + offset + prg_size,
-              size - offset - prg_size, dest_name, "ab");
+             size - offset - prg_size, dest_name, "ab");
 
       free (prg_data);
     }
@@ -7488,7 +7489,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       break;
     }
 
-  if (UCON64_ISSET (ucon64.backup_header_len))  // -hd, -nhd or -hdn switch was specified
+  if (UCON64_ISSET2 (ucon64.backup_header_len, unsigned int)) // -hd, -nhd or -hdn switch was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
 
   if (ucon64.crc32 == 0)

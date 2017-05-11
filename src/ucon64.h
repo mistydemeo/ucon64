@@ -3,7 +3,7 @@ uCON64 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
 with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
-their backup units
+their backup units.
 
 Copyright (c) 1999 - 2004              NoisyB
 Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
+#define UCON64_ISSET2(x, y) (x != (y) UCON64_UNKNOWN)
 
 
 /*
@@ -52,15 +53,15 @@ typedef struct
   const char *backup_usage;                     // backup unit of the ROM
 
   int interleaved;                              // ROM is interleaved (swapped)
-  int data_size;                                // ROM data size without "red tape"
+  uint64_t data_size;                           // ROM data size without "red tape"
 
   const void *backup_header;                    // (possible) header of backup unit
   int backup_header_start;                      // start of backup unit header (mostly 0)
-  int backup_header_len;                        // length of backup unit header 0 == no bu hdr
+  unsigned int backup_header_len;               // length of backup unit header 0 == no bu hdr
 
   const void *header;                           // (possible) internal ROM header
   int header_start;                             // start of internal ROM header
-  int header_len;                               // length of internal ROM header 0 == no hdr
+  unsigned int header_len;                      // length of internal ROM header 0 == no hdr
 
   char name[MAXBUFSIZE];                        // internal ROM name
   const char *maker;                            // maker name of the ROM
@@ -72,7 +73,7 @@ typedef struct
 
   unsigned int internal_crc;                    // internal checksum
   int internal_crc_start;                       // start of internal checksum in ROM header
-  int internal_crc_len;                         // length (in bytes) of internal checksum in ROM header
+  unsigned int internal_crc_len;                // length (in bytes) of internal checksum in ROM header
 
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
 } st_ucon64_nfo_t;
@@ -90,7 +91,7 @@ typedef struct
   int recursive;
 
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
-  int file_size;                                // (uncompressed) ROM file size (NOT console specific)
+  uint64_t file_size;                           // (uncompressed) ROM file size (NOT console specific)
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files) (NOT console specific)
   unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk (NOT console specific)
 
@@ -152,7 +153,7 @@ typedef struct
     to check them. When adding new ones don't forget to update
     ucon64_execute_options() too.
   */
-  int backup_header_len;                        // length of backup unit header 0 == no bu hdr
+  unsigned int backup_header_len;               // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
 
 #if 1
@@ -202,7 +203,8 @@ typedef struct
 */
 extern int ucon64_init (void);
 extern int ucon64_nfo (void);
-enum {
+enum
+{
   USAGE_VIEW_SHORT = 0,
   USAGE_VIEW_LONG,
   USAGE_VIEW_PAD,

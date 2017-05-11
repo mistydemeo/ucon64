@@ -1,8 +1,8 @@
 /*
 ucon64_dat.c - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 1999 - 2004              NoisyB
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1230,7 +1230,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
   n = 0;
   if (ucon64.console != console)
     {
-      if (ucon64.quiet == -1)
+      if (ucon64.quiet < 0)
         printf ("WARNING: Skipping (!%s) ", console_name);
       else
         return -1;
@@ -1254,12 +1254,12 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     }
 
   fputs (filename, stdout);
-  if (ucon64.quiet == -1)                       // -v was specified
+  if (ucon64.quiet < 0)                         // -v was specified
     if (ucon64.fname_arch[0])
       printf (" (%s)", ucon64.fname_arch);
   fputc ('\n', stdout);
 
-  if (ucon64.console != console)                // ucon64.quiet == -1
+  if (ucon64.console != console)                // ucon64.quiet < 0 (-1)
     return -1;
   if (n != ucon64_n_files)
     {
@@ -1278,15 +1278,15 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
   */
   x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 1);
   if ((ucon64_mkdat_entries[ucon64_n_files].fname = (char *) malloc (x)) == NULL)
-    {                                                 // + 3 for " ()"
-      fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);  //  + 1 for ASCII-z
+    {                                                // + 3 for " ()"
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], x); //  + 1 for ASCII-z
       exit (1);
     }
   sprintf (ucon64_mkdat_entries[ucon64_n_files].fname, "%s%s%s%s",
-    fname,
-    ucon64.fname_arch[0] ? " (" : "",
-    ucon64.fname_arch[0] ? ucon64.fname_arch : "",
-    ucon64.fname_arch[0] ? ")" : "");
+           fname,
+           ucon64.fname_arch[0] ? " (" : "",
+           ucon64.fname_arch[0] ? ucon64.fname_arch : "",
+           ucon64.fname_arch[0] ? ")" : "");
 
   ptr = (char *) get_suffix (fname);
   if (*ptr)
@@ -1297,7 +1297,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            DAT_FIELD_SEPARATOR_S "%s" // clone full name
                            DAT_FIELD_SEPARATOR_S "%s" // rom file name
                            DAT_FIELD_SEPARATOR_S "%08x" // RC quirck: leading zeroes are required
-                           DAT_FIELD_SEPARATOR_S "%d"
+                           DAT_FIELD_SEPARATOR_S "%u"
                            DAT_FIELD_SEPARATOR_S // merged clone name
                            DAT_FIELD_SEPARATOR_S // merged rom name
                            DAT_FIELD_SEPARATOR_S "\r\n",
@@ -1307,7 +1307,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            fname,
                            fname,
                            ucon64.crc32,
-                           ucon64.file_size - backup_header_len);
+                           (unsigned int) ucon64.file_size - backup_header_len);
   ucon64_n_files++;
   return 0;
 }

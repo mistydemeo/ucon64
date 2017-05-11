@@ -50,7 +50,7 @@ const st_getopt2_t coleco_usage[] =
 
 
 /*
-  The First thing the Coleco does, when you turn it on, is check
+  The first thing the Coleco does, when you turn it on, is check
   memory location 8000H & 8001H. If there is a 55H & AAH located at
   these locations then the Coleco goes to the memory address pointed
   to by 800AH & 800BH, and begins immediate execution of cartridge.
@@ -111,13 +111,13 @@ coleco_init (st_ucon64_nfo_t *rominfo)
   rominfo->console_usage = coleco_usage[0].help;
   rominfo->backup_usage = unknown_backup_usage[0].help;
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-    ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                 ucon64.backup_header_len : 0;
 
   ucon64_fread (&coleco_header, ucon64.backup_header_len, COLECO_HEADER_LEN, ucon64.fname);
 
-  if (coleco_header.type == 0xaa55 ||  // Coleco
-      coleco_header.type == 0x55aa)    // ColecoVision
+  if (coleco_header.type == 0xaa55 ||           // Coleco
+      coleco_header.type == 0x55aa)             // ColecoVision
     result = 0;
   else
     result = -1;

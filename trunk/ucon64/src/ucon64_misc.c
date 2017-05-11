@@ -50,6 +50,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 
 
+#define SUFFIX_MAX 80
+
 #ifdef  USE_DISCMAGE
 #ifdef  DLOPEN
 #include "misc/dlopen.h"
@@ -576,7 +578,7 @@ ucon64_load_discmage (void)
   if (p)
     strcpy (ucon64.discmage_path, p);
   else
-    *(ucon64.discmage_path) = 0;
+    *(ucon64.discmage_path) = '\0';
 
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
@@ -910,11 +912,12 @@ remove_temp_file (void)
 char *
 ucon64_output_fname (char *requested_fname, int flags)
 {
-  char suffix[80], fname[FILENAME_MAX];
+  char suffix[SUFFIX_MAX + 1], fname[FILENAME_MAX];
 
   // We have to make a copy, because get_suffix() returns a pointer to a
-  //  location in the original string
-  strncpy (suffix, get_suffix (requested_fname), sizeof (suffix))[sizeof (suffix) - 1] = 0; // in case suffix is >= 80 chars
+  //  location in the original string.
+  strncpy (suffix, get_suffix (requested_fname), sizeof suffix - 1)
+    [sizeof suffix - 1] = '\0';                 // in case suffix is >= SUFFIX_MAX chars
 
   // OF_FORCE_BASENAME is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
@@ -1284,14 +1287,14 @@ to_func (char *s, int len, int (*func) (int))
 int
 ucon64_rename (int mode)
 {
-#define SUFFIX_MAX 80
-  char buf[FILENAME_MAX], buf2[FILENAME_MAX], suffix[SUFFIX_MAX];
+  char buf[FILENAME_MAX], buf2[FILENAME_MAX], suffix[SUFFIX_MAX + 1];
   const char *p, *p2;
   unsigned int crc = 0;
   int good_name;
 
-  *buf = 0;
-  strncpy (suffix, get_suffix (ucon64.fname), SUFFIX_MAX)[SUFFIX_MAX - 1] = 0; // in case suffix is >= SUFFIX_MAX chars
+  *buf = '\0';
+  strncpy (suffix, get_suffix (ucon64.fname), sizeof suffix - 1)
+    [sizeof suffix - 1] = '\0';                 // in case suffix is >= SUFFIX_MAX chars
 
   switch (mode)
     {
@@ -1323,7 +1326,7 @@ ucon64_rename (int mode)
                   stricmp (p, ".gg") &&         // Game Gear
                   stricmp (p, ".smd") &&        // Genesis
                   stricmp (p, ".v64")))         // Nintendo 64
-              buf[strlen (buf) - strlen (p)] = 0;
+              buf[strlen (buf) - strlen (p)] = '\0';
         }
       break;
 
@@ -1367,13 +1370,13 @@ ucon64_rename (int mode)
                 len = 48 - 3;
                 len2 = 16;
               }
-            suffix[len2] = 0;
+            suffix[len2] = '\0';
           }
         // NOTE: The implementation of snprintf() in glibc 2.3.5-10 (FC4)
         //       terminates the string. So, a size argument of 4 results in 3
         //       characters plus a string terminator.
         snprintf (buf + len, 4, "%0x", crc);
-        buf[len + 3] = 0;
+        buf[len + 3] = '\0';
       }
       break;
 
@@ -1403,9 +1406,9 @@ ucon64_rename (int mode)
         if (len > 8 - 3)
           len = 8 - 3;
         if (len2 > 4)
-          suffix[4] = 0;
+          suffix[4] = '\0';
         snprintf (buf + len, 4, "%0x", crc);
-        buf[len + 3] = 0;
+        buf[len + 3] = '\0';
       }
       break;
 
@@ -1425,7 +1428,7 @@ ucon64_rename (int mode)
   //  However, this is the best solution, because several DAT files contain
   //  "canonical" file names with a suffix. That is a STUPID bug.
   if (p)
-    buf[strlen (buf) - strlen (p)] = 0;
+    buf[strlen (buf) - strlen (p)] = '\0';
 
 #ifdef  DEBUG
 //  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
@@ -1444,7 +1447,7 @@ ucon64_rename (int mode)
       if (!strcmp (buf, buf2))
         {
           good_name = 1;
-          suffix[0] = 0;                        // discard "suffix" (part after period)
+          suffix[0] = '\0';                     // discard "suffix" (part after period)
         }
       else
         good_name = 0;
@@ -1455,7 +1458,7 @@ ucon64_rename (int mode)
   strcat (buf2, suffix);
 
   if (mode == UCON64_R83)
-    buf2[12] = 0;
+    buf2[12] = '\0';
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
@@ -1614,18 +1617,19 @@ ucon64_e (void)
 int
 ucon64_pattern (const char *pattern_fname)
 {
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
-       buffer[PATTERN_BUFSIZE];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buffer[PATTERN_BUFSIZE];
   FILE *srcfile, *destfile;
-  int bytesread = 0, totalbytesread = 0, n, n_found = 0, n_patterns,
-      overlap = 0, effective_overlap = 0;
+  int n_patterns, n;
+  unsigned int bytesread = 0, n_found = 0, overlap = 0, effective_overlap = 0;
+  uint64_t totalbytesread = 0;
   st_cm_pattern_t *patterns = NULL;
 
   realpath2 (pattern_fname, src_name);
-  // First try the current directory, then the configuration directory
+  // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, pattern_fname);
-  n_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
+    sprintf (src_name, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir,
+             basename2 (pattern_fname));
+  n_patterns = build_cm_patterns (&patterns, src_name);
   if (n_patterns == 0)
     {
       fprintf (stderr, "ERROR: No patterns found in %s\n", src_name);
@@ -1661,7 +1665,7 @@ ucon64_pattern (const char *pattern_fname)
             }
         }
 
-      if (patterns[n].offset <= -patterns[n].search_size || patterns[n].offset > 0)
+      if (patterns[n].offset <= (int) -patterns[n].search_size || patterns[n].offset > 0)
         printf ("WARNING: The offset of pattern %d falls outside the search pattern.\n"
                 "         This can cause matches to be ignored with the current implementation\n"
                 "         of " OPTION_LONG_S "pattern. Please consider enlarging the search pattern\n",
@@ -1690,22 +1694,34 @@ ucon64_pattern (const char *pattern_fname)
     {
       for (n = 0; n < n_patterns; n++)
         {
-          int search_overlap = patterns[n].search_size - 1;
+          unsigned int search_overlap = patterns[n].search_size - 1;
           char *buffer_start = buffer + (totalbytesread > 0 ? overlap - search_overlap : 0);
-          int buffer_size = bytesread + (totalbytesread > 0 ? search_overlap : 0);
+          unsigned int buffer_size = bytesread + (totalbytesread > 0 ? search_overlap : 0);
 
+          if (ucon64.quiet < 0)
+            printf ("Scanning offset 0x%08x-0x%08x (%u bytes) for pattern %d\n",
+                    (unsigned int) totalbytesread - effective_overlap +
+                      (buffer_start - buffer),
+                    (unsigned int) totalbytesread - effective_overlap +
+                      (buffer_start - buffer) + buffer_size - 1,
+                    buffer_size, n + 1);
           n_found += change_mem2 (buffer_start, buffer_size, patterns[n].search,
                                   patterns[n].search_size, patterns[n].wildcard,
                                   patterns[n].escape, patterns[n].replace,
                                   patterns[n].replace_size, patterns[n].offset,
                                   patterns[n].sets);
         }
-      fwrite (buffer + effective_overlap, 1, bytesread, destfile);
+      fwrite (buffer, 1, bytesread + effective_overlap - overlap, destfile);
 
       totalbytesread += bytesread;
       if (totalbytesread < ucon64.file_size)
         memmove (buffer, buffer + effective_overlap - overlap + bytesread, overlap);
+      else
+        fwrite (buffer + effective_overlap - overlap + bytesread, 1, overlap, destfile);
       effective_overlap = overlap;
+
+      if (ucon64.quiet < 0)
+        fputc ('\n', stdout);
     }
 
   fclose (srcfile);
@@ -1953,7 +1969,7 @@ ucon64_find (const char *filename, size_t start, size_t len,
         }
       memcpy (display_search, search, searchlen);
       for (n = 0; n < searchlen; n++)
-        if (!isprint ((int) display_search[n])) // we can't use mkprint(), because it skips \n
+        if (!isprint ((int) display_search[n]))
           display_search[n] = '.';
       display_search[searchlen] = '\0';         // terminate string
 
@@ -2082,8 +2098,8 @@ typedef struct
   const char *fname0;
   const char *fname;
   const char *fname_arch;
-  int fsize;
-  int found;
+  uint64_t fsize;
+  uint64_t found;
 } st_ucon64_filefile_t;
 
 
@@ -2127,9 +2143,10 @@ ucon64_filefile_func (void *buffer, int n, void *object)
 
 
 void
-ucon64_filefile (const char *filename1, int start1, int start2, int similar)
+ucon64_filefile (const char *filename1, unsigned int start1,
+                 unsigned int start2, int similar)
 {
-  int fsize1;
+  uint64_t fsize1;
   st_ucon64_filefile_t o;
 
   printf ("Comparing %s with %s", filename1, ucon64.fname);
@@ -2170,7 +2187,7 @@ ucon64_filefile (const char *filename1, int start1, int start2, int similar)
 
   free (o.buffer);
 
-  printf ("Found %d %s\n\n",
+  printf ("Found %llu %s\n\n",
           o.found,
           similar ? (o.found == 1 ? "similarity" : "similarities") :
                     (o.found == 1 ? "difference" : "differences"));
@@ -2180,15 +2197,16 @@ ucon64_filefile (const char *filename1, int start1, int start2, int similar)
 // When verifying if the code produces the same output when FILEFILE_LARGE_BUF
 //  is defined as when it's not, be sure to use the same buffer size
 void
-ucon64_filefile (const char *filename1, int start1, int start2, int similar)
+ucon64_filefile (const char *filename1, unsigned int start1,
+                 unsigned int start2, int similar)
 {
-  int base, fsize1, len, chunksize1, chunksize2, readok = 1, bytesread1,
-      bytesread2, bytesleft1, bytesleft2, n_bytes = 0;
+  unsigned int base, len, chunksize1, chunksize2, readok = 1;
+  uint64_t fsize1, bytesread1, bytesread2, bytesleft1, bytesleft2, n_bytes = 0;
 #ifdef  FILEFILE_LARGE_BUF
-  int bufsize = 1024 * 1024;
+  unsigned int bufsize = 1024 * 1024;
   unsigned char *buf1, *buf2;
 #else
-  int bufsize = MAXBUFSIZE;
+  unsigned int bufsize = MAXBUFSIZE;
   unsigned char buf1[MAXBUFSIZE], buf2[MAXBUFSIZE];
 #endif
   FILE *file1, *file2;
@@ -2311,7 +2329,7 @@ ucon64_filefile (const char *filename1, int start1, int start2, int similar)
   free (buf2);
 #endif
 
-  printf ("Found %d %s\n\n",
+  printf ("Found %llu %s\n\n",
           n_bytes,
           similar ? (n_bytes == 1 ? "similarity" : "similarities") :
                     (n_bytes == 1 ? "difference" : "differences"));

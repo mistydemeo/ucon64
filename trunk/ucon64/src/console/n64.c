@@ -1,9 +1,9 @@
 /*
 n64.c - Nintendo 64 support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2004 dbjh
-Copyright (c) 2005        Parasyte
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2002 - 2005, 2015, 2017 dbjh
+Copyright (c) 2005                    Parasyte
 
 05-06-2005 / Parasyte:
   Added support for remaining CIC algorithms in n64_chksum()
@@ -465,7 +465,8 @@ n64_init (st_ucon64_nfo_t *rominfo)
       "Australia", NULL, NULL, "France, Germany, The Netherlands", NULL // Holland is an incorrect name for The Netherlands
     };
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ? ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                 ucon64.backup_header_len : 0;
 
   ucon64_fread (&n64_header, rominfo->backup_header_len, N64_HEADER_LEN, ucon64.fname);
 

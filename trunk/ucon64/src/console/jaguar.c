@@ -50,6 +50,7 @@ typedef struct st_jaguar
 {
   char pad[16];
 } st_jaguar_t;
+
 #define JAGUAR_HEADER_START 0x400
 #define JAGUAR_HEADER_LEN (sizeof (st_jaguar_t))
 
@@ -61,8 +62,8 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x, value;
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-    ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                 ucon64.backup_header_len : 0;
 
   ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
                   rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);
@@ -73,8 +74,8 @@ jaguar_init (st_ucon64_nfo_t *rominfo)
     result = 0;
   else
     {
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-        ucon64.backup_header_len : (int) UNKNOWN_BACKUP_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                     ucon64.backup_header_len : UNKNOWN_BACKUP_HEADER_LEN;
 
       ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
                       rominfo->backup_header_len, JAGUAR_HEADER_LEN, ucon64.fname);

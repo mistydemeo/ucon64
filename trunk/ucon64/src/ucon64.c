@@ -3,7 +3,7 @@ uCON64 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
 with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
-their backup units
+their backup units.
 
 Copyright (c) 1999 - 2005              NoisyB
 Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
@@ -292,7 +293,7 @@ typedef struct
   int val;
 
   const char *cmdline;
-  uint32_t crc32;    // crc32 of cmdline's output
+  uint32_t crc32;                               // crc32 of cmdline's output
 } st_ucon64_test_t;
 
 
@@ -944,9 +945,9 @@ main (int argc, char **argv)
   realpath2 (PROPERTY_HOME_RC ("ucon64"), ucon64.configfile);
 
   result = property_check (ucon64.configfile, UCON64_CONFIG_VERSION, 1);
-  if (result == 1) // update needed
+  if (result == 1)                              // update needed
     result = ucon64_set_property_array ();
-  if (result == -1) // property_check() or update failed
+  if (result == -1)                             // property_check() or update failed
     return -1;
 
 #ifdef  USE_ANSI_COLOR
@@ -971,9 +972,9 @@ main (int argc, char **argv)
   if (p)
     sscanf (p, "%hx", &ucon64.parport);
   else
-    // use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
+    // use PARPORT_UNKNOWN to force probing if the config file doesn't contain
     //  a parport line
-    ucon64.parport = (uint16_t) -1;
+    ucon64.parport = PARPORT_UNKNOWN;
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups");
@@ -1056,7 +1057,7 @@ main (int argc, char **argv)
           const st_ucon64_obj_t *o =
             (st_ucon64_obj_t *) getopt2_get_index_by_val (options, c)->object;
 
-          arg[x].console = UCON64_UNKNOWN; // default
+          arg[x].console = UCON64_UNKNOWN;      // default
 
           if (o)
             {
@@ -1292,7 +1293,7 @@ ucon64_execute_options (void)
         // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
         result = ucon64_rom_handling ();
 
-        if (result == -1) // no rom, but WF_NO_ROM
+        if (result == -1)                       // no rom, but WF_NO_ROM
           return -1;
 
         if (ucon64_options (&ucon64) == -1)
@@ -1331,7 +1332,7 @@ ucon64_execute_options (void)
       ucon64.flags = WF_DEFAULT;
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       if (ucon64_rom_handling () == -1)
-        return -1; // no rom, but WF_NO_ROM
+        return -1;                              // no rom, but WF_NO_ROM
     }
 
   fflush (stdout);
@@ -1380,33 +1381,35 @@ ucon64_rom_handling (void)
       return 0;
     }
 
-  // The next statement is important and should be executed as soon as
+  // setting ucon64.file_size is important and should be done as soon as
   //  possible (and sensible) in this function
-  if ((ucon64.file_size = fsizeof (ucon64.fname)) < 0)
+  if ((int64_t) (ucon64.file_size = fsizeof (ucon64.fname)) < 0)
     {
       fprintf (stderr, "ERROR: Could not determine size of %s\n", ucon64.fname);
       return -1;
     }
-  // We have to do this here, because we don't know the file size until now
-  if (ucon64.backup_header_len > ucon64.file_size)
+  // we have to do this here, because we don't know the file size until now
+  if (UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) &&
+      ucon64.backup_header_len >= ucon64.file_size)
     {
       fprintf (stderr,
-               "ERROR: A backup unit header length was specified that is larger than the file\n"
-               "       size (%d > %d)\n", ucon64.backup_header_len, ucon64.file_size);
+               "ERROR: A backup unit header length was specified that is larger than or equal\n"
+               "       to the file size (%u >= %u)\n", ucon64.backup_header_len,
+               (unsigned int) ucon64.file_size);
       return -1;
     }
 
   if (!(ucon64.flags & WF_INIT))
     return 0;
 
-  // Try to find the correct console by analysing the ROM
+  // try to find the correct console by analysing the ROM
   if (ucon64.flags & WF_PROBE)
     {
       if (ucon64.nfo)
         {
           // Restore any overrides from st_ucon64_t
           // We have to do this *before* calling ucon64_probe(), *not* afterwards
-          if (UCON64_ISSET (ucon64.backup_header_len))
+          if (UCON64_ISSET2 (ucon64.backup_header_len, unsigned int))
             nfo.backup_header_len = ucon64.backup_header_len;
 
           if (UCON64_ISSET (ucon64.interleaved))
@@ -1471,7 +1474,7 @@ ucon64_rom_handling (void)
         {
           // detected file size must match DAT file size
           int size = ucon64.nfo ?
-                       UCON64_ISSET (ucon64.nfo->data_size) ?
+                       UCON64_ISSET2 (ucon64.nfo->data_size, uint64_t) ?
                          ucon64.nfo->data_size :
                          ucon64.file_size - ucon64.nfo->backup_header_len :
                        ucon64.file_size;
@@ -1728,12 +1731,14 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 
   // name, maker, country and size
   strcpy (buf, NULL_TO_EMPTY (nfo->name));
-  x = UCON64_ISSET (nfo->data_size) ?
-    nfo->data_size :
-    ucon64.file_size - nfo->backup_header_len;
+  // some ROMs have a name with control chars in it => replace control chars
+  for (x = 0; buf[x] != '\0'; x++)
+    if (!isprint ((int) buf[x]))
+      buf[x] = '.';
+  x = UCON64_ISSET2 (nfo->data_size, uint64_t) ?
+        nfo->data_size : ucon64.file_size - nfo->backup_header_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
-          // some ROMs have a name with control chars in it => replace control chars
-          to_func (buf, strlen (buf), toprint),
+          buf,
           NULL_TO_EMPTY (nfo->maker),
           NULL_TO_EMPTY (nfo->country),
           x,

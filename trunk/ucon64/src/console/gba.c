@@ -1,8 +1,8 @@
 /*
 gba.c - Game Boy Advance support for uCON64
 
-Copyright (c) 2001 - 2005 NoisyB
-Copyright (c) 2001 - 2005 dbjh
+Copyright (c) 2001 - 2005              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -614,22 +614,22 @@ gba_init (st_ucon64_nfo_t *rominfo)
   int result = -1, value;
   char buf[MAXBUFSIZE];
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-    ucon64.backup_header_len : 0;
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                 ucon64.backup_header_len : 0;
 
   ucon64_fread (&gba_header, GBA_HEADER_START +
-           rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
+                rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
   if (/*gba_header.game_id_prefix == 'A' && */ // 'B' in Mario vs. Donkey Kong
       gba_header.start[3] == 0xea && gba_header.pad1 == 0x96 && gba_header.gba_type == 0)
     result = 0;
   else
     {
 #if 0 // AFAIK (dbjh) GBA ROMs never have a header
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-        ucon64.backup_header_len : UNKNOWN_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len, unsigned int) ?
+                                     ucon64.backup_header_len : UNKNOWN_HEADER_LEN;
 
       ucon64_fread (&gba_header, GBA_HEADER_START +
-               rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
+                    rominfo->backup_header_len, GBA_HEADER_LEN, ucon64.fname);
       if (gba_header.game_id_prefix == 'A' && gba_header.gba_type == 0)
         result = 0;
       else
@@ -714,7 +714,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
     }
 
   rominfo->console_usage = gba_usage[0].help;
-  // We use fal_usage, but we could just as well use f2a_usage
+  // we use fal_usage, but we could just as well use f2a_usage
   rominfo->backup_usage = (!rominfo->backup_header_len ? fal_usage[0].help : unknown_backup_usage[0].help);
 
   return result;
@@ -736,12 +736,13 @@ gba_chksum (void)
 
 
 int
-gba_multi (int truncate_size, char *multi_fname)
+gba_multi (unsigned int truncate_size, char *multi_fname)
 // TODO: Check if 1024 Mbit multi-game files are supported by the FAL code
 {
 #define BUFSIZE (32 * 1024)
-  int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
-      truncated = 0, size_pow2_lesser = 1, size_pow2 = 1, truncate_size_ispow2 = 0;
+  unsigned int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0,
+               done, truncated = 0, size_pow2_lesser = 1, size_pow2 = 1,
+               truncate_size_ispow2 = 0;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char buffer[BUFSIZE], fname[FILENAME_MAX], *fname_ptr;
@@ -835,9 +836,9 @@ gba_multi (int truncate_size, char *multi_fname)
               bytestowrite = truncate_size - totalsize;
               done = 1;
               truncated = 1;
-              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
+              printf ("Output file is %u Mbit, truncating %s, skipping %u bytes\n",
                       truncate_size / MBIT, fname_ptr,
-                      fsizeof (fname_ptr) - (byteswritten + bytestowrite));
+                      (unsigned int) fsizeof (fname_ptr) - (byteswritten + bytestowrite));
               // DON'T use fstate.st_size, because file could be compressed
             }
           totalsize += bytestowrite;

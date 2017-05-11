@@ -46,7 +46,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-#endif // _WIN32
+#elif   defined AMIGA // _WIN32
+#error Include directives are missing. Please add them and let us know.
+#include <libraries/lowlevel.h>                 // GetKey()
+#endif
 #ifdef  DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
 #endif
@@ -385,7 +388,7 @@ ansi_init (void)
 #ifdef  DJGPP
   if (result)
     {
-      // Don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
+      // don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
       __dpmi_regs reg;
 
       reg.x.ax = 0x1a00;                        // DOS 4.0+ ANSI.SYS installation check
@@ -416,7 +419,7 @@ gauge (int percent, int width, char char1, char char2, int color1, int color2)
   memset (buf, char1, x);
   buf[x] = 0;
 
-  if (x < width) // percent < 100
+  if (x < width)                                // percent < 100
     {
       if (color1 != -1 && color2 != -1)
         sprintf (&buf[x], "\x1b[3%d;4%dm", color1, color1);
@@ -424,7 +427,7 @@ gauge (int percent, int width, char char1, char char2, int color1, int color2)
       memset (strchr (buf, 0), char2, width - x);
     }
 
-  if (color1 != -1 && color2 != -1) // ANSI?
+  if (color1 != -1 && color2 != -1)             // ANSI?
     {
       buf[width + 8] = 0;                       // 8 == ANSI code length
       fprintf (stdout, "\x1b[3%d;4%dm%s\x1b[0m", color2, color2, buf);

@@ -511,24 +511,23 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   Special thanks go to Leo of ToToTEK for being very helpful and willing to
   answer our questions)<br>
 - added (Genesis) -ssize=SIZE specify split part size in Mbit (by dbjh)<br>
-- updated (SNES, SMS, PC-Engine &amp; Genesis) -mgd produces correct file names
-  (by dbjh; thanks to acem77 for testing and feedback)<br>
+- updated (SNES, SMS, PCE &amp; Genesis) -mgd produces correct file names (by
+  dbjh; thanks to acem77 for testing and feedback)<br>
 - updated (Genesis) -mgd automatically pads files to the right size (by dbjh)<br>
-- added (PC-Engine) -swap invert/swap bits of all bytes of a file. This
-  effectively converts PC-Engine games between Japan and U.S.A. "mode" (by
-  dbjh; thanks to acem77 for the information)<br>
+- added (PCE) -swap invert/swap bits of all bytes of a file. This effectively
+  converts PC-Engine games between Japan and U.S.A. "mode" (by dbjh; thanks to
+  acem77 for the information)<br>
 - added (SMS) backup unit header length detection (by dbjh; thanks to acem77
   for pointing this out) This made a problem with the current SMS DAT file
   surface: some CRC32 values are the result of including a backup unit header
   in the calculation. Someone with a complete GoodSMS collection should create
   a new DAT file<br>
-- updated (PC-Engine) auto-detection of bit-swapped files (by dbjh; thanks to
-  Cowering for the info)<br>
-- updated (PC-Engine) -mgd automatically bit-swaps the file if it is detected
-  as being in Japan "mode" (by dbjh)<br>
-- updated (PC-Engine) -smg automatically bit-swaps the file if it is detected
-  as being in U.S.A. "mode" (by dbjh) I don't know if this correct. Please give
-  feedback<br>
+- updated (PCE) auto-detection of bit-swapped files (by dbjh; thanks to Cowering
+  for the info)<br>
+- updated (PCE) -mgd automatically bit-swaps the file if it is detected as
+  being in Japan "mode" (by dbjh)<br>
+- updated (PCE) -smg automatically bit-swaps the file if it is detected as being
+  in U.S.A. "mode" (by dbjh) I don't know if this correct. Please give feedback<br>
 - added (GB) -logo restore ROM logo character data (offset: 0x104-0x134)
   (by NoisyB)<br>
 <p>
@@ -540,13 +539,13 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   -nhi in combination with one of the mentioned dump options<br>
 - updated (Genesis) fixed problem with -multi that caused problems with some
   games when run on the MD-PRO (by dbjh)<br>
-- updated (SNES, Genesis, PC-Engine, SMS, Game Gear &amp; GB) -mgd now produces
+- updated (SNES, Genesis, PCE, SMS, Game Gear &amp; GB) -mgd now produces
   correct file names. This time for real! :-) (by dbjh; thanks to acem77 for
   testing and feedback)<br>
 - added (SNES) -xswcr send/receive RTS data to/from Super Wild Card*/(all)SWC
   (by dbjh)<br>
-- updated (PC-Engine) reversed how -mgd &amp; -smg work. -mgd bit-swaps a file
-  if it is detected as not being bit-swapped ("Japan mode"/"unencrypted"). -smg
+- updated (PCE) reversed how -mgd &amp; -smg work. -mgd bit-swaps a file if it
+  is detected as not being bit-swapped ("Japan mode"/"unencrypted"). -smg
   bit-swaps a file if it is detected as being bit-swapped
   ("U.S.A. mode"/"encrypted") (by dbjh; thanks to kyuusaku for the feedback)<br>
   Note that if you want to play a game with an MGD2 on a PC-Engine that you
@@ -555,13 +554,12 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (SMS) improved detection of SMS and Game Gear files. In most cases
   specifying -sms is no longer necessary (by dbjh)<br>
 - added (SMS) -chk fix checksum (by dbjh)<br>
-- updated (PC-Engine) it's Magic Super Griffin, not Super Magic Griffin. Thus
-  the option -smg has been renamed to -msg (by dbjh; thanks to kyuusaku for the
+- updated (PCE) it's Magic Super Griffin, not Super Magic Griffin. Thus the
+  option -smg has been renamed to -msg (by dbjh; thanks to kyuusaku for the
   info)<br>
-- added (PC-Engine) -xmsg send/receive to/from Magic Super Griffin (by dbjh;
-  thanks to kyuusaku for testing)<br>
-- added (PC-Engine) -f fix region protection (by dbjh; thanks to kyuusaku for
-  testing)<br>
+- added (PCE) -xmsg send/receive to/from Magic Super Griffin (by dbjh; thanks to
+  kyuusaku for testing)<br>
+- added (PCE) -f fix region protection (by dbjh; thanks to kyuusaku for testing)<br>
 - updated (NES) -ffe writes correct headers for the NES games that actually run
   on the Super Magic Card (by dbjh; thanks to kyuusaku for the info and
   testing)<br>
@@ -578,8 +576,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   thanks to John) This crack is only necessay when the game is modified, for
   example by -f.<br>
 - updated (SNES) added NTSC/PAL fix for Pop'n Twinbee (by dbjh)<br>
-- updated (SNES, Genesis, PC-Engine &amp; NES) (dumping) functions for FFE
-  copiers and Pro Fighter should work correctly with very fast PCs (by JohnDie)<br>
+- updated (SNES, Genesis, PCE &amp; NES) (dumping) functions for FFE copiers and
+  Pro Fighter should work correctly with very fast PCs (by JohnDie)<br>
 - updated (N64) added work-around for old bug in DJGPP and Solaris. Now -swap,
   -swap2, -v64 and -z64 work correctly for large files (larger than 8 or 12 MB
   respectively) when using the DOS or Solaris port of uCON64 (by dbjh)<br>
@@ -593,8 +591,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (SNES) -xfigc and -xswcc option to transfer SRAM to/from cartridge in
   *Pro Fighter* and Super Wild Card copiers (by JohnDie)<br>
 - added support for Linux/PPC (by dbjh; thanks to Tobias Pflug and Misty De Meo)<br>
-- updated (SNES, Genesis, PC-Engine &amp; NES) fixed subtle bug in code of FFE
-  dumping routines (by dbjh; thanks to Neill Corlett for pointing this out)<br>
+- updated (SNES, Genesis, PCE &amp; NES) fixed subtle bug in code of FFE dumping
+  routines (by dbjh; thanks to Neill Corlett for pointing this out)<br>
 - updated (SNES) implemented SRAM size display for Super FX ROMs (by JohnDie)<br>
 - updated (SMS) fixed bug that caused -chk not to work for uninterleaved files
   with a header (by dbjh)<br>
@@ -616,8 +614,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   It also prevents uCON64 from accessing I/O ports not associated to the
   parallel port if you specify additional transfer switches while &#60;rom&#62;
   has a name that starts with a number<br>
-- updated (SNES, Genesis, PC-Engine, SMS, Game Gear &amp; GB) -mgd produces
-  correct index files (MULTI-GD) (by dbjh)<br>
+- updated (SNES, Genesis, PCE, SMS, Game Gear &amp; GB) -mgd produces correct
+  index files (MULTI-GD) (by dbjh)<br>
 - updated (SNES &amp; Genesis) -s produces an index file if the ROM dump is in
   MGD format (by dbjh)<br>
 - added support for ppdev (GNU/Linux-only) (by dbjh)<br>
@@ -853,6 +851,25 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   reversed (the associated options use EPP mode by default and use SPP as
   fallback). Another consequence is that UserPort can no longer be used as I/O
   driver (by dbjh)<br>
+- updated (SNES) improved --id to the point where its help text can be shown
+  (by dbjh)<br>
+- updated (SNES/Genesis) fixed several edge cases in MGD splitting code (by
+  dbjh)<br>
+- updated (SNES) fixed crash when splitting files in Game Doctor SF3 format
+  &#62;= 100 Mbit (by dbjh)<br>
+- updated (all) made --pattern more verbose when -v is specified (by dbjh)<br>
+- updated (GBA) made --crp more verbose when -v is specified (by dbjh)<br>
+- updated (SNES) made -k, -f &amp; -l more verbose when -v is specified (by
+  dbjh)<br>
+- updated (Genesis/PCE) made -f more verbose when -v is specified (by dbjh)<br>
+- updated (all) fixed bug in code of --pattern that caused changes to be
+  omitted in the output file (by dbjh)<br>
+- added (SNES) --smgh split ROM for MGH. Its main purpose is splitting HiROM
+  games in MGH format. Splitting is required to make them run with an MGH (by
+  dbjh, based on post by Mystic_Merlin on ToToTEK's Help &amp; Support Forum)<br>
+- added (SNES) --mgh convert to Magic Game Hunter/MGH format. This does the
+  same as --gd3, except that the resulting file will have an MGD name and no
+  header (by dbjh)<br>
 <br>
 <br>
 <br>

@@ -2,7 +2,7 @@
 pce.c - PC-Engine support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2003 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -696,7 +696,7 @@ pce_msg (st_ucon64_nfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
   st_msg_header_t header;
-  int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
 
   if (rominfo->interleaved)
     if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
@@ -741,7 +741,7 @@ pce_mgd (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
-  int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
 
   if (!rominfo->interleaved)
     if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
@@ -751,7 +751,7 @@ pce_mgd (st_ucon64_nfo_t *rominfo)
       }
 
   strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, UCON64_PCE, size, dest_name);
+  mgd_make_name (ucon64.fname, UCON64_PCE, size, dest_name, 1);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   // bit-swapping images for the MGD2 only makes sense for owners of a TG-16
@@ -779,7 +779,7 @@ pce_swap (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
-  int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
 
   if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
     {
@@ -876,11 +876,12 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-pce_multi (int truncate_size, char *fname)
+pce_multi (unsigned int truncate_size, char *fname)
 {
 #define BUFSIZE (32 * 1024)
-  int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
-      totalsize = 0, size, org_do_not_calc_crc = ucon64.do_not_calc_crc;
+  unsigned int n, n_files, file_no, bytestowrite, byteswritten, done,
+               truncated = 0, totalsize = 0, size,
+               org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
@@ -967,7 +968,7 @@ pce_multi (int truncate_size, char *fname)
               bytestowrite = truncate_size - totalsize;
               done = 1;
               truncated = 1;
-              printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
+              printf ("Output file needs %u Mbit on flash card, truncating %s, skipping %u bytes\n",
                       truncate_size / MBIT, ucon64.fname, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
@@ -1085,13 +1086,14 @@ pce_check (unsigned char *buf, unsigned int len)
 int
 pce_init (st_ucon64_nfo_t *rominfo)
 {
-  int result = -1, size, swapped, x;
+  int result = -1, swapped;
+  unsigned int size, x;
   unsigned char *rom_buffer;
   st_pce_data_t *info, key;
 
   x = ucon64.file_size % (16 * 1024);
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-    ucon64.backup_header_len : (ucon64.file_size > x ? x : 0);
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                 ucon64.backup_header_len : ucon64.file_size > x ? x : 0;
 
   size = ucon64.file_size - rominfo->backup_header_len;
   if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)

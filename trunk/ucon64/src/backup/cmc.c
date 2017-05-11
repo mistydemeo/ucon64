@@ -686,7 +686,7 @@ cyan_test_copier (int test, int speed, unsigned short parport)
                       "You may wish to replace the battery or try another power supply, and use\n"
                       "shorter cables.\n"
                       "Make sure no electrical appliances turn on or off during the copy.\n"
-                      "Re-run the test to be sure; it's recommended that you use a lower speed\n");
+                      "Re-run the test to be sure; it is recommended that you use a lower speed\n");
               free (buffer1);
               free (buffer2);
               return 1;

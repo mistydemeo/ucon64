@@ -1909,7 +1909,7 @@ gbx_read_sram (const char *filename, unsigned short parport, int start_bank)
 int
 gbx_write_sram (const char *filename, unsigned short parport, int start_bank)
 {
-  int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
+  unsigned int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
   time_t starttime;
   FILE *file;
 
@@ -1930,7 +1930,7 @@ gbx_write_sram (const char *filename, unsigned short parport, int start_bank)
     }
   else
     {
-      if (start_bank >= n_banks)
+      if ((unsigned int) start_bank >= n_banks)
         {
           fprintf (stderr, "ERROR: Bank must be a value 0 - %d (for this card)\n",
                    n_banks - 1);

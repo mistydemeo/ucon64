@@ -52,11 +52,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define F_OK 00
 #endif
+#elif   defined AMIGA
+#error Include directives are missing. Please add them and let us know.
 #endif
 
 #include "misc/archive.h"
 #include "misc/file.h"
-#include "misc/misc.h"                          // getenv2(), implementations of truncate()
+#include "misc/misc.h"                          // getenv2()
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
@@ -73,8 +75,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 isfname (int c)
 {
-  // characters that are allowed in filenames
-  return ((isalnum (c) || (c && strchr (".,'+- ()[]!&_", c))));
+  // characters that are allowed in filenames (pre UTF-8)
+  return isalnum (c) || (c &&
+#ifndef __MSDOS__
+           strchr (" !#$%&'()-@^_`{}~+,;=[].", c));
+#else
+           // WinDOS can handle the above, but at this point I do not want to
+           //  add run-time checks whether we are running in Windows. - dbjh
+           strchr ("!#$%&'()-@^_`{}~", c));
+#endif
 }
 
 
@@ -112,7 +121,7 @@ realpath (const char *path, char *full_path)
 
   memset (got_path, 0, sizeof (got_path));
 
-  // Make a copy of the source path since we may need to modify it
+  // make a copy of the source path since we may need to modify it
   n = strlen (path);
   if (n >= FILENAME_MAX - 2)
     return NULL;
@@ -121,7 +130,7 @@ realpath (const char *path, char *full_path)
 
   strcpy (copy_path, path);
 #ifdef  DJGPP
-  // With DJGPP path can contain (forward) slashes
+  // with DJGPP path can contain (forward) slashes
   {
     int l = strlen (copy_path);
     for (n = 0; n < l; n++)
@@ -164,10 +173,10 @@ realpath (const char *path, char *full_path)
       path++;
     }
 
-  // Expand each (back)slash-separated pathname component
-  while (*path != 0)
+  // expand each (back)slash-separated pathname component
+  while (*path != '\0')
     {
-      // Ignore stray DIR_SEPARATOR
+      // ignore stray DIR_SEPARATOR
       if (*path == DIR_SEPARATOR)
         {
           path++;
@@ -175,29 +184,29 @@ realpath (const char *path, char *full_path)
         }
       if (*path == '.')
         {
-          // Ignore "."
-          if (path[1] == 0 || path[1] == DIR_SEPARATOR)
+          // ignore "."
+          if (path[1] == '\0' || path[1] == DIR_SEPARATOR)
             {
               path++;
               continue;
             }
           if (path[1] == '.')
             {
-              if (path[2] == 0 || path[2] == DIR_SEPARATOR)
+              if (path[2] == '\0' || path[2] == DIR_SEPARATOR)
                 {
                   path += 2;
-                  // Ignore ".." at root
+                  // ignore ".." at root
                   if (new_path == got_path + 1)
                     continue;
-                  // Handle ".." by backing up
+                  // handle ".." by backing up
                   while (*((--new_path) - 1) != DIR_SEPARATOR)
                     ;
                   continue;
                 }
             }
         }
-      // Safely copy the next pathname component
-      while (*path != 0 && *path != DIR_SEPARATOR)
+      // safely copy the next pathname component
+      while (*path != '\0' && *path != DIR_SEPARATOR)
         {
           if (path > max_path)
             return NULL;
@@ -205,25 +214,25 @@ realpath (const char *path, char *full_path)
           *new_path++ = *path++;
         }
 #ifdef  S_IFLNK
-      // Protect against infinite loops
+      // protect against infinite loops
       if (readlinks++ > MAX_READLINKS)
         return NULL;
 
-      // See if latest pathname component is a symlink
-      *new_path = 0;
+      // see if latest pathname component is a symlink
+      *new_path = '\0';
       n = readlink (got_path, link_path, FILENAME_MAX - 1);
       if (n < 0)
         {
           // EINVAL means the file exists but isn't a symlink
           if (errno != EINVAL && errno != ENOENT
 #ifdef  __BEOS__
-              // Make this function work for a mounted ext2 fs ("/:")
+              // make this function work for a mounted ext2 fs ("/:")
               && errno != B_NAME_TOO_LONG
 #endif
              )
             {
-              // Make sure it's null terminated
-              *new_path = 0;
+              // make sure it's null terminated
+              *new_path = '\0';
               strcpy (full_path, got_path);
               return NULL;
             }
@@ -231,17 +240,17 @@ realpath (const char *path, char *full_path)
       else
         {
           // NOTE: readlink() doesn't add the null byte
-          link_path[n] = 0;
+          link_path[n] = '\0';
           if (*link_path == DIR_SEPARATOR)
-            // Start over for an absolute symlink
+            // start over for an absolute symlink
             new_path = got_path;
           else
-            // Otherwise back up over this component
+            // otherwise back up over this component
             while (*(--new_path) != DIR_SEPARATOR)
               ;
           if (strlen (path) + n >= FILENAME_MAX - 2)
             return NULL;
-          // Insert symlink contents into path
+          // insert symlink contents into path
           strcat (link_path, path);
           strcpy (copy_path, link_path);
           path = copy_path;
@@ -249,7 +258,7 @@ realpath (const char *path, char *full_path)
 #endif // S_IFLNK
       *new_path++ = DIR_SEPARATOR;
     }
-  // Delete trailing slash but don't whomp a lone slash
+  // delete trailing slash but don't whomp a lone slash
   if (new_path != got_path + 1 && *(new_path - 1) == DIR_SEPARATOR)
     {
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
@@ -270,8 +279,8 @@ realpath (const char *path, char *full_path)
       new_path--;
 #endif
     }
-  // Make sure it's null terminated
-  *new_path = 0;
+  // make sure it's null terminated
+  *new_path = '\0';
   strcpy (full_path, got_path);
 
   return full_path;
@@ -284,11 +293,11 @@ realpath (const char *path, char *full_path)
 
   c = (char) toupper (full_path[0]);
   n = strlen (full_path) - 1;
-  // Remove trailing separator if full_path is not the root dir of a drive,
+  // remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
   if (full_path[n] == DIR_SEPARATOR &&
-      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == DIR_SEPARATOR
-    full_path[n] = 0;
+      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == '\0')) // && full_path[2] == DIR_SEPARATOR
+    full_path[n] = '\0';
 
   return full_path;
 #elif   defined AMIGA
@@ -314,7 +323,7 @@ realpath2 (const char *path, char *full_path)
 #endif
          )
         sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
-      else if (path[1] == 0)
+      else if (path[1] == '\0')
         strcpy (path1, getenv2 ("HOME"));
       path2 = path1;
     }
@@ -336,7 +345,7 @@ realpath2 (const char *path, char *full_path)
       else
         full_path = strdup (path2);
 #ifdef  DJGPP
-      // With DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
+      // with DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
       //  returns a path with forward slashes)
       {
         int n, l = strlen (full_path);
@@ -346,7 +355,7 @@ realpath2 (const char *path, char *full_path)
       }
 #endif
       errno = ENOENT;
-      return 0;
+      return NULL;
     }
 }
 
@@ -364,7 +373,7 @@ dirname2 (const char *path, char *dir)
 
   strcpy (dir, path);
 #if     defined DJGPP || defined __CYGWIN__
-  // Yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
+  // yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
   // Cygwin has no dirname()
   p1 = strrchr (dir, '/');
   p2 = strrchr (dir, '\\');
@@ -404,11 +413,11 @@ dirname2 (const char *path, char *dir)
 #endif                                          //  it was directly preceded by a drive letter
 
   if (p1)
-    *p1 = 0;                                    // terminate string (overwrite the separator)
+    *p1 = '\0';                                 // terminate string (overwrite the separator)
   else
     {
       dir[0] = '.';
-      dir[1] = 0;
+      dir[1] = '\0';
     }
 
   return dir;
@@ -427,7 +436,7 @@ basename2 (const char *path)
     return NULL;
 
 #if     defined DJGPP || defined __CYGWIN__
-  // Yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
+  // yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
   // Cygwin has no basename()
   p1 = strrchr (path, '/');
   p2 = strrchr (path, '\\');
@@ -455,9 +464,9 @@ get_suffix (const char *filename)
   if ((p = basename2 (filename)) == NULL)
     p = filename;
   if ((s = strrchr (p, '.')) == NULL)
-    s = strchr (p, 0);                          // strchr(p, 0) and NOT "" is the
+    s = strchr (p, '\0');                       // strchr(p, '\0') and NOT "" is the
   if (s == p)                                   //  suffix of a file without suffix
-    s = strchr (p, 0);                          // files can start with '.'
+    s = strchr (p, '\0');                       // files can start with '.'
 
   return s;
 }
@@ -564,7 +573,7 @@ one_filesystem (const char *filename1, const char *filename2)
       d2 = (char) toupper (path2[0]);
       if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z')
         if (strlen (path1) >= 2 && strlen (path2) >= 2)
-          // We don't handle unique volume names
+          // we don't handle unique volume names
           if (path1[1] == ':' && path2[1] == ':')
             return 1;
       return 0;
@@ -603,7 +612,7 @@ rename2 (const char *oldname, const char *newname)
   dirname2 (oldname, dir1);
   dirname2 (newname, dir2);
 
-  // We should use dirname{2}() in case oldname or newname doesn't exist yet
+  // we should use dirname{2}() in case oldname or newname doesn't exist yet
   if (one_filesystem (dir1, dir2))
     {
       if (access (newname, F_OK) == 0 && !one_file (oldname, newname))
@@ -633,7 +642,7 @@ rename2 (const char *oldname, const char *newname)
 int
 truncate2 (const char *filename, off_t new_size)
 {
-  int size = fsizeof (filename);
+  off_t size = fsizeof (filename);
   struct stat fstate;
 
   stat (filename, &fstate);
@@ -683,6 +692,63 @@ tmpnam2 (char *temp)
 }
 
 
+char *
+mkbak (const char *filename, backup_t type)
+{
+  static char buf[FILENAME_MAX];
+
+  if (access (filename, R_OK) != 0)
+    return (char *) filename;
+
+  strcpy (buf, filename);
+  set_suffix (buf, ".bak");
+  if (strcmp (filename, buf) != 0)
+    {
+      remove (buf);                             // *try* to remove or rename() will fail
+      if (rename (filename, buf))               // keep file attributes like date, etc.
+        {
+          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
+          exit (1);
+        }
+    }
+  else // handle the case where filename has the suffix ".bak".
+    {
+      char buf2[FILENAME_MAX];
+
+      if (!dirname2 (filename, buf))
+        {
+          fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
+          exit (1);
+        }
+      if (buf[0] != '\0')
+        if (buf[strlen (buf) - 1] != DIR_SEPARATOR)
+          strcat (buf, DIR_SEPARATOR_S);
+
+      strcat (buf, basename2 (tmpnam2 (buf2)));
+      if (rename (filename, buf))
+        {
+          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
+          exit (1);
+        }
+    }
+
+  switch (type)
+    {
+    case BAK_MOVE:
+      return buf;
+
+    case BAK_DUPE:
+    default:
+      if (fcopy (buf, 0, fsizeof (buf), filename, "wb"))
+        {
+          fprintf (stderr, "ERROR: Cannot open \"%s\" for writing\n", filename);
+          exit (1);
+        }
+      return buf;
+    }
+}
+
+
 static inline int
 fcopy_func (void *buffer, int n, void *object)
 {
@@ -719,7 +785,7 @@ fcopy (const char *src, size_t start, size_t len, const char *dest, const char *
 int
 fcopy_raw (const char *src, const char *dest)
 // Raw file copy function. Raw, because it will copy the file data as it is,
-//  unlike fcopy(). Don't merge fcopy_raw() with fcopy(). They have both their
+//  unlike fcopy(). Don't merge fcopy_raw() with fcopy(). They both have their
 //  uses.
 {
 #ifdef  USE_ZLIB
@@ -758,15 +824,15 @@ fcopy_raw (const char *src, const char *dest)
 
 
 #ifndef USE_ZLIB
-int
+off_t
 fsizeof (const char *filename)
 {
   struct stat fstate;
 
+  errno = 0;
   if (!stat (filename, &fstate))
     return fstate.st_size;
 
-  errno = ENOENT;
   return -1;
 }
 #endif
@@ -781,8 +847,8 @@ quick_io_open (const char *filename, const char *mode)
     if (!access (filename, F_OK))               // exists?
       {
         struct stat fstate;
-        // First (try to) change the file mode or we won't be able to write to
-        //  it if it's a read-only file.
+        // first (try to) change the file mode or we won't be able to write to
+        //  it if it's a read-only file
         stat (filename, &fstate);
         if (chmod (filename, fstate.st_mode | S_IWUSR))
           {
@@ -931,58 +997,83 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
 }
 
 
-char *
-mkbak (const char *filename, backup_t type)
+#ifdef  _WIN32
+int
+truncate (const char *path, off_t size)
 {
-  static char buf[FILENAME_MAX];
+  int retval;
+  HANDLE file = CreateFile (path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file == INVALID_HANDLE_VALUE)
+    return -1;
 
-  if (access (filename, R_OK) != 0)
-    return (char *) filename;
+  SetFilePointer (file, size, 0, FILE_BEGIN);
+  retval = SetEndOfFile (file);                 // returns nonzero on success
+  CloseHandle (file);
 
-  strcpy (buf, filename);
-  set_suffix (buf, ".bak");
-  if (strcmp (filename, buf) != 0)
-    {
-      remove (buf);                             // *try* to remove or rename() will fail
-      if (rename (filename, buf))               // keep file attributes like date, etc.
-        {
-          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
-          exit (1);
-        }
-    }
-  else // handle the case where filename has the suffix ".bak".
-    {
-      char buf2[FILENAME_MAX];
-
-      if (!dirname2 (filename, buf))
-        {
-          fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
-          exit (1);
-        }
-      if (buf[0] != 0)
-        if (buf[strlen (buf) - 1] != DIR_SEPARATOR)
-          strcat (buf, DIR_SEPARATOR_S);
-
-      strcat (buf, basename2 (tmpnam2 (buf2)));
-      if (rename (filename, buf))
-        {
-          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
-          exit (1);
-        }
-    }
-
-  switch (type)
-    {
-    case BAK_MOVE:
-      return buf;
-
-    case BAK_DUPE:
-    default:
-      if (fcopy (buf, 0, fsizeof (buf), filename, "wb"))
-        {
-          fprintf (stderr, "ERROR: Cannot open \"%s\" for writing\n", filename);
-          exit (1);
-        }
-      return buf;
-    }
+  return retval ? 0 : -1;                       // truncate() returns zero on success
 }
+
+
+int
+sync (void)
+{
+  _commit (fileno (stdout));
+  _commit (fileno (stderr));
+  fflush (NULL);                                // flushes all streams opened for output
+  return 0;
+}
+
+
+#elif   defined AMIGA                           // _WIN32
+int
+truncate (const char *path, off_t size)
+{
+  BPTR fh;
+  ULONG newsize;
+
+  if (!(fh = Open (path, MODE_OLDFILE)))
+    return -1;
+
+  newsize = SetFileSize (fh, size, OFFSET_BEGINNING);
+  Close (fh);
+
+  return newsize == (ULONG) size ? 0 : -1;      // truncate() returns zero on success
+}
+
+
+void
+sync (void)
+{
+}
+
+
+int
+chmod (const char *path, mode_t mode)
+{
+  if (!SetProtection ((STRPTR) path,
+                      ((mode & S_IRUSR ? 0 : FIBF_READ) |
+                       (mode & S_IWUSR ? 0 : FIBF_WRITE | FIBF_DELETE) |
+                       (mode & S_IXUSR ? 0 : FIBF_EXECUTE) |
+                       (mode & S_IRGRP ? FIBF_GRP_READ : 0) |
+                       (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE : 0) |
+                       (mode & S_IXGRP ? FIBF_GRP_EXECUTE : 0) |
+                       (mode & S_IROTH ? FIBF_OTR_READ : 0) |
+                       (mode & S_IWOTH ? FIBF_OTR_WRITE | FIBF_OTR_DELETE : 0) |
+                       (mode & S_IXOTH ? FIBF_OTR_EXECUTE : 0))))
+    return -1;
+  else
+    return 0;
+}
+
+
+int
+readlink (const char *path, char *buf, int bufsize)
+{
+  (void) path;                                  // warning remover
+  (void) buf;                                   // idem
+  (void) bufsize;                               // idem
+  // always return -1 as if anything passed to it isn't a soft link
+  return -1;
+}
+#endif                                          // AMIGA

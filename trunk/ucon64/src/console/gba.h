@@ -36,7 +36,7 @@ extern int gba_init (st_ucon64_nfo_t *rominfo);
 extern int gba_logo (st_ucon64_nfo_t *rominfo);
 extern int gba_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int gba_sram (void);
-extern int gba_multi (int truncate_size, char *fname);
+extern int gba_multi (unsigned int truncate_size, char *fname);
 extern int gba_sc (void);
 
 #endif

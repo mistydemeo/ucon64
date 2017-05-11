@@ -1,9 +1,9 @@
 /*
 misc.h - miscellaneous functions
 
-Copyright (c) 1999 - 2004       NoisyB
-Copyright (c) 2001 - 2004, 2015 dbjh
-Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2004              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2004              Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -285,7 +285,7 @@ extern int one_filesystem (const char *filename1, const char *filename2);
 extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
-extern int truncate2 (const char *filename, int size);
+extern int truncate2 (const char *filename, off_t new_size);
 extern int strarg (char **argv, char *str, const char *separator_s, int max_args);
 
 
@@ -311,7 +311,7 @@ extern int strarg (char **argv, char *str, const char *separator_s, int max_args
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
   tmpnam2()       replacement for tmpnam() temp must have the size of FILENAME_MAX
   renlwr()        renames all files tolower()
-  drop_privileges() switch to the real user and group id (leave "root mode")
+  drop_privileges() switch to the real user and group ID (leave "root mode")
   register_func() atexit() replacement
                   returns -1 if it fails, 0 if it was successful
   unregister_func() unregisters a previously registered function
@@ -322,7 +322,7 @@ extern int strarg (char **argv, char *str, const char *separator_s, int max_args
 typedef struct st_cm_set
 {
   char *data;
-  int size;
+  unsigned int size;
 } st_cm_set_t;
 
 typedef struct st_cm_pattern
@@ -335,17 +335,20 @@ typedef struct st_cm_pattern
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-  int search_size, replace_size, offset, n_sets;
+  unsigned int search_size, replace_size, n_sets;
+  int offset;
   st_cm_set_t *sets;
 } st_cm_pattern_t;
 
-extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
-                       char wc, char esc, char *newstr, int newsize, int offset, ...);
-extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
-                        char wc, char esc, char *newstr, int newsize,
-                        int offset, st_cm_set_t *sets);
-extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose);
+extern int change_mem (char *buf, unsigned int bufsize, char *searchstr,
+                       unsigned int strsize, char wc, char esc, char *newstr,
+                       unsigned int newsize, int offset, ...);
+extern int change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
+                        unsigned int strsize, char wc, char esc, char *newstr,
+                        unsigned int newsize, int offset, st_cm_set_t *sets);
+extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename);
 extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
+extern int cm_verbose;
 
 extern void clear_line (void);
 extern int ansi_init (void);
@@ -471,7 +474,7 @@ extern char *q_fbackup (const char *filename, int mode);
 extern char *q_fbackup (char *move_name, const char *filename);
 #endif
 #ifndef  USE_ZLIB
-extern int q_fsize (const char *filename);
+extern off_t q_fsize (const char *filename);
 #endif
 
 

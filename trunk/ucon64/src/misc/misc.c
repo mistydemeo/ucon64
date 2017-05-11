@@ -1,9 +1,9 @@
 /*
 misc.c - miscellaneous functions
 
-Copyright (c) 1999 - 2005       NoisyB
-Copyright (c) 2001 - 2005, 2015 dbjh
-Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2008              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005              Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -33,17 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>                             // usleep(), microseconds
 #elif   defined __BEOS__
 #include <OS.h>                                 // snooze(), microseconds
-// Include OS.h before misc.h, because OS.h includes StorageDefs.h which
-//  includes param.h which unconditionally defines MIN and MAX.
+// OS.h includes StorageDefs.h which includes param.h which unconditionally
+//  defines MIN and MAX.
 #elif   defined AMIGA
-#include <fcntl.h>
-#include <unistd.h>
-#include <dos/dos.h>
-#include <dos/var.h>
-#include <dos/dostags.h>
-#include <libraries/lowlevel.h>                 // GetKey()
-#include <proto/dos.h>
-#include <proto/lowlevel.h>
+#error Include directives are missing. Please add them and let us know.
 #elif   defined _WIN32
 #ifdef  _MSC_VER
 #pragma warning(push)
@@ -75,6 +68,7 @@ typedef struct st_func_node
   struct st_func_node *next;
 } st_func_node_t;
 
+int cm_verbose = 0;
 static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 
@@ -125,7 +119,7 @@ wait2 (int nmillis)
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
 #elif   defined AMIGA
-  Delay (nmillis * 1000);
+  Delay (nmillis > 20 ? nmillis / 20 : 1);      // 50Hz clock, so interval is 20ms
 #elif   defined _WIN32
   Sleep (nmillis);
 #else
@@ -213,7 +207,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
     {
       if (pos & 3)
         {
-          *(buf + (pos & 3)) = 0;
+          *(buf + (pos & 3)) = '\0';
           fprintf (output, "%s\n", buf);
         }
     }
@@ -242,12 +236,13 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
 
 
 int
-change_mem (char *buf, int bufsize, char *searchstr, int strsize, char wc,
-            char esc, char *newstr, int newsize, int offset, ...)
+change_mem (char *buf, unsigned int bufsize, char *searchstr,
+            unsigned int strsize, char wc, char esc, char *newstr,
+            unsigned int newsize, int offset, ...)
 // convenience wrapper for change_mem2()
 {
   va_list argptr;
-  int i, n_esc = 0, retval;
+  unsigned int i, n_esc = 0, retval;
   st_cm_set_t *sets;
 
   for (i = 0; i < strsize; i++)
@@ -270,8 +265,9 @@ change_mem (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
 
 int
-change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
-             char esc, char *newstr, int newsize, int offset, st_cm_set_t *sets)
+change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
+             unsigned int strsize, char wc, char esc, char *newstr,
+             unsigned int newsize, int offset, st_cm_set_t *sets)
 /*
   Search for all occurrences of string searchstr in buf and replace newsize
   bytes in buf by copying string newstr to the end of the found search string
@@ -309,11 +305,11 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 */
 {
   char *set;
-  int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc, n_matches = 0,
-      setindex = 0;
+  unsigned int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc,
+               n_matches = 0, setindex = 0;
   const char *overflow_msg =
-               "WARNING: The combination of buffer position (%d), offset (%d) and\n"
-               "         replacement size (%d) would cause a buffer overflow -- ignoring\n"
+               "WARNING: The combination of buffer position (%u), offset (%d) and\n"
+               "         replacement size (%u) would cause a buffer overflow -- ignoring\n"
                "         match\n";
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
@@ -327,7 +323,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
         {
           if (strpos == pos_1st_esc)
             setindex = 0;                       // reset argument pointer
-          if (pos_1st_esc == -1)
+          if (pos_1st_esc == (unsigned int) -1)
             pos_1st_esc = strpos;
 
           set = sets[setindex].data;            // get next set of characters
@@ -342,8 +338,16 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
           if (strpos == strsize - 1)            // check if we are at the end of searchstr
             {
-              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+              if ((int) bufpos + offset >= 0 &&
+                  bufpos + offset + newsize <= bufsize)
                 {
+                  if (cm_verbose > 0)
+                    {
+                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                              offset, offset, bufpos + offset, bufpos + offset);
+                      dumper (stdout, buf + bufpos - strpos, strsize,
+                              bufpos - strpos, DUMPER_HEX);
+                    }
                   memcpy (buf + bufpos + offset, newstr, newsize);
                   n_matches++;
                 }
@@ -367,8 +371,16 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+              if ((int) bufpos + offset >= 0 &&
+                  bufpos + offset + newsize <= bufsize)
                 {
+                  if (cm_verbose > 0)
+                    {
+                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                              offset, offset, bufpos + offset, bufpos + offset);
+                      dumper (stdout, buf + bufpos - strpos, strsize,
+                              bufpos - strpos, DUMPER_HEX);
+                    }
                   memcpy (buf + bufpos + offset, newstr, newsize);
                   n_matches++;
                 }
@@ -391,17 +403,25 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
       if (searchstr[strpos] == esc)
         {
-          bufpos--;                             // current char has to be checked, but `for'
+          bufpos--;                             // current char has to be checked, but "for"
           continue;                             //  increments bufpos
         }
 
-      // no escape char, no wildcard -> normal character
+      // no escape char, no wildcard => normal character
       if (searchstr[strpos] == buf[bufpos])
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+              if ((int) bufpos + offset >= 0 &&
+                  bufpos + offset + newsize <= bufsize)
                 {
+                  if (cm_verbose > 0)
+                    {
+                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                              offset, offset, bufpos + offset, bufpos + offset);
+                      dumper (stdout, buf + bufpos - strpos, strsize,
+                              bufpos - strpos, DUMPER_HEX);
+                    }
                   memcpy (buf + bufpos + offset, newstr, newsize);
                   n_matches++;
                 }
@@ -417,7 +437,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
           bufpos -= n_wc;                       // scan the most recent wildcards too if
           if (strpos > 0)                       //  the character didn't match
             {
-              bufpos--;                         // current char has to be checked, but `for'
+              bufpos--;                         // current char has to be checked, but "for"
               strpos = 0;                       //  increments bufpos
             }
         }
@@ -428,7 +448,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
 
 int
-build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose)
+build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
 /*
   This function goes a bit over the top what memory allocation technique
   concerns, but at least it's stable.
@@ -439,8 +459,9 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 {
   char src_name[FILENAME_MAX], line[MAXBUFSIZE], buffer[MAXBUFSIZE],
        *token, *last, *ptr;
-  int line_num = 0, n_sets, n_codes = 0, n, currentsize1, requiredsize1,
-      currentsize2, requiredsize2, currentsize3, requiredsize3;
+  unsigned int line_num = 0, n_sets, n, currentsize1, requiredsize1,
+               currentsize2, requiredsize2, currentsize3, requiredsize3;
+  int n_codes = 0;
   FILE *srcfile;
 
   strcpy (src_name, filename);
@@ -464,7 +485,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
       if (*ptr == '#' || *ptr == '\n' || *ptr == '\r')
         continue;
       if ((ptr = strpbrk (line, "\n\r#")) != NULL) // text after # is comment
-        *ptr = 0;
+        *ptr = '\0';
 
       requiredsize1 += sizeof (st_cm_pattern_t);
       if (requiredsize1 > currentsize1)
@@ -568,7 +589,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           n++;
         }
       while ((token = strtok (NULL, " ")) != NULL);
-      (*patterns)[n_codes].replace_size = n;  // size in bytes
+      (*patterns)[n_codes].replace_size = n;    // size in bytes
 
       strcpy (buffer, line);
       token = strtok (last, ":");
@@ -582,14 +603,15 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
         }
       (*patterns)[n_codes].offset = strtol (token, NULL, 10); // yes, offset is decimal
 
-      if (verbose)
+      if (cm_verbose)
         {
-          printf ("line:         %d\n"
+          printf ("pattern:      %d\n"
+                  "line:         %u\n"
                   "searchstring: ",
-                  line_num);
+                  n_codes + 1, line_num);
           for (n = 0; n < (*patterns)[n_codes].search_size; n++)
             printf ("%02x ", (unsigned char) (*patterns)[n_codes].search[n]);
-          printf ("(%d)\n"
+          printf ("(%u)\n"
                   "wildcard:     %02x\n"
                   "escape:       %02x\n"
                   "replacement:  ",
@@ -598,7 +620,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
                   (unsigned char) (*patterns)[n_codes].escape);
           for (n = 0; n < (*patterns)[n_codes].replace_size; n++)
             printf ("%02x ", (unsigned char) (*patterns)[n_codes].replace[n]);
-          printf ("(%d)\n"
+          printf ("(%u)\n"
                   "offset:       %d\n",
                   (*patterns)[n_codes].replace_size,
                   (*patterns)[n_codes].offset);
@@ -659,12 +681,12 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           while ((token = strtok (NULL, " ")) != NULL);
           (*patterns)[n_codes].sets[n_sets].size = n;
 
-          if (verbose)
+          if (cm_verbose)
             {
               printf ("set:          ");
               for (n = 0; n < (*patterns)[n_codes].sets[n_sets].size; n++)
                 printf ("%02x ", (unsigned char) (*patterns)[n_codes].sets[n_sets].data[n]);
-              printf ("(%d)\n", (*patterns)[n_codes].sets[n_sets].size);
+              printf ("(%u)\n", (*patterns)[n_codes].sets[n_sets].size);
             }
 
           strcpy (buffer, line);
@@ -678,7 +700,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 
       n_codes++;
 
-      if (verbose)
+      if (cm_verbose)
         fputc ('\n', stdout);
     }
   fclose (srcfile);
@@ -689,9 +711,12 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 void
 cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 {
-  int n, m;
+  int n;
+
   for (n = 0; n < n_patterns; n++)
     {
+      unsigned int m;
+
       free ((*patterns)[n].search);
       (*patterns)[n].search = NULL;
       free ((*patterns)[n].replace);
@@ -736,7 +761,7 @@ getenv2 (const char *variable)
   variable = strupr (tmp2);                     // DON'T copy the string into variable
 #endif                                          //  (variable itself is local)
 
-  *value = 0;
+  *value = '\0';
 
   if (!strcmp (variable, "HOME"))
     {
@@ -768,8 +793,8 @@ getenv2 (const char *variable)
           c = (char) toupper ((int) *value);
           // if current dir is root dir strip problematic ending slash (DJGPP)
           if (c >= 'A' && c <= 'Z' &&
-              value[1] == ':' && value[2] == '/' && value[3] == 0)
-            value[2] = 0;
+              value[1] == ':' && value[2] == '/' && value[3] == '\0')
+            value[2] = '\0';
         }
     }
   else if ((tmp = getenv (variable)) != NULL)
@@ -826,10 +851,10 @@ drop_privileges (void)
       fputs ("ERROR: Could not set uid\n", stderr);
       return 1;
     }
-  gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was used,
+  gid = getgid ();                              // this shouldn't be necessary
+  if (setgid (gid) == -1)                       //  if "make install" was used,
     {                                           //  but just in case (root did
-      fputs ("ERROR: Could not set gid\n", stderr); //  `chmod +s')
+      fputs ("ERROR: Could not set gid\n", stderr); //  "chmod +s")
       return 1;
     }
 
@@ -893,97 +918,16 @@ handle_registered_funcs (void)
 }
 
 
-#ifdef  _WIN32
-int
-truncate (const char *path, off_t size)
-{
-  int retval;
-  HANDLE file = CreateFile (path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
-                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (file == INVALID_HANDLE_VALUE)
-    return -1;
-
-  SetFilePointer (file, size, 0, FILE_BEGIN);
-  retval = SetEndOfFile (file);                 // returns nonzero on success
-  CloseHandle (file);
-
-  return retval ? 0 : -1;                       // truncate() returns zero on success
-}
-
-
-int
-sync (void)
-{
-  _commit (fileno (stdout));
-  _commit (fileno (stderr));
-  fflush (NULL);                                // flushes all streams opened for output
-  return 0;
-}
-
-
 #if     defined __MINGW32__ && defined DLL
-// Ugly hack in order to fix something in zlib
+// ugly hack in order to fix something in zlib
 FILE *
 fdopen (int fd, const char *mode)
 {
   return _fdopen (fd, mode);
 }
-#endif
 
 
-#elif   defined AMIGA                           // _WIN32
-int
-truncate (const char *path, off_t size)
-{
-  BPTR fh;
-  ULONG newsize;
-
-  if (!(fh = Open (path, MODE_OLDFILE)))
-    return -1;
-
-  newsize = SetFileSize (fh, size, OFFSET_BEGINNING);
-  Close (fh);
-
-  return newsize == (ULONG) size ? 0 : -1;      // truncate() returns zero on success
-}
-
-
-int
-chmod (const char *path, mode_t mode)
-{
-  if (!SetProtection ((STRPTR) path,
-                      ((mode & S_IRUSR ? 0 : FIBF_READ) |
-                       (mode & S_IWUSR ? 0 : FIBF_WRITE | FIBF_DELETE) |
-                       (mode & S_IXUSR ? 0 : FIBF_EXECUTE) |
-                       (mode & S_IRGRP ? FIBF_GRP_READ : 0) |
-                       (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE : 0) |
-                       (mode & S_IXGRP ? FIBF_GRP_EXECUTE : 0) |
-                       (mode & S_IROTH ? FIBF_OTR_READ : 0) |
-                       (mode & S_IWOTH ? FIBF_OTR_WRITE | FIBF_OTR_DELETE : 0) |
-                       (mode & S_IXOTH ? FIBF_OTR_EXECUTE : 0))))
-    return -1;
-  else
-    return 0;
-}
-
-
-void
-sync (void)
-{
-}
-
-
-int
-readlink (const char *path, char *buf, int bufsize)
-{
-  (void) path;                                  // warning remover
-  (void) buf;                                   // idem
-  (void) bufsize;                               // idem
-  // always return -1 as if anything passed to it isn't a soft link
-  return -1;
-}
-
-
+#elif   defined AMIGA                           // __MINGW32__ && DLL
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
 FILE *

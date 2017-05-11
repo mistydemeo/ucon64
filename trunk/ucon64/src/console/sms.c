@@ -2,7 +2,7 @@
 sms.c - Sega Master System/Game Gear support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2003 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SMS_HEADER_START 0x7ff0
 #define SMS_HEADER_LEN (sizeof (st_sms_header_t))
 
-static int sms_chksum (unsigned char *rom_buffer, int rom_size);
+static int sms_chksum (unsigned char *rom_buffer, unsigned int rom_size);
 
 
 static st_ucon64_obj_t sms_obj[] =
@@ -143,10 +143,10 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
-  int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
 
   strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, console, size, dest_name);
+  mgd_make_name (ucon64.fname, console, size, dest_name, 1);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if ((buffer = (unsigned char *) malloc (size)) == NULL)
@@ -179,7 +179,7 @@ sms_smd (st_ucon64_nfo_t *rominfo)
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
-  int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
 
   memset (&header, 0, SMD_HEADER_LEN);
   header.size = (unsigned char) (size / 16384);
@@ -322,13 +322,14 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-sms_multi (int truncate_size, char *fname)
+sms_multi (unsigned int truncate_size, char *fname)
 {
 #define BUFSIZE 0x20000
 // BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
 //  equal to 1 Mbit (for checksum calculation)
-  int n, n_files, file_no, bytestowrite, byteswritten, done, truncated = 0,
-      totalsize = 0, size, org_do_not_calc_crc = ucon64.do_not_calc_crc;
+  unsigned int n, n_files, file_no, bytestowrite, byteswritten, done,
+               truncated = 0, totalsize = 0, size,
+               org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
@@ -423,7 +424,7 @@ sms_multi (int truncate_size, char *fname)
               bytestowrite = truncate_size - totalsize;
               done = 1;
               truncated = 1;
-              printf ("Output file needs %d Mbit on flash card, truncating %s, skipping %d bytes\n",
+              printf ("Output file needs %u Mbit on flash card, truncating %s, skipping %u bytes\n",
                       truncate_size / MBIT, ucon64.fname, size - (byteswritten + bytestowrite));
             }
           totalsize += bytestowrite;
@@ -513,9 +514,9 @@ sms_testinterleaved (st_ucon64_nfo_t *rominfo)
 }
 
 
-#define SEARCHBUFSIZE (SMS_HEADER_START + 8 + 16 * 1024)
+#define SEARCHBUFSIZE (SMS_HEADER_START + 12 + 16 * 1024)
 #define N_SEARCH_STR 4
-static int
+static unsigned int
 sms_header_len (void)
 /*
   At first sight it seems reasonable to also determine whether the file is
@@ -538,7 +539,7 @@ sms_header_len (void)
       char buffer[SEARCHBUFSIZE] = { 0 }, *ptr, *ptr2 = NULL,
            search_str[N_SEARCH_STR][9] = { "TMR SEGA", "TMR ALVS", "TMR SMSC",
              "TMG SEGA" };
-      int n;
+      unsigned int n;
 
       ucon64_fread (buffer, 0, SEARCHBUFSIZE, ucon64.fname);
 
@@ -554,17 +555,18 @@ sms_header_len (void)
             bytes being non-zero.
           */
           while ((ptr = (char *) memmem2 (ptr, SEARCHBUFSIZE - (ptr - buffer),
-                   search_str[n], 8, 0)) != NULL)
+                                          search_str[n], 8, 0)) != NULL)
             {
               if (!ptr2 ||
-                  (ptr - buffer >= 12 && ptr[10] != 0 && ptr[11] != 0))
+                   (SEARCHBUFSIZE - (ptr - buffer) >= 12 &&
+                    ptr[10] != '\0' && ptr[11] != '\0'))
                 ptr2 = ptr;
               ptr++;
             }
           if (ptr2)
             {
-              n = ptr2 - buffer - SMS_HEADER_START;
-              return n < 0 ? 0 : n;
+              int offset = ptr2 - buffer - SMS_HEADER_START;
+              return offset < 0 ? 0 : offset;
             }
         }
 
@@ -588,7 +590,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
   is_gamegear = 0;
   memset (&sms_header, 0, SMS_HEADER_LEN);
 
-  if (UCON64_ISSET (ucon64.backup_header_len))       // -hd, -nhd or -hdn option was specified
+  if (UCON64_ISSET2 (ucon64.backup_header_len, unsigned int)) // -hd, -nhd or -hdn switch was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
   else
     rominfo->backup_header_len = sms_header_len ();
@@ -649,7 +651,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
-      int size = ucon64.file_size - rominfo->backup_header_len;
+      unsigned int size = ucon64.file_size - rominfo->backup_header_len;
       if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
@@ -692,10 +694,10 @@ sms_init (st_ucon64_nfo_t *rominfo)
 
 
 static int
-sms_chksum (unsigned char *rom_buffer, int rom_size)
+sms_chksum (unsigned char *rom_buffer, unsigned int rom_size)
 {
   unsigned short int sum;
-  int i, i_end;
+  unsigned int i, i_end;
 
   switch (sms_header.checksum_range & 0xf)
     {
@@ -723,8 +725,8 @@ sms_chksum (unsigned char *rom_buffer, int rom_size)
   for (i = 0; i < i_end; i++)
     sum += rom_buffer[i];
 
-  if (i_end >= (int) (SMS_HEADER_START + SMS_HEADER_LEN))
-    for (i = SMS_HEADER_START; i < (int) (SMS_HEADER_START + SMS_HEADER_LEN); i++)
+  if (i_end >= SMS_HEADER_START + SMS_HEADER_LEN)
+    for (i = SMS_HEADER_START; i < SMS_HEADER_START + SMS_HEADER_LEN; i++)
       sum -= rom_buffer[i];
 
   return sum;

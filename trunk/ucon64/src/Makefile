@@ -526,7 +526,7 @@ misc/term.o: config.h $(TERM_H_DEPS) ucon64_defines.h
 misc/unzip.o: config.h misc/crypt.h misc/ioapi.h misc/unzip.h
 misc/usb.o: config.h misc/usb.h
 patch/aps.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
-             $(MISC_H_DEPS) $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) patch/aps.h \
+             $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) patch/aps.h \
              $(GETOPT2_H_DEPS)
 patch/bsl.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_H_DEPS) \
              $(UCON64_MISC_H_DEPS) patch/bsl.h $(GETOPT2_H_DEPS)
@@ -538,5 +538,5 @@ patch/ips.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
 patch/patch.o: config.h $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) patch/patch.h \
                $(GETOPT2_H_DEPS)
 patch/ppf.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
-             $(MISC_H_DEPS) misc/string.h $(UCON64_H_DEPS) \
-             $(UCON64_MISC_H_DEPS) patch/ppf.h $(GETOPT2_H_DEPS)
+             misc/string.h $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) patch/ppf.h \
+             $(GETOPT2_H_DEPS)

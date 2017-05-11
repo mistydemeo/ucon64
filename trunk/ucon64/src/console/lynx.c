@@ -1,8 +1,8 @@
 /*
 lynx.c - Atari Lynx support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2002 - 2005, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -92,9 +92,6 @@ const st_getopt2_t lynx_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
-const char *lynx_lyx_desc = "convert to LYX/RAW (strip 64 Bytes LNX header)";
-
-//static const char *lnx_usage[] = "LNX header";
 #define LNX_HEADER_START 0
 #define LNX_HEADER_LEN (sizeof (st_lnx_header_t))
 
@@ -128,7 +125,7 @@ lynx_lnx (st_ucon64_nfo_t *rominfo)
 {
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
-  int size = ucon64.file_size;
+  unsigned int size = ucon64.file_size;
 
   if (rominfo->backup_header_len != 0)
     {
@@ -153,7 +150,8 @@ lynx_lnx (st_ucon64_nfo_t *rominfo)
 
   memcpy (header.magic, "LYNX", 4);
   header.rotation = 0;
-  strncpy (header.cartname, basename2 (ucon64.fname), sizeof (header.cartname))[sizeof (header.cartname) - 1] = 0;
+  strncpy (header.cartname, basename2 (ucon64.fname), sizeof header.cartname - 1)
+    [sizeof header.cartname - 1] = '\0';
   strcpy (header.manufname, "Atari");
 
   strcpy (dest_name, ucon64.fname);
@@ -229,8 +227,8 @@ lynx_n (st_ucon64_nfo_t *rominfo, const char *name)
 
   ucon64_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.fname);
 
-  memset (header.cartname, 0, sizeof (header.cartname));
-  strncpy (header.cartname, name, sizeof (header.cartname));
+  strncpy (header.cartname, name, sizeof header.cartname - 1)
+    [sizeof header.cartname - 1] = '\0';
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -309,41 +307,45 @@ lynx_init (st_ucon64_nfo_t *rominfo)
 
   if (!strncmp (lnx_header.magic, "LYNX", 4))
     {
-      rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
-        ucon64.backup_header_len : (int) LNX_HEADER_LEN;
+      rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
+                                     ucon64.backup_header_len : LNX_HEADER_LEN;
 
-      if (UCON64_ISSET (ucon64.backup_header_len) && !ucon64.backup_header_len)
+      if (UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) &&
+          !ucon64.backup_header_len)
         return ucon64.console == UCON64_LYNX ? 0 : result;
 
       ucon64_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &lnx_header;
 
       // internal ROM name
-      strcpy (rominfo->name, lnx_header.cartname);
+      strncpy (rominfo->name, lnx_header.cartname, sizeof lnx_header.cartname - 1)
+        [sizeof lnx_header.cartname - 1] = '\0';
 
       // ROM maker
       rominfo->maker = lnx_header.manufname;
 
       // misc stuff
       sprintf (rominfo->misc,
-        "Internal Size: Bank0 %hd Bytes (%.4f Mb)\n"
-        "               Bank1 %hd Bytes (%.4f Mb)\n"
-        "Version: %hd\n"
-        "Rotation: %s",
+               "Internal Size: Bank0 %hd Bytes (%.4f Mb)\n"
+               "               Bank1 %hd Bytes (%.4f Mb)\n"
+               "Version: %hd\n"
+               "Rotation: %s",
 #ifdef  WORDS_BIGENDIAN
-        bswap_16 (lnx_header.page_size_bank0) * 256,
-        TOMBIT_F (bswap_16 (lnx_header.page_size_bank0) * 256),
-        bswap_16 (lnx_header.page_size_bank1) * 256,
-        TOMBIT_F (bswap_16 (lnx_header.page_size_bank1) * 256),
-        bswap_16 (lnx_header.version),
+               bswap_16 (lnx_header.page_size_bank0) * 256,
+               TOMBIT_F (bswap_16 (lnx_header.page_size_bank0) * 256),
+               bswap_16 (lnx_header.page_size_bank1) * 256,
+               TOMBIT_F (bswap_16 (lnx_header.page_size_bank1) * 256),
+               bswap_16 (lnx_header.version),
 #else
-        lnx_header.page_size_bank0 * 256,
-        TOMBIT_F (lnx_header.page_size_bank0 * 256),
-        lnx_header.page_size_bank1 * 256,
-        TOMBIT_F (lnx_header.page_size_bank1 * 256),
-        lnx_header.version,
+               lnx_header.page_size_bank0 * 256,
+               TOMBIT_F (lnx_header.page_size_bank0 * 256),
+               lnx_header.page_size_bank1 * 256,
+               TOMBIT_F (lnx_header.page_size_bank1 * 256),
+               lnx_header.version,
 #endif
-        (!lnx_header.rotation) ? "No" : ((lnx_header.rotation == 1) ? "Left" : "Right"));
+               !lnx_header.rotation ?
+                 "No" : lnx_header.rotation == 1 ?
+                   "Left" : "Right");
     }
 
   return result;

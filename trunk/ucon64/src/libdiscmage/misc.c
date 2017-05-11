@@ -1,9 +1,9 @@
 /*
 misc.c - miscellaneous functions
 
-Copyright (c) 1999 - 2004              NoisyB
-Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
-Copyright (c) 2002 - 2004              Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2008              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005              Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -103,21 +103,22 @@ typedef struct st_func_node
   struct st_func_node *next;
 } st_func_node_t;
 
+int cm_verbose = 0;
 static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 static int misc_ansi_color = 0;
 
 
 #ifndef USE_ZLIB
-int
+off_t
 q_fsize (const char *filename)
 {
   struct stat fstate;
 
+  errno = 0;
   if (!stat (filename, &fstate))
     return fstate.st_size;
 
-  errno = ENOENT;
   return -1;
 }
 #endif
@@ -186,7 +187,7 @@ getopt2_parse_usage (const char *usage_output)
           if (d)
             usage.name = d;
 
-          if (value)            // parse =VALUE
+          if (value)                            // parse =VALUE
             {
               d = strtok (NULL, " ");
 
@@ -224,7 +225,7 @@ string_code (char *d, const char *s)
 {
   char *p = d;
 
-  *p = 0;
+  *p = '\0';
   for (; *s; s++)
     switch (*s)
       {
@@ -237,9 +238,9 @@ string_code (char *d, const char *s)
         break;
 
       default:
-        p = strchr (p, 0);
+        p = strchr (p, '\0');
         *p = *s;
-        *(++p) = 0;
+        *(++p) = '\0';
       }
 
   return d;
@@ -285,7 +286,7 @@ getopt2_usage (const st_getopt2_t *usage)
   char buf[MAXBUFSIZE];
 
   for (i = 0; usage[i].name || usage[i].help; i++)
-    if (usage[i].help) // hidden options ARE allowed
+    if (usage[i].help)                          // hidden options ARE allowed
       {
         if (usage[i].name)
           {
@@ -301,7 +302,7 @@ getopt2_usage (const st_getopt2_t *usage)
             if (strlen (buf) < 16)
               {
                 strcat (buf, "                             ");
-                buf[16] = 0;
+                buf[16] = '\0';
               }
             fputs (buf, stdout);
           }
@@ -316,7 +317,7 @@ getopt2_usage (const st_getopt2_t *usage)
               for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
                 {
                   c = p2[1];
-                  p2[1] = 0;
+                  p2[1] = '\0';
                   fputs (p, stdout);
                   fputs ("                  ", stdout);
                   p2[1] = c;
@@ -342,12 +343,12 @@ getopt2_long (struct option *long_option, const st_getopt2_t *option, int n)
   memset (long_option, 0, sizeof (struct option) * n);
 
   for (; option[i].name || option[i].help; i++)
-    if (option[i].name) // IS option
+    if (option[i].name)                         // IS option
       {
         for (j = 0; j < i; j++)
           if (option[j].name)
             if (!strcmp (option[i].name, option[j].name))
-              break; // no dupes
+              break;                            // no dupes
 
         if (j == i && x < n)
           {
@@ -379,10 +380,10 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
   getopt2_sanity_check (option);
 #endif
 
-  *p = 0;
+  *p = '\0';
   for (; option[i].name || option[i].help; i++)
     if ((int) strlen (short_option) + 3 < n && option[i].name) // IS option
-      if (!option[i].name[1]) // IS short
+      if (!option[i].name[1])                   // IS short
         if (!strchr (short_option, option[i].name[0])) // no dupes
           {
             *p++ = option[i].name[0];
@@ -399,7 +400,7 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
                 fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
 #endif // DEBUG
               }
-            *p = 0;
+            *p = '\0';
           }
 #ifdef  DEBUG
   printf ("%s\n", short_option);
@@ -416,7 +417,7 @@ getopt2_get_index_by_val (const st_getopt2_t *option, int val)
   int x = 0;
 
   for (; option[x].name || option[x].help; x++)
-    if (option[x].name) // it IS an option
+    if (option[x].name)                         // it IS an option
       if (option[x].val == val)
         return &option[x];
 
@@ -456,7 +457,7 @@ vprintf2 (const char *format, va_list argptr)
 
       if (ptr > output)
         {
-          *ptr = 0;
+          *ptr = '\0';
           fputs (output, stdout);
           *ptr = 0x1b;
         }
@@ -522,7 +523,7 @@ vprintf2 (const char *format, va_list argptr)
               done = 1;
             }
 
-          ptr[n_print] = 0;
+          ptr[n_print] = '\0';
           ptr += n_ctrl;
           fputs (ptr, stdout);
           (ptr - n_ctrl)[n_print] = 0x1b;
@@ -602,7 +603,7 @@ ansi_init (void)
 #ifdef  DJGPP
   if (result)
     {
-      // Don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
+      // don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
       __dpmi_regs reg;
 
       reg.x.ax = 0x1a00;                        // DOS 4.0+ ANSI.SYS installation check
@@ -647,7 +648,7 @@ ansi_strip (char *str)
           }
         break;
       }
-  *s = 0;
+  *s = '\0';
 
   return str;
 }
@@ -657,11 +658,15 @@ ansi_strip (char *str)
 int
 isfname (int c)
 {
-  if (isalnum (c))
-    return TRUE;
-
-  // characters that are also allowed in filenames
-  return strchr (".,'+- ()[]!&", c) ? TRUE : FALSE;
+  // characters that are allowed in filenames (pre UTF-8)
+  return isalnum (c) || (c &&
+#ifndef __MSDOS__
+           strchr (" !#$%&'()-@^_`{}~+,;=[].", c));
+#else
+           // WinDOS can handle the above, but at this point I do not want to
+           //  add run-time checks whether we are running in Windows. - dbjh
+           strchr ("!#$%&'()-@^_`{}~", c));
+#endif
 }
 
 
@@ -671,7 +676,7 @@ isprint2 (int c)
   if (isprint (c))
     return TRUE;
 
-  // characters that also work with printf
+  // characters that also work with printf()
   if (c == '\x1b')
     return misc_ansi_color ? TRUE : FALSE;
 
@@ -747,7 +752,7 @@ strncpy2 (char *dest, const char *src, size_t size)
   if (dest)
     {
       strncpy (dest, src ? src : "", size);
-      dest[size] = 0;
+      dest[size] = '\0';
     }
   return dest;
 }
@@ -769,7 +774,7 @@ set_suffix (char *filename, const char *suffix)
     p = filename;
   if ((p2 = strrchr (p, '.')) != NULL)
     if (p2 != p)                                // files can start with '.'
-      *p2 = 0;
+      *p2 = '\0';
 
   strcpy (suffix2, suffix);
   strcat (filename, is_func (p, strlen (p), isupper2) ? strupr (suffix2) : strlwr (suffix2));
@@ -787,7 +792,7 @@ set_suffix_i (char *filename, const char *suffix)
     p = filename;
   if ((p2 = strrchr (p, '.')) != NULL)
     if (p2 != p)                                // files can start with '.'
-      *p2 = 0;
+      *p2 = '\0';
 
   strcat (filename, suffix);
 
@@ -825,7 +830,7 @@ strtrimr (char *str)
   j = i = strlen (str) - 1;
 
   while (isspace ((int) str[i]) && (i >= 0))
-    str[i--] = 0;
+    str[i--] = '\0';
 
   return j - i;
 }
@@ -961,7 +966,7 @@ mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
   char buf[17];
   const unsigned char *p = (const unsigned char *) buffer;
 
-  buf[16] = 0;
+  buf[16] = '\0';
   for (pos = 0; pos < n; pos++, p++)
     {
       if (!(pos & 15))
@@ -974,7 +979,7 @@ mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
     }
   if (pos & 15)
     {
-      *(buf + (pos & 15)) = 0;
+      *(buf + (pos & 15)) = '\0';
       puts (buf);
     }
 #endif
@@ -1041,7 +1046,7 @@ basename2 (const char *path)
     return NULL;
 
 #if     defined DJGPP || defined __CYGWIN__
-  // Yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
+  // yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
   // Cygwin has no basename()
   p1 = strrchr (path, '/');
   p2 = strrchr (path, '\\');
@@ -1077,7 +1082,7 @@ dirname2 (const char *path)
 
   strcpy (dir, path);
 #if     defined DJGPP || defined __CYGWIN__
-  // Yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
+  // yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
   // Cygwin has no dirname()
   p1 = strrchr (dir, '/');
   p2 = strrchr (dir, '\\');
@@ -1116,11 +1121,11 @@ dirname2 (const char *path)
 #endif                                          //  it was directly preceded by a drive letter
 
   if (p1)
-    *p1 = 0;                                    // terminate string (overwrite the separator)
+    *p1 = '\0';                                 // terminate string (overwrite the separator)
   else
     {
       dir[0] = '.';
-      dir[1] = 0;
+      dir[1] = '\0';
     }
 
   return dir;
@@ -1154,7 +1159,7 @@ realpath (const char *path, char *full_path)
 
   memset (got_path, 0, sizeof (got_path));
 
-  // Make a copy of the source path since we may need to modify it
+  // make a copy of the source path since we may need to modify it
   n = strlen (path);
   if (n >= FILENAME_MAX - 2)
     return NULL;
@@ -1163,7 +1168,7 @@ realpath (const char *path, char *full_path)
 
   strcpy (copy_path, path);
 #ifdef  DJGPP
-  // With DJGPP path can contain (forward) slashes
+  // with DJGPP path can contain (forward) slashes
   {
     int l = strlen (copy_path);
     for (n = 0; n < l; n++)
@@ -1206,10 +1211,10 @@ realpath (const char *path, char *full_path)
       path++;
     }
 
-  // Expand each (back)slash-separated pathname component
-  while (*path != 0)
+  // expand each (back)slash-separated pathname component
+  while (*path != '\0')
     {
-      // Ignore stray DIR_SEPARATOR
+      // ignore stray DIR_SEPARATOR
       if (*path == DIR_SEPARATOR)
         {
           path++;
@@ -1217,29 +1222,29 @@ realpath (const char *path, char *full_path)
         }
       if (*path == '.')
         {
-          // Ignore "."
-          if (path[1] == 0 || path[1] == DIR_SEPARATOR)
+          // ignore "."
+          if (path[1] == '\0' || path[1] == DIR_SEPARATOR)
             {
               path++;
               continue;
             }
           if (path[1] == '.')
             {
-              if (path[2] == 0 || path[2] == DIR_SEPARATOR)
+              if (path[2] == '\0' || path[2] == DIR_SEPARATOR)
                 {
                   path += 2;
-                  // Ignore ".." at root
+                  // ignore ".." at root
                   if (new_path == got_path + 1)
                     continue;
-                  // Handle ".." by backing up
+                  // handle ".." by backing up
                   while (*((--new_path) - 1) != DIR_SEPARATOR)
                     ;
                   continue;
                 }
             }
         }
-      // Safely copy the next pathname component
-      while (*path != 0 && *path != DIR_SEPARATOR)
+      // safely copy the next pathname component
+      while (*path != '\0' && *path != DIR_SEPARATOR)
         {
           if (path > max_path)
             return NULL;
@@ -1247,25 +1252,25 @@ realpath (const char *path, char *full_path)
           *new_path++ = *path++;
         }
 #ifdef  S_IFLNK
-      // Protect against infinite loops
+      // protect against infinite loops
       if (readlinks++ > MAX_READLINKS)
         return NULL;
 
-      // See if latest pathname component is a symlink
-      *new_path = 0;
+      // see if latest pathname component is a symlink
+      *new_path = '\0';
       n = readlink (got_path, link_path, FILENAME_MAX - 1);
       if (n < 0)
         {
           // EINVAL means the file exists but isn't a symlink
           if (errno != EINVAL && errno != ENOENT
 #ifdef  __BEOS__
-              // Make this function work for a mounted ext2 fs ("/:")
+              // make this function work for a mounted ext2 fs ("/:")
               && errno != B_NAME_TOO_LONG
 #endif
              )
             {
-              // Make sure it's null terminated
-              *new_path = 0;
+              // make sure it's null terminated
+              *new_path = '\0';
               strcpy (full_path, got_path);
               return NULL;
             }
@@ -1273,17 +1278,17 @@ realpath (const char *path, char *full_path)
       else
         {
           // NOTE: readlink() doesn't add the null byte
-          link_path[n] = 0;
+          link_path[n] = '\0';
           if (*link_path == DIR_SEPARATOR)
-            // Start over for an absolute symlink
+            // start over for an absolute symlink
             new_path = got_path;
           else
-            // Otherwise back up over this component
+            // otherwise back up over this component
             while (*(--new_path) != DIR_SEPARATOR)
               ;
           if (strlen (path) + n >= FILENAME_MAX - 2)
             return NULL;
-          // Insert symlink contents into path
+          // insert symlink contents into path
           strcat (link_path, path);
           strcpy (copy_path, link_path);
           path = copy_path;
@@ -1291,7 +1296,7 @@ realpath (const char *path, char *full_path)
 #endif // S_IFLNK
       *new_path++ = DIR_SEPARATOR;
     }
-  // Delete trailing slash but don't whomp a lone slash
+  // delete trailing slash but don't whomp a lone slash
   if (new_path != got_path + 1 && *(new_path - 1) == DIR_SEPARATOR)
     {
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
@@ -1312,8 +1317,8 @@ realpath (const char *path, char *full_path)
       new_path--;
 #endif
     }
-  // Make sure it's null terminated
-  *new_path = 0;
+  // make sure it's null terminated
+  *new_path = '\0';
   strcpy (full_path, got_path);
 
   return full_path;
@@ -1326,11 +1331,11 @@ realpath (const char *path, char *full_path)
 
   c = (char) toupper (full_path[0]);
   n = strlen (full_path) - 1;
-  // Remove trailing separator if full_path is not the root dir of a drive,
+  // remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
   if (full_path[n] == DIR_SEPARATOR &&
-      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == DIR_SEPARATOR
-    full_path[n] = 0;
+      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == '\0')) // && full_path[2] == DIR_SEPARATOR
+    full_path[n] = '\0';
 
   return full_path;
 #elif   defined AMIGA
@@ -1356,7 +1361,7 @@ realpath2 (const char *path, char *full_path)
 #endif
          )
         sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
-      else if (path[1] == 0)
+      else if (path[1] == '\0')
         strcpy (path1, getenv2 ("HOME"));
       path2 = path1;
     }
@@ -1378,7 +1383,7 @@ realpath2 (const char *path, char *full_path)
       else
         full_path = strdup (path2);
 #ifdef  DJGPP
-      // With DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
+      // with DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
       //  returns a path with forward slashes)
       {
         int n, l = strlen (full_path);
@@ -1388,7 +1393,7 @@ realpath2 (const char *path, char *full_path)
       }
 #endif
       errno = ENOENT;
-      return 0;
+      return NULL;
     }
 }
 
@@ -1484,7 +1489,7 @@ one_filesystem (const char *filename1, const char *filename2)
       d2 = (char) toupper (path2[0]);
       if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z')
         if (strlen (path1) >= 2 && strlen (path2) >= 2)
-          // We don't handle unique volume names
+          // we don't handle unique volume names
           if (path1[1] == ':' && path2[1] == ':')
             return 1;
       return 0;
@@ -1520,7 +1525,7 @@ rename2 (const char *oldname, const char *newname)
   char *dir1 = dirname2 (oldname), *dir2 = dirname2 (newname);
   struct stat fstate;
 
-  // We should use dirname{2}() in case oldname or newname doesn't exist yet
+  // we should use dirname{2}() in case oldname or newname doesn't exist yet
   if (one_filesystem (dir1, dir2))
     {
       if (access (newname, F_OK) == 0)
@@ -1550,9 +1555,9 @@ rename2 (const char *oldname, const char *newname)
 
 
 int
-truncate2 (const char *filename, int new_size)
+truncate2 (const char *filename, off_t new_size)
 {
-  int size = q_fsize (filename);
+  off_t size = q_fsize (filename);
   struct stat fstate;
 
   stat (filename, &fstate);
@@ -1587,12 +1592,13 @@ truncate2 (const char *filename, int new_size)
 
 
 int
-change_mem (char *buf, int bufsize, char *searchstr, int strsize, char wc,
-            char esc, char *newstr, int newsize, int offset, ...)
+change_mem (char *buf, unsigned int bufsize, char *searchstr,
+            unsigned int strsize, char wc, char esc, char *newstr,
+            unsigned int newsize, int offset, ...)
 // convenience wrapper for change_mem2()
 {
   va_list argptr;
-  int i, n_esc = 0, retval;
+  unsigned int i, n_esc = 0, retval;
   st_cm_set_t *sets;
 
   for (i = 0; i < strsize; i++)
@@ -1615,8 +1621,9 @@ change_mem (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
 
 int
-change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
-             char esc, char *newstr, int newsize, int offset, st_cm_set_t *sets)
+change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
+             unsigned int strsize, char wc, char esc, char *newstr,
+             unsigned int newsize, int offset, st_cm_set_t *sets)
 /*
   Search for all occurrences of string searchstr in buf and replace newsize
   bytes in buf by copying string newstr to the end of the found search string
@@ -1654,11 +1661,11 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 */
 {
   char *set;
-  int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc, n_matches = 0,
-      setindex = 0;
+  unsigned int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc,
+               n_matches = 0, setindex = 0;
   const char *overflow_msg =
-               "WARNING: The combination of buffer position (%d), offset (%d) and\n"
-               "         replacement size (%d) would cause a buffer overflow -- ignoring\n"
+               "WARNING: The combination of buffer position (%u), offset (%d) and\n"
+               "         replacement size (%u) would cause a buffer overflow -- ignoring\n"
                "         match\n";
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
@@ -1672,7 +1679,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
         {
           if (strpos == pos_1st_esc)
             setindex = 0;                       // reset argument pointer
-          if (pos_1st_esc == -1)
+          if (pos_1st_esc == (unsigned int) -1)
             pos_1st_esc = strpos;
 
           set = sets[setindex].data;            // get next set of characters
@@ -1687,8 +1694,15 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
           if (strpos == strsize - 1)            // check if we are at the end of searchstr
             {
-              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+              if ((int) bufpos + offset >= 0 &&
+                  bufpos + offset + newsize <= bufsize)
                 {
+                  if (cm_verbose > 0)
+                    {
+                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                              offset, offset, bufpos + offset, bufpos + offset);
+                      mem_hexdump (buf + bufpos - strpos, strsize, bufpos - strpos);
+                    }
                   memcpy (buf + bufpos + offset, newstr, newsize);
                   n_matches++;
                 }
@@ -1712,8 +1726,15 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+              if ((int) bufpos + offset >= 0 &&
+                  bufpos + offset + newsize <= bufsize)
                 {
+                  if (cm_verbose > 0)
+                    {
+                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                              offset, offset, bufpos + offset, bufpos + offset);
+                      mem_hexdump (buf + bufpos - strpos, strsize, bufpos - strpos);
+                    }
                   memcpy (buf + bufpos + offset, newstr, newsize);
                   n_matches++;
                 }
@@ -1736,17 +1757,24 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
       if (searchstr[strpos] == esc)
         {
-          bufpos--;                             // current char has to be checked, but `for'
+          bufpos--;                             // current char has to be checked, but "for"
           continue;                             //  increments bufpos
         }
 
-      // no escape char, no wildcard -> normal character
+      // no escape char, no wildcard => normal character
       if (searchstr[strpos] == buf[bufpos])
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if (bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+              if ((int) bufpos + offset >= 0 &&
+                  bufpos + offset + newsize <= bufsize)
                 {
+                  if (cm_verbose > 0)
+                    {
+                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                              offset, offset, bufpos + offset, bufpos + offset);
+                      mem_hexdump (buf + bufpos - strpos, strsize, bufpos - strpos);
+                    }
                   memcpy (buf + bufpos + offset, newstr, newsize);
                   n_matches++;
                 }
@@ -1762,7 +1790,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
           bufpos -= n_wc;                       // scan the most recent wildcards too if
           if (strpos > 0)                       //  the character didn't match
             {
-              bufpos--;                         // current char has to be checked, but `for'
+              bufpos--;                         // current char has to be checked, but "for"
               strpos = 0;                       //  increments bufpos
             }
         }
@@ -1773,7 +1801,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 
 
 int
-build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose)
+build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
 /*
   This function goes a bit over the top what memory allocation technique
   concerns, but at least it's stable.
@@ -1784,8 +1812,9 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 {
   char src_name[FILENAME_MAX], line[MAXBUFSIZE], buffer[MAXBUFSIZE],
        *token, *last, *ptr;
-  int line_num = 0, n_sets, n_codes = 0, n, currentsize1, requiredsize1,
-      currentsize2, requiredsize2, currentsize3, requiredsize3;
+  unsigned int line_num = 0, n_sets, n, currentsize1, requiredsize1,
+               currentsize2, requiredsize2, currentsize3, requiredsize3;
+  int n_codes = 0;
   FILE *srcfile;
 
   strcpy (src_name, filename);
@@ -1809,7 +1838,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
       if (*ptr == '#' || *ptr == '\n' || *ptr == '\r')
         continue;
       if ((ptr = strpbrk (line, "\n\r#")) != NULL) // text after # is comment
-        *ptr = 0;
+        *ptr = '\0';
 
       requiredsize1 += sizeof (st_cm_pattern_t);
       if (requiredsize1 > currentsize1)
@@ -1913,7 +1942,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           n++;
         }
       while ((token = strtok (NULL, " ")) != NULL);
-      (*patterns)[n_codes].replace_size = n;  // size in bytes
+      (*patterns)[n_codes].replace_size = n;    // size in bytes
 
       strcpy (buffer, line);
       token = strtok (last, ":");
@@ -1927,14 +1956,15 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
         }
       (*patterns)[n_codes].offset = strtol (token, NULL, 10); // yes, offset is decimal
 
-      if (verbose)
+      if (cm_verbose)
         {
-          printf ("line:         %d\n"
+          printf ("pattern:      %d\n"
+                  "line:         %u\n"
                   "searchstring: ",
-                  line_num);
+                  n_codes + 1, line_num);
           for (n = 0; n < (*patterns)[n_codes].search_size; n++)
             printf ("%02x ", (unsigned char) (*patterns)[n_codes].search[n]);
-          printf ("(%d)\n"
+          printf ("(%u)\n"
                   "wildcard:     %02x\n"
                   "escape:       %02x\n"
                   "replacement:  ",
@@ -1943,7 +1973,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
                   (unsigned char) (*patterns)[n_codes].escape);
           for (n = 0; n < (*patterns)[n_codes].replace_size; n++)
             printf ("%02x ", (unsigned char) (*patterns)[n_codes].replace[n]);
-          printf ("(%d)\n"
+          printf ("(%u)\n"
                   "offset:       %d\n",
                   (*patterns)[n_codes].replace_size,
                   (*patterns)[n_codes].offset);
@@ -2004,12 +2034,12 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
           while ((token = strtok (NULL, " ")) != NULL);
           (*patterns)[n_codes].sets[n_sets].size = n;
 
-          if (verbose)
+          if (cm_verbose)
             {
               printf ("set:          ");
               for (n = 0; n < (*patterns)[n_codes].sets[n_sets].size; n++)
                 printf ("%02x ", (unsigned char) (*patterns)[n_codes].sets[n_sets].data[n]);
-              printf ("(%d)\n", (*patterns)[n_codes].sets[n_sets].size);
+              printf ("(%u)\n", (*patterns)[n_codes].sets[n_sets].size);
             }
 
           strcpy (buffer, line);
@@ -2023,7 +2053,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 
       n_codes++;
 
-      if (verbose)
+      if (cm_verbose)
         fputc ('\n', stdout);
     }
   fclose (srcfile);
@@ -2034,9 +2064,12 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
 void
 cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 {
-  int n, m;
+  int n;
+
   for (n = 0; n < n_patterns; n++)
     {
+      unsigned int m;
+
       free ((*patterns)[n].search);
       (*patterns)[n].search = NULL;
       free ((*patterns)[n].replace);
@@ -2550,10 +2583,10 @@ drop_privileges (void)
       fputs ("ERROR: Could not set uid\n", stderr);
       return 1;
     }
-  gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was used,
+  gid = getgid ();                              // this shouldn't be necessary
+  if (setgid (gid) == -1)                       //  if "make install" was used,
     {                                           //  but just in case (root did
-      fputs ("ERROR: Could not set gid\n", stderr); //  `chmod +s')
+      fputs ("ERROR: Could not set gid\n", stderr); //  "chmod +s")
       return 1;
     }
 
@@ -2683,7 +2716,7 @@ wait2 (int nmillis)
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
 #elif   defined AMIGA
-  Delay (nmillis * 1000);
+  Delay (nmillis > 20 ? nmillis / 20 : 1);      // 50Hz clock, so interval is 20ms
 #elif   defined _WIN32
   Sleep (nmillis);
 #else
@@ -2728,7 +2761,7 @@ q_fbackup (const char *filename, int mode)
           exit (1);
         }
       strcpy (buf, dir);
-      if (buf[0] != 0)
+      if (buf[0] != '\0')
         if (buf[strlen (buf) - 1] != DIR_SEPARATOR)
           strcat (buf, DIR_SEPARATOR_S);
 
@@ -2799,7 +2832,7 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
 int
 q_rfcpy (const char *src, const char *dest)
 // Raw file copy function. Raw, because it will copy the file data as it is,
-//  unlike q_fcpy()
+//  unlike q_fcpy().
 {
 #ifdef  USE_ZLIB
 #undef  fopen
@@ -2844,8 +2877,8 @@ q_fswap (const char *filename, int start, int len, swap_t type)
   char buf[MAXBUFSIZE];
   struct stat fstate;
 
-  // First (try to) change the file mode or we won't be able to write to it if
-  //  it's a read-only file.
+  // first (try to) change the file mode or we won't be able to write to it if
+  //  it's a read-only file
   stat (filename, &fstate);
   if (chmod (filename, fstate.st_mode | S_IWUSR))
     {
@@ -2867,7 +2900,7 @@ q_fswap (const char *filename, int start, int len, swap_t type)
         break;
       if (type == SWAP_BYTE)
         mem_swap_b (buf, seg_len);
-      else // SWAP_WORD
+      else                                      // SWAP_WORD
         mem_swap_w (buf, seg_len);
       fseek (fh, -seg_len, SEEK_CUR);
       fwrite (buf, 1, seg_len, fh);

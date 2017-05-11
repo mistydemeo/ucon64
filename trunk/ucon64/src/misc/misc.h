@@ -1,9 +1,9 @@
 /*
 misc.h - miscellaneous functions
 
-Copyright (c) 1999 - 2005 NoisyB
-Copyright (c) 2001 - 2005 dbjh
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2008              NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2004              Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -149,7 +149,7 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
                   gauge())
   misc_percent()  returns percentage of progress (useful in combination with
                   gauge())
-  drop_privileges() switch to the real user and group id (leave "root mode")
+  drop_privileges() switch to the real user and group ID (leave "root mode")
   register_func() atexit() replacement
                   returns -1 if it fails, 0 if it was successful
   unregister_func() unregisters a previously registered function
@@ -161,7 +161,7 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
 typedef struct st_cm_set
 {
   char *data;
-  int size;
+  unsigned int size;
 } st_cm_set_t;
 
 typedef struct st_cm_pattern
@@ -174,17 +174,20 @@ typedef struct st_cm_pattern
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
-  int search_size, replace_size, offset, n_sets;
+  unsigned int search_size, replace_size, n_sets;
+  int offset;
   st_cm_set_t *sets;
 } st_cm_pattern_t;
 
-extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
-                       char wc, char esc, char *newstr, int newsize, int offset, ...);
-extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
-                        char wc, char esc, char *newstr, int newsize,
-                        int offset, st_cm_set_t *sets);
-extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose);
+extern int change_mem (char *buf, unsigned int bufsize, char *searchstr,
+                       unsigned int strsize, char wc, char esc, char *newstr,
+                       unsigned int newsize, int offset, ...);
+extern int change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
+                        unsigned int strsize, char wc, char esc, char *newstr,
+                        unsigned int newsize, int offset, st_cm_set_t *sets);
+extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename);
 extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
+extern int cm_verbose;
 
 extern int bytes_per_second (time_t start_time, int nbytes);
 extern int misc_percent (int pos, int len);
@@ -202,18 +205,12 @@ extern int misc_digits (unsigned long value);
 /*
   Portability and Fixes
 
-  truncate()
-  sync()
   popen()
   pclose()
 */
 #ifdef  _WIN32
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.
-#include <sys/types.h>
-
-extern int truncate (const char *path, off_t size);
-extern int sync (void);
 
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
@@ -269,7 +266,7 @@ extern int sync (void);
 #endif // _WIN32
 
 #ifdef  AMIGA
-// The compiler used by Jan-Erik doesn't have snprintf(). - dbjh
+// The compiler used by Jan-Erik doesn't have snprintf().
 #include "misc/snprintf.h"
 
 // custom _popen() and _pclose(), because the standard ones (named popen() and

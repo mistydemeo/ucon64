@@ -294,6 +294,7 @@ enum
   UCON64_SMC,
   UCON64_SMD,
   UCON64_SMDS,
+  UCON64_SMGH,
   UCON64_SRAM,
   UCON64_SSC,
   UCON64_SSIZE,
@@ -341,8 +342,8 @@ enum
   UCON64_XFALC,
   UCON64_XFALMULTI,
   UCON64_XFALS,
-  UCON64_XFALM,                                 // actually only necessary for the Windows
-  UCON64_XFIG,                                  //  ports, but might be useful for others too
+  UCON64_XFALM,
+  UCON64_XFIG,
   UCON64_XFIGS,
   UCON64_XFIGC,
   UCON64_XGBX,

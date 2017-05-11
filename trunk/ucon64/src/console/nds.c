@@ -212,11 +212,11 @@ nds_init (st_ucon64_nfo_t *rominfo)
   int result = -1, value, pos;
   char buf[144];
 
-  rominfo->backup_header_len = UCON64_ISSET (ucon64.backup_header_len) ?
+  rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
                                  ucon64.backup_header_len : 0;
 
   if (ucon64.file_size - rominfo->backup_header_len <
-        (int) (NDS_HEADER_START + NDS_HEADER_LEN))
+        NDS_HEADER_START + NDS_HEADER_LEN)
     return -1;
 
   ucon64_fread (&nds_header, NDS_HEADER_START + rominfo->backup_header_len,

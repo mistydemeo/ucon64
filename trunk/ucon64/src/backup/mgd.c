@@ -1,8 +1,8 @@
 /*
 mgd.c - Multi Game Doctor/Hunter support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -32,8 +32,8 @@ const st_getopt2_t mgd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Multi Game Doctor (2)/Multi Game Hunter/MGH"
-      /*"19XX Bung Enterprises Ltd http://www.bung.com.hk\n" "?Makko Toys Co., Ltd.?"*/,
+      NULL, "Multi Game Doctor (2)/MGD/Multi Game Hunter/MGH"
+      /*"19XX Bung Enterprises Ltd http://www.bung.com.hk\n" "?Makko Toys Co., Ltd.?" "Venus Corp. (MGH) */,
       NULL
     },
 #if 0
@@ -187,10 +187,11 @@ remove_mgd_id (char *name, const char *id)
 
 
 void
-mgd_make_name (const char *filename, int console, int size, char *name)
+mgd_make_name (const char *filename, int console, unsigned int size, char *name,
+               int add_suffix)
 // these characters are also valid in MGD file names: !@#$%^&_
 {
-  char *prefix = 0, *p, *size_str = 0, *suffix = 0;
+  char *prefix = NULL, *p, *size_str = NULL, *suffix = NULL;
   const char *fname;
   int n;
 
@@ -371,42 +372,22 @@ mgd_make_name (const char *filename, int console, int size, char *name)
 
   fname = basename2 (filename);
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
-  sprintf (name, "%s%s%s", prefix, size_str, fname);
-  if (size >= 10 * MBIT)
-    {
-      if (!strnicmp (name, fname, 4))
-        strcpy (name, fname);
-    }
-  else
-    {
-      if (!strnicmp (name, fname, 3))
-        strcpy (name, fname);
-    }
+  sprintf (name, "%s%s%.3s", prefix, size_str, fname);
+  if (!strnicmp (name, fname, size < 10 * MBIT ? 3 : 4))
+    strcpy (name, fname);
   if ((p = strchr (name, '.')) != NULL)
-    *p = 0;
-  n = strlen (name);
-  if (size >= 10 * MBIT)
-    {
-      if (n < 7)
-        strcat (name, "XXX");                   // in case fname is 1 character long
-      n = 7;
-    }
-  else
-    {
-      if (n < 6)
-        strcat (name, "XX");
-      n = 6;
-    }
+    *p = '\0';
+  strcat (name, "XX");
+  n = size < 10 * MBIT ? 6 : 7;
   name[n] = '0';                                // last character must be a number
-  name[n + 1] = 0;
-  for (n = 3; n < 8; n++)                       // we can skip the prefix
+  name[n + 1] = '\0';
+  for (n--; n >= 3; n--)                        // skip prefix and first digit
     if (name[n] == ' ')
       name[n] = 'X';
 
   /*
-    the transfer program "pclink" contains a bug in that it looks at the
-    entire file name for an ID string (it should look only at the first 2
-    characters).
+    The transfer program "pclink" contains a bug in that it looks at the entire
+    filename for an ID string (it should look only at the first 2 characters).
   */
   strupr (name);
   remove_mgd_id (name + 3, "SF");
@@ -415,39 +396,30 @@ mgd_make_name (const char *filename, int console, int size, char *name)
   remove_mgd_id (name + 3, "GG");
   remove_mgd_id (name + 3, "GB");
 
-  set_suffix (name, suffix);
+  if (add_suffix)
+    set_suffix (name, suffix);
 }
 
 
 void
 mgd_write_index_file (void *ptr, int n_names)
 {
-  char buf[100 * 10], *p, name[16], dest_name[FILENAME_MAX];
+  char buf[100 * 10], *p, name[9], dest_name[FILENAME_MAX];
   // one line in the index file takes 10 bytes at max (name (8) + "\r\n" (2)),
   //  so buf is large enough for 44 files of 1/4 Mbit (max for 1 diskette)
+  int n = 0, offset = 0;
 
-  if (n_names == 1)
-    {
-      strcpy (name, (char *) ptr);
-      if ((p = strrchr (name, '.')) != NULL)
-        *p = 0;
-      sprintf (buf, "%s\r\n", name);            // DOS text file format
-    }
-  else if (n_names > 1)
-    {
-      int n = 0, offset = 0;
-
-      for (; n < n_names; n++)
-        {
-          strcpy (name, ((char **) ptr)[n]);
-          if ((p = strrchr (name, '.')) != NULL)
-            *p = 0;
-          sprintf (buf + offset, "%s\r\n", name);
-          offset += strlen (name) + 2;          // + 2 for "\r\n"
-        }
-    }
-  else // n_names <= 0
+  if (n_names <= 0)
     return;
+  for (; n < n_names; n++)
+    {
+      strncpy (name, n_names > 1 ? ((char **) ptr)[n] : (char *) ptr, 8)[8] =
+        '\0';
+      if ((p = strrchr (name, '.')) != NULL)
+        *p = '\0';
+      sprintf (buf + offset, "%s\r\n", name);   // DOS text file format
+      offset += strlen (name) + 2;              // + 2 for "\r\n"
+    }
 
   strcpy (dest_name, "MULTI-GD");
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);

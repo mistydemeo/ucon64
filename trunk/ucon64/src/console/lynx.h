@@ -39,7 +39,6 @@ typedef struct st_lnx_header
 
 
 extern const st_getopt2_t lynx_usage[];
-extern const char *lynx_lyx_desc;
 
 extern int lynx_b0 (st_ucon64_nfo_t *rominfo, const char *value);
 extern int lynx_b1 (st_ucon64_nfo_t *rominfo, const char *value);

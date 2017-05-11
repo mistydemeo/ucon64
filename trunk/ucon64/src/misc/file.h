@@ -1,9 +1,9 @@
 /*
 file.h - miscellaneous file functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
-Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2004             NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 dbjh
+Copyright (c) 2002 - 2004             Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -96,7 +96,7 @@ extern char *set_suffix (char *filename, const char *suffix);
 extern int one_file (const char *filename1, const char *filename2);
 extern int one_filesystem (const char *filename1, const char *filename2);
 extern int rename2 (const char *oldname, const char *newname);
-extern int truncate2 (const char *filename, off_t size);
+extern int truncate2 (const char *filename, off_t new_size);
 extern char *tmpnam2 (char *temp);
 typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
 extern char *mkbak (const char *filename, backup_t type);
@@ -105,7 +105,7 @@ extern int fcopy (const char *src, size_t start, size_t len, const char *dest,
 extern int fcopy_raw (const char *src, const char *dest);
 #ifndef  USE_ZLIB
 // archive.h's definition gets higher precedence
-extern int fsizeof (const char *filename);
+extern off_t fsizeof (const char *filename);
 #endif
 extern int quick_io (void *buffer, size_t start, size_t len, const char *fname,
                      const char *mode);
@@ -113,5 +113,17 @@ extern int quick_io_c (int value, size_t pos, const char *fname, const char *mod
 extern int quick_io_func (int (*callback_func) (void *, int, void *),
                           int func_maxlen, void *object, size_t start,
                           size_t len, const char *fname, const char *mode);
+
+
+/*
+  Portability and Fixes
+
+  truncate()
+  sync()
+*/
+#if     defined _WIN32 || defined AMIGA
+extern int truncate (const char *path, off_t size);
+extern int sync (void);
+#endif
 
 #endif // MISC_FILE_H

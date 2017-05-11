@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/string.h"
 #include "misc/term.h"
 #include "ucon64_misc.h"
-#include "console/snes.h"                       // for snes_make_gd_names() &
+#include "console/snes.h"                       // for snes_gd_make_names() &
 #include "backup/gd.h"                          //  snes_get_snes_hirom()
 
 
@@ -614,7 +614,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   if (!ucon64.split)
     {
       split = 0;
-      num_units = snes_make_gd_names (filename, rominfo, (char **) names);
+      num_units = snes_gd_make_names (filename, rominfo, (char **) names);
     }
 
   dirname2 (filename, dir);

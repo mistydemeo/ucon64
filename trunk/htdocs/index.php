@@ -133,7 +133,7 @@ Screenshots: <a href="images/ucon64_ss1.png">1</a>|<a href="images/ucon64_ss2.pn
 <a name="download"></a>
 <img src="images/download.png"><br>
 <b>CVS</b><br>
-To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3">this</a><br>
+To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3">this</a> or click <a href="http://ucon64.cvs.sourceforge.net/viewvc/ucon64/ucon64/?view=tar">here</a> to download a GNU tarball<br>
 <br>
 <b>Sources</b><br><font size="-1">
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-src.tar.gz/download">ucon64-2.0.3-src.tar.gz</a><br>

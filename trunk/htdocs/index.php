@@ -299,10 +299,15 @@ on Sourceforge CVS).<br>
 This project is free for "adoption" since all original developers forked to a
 closed source project with the same name but a different license.<br>
 --><br>
-<img src="images/dos.png"><br>
+<img src="images/win32.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/userport.zip?download">userport.zip</a><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/giveio.zip?download">giveio.zip</a><br>
-I/O port driver for Windows NT, Windows 2000 or Windows XP<br>
+I/O port drivers for 32-bit Windows (95/98/ME/NT/2000/XP/2003/Vista/7)<br>
+Only necessary to access the parallel port. UserPort does not work for uCON64 2.1.0 and newer<br>
+<br>
+<img src="images/win32.png"><br>
+<a href="http://prdownloads.sourceforge.net/ucon64/giveio64.zip?download">giveio64.zip</a><br>
+I/O port driver for 64-bit Windows (XP/2003/Vista/7/8/8.1/10)<br>
 Only necessary to access the parallel port<br>
 <br>
 <img src="images/dos.png"><br>
@@ -327,7 +332,7 @@ zlib.dll<br>
 <a href="http://www.cygwin.com"><img src="images/cygwin-icon.png" border="0"></a> (Cygwin)<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/cygwindll.zip?download">cygwindll.zip</a><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/cygzdll.zip?download">cygzdll.zip</a><br>
-Needed by the uCON64 Cygwin port to work<br>
+Needed by the Cygwin port of uCON64 2.0.0 and older to work. Not needed by the Cygwin port of uCON64 2.0.1 and newer<br>
 <br>
 <img src="images/beos.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/ioport.zip?download">ioport.zip</a><br>

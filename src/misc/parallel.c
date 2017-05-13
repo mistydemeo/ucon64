@@ -1010,7 +1010,7 @@ parport_reset_timeout (unsigned short port)
 #endif
 }
 
- 
+
 void
 parport_close (void)
 {

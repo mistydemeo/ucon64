@@ -302,7 +302,7 @@ closed source project with the same name but a different license.<br>
 <img src="images/win32.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/userport.zip?download">userport.zip</a><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/giveio.zip?download">giveio.zip</a><br>
-I/O port drivers for 32-bit Windows (95/98/ME/NT/2000/XP/2003/Vista/7)<br>
+I/O port drivers for 32-bit Windows (NT/2000/XP/2003/Vista/7)<br>
 Only necessary to access the parallel port. UserPort does not work for uCON64 2.1.0 and newer<br>
 <br>
 <img src="images/win32.png"><br>

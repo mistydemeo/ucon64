@@ -323,42 +323,10 @@ ucon64_switches (st_ucon64_t *p)
       privileges before libcd64 is initialised (after cd64_t.devopen() has been
       called).
     */
-    case UCON64_XCMC:
-    case UCON64_XCMCT:
-    case UCON64_XMCCL:
-    case UCON64_XMCD:
-      ucon64.parport_mode = PPMODE_SPP_BIDIR;
-    case UCON64_XDJR:
-    case UCON64_XF2A:                           // could be for USB version
-    case UCON64_XF2AMULTI:                      // idem
-    case UCON64_XF2AC:                          // idem
-    case UCON64_XF2AS:                          // idem
-    case UCON64_XF2AB:                          // idem
-    case UCON64_XFAL:
-    case UCON64_XFALMULTI:
-    case UCON64_XFALC:
-    case UCON64_XFALS:
-    case UCON64_XFALB:
-    case UCON64_XGBX:
-    case UCON64_XGBXS:
-    case UCON64_XGBXB:
-    case UCON64_XGG:
-    case UCON64_XGGS:
-    case UCON64_XGGB:
-    case UCON64_XMD:
-    case UCON64_XMDS:
-    case UCON64_XMDB:
-    case UCON64_XPCE:
-    case UCON64_XPL:
-    case UCON64_XPLI:
-    case UCON64_XSF:
-    case UCON64_XSFS:
-      if (ucon64.parport_mode == (parport_mode_t) UCON64_UNKNOWN)
-        ucon64.parport_mode = PPMODE_EPP;
     case UCON64_XDEX:
     case UCON64_XFIG:
-    case UCON64_XFIGS:
     case UCON64_XFIGC:
+    case UCON64_XFIGS:
     case UCON64_XGD3:
     case UCON64_XGD3R:
     case UCON64_XGD3S:
@@ -374,12 +342,45 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XSMDS:
     case UCON64_XSWC:
     case UCON64_XSWC2:
+    case UCON64_XSWCC:
     case UCON64_XSWCR:
     case UCON64_XSWCS:
-    case UCON64_XSWCC:
     case UCON64_XV64:
-      if (ucon64.parport_mode == (parport_mode_t) UCON64_UNKNOWN)
+      if (!UCON64_ISSET2 (ucon64.parport_mode, parport_mode_t))
         ucon64.parport_mode = PPMODE_SPP;
+    case UCON64_XCMC:
+    case UCON64_XCMCT:
+    case UCON64_XMCCL:
+    case UCON64_XMCD:
+      if (!UCON64_ISSET2 (ucon64.parport_mode, parport_mode_t))
+        ucon64.parport_mode = PPMODE_SPP_BIDIR;
+    case UCON64_XDJR:
+    case UCON64_XF2A:                           // could be for USB version
+    case UCON64_XF2AMULTI:                      // idem
+    case UCON64_XF2AB:                          // idem
+    case UCON64_XF2AC:                          // idem
+    case UCON64_XF2AS:                          // idem
+    case UCON64_XFAL:
+    case UCON64_XFALMULTI:
+    case UCON64_XFALB:
+    case UCON64_XFALC:
+    case UCON64_XFALS:
+    case UCON64_XGBX:
+    case UCON64_XGBXB:
+    case UCON64_XGBXS:
+    case UCON64_XGG:
+    case UCON64_XGGB:
+    case UCON64_XGGS:
+    case UCON64_XMD:
+    case UCON64_XMDB:
+    case UCON64_XMDS:
+    case UCON64_XPCE:
+    case UCON64_XPL:
+    case UCON64_XPLI:
+    case UCON64_XSF:
+    case UCON64_XSFS:
+      if (!UCON64_ISSET2 (ucon64.parport_mode, parport_mode_t))
+        ucon64.parport_mode = PPMODE_EPP;
 #ifdef  USE_USB
       if (!ucon64.usbport)                      // no pport I/O if F2A option and USB F2A
 #endif
@@ -396,7 +397,8 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XCD64M:
     case UCON64_XCD64S:
 #ifdef  USE_PARALLEL
-      ucon64.parport_mode = PPMODE_SPP_BIDIR;
+      if (!UCON64_ISSET2 (ucon64.parport_mode, parport_mode_t))
+        ucon64.parport_mode = PPMODE_SPP;
 #endif
       // We don't really need the parallel port. We just have to make sure that
       //  privileges aren't dropped.

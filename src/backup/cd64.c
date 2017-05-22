@@ -215,7 +215,7 @@ cd64_init (void)
     }
 
 #ifndef USE_PPDEV
-  if (ucon64.parport == (uint16_t) UCON64_UNKNOWN)
+  if (ucon64.parport == PARPORT_UNKNOWN)
     {
       fputs ("ERROR: No port or invalid port specified\n"
              "TIP:   Specify one with " OPTION_LONG_S "port or in the configuration file\n", stderr);
@@ -223,7 +223,6 @@ cd64_init (void)
     }
   if (port >= 0x300 && port <= 0x330)
     is_parallel = 0;
-#endif
 
 #ifdef  USE_PARALLEL
   /*
@@ -237,6 +236,7 @@ cd64_init (void)
       ucon64.parport_mode = parport_setup (port, ucon64.parport_mode);
       parport_close ();
     }
+#endif
 #endif
 
   cd64->notice_callback = cd64_notice;

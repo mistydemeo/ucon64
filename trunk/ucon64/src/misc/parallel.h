@@ -44,7 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef enum { PPMODE_SPP, PPMODE_SPP_BIDIR, PPMODE_EPP } parport_mode_t;
 
-// DJGPP (DOS) has these, but it's better that all code uses the same functions.
+// DJGPP (DOS) has these, but it's better that all platforms use the same code.
 extern unsigned char inportb (unsigned short port);
 extern unsigned short inportw (unsigned short port);
 extern void outportb (unsigned short port, unsigned char byte);

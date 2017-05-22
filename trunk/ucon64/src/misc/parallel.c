@@ -694,7 +694,7 @@ parport_open (unsigned short port)
       fputs ("ERROR: Could not set the I/O privilege level to 3\n"
              "       (This program needs root privileges for the requested action)\n",
              stderr);
-      exit (1);                                 // Don't return, if iopl() fails port access
+      exit (1);                                 // don't return, if iopl() fails port access
     }                                           //  causes core dump
 #endif // __linux__ && (__i386__ || __x86_64__) && !USE_PPDEV
 
@@ -844,7 +844,7 @@ parport_open (unsigned short port)
     LPTOP_LEVEL_EXCEPTION_FILTER org_exception_filter =
       SetUnhandledExceptionFilter ((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
     input_byte (0x378 + 0x402); // 0x378 + 0x402 is okay (don't use "port")
-    // if we get here accessing I/O port 0x378 did not cause an exception
+    // if we get here accessing the I/O port did not cause an exception
     SetUnhandledExceptionFilter (org_exception_filter);
 #else                                           // Cygwin
     EXCEPTION_REGISTRATION exception_registration;
@@ -857,7 +857,7 @@ parport_open (unsigned short port)
       : "b" (&exception_registration)
     );
     input_byte (0x378 + 0x402); // 0x378 + 0x402 is okay (don't use "port")
-    // if we get here accessing I/O port 0x378 did not cause an exception
+    // if we get here accessing the I/O port did not cause an exception
     __asm__ __volatile__
     ("movl %0, %%fs:0"
       :
@@ -890,8 +890,8 @@ parport_open (unsigned short port)
 
   if (port < 0x100)
     {
-      printf ("WARNING: Specified port (0x%hx) < 0x100. Using 0x100\n", port);
-      port = 0x100;
+      printf ("WARNING: Specified port (0x%hx) < 0x100. Using 0x278\n", port);
+      port = 0x278;
     }
 #endif // (__i386__ || __x86_64__ || _WIN32) && !USE_PPDEV
 
@@ -902,6 +902,11 @@ parport_open (unsigned short port)
 parport_mode_t
 parport_setup (unsigned short port, parport_mode_t mode)
 {
+  if (mode != PPMODE_SPP && mode != PPMODE_SPP_BIDIR && mode != PPMODE_EPP)
+    {
+      fputs ("ERROR: Mode must be PPMODE_SPP, PPMODE_SPP_BIDIR or PPMODE_EPP\n", stderr);
+      exit (1);
+    }
 #ifdef  USE_PPDEV
   if (mode == PPMODE_SPP)
     parport_io_mode = IEEE1284_MODE_COMPAT | IEEE1284_DATA;
@@ -913,24 +918,25 @@ parport_setup (unsigned short port, parport_mode_t mode)
 
       ioctl (parport_io_fd, PPGETMODES, &capabilities);
 //      printf ("Capabilities: %x\n", capabilities);
-      if ((capabilities & PARPORT_MODE_EPP) == 0)
+      if (capabilities & PARPORT_MODE_EPP)
+        parport_io_mode = IEEE1284_MODE_EPP | IEEE1284_DATA;
+      else
         {
           puts ("WARNING: EPP mode was requested, but not available");
           mode = PPMODE_SPP_BIDIR;
           parport_io_mode = IEEE1284_MODE_BYTE | IEEE1284_DATA;
         }
-      else
-        parport_io_mode = IEEE1284_MODE_EPP | IEEE1284_DATA;
     }
   // set mode for read() and write(); IEEE1284_DATA is 0...
   ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
-#elif   (defined __i386__ || defined __x86_64__ || defined _WIN32)
-  const char *p = get_property (ucon64.configfile, "ecr_offset", PROPERTY_MODE_TEXT);
-
-  if (p)
-    sscanf (p, "%hx", &ucon64.ecr_offset);
-  else
-    ucon64.ecr_offset = 0x402;
+#elif   defined __i386__ || defined __x86_64__ || defined _WIN32
+  {
+    const char *p = get_property (ucon64.configfile, "ecr_offset", PROPERTY_MODE_TEXT);
+    if (p)
+      sscanf (p, "%hx", &ucon64.ecr_offset);
+    else
+      ucon64.ecr_offset = 0x402;
+  }
   if ((uint16_t) (port + ucon64.ecr_offset) < 0x100)
     ucon64.ecr_offset = 0xffff - port;
 /*
@@ -965,7 +971,7 @@ parport_setup (unsigned short port, parport_mode_t mode)
                 "SPP" : "unknown");
 //*/
   /*
-    "In the idle state, an EPP port should have it's [sic] nAddress Strobe,
+    "In the idle state, an EPP port should have it's nAddress Strobe,
     nDataStrobe, nWrite and nReset lines inactive, high." - "Interfacing the
     Enhanced Parallel Port", page 6.
     The SPP names of those pins are respectively nSelect Printer/nSelect In,

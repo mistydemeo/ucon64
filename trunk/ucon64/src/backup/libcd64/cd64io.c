@@ -5,7 +5,7 @@
  * I/O routines for CD64 device
  *
  * (c) 2004 Ryan Underwood
- * Portions (c) 2004, 2005, 2015 Daniel Horchner (OpenBSD, FreeBSD, BeOS, Win32, DOS)
+ * Portions (c) 2004 - 2005, 2015 - 2017 Daniel Horchner (OpenBSD, FreeBSD, BeOS, Win32, DOS)
  *
  * May be distributed under the terms of the GNU Lesser/Library General Public
  * License, or any later version of the same, as published by the Free Software
@@ -955,7 +955,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		  : "b" (&exception_registration)
 		);
 		input_byte(0x378 + 0x402);                  /* 0x378 + 0x402 is okay */
-		/* if we get here accessing I/O port 0x378 did not cause an exception */
+		/* if we get here accessing the I/O port did not cause an exception */
 		__asm__ __volatile__
 		("movl %0, %%fs:0"
 		  :
@@ -965,7 +965,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		LPTOP_LEVEL_EXCEPTION_FILTER org_exception_filter =
 			SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
 		input_byte(0x378 + 0x402);                  /* 0x378 + 0x402 is okay */
-		/* if we get here accessing I/O port 0x378 did not cause an exception */
+		/* if we get here accessing the I/O port did not cause an exception */
 		SetUnhandledExceptionFilter(org_exception_filter);
 #endif
 	}

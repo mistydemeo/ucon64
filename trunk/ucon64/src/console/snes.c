@@ -278,7 +278,7 @@ const st_getopt2_t snes_usage[] =
     },
     {
       "dbuh", 0, 0, UCON64_DBUH,
-      NULL, "display (relevant part of) backup unit header",
+      NULL, "display (relevant part of) backup unit header and interpret it",
       &snes_obj[7]
     },
     {
@@ -1232,13 +1232,14 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
       if (!((size >= 2 * MBIT && total4Mbparts <= 8) ||
             total4Mbparts == 10 || total4Mbparts == 12))
         {
-          fprintf (stderr, "ERROR: ROM size is %u Mbit -- conversion not yet implemented/verified\n",
+          fprintf (stderr,
+                   "ERROR: ROM size is %u Mbit -- conversion not yet implemented/verified\n",
                    size / MBIT);
           return -1;
         }
       else if (total4Mbparts > 8 && snes_header_base != SNES_EROM)
         {
-          fprintf (stderr, "ERROR: Normal ROM > 32 Mbit -- conversion not yet implemented\n");
+          fputs ("ERROR: Normal ROM > 32 Mbit -- conversion not yet implemented\n", stderr);
           return -1;
         }
 
@@ -1673,7 +1674,7 @@ snes_gd_make_names (const char *filename, st_ucon64_nfo_t *rominfo, char **names
         strcpy (names[n_names++], dest_name);
     }
   if (n_names == 1)
-    names[0][7] = '\0';                         // 'A' causes trouble for 1-part split files
+    names[0][7] = '\0';                         // don't use 'A' if not split
   return n_names;
 }
 
@@ -1699,9 +1700,10 @@ snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
   if (!(snes_hirom && size <= 16 * MBIT) &&
       nparts + (surplus ? 1 : 0) > sizeof names / sizeof names[0])
     {
-      printf ("ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
-              "       %u is the maximum number of parts for GD3 and MGD\n",
-              nparts + (surplus ? 1 : 0), sizeof names / sizeof names[0]);
+      fprintf (stderr,
+               "ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
+               "       %u is the maximum number of parts for GD3 and MGD\n",
+               nparts + (surplus ? 1 : 0), sizeof names / sizeof names[0]);
       return;
     }
   snes_gd_make_names (ucon64.fname, rominfo, (char **) names);
@@ -2039,9 +2041,10 @@ snes_smgh (st_ucon64_nfo_t *rominfo)
     {
       if (nparts + (surplus ? 1 : 0) > 4)
         {
-          printf ("ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
-                  "       4 is the maximum number of parts for Multi Game Hunter\n",
-                  nparts + (surplus ? 1 : 0));
+          fprintf (stderr,
+                   "ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
+                   "       4 is the maximum number of parts for Multi Game Hunter\n",
+                   nparts + (surplus ? 1 : 0));
           return -1;
         }
 

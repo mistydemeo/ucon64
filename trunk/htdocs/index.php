@@ -460,12 +460,11 @@ If you are using uCON64 you may also consider visiting one of these cool sites<b
 <a href="http://www.robwebb.clara.co.uk/backup/">Robert Webb - Neo-classic Gaming and Collecting</a><br>
 <a href="http://www.kultpower.de/">Kultpower.de - Die Powerplay und ASM Fan Site</a><br>
 <a href="http://www.fcc.gov/oet/fccid/">OET -- FCC ID Number Search Page</a><br>
-<a href="http://www.robwebb.clara.co.uk/backup/">Robert Webb - Neo-classic Gaming and Collecting</a><br>
 <!--a href="http://www.front.com.tw">FFE</a-->
 <!--a href="http://www.superufo.com/">SuperUFO</a-->
 <!--a href="http://www.ntscco.com.hk">New Tai Sang CO</a-->
 <!--a href="http://www.lan-kwei.com/">Lan Kwei Trading</a-->
-<a href="http://www.tototek.com/">ToTotek</a><br>
+<a href="http://www.tototek.com/">ToToTEK</a><br>
 <!--a href="http://www.lik-sang.com">Lik-Sang online</a-->
 <!--a href="http://www.hkems.com/">Welcome To EMS Production Limited</a-->
 <a href="http://www.gsarchives.net/index2.php">Game Sprite Archives</a><br>

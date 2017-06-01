@@ -417,7 +417,7 @@ gauge (int percent, int width, char char1, char char2, int color1, int color2)
   x = (width * percent) / 100;
 
   memset (buf, char1, x);
-  buf[x] = 0;
+  buf[x] = '\0';
 
   if (x < width)                                // percent < 100
     {
@@ -429,12 +429,12 @@ gauge (int percent, int width, char char1, char char2, int color1, int color2)
 
   if (color1 != -1 && color2 != -1)             // ANSI?
     {
-      buf[width + 8] = 0;                       // 8 == ANSI code length
+      buf[width + 8] = '\0';                    // 8 == ANSI code length
       fprintf (stdout, "\x1b[3%d;4%dm%s\x1b[0m", color2, color2, buf);
     }
   else // no ANSI
     {
-      buf[width] = 0;
+      buf[width] = '\0';
       fputs (buf, stdout);
     }
 

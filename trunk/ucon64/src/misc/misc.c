@@ -264,6 +264,33 @@ change_mem (char *buf, unsigned int bufsize, char *searchstr,
 }
 
 
+static int
+match_found (char *buf, unsigned int bufsize, unsigned int strsize,
+             char *newstr, unsigned int newsize, int offset,
+             unsigned int bufpos, unsigned int strpos)
+{
+  if ((int) bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+    {
+      if (cm_verbose > 0)
+        {
+          printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                  offset, offset, bufpos + offset, bufpos + offset);
+          dumper (stdout, buf + bufpos - strpos, strsize,
+                  bufpos - strpos, DUMPER_HEX);
+        }
+      memcpy (buf + bufpos + offset, newstr, newsize);
+      return 1;
+    }
+  else
+    {
+      printf ("WARNING: The combination of buffer position (%u), offset (%d) and\n"
+              "         replacement size (%u) would cause a buffer overflow -- ignoring\n"
+              "         match\n", bufpos, offset, newsize);
+      return 0;
+    }
+}
+
+
 int
 change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
              unsigned int strsize, char wc, char esc, char *newstr,
@@ -307,10 +334,6 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
   char *set;
   unsigned int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc,
                n_matches = 0, setindex = 0;
-  const char *overflow_msg =
-               "WARNING: The combination of buffer position (%u), offset (%d) and\n"
-               "         replacement size (%u) would cause a buffer overflow -- ignoring\n"
-               "         match\n";
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
     {
@@ -338,21 +361,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
 
           if (strpos == strsize - 1)            // check if we are at the end of searchstr
             {
-              if ((int) bufpos + offset >= 0 &&
-                  bufpos + offset + newsize <= bufsize)
-                {
-                  if (cm_verbose > 0)
-                    {
-                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
-                              offset, offset, bufpos + offset, bufpos + offset);
-                      dumper (stdout, buf + bufpos - strpos, strsize,
-                              bufpos - strpos, DUMPER_HEX);
-                    }
-                  memcpy (buf + bufpos + offset, newstr, newsize);
-                  n_matches++;
-                }
-              else
-                printf (overflow_msg, bufpos, offset, newsize);
+              n_matches += match_found (buf, bufsize, strsize, newstr, newsize,
+                                        offset, bufpos, strpos);
               break;
             }
 
@@ -371,21 +381,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if ((int) bufpos + offset >= 0 &&
-                  bufpos + offset + newsize <= bufsize)
-                {
-                  if (cm_verbose > 0)
-                    {
-                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
-                              offset, offset, bufpos + offset, bufpos + offset);
-                      dumper (stdout, buf + bufpos - strpos, strsize,
-                              bufpos - strpos, DUMPER_HEX);
-                    }
-                  memcpy (buf + bufpos + offset, newstr, newsize);
-                  n_matches++;
-                }
-              else
-                printf (overflow_msg, bufpos, offset, newsize);
+              n_matches += match_found (buf, bufsize, strsize, newstr, newsize,
+                                        offset, bufpos, strpos);
               break;
             }
 
@@ -412,21 +409,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if ((int) bufpos + offset >= 0 &&
-                  bufpos + offset + newsize <= bufsize)
-                {
-                  if (cm_verbose > 0)
-                    {
-                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
-                              offset, offset, bufpos + offset, bufpos + offset);
-                      dumper (stdout, buf + bufpos - strpos, strsize,
-                              bufpos - strpos, DUMPER_HEX);
-                    }
-                  memcpy (buf + bufpos + offset, newstr, newsize);
-                  n_matches++;
-                }
-              else
-                printf (overflow_msg, bufpos, offset, newsize);
+              n_matches += match_found (buf, bufsize, strsize, newstr, newsize,
+                                        offset, bufpos, strpos);
               strpos = 0;
             }
           else
@@ -957,14 +941,14 @@ _popen (const char *path, const char *mode)
           break;
         case -1:
           Close (fh);
-          return 0;
+          return NULL;
           break;
         default:
-          return 0;
+          return NULL;
           break;
         }
     }
-  return 0;
+  return NULL;
 }
 
 

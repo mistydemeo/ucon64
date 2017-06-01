@@ -487,8 +487,7 @@ extern off_t q_fsize (const char *filename);
                   if the value of propname was 0, [Nn] or [Nn][Oo] and an
                   integer or at least 1 for every other case
   get_property_fname()  like get_property() but specifically for filenames,
-                  i.e., it runs realpath2() on the filename and fixes the
-                  characters if necessary (Cygwin)
+                  i.e., it runs realpath2() on the filename
   set_property()  set propname with value in filename
   DELETE_PROPERTY() like set_property but when value of propname is NULL the
                   whole property will disappear from filename

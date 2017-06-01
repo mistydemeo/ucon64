@@ -864,7 +864,7 @@ main (int argc, char **argv)
   const char *p = NULL;
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
-  
+
 #ifdef  TEST
   if (argc == 1)
     ucon64_test ();

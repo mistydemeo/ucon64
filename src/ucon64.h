@@ -117,7 +117,7 @@ typedef struct
   int parport_needed;
   uint16_t parport;                             // (parallel) port address
 #ifdef  USE_PARALLEL
-  uint16_t ecr_offset;                          // offset of ECP Extended Control Register from parport
+  uint16_t ecr_offset;                          // offset of ECP Extended Control register from parport
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'

@@ -48,11 +48,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 int
-property_check (const char *filename, int version, int verbose)
+property_check (char *filename, int version, int verbose)
 {
-  char buf[MAXBUFSIZE];
+  char filename2[MAXBUFSIZE];
   const char *p = NULL;
   int result = 0;
+
+  strcpy (filename2, filename);
 
   if (access (filename, F_OK) != 0)
     {
@@ -66,7 +68,7 @@ property_check (const char *filename, int version, int verbose)
 
       if ((fh = fopen (filename, "w")) == NULL) // opening the file in text mode
         {                                       //  avoids trouble on DOS
-          printf ("FAILED\n\n");
+          puts ("FAILED\n");
           return -1;
         }
       fclose (fh);                              // we'll use set_property() from now
@@ -77,34 +79,36 @@ property_check (const char *filename, int version, int verbose)
       if (strtol (p ? p : "0", NULL, 10) >= version)
         return 0;                               // OK
 
-      strcpy (buf, filename);
-      set_suffix (buf, ".old");
+      set_suffix (filename, ".old");
 
       if (verbose)
         {
-          fprintf (stderr, "NOTE: updating config: will be renamed to %s...", buf);
+          fprintf (stderr, "NOTE: updating config: will be renamed to %s...", filename);
           fflush (stderr);
         }
 
-      rename (filename, buf);
+      rename2 (filename2, filename);
     }
 
   // store new version
-  sprintf (buf, "%d", version);
-  result = set_property (filename, "version", buf, "configfile version (do NOT edit)");
+  {
+    char buf[80];
+    sprintf (buf, "%d", version);
+    result = set_property (filename2, "version", buf, "configfile version (do NOT edit)");
+  }
 
   if (result > 0)
     {
       if (verbose)
-        fprintf (stderr, "OK\n\n");
+        fputs ("OK\n\n", stderr);
     }
   else
     {
       if (verbose)
-        fprintf (stderr, "FAILED\n\n");
+        fputs ("FAILED\n\n", stderr);
 
       // remove the crap
-      remove (filename);
+      remove (filename2);
     }
 
   if (verbose)
@@ -125,7 +129,7 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
   if (len >= MAXBUFSIZE)
     len = MAXBUFSIZE - 1;
   memcpy (buf, str, len);
-  buf[len] = 0;
+  buf[len] = '\0';
 
   p = strtriml (buf);
   if (*p == comment_sep || *p == '\n' || *p == '\r')
@@ -133,12 +137,12 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
 
   sprintf (str_end, "%c\r\n", comment_sep);
   if ((p = strpbrk (buf, str_end)) != NULL)     // strip *any* returns and comments
-    *p = 0;
+    *p = '\0';
 
   p = strchr (buf, prop_sep);
   if (p)
     {
-      *p = 0;                                   // note that this "cuts" _buf_ ...
+      *p = '\0';                                // note that this "cuts" _buf_ ...
       p++;
     }
   strtriml (strtrimr (buf));
@@ -149,7 +153,7 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
       //  (present or not present)
       if (p)
         {
-          strncpy (value_s, p, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
+          strncpy (value_s, p, MAXBUFSIZE - 1)[MAXBUFSIZE - 1] = '\0';
           strtriml (strtrimr (value_s));
         }
       else
@@ -169,7 +173,7 @@ get_property (const char *filename, const char *propname, int mode)
   FILE *fh;
   const char *value_s = NULL;
 
-  if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
+  if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
       while (fgets (line, sizeof line, fh) != NULL)
         if ((value_s = get_property_from_string (line, propname,
@@ -179,17 +183,19 @@ get_property (const char *filename, const char *propname, int mode)
       fclose (fh);
     }
 
-  p = getenv2 (propname);
-  if (*p != 0)                                  // getenv2() never returns NULL
-    value_s = p;
+  if (mode != PROPERTY_MODE_CFG_ONLY)
+    {
+      p = getenv2 (propname);
+      if (*p != '\0')                           // getenv2() never returns NULL
+        value_s = p;
+    }
 
-  if (value_s)
-    if (mode == PROPERTY_MODE_FILENAME)
-      {
-        static char tmp[FILENAME_MAX];
+  if (value_s && mode == PROPERTY_MODE_FILENAME)
+    {
+      static char tmp[FILENAME_MAX];
 
-        realpath2 (value_s, tmp);
-        value_s = tmp;
+      realpath2 (value_s, tmp);
+      value_s = tmp;
     }
 
   return value_s;
@@ -237,18 +243,18 @@ set_property (const char *filename, const char *propname,
 
   sprintf (line_end, "%c\r\n", PROPERTY_COMMENT);
 
-  *str = 0;
-  if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
+  *str = '\0';
+  if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
       // update existing properties
       while (fgets (line, sizeof line, fh) != NULL)
         {
           strcpy (line2, line);
           if ((p = strpbrk (line2, line_end)) != NULL)
-            *p = 0;                             // note that this "cuts" _line2_
+            *p = '\0';                          // note that this "cuts" _line2_
           p = strchr (line2, PROPERTY_SEPARATOR);
           if (p)
-            *p = 0;
+            *p = '\0';
 
           strtriml (strtrimr (line2));
 
@@ -268,25 +274,25 @@ set_property (const char *filename, const char *propname,
     {
       if (comment_s)
         {
-          sprintf (strchr (str, 0), "%c\n%c ", PROPERTY_COMMENT, PROPERTY_COMMENT);
+          sprintf (strchr (str, '\0'), "%c\n%c ", PROPERTY_COMMENT, PROPERTY_COMMENT);
 
-          for (p = strchr (str, 0); *comment_s; comment_s++)
+          for (p = strchr (str, '\0'); *comment_s; comment_s++)
             switch (*comment_s)
               {
               case '\r':
                 break;
               case '\n':
-                sprintf (strchr (str, 0), "\n%c ", PROPERTY_COMMENT);
+                sprintf (strchr (str, '\0'), "\n%c ", PROPERTY_COMMENT);
                 break;
 
               default:
-                p = strchr (str, 0);
+                p = strchr (str, '\0');
                 *p = *comment_s;
-                *(++p) = 0;
+                *(++p) = '\0';
                 break;
               }
 
-          sprintf (strchr (str, 0), "\n%c\n", PROPERTY_COMMENT);
+          sprintf (strchr (str, '\0'), "\n%c\n", PROPERTY_COMMENT);
         }
 
       sprintf (line, "%s%c%s\n", propname, PROPERTY_SEPARATOR, value_s);

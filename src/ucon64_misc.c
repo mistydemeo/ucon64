@@ -1139,136 +1139,125 @@ ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
 }
 
 
-int
-ucon64_set_property_array (void)
+static void
+ucon64_set_property (st_property_t* prop, const char *org_configfile,
+                     const char *propname, const char *value_s,
+                     const char *comment_s)
 {
-  const st_property_t props[] =
-    {
-      {
-        "backups", "1",
-        "create backups of files? (1=yes; 0=no)\n"
-        "before processing a ROM uCON64 will make a backup of it"
-      },
-      {
-        "ansi_color", "1",
-        "use ANSI colors in output? (1=yes; 0=no)"
-      },
-#ifdef  USE_PPDEV
-      {
-        "parport_dev", "/dev/parport0",
-        "parallel port"
-      },
-#elif   defined AMIGA
-      {
-        "parport_dev", "parallel.device",
-        "parallel port"
-      },
-      {
-        "parport", "0",
-        NULL
-      },
-#else
-      {
-        "parport", "378",
-        "(parallel) port"
-      },
-#ifdef  USE_PARALLEL
-      {
-        "ecr_offset", "402",
-        "offset of ECP Extended Control Register relative to Data register (parport)"
-      },
-#endif
-#endif
-      {
-        "discmage_path",
-#if     defined __MSDOS__
-        PROPERTY_MODE_DIR ("ucon64") "discmage.dxe",
-#elif   defined __CYGWIN__ || defined _WIN32
-        PROPERTY_MODE_DIR ("ucon64") "discmage.dll",
-#elif   defined __APPLE__                       // Mac OS X actually
-        PROPERTY_MODE_DIR ("ucon64") "discmage.dylib",
-#elif   defined __unix__ || defined __BEOS__
-        PROPERTY_MODE_DIR ("ucon64") "discmage.so",
-#else
-        "",
-#endif
-        "complete path to the discmage library for DISC image support"
-      },
-      {
-        "ucon64_configdir",
-        PROPERTY_MODE_DIR ("ucon64"),
-        "directory with additional config files"
-      },
-      {
-        "ucon64_datdir",
-        PROPERTY_MODE_DIR ("ucon64/dat"),
-        "directory with DAT files"
-      },
-      {
-        "f2afirmware", "f2afirm.hex",
-        "F2A support files\n"
-        "path to F2A USB firmware"
-      },
-      {
-        "iclientu", "iclientu.bin",
-        "path to GBA client binary (for USB code)"
-      },
-      {
-        "iclientp", "iclientp.bin",
-        "path to GBA client binary (for parallel port code)"
-      },
-      {
-        "ilogo", "ilogo.bin",
-        "path to iLinker logo file"
-      },
-      {
-        "gbaloader", "loader.bin",
-        "path to GBA multi-game loader"
-      },
-      {
-        "gbaloader_sc", "sc_menu.bin",
-        "path to GBA multi-game loader (Super Card)"
-      },
-      {
-        "emulate_" UCON64_3DO_S,      "",
-        "emulate_<console shortcut>=<emulator with options>\n\n"
-        "You can also use CRC32 values for ROM specific emulation options:\n\n"
-        "emulate_0x<crc32>=<emulator with options>\n"
-        "emulate_<crc32>=<emulator with options>"
-      },
-      {"emulate_" UCON64_ATA_S,      "", NULL},
-      {"emulate_" UCON64_CD32_S,     "", NULL},
-      {"emulate_" UCON64_CDI_S,      "", NULL},
-      {"emulate_" UCON64_COLECO_S,   "", NULL},
-      {"emulate_" UCON64_DC_S,       "", NULL},
-      {"emulate_" UCON64_GB_S,       "vgb -sound -sync 50 -sgb -scale 2", NULL},
-      {"emulate_" UCON64_GBA_S,      "vgba -scale 2 -uperiod 6", NULL},
-      {"emulate_" UCON64_GC_S,       "", NULL},
-      {"emulate_" UCON64_GEN_S,      "dgen -f -S 2", NULL},
-      {"emulate_" UCON64_INTELLI_S,  "", NULL},
-      {"emulate_" UCON64_JAG_S,      "", NULL},
-      {"emulate_" UCON64_LYNX_S,     "", NULL},
-      {"emulate_" UCON64_ARCADE_S,   "", NULL},
-      {"emulate_" UCON64_N64_S,      "", NULL},
-      {"emulate_" UCON64_NES_S,      "tuxnes -E2 -rx11 -v -s/dev/dsp -R44100", NULL},
-      {"emulate_" UCON64_NG_S,       "", NULL},
-      {"emulate_" UCON64_NGP_S,      "", NULL},
-      {"emulate_" UCON64_PCE_S,      "", NULL},
-      {"emulate_" UCON64_PS2_S,      "", NULL},
-      {"emulate_" UCON64_PSX_S,      "pcsx", NULL},
-      {"emulate_" UCON64_S16_S,      "", NULL},
-      {"emulate_" UCON64_SAT_S,      "", NULL},
-      {"emulate_" UCON64_SMS_S,      "", NULL},
-      {"emulate_" UCON64_GAMEGEAR_S, "", NULL},
-      {"emulate_" UCON64_SNES_S,     "snes9x -tr -sc -hires -dfr -r 7 -is -joymap1 2 3 5 0 4 7 6 1", NULL},
-      {"emulate_" UCON64_SWAN_S,     "", NULL},
-      {"emulate_" UCON64_VBOY_S,     "", NULL},
-      {"emulate_" UCON64_VEC_S,      "", NULL},
-      {"emulate_" UCON64_XBOX_S,     "", NULL},
-      {NULL, NULL, NULL}
-    };
+  const char *p = NULL;
 
-  return set_property_array (ucon64.configfile, props);
+  prop->name = propname;
+  if (*org_configfile && propname)
+    p = get_property (org_configfile, propname, PROPERTY_MODE_CFG_ONLY);
+  prop->value_s = (p || value_s) ? strdup (p ? p : value_s) : NULL;
+  prop->comment_s = comment_s;
+}
+
+
+int
+ucon64_set_property_array (const char *org_configfile)
+{
+  st_property_t props[44];
+  int i = 0, result;
+
+  ucon64_set_property (&props[i++], org_configfile, "backups", "1",
+                       "create backups of files? (1=yes; 0=no)\n"
+                       "before processing a ROM uCON64 will make a backup of it");
+  ucon64_set_property (&props[i++], org_configfile, "ansi_color", "1",
+                       "use ANSI colors in output? (1=yes; 0=no)");
+#ifdef  USE_PPDEV
+  ucon64_set_property (&props[i++], org_configfile, "parport_dev", "/dev/parport0",
+                       "parallel port");
+#elif   defined AMIGA
+  ucon64_set_property (&props[i++], org_configfile, "parport_dev", "parallel.device",
+                       "parallel port");
+  ucon64_set_property (&props[i++], org_configfile, "parport", "0", NULL);
+#else
+  ucon64_set_property (&props[i++], org_configfile, "parport", "378",
+                       "(parallel) port");
+#ifdef  USE_PARALLEL
+  ucon64_set_property (&props[i++], org_configfile, "ecr_offset", "402",
+                       "offset of ECP Extended Control register relative to Data register (parport)");
+#endif
+#endif
+  ucon64_set_property (&props[i++], org_configfile, "discmage_path",
+#ifdef  __MSDOS__
+                       PROPERTY_MODE_DIR ("ucon64") "discmage.dxe",
+#elif   defined __CYGWIN__ || defined _WIN32
+                       PROPERTY_MODE_DIR ("ucon64") "discmage.dll",
+#elif   defined __APPLE__                       // Mac OS X actually
+                       PROPERTY_MODE_DIR ("ucon64") "discmage.dylib",
+#elif   defined __unix__ || defined __BEOS__
+                       PROPERTY_MODE_DIR ("ucon64") "discmage.so",
+#else
+                       "",
+#endif
+                       "complete path to the discmage library for DISC image support");
+  ucon64_set_property (&props[i++], org_configfile, "ucon64_configdir",
+                       PROPERTY_MODE_DIR ("ucon64"),
+                       "directory with additional config files");
+  ucon64_set_property (&props[i++], org_configfile, "ucon64_datdir",
+                       PROPERTY_MODE_DIR ("ucon64/dat"),
+                       "directory with DAT files");
+  ucon64_set_property (&props[i++], org_configfile, "f2afirmware", "f2afirm.hex",
+                       "F2A support files\n"
+                       "path to F2A USB firmware");
+  ucon64_set_property (&props[i++], org_configfile, "iclientu", "iclientu.bin",
+                       "path to GBA client binary (for USB code)");
+  ucon64_set_property (&props[i++], org_configfile, "iclientp", "iclientp.bin",
+                       "path to GBA client binary (for parallel port code)");
+  ucon64_set_property (&props[i++], org_configfile, "ilogo", "ilogo.bin",
+                       "path to iLinker logo file");
+  ucon64_set_property (&props[i++], org_configfile, "gbaloader", "loader.bin",
+                       "path to GBA multi-game loader");
+  ucon64_set_property (&props[i++], org_configfile, "gbaloader_sc", "sc_menu.bin",
+                       "path to GBA multi-game loader (Super Card)");
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_3DO_S, "",
+                       "emulate_<console shortcut>=<emulator with options>\n\n"
+                       "You can also use CRC32 values for ROM specific emulation options:\n\n"
+                       "emulate_0x<crc32>=<emulator with options>\n"
+                       "emulate_<crc32>=<emulator with options>");
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_ATA_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_CD32_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_CDI_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_COLECO_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_DC_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_GB_S,
+                       "vgb -sound -sync 50 -sgb -scale 2", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_GBA_S,
+                       "vgba -scale 2 -uperiod 6", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_GC_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_GEN_S, "dgen -f -S 2", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_INTELLI_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_JAG_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_LYNX_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_ARCADE_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_N64_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_NES_S,
+                       "tuxnes -E2 -rx11 -v -s/dev/dsp -R44100", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_NG_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_NGP_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_PCE_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_PS2_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_PSX_S, "pcsx", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_S16_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_SAT_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_SMS_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_GAMEGEAR_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_SNES_S,
+                       "snes9x -tr -sc -hires -dfr -r 7 -is -joymap1 2 3 5 0 4 7 6 1", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_SWAN_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_VBOY_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_VEC_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, "emulate_" UCON64_XBOX_S, "", NULL);
+  ucon64_set_property (&props[i++], org_configfile, NULL, NULL, NULL);
+
+  result = set_property_array (ucon64.configfile, props);
+
+  for (i -= 2; i >= 0; i--)
+    free ((char *) props[i].value_s);
+
+  return result;
 }
 
 

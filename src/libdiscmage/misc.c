@@ -897,7 +897,7 @@ mem_search (const void *buffer, uint32_t buflen,
     if (memcmp ((uint8_t *) buffer + n, search, searchlen) == 0)
       return (uint8_t *) buffer + n;
 
-  return 0;
+  return NULL;
 }
 
 
@@ -1620,6 +1620,32 @@ change_mem (char *buf, unsigned int bufsize, char *searchstr,
 }
 
 
+static int
+match_found (char *buf, unsigned int bufsize, unsigned int strsize,
+             char *newstr, unsigned int newsize, int offset,
+             unsigned int bufpos, unsigned int strpos)
+{
+  if ((int) bufpos + offset >= 0 && bufpos + offset + newsize <= bufsize)
+    {
+      if (cm_verbose > 0)
+        {
+          printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
+                  offset, offset, bufpos + offset, bufpos + offset);
+          mem_hexdump (buf + bufpos - strpos, strsize, bufpos - strpos);
+        }
+      memcpy (buf + bufpos + offset, newstr, newsize);
+      return 1;
+    }
+  else
+    {
+      printf ("WARNING: The combination of buffer position (%u), offset (%d) and\n"
+              "         replacement size (%u) would cause a buffer overflow -- ignoring\n"
+              "         match\n", bufpos, offset, newsize);
+      return 0;
+    }
+}
+
+
 int
 change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
              unsigned int strsize, char wc, char esc, char *newstr,
@@ -1663,10 +1689,6 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
   char *set;
   unsigned int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc,
                n_matches = 0, setindex = 0;
-  const char *overflow_msg =
-               "WARNING: The combination of buffer position (%u), offset (%d) and\n"
-               "         replacement size (%u) would cause a buffer overflow -- ignoring\n"
-               "         match\n";
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
     {
@@ -1694,20 +1716,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
 
           if (strpos == strsize - 1)            // check if we are at the end of searchstr
             {
-              if ((int) bufpos + offset >= 0 &&
-                  bufpos + offset + newsize <= bufsize)
-                {
-                  if (cm_verbose > 0)
-                    {
-                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
-                              offset, offset, bufpos + offset, bufpos + offset);
-                      mem_hexdump (buf + bufpos - strpos, strsize, bufpos - strpos);
-                    }
-                  memcpy (buf + bufpos + offset, newstr, newsize);
-                  n_matches++;
-                }
-              else
-                printf (overflow_msg, bufpos, offset, newsize);
+              n_matches += match_found (buf, bufsize, strsize, newstr, newsize,
+                                        offset, bufpos, strpos);
               break;
             }
 
@@ -1726,20 +1736,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if ((int) bufpos + offset >= 0 &&
-                  bufpos + offset + newsize <= bufsize)
-                {
-                  if (cm_verbose > 0)
-                    {
-                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
-                              offset, offset, bufpos + offset, bufpos + offset);
-                      mem_hexdump (buf + bufpos - strpos, strsize, bufpos - strpos);
-                    }
-                  memcpy (buf + bufpos + offset, newstr, newsize);
-                  n_matches++;
-                }
-              else
-                printf (overflow_msg, bufpos, offset, newsize);
+              n_matches += match_found (buf, bufsize, strsize, newstr, newsize,
+                                        offset, bufpos, strpos);
               break;
             }
 
@@ -1766,20 +1764,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              if ((int) bufpos + offset >= 0 &&
-                  bufpos + offset + newsize <= bufsize)
-                {
-                  if (cm_verbose > 0)
-                    {
-                      printf ("Match, patching at pattern offset %d/0x%08x / buffer[%u/0x%08x]\n",
-                              offset, offset, bufpos + offset, bufpos + offset);
-                      mem_hexdump (buf + bufpos - strpos, strsize, bufpos - strpos);
-                    }
-                  memcpy (buf + bufpos + offset, newstr, newsize);
-                  n_matches++;
-                }
-              else
-                printf (overflow_msg, bufpos, offset, newsize);
+              n_matches += match_found (buf, bufsize, strsize, newstr, newsize,
+                                        offset, bufpos, strpos);
               strpos = 0;
             }
           else
@@ -2106,12 +2092,12 @@ gauge (time_t init_time, int pos, int size)
   left /= bps ? bps : 1;
 
   p = (int) ((GAUGE_LENGTH * pos) / size);
-  *progress = 0;
+  *progress = '\0';
   strncat (progress, "========================", p);
 
   if (misc_ansi_color)
     {
-      progress[p] = 0;
+      progress[p] = '\0';
       if (p < GAUGE_LENGTH)
         strcat (progress, "\x1b[31;41m");
     }
@@ -2162,7 +2148,7 @@ getenv2 (const char *variable)
   variable = strupr (tmp2);                     // DON'T copy the string into variable
 #endif                                          //  (variable itself is local)
 
-  *value = 0;
+  *value = '\0';
 
   if ((tmp = getenv (variable)) != NULL)
     strcpy (value, tmp);
@@ -2194,8 +2180,8 @@ getenv2 (const char *variable)
               c = (char) toupper ((int) *value);
               // if current dir is root dir strip problematic ending slash (DJGPP)
               if (c >= 'A' && c <= 'Z' &&
-                  value[1] == ':' && value[2] == '/' && value[3] == 0)
-                value[2] = 0;
+                  value[1] == ':' && value[2] == '/' && value[3] == '\0')
+                value[2] = '\0';
             }
         }
 
@@ -2244,7 +2230,7 @@ get_property (const char *filename, const char *propname, char *buffer,
   FILE *fh;
   int prop_found = 0, i, whitespace_len;
 
-  if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
+  if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
       while (fgets (line, sizeof line, fh) != NULL)
         {
@@ -2253,19 +2239,19 @@ get_property (const char *filename, const char *propname, char *buffer,
           if (*p == '#' || *p == '\n' || *p == '\r')
             continue;                           // text after # is comment
           if ((p = strpbrk (line, "#\r\n")) != NULL) // strip *any* returns
-            *p = 0;
+            *p = '\0';
 
           p = strchr (line, PROPERTY_SEPARATOR);
           // if no divider was found the propname must be a bool config entry
           //  (present or not present)
           if (p)
-            *p = 0;                             // note that this "cuts" _line_
+            *p = '\0';                          // note that this "cuts" _line_
           // strip trailing whitespace from property name part of line
           for (i = strlen (line) - 1;
                i >= 0 && (line[i] == '\t' || line[i] == ' ');
                i--)
             ;
-          line[i + 1] = 0;
+          line[i + 1] = '\0';
 
           if (!stricmp (line + whitespace_len, propname))
             {
@@ -2279,7 +2265,7 @@ get_property (const char *filename, const char *propname, char *buffer,
                        i >= 0 && (buffer[i] == '\t' || buffer[i] == ' ');
                        i--)
                     ;
-                  buffer[i + 1] = 0;
+                  buffer[i + 1] = '\0';
                 }
               prop_found = 1;
               break;                            // an environment variable
@@ -2289,7 +2275,7 @@ get_property (const char *filename, const char *propname, char *buffer,
     }
 
   p = getenv2 (propname);
-  if (*p == 0)                                  // getenv2() never returns NULL
+  if (*p == '\0')                               // getenv2() never returns NULL
     {
       if (!prop_found)
         {
@@ -2355,20 +2341,20 @@ set_property (const char *filename, const char *propname, const char *value,
       errno = ENOMEM;
       return -1;
     }
-  *str = 0;
+  *str = '\0';
 
-  if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
+  if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
       while (fgets (line, sizeof line, fh) != NULL)
         {
           strcpy (line2, line);
           if ((p = strpbrk (line2, PROPERTY_SEPARATOR_S "#\r\n")) != NULL)
-            *p = 0;                             // note that this "cuts" _line2_
+            *p = '\0';                          // note that this "cuts" _line2_
           for (i = strlen (line2) - 1;
                i >= 0 && (line2[i] == '\t' || line2[i] == ' ');
                i--)
             ;
-          line2[i + 1] = 0;
+          line2[i + 1] = '\0';
 
           if (!stricmp (line2 + strspn (line2, "\t "), propname))
             {
@@ -2389,7 +2375,7 @@ set_property (const char *filename, const char *propname, const char *value,
         {
           strcat (str, PROPERTY_COMMENT_S "\n" PROPERTY_COMMENT_S " ");
 
-          for (p = strchr (str, 0); *comment; comment++)
+          for (p = strchr (str, '\0'); *comment; comment++)
             switch (*comment)
               {
               case '\r':
@@ -2399,9 +2385,9 @@ set_property (const char *filename, const char *propname, const char *value,
                 break;
 
               default:
-                p = strchr (str, 0);
+                p = strchr (str, '\0');
                 *p = *comment;
-                *(++p) = 0;
+                *(++p) = '\0';
                 break;
               }
 
@@ -2434,7 +2420,7 @@ tmpnam2 (char *temp)
       srand ((int) init);
     }
 
-  *temp = 0;
+  *temp = '\0';
   while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs
     sprintf (temp, "%s%s%08x.tmp", p, DIR_SEPARATOR_S, rand());
 
@@ -3224,14 +3210,14 @@ _popen (const char *path, const char *mode)
           break;
         case -1:
           Close (fh);
-          return 0;
+          return NULL;
           break;
         default:
-          return 0;
+          return NULL;
           break;
         }
     }
-  return 0;
+  return NULL;
 }
 
 

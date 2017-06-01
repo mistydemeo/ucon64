@@ -864,7 +864,7 @@ main (int argc, char **argv)
   const char *p = NULL;
   struct stat fstate;
   struct option long_options[UCON64_MAX_ARGS];
-
+  
 #ifdef  TEST
   if (argc == 1)
     ucon64_test ();
@@ -892,7 +892,7 @@ main (int argc, char **argv)
   ucon64.mapr =
   ucon64.comment = "";
 
-  ucon64.fname_arch[0] = 0;
+  ucon64.fname_arch[0] = '\0';
 
   ucon64.recursive =
   ucon64.parport_needed =
@@ -938,17 +938,24 @@ main (int argc, char **argv)
   // configfile handling
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
-  //  still running in root mode. Maybe 0 is even better (in case root did
-  //  `chmod +s').
+  //  still running as root. Maybe 0 is even better (in case root did
+  //  "chmod +s").
   umask (002);
 #endif
   realpath2 (PROPERTY_HOME_RC ("ucon64"), ucon64.configfile);
 
-  result = property_check (ucon64.configfile, UCON64_CONFIG_VERSION, 1);
-  if (result == 1)                              // update needed
-    result = ucon64_set_property_array ();
-  if (result == -1)                             // property_check() or update failed
-    return -1;
+  {
+    char org_configfile[FILENAME_MAX];
+
+    strncpy (org_configfile, ucon64.configfile, FILENAME_MAX - 1)
+      [FILENAME_MAX - 1] = '\0';
+    result = property_check (org_configfile, UCON64_CONFIG_VERSION, 1);
+    if (result == 1)                            // update needed
+      result = ucon64_set_property_array (strcmp (ucon64.configfile, org_configfile) ?
+                                            org_configfile : "");
+    if (result == -1)                           // property_check() or update failed
+      return -1;
+  }
 
 #ifdef  USE_ANSI_COLOR
   // ANSI colors?
@@ -960,11 +967,11 @@ main (int argc, char **argv)
   // parallel port?
 #if     defined USE_PPDEV || defined AMIGA
   p = get_property (ucon64.configfile, "parport_dev", PROPERTY_MODE_FILENAME);
-  x = sizeof (ucon64.parport_dev);
+  x = sizeof ucon64.parport_dev;
 #ifdef  USE_PPDEV
-  strncpy (ucon64.parport_dev, p ? p : "/dev/parport0", x)[x - 1] = 0;
+  strncpy (ucon64.parport_dev, p ? p : "/dev/parport0", x - 1)[x - 1] = '\0';
 #elif   defined AMIGA
-  strncpy (ucon64.parport_dev, p ? p : "parallel.device", x)[x - 1] = 0;
+  strncpy (ucon64.parport_dev, p ? p : "parallel.device", x - 1)[x - 1] = '\0';
 #endif
 #endif
 
@@ -972,9 +979,9 @@ main (int argc, char **argv)
   if (p)
     sscanf (p, "%hx", &ucon64.parport);
   else
-    // use PARPORT_UNKNOWN to force probing if the config file doesn't contain
-    //  a parport line
-    ucon64.parport = PARPORT_UNKNOWN;
+    // use PARPORT_UNKNOWN (UCON64_UNKNOWN) to force probing if the config file
+    //  doesn't contain a parport line
+    ucon64.parport = UCON64_UNKNOWN;            // PARPORT_UNKNOWN depends on USE_PARALLEL
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups");
@@ -983,24 +990,24 @@ main (int argc, char **argv)
   p = get_property (ucon64.configfile, "ucon64_configdir", PROPERTY_MODE_FILENAME);
   if (p)
     {
-      x = sizeof (ucon64.configdir);
-      strncpy (ucon64.configdir, p, x)[x - 1] = 0;
+      x = sizeof ucon64.configdir;
+      strncpy (ucon64.configdir, p, x - 1)[x - 1] = '\0';
     }
   else
-    *ucon64.configdir = 0;
+    *ucon64.configdir = '\0';
 
   // DAT file handling
   ucon64.dat_enabled = 0;
   p = get_property (ucon64.configfile, "ucon64_datdir", PROPERTY_MODE_FILENAME);
   if (p)
     {
-      x = sizeof (ucon64.datdir);
-      strncpy (ucon64.datdir, p, x)[x - 1] = 0;
+      x = sizeof ucon64.datdir;
+      strncpy (ucon64.datdir, p, x - 1)[x - 1] = '\0';
     }
   else
-    *ucon64.datdir = 0;
+    *ucon64.datdir = '\0';
 
-  // we use ucon64.datdir as path to the dats
+  // we use ucon64.datdir as path to the DAT files
   if (!access (ucon64.datdir,
   // !W_OK doesn't mean that files can't be written to dir for Win32 exe's
 #if     !defined __CYGWIN__ && !defined _WIN32
@@ -1047,8 +1054,8 @@ main (int argc, char **argv)
       if (c == '?') // getopt() returns 0x3f ('?') when an unknown option was given
         {
           fprintf (stderr,
-               "Try '%s " OPTION_LONG_S "help' for more information.\n",
-               argv[0]);
+                   "Try '%s " OPTION_LONG_S "help' for more information.\n",
+                   argv[0]);
           exit (1);
         }
 
@@ -1077,10 +1084,10 @@ main (int argc, char **argv)
 #ifdef  DEBUG
   for (x = 0; arg[x].val; x++)
     printf ("%d %s %d %d\n\n",
-      arg[x].val,
-      arg[x].optarg ? arg[x].optarg : "(null)",
-      arg[x].flags,
-      arg[x].console);
+            arg[x].val,
+            arg[x].optarg ? arg[x].optarg : "(null)",
+            arg[x].flags,
+            arg[x].console);
 #endif
 
   // switches
@@ -1223,7 +1230,7 @@ ucon64_process_rom (const char *fname)
             name. So, if the entry in the ZIP file is a directory
             ucon64.fname_arch will be an empty string.
           */
-          if (ucon64.fname_arch[0] == 0)
+          if (ucon64.fname_arch[0] == '\0')
             continue;
 
           ucon64.fname = fname;
@@ -1234,7 +1241,7 @@ ucon64_process_rom (const char *fname)
             break;
         }
       unzip_current_file_nr = 0;
-      ucon64.fname_arch[0] = 0;
+      ucon64.fname_arch[0] = '\0';
 
       if (ucon64.flags & WF_STOP)
         return 1;
@@ -1302,8 +1309,8 @@ ucon64_execute_options (void)
             const char *opt = p ? p->name : NULL;
 
             fprintf (stderr, "ERROR: %s%s encountered a problem\n",
-                             opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
-                             opt ? opt : "uCON64");
+                     opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
+                     opt ? opt : "uCON64");
 
 //            if (p)
 //              getopt2_usage (p);
@@ -1848,7 +1855,8 @@ ucon64_fname_arch (const char *fname)
         name[n] = DIR_SEPARATOR;
   }
 #endif
-  strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX - 1)
+    [FILENAME_MAX - 1] = '\0';
 }
 #endif
 
@@ -1966,7 +1974,7 @@ ucon64_usage (int argc, char *argv[], int view)
 #ifdef  DLOPEN
     ucon64.discmage_path;
 #else
-#if     defined __MSDOS__
+#ifdef  __MSDOS__
     "discmage.dxe";
 #elif   defined __CYGWIN__ || defined _WIN32
     "discmage.dll";

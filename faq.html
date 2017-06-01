@@ -158,9 +158,9 @@ Q53: <a href="#53">I am trying to use a PCI parallel port card, but while
    uCON64 can communicate with an older backup unit like my Super Wild Card it
    cannot communicate with my MD-PRO, which requires EPP. Can this be solved?</a><br>
 <br>
-Q54: <a href="#54">My PCI parallel port card has its Extended Control register
-   at a lower I/O address than its Data register. How do I specify a negative
-   Extended Control register offset in the configuration file?</a><br>
+Q54: <a href="#54">My PCI parallel port card has its ECP Extended Control
+   register at a lower I/O address than its Data register. How do I specify a
+   negative ECP Extended Control register offset in the configuration file?</a><br>
 <br>
 Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    Game Doctor SF6/SF7?</a><br>
@@ -1990,31 +1990,36 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
 <a name="53"><b>Q53</b>: I am trying to use a PCI parallel port card, but while
    uCON64 can communicate with an older backup unit like my Super Wild Card it
    cannot communicate with my MD-PRO, which requires EPP. Can this be solved?</a><br>
-<b>A</b>: If you are using ppdev on GNU/Linux then it looks like your PCI
-   parallel port card is not fully supported by the version of GNU/Linux you
-   are using. Fortunately, starting with uCON64 2.1.0 this problem can be
-   solved for all supported platforms on which the parallel port can be
+<b>A</b>: First make sure EPP is enabled for your PCI parallel port card. Try
+   different settings for the parallel port in the BIOS, UEFI or configuration
+   software. "ECP and EPP 1.9" should give the best results. This may already
+   solve the problem.<br>
+   If the above did not solve the problem and you are using ppdev on GNU/Linux
+   then it looks like your PCI parallel port card is not fully supported by the
+   version of GNU/Linux you are using. The problem could be caused by your PCI
+   parallel port card requiring to enable EPP through the ECP Extended Control
+   register while that register is mapped at a non-standard offset relative to
+   the Data register. Fortunately, starting with uCON64 2.1.0 this problem can
+   be solved for all supported platforms on which the parallel port can be
    accessed directly. So, GNU/Linux, all Windows versions (including Windows
-   10), MS-DOS, FreeBSD, OpenBSD and BeOS. First determine the offset of the
+   10), MS-DOS, FreeBSD, OpenBSD and BeOS. First determine the offset of the ECP
    Extended Control register relative to the Data register.<br>
    On GNU/Linux use lspci -v to find out what I/O ports are being used by your
    PCI parallel port card. On Windows you can use Device Manager. You should
    see two I/O ranges. One of them should start with the I/O port you specified
    when communicating with your Super Wild Card. That is the I/O address of the
    Data register. The other starts with the I/O port of the first ECP
-   configuration register. Add 2 to get the I/O address of the Extended Control
-   register. To get the offset subtract the I/O address of the Data register
-   from the I/O address of the ECP Extended Control register, <u>in that order</u>.<br>
+   configuration register. Add 2 to get the I/O address of the ECP Extended
+   Control register. To get the offset subtract the I/O address of the Data
+   register from the I/O address of the ECP Extended Control register, <u>in
+   that order</u>.<br>
    Find the line starting with ecr_offset= in the configuration file and update
    it with the value you just calculated.<br>
-   Finally, make sure EPP is enabled for your PCI parallel port card. You may
-   have to enable both EPP and ECP, before uCON64 can communicate with your
-   MD-PRO.<br>
 <br>
 <p>
-<a name="54"><b>Q54</b>: My PCI parallel port card has its Extended Control
+<a name="54"><b>Q54</b>: My PCI parallel port card has its ECP Extended Control
    register at a lower I/O address than its Data register. How do I specify a
-   negative Extended Control register offset in the configuration file?</a><br>
+   negative ECP Extended Control register offset in the configuration file?</a><br>
 <b>A</b>: See <a href="#53">question 53</a>. Use a calculator and set it to
    hexadecimal (base 16). After you subtract the I/O address of the Data
    register from the I/O address of the ECP Extended Control register you will

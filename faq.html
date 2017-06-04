@@ -203,7 +203,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
-   uCON64 can be compiled for UNIX (GNU/Linux, Solaris, FreeBSD, OpenBSD,
+   uCON64 can be compiled for UNIX (GNU/Linux, FreeBSD, OpenBSD, Solaris,
    Mac OS X), DOS, BeOS, Windows (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1/10) and
    AmigaOS (PPC/68K).<br>
    To compile uCON64 you need a compiler :-) You can use either GCC (GNU
@@ -350,11 +350,10 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    Now read the relevant section for the compiler you are using.<br>
 <br>
    <b>GCC</b> (including DJGPP, Cygwin and MinGW)<br>
-   If you use Bash you may have to take one extra step before running make.
-   Because of a strange design decision made by the authors of Bash, the
-   environment variable OSTYPE is not exported on all platforms. Because of
-   that, on several platforms (like FreeBSD and Mac OS X), you have to export it
-   manually before running make. You can do that with the following command:<br>
+   If you use Bash you have to take one extra step before running make. By
+   default the environment variable OSTYPE is not exported, but that variable is
+   needed to let make use the correct settings for the platform you are
+   compiling for. Export OSTYPE with the following command:<br>
    &nbsp;&nbsp;export OSTYPE<br>
 <br>
    If you have compiled uCON64 in the same directory before, first type:<br>
@@ -437,7 +436,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    information specific for your operating system. Then continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>UNIX (GNU/Linux, FreeBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
+   <b>UNIX (GNU/Linux, FreeBSD, OpenBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
    Start a command line shell like Bash. Then extract the binary package.
    To extract or unpack a package in .tar.gz format use a command like this:<br>
    &nbsp;&nbsp;tar xvzf ucon64-1.9.8-1-linux-bin.tar.gz<br>
@@ -1702,18 +1701,21 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    &nbsp;&nbsp;ERROR: Cannot open "C:\Documents and Settings\NoisyB\ntuser.dat" for reading<br>
    you should modify the configuration file so that ucon64_datdir points to
    another directory.<br>
-   By default uCON64 will use the home directory as the directory where it
-   searches for DAT files (the "DAT file directory"). uCON64 handles all files
-   in the DAT file directory that have a name that ends with ".dat" as DAT
-   files. ntuser.dat seems to be a standard file in a Windows XP user's home
-   directory (and should not be removed), but it is not a DAT file for use with
-   uCON64. See <a href="#36">question 36</a> for more information on how to
-   configure uCON64 so that it uses "real" DAT files. If you only want to get
-   rid of that error message either make ucon64_datdir in the configuration
-   file point to an existing directory that does not contain any files with a
-   name that ends with ".dat" or make an environment variable with the name
-   ucon64_datdir point to such a directory. Do not forget that the environment
-   variable will not be set the next time you start a DOS session.<br>
+   By default uCON64 versions before 2.1.0 will use the home directory as the
+   directory where it searches for DAT files (the "DAT file directory"). uCON64
+   handles all files in the DAT file directory that have a name that ends with
+   ".dat" as DAT files. ntuser.dat seems to be a standard file in a Windows XP
+   user's home directory (and should not be removed), but it is not a DAT file
+   for use with uCON64. See <a href="#36">question 36</a> for more information
+   on how to configure uCON64 so that it uses "real" DAT files. If you only want
+   to get rid of that error message either make ucon64_datdir in the
+   configuration file point to an existing directory that does not contain any
+   files with a name that ends with ".dat" or make an environment variable with
+   the name ucon64_datdir point to such a directory. Do not forget that the
+   environment variable will not be set the next time you start a DOS session.<br>
+   Starting with version 2.1.0 the DOS and Windows versions of uCON64 will by
+   default use the subdirectory dat of the subdirectory ucon64 of the home
+   directory (~\ucon64\dat\) as DAT file directory.<br>
 <br>
 <p>
 <a name="48"><b>Q48</b>: Is there any way to make uCON64 convert a ROM dump to

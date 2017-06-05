@@ -26,11 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ctype.h>
 #include <stdarg.h>                             // va_arg()
 #include <stdlib.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>                             // usleep(), microseconds
+#endif
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
-#elif   defined __unix__
-#include <unistd.h>                             // usleep(), microseconds
 #elif   defined __BEOS__
 #include <OS.h>                                 // snooze(), microseconds
 // OS.h includes StorageDefs.h which includes param.h which unconditionally
@@ -332,8 +333,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
 */
 {
   char *set;
-  unsigned int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc,
-               n_matches = 0, setindex = 0;
+  unsigned int bufpos, strpos = 0, pos_1st_esc = (unsigned int) -1, setsize, i,
+               n_wc, n_matches = 0, setindex = 0;
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
     {

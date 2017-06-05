@@ -143,7 +143,7 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   strcpy (src_name, ucon64.fname);
   mgd_make_name (ucon64.fname, console, size, dest_name, 1);
@@ -179,7 +179,7 @@ sms_smd (st_ucon64_nfo_t *rominfo)
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   memset (&header, 0, SMD_HEADER_LEN);
   header.size = (unsigned char) (size / 16384);
@@ -231,7 +231,7 @@ sms_smds (void)
   ucon64_file_handler (dest_name, src_name, 0);
 
   ucon64_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
-  fcopy (src_name, 0, ucon64.file_size, dest_name, "ab");
+  fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -253,7 +253,7 @@ sms_chk (st_ucon64_nfo_t *rominfo)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   buf[0] = (char) rominfo->current_internal_crc; // low byte
   buf[1] = (char) (rominfo->current_internal_crc >> 8); // high byte
@@ -396,7 +396,7 @@ sms_multi (unsigned int truncate_size, char *fname)
         }
       if (ucon64.nfo->backup_header_len)
         fseek (srcfile, ucon64.nfo->backup_header_len, SEEK_SET);
-      size = ucon64.file_size - ucon64.nfo->backup_header_len;
+      size = (unsigned int) ucon64.file_size - ucon64.nfo->backup_header_len;
 
       if (file_no == 0)
         {
@@ -651,7 +651,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
-      unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+      unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
       if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);

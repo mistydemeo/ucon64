@@ -648,7 +648,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
       else
         {
           if (!gd_fsize)
-            gd_fsize = ucon64.file_size;
+            gd_fsize = (int) ucon64.file_size;
           if (hirom)
             gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
           else
@@ -895,7 +895,7 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
       exit (1);
     }
 
-  size = ucon64.file_size;                      // GD SRAM is 4*8 KB, emu SRAM often not
+  size = (int) ucon64.file_size;                // GD SRAM is 4*8 KB, emu SRAM often not
 
   if (size == 0x8000)
     header_size = 0;
@@ -1122,7 +1122,7 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
       exit (1);
     }
 
-  size = ucon64.file_size;
+  size = (int) ucon64.file_size;
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
       fputs ("ERROR: GD saver file size must be 229376 bytes\n", stderr);

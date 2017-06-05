@@ -6367,8 +6367,8 @@ nes_ffe (st_ucon64_nfo_t *rominfo)
 {
   st_smc_header_t smc_header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len, mapper,
-               prg_size, chr_size;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+                      mapper, prg_size, chr_size;
   int new_prg_size = -1;
 
   if (type != INES)
@@ -7118,7 +7118,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       ucon64_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &unif_header;
 
-      rom_size = ucon64.file_size - UNIF_HEADER_LEN;
+      rom_size = (int) ucon64.file_size - UNIF_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
@@ -7391,7 +7391,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
                              ((ines_header.ctrl1 & INES_TRAINER) ? 512 : 0);
       if (x == 0)
         {                                       // use buf only if it could be allocated
-          ucon64.crc32 = crc32 (0, rom_buffer, rominfo->data_size);
+          ucon64.crc32 = crc32 (0, rom_buffer, (unsigned int) rominfo->data_size);
           free (rom_buffer);
         }
 
@@ -7468,7 +7468,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       rominfo->country = "Japan";
 
       // FAM files don't have a header. Instead they seem to have a 192 byte trailer.
-      rominfo->backup_header_start = ucon64.file_size - FAM_HEADER_LEN;
+      rominfo->backup_header_start = (int) ucon64.file_size - FAM_HEADER_LEN;
       rominfo->backup_header_len = FAM_HEADER_LEN;
 
       // we use ffe_header to save some space
@@ -7477,7 +7477,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
 
-      rom_size = ucon64.file_size - FAM_HEADER_LEN;
+      rom_size = (int) ucon64.file_size - FAM_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
@@ -7493,8 +7493,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
     rominfo->backup_header_len = ucon64.backup_header_len;
 
   if (ucon64.crc32 == 0)
-    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.file_size,
-                   rominfo->backup_header_len);
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname,
+                   (int) ucon64.file_size, rominfo->backup_header_len);
 
   // additional info
   key.crc32 = ucon64.crc32;
@@ -7573,7 +7573,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
       return -1;
     }
 
-  n_disks = (ucon64.file_size - rominfo->backup_header_len) / 65500;
+  n_disks = ((int) ucon64.file_size - rominfo->backup_header_len) / 65500;
   x = (ucon64.file_size - rominfo->backup_header_len) % 65500;
   if (x)
     {

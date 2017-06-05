@@ -203,8 +203,8 @@ n64_v64 (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".v64");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
+  ucon64_fbswap16 (dest_name, 0, (size_t) ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -225,8 +225,8 @@ n64_z64 (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".z64");
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
+  ucon64_fbswap16 (dest_name, 0, (size_t) ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -246,7 +246,7 @@ n64_n (st_ucon64_nfo_t *rominfo, const char *name)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, rominfo->backup_header_len + 32, N64_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -290,7 +290,7 @@ n64_chk (st_ucon64_nfo_t *rominfo)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   n64_update_chksum (rominfo, dest_name, buf);
   dumper (stdout, buf, 8, rominfo->backup_header_len + 16, DUMPER_HEX);
@@ -327,7 +327,7 @@ n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (sram, 0x286c0, N64_SRAM_SIZE, dest_name, "r+b");
   n64_chksum (rominfo, dest_name);              // calculate the checksum of the modified file
   n64_update_chksum (rominfo, dest_name, buf);
@@ -351,7 +351,7 @@ n64_bot (st_ucon64_nfo_t *rominfo, const char *bootfile)
         ucon64_bswap16_n (buf, N64_BC_SIZE);
 
       ucon64_file_handler (dest_name, NULL, 0);
-      fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+      fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
       ucon64_fwrite (buf, rominfo->backup_header_len + N64_HEADER_LEN, N64_BC_SIZE,
                      dest_name, "r+b");
     }
@@ -407,7 +407,7 @@ n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
   // Jos Kwanten's rominserter.exe produces a file named Patched.v64
   strcpy (dest_name, "Patched.v64");
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-  fcopy (ucon64.fname, rominfo->backup_header_len, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, rominfo->backup_header_len, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (usmsbuf, rominfo->backup_header_len + 0x01b410, 4 * MBIT, dest_name, "r+b");
 
   free (usmsbuf);
@@ -582,7 +582,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 {
   unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
   unsigned int i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
-               rlen = (ucon64.file_size - rominfo->backup_header_len) - CHECKSUM_START,
+               rlen = ((unsigned int) ucon64.file_size - rominfo->backup_header_len) - CHECKSUM_START,
                n, bootcode; // using ucon64.file_size is OK for n64_init() & n64_sram()
   FILE *file;
 #ifdef  CALC_CRC32
@@ -593,7 +593,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   if (rlen < CHECKSUM_START + CHECKSUM_LENGTH)
     {
 #ifdef  CALC_CRC32
-      n = ucon64.file_size - rominfo->backup_header_len;
+      n = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
       if ((crc32_mem = (unsigned char *) malloc (n)) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], n);

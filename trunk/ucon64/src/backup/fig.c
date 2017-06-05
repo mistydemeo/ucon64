@@ -401,7 +401,7 @@ fig_write_rom (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  fsize = ucon64.file_size;
+  fsize = (int) ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
@@ -560,7 +560,7 @@ fig_write_sram (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = ucon64.file_size - FIG_HEADER_LEN;     // FIG SRAM is 4*8 kB, emu SRAM often not
+  size = (int) ucon64.file_size - FIG_HEADER_LEN; // FIG SRAM is 4*8 kB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, FIG_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -697,7 +697,7 @@ fig_write_cart_sram (const char *filename, unsigned short parport)
   ffe_send_command0 (0xe00c, 0);                //  want to write more data than necessary
   byte = ffe_send_command1 (0xbfd8);
 
-  size = ucon64.file_size - FIG_HEADER_LEN;     // FIG SRAM is 4*8 kB, emu SRAM often not
+  size = (int) ucon64.file_size - FIG_HEADER_LEN; // FIG SRAM is 4*8 kB, emu SRAM often not
   size = MIN ((byte ? 1 << (byte + 10) : 0), size);
 
   printf ("Send: %d Bytes\n", size);

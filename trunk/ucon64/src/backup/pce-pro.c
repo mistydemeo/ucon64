@@ -207,7 +207,7 @@ pce_write_rom (const char *filename, unsigned short parport)
         }
     }
 
-  size = ucon64.file_size;
+  size = (int) ucon64.file_size;
   // 4 Mbit games need the last 2 Mbit to be mirrored (so, they need 6 Mbit)
   if (multi_game)
     {

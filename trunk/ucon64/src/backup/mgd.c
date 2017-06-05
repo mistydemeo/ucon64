@@ -102,7 +102,7 @@ fread_mgd (void *buffer, size_t size, size_t number, FILE *fh)
 */
 {
   int n = 0, bpos = 0, fpos, fpos_org, block_size, bytesread = 0,
-      len = number * size, fsize = ucon64.file_size /* fsizeof (filename) */;
+      len = number * size, fsize = (int) ucon64.file_size /* fsizeof (filename) */;
   unsigned char tmp1[MAXBUFSIZE], tmp2[MAXBUFSIZE];
 
   fpos = fpos_org = ftell (fh);

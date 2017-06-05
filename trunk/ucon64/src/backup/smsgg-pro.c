@@ -249,7 +249,7 @@ smsgg_write_rom (const char *filename, unsigned short parport)
         }
     }
 
-  size = ucon64.file_size;
+  size = (int) ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   if (check_card () == 0)
@@ -373,7 +373,7 @@ smsgg_write_sram (const char *filename, unsigned short parport, int start_bank)
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
 
-  size = ucon64.file_size;
+  size = (int) ucon64.file_size;
   if (start_bank == -1)
     address = 0;
   else

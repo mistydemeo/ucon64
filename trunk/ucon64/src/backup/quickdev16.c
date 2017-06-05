@@ -168,7 +168,7 @@ quickdev16_write_rom (const char *filename)
       bank_size = 1 << SNES_LOROM_SHIFT;
     }
 
-  size = ucon64.file_size - ucon64.nfo->backup_header_len;
+  size = (int) ucon64.file_size - ucon64.nfo->backup_header_len;
   fseek (file, ucon64.nfo->backup_header_len, SEEK_SET);
 
   printf ("Send: %d Bytes\n", size);

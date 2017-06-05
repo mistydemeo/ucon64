@@ -1687,8 +1687,8 @@ change_mem2 (char *buf, unsigned int bufsize, char *searchstr,
 */
 {
   char *set;
-  unsigned int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc,
-               n_matches = 0, setindex = 0;
+  unsigned int bufpos, strpos = 0, pos_1st_esc = (unsigned int) -1, setsize, i,
+               n_wc, n_matches = 0, setindex = 0;
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
     {

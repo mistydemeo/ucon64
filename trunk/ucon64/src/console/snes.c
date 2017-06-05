@@ -814,7 +814,8 @@ snes_dint (st_ucon64_nfo_t *rominfo)
     puts ("WARNING: Deinterleaving a ROM that was not detected as interleaved");
   fcopy (src_name, 0, backup_header_len, dest_name, "wb");
   write_deinterleaved_data (rominfo, src_name, dest_name,
-                            ucon64.file_size - rominfo->backup_header_len, backup_header_len);
+                            (int) ucon64.file_size - rominfo->backup_header_len,
+                            backup_header_len);
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -826,7 +827,7 @@ static int
 snes_ffe (st_ucon64_nfo_t *rominfo, char *suffix)
 {
   st_swc_header_t header;
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   ucon64_fread (&header, 0, rominfo->backup_header_len > SWC_HEADER_LEN ?
@@ -891,7 +892,8 @@ snes_swc (st_ucon64_nfo_t *rominfo)
 void
 snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header)
 {
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len, uses_DSP;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+                      uses_DSP;
 
   header->size_low = (unsigned char) (size / 8192);
   header->size_high = (unsigned char) (size / 8192 >> 8);
@@ -943,7 +945,7 @@ int
 snes_fig (st_ucon64_nfo_t *rominfo)
 {
   st_fig_header_t header;
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   ucon64_fread (&header, 0, rominfo->backup_header_len > FIG_HEADER_LEN ?
@@ -974,7 +976,7 @@ int
 snes_mgd (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   if (snes_hirom)
     puts ("NOTE: This game may not work with an MGD because it is a HiROM game");
@@ -986,7 +988,8 @@ snes_mgd (st_ucon64_nfo_t *rominfo)
   if (rominfo->interleaved)
     write_deinterleaved_data (rominfo, src_name, dest_name, size, 0);
   else
-    fcopy (src_name, rominfo->backup_header_len, ucon64.file_size, dest_name, "wb");
+    fcopy (src_name, rominfo->backup_header_len, (size_t) ucon64.file_size,
+           dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
@@ -1043,7 +1046,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
               unsigned char *buffer, int newsize)
 {
   char *p, id_str[4];
-  int n, size = ucon64.file_size - rominfo->backup_header_len;
+  int n, size = (int) ucon64.file_size - rominfo->backup_header_len;
 
   if (UCON64_ISSET (ucon64.id))
     {
@@ -1213,7 +1216,7 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
   unsigned int n, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad,
                half_size_4Mb, half_size_1Mb;
 
-  size = ucon64.file_size - rominfo->backup_header_len;
+  size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
   n4Mbparts = size / (4 * MBIT);
   surplus4Mb = size % (4 * MBIT);
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
@@ -1408,7 +1411,7 @@ int
 snes_ufo (st_ucon64_nfo_t *rominfo)
 {
   st_ufo_header_t header;
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   ucon64_fread (&header, 0, rominfo->backup_header_len > UFO_HEADER_LEN ?
@@ -1534,7 +1537,7 @@ int
 snes_ufosd (st_ucon64_nfo_t *rominfo)
 {
   st_ufosd_header_t header;
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   ucon64_fread (&header, 0, rominfo->backup_header_len > UFOSD_HEADER_LEN ?
@@ -1641,7 +1644,7 @@ snes_gd_make_names (const char *filename, st_ucon64_nfo_t *rominfo, char **names
 {
   char dest_name[FILENAME_MAX];
   unsigned int nparts, surplus, n, n_names = 0,
-               size = ucon64.file_size - rominfo->backup_header_len;
+               size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   // don't use PARTSIZE here, because the Game Doctor doesn't support
   //  arbitrary part sizes
@@ -1937,7 +1940,8 @@ snes_split_smc (st_ucon64_nfo_t *rominfo, int size, int part_size)
 int
 snes_s (st_ucon64_nfo_t *rominfo)
 {
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len, part_size;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+                      part_size;
 
   if (UCON64_ISSET (ucon64.part_size) && !(type == GD3 || type == UFO || type == UFOSD))
     {
@@ -2005,8 +2009,8 @@ snes_s (st_ucon64_nfo_t *rominfo)
 int
 snes_smgh (st_ucon64_nfo_t *rominfo)
 {
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len, nparts,
-               surplus, n, half_size;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+                      nparts, surplus, n, half_size;
   const char *p0;
   char dest_name[FILENAME_MAX], *p;
 
@@ -2746,16 +2750,16 @@ int
 snes_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len,
-               header_start,
-               name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+                      header_start,
+                      name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
 
   memset (buf, ' ', name_len);
   strncpy (buf, name, strlen (name) > name_len ? name_len : strlen (name));
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   if (rominfo->interleaved)
     header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
@@ -2775,12 +2779,12 @@ int
 snes_chk (st_ucon64_nfo_t *rominfo)
 {
   char buf[4], dest_name[FILENAME_MAX];
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len,
-               header_start;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+                      header_start;
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   /*
     The internal checksum bytes have been included in the checksum
@@ -3134,14 +3138,14 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 
   if (type == SWC || type == FIG || type == SMC || type == UFO)
     {
-      x = ucon64.file_size - rominfo->backup_header_len;
+      x = (int) ucon64.file_size - rominfo->backup_header_len;
       y = (header[0] + (header[1] << 8)) * 8 * 1024;
       printf ("[0-1]    File size: %d Bytes (%.4f Mb) => %s\n",
               y, TOMBIT_F (y), matches_deviates (x == y));
     }
   else if (type == UFOSD)
     {
-      x = ucon64.file_size - rominfo->backup_header_len;
+      x = (int) ucon64.file_size - rominfo->backup_header_len;
       y = header[0] * MBIT;
       printf ("[0]      File size: %d Bytes (%.4f Mb) => %s\n",
               y, TOMBIT_F (y), matches_deviates (x == y));
@@ -3672,7 +3676,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
         }
       set_ufosd_sram_pattern (pattern, sizeof pattern);
 
-      fseek (file, ucon64.file_size - 64 * 1024, SEEK_SET);
+      fseek (file, (long) ucon64.file_size - 64 * 1024, SEEK_SET);
       fread (buffer, 1, sizeof pattern, file);
       if (memcmp (buffer, pattern, sizeof pattern) == 0) // pattern at 64 kB?
         {
@@ -3786,7 +3790,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
         snes_split = ucon64_testsplit (ucon64.fname, NULL);
     }
 
-  size = ucon64.file_size - rominfo->backup_header_len;
+  size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
   if (size < SNES_HEADER_START + SNES_HEADER_LEN)
     {
       snes_hirom = 0;
@@ -4414,7 +4418,8 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 int
 snes_demirror (st_ucon64_nfo_t *rominfo)        // nice verb :-)
 {
-  int fixed = 0, size = ucon64.file_size - rominfo->backup_header_len, mirror_size = 0;
+  int fixed = 0, size = (int) ucon64.file_size - rominfo->backup_header_len,
+      mirror_size = 0;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
 
@@ -4680,7 +4685,8 @@ snes_multi (unsigned int truncate_size, char *fname)
 int
 snes_densrt (st_ucon64_nfo_t *rominfo)
 {
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len, header_start;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+                      header_start;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char backup_header[512], *buffer;
 

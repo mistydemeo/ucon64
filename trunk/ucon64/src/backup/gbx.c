@@ -1725,7 +1725,7 @@ gbx_write_rom (const char *filename, unsigned short parport)
       fputs ("ERROR: File size error\n", stderr);
       exit (1);
     }
-  n_banks = (ucon64.file_size / 0x8000) * 2;    // how many 16k banks (rounded
+  n_banks = ((int) ucon64.file_size / 0x8000) * 2; // how many 16k banks (rounded
                                                 //  down to 32k boundary)
   if (eeprom_type == MX)
     if (mx_erase ())                            // erase 16M flash
@@ -1763,7 +1763,7 @@ gbx_write_rom (const char *filename, unsigned short parport)
           exit (1);
         }
       n_bytes += 0x4000;
-      ucon64_gauge (starttime, n_bytes, ucon64.file_size);
+      ucon64_gauge (starttime, n_bytes, (int) ucon64.file_size);
     }
 
 #if 0 // write_eeprom_16k() already calls verify_rom_16k() (indirectly)...
@@ -1926,7 +1926,7 @@ gbx_write_sram (const char *filename, unsigned short parport, int start_bank)
   if (start_bank == -1)
     {
       start_bank = 0;
-      n_banks = MIN (n_banks, (ucon64.file_size + 8192 - 1) / 8192); // "+ 8192 - 1" to round up
+      n_banks = MIN (n_banks, ((unsigned int) ucon64.file_size + 8192 - 1) / 8192); // "+ 8192 - 1" to round up
     }
   else
     {

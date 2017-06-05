@@ -192,7 +192,7 @@ UCON64_H_DEPS=ucon64.h misc/itypes.h misc/parallel.h ucon64_defines.h
 UCON64_DAT_H_DEPS=ucon64_dat.h $(GETOPT2_H_DEPS) misc/itypes.h
 UCON64_MISC_H_DEPS=ucon64_misc.h $(GETOPT2_H_DEPS) misc/itypes.h
 !ifdef USE_DISCMAGE
-UCON64_MISC_H_DEPS+=$(UCON64_MISC_H_DEPS) libdiscmage/libdiscmage.h
+UCON64_MISC_H_DEPS=$(UCON64_MISC_H_DEPS) libdiscmage/libdiscmage.h
 !endif
 UCON64_OPTS_H_DEPS=ucon64_opts.h $(UCON64_H_DEPS)
 CONSOLE_DEPS=$(GETOPT2_H_DEPS) $(UCON64_H_DEPS)

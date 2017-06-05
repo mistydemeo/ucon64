@@ -212,7 +212,7 @@ extern int misc_digits (unsigned long value);
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.
 
-// For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
+// For MinGW popen() and pclose() are unavailable for DLLs. For DLLs _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
 #ifndef pclose                                  // archive.h's definition gets higher precedence
 #define pclose _pclose

@@ -529,7 +529,7 @@ doctor64jr_write (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = ucon64.file_size;
+  size = (int) ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
 #if 0

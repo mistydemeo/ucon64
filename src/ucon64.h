@@ -53,7 +53,14 @@ typedef struct
   const char *backup_usage;                     // backup unit of the ROM
 
   int interleaved;                              // ROM is interleaved (swapped)
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
   uint64_t data_size;                           // ROM data size without "red tape"
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
   const void *backup_header;                    // (possible) header of backup unit
   int backup_header_start;                      // start of backup unit header (mostly 0)
@@ -76,7 +83,14 @@ typedef struct
   unsigned int internal_crc_len;                // length (in bytes) of internal checksum in ROM header
 
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 } st_ucon64_nfo_t;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 typedef struct
 {
@@ -184,7 +198,14 @@ typedef struct
 #endif
   void *dat;                                    // info from DATabase (st_ucon64_dat_t *)
   st_ucon64_nfo_t *nfo;                         // info from <console>_init() (st_ucon64_nfo_t *)
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 } st_ucon64_t;
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 
 typedef struct
 {

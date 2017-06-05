@@ -113,7 +113,8 @@ lynx_lyx (st_ucon64_nfo_t *rominfo)
   set_suffix (dest_name, ".lyx");
 
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, rominfo->backup_header_len, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, rominfo->backup_header_len, (size_t) ucon64.file_size,
+         dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -125,7 +126,7 @@ lynx_lnx (st_ucon64_nfo_t *rominfo)
 {
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
-  unsigned int size = ucon64.file_size;
+  unsigned int size = (unsigned int) ucon64.file_size;
 
   if (rominfo->backup_header_len != 0)
     {
@@ -159,7 +160,7 @@ lynx_lnx (st_ucon64_nfo_t *rominfo)
 
   ucon64_file_handler (dest_name, NULL, 0);
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "wb");
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "ab");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -184,7 +185,7 @@ lynx_rot (st_ucon64_nfo_t *rominfo, unsigned char rotation)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -232,7 +233,7 @@ lynx_n (st_ucon64_nfo_t *rominfo, const char *name)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -267,7 +268,7 @@ lynx_b (st_ucon64_nfo_t *rominfo, int bank, const char *value)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);

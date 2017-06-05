@@ -183,12 +183,11 @@ const st_getopt2_t fal_usage[] =
 // ***Global Variables ***
 
 //int WaitDelay,WaitNCDelay;
-unsigned SPPDataPort;
-unsigned SPPStatPort;
-unsigned SPPCtrlPort;
-unsigned EPPAddrPort;
-unsigned EPPDataPort;
-unsigned ECPRegECR;
+unsigned short SPPDataPort;
+unsigned short SPPStatPort;
+unsigned short SPPCtrlPort;
+unsigned short EPPAddrPort;
+unsigned short EPPDataPort;
 
 // prototypes
 void WriteFlash (int addr, int data);
@@ -287,7 +286,7 @@ usage (char *name)
 
 
 void
-InitPort (int port)
+InitPort (unsigned short port)
 {
   // uCON64 comment: see the comment in fal_main() where port is initialised
   SPPDataPort = port;
@@ -295,7 +294,6 @@ InitPort (int port)
   SPPCtrlPort = SPPDataPort + 2;
   EPPAddrPort = SPPDataPort + 3;
   EPPDataPort = SPPDataPort + 4;
-  ECPRegECR = SPPDataPort + 0x402;
 }
 
 
@@ -668,7 +666,7 @@ RestoreSRAM (FILE *fp, int StartOS)
             }
           byteswritten += 256;
           if ((byteswritten & 0x1fff) == 0)     // call ucon64_gauge() after sending 8 kB
-            ucon64_gauge (starttime, byteswritten, ucon64.file_size);
+            ucon64_gauge (starttime, byteswritten, (int) ucon64.file_size);
         }
       m++;
     }
@@ -863,9 +861,9 @@ int
 GetFileSize2 (FILE *fp)
 /*
   The name "GetFileSize" conflicts with a Windows function.
-  For some odd reason Jeff Frohwein returned the file size minus 1. I (dbjh)
-  guess that's a bug. I disabled the (terribly inefficient) file size code
-  because uCON64 already determined the file size at this point.
+  For some odd reason Jeff Frohwein returned the file size minus 1. I guess
+  that's a bug. I disabled the (terribly inefficient) file size code, because
+  uCON64 already determined the file size at this point. - dbjh
 */
 {
   int FileSize;
@@ -911,7 +909,7 @@ GetFileSize2 (FILE *fp)
   else
     rewind (fp);
 
-  return ucon64.file_size;
+  return (int) ucon64.file_size;
 }
 
 
@@ -1282,7 +1280,7 @@ SpaceCheck (char c)
 int
 fal_main (int argc, char **argv)
 {
-  int arg, i;
+  int arg;
   u8 Base = 0;
   FILE *fp;
   char fname[128];//, fname2[128];
@@ -1293,7 +1291,7 @@ fal_main (int argc, char **argv)
   int OptS = 0;
 //  int OptV = 0;
 //  int OptZ = 0;
-  int port = 0x378;
+  unsigned short port = 0x378;
   int ChipSize = 32;
   int BackupMemOffset = 0;
   int BackupMemSize = 0;
@@ -1398,13 +1396,12 @@ fal_main (int argc, char **argv)
 #endif
         case 'l':
           SpaceCheck (argv[arg][2]);
-          i = atoi (argv[++arg]);
           /*
             uCON64 comment: we want to support non-standard parallel port
             addresses too. So, instead of passing a number from 1 to 4, we pass
             the address itself
           */
-          port = i;
+          port = (unsigned short) atoi (argv[++arg]);;
           break;
         case 'm':
           EPPMode = 0;                          // Set SPP mode

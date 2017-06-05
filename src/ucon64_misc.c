@@ -1654,7 +1654,7 @@ ucon64_pattern (const char *pattern_fname)
             }
         }
 
-      if (patterns[n].offset <= (int) -patterns[n].search_size || patterns[n].offset > 0)
+      if (patterns[n].offset <= -(int) patterns[n].search_size || patterns[n].offset > 0)
         printf ("WARNING: The offset of pattern %d falls outside the search pattern.\n"
                 "         This can cause matches to be ignored with the current implementation\n"
                 "         of " OPTION_LONG_S "pattern. Please consider enlarging the search pattern\n",
@@ -2288,13 +2288,15 @@ ucon64_filefile (const char *filename1, unsigned int start1,
                           break;
 
                       printf ("%s:\n", filename1);
-                      dumper (stdout, &buf1[base], len, start1 + base + bytesread2, DUMPER_HEX);
+                      dumper (stdout, &buf1[base], len,
+                              (int) (start1 + base + bytesread2), DUMPER_HEX);
 
                       printf ("%s", ucon64.fname);
                       if (ucon64.fname_arch[0])
                         printf (" (%s)", ucon64.fname_arch);
                       puts (":");
-                      dumper (stdout, &buf2[base], len, start2 + base + bytesread2, DUMPER_HEX);
+                      dumper (stdout, &buf2[base], len,
+                              (int) (start2 + base + bytesread2), DUMPER_HEX);
 
                       fputc ('\n', stdout);
 

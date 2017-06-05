@@ -711,7 +711,7 @@ pl_write_rom (const char *filename, unsigned short parport)
       exit (1);
     }
   init_io (parport);
-  size = ucon64.file_size;
+  size = (int) ucon64.file_size;
 
   erase ();
   reset_read ();

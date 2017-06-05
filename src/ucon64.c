@@ -280,7 +280,7 @@ ucon64_clear_nfo (st_ucon64_nfo_t *nfo)
 
   ucon64.nfo = NULL;
   ucon64.crc32 = ucon64.fcrc32 = 0;             // yes, this belongs here
-  nfo->data_size = UCON64_UNKNOWN;
+  nfo->data_size = (uint64_t) UCON64_UNKNOWN;
 
   return nfo;
 }
@@ -981,7 +981,7 @@ main (int argc, char **argv)
   else
     // use PARPORT_UNKNOWN (UCON64_UNKNOWN) to force probing if the config file
     //  doesn't contain a parport line
-    ucon64.parport = UCON64_UNKNOWN;            // PARPORT_UNKNOWN depends on USE_PARALLEL
+    ucon64.parport = (uint16_t) UCON64_UNKNOWN; // PARPORT_UNKNOWN depends on USE_PARALLEL
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups");
@@ -1468,7 +1468,7 @@ ucon64_rom_handling (void)
   */
   if (ucon64.crc32 == 0 && !ucon64.force_disc && // NOT for disc images
       !(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
-    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, ucon64.file_size,
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, (int) ucon64.file_size,
                    ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
 
 
@@ -1480,11 +1480,11 @@ ucon64_rom_handling (void)
       if (ucon64.dat)
         {
           // detected file size must match DAT file size
-          int size = ucon64.nfo ?
+          int size = (int) (ucon64.nfo ?
                        UCON64_ISSET2 (ucon64.nfo->data_size, uint64_t) ?
                          ucon64.nfo->data_size :
                          ucon64.file_size - ucon64.nfo->backup_header_len :
-                       ucon64.file_size;
+                       ucon64.file_size);
           if ((int) (((st_ucon64_dat_t *) ucon64.dat)->fsize) != size)
             ucon64.dat = NULL;
         }
@@ -1742,8 +1742,8 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   for (x = 0; buf[x] != '\0'; x++)
     if (!isprint ((int) buf[x]))
       buf[x] = '.';
-  x = UCON64_ISSET2 (nfo->data_size, uint64_t) ?
-        nfo->data_size : ucon64.file_size - nfo->backup_header_len;
+  x = (int) (UCON64_ISSET2 (nfo->data_size, uint64_t) ?
+        nfo->data_size : ucon64.file_size - nfo->backup_header_len);
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           buf,
           NULL_TO_EMPTY (nfo->maker),

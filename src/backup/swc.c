@@ -845,7 +845,7 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
       exit (1);
     }
 
-  fsize = ucon64.file_size;
+  fsize = (int) ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
@@ -997,7 +997,7 @@ swc_write_sram (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = ucon64.file_size - SWC_HEADER_LEN;     // SWC SRAM is 4*8 kB, emu SRAM often not
+  size = (int) ucon64.file_size - SWC_HEADER_LEN; // SWC SRAM is 4*8 kB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -1162,7 +1162,7 @@ swc_write_rts (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = ucon64.file_size - SWC_HEADER_LEN;
+  size = (int) ucon64.file_size - SWC_HEADER_LEN;
   printf ("Send: %d Bytes\n", size);
   fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -1310,7 +1310,7 @@ swc_write_cart_sram (const char *filename, unsigned short parport, int io_mode)
   ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
   ffe_send_command0 (0xe00c, 0);                //  want to write more data than necessary
   byte = read_cartridge1 (io_mode & SWC_IO_SUPER_FX ? 0x00ffbd : 0x00ffd8);
-  size = ucon64.file_size - SWC_HEADER_LEN;     // SWC SRAM is 4*8 kB, emu SRAM often not
+  size = (int) ucon64.file_size - SWC_HEADER_LEN; // SWC SRAM is 4*8 kB, emu SRAM often not
   size = MIN ((byte ? 1 << (byte + 10) : 0), size);
 
   printf ("Send: %d Bytes\n", size);

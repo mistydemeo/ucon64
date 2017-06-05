@@ -278,7 +278,7 @@ gba_n (st_ucon64_nfo_t *rominfo, const char *name)
   strncpy (buf, name, GBA_NAME_LEN);
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, GBA_HEADER_START + rominfo->backup_header_len + 0xa0, GBA_NAME_LEN,
             dest_name, "r+b");
 
@@ -294,7 +294,7 @@ gba_logo (st_ucon64_nfo_t *rominfo)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (gba_logodata, GBA_HEADER_START + rominfo->backup_header_len + 0x04,
             GBA_LOGODATA_LEN, dest_name, "r+b");
 
@@ -310,7 +310,7 @@ gba_chk (st_ucon64_nfo_t *rominfo)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   buf = (char) rominfo->current_internal_crc;
   ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->backup_header_len + 0xbd,
@@ -409,12 +409,12 @@ gba_sram (void)
     major, minor, micro, *buffer, *bufferptr, *ptr, value;
   char dest_name[FILENAME_MAX];
   int p_size[2] = { 188, 168 }, p_off, st_off;
-  unsigned int fsize = ucon64.file_size;
+  unsigned int fsize = (unsigned int) ucon64.file_size;
   FILE *destfile;
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   if ((destfile = fopen (dest_name, "r+b")) == NULL)
     {
@@ -1148,7 +1148,7 @@ gba_sc (void)
       0xfe, 0x46
     };
   int x = 0;
-  unsigned int fsize = ucon64.file_size, padded = 0;
+  unsigned int fsize = (unsigned int) ucon64.file_size, padded = 0;
   uint32_t address = 0, pos = 0;
   char dest_name[FILENAME_MAX], fname[FILENAME_MAX];
   unsigned char *buffer, *ptr = NULL;
@@ -1157,7 +1157,7 @@ gba_sc (void)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   if ((destfile = fopen (dest_name, "rb+")) == NULL)
     {

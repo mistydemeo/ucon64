@@ -718,7 +718,7 @@ ucon64_options (st_ucon64_t *p)
       else
         fputc ('\n', stdout);
       checksum = 0;
-      ucon64_chksum (NULL, NULL, &checksum, ucon64.fname, ucon64.file_size, value);
+      ucon64_chksum (NULL, NULL, &checksum, ucon64.fname, (int) ucon64.file_size, value);
       printf ("Checksum (CRC32): 0x%08x\n\n", checksum);
       break;
 
@@ -730,7 +730,7 @@ ucon64_options (st_ucon64_t *p)
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
         fputc ('\n', stdout);
-      ucon64_chksum (buf, NULL, NULL, ucon64.fname, ucon64.file_size, value);
+      ucon64_chksum (buf, NULL, NULL, ucon64.fname, (int) ucon64.file_size, value);
       printf ("Checksum (SHA1): 0x%s\n\n", buf);
       break;
 
@@ -742,32 +742,32 @@ ucon64_options (st_ucon64_t *p)
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
         fputc ('\n', stdout);
-      ucon64_chksum (NULL, buf, NULL, ucon64.fname, ucon64.file_size, value);
+      ucon64_chksum (NULL, buf, NULL, ucon64.fname, (int) ucon64.file_size, value);
       printf ("Checksum (MD5): 0x%s\n\n", buf);
       break;
 
     case UCON64_HEX:
       ucon64_dump (stdout, ucon64.fname,
                    option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
-                   ucon64.file_size, DUMPER_HEX);
+                   (size_t) ucon64.file_size, DUMPER_HEX);
       break;
 
     case UCON64_DUAL:
       ucon64_dump (stdout, ucon64.fname,
                    option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
-                   ucon64.file_size, DUMPER_DUAL);
+                   (size_t) ucon64.file_size, DUMPER_DUAL);
       break;
 
     case UCON64_CODE:
       ucon64_dump (stdout, ucon64.fname,
                    option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
-                   ucon64.file_size, DUMPER_CODE);
+                   (size_t) ucon64.file_size, DUMPER_CODE);
       break;
 
     case UCON64_PRINT:
       ucon64_dump (stdout, ucon64.fname,
                    option_arg ? MAX (strtol2 (option_arg, NULL), 0) : 0,
-                   ucon64.file_size, DUMPER_PRINT);
+                   (size_t) ucon64.file_size, DUMPER_PRINT);
       break;
 
     case UCON64_C:
@@ -779,17 +779,17 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_FIND:
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, option_arg,
+      ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, option_arg,
                    strlen (option_arg), MEMCMP2_WCARD ('?'));
       break;
 
     case UCON64_FINDR:
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, option_arg,
+      ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, option_arg,
                    strlen (option_arg), MEMCMP2_REL);
       break;
 
     case UCON64_FINDI:
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, option_arg,
+      ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, option_arg,
                    strlen (option_arg), MEMCMP2_WCARD ('?') | MEMCMP2_CASE);
       break;
 
@@ -800,8 +800,8 @@ ucon64_options (st_ucon64_t *p)
         buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
           '?' : (char) strtol (values[x], NULL, 16);
       buf[x] = '\0';
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_WCARD ('?'));
+      ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, buf, value,
+                   MEMCMP2_WCARD ('?'));
       break;
 
     case UCON64_HFINDR:
@@ -811,8 +811,8 @@ ucon64_options (st_ucon64_t *p)
         buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
           '?' : (char) strtol (values[x], NULL, 16);
       buf[x] = '\0';
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_REL);
+      ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, buf, value,
+                   MEMCMP2_REL);
       break;
 
     case UCON64_DFIND:
@@ -822,8 +822,8 @@ ucon64_options (st_ucon64_t *p)
         buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
           '?' : (char) strtol (values[x], NULL, 10);
       buf[x] = '\0';
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_WCARD ('?'));
+      ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, buf, value,
+                   MEMCMP2_WCARD ('?'));
       break;
 
     case UCON64_DFINDR:
@@ -833,8 +833,8 @@ ucon64_options (st_ucon64_t *p)
         buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
           '?' : (char) strtol (values[x], NULL, 10);
       buf[x] = '\0';
-      ucon64_find (ucon64.fname, 0, ucon64.file_size, buf,
-                   value, MEMCMP2_REL);
+      ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, buf, value,
+                   MEMCMP2_REL);
       break;
 
     case UCON64_PADHD:                          // deprecated
@@ -845,8 +845,8 @@ ucon64_options (st_ucon64_t *p)
         value = ucon64.nfo->backup_header_len;
       ucon64_file_handler (dest_name, src_name, 0);
 
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-      if (truncate2 (dest_name, ucon64.file_size +
+      fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "wb");
+      if (truncate2 (dest_name, (off_t) ucon64.file_size +
                      (MBIT - ((ucon64.file_size - value) % MBIT))) == -1)
         {
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
@@ -860,7 +860,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_PADN:
       ucon64_file_handler (dest_name, src_name, 0);
 
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+      fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "wb");
       if (truncate2 (dest_name, strtol (option_arg, NULL, 10) +
                      (ucon64.nfo ? ucon64.nfo->backup_header_len : 0)) == -1)
         {
@@ -885,7 +885,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_STRIP:
       ucon64_file_handler (dest_name, src_name, 0);
-      fcopy (src_name, 0, ucon64.file_size - strtol (option_arg, NULL, 10),
+      fcopy (src_name, 0, (size_t) ucon64.file_size - strtol (option_arg, NULL, 10),
              dest_name, "wb");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
@@ -893,14 +893,14 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_STP:
       ucon64_file_handler (dest_name, src_name, 0);
-      fcopy (src_name, 512, ucon64.file_size, dest_name, "wb");
+      fcopy (src_name, 512, (size_t) ucon64.file_size, dest_name, "wb");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;
 
     case UCON64_STPN:
       ucon64_file_handler (dest_name, src_name, 0);
-      fcopy (src_name, strtol (option_arg, NULL, 10), ucon64.file_size,
+      fcopy (src_name, strtol (option_arg, NULL, 10), (size_t) ucon64.file_size,
              dest_name, "wb");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
@@ -910,7 +910,7 @@ ucon64_options (st_ucon64_t *p)
       ucon64_file_handler (dest_name, src_name, 0);
       memset (buf, 0, 512);
       ucon64_fwrite (buf, 0, 512, dest_name, "wb");
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "ab");
+      fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;
@@ -935,7 +935,7 @@ ucon64_options (st_ucon64_t *p)
               bytesleft -= bytestowrite;           //  the first iteration
             }
         }
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "ab");
+      fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;
@@ -1347,8 +1347,8 @@ ucon64_options (st_ucon64_t *p)
         default:                                // Nintendo 64
           puts ("Converting file...");
           ucon64_file_handler (dest_name, NULL, 0);
-          fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-          ucon64_fbswap16 (dest_name, 0, ucon64.file_size);
+          fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "wb");
+          ucon64_fbswap16 (dest_name, 0, (size_t) ucon64.file_size);
           printf (ucon64_msg[WROTE], dest_name);
           break;
         }
@@ -1358,8 +1358,8 @@ ucon64_options (st_ucon64_t *p)
       // --swap2 is currently used only for Nintendo 64
       puts ("Converting file...");
       ucon64_file_handler (dest_name, NULL, 0);
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
-      ucon64_fwswap32 (dest_name, 0, ucon64.file_size);
+      fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "wb");
+      ucon64_fwswap32 (dest_name, 0, (size_t) ucon64.file_size);
       printf (ucon64_msg[WROTE], dest_name);
       break;
 
@@ -1646,7 +1646,7 @@ ucon64_options (st_ucon64_t *p)
         }
 
       ucon64_file_handler (dest_name, src_name, 0);
-      fcopy (src_name, 0, ucon64.file_size, dest_name, "wb");
+      fcopy (src_name, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
       fputc ('\n', stdout);
       buf[0] = (char) ucon64_fgetc (dest_name, x);
@@ -2329,7 +2329,7 @@ ucon64_options (st_ucon64_t *p)
                    stderr);
           else
             doctor64_write (ucon64.fname, ucon64.nfo->backup_header_len,
-                            ucon64.file_size, ucon64.parport);
+                            (int) ucon64.file_size, ucon64.parport);
         }
       fputc ('\n', stdout);
       break;

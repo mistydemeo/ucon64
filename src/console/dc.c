@@ -627,7 +627,7 @@ dc_scramble (void)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 
-  if (!scramble (ucon64.fname, ucon64.file_size, dest_name))
+  if (!scramble (ucon64.fname, (uint32_t) ucon64.file_size, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else
     fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name);
@@ -643,7 +643,7 @@ dc_unscramble (void)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 
-  if (!descramble (ucon64.fname, ucon64.file_size, dest_name))
+  if (!descramble (ucon64.fname, (uint32_t) ucon64.file_size, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else
     fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name);

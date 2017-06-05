@@ -200,7 +200,7 @@ smd_write_rom (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  fsize = ucon64.file_size;
+  fsize = (int) ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   fread (buffer, 1, SMD_HEADER_LEN, file);
@@ -310,7 +310,7 @@ smd_write_sram (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = ucon64.file_size - SMD_HEADER_LEN;
+  size = (int) ucon64.file_size - SMD_HEADER_LEN;
   printf ("Send: %d Bytes\n", size);
   fseek (file, SMD_HEADER_LEN, SEEK_SET);       // skip the header
 

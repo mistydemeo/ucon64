@@ -60,7 +60,7 @@ typedef struct st_swan_header
 {
   char pad[10];
 } st_swan_header_t;
-#define SWAN_HEADER_START (ucon64.file_size - 10)
+#define SWAN_HEADER_START ((size_t) ucon64.file_size - 10)
 #define SWAN_HEADER_LEN (sizeof (st_swan_header_t))
 
 st_swan_header_t swan_header;
@@ -73,7 +73,7 @@ swan_chk (st_ucon64_nfo_t *rominfo)
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
   ucon64_fputc (dest_name, SWAN_HEADER_START + 8, rominfo->current_internal_crc, "r+b"); // low byte
   ucon64_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte
@@ -158,12 +158,12 @@ swan_init (st_ucon64_nfo_t *rominfo)
            (!OFFSET (swan_header, 1) ? "WS Monochrome" : "WS Color"));
   strcat (rominfo->misc, (const char *) buf);
 
-  if ((rom_buffer = (unsigned char *) malloc (ucon64.file_size)) == NULL)
+  if ((rom_buffer = (unsigned char *) malloc ((size_t) ucon64.file_size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], ucon64.file_size);
       return -1;
     }
-  ucon64_fread (rom_buffer, 0, ucon64.file_size, ucon64.fname);
+  ucon64_fread (rom_buffer, 0, (size_t) ucon64.file_size, ucon64.fname);
 
   rominfo->has_internal_crc = 1;
   rominfo->internal_crc_len = 2;
@@ -197,7 +197,7 @@ swan_chksum (unsigned char *ptr)
   if (ucon64.file_size % 4)
     return -1;
 
-  t = ucon64.file_size - 2;
+  t = (unsigned int) ucon64.file_size - 2;
   while (t-- > 0)
     csum += *ptr++;
 

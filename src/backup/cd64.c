@@ -306,7 +306,7 @@ cd64_write_rom (const char *filename)
     }
 
   cd64_starttime = time (NULL);
-  cd64_upload_dram (cd64, file, ucon64.file_size, NULL, 1);
+  cd64_upload_dram (cd64, file, (uint32_t) ucon64.file_size, NULL, 1);
 
   cd64->devclose (cd64);
   fclose (file);
@@ -329,7 +329,7 @@ cd64_write_bootemu (const char *filename)
     }
 
   cd64_starttime = time (NULL);
-  cd64_upload_bootemu (cd64, file, ucon64.file_size, NULL);
+  cd64_upload_bootemu (cd64, file, (uint32_t) ucon64.file_size, NULL);
 
   cd64->devclose (cd64);
   fclose (file);

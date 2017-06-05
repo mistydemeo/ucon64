@@ -214,7 +214,7 @@ msg_write_rom (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  size = ucon64.file_size - MSG_HEADER_LEN;
+  size = (int) ucon64.file_size - MSG_HEADER_LEN;
   printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
 
   fread (buffer, 1, MSG_HEADER_LEN, file);

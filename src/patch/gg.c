@@ -984,8 +984,8 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 int
 gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
-  unsigned int size = ucon64.file_size - rominfo->backup_header_len, offset,
-               address, value, writefile;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+               offset, address, value, writefile;
   int check = -1, result = -1;
   char buf[GAME_GENIE_MAX_STRLEN], buf2[GAME_GENIE_MAX_STRLEN], dest_name[FILENAME_MAX];
   FILE *destfile;
@@ -1042,7 +1042,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
   if (writefile)
     {
       ucon64_file_handler (dest_name, NULL, 0);
-      fcopy (ucon64.fname, 0, ucon64.file_size, dest_name, "wb"); /* no copy if one file */
+      fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb"); /* no copy if one file */
 
       if ((destfile = fopen (dest_name, "r+b")) == NULL)
         {

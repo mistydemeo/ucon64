@@ -63,7 +63,7 @@ typedef struct st_vboy_header
 } st_vboy_header_t;
 
 #define VBOY_HEADER_LEN (sizeof (st_vboy_header_t))
-#define VBOY_HEADER_START (ucon64.file_size - (VBOY_HEADER_LEN + 512))
+#define VBOY_HEADER_START ((size_t) ucon64.file_size - (VBOY_HEADER_LEN + 512))
 
 
 int

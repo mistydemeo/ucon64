@@ -327,7 +327,7 @@ is_probably_3f (const unsigned char *image, unsigned int size)
 int
 atari_init (st_ucon64_nfo_t * rominfo)
 {
-  int i, j, bsmode, size = ucon64.file_size;
+  int i, j, bsmode, size = (int) ucon64.file_size;
   unsigned int crc32;
   static char backup_usage[80];
   unsigned char first, image[ATARI_ROM_SIZE], buffer[0x200];
@@ -342,7 +342,7 @@ atari_init (st_ucon64_nfo_t * rominfo)
     return -1;
 
   ucon64_fread (image, 0, size, ucon64.fname);
-  ucon64_chksum (NULL, md5, &crc32, ucon64.fname, ucon64.file_size, 0);
+  ucon64_chksum (NULL, md5, &crc32, ucon64.fname, size, 0);
 
   bsmode = get_game_bsmode_by_crc (crc32);
   if (bsmode == -1)

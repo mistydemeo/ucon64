@@ -268,6 +268,8 @@ extern char *strcasestr2 (const char *str, const char *search);
 #ifndef _WIN32
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
+#else
+#include <sys/types.h>                          // off_t (VC++)
 #endif
 extern char *strtrim (char *str);
 extern char *strncpy2 (char *dest, const char *src, size_t size);
@@ -545,12 +547,9 @@ extern int kbhit (void);
 #ifdef  _WIN32
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.
-
-#include <sys/types.h>
-
 extern int truncate (const char *path, off_t size);
 extern int sync (void);
-// For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
+// For MinGW popen() and pclose() are unavailable for DLLs. For DLLs _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
 #ifndef pclose                                  // misc_z.h's definition gets higher precedence
 #define pclose _pclose

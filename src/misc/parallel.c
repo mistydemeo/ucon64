@@ -125,11 +125,11 @@ static struct MsgPort *parport;
 
 static void *io_driver = NULL;
 
-// The original inpout32.dll only has I/O functions for byte-sized I/O
+// the original inpout32.dll only has I/O functions for byte-sized I/O
 static short (__stdcall *Inp32) (short) = NULL;
 static void (__stdcall *Outp32) (short, short) = NULL;
 
-static unsigned char inpout32_input_byte (unsigned short port) { return Inp32 (port); }
+static unsigned char inpout32_input_byte (unsigned short port) { return (unsigned char) Inp32 (port); }
 static void inpout32_output_byte (unsigned short port, unsigned char byte) { Outp32 (port, byte); }
 
 // io.dll has more functions then the ones we refer to here, but we don't need them
@@ -164,7 +164,7 @@ static void (*output_byte) (unsigned short, unsigned char) = i386_output_byte;
 static void (*output_word) (unsigned short, unsigned short) = i386_output_word;
 
 #elif   defined _WIN32
-// The following four functions are needed because inp{w} and outp{w} seem to be macros
+// the following four functions are needed because inp{w} and outp{w} seem to be macros
 static unsigned char inp_func (unsigned short port) { return (unsigned char) inp (port); }
 static unsigned short inpw_func (unsigned short port) { return inpw (port); }
 static void outp_func (unsigned short port, unsigned char byte) { outp (port, byte); }
@@ -726,7 +726,7 @@ parport_open (unsigned short port)
   io_driver = NULL;
 
   sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "dlportio.dll");
-#if 0 // We must not do this for Cygwin or access() won't "find" the file
+#if 0 // we must not do this for Cygwin or access() won't "find" the file
   change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
 #endif
   if (access (fname, F_OK) == 0)

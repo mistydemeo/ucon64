@@ -146,7 +146,7 @@ To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3
 <br><img src="images/win32.png"> (MinGW)<br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-win32-mingw-bin.zip/download">ucon64-2.0.3-win32-mingw-bin.zip</a><br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-usb-win32-mingw-bin.zip/download">ucon64-2.0.3-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16)<br>
-<a href="ucon64/ucon64-2.1.0wip-usb-win32-mingw-bin.zip">ucon64-2.1.0wip-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16) WIP build 20170601<br>
+<a href="ucon64/ucon64-2.1.0wip-usb-win32-mingw-bin.zip">ucon64-2.1.0wip-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16) WIP build 20170617<br>
 <br><img src="images/win32.png"> (Visual C++)<br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-win32-vc-bin.zip/download">ucon64-2.0.3-win32-vc-bin.zip</a><br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-usb-win32-vc-bin.zip/download">ucon64-2.0.3-usb-win32-vc-bin.zip</a> (with USB support, for Quickdev16)<br>
@@ -327,7 +327,7 @@ Only necessary to access the parallel port<br>
 <br>
 <img src="images/win32.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/zlib.zip?download">zlib.zip</a><br>
-zlib.dll<br>
+Needed by the Visual C++ port of uCON64 versions before 2.0.0<br>
 <br>
 <a href="http://www.cygwin.com"><img src="images/cygwin-icon.png" border="0"></a> (Cygwin)<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/cygwindll.zip?download">cygwindll.zip</a><br>

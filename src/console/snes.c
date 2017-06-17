@@ -50,6 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/backup.h"
 #include "backup/gd.h"
 #include "backup/mgd.h"
+#include "backup/mgh.h"
 #include "backup/swc.h"
 #include "backup/ufo.h"
 #include "backup/ufosd.h"
@@ -205,7 +206,7 @@ const st_getopt2_t snes_usage[] =
     },
     {
       "mgd", 0, 0, UCON64_MGD,
-      NULL, "convert to Multi Game Doctor*/MGD/RAW",
+      NULL, "convert to Multi Game Doctor 2/MGD2/RAW",
       &snes_obj[2]
     },
     {
@@ -979,10 +980,10 @@ snes_mgd (st_ucon64_nfo_t *rominfo)
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   if (snes_hirom)
-    puts ("NOTE: This game may not work with an MGD because it is a HiROM game");
+    puts ("NOTE: This game may not work with an MGD2 because it is a HiROM game");
 
   strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, UCON64_SNES, size, dest_name, 1);
+  mgd_make_name (ucon64.fname, UCON64_SNES, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if (rominfo->interleaved)
@@ -1379,18 +1380,42 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
 
 
 static void
-write_mgh_file (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
-                unsigned char *dstbuf, unsigned int newsize,
-                unsigned int total4Mbparts)
+write_mgh_files (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
+                 unsigned char *dstbuf, unsigned int newsize,
+                 unsigned int total4Mbparts)
 {
   char dest_name[FILENAME_MAX];
+  unsigned char mgh_data[32];
+  int n;
 
   (void) rominfo;
   (void) srcbuf;
   (void) total4Mbparts;
-  mgd_make_name (ucon64.fname, UCON64_SNES, newsize, dest_name, 0);
+  mgh_make_name (ucon64.fname, UCON64_SNES, newsize, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   ucon64_fwrite (dstbuf, 0, newsize, dest_name, "wb");
+
+  printf (ucon64_msg[WROTE], dest_name);
+
+  // automatically create MGH name file
+  memset (mgh_data, 0, sizeof mgh_data);
+  mgh_data[0] = 'M';
+  mgh_data[1] = 'G';
+  mgh_data[2] = 'H';
+  mgh_data[3] = 0x1a;
+  mgh_data[4] = 0x06;
+  mgh_data[5] = 0xf0;
+  for (n = 0; n < 15 && rominfo->name[n] != '\0'; n++)
+    mgh_data[16 + n] = isprint ((int) rominfo->name[n]) ? rominfo->name[n] : '.';
+  mgh_data[31] = 0xff;
+
+  set_suffix (dest_name, ".MGH");
+  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
+  /*
+    If a backup would be created it would overwrite the backup of the ROM. The
+    ROM backup is more important, so we don't write a backup of the MGH file.
+  */
+  ucon64_fwrite (mgh_data, 0, sizeof mgh_data, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
 }
@@ -1402,7 +1427,7 @@ snes_mgh (st_ucon64_nfo_t *rominfo)
   if (snes_hirom)
     puts ("NOTE: This game has to be split with " OPTION_LONG_S "smgh in order to work with an MGH");
 
-  return snes_convert_to_gd (rominfo, write_mgh_file);
+  return snes_convert_to_gd (rominfo, write_mgh_files);
 }
 
 
@@ -1705,7 +1730,7 @@ snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
     {
       fprintf (stderr,
                "ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
-               "       %u is the maximum number of parts for GD3 and MGD\n",
+               "       %u is the maximum number of parts for GD3 and MGD2\n",
                nparts + (surplus ? 1 : 0), sizeof names / sizeof names[0]);
       return;
     }
@@ -1749,8 +1774,8 @@ snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
         }
     }
 
-  // An index file is not used by the GD, but by the MGD. We don't have a
-  //  special function for splitting MGD files, so we do it here.
+  // An index file is not used by the GD, but by the MGD2. We don't have a
+  //  special function for splitting MGD2 files, so we do it here.
   if (!rominfo->backup_header_len)
     mgd_write_index_file (names, name_i);
 }
@@ -2012,7 +2037,7 @@ snes_smgh (st_ucon64_nfo_t *rominfo)
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
                       nparts, surplus, n, half_size;
   const char *p0;
-  char dest_name[FILENAME_MAX], *p;
+  char dest_name[FILENAME_MAX], *p, *suffix;
 
   if (UCON64_ISSET (ucon64.part_size))
     puts ("NOTE: ROM will be split as Multi Game Hunter ROM, ignoring switch " OPTION_LONG_S "ssize");
@@ -2020,13 +2045,23 @@ snes_smgh (st_ucon64_nfo_t *rominfo)
   nparts = size / (8 * MBIT);
   surplus = size % (8 * MBIT);
 
-  mgd_make_name (ucon64.fname, UCON64_SNES, size, dest_name, 0);
+  mgh_make_name (ucon64.fname, UCON64_SNES, size, dest_name);
   ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
   p0 = basename2 (dest_name);
-  n = strlen (p0);
-  p = (char *) p0 + (n > 7 ? 7 : n);
+  p = strrchr (p0, '.');
+  suffix = strdup (p);
+  n = p - p0;
+  if (n <= 7)
+    {
+      memset (p, '_', 7 - n);
+      p += 7 - n;
+    }
+  else // n == 8
+    p--;
   *p = 'A';
   *(p + 1) = '\0';
+  set_suffix (dest_name, suffix);
+  free (suffix);
 
   if (snes_hirom && size <= 16 * MBIT)
     {

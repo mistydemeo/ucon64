@@ -1,5 +1,5 @@
 /*
-mgd.h - Multi Game Doctor/Hunter support for uCON64
+mgd.h - Multi Game Doctor 2 support for uCON64
 
 Copyright (c) 1999 - 2001             NoisyB
 Copyright (c) 2002 - 2004, 2015, 2017 dbjh
@@ -181,7 +181,7 @@ extern int fread_mgd (void *buffer, size_t size, size_t number, FILE *fh);
 extern int q_fread_mgd (void *buffer, size_t start, size_t len,
                         const char *filename);
 extern void mgd_make_name (const char *filename, int console, unsigned int size,
-                           char *name, int add_suffix);
+                           char *name);
 extern void mgd_write_index_file (void *ptr, int n_names);
 
 #endif

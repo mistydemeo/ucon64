@@ -912,14 +912,16 @@ main (int argc, char **argv)
   ucon64.region =
   ucon64.snes_header_base =
   ucon64.snes_hirom =
+  ucon64.org_split =
   ucon64.tv_standard =
   ucon64.use_dump_info =
   ucon64.vram = UCON64_UNKNOWN;
 
   ucon64.flags = WF_DEFAULT;
 
-  // ucon64.console does change per file
+  // ucon64.console and ucon64.split do change per file
   ucon64.console = ucon64.org_console;
+  ucon64.split = ucon64.org_split;
 
   // convert (st_getopt2_t **) to (st_getopt2_t *)
   memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
@@ -1278,7 +1280,7 @@ ucon64_execute_options (void)
 #endif
   ucon64.nfo = NULL;
 
-  ucon64.split = UCON64_UNKNOWN;
+  ucon64.split = ucon64.org_split;
 
   ucon64.file_size =
   ucon64.crc32 =

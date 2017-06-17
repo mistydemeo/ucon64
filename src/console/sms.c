@@ -146,7 +146,7 @@ sms_mgd (st_ucon64_nfo_t *rominfo, int console)
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, console, size, dest_name, 1);
+  mgd_make_name (ucon64.fname, console, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if ((buffer = (unsigned char *) malloc (size)) == NULL)

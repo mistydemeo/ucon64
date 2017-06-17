@@ -422,7 +422,7 @@ gb_mgd (st_ucon64_nfo_t *rominfo)
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, UCON64_GB, size, dest_name, 1);
+  mgd_make_name (ucon64.fname, UCON64_GB, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   fcopy (src_name, rominfo->backup_header_len, size, dest_name, "wb");

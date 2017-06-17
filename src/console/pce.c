@@ -751,7 +751,7 @@ pce_mgd (st_ucon64_nfo_t *rominfo)
       }
 
   strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, UCON64_PCE, size, dest_name, 1);
+  mgd_make_name (ucon64.fname, UCON64_PCE, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   // bit-swapping images for the MGD2 only makes sense for owners of a TG-16

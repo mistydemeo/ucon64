@@ -265,7 +265,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_NS:
-      ucon64.split = 0;
+      ucon64.org_split = ucon64.split = 0;
       break;
 
     case UCON64_HD:
@@ -1568,7 +1568,19 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MGH:
-      snes_mgh (ucon64.nfo);
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_mgh (ucon64.nfo);
+          break;
+        case UCON64_SNES:
+          snes_mgh (ucon64.nfo);
+          break;
+        default:
+// the next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
       break;
 
     case UCON64_MKSRM:
@@ -1737,7 +1749,19 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_SMGH:
-      snes_smgh (ucon64.nfo);
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_smgh (ucon64.nfo);
+          break;
+        case UCON64_SNES:
+          snes_smgh (ucon64.nfo);
+          break;
+        default:
+// the next msg has already been printed
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          return -1;
+        }
       break;
 
     case UCON64_SRAM:

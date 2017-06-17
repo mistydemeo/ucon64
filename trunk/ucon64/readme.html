@@ -274,7 +274,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --idnum=NUM   make --gd3 produce filenames where first file has numerical
                   identifier NUM, next NUM + 1, etc.
   --gd3s        convert *.srm (SRAM) file to GD SF3(SF6/SF7)/Professor SF*
-  --mgd         convert to Multi Game Doctor*/MGD/RAW
+  --mgd         convert to Multi Game Doctor 2/MGD2/RAW
   --mgh         convert to Multi Game Hunter/MGH
   --smc         convert to Super Magicom/SMC
   --swc         convert to Super Wild Card*/SWC
@@ -374,18 +374,20 @@ Neo Geo/Neo Geo CD(Z)/MVS
 Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --gen         force recognition
   --int         force ROM is in interleaved format (SMD)
-  --int2        force ROM is in interleaved format 2 (MGD)
+  --int2        force ROM is in interleaved format 2 (MGD2)
   --nint        force ROM is not in interleaved format (BIN/RAW)
    -n=NEW_NAME  change foreign ROM name to NEW_NAME
   --n2=NEW_NAME change Japanese ROM name to NEW_NAME
   --smd         convert to Super Magic Drive/SMD
   --smds        convert *.srm (SRAM) file to Super Magic Drive/SMD
   --bin         convert to Magicom/BIN/RAW
-  --mgd         convert to Multi Game*/MGD2/MGH
+  --mgd         convert to Multi Game Doctor 2/MGD2
+  --mgh         convert to Multi Game Hunter/MGH
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
    -j           join split ROM
    -s           split ROM; default part size is 8 Mb (4 Mb for SMD)
+  --smgh        split ROM for Multi Game Hunter/MGH
   --ssize=SIZE  specify split part size in Mbit
    -f           remove NTSC/PAL protection
   --chk         fix ROM checksum

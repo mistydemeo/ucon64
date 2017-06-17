@@ -118,7 +118,7 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/doctor64.o backup/doctor64jr.o backup/f2a.o backup/fal.o \
         backup/ffe.o backup/fig.o backup/gbx.o backup/gd.o \
         backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
-        backup/md-pro.o backup/mgd.o backup/msg.o backup/nfc.o \
+        backup/md-pro.o backup/mgd.o backup/mgh.o backup/msg.o backup/nfc.o \
         backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/quickdev16.o \
         backup/sc.o backup/sflash.o backup/smc.o backup/smd.o \
         backup/smsgg-pro.o backup/spsc.o backup/ssc.o backup/swc.o \
@@ -419,6 +419,7 @@ backup/md-pro.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
 backup/mgd.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \
               $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) backup/mgd.h \
               $(GETOPT2_H_DEPS)
+backup/mgh.o: config.h misc/file.h misc/string.h ucon64_defines.h backup/mgh.h
 backup/msg.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(UCON64_H_DEPS) \
               $(UCON64_MISC_H_DEPS) backup/ffe.h backup/msg.h $(GETOPT2_H_DEPS)
 backup/nfc.o: config.h backup/nfc.h $(GETOPT2_H_DEPS)
@@ -470,7 +471,8 @@ console/gb.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
               backup/ssc.h
 console/genesis.o: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
                    $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) console/genesis.h \
-                   backup/md-pro.h backup/mgd.h backup/smd.h $(CONSOLE_DEPS)
+                   backup/md-pro.h backup/mgd.h backup/mgh.h backup/smd.h \
+                   $(CONSOLE_DEPS)
 console/jaguar.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
                   console/jaguar.h backup/backup.h $(CONSOLE_DEPS)
 console/lynx.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
@@ -501,8 +503,8 @@ console/sms.o: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
 console/snes.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
                 misc/file.h $(MISC_H_DEPS) misc/string.h $(TERM_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) $(SNES_H_DEPS) \
-                backup/backup.h backup/gd.h backup/mgd.h backup/swc.h \
-                backup/ufo.h backup/ufosd.h
+                backup/backup.h backup/gd.h backup/mgd.h backup/mgh.h \
+                backup/swc.h backup/ufo.h backup/ufosd.h
 console/swan.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) console/swan.h backup/backup.h \
                 $(CONSOLE_DEPS)

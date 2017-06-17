@@ -708,11 +708,12 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   dbjh; thanks to timofonic for his PR work)<br>
 - moved and split some files in the codebase and changed the workflow. Adding a
   new option/function now requires only two changes in the code (by NoisyB)<br>
-- added --dual show ROM as dualdump (by NoisyB)<br>
-- added --code show ROM as code (by NoisyB)<br>
-- added --print show ROM in printable characters (by NoisyB)<br>
-- added --findi find STRING in ROM and ignore case of alpha bytes (by NoisyB)<br>
-- added --findr find STRING in ROM but look also for shifted/relative
+- added (all) --dual show ROM as dualdump (by NoisyB)<br>
+- added (all) --code show ROM as code (by NoisyB)<br>
+- added (all) --print show ROM in printable characters (by NoisyB)<br>
+- added (all) --findi find STRING in ROM and ignore case of alpha bytes (by
+  NoisyB)<br>
+- added (all) --findr find STRING in ROM but look also for shifted/relative
   similarities (by NoisyB)<br>
 - added (NeoGeo Pocket) --xpl send/receive ROM to/from Pocket Linker, --xpli
   show information about inserted cartridge &amp; --xplm try to enable EPP mode
@@ -779,11 +780,11 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   for testing)<br>
 - updated (PCE) --xpce now correctly handles 3 and 4 Mbit games that are part
   of a multi-game file (by dbjh; thanks to Bryan Lama for testing)<br>
-- updated (PCE, Genesis, SMS/Game Gear) --multi now produces more efficient
+- updated (PCE, Genesis &amp; SMS/Game Gear) --multi now produces more efficient
   multi-game files which results in shorter upload times (by dbjh)<br>
-- updated (PCE, Genesis, SMS/Game Gear, SNES) all transfer options for ToToTEK
-  devices now check for the presence of the device (only the upload ROM options
-  used to do the check) (by dbjh)<br>
+- updated (PCE, Genesis, SMS/Game Gear &amp; SNES) all transfer options for
+  ToToTEK devices now check for the presence of the device (only the upload ROM
+  options used to do the check) (by dbjh)<br>
 - added (all) -r process subdirectories recursively (by NoisyB and dbjh)<br>
 - updated (SNES) improved reliability of --xgd3 (should reduce the frequency of
   "File Size Error !") (by dbjh)<br>
@@ -808,7 +809,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   eadmaster for reporting the issue and testing)<br>
 - updated (Genesis) --ggd, --gge and --gg correctly handle Genesis patch values
   (by dbjh; thanks to eadmaster for reporting the issue and testing)<br>
-- updated (SMS/Game Gear/GB) --gg can use the check byte (by dbjh)<br>
+- updated (SMS/Game Gear &amp; GB) --gg can use the check byte (by dbjh)<br>
 <p>
 <a name="203">2.0.3</a><br>
 - updated (NDS) fixed stupid mistake in reported device capacity (by dbjh)<br>
@@ -853,23 +854,27 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   driver (by dbjh)<br>
 - updated (SNES) improved --id to the point where its help text can be shown
   (by dbjh)<br>
-- updated (SNES/Genesis) fixed several edge cases in MGD splitting code (by
-  dbjh)<br>
+- updated (SNES &amp; Genesis) fixed several edge cases in MGD splitting code
+  (by dbjh)<br>
 - updated (SNES) fixed crash when splitting files in Game Doctor SF3 format
   &#62;= 100 Mbit (by dbjh)<br>
 - updated (all) made --pattern more verbose when -v is specified (by dbjh)<br>
 - updated (GBA) made --crp more verbose when -v is specified (by dbjh)<br>
 - updated (SNES) made -k, -f &amp; -l more verbose when -v is specified (by
   dbjh)<br>
-- updated (Genesis/PCE) made -f more verbose when -v is specified (by dbjh)<br>
+- updated (Genesis &amp; PCE) made -f more verbose when -v is specified (by
+  dbjh)<br>
 - updated (all) fixed bug in code of --pattern that caused changes to be
   omitted in the output file (by dbjh)<br>
-- added (SNES) --smgh split ROM for MGH. Its main purpose is splitting HiROM
-  games in MGH format. Splitting is required to make them run with an MGH (by
-  dbjh, based on post by Mystic_Merlin on ToToTEK's Help &amp; Support Forum)<br>
-- added (SNES) --mgh convert to Magic Game Hunter/MGH format. This does the
-  same as --gd3, except that the resulting file will have an MGD name and no
-  header (by dbjh)<br>
+- added (SNES &amp; Genesis) --smgh split ROM for MGH. Its main purpose is
+  splitting SNES HiROM games in MGH format. Splitting is required to make them
+  run with an MGH (by dbjh, thanks to Mystic_Merlin for information and testing)<br>
+- added (SNES &amp; Genesis) --mgh convert to Magic Game Hunter/MGH format. For
+  SNES this does the same as --gd3, except that the resulting file will have an
+  MGH name and no header. For Genesis this does something very similar to --mgd,
+  but the resulting file will have an MGH name. For both consoles an MGH name
+  file will be produced (by dbjh)<br>
+- updated (NES, SNES, Genesis &amp; NeoGeo Pocket) fixed --ns (by dbjh)<br>
 <br>
 <br>
 <br>

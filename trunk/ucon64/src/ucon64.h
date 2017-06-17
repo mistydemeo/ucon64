@@ -188,6 +188,7 @@ typedef struct
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int split;                                    // ROM is split
+  int org_split;                                // the value of split before processing the first file
   int tv_standard;                              // NES UNIF
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF

@@ -1,5 +1,5 @@
 /*
-mgd.c - Multi Game Doctor/Hunter support for uCON64
+mgd.c - Multi Game Doctor 2 support for uCON64
 
 Copyright (c) 1999 - 2001             NoisyB
 Copyright (c) 2001 - 2004, 2015, 2017 dbjh
@@ -32,14 +32,14 @@ const st_getopt2_t mgd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Multi Game Doctor (2)/MGD/Multi Game Hunter/MGH"
-      /*"19XX Bung Enterprises Ltd http://www.bung.com.hk\n" "?Makko Toys Co., Ltd.?" "Venus Corp. (MGH) */,
+      NULL, "Multi Game Doctor 2/MGD2/Multi Game Hunter/MGH"
+      /*"19XX Bung Enterprises Ltd http://www.bung.com.hk\n" "Makko Toys Co., Ltd.?" "Venus Corp. (MGH)*/,
       NULL
     },
 #if 0
     {
       "xmgd", 0, 0, UCON64_XMGD,
-      NULL, "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
+      NULL, "(TODO) send/receive ROM to/from Multi Game Doctor 2/MGD2; " OPTION_LONG_S "port" OPTARG_S "PORT\n"
       "receives automatically when " OPTION_LONG_S "rom does not exist",
       NULL
     },
@@ -187,13 +187,12 @@ remove_mgd_id (char *name, const char *id)
 
 
 void
-mgd_make_name (const char *filename, int console, unsigned int size, char *name,
-               int add_suffix)
+mgd_make_name (const char *filename, int console, unsigned int size, char *name)
 // these characters are also valid in MGD file names: !@#$%^&_
 {
-  char *prefix = NULL, *p, *size_str = NULL, *suffix = NULL;
+  char *prefix = NULL, *p, *suffix = NULL;
   const char *fname;
-  int n;
+  unsigned int size_mbit = 0, n;
 
   switch (console)
     {
@@ -202,63 +201,63 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name,
       prefix = "SF";
       suffix = ".048";
       if (size <= 1 * MBIT)
-        size_str = "1";
+        size_mbit = 1;
       else if (size <= 2 * MBIT)
-        size_str = "2";
+        size_mbit = 2;
       else if (size <= 4 * MBIT)
-        size_str = "4";
+        size_mbit = 4;
       else if (size <= 8 * MBIT)
         {
-          size_str = "8";
+          size_mbit = 8;
           suffix = ".058";
         }
       else
         {
           suffix = ".078";
           if (size <= 10 * MBIT)
-            size_str = "10";
+            size_mbit = 10;
           else if (size <= 12 * MBIT)
-            size_str = "12";
+            size_mbit = 12;
           else if (size <= 16 * MBIT)
-            size_str = "16";
+            size_mbit = 16;
           else if (size <= 20 * MBIT)
-            size_str = "20";
+            size_mbit = 20;
           else if (size <= 24 * MBIT)
-            size_str = "24";
+            size_mbit = 24;
           else // MGD supports SNES games with sizes up to 32 Mbit
-            size_str = "32";
+            size_mbit = 32;
         }
       break;
     case UCON64_GEN:
       prefix = "MD";
       suffix = ".000";
       if (size <= 1 * MBIT)
-        size_str = "1";
+        size_mbit = 1;
       else if (size <= 2 * MBIT)
-        size_str = "2";
+        size_mbit = 2;
       else if (size <= 4 * MBIT)
-        size_str = "4";
+        size_mbit = 4;
       else
         {
           if (size <= 8 * MBIT)
             {
-              size_str = "8";
+              size_mbit = 8;
               suffix = ".008";
             }
           else if (size <= 16 * MBIT)
             {
-              size_str = "16";
+              size_mbit = 16;
               suffix = ".018";
             }
           else
             {
               suffix = ".038";
               if (size <= 20 * MBIT)
-                size_str = "20";
+                size_mbit = 20;
               else if (size <= 24 * MBIT)
-                size_str = "24";
+                size_mbit = 24;
               else // MGD supports Genesis games with sizes up to 32 Mbit
-                size_str = "32";
+                size_mbit = 32;
             }
         }
       break;
@@ -266,73 +265,73 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name,
       prefix = "PC";
       suffix = ".040";
       if (size <= 1 * MBIT)
-        size_str = "1";
+        size_mbit = 1;
       else if (size <= 2 * MBIT)
-        size_str = "2";
+        size_mbit = 2;
       else if (size <= 3 * MBIT)
         {
-          size_str = "3";
+          size_mbit = 3;
           suffix = ".030";
         }
       else if (size <= 4 * MBIT)
         {
-          size_str = "4";
+          size_mbit = 4;
           suffix = ".048";
         }
       else
         {
           suffix = ".058";
           if (size <= 6 * MBIT)
-            size_str = "6";
+            size_mbit = 6;
           else // MGD supports PC-Engine games with sizes up to 8 Mbit
-            size_str = "8";
+            size_mbit = 8;
         }
       break;
     case UCON64_SMS:
       prefix = "GG";
       suffix = ".060";
       if (size < 1 * MBIT)
-        size_str = "0";
+        size_mbit = 0;
       else if (size == 1 * MBIT)
-        size_str = "1";
+        size_mbit = 1;
       else if (size <= 2 * MBIT)
-        size_str = "2";
+        size_mbit = 2;
       else
         {
           suffix = ".078";
           if (size <= 3 * MBIT)
-            size_str = "3";
+            size_mbit = 3;
           else if (size <= 4 * MBIT)
-            size_str = "4";
+            size_mbit = 4;
           else if (size <= 6 * MBIT)
-            size_str = "6";
+            size_mbit = 6;
           else // MGD supports Sega Master System games with sizes up to 8 Mbit
-            size_str = "8";
+            size_mbit = 8;
         }
       break;
     case UCON64_GAMEGEAR:
       prefix = "GG";
       suffix = ".040";
       if (size < 1 * MBIT)
-        size_str = "0";
+        size_mbit = 0;
       else if (size == 1 * MBIT)
-        size_str = "1";
+        size_mbit = 1;
       else if (size <= 2 * MBIT)
-        size_str = "2";
+        size_mbit = 2;
       else
         {
           suffix = ".048";
           if (size <= 3 * MBIT)
-            size_str = "3";
+            size_mbit = 3;
           else if (size <= 4 * MBIT)
-            size_str = "4";
+            size_mbit = 4;
           else
             {
               suffix = ".078";
               if (size <= 6 * MBIT)
-                size_str = "6";
+                size_mbit = 6;
               else // MGD supports Game Gear games with sizes up to 8 Mbit
-                size_str = "8";
+                size_mbit = 8;
             }
         }
       break;
@@ -344,35 +343,35 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name,
       */
       suffix = ".040";
       if (size < 1 * MBIT)
-        size_str = "0";
+        size_mbit = 0;
       else if (size == 1 * MBIT)
-        size_str = "1";
+        size_mbit = 1;
       else if (size <= 2 * MBIT)
-        size_str = "2";
+        size_mbit = 2;
       else if (size <= 3 * MBIT)
         {
-          size_str = "3";
+          size_mbit = 3;
           suffix = ".030";
         }
       else if (size <= 4 * MBIT)
         {
-          size_str = "4";
+          size_mbit = 4;
           suffix = ".048";
         }
       else
         {
           suffix = ".058";
           if (size <= 6 * MBIT)
-            size_str = "6";
+            size_mbit = 6;
           else
-            size_str = "8";
+            size_mbit = 8;
         }
       break;
     }
 
   fname = basename2 (filename);
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
-  sprintf (name, "%s%s%.3s", prefix, size_str, fname);
+  sprintf (name, "%s%u%.3s", prefix, size_mbit, fname);
   if (!strnicmp (name, fname, size < 10 * MBIT ? 3 : 4))
     strcpy (name, fname);
   if ((p = strchr (name, '.')) != NULL)
@@ -396,8 +395,7 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name,
   remove_mgd_id (name + 3, "GG");
   remove_mgd_id (name + 3, "GB");
 
-  if (add_suffix)
-    set_suffix (name, suffix);
+  set_suffix (name, suffix);
 }
 
 

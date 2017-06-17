@@ -367,11 +367,10 @@ genesis_mgd (st_ucon64_nfo_t *rominfo)
 }
 
 
-int
-genesis_mgh (st_ucon64_nfo_t *rominfo)
+static void
+write_mgh_name_file (st_ucon64_nfo_t *rominfo, char *dest_name)
 {
-  unsigned char *rom_buffer = NULL, mgh_data[512];
-  char dest_name[FILENAME_MAX];
+  unsigned char mgh_data[512];
   int x, y;
   const unsigned char mgh_charset[1024] =
     {
@@ -505,6 +504,34 @@ genesis_mgh (st_ucon64_nfo_t *rominfo)
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
 
+  memset (mgh_data, 0, sizeof mgh_data);
+  memcpy (mgh_data, "MGH\x1a\x06\xf0", 6);
+  mgh_data[31] = 0xff;
+  // in addition to the above, uCON also does "strcpy (mgh_data + 16, "MGH By uCON/chp");"
+
+  for (x = 0; x < 15; x++)
+    {
+      for (y = 0; y < 4; y++)
+        mgh_data[(x + 2) * 16 + y + 4] = mgh_charset[(rominfo->name[x] & 0x7f) * 8 + y];
+      for (y = 4; y < 8; y++)
+        mgh_data[(x + 2) * 16 + y + 244] = mgh_charset[(rominfo->name[x] & 0x7f) * 8 + y];
+    }
+
+  /*
+    If a backup would be created it would overwrite the backup of the ROM. The
+    ROM backup is more important, so we don't write a backup of the MGH file.
+  */
+  ucon64_fwrite (mgh_data, 0, sizeof mgh_data, dest_name, "wb");
+  printf (ucon64_msg[WROTE], dest_name);
+}
+
+
+int
+genesis_mgh (st_ucon64_nfo_t *rominfo)
+{
+  unsigned char *rom_buffer = NULL;
+  char dest_name[FILENAME_MAX];
+
   if ((rom_buffer = load_rom (rominfo, ucon64.fname, rom_buffer)) == NULL)
     return -1;
 
@@ -517,34 +544,8 @@ genesis_mgh (st_ucon64_nfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
-  // automatically create MGH name file
-  memset (mgh_data, 0, sizeof mgh_data);
-  mgh_data[0] = 'M';
-  mgh_data[1] = 'G';
-  mgh_data[2] = 'H';
-  mgh_data[3] = 0x1a;
-  mgh_data[4] = 0x06;
-  mgh_data[5] = 0xf0;
-  mgh_data[31] = 0xff;
-  // in addition to the above, uCON also does "strcpy (mgh_data + 16, "MGH By uCON/chp");"
-
-  for (x = 0; x < 15; x++)
-    {
-      for (y = 0; y < 4; y++)
-        mgh_data[(x + 2) * 16 + y + 4] = mgh_charset[(rominfo->name[x] & 0x7f) * 8 + y];
-      for (y = 4; y < 8; y++)
-        mgh_data[(x + 2) * 16 + y + 244] = mgh_charset[(rominfo->name[x] & 0x7f) * 8 + y];
-    }
-
   set_suffix (dest_name, ".MGH");
-  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
-  /*
-    If a backup would be created it would overwrite the backup of the ROM. The
-    ROM backup is more important, so we don't write a backup of the MGH file.
-  */
-  ucon64_fwrite (mgh_data, 0, sizeof mgh_data, dest_name, "wb");
-
-  printf (ucon64_msg[WROTE], dest_name);
+  write_mgh_name_file (rominfo, dest_name);
   return 0;
 }
 
@@ -563,9 +564,8 @@ genesis_s (st_ucon64_nfo_t *rominfo)
       // don't allow too small part sizes, see src/console/snes.c (snes_s())
       if (part_size < 4 * MBIT)
         {
-          fputs (
-            "ERROR: Split part size must be larger than or equal to 4 Mbit\n",
-            stderr);
+          fputs ("ERROR: Split part size must be larger than or equal to 4 Mbit\n",
+                 stderr);
           return -1;
         }
     }
@@ -579,9 +579,8 @@ genesis_s (st_ucon64_nfo_t *rominfo)
 
   if (size <= part_size)
     {
-      printf (
-        "NOTE: ROM size is smaller than or equal to %u Mbit -- will not be split\n",
-        part_size / MBIT);
+      printf ("NOTE: ROM size is smaller than or equal to %u Mbit -- will not be split\n",
+              part_size / MBIT);
       return -1;
     }
 
@@ -636,7 +635,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
       if (nparts > sizeof names / sizeof names[0])
         {
           printf ("ERROR: Splitting this ROM would result in %u parts (of %u Mbit).\n"
-                  "       %u is the maximum number of parts for Multi Game Doctor\n",
+                  "       %u is the maximum number of parts for Multi Game Doctor 2\n",
                   nparts, part_size / MBIT, sizeof names / sizeof names[0]);
           return -1;
         }
@@ -716,9 +715,8 @@ genesis_smgh (st_ucon64_nfo_t *rominfo)
       // don't allow too small part sizes, see src/console/snes.c (snes_s())
       if (part_size < 4 * MBIT)
         {
-          fputs (
-            "ERROR: Split part size must be larger than or equal to 4 Mbit\n",
-            stderr);
+          fputs ("ERROR: Split part size must be larger than or equal to 4 Mbit\n",
+                 stderr);
           return -1;
         }
     }
@@ -727,9 +725,8 @@ genesis_smgh (st_ucon64_nfo_t *rominfo)
 
   if (size <= part_size)
     {
-      printf (
-        "NOTE: ROM size is smaller than or equal to %u Mbit -- will not be split\n",
-        part_size / MBIT);
+      printf ("NOTE: ROM size is smaller than or equal to %u Mbit -- will not be split\n",
+              part_size / MBIT);
       return -1;
     }
 
@@ -776,6 +773,9 @@ genesis_smgh (st_ucon64_nfo_t *rominfo)
       (*p)++;
     }
 
+  *p = 'A';
+  set_suffix (dest_name, ".MGH");
+  write_mgh_name_file (rominfo, dest_name);
   return 0;
 }
 

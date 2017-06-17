@@ -311,7 +311,7 @@ const st_getopt2_t snes_usage[] =
     },
     {
       "ssize", 1, 0, UCON64_SSIZE,
-      "SIZE", "specify split part size in Mbit (not for GD SF3 or MGH)",
+      "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)",
       &snes_obj[0]
     },
 #if 0
@@ -1380,13 +1380,32 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
 
 
 static void
+write_mgh_name_file (st_ucon64_nfo_t *rominfo, char *dest_name)
+{
+  unsigned char mgh_data[32];
+  int n;
+
+  memset (mgh_data, 0, sizeof mgh_data);
+  memcpy (mgh_data, "MGH\x1a\x06\xf0", 6);
+  for (n = 0; n < 15 && rominfo->name[n] != '\0'; n++)
+    mgh_data[16 + n] = isprint ((int) rominfo->name[n]) ? rominfo->name[n] : '.';
+  mgh_data[31] = 0xff;
+
+  /*
+    If a backup would be created it would overwrite the backup of the ROM. The
+    ROM backup is more important, so we don't write a backup of the MGH file.
+  */
+  ucon64_fwrite (mgh_data, 0, sizeof mgh_data, dest_name, "wb");
+  printf (ucon64_msg[WROTE], dest_name);
+}
+
+
+static void
 write_mgh_files (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
                  unsigned char *dstbuf, unsigned int newsize,
                  unsigned int total4Mbparts)
 {
   char dest_name[FILENAME_MAX];
-  unsigned char mgh_data[32];
-  int n;
 
   (void) rominfo;
   (void) srcbuf;
@@ -1397,27 +1416,8 @@ write_mgh_files (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
 
   printf (ucon64_msg[WROTE], dest_name);
 
-  // automatically create MGH name file
-  memset (mgh_data, 0, sizeof mgh_data);
-  mgh_data[0] = 'M';
-  mgh_data[1] = 'G';
-  mgh_data[2] = 'H';
-  mgh_data[3] = 0x1a;
-  mgh_data[4] = 0x06;
-  mgh_data[5] = 0xf0;
-  for (n = 0; n < 15 && rominfo->name[n] != '\0'; n++)
-    mgh_data[16 + n] = isprint ((int) rominfo->name[n]) ? rominfo->name[n] : '.';
-  mgh_data[31] = 0xff;
-
   set_suffix (dest_name, ".MGH");
-  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
-  /*
-    If a backup would be created it would overwrite the backup of the ROM. The
-    ROM backup is more important, so we don't write a backup of the MGH file.
-  */
-  ucon64_fwrite (mgh_data, 0, sizeof mgh_data, dest_name, "wb");
-
-  printf (ucon64_msg[WROTE], dest_name);
+  write_mgh_name_file (rominfo, dest_name);
 }
 
 
@@ -1984,7 +1984,8 @@ snes_s (st_ucon64_nfo_t *rominfo)
       */
       if (part_size < 4 * MBIT)
         {
-          fputs ("ERROR: Split part size must be larger than or equal to 4 Mbit\n", stderr);
+          fputs ("ERROR: Split part size must be larger than or equal to 4 Mbit\n",
+                 stderr);
           return -1;
         }
     }
@@ -2035,15 +2036,33 @@ int
 snes_smgh (st_ucon64_nfo_t *rominfo)
 {
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      nparts, surplus, n, half_size;
+                      part_size, nparts, surplus, n, half_size;
   const char *p0;
   char dest_name[FILENAME_MAX], *p, *suffix;
 
   if (UCON64_ISSET (ucon64.part_size))
-    puts ("NOTE: ROM will be split as Multi Game Hunter ROM, ignoring switch " OPTION_LONG_S "ssize");
+    {
+      part_size = ucon64.part_size;
+      // don't allow too small part sizes, see snes_s()
+      if (part_size < 4 * MBIT)
+        {
+          fputs ("ERROR: Split part size must be larger than or equal to 4 Mbit\n",
+                 stderr);
+          return -1;
+        }
+    }
+  else
+    part_size = PARTSIZE;
 
-  nparts = size / (8 * MBIT);
-  surplus = size % (8 * MBIT);
+  if (size <= part_size)
+    {
+      printf ("NOTE: ROM size is smaller than or equal to %u Mbit -- will not be split\n",
+              part_size / MBIT);
+      return -1;
+    }
+
+  nparts = size / part_size;
+  surplus = size % part_size;
 
   mgh_make_name (ucon64.fname, UCON64_SNES, size, dest_name);
   ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
@@ -2065,6 +2084,9 @@ snes_smgh (st_ucon64_nfo_t *rominfo)
 
   if (snes_hirom && size <= 16 * MBIT)
     {
+      if (UCON64_ISSET (ucon64.part_size))
+        puts ("NOTE: Splitting Multi Game Hunter HiROM <= 16 Mbit, ignoring switch " OPTION_LONG_S "ssize");
+
       half_size = size / 2;
 
       // don't write backups of parts, because one name is used
@@ -2078,20 +2100,11 @@ snes_smgh (st_ucon64_nfo_t *rominfo)
     }
   else
     {
-      if (nparts + (surplus ? 1 : 0) > 4)
-        {
-          fprintf (stderr,
-                   "ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
-                   "       4 is the maximum number of parts for Multi Game Hunter\n",
-                   nparts + (surplus ? 1 : 0));
-          return -1;
-        }
-
       for (n = 0; n < nparts; n++)
         {
           // don't write backups of parts, because one name is used
-          fcopy (ucon64.fname, n * 8 * MBIT + rominfo->backup_header_len,
-                 8 * MBIT, dest_name, "wb");
+          fcopy (ucon64.fname, n * part_size + rominfo->backup_header_len,
+                 part_size, dest_name, "wb");
           printf (ucon64_msg[WROTE], dest_name);
           (*p)++;
         }
@@ -2099,12 +2112,15 @@ snes_smgh (st_ucon64_nfo_t *rominfo)
       if (surplus)
         {
           // don't write backups of parts, because one name is used
-          fcopy (ucon64.fname, n * 8 * MBIT + rominfo->backup_header_len,
+          fcopy (ucon64.fname, n * part_size + rominfo->backup_header_len,
                  surplus, dest_name, "wb");
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
 
+  *p = 'A';
+  set_suffix (dest_name, ".MGH");
+  write_mgh_name_file (rominfo, dest_name);
   return 0;
 }
 

@@ -1380,7 +1380,7 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
 
 
 static void
-write_mgh_name_file (st_ucon64_nfo_t *rominfo, char *dest_name)
+write_mgh_name_file (st_ucon64_nfo_t *rominfo, const char *dest_name)
 {
   unsigned char mgh_data[32];
   int n;
@@ -2054,7 +2054,7 @@ snes_smgh (st_ucon64_nfo_t *rominfo)
   else
     part_size = PARTSIZE;
 
-  if (size <= part_size)
+  if (size <= part_size && !(snes_hirom && size <= 16 * MBIT))
     {
       printf ("NOTE: ROM size is smaller than or equal to %u Mbit -- will not be split\n",
               part_size / MBIT);
@@ -3091,7 +3091,7 @@ snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer,
           snes_hirom_ok = 1;
         }
 
-      if (type == GD3)
+      if (type == GD3 || rominfo->backup_header_len == 0)
         {
           // deinterleaving schemes specific for the Game Doctor
           if ((snes_hirom || snes_hirom_ok == 2) && rom_size == 24 * MBIT)

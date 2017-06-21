@@ -146,7 +146,7 @@ To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3
 <br><img src="images/win32.png"> (MinGW)<br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-win32-mingw-bin.zip/download">ucon64-2.0.3-win32-mingw-bin.zip</a><br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-usb-win32-mingw-bin.zip/download">ucon64-2.0.3-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16)<br>
-<a href="ucon64/ucon64-2.1.0wip-usb-win32-mingw-bin.zip">ucon64-2.1.0wip-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16) WIP build 20170617<br>
+<a href="ucon64/ucon64-2.1.0wip-usb-win32-mingw-bin.zip">ucon64-2.1.0wip-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16) WIP build 20170622<br>
 <br><img src="images/win32.png"> (Visual C++)<br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-win32-vc-bin.zip/download">ucon64-2.0.3-win32-vc-bin.zip</a><br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-usb-win32-vc-bin.zip/download">ucon64-2.0.3-usb-win32-vc-bin.zip</a> (with USB support, for Quickdev16)<br>
@@ -322,7 +322,7 @@ Some DOS extenders/DPMI hosts. uCON64 needs the files in csdpmi5b.zip under plai
 <br>
 <img src="images/win32.png"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/port95nt.exe?download">port95nt.exe</a><br>
-One of the three DLL I/O port drivers supported by the Windows versions of uCON64 (see the FAQ for links to the other two)<br>
+DlPortIO, one of the three DLL I/O port drivers supported by the Windows versions of uCON64 (see the FAQ for links to the other two)<br>
 Only necessary to access the parallel port<br>
 <br>
 <img src="images/win32.png"><br>

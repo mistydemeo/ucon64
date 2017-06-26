@@ -1019,7 +1019,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
               unsigned char *buffer, int newsize)
 {
   char *p, id_str[4];
-  int n, size = (int) ucon64.file_size - rominfo->backup_header_len;
+  int n;
 
   if (UCON64_ISSET (ucon64.id))
     {
@@ -1055,20 +1055,21 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
             SNES checksum, because several beta ROM dumps have an internal
             checksum of 0 or 0xffff.
           */
-          int local_buffer = !buffer, id = 0;
+          int size, local_buffer = !buffer, id = 0;
           const char *base50_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()-@^_{}~";
 
           if (local_buffer)
             {
+              size = (int) ucon64.file_size - rominfo->backup_header_len;
               if ((buffer = (unsigned char *) malloc (size)) == NULL)
                 {
                   fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
                   exit (1);
                 }
               ucon64_fread (buffer, rominfo->backup_header_len, size, filename);
-              if (rominfo->interleaved)
-                snes_deinterleave (rominfo, &buffer, size);
             }
+          else
+            size = newsize;
 
           for (n = 0; n < size; n++)
             id += (id << 1) + (buffer[n] ^ n);
@@ -1089,10 +1090,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
   else
     p = (char *) basename2 (filename);
 
-  if (newsize / MBIT <= 99)
-    sprintf (name, "sf%d%.3s", newsize / MBIT, p);
-  else
-    sprintf (name, "sf%d%.2s", newsize / MBIT, p);
+  sprintf (name, newsize / MBIT <= 99 ? "sf%d%.3s" : "sf%d%.2s", newsize / MBIT, p);
   if (!strnicmp (name, p, newsize < 10 * MBIT ? 3 : 4))
     strncpy (name, p, 8)[8] = '\0';
   if ((p = strrchr (name, '.')) != NULL)
@@ -1180,8 +1178,7 @@ snes_set_gd3_header (unsigned int total4Mbparts, char *header)
 static int
 snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
                     void (*write_file) (st_ucon64_nfo_t *rominfo,
-                                        unsigned char *srcbuf,
-                                        unsigned char *dstbuf,
+                                        unsigned char *buffer,
                                         unsigned int newsize,
                                         unsigned int total4Mbparts))
 {
@@ -1311,7 +1308,7 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
       newsize = size;
     }
 
-  write_file (rominfo, srcbuf, dstbuf, newsize, total4Mbparts);
+  write_file (rominfo, dstbuf, newsize, total4Mbparts);
 
   free (srcbuf);
   if (snes_hirom)
@@ -1322,9 +1319,8 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
 
 
 static void
-write_gd3_file (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
-                unsigned char *dstbuf, unsigned int newsize,
-                unsigned int total4Mbparts)
+write_gd3_file (st_ucon64_nfo_t *rominfo, unsigned char *buffer,
+                unsigned int newsize, unsigned int total4Mbparts)
 {
   char header[GD_HEADER_LEN], dest_name[FILENAME_MAX];
 
@@ -1335,10 +1331,10 @@ write_gd3_file (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
   snes_set_gd3_header (total4Mbparts, header);
   set_nsrt_info (rominfo, (unsigned char *) &header);
 
-  gd_make_name (ucon64.fname, rominfo, dest_name, srcbuf, newsize);
+  gd_make_name (ucon64.fname, rominfo, dest_name, buffer, newsize);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   ucon64_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
-  ucon64_fwrite (dstbuf, GD_HEADER_LEN, newsize, dest_name, "ab");
+  ucon64_fwrite (buffer, GD_HEADER_LEN, newsize, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
 }
@@ -1353,18 +1349,16 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
 
 // see src/backup/mgd.h for the file naming scheme
 static void
-write_mgd_files (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
-                 unsigned char *dstbuf, unsigned int newsize,
-                 unsigned int total4Mbparts)
+write_mgd_files (st_ucon64_nfo_t *rominfo, unsigned char *buffer,
+                 unsigned int newsize, unsigned int total4Mbparts)
 {
   char dest_name[FILENAME_MAX];
 
   (void) rominfo;
-  (void) srcbuf;
   (void) total4Mbparts;
   mgd_make_name (ucon64.fname, UCON64_SNES, newsize, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-  ucon64_fwrite (dstbuf, 0, newsize, dest_name, "wb");
+  ucon64_fwrite (buffer, 0, newsize, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
 
@@ -1399,18 +1393,16 @@ write_mgh_name_file (st_ucon64_nfo_t *rominfo, const char *dest_name)
 
 
 static void
-write_mgh_files (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
-                 unsigned char *dstbuf, unsigned int newsize,
-                 unsigned int total4Mbparts)
+write_mgh_files (st_ucon64_nfo_t *rominfo, unsigned char *buffer,
+                 unsigned int newsize, unsigned int total4Mbparts)
 {
   char dest_name[FILENAME_MAX];
 
   (void) rominfo;
-  (void) srcbuf;
   (void) total4Mbparts;
   mgh_make_name (ucon64.fname, UCON64_SNES, newsize, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-  ucon64_fwrite (dstbuf, 0, newsize, dest_name, "wb");
+  ucon64_fwrite (buffer, 0, newsize, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
 

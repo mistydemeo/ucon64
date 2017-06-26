@@ -972,34 +972,6 @@ snes_fig (st_ucon64_nfo_t *rominfo)
 }
 
 
-// see src/backup/mgd.h for the file naming scheme
-int
-snes_mgd (st_ucon64_nfo_t *rominfo)
-{
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
-
-  if (snes_hirom)
-    puts ("NOTE: This game may not work with an MGD2 because it is a HiROM game");
-
-  strcpy (src_name, ucon64.fname);
-  mgd_make_name (ucon64.fname, UCON64_SNES, size, dest_name);
-  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
-
-  if (rominfo->interleaved)
-    write_deinterleaved_data (rominfo, src_name, dest_name, size, 0);
-  else
-    fcopy (src_name, rominfo->backup_header_len, (size_t) ucon64.file_size,
-           dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-
-  mgd_write_index_file ((char *) basename2 (dest_name), 1);
-
-  return 0;
-}
-
-
 static void
 snes_int_blocks (const unsigned char *deintptr, unsigned char *ipl,
                  unsigned char *iph, int nblocks)
@@ -1122,7 +1094,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
   else
     sprintf (name, "sf%d%.2s", newsize / MBIT, p);
   if (!strnicmp (name, p, newsize < 10 * MBIT ? 3 : 4))
-    strcpy (name, p);
+    strncpy (name, p, 8)[8] = '\0';
   if ((p = strrchr (name, '.')) != NULL)
     *p = '\0';
   strcat (name, "__");
@@ -1379,14 +1351,40 @@ snes_gd3 (st_ucon64_nfo_t *rominfo)
 }
 
 
+// see src/backup/mgd.h for the file naming scheme
+static void
+write_mgd_files (st_ucon64_nfo_t *rominfo, unsigned char *srcbuf,
+                 unsigned char *dstbuf, unsigned int newsize,
+                 unsigned int total4Mbparts)
+{
+  char dest_name[FILENAME_MAX];
+
+  (void) rominfo;
+  (void) srcbuf;
+  (void) total4Mbparts;
+  mgd_make_name (ucon64.fname, UCON64_SNES, newsize, dest_name);
+  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
+  ucon64_fwrite (dstbuf, 0, newsize, dest_name, "wb");
+
+  printf (ucon64_msg[WROTE], dest_name);
+
+  mgd_write_index_file ((char *) basename2 (dest_name), 1);
+}
+
+
+int
+snes_mgd (st_ucon64_nfo_t *rominfo)
+{
+  return snes_convert_to_gd (rominfo, write_mgd_files);
+}
+
+
 static void
 write_mgh_name_file (st_ucon64_nfo_t *rominfo, const char *dest_name)
 {
-  unsigned char mgh_data[32];
+  unsigned char mgh_data[32] = "MGH\x1a";
   int n;
 
-  memset (mgh_data, 0, sizeof mgh_data);
-  memcpy (mgh_data, "MGH\x1a\x06\xf0", 6);
   for (n = 0; n < 15 && rominfo->name[n] != '\0'; n++)
     mgh_data[16 + n] = isprint ((int) rominfo->name[n]) ? rominfo->name[n] : '.';
   mgh_data[31] = 0xff;
@@ -2148,7 +2146,7 @@ snes_j (st_ucon64_nfo_t *rominfo)
   block_size = fsizeof (src_name) - header_len;
   while (fcopy (src_name, header_len, block_size, dest_name, "ab") != -1)
     {
-      printf ("Joined: %s\n", src_name);
+      printf ("Joined %s\n", src_name);
       total_size += block_size;
       (*p)++;
 

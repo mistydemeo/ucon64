@@ -370,7 +370,7 @@ genesis_mgd (st_ucon64_nfo_t *rominfo)
 static void
 write_mgh_name_file (st_ucon64_nfo_t *rominfo, const char *dest_name)
 {
-  unsigned char mgh_data[512];
+  unsigned char mgh_data[512] = "MGH\x1a";
   int x, y;
   const unsigned char mgh_charset[1024] =
     {
@@ -504,11 +504,7 @@ write_mgh_name_file (st_ucon64_nfo_t *rominfo, const char *dest_name)
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
 
-  memset (mgh_data, 0, sizeof mgh_data);
-  memcpy (mgh_data, "MGH\x1a\x06\xf0", 6);
   mgh_data[31] = 0xff;
-  // in addition to the above, uCON also does "strcpy (mgh_data + 16, "MGH By uCON/chp");"
-
   for (x = 0; x < 15; x++)
     {
       for (y = 0; y < 4; y++)
@@ -801,7 +797,7 @@ genesis_j (st_ucon64_nfo_t *rominfo)
       while (fcopy (src_name, rominfo->backup_header_len, block_size, dest_name,
                     "ab") != -1)
         {
-          printf ("Joined: %s\n", src_name);
+          printf ("Joined %s\n", src_name);
           total_size += block_size;
           (*p)++;
           block_size = fsizeof (src_name) - rominfo->backup_header_len;
@@ -851,7 +847,7 @@ genesis_j (st_ucon64_nfo_t *rominfo)
       while (fcopy (src_name, rominfo->backup_header_len + block_size,
                     block_size, dest_name, "ab") != -1)
         {
-          printf ("Joined: %s\n", src_name);    // print this here, not in the
+          printf ("Joined %s\n", src_name);     // print this here, not in the
           (*p)++;                               //  previous loop
           // BUG ALERT: assume all parts have the same header length
           block_size = (fsizeof (src_name) - rominfo->backup_header_len) / 2;
@@ -876,7 +872,7 @@ genesis_j (st_ucon64_nfo_t *rominfo)
       while (fcopy (src_name, rominfo->backup_header_len, block_size, dest_name,
                     "ab") != -1)
         {
-          printf ("Joined: %s\n", src_name);
+          printf ("Joined %s\n", src_name);
           if (tried_r00)
             break;                              // quit after joining last file
           (*p)++;

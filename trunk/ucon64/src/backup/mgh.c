@@ -35,18 +35,12 @@ mgh_make_name (const char *filename, int console, unsigned int size, char *name)
   fname = basename2 (filename);
   sprintf (name, "%s%.6s", console == UCON64_SNES ? "SF" : "MD", fname);
   if (!strnicmp (name, fname, 2))
-    strcpy (name, fname);
+    strncpy (name, fname, 8)[8] = '\0';
   if ((p = strchr (name, '.')) != NULL)
     *p = '\0';
 
-  n = strlen (name);
-  if (n > 8)
-    {
-      n = 8;
-      name[n] = '\0';
-    }
-
   strupr (name);
+  n = strlen (name);
   if (n == 8 && name[7] == 'A')                 // 'A' indicates first part of split file
     name[7] = '\0';
 

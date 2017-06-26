@@ -373,7 +373,7 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name)
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
   sprintf (name, "%s%u%.3s", prefix, size_mbit, fname);
   if (!strnicmp (name, fname, size < 10 * MBIT ? 3 : 4))
-    strcpy (name, fname);
+    strncpy (name, fname, 8)[8] = '\0';
   if ((p = strchr (name, '.')) != NULL)
     *p = '\0';
   strcat (name, "XX");

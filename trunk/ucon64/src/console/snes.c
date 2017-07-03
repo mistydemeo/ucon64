@@ -1071,6 +1071,15 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
           else
             size = newsize;
 
+          /*
+            With the (hashing) algorithm below there are 5 collisions between
+            proper dumps in a GoodSNES 2.04 set:
+            - Battle Dodgeball (J) / BS Sousa Sentai Wappers 2 (J)
+            - Dokapon Gaiden - Honoo no Audition (J) / BS Super Earth Defense Force (J)
+            - Plok! (U) [!] / BS Yung Hakase no Shinsatsu Shitsu 1 (J)
+            - Rocko's Modern Life - Spunky's Dangerous Day (U) / Yokoyama Mitsuteru - Sangokushi Bangi - Sugoroku Eiyuuki (J)
+            - Super Ice Hockey (E) / Keiba Eight Special (J) (V1.1) [!]
+          */
           for (n = 0; n < size; n++)
             id += (id << 1) + (buffer[n] ^ n);
           id &= 0x7fffffff;
@@ -1205,9 +1214,10 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
       if (!((size >= 2 * MBIT && total4Mbparts <= 8) ||
             total4Mbparts == 10 || total4Mbparts == 12))
         {
+          // use 5 decimals here to get byte resolution (for 32 Mbit + 1 byte dumps)
           fprintf (stderr,
-                   "ERROR: ROM size is %u Mbit -- conversion not yet implemented/verified\n",
-                   size / MBIT);
+                   "ERROR: ROM size is %.5f Mbit -- conversion not yet implemented/verified\n",
+                   TOMBIT_F (size));
           return -1;
         }
       else if (total4Mbparts > 8 && snes_header_base != SNES_EROM)
@@ -1300,7 +1310,7 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
     {
       if (total4Mbparts > 8)
         {
-          fputs ("ERROR: This ROM > 32 Mbit LoROM -- cannot convert\n", stderr);
+          fputs ("ERROR: LoROM > 32 Mbit -- cannot convert\n", stderr);
           return -1;
         }
 
@@ -1398,7 +1408,6 @@ write_mgh_files (st_ucon64_nfo_t *rominfo, unsigned char *buffer,
 {
   char dest_name[FILENAME_MAX];
 
-  (void) rominfo;
   (void) total4Mbparts;
   mgh_make_name (ucon64.fname, UCON64_SNES, newsize, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);

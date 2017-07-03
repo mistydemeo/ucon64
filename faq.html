@@ -2034,18 +2034,18 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    or Game Doctor SF6/SF7?</a><br>
 <b>A</b>: The communication protocols of the Doctor V64 and Game Doctor SF6/SF7
    involve reading specific values from the parallel port Control register.
-   However, the Control register was intended as a write only register. Many
-   parallel ports support input from this register, but some do not. You may
-   happen to have a parallel port that does not support using the Control
-   register for input.<br>
+   However, the Control register was intended as a write only register. Many old
+   parallel ports support input from this register, but most newer ones do not.
+   You may happen to have a parallel port that does not support using the
+   Control register for input.<br>
    Another possibility may be that you configured uCON64 to use ppdev. The
    developers of ppdev decided to target the lowest common denominator and to
    not support reading from the Control register, which is unhelpful to say the
-   least. So, even if your parallel port supports using the Control register
-   for input, ppdev will not let you. This means that you cannot use ppdev in
+   least. So, even if your parallel port supports using the Control register for
+   input, ppdev will not let you. This means that you cannot use ppdev in
    combination with a Doctor V64, unless you modify ppdev (which is not
-   difficult). For the Game Doctor SF6/SF7 a workaround exists by using the
-   Game Doctor SF3 protocol, but you will lose the saver (RTS) transfer
+   difficult). For the Game Doctor SF6/SF7 a workaround exists by using the Game
+   Doctor SF3 protocol, but you will lose the saver (RTS) transfer
    functionality. Of course, you can also avoid this by not configuring uCON64
    to use ppdev.<br>
 <br>

@@ -1733,7 +1733,7 @@ snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
       fprintf (stderr,
                "ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
                "       %u is the maximum number of parts for GD3 and MGD2\n",
-               nparts + (surplus ? 1 : 0), sizeof names / sizeof names[0]);
+               nparts + (surplus ? 1 : 0), (unsigned) (sizeof names / sizeof names[0]));
       return;
     }
   snes_gd_make_names (ucon64.fname, rominfo, (char **) names);

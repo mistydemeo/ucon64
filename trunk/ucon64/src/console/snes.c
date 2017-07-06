@@ -1218,11 +1218,13 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
           fprintf (stderr,
                    "ERROR: ROM size is %.5f Mbit -- conversion not yet implemented/verified\n",
                    TOMBIT_F (size));
+          free (srcbuf);
           return -1;
         }
       else if (total4Mbparts > 8 && snes_header_base != SNES_EROM)
         {
           fputs ("ERROR: Normal ROM > 32 Mbit -- conversion not yet implemented\n", stderr);
+          free (srcbuf);
           return -1;
         }
 
@@ -1311,6 +1313,7 @@ snes_convert_to_gd (st_ucon64_nfo_t *rominfo,
       if (total4Mbparts > 8)
         {
           fputs ("ERROR: LoROM > 32 Mbit -- cannot convert\n", stderr);
+          free (srcbuf);
           return -1;
         }
 
@@ -2344,6 +2347,7 @@ when it has been patched with -f.
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
   if (rominfo->backup_header_len)               // copy header (if present)
@@ -2500,6 +2504,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
   if (rominfo->backup_header_len)               // copy header (if present)
@@ -2609,6 +2614,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
   if (rominfo->backup_header_len)               // copy header (if present)
@@ -2746,6 +2752,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
   if (rominfo->backup_header_len)               // copy header (if present)

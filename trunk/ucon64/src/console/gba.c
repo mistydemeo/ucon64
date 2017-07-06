@@ -578,6 +578,7 @@ gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
   if (rominfo->backup_header_len)                    // copy header (if present)

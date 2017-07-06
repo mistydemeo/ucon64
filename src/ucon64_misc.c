@@ -1675,6 +1675,7 @@ ucon64_pattern (const char *pattern_fname)
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
 

@@ -632,7 +632,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
         {
           printf ("ERROR: Splitting this ROM would result in %u parts (of %u Mbit).\n"
                   "       %u is the maximum number of parts for Multi Game Doctor 2\n",
-                  nparts, part_size / MBIT, sizeof names / sizeof names[0]);
+                  nparts, part_size / MBIT, (unsigned) (sizeof names / sizeof names[0]));
           return -1;
         }
 

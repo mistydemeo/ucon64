@@ -5156,7 +5156,7 @@ remove_destfile (void)
 {
   if (nes_destfname)
     {
-      printf ("Removing: %s\n", nes_destfname);
+      printf ("Removing %s\n", nes_destfname);
       fclose (nes_destfile);                    // necessary on DOS/Win9x for DJGPP port
       remove (nes_destfname);
       nes_destfname = NULL;
@@ -5178,7 +5178,7 @@ read_block (unsigned char **data, unsigned int size, FILE *file, const char *for
     }
   real_size = fread (*data, 1, size, file);
   if (real_size != size)
-    printf ("WARNING: Could not read %d bytes, only %d bytes were available\n",
+    printf ("WARNING: Could not read %u bytes, only %u bytes were available\n",
       size, real_size);
 
   va_end (argptr);
@@ -5252,7 +5252,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
   if ((unif_chunk = (st_unif_chunk_t *)
          malloc (sizeof (st_unif_chunk_t) + chunk_header.length)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for chunk (%d bytes)\n",
+      fprintf (stderr, "ERROR: Not enough memory for chunk (%u bytes)\n",
         (int) sizeof (st_unif_chunk_t) + chunk_header.length);
       exit (1);
     }
@@ -7189,7 +7189,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
           st_dumper_info_t *dumper_info = (st_dumper_info_t *) unif_chunk->data;
           sprintf (buf, "Dump info:\n"
                         "  Dumper: %s\n"
-                        "  Date: %d-%d-%02d\n"
+                        "  Date: %u-%u-%02u\n"
                         "  Agent: %s\n",
                         dumper_info->dumper_name,
                         dumper_info->day, dumper_info->month,
@@ -7653,7 +7653,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
             won't print those character so we have to use to_func() with
             toprint().
           */
-          sprintf (line, "%03d $%02x '%-8s' $%04x-$%04x [%s]\n",
+          sprintf (line, "%03u $%02x '%-8s' $%04x-$%04x [%s]\n",
                    buffer[1], buffer[2],
                    to_func (name, strlen (name), toprint),
                    start, start + size - 1, str_list[buffer[15]]);

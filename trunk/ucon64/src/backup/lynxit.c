@@ -93,8 +93,8 @@ const st_getopt2_t lynxit_usage[] =
 #define    DATA_LOAD   0x20
 #define    PAGE_STB    0x40
 
-unsigned int printer_port = 1, print_data = 0, print_ctrl = 0, print_stat = 0;
-char cartname[32], manufname[16];
+static unsigned int printer_port = 1, print_data = 0, print_ctrl = 0, print_stat = 0;
+static char cartname[32], manufname[16];
 
 //
 // CONTROL REGISTER DEFINITIONS
@@ -112,7 +112,7 @@ char cartname[32], manufname[16];
 
 // Make cart strobes inactive & counter clock & reset inactive
 
-unsigned char control_register = CTRL_INACTIVE;
+static unsigned char control_register = CTRL_INACTIVE;
 static void lynxit_write_control (unsigned char data);
 
 
@@ -130,7 +130,7 @@ static int debug = FALSE, quiet = FALSE, verify = TRUE;
 
 
 #if 0
-void
+static void
 usage (void)
 {
   MESSAGE (("\nUsage: lynxit [-pX] [-d] [-q] <command> <filename> [cartname] [manuf]\n"));
@@ -145,7 +145,7 @@ usage (void)
 #endif
 
 
-int
+static int
 ptr_port_init (unsigned int port)
 {
 #if 0
@@ -175,7 +175,7 @@ ptr_port_init (unsigned int port)
 }
 
 
-void
+static void
 lynxit_shift_out_byte (unsigned char data)
 {
   unsigned int loop;
@@ -206,7 +206,7 @@ lynxit_shift_out_byte (unsigned char data)
 }
 
 
-unsigned char
+static unsigned char
 lynxit_shift_in_byte (void)
 {
   unsigned int loop;
@@ -231,7 +231,7 @@ lynxit_shift_in_byte (void)
 }
 
 
-void
+static void
 lynxit_write_control (unsigned char data)
 {
 #if 0
@@ -247,7 +247,7 @@ lynxit_write_control (unsigned char data)
 }
 
 
-void
+static void
 lynxit_write_page (unsigned char page)
 {
 #if 0
@@ -262,7 +262,7 @@ lynxit_write_page (unsigned char page)
 }
 
 
-void
+static void
 lynxit_counter_reset (void)
 {
   lynxit_write_control ((unsigned char) (control_register | CTRL_CTR_RST));
@@ -270,7 +270,7 @@ lynxit_counter_reset (void)
 }
 
 
-void
+static void
 lynxit_counter_increment (void)
 {
   lynxit_write_control ((unsigned char) (control_register & (CTRL_CTR_CLKB ^ 0xff)));
@@ -278,7 +278,7 @@ lynxit_counter_increment (void)
 }
 
 
-unsigned char
+static unsigned char
 cart_read_byte (unsigned int cart)
 {
   unsigned char data;
@@ -333,7 +333,8 @@ cart_read_byte (unsigned int cart)
 }
 
 
-void
+#if 0
+static void
 cart_write_byte (unsigned int cart, unsigned char data)
 {
 #if 0
@@ -382,9 +383,10 @@ cart_write_byte (unsigned int cart, unsigned char data)
   lynxit_write_control ((unsigned char) (control_register | CTRL_WR_EN));
 
 }
+#endif
 
 
-void
+static void
 cart_read_page (unsigned int cart, unsigned int page_number,
                 unsigned int page_size, unsigned char *page_ptr)
 {
@@ -403,7 +405,7 @@ cart_read_page (unsigned int cart, unsigned int page_number,
 
 
 #if 0
-void
+static void
 cart_write_page (unsigned int cart, unsigned int page_number,
                  unsigned int page_size, unsigned char *page_ptr)
 {
@@ -411,7 +413,7 @@ cart_write_page (unsigned int cart, unsigned int page_number,
 #endif
 
 
-int
+static int
 cart_analyse (int cart)
 {
   unsigned char image[MAX_PAGE_SIZE];
@@ -532,7 +534,7 @@ cart_analyse (int cart)
 
 #define  MAX_ERRORS    16
 
-int
+static int
 cart_verify (char *filename)
 {
   unsigned char image1[MAX_PAGE_SIZE], image2[MAX_PAGE_SIZE];
@@ -561,7 +563,7 @@ cart_verify (char *filename)
       return FALSE;
     }
 
-  if (strcmp (header.magic, "LYNX") != 0)
+  if (memcmp (header.magic, MAGIC_STRING, sizeof header.magic) != 0)
     {
       MESSAGE (("ERROR    : %s is not a lynx image\n", filename));
       fclose (fp);
@@ -668,7 +670,7 @@ cart_verify (char *filename)
 }
 
 
-int
+static int
 cart_read (char *filename)
 {
   unsigned char image[MAX_PAGE_SIZE];
@@ -681,10 +683,12 @@ cart_read (char *filename)
   DEBUG (("read_cart() called with <%s>\n\n", filename));
 #endif
 
-  memset (&header, 0, sizeof (st_lnx_header_t));
-  strcpy (header.magic, MAGIC_STRING);
-  strcpy (header.cartname, cartname);
-  strcpy (header.manufname, manufname);
+  memset (&header, 0, sizeof header);
+  memcpy (header.magic, MAGIC_STRING, sizeof header.magic);
+  strncpy (header.cartname, cartname, sizeof header.cartname - 1)
+    [sizeof header.cartname - 1] = '\0';
+  strncpy (header.manufname, manufname, sizeof header.manufname - 1)
+    [sizeof header.manufname - 1] = '\0';
   header.page_size_bank0 = (short) cart_analyse (BANK0);
   header.page_size_bank1 = (short) cart_analyse (BANK1);
   header.version = FILE_FORMAT_VERSION;
@@ -747,7 +751,7 @@ cart_read (char *filename)
 
 
 #if 0
-int
+static int
 cart_write (char *filename)
 {
   DEBUG (("write_cart() called with <%s>\n\n", filename));
@@ -756,7 +760,7 @@ cart_write (char *filename)
 #endif
 
 
-int
+static int
 perform_test (char *testname)
 {
   if (strcmp (testname, "LOOPBACK") == 0)
@@ -907,7 +911,7 @@ perform_test (char *testname)
 static char buf[FILENAME_MAX];
 
 
-int
+static int
 lynxit_main (int argc, char **argv)
 {
   int loop;

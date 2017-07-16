@@ -618,7 +618,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
     }
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Version: 1.%d\n", gb_header.version);
+  sprintf (buf, "Version: 1.%u\n", gb_header.version);
   strcat (rominfo->misc, buf);
 
   if (gb_header.gb_type == 0x80)
@@ -707,22 +707,25 @@ gb_chksum (st_ucon64_nfo_t *rominfo)
   unsigned char *rom_buffer;
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len, i;
 
-  if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
+  if (size > GB_HEADER_START + 0x4f)
     {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
-      return sum;
+      if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+          return sum;
+        }
+      ucon64_fread (rom_buffer, rominfo->backup_header_len, size, ucon64.fname);
+
+      for (i = GB_HEADER_START + 0x34; i < GB_HEADER_START + 0x4d; i++)
+        sum.header += ~rom_buffer[i];
+      for (i = 0; i < size; i++)
+        sum.value += rom_buffer[i];
+      sum.value -= (rom_buffer[GB_HEADER_START + 0x4d] - sum.header) +
+                   rom_buffer[GB_HEADER_START + 0x4e] +
+                   rom_buffer[GB_HEADER_START + 0x4f];
+
+      free (rom_buffer);
     }
-  ucon64_fread (rom_buffer, rominfo->backup_header_len, size, ucon64.fname);
-
-  for (i = GB_HEADER_START + 0x34; i < GB_HEADER_START + 0x4d; i++)
-    sum.header += ~rom_buffer[i];
-  for (i = 0; i < size; i++)
-    sum.value += rom_buffer[i];
-  sum.value -= (rom_buffer[GB_HEADER_START + 0x4d] - sum.header) +
-               rom_buffer[GB_HEADER_START + 0x4e] +
-               rom_buffer[GB_HEADER_START + 0x4f];
-
-  free (rom_buffer);
 
   return sum;
 }

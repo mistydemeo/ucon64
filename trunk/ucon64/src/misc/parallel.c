@@ -311,7 +311,7 @@ inportb (unsigned short port)
 
   if (DoIO ((struct IORequest *) parport_io_req))
     {
-      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
+      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %u)\n",
                ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
@@ -375,7 +375,7 @@ inportw (unsigned short port)
 
   if (DoIO ((struct IORequest *) parport_io_req))
     {
-      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
+      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %u)\n",
                ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
@@ -448,7 +448,7 @@ outportb (unsigned short port, unsigned char byte)
 
   if (DoIO ((struct IORequest *) parport_io_req))
     {
-      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
+      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %u)\n",
                ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
@@ -512,7 +512,7 @@ outportw (unsigned short port, unsigned short word)
 
   if (DoIO ((struct IORequest *) parport_io_req))
     {
-      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
+      fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %u)\n",
                ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
@@ -659,7 +659,7 @@ parport_open (unsigned short port)
                   (ULONG) 0);
   if (x != 0)
     {
-      fprintf (stderr, "ERROR: Could not open parallel port (%s, %x)\n",
+      fprintf (stderr, "ERROR: Could not open parallel port (%s, %u)\n",
                ucon64.parport_dev, port);
       DeleteExtIO ((struct IOExtPar *) parport_io_req);
       DeletePort (parport);
@@ -1061,7 +1061,7 @@ parport_print_info (void)
 #ifdef  USE_PPDEV
   printf ("Using parallel port device: %s\n", ucon64.parport_dev);
 #elif   defined AMIGA
-  printf ("Using parallel port device: %s, port %d\n", ucon64.parport_dev, ucon64.parport);
+  printf ("Using parallel port device: %s, port %u\n", ucon64.parport_dev, ucon64.parport);
 #else
   printf ("Using I/O port base address: 0x%x\n", ucon64.parport);
 #endif

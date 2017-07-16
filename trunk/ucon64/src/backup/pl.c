@@ -376,9 +376,7 @@ is_header (unsigned char *buf)
 {
   char msg[0x1d];
 
-  strncpy (msg, (char *) buf, 0x1c);
-  msg[0x1c] = '\0';
-
+  strncpy (msg, (char *) buf, 0x1c)[0x1c] = '\0';
   if (strstr (msg, "COPYRIGHT") || strstr (msg, "SNK") ||
       strstr (msg, "LICENSED") || strstr (msg, "CORPORATION"))
     return 1;                                   // header found
@@ -407,14 +405,11 @@ game_info (unsigned int cart_size, char name[13], int *type)
     return 0;                                   // no game found
 
   if (name)
-    {
-      strncpy (name, (char *) (header + 0x24), 12);
-      name[12] = '\0';
-    }
+    strncpy (name, (char *) (header + 0x24), 12)[12] = '\0';
 
   if (type)
     {
-      if (strstr (name, "Multi"))
+      if (name && strstr (name, "Multi"))
         *type = TYPE_MULTI;
       else if (header[0x23] == 0x10)
         *type = TYPE_COLOR;
@@ -677,7 +672,7 @@ pl_read_rom (const char *filename, unsigned short parport)
 
   reset_read ();
 
-  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+  printf ("Receive: %u Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   blocksleft = size >> 15;
   starttime = time (NULL);
@@ -716,7 +711,7 @@ pl_write_rom (const char *filename, unsigned short parport)
   erase ();
   reset_read ();
 
-  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+  printf ("Send: %u Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   starttime = time (NULL);
 
@@ -761,7 +756,7 @@ pl_info (unsigned short parport)
     {
       printf ("Game name: \"%s\"\n", g_name);
       printf ("Game type: %s\n", (g_type == TYPE_COLOR) ? "Color" : "B&W");
-      printf ("Game size: %d Bytes (%.4f Mb)\n", g_size, (float) g_size / MBIT);
+      printf ("Game size: %u Bytes (%.4f Mb)\n", g_size, (float) g_size / MBIT);
     }
   deinit_io ();
 

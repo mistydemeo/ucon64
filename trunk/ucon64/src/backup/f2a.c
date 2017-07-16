@@ -1549,10 +1549,12 @@ f2a_write_rom (const char *filename, int size)
 
           if (n_files == n_files_max)
             {
+              char **old_files = files;
               n_files_max += 20;                // allocate mem for 20 extra pointers
-              if ((files = (char **) realloc (files, n_files_max * 4)) == NULL)
+              if ((files = (char **) realloc (old_files, n_files_max * 4)) == NULL)
                 {
                   fprintf (stderr, ucon64_msg[BUFFER_ERROR], n_files_max * 4);
+                  free (old_files);
                   exit (1);
                 }
             }

@@ -857,15 +857,9 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
   n = strlen (p);
   if (n > 0x1c)
     n = 0x1c;
-  memcpy (name, p, n);
   memset (name + n, ' ', 0x1c - n);
-  for (n = 0; n < 0x1c; n++)
-    {
-      if (!isprint ((int) name[n]))
-        name[n] = '.';
-      else
-        name[n] = (unsigned char) toupper (name[n]); // loader only supports upper case characters
-    }
+  for (n--; n >= 0; n--)                        // loader only supports upper case characters
+    name[n] = isprint ((int) p[n]) ? (unsigned char) toupper (p[n]) : '.';
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (totalsize / MBIT, destfile);           // 0x1d = bank code
   fputc (size / MBIT, destfile);                // 0x1e = ROM size (not used by loader, but by us)
@@ -953,7 +947,7 @@ pce_multi (unsigned int truncate_size, char *fname)
         }
       else
         {
-          printf ("ROM%d: %s\n", file_no, ucon64.fname);
+          printf ("ROM%u: %s\n", file_no, ucon64.fname);
           write_game_table_entry (destfile, file_no, totalsize, size);
         }
       file_no++;

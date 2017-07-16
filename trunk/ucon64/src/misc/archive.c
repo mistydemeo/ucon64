@@ -515,12 +515,12 @@ fgets2 (char *buffer, int maxlength, FILE *file)
           n++;
           if (c == '\n')
             {
-              buffer[n] = 0;
+              buffer[n] = '\0';
               break;
             }
         }
       if (n >= maxlength - 1 || c == EOF)
-        buffer[n] = 0;
+        buffer[n] = '\0';
       return n > 0 ? buffer : NULL;
     }
   else

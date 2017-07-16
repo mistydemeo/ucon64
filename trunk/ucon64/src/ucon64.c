@@ -275,8 +275,7 @@ static const st_getopt2_t lf[] =
 static st_ucon64_nfo_t *
 ucon64_clear_nfo (st_ucon64_nfo_t *nfo)
 {
-  if (nfo)
-    memset (nfo, 0, sizeof (st_ucon64_nfo_t));
+  memset (nfo, 0, sizeof (st_ucon64_nfo_t));
 
   ucon64.nfo = NULL;
   ucon64.crc32 = ucon64.fcrc32 = 0;             // yes, this belongs here
@@ -1160,7 +1159,7 @@ main (int argc, char **argv)
 #endif // __unix__ && !__MSDOS__
 
   if (optind == argc)                   // no file was specified (e.g. --db)
-    ucon64_execute_options();
+    ucon64_execute_options ();
   else
     {
       int flags = GETOPT2_FILE_FILES_ONLY;
@@ -1360,9 +1359,7 @@ ucon64_rom_handling (void)
   ucon64_clear_nfo (&nfo);
 
   // a ROM (file)?
-  if (!ucon64.fname)
-    no_rom = 1;
-  else if (!ucon64.fname[0])
+  if (!ucon64.fname[0])
     no_rom = 1;
   else if (access (ucon64.fname, F_OK | R_OK) == -1 && (!(ucon64.flags & WF_NO_ROM)))
     {

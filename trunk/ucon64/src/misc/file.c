@@ -129,7 +129,7 @@ realpath (const char *path, char *full_path)
     return NULL;
 
   strcpy (copy_path, path);
-#ifdef  DJGPP
+#if     defined DJGPP || defined __MINGW32__
   // with DJGPP path can contain (forward) slashes
   {
     int l = strlen (copy_path);
@@ -154,7 +154,7 @@ realpath (const char *path, char *full_path)
   if (*path != DIR_SEPARATOR)
     {
       getcwd (new_path, FILENAME_MAX);
-#ifdef  DJGPP
+#if     defined DJGPP || defined __MINGW32__
       // DJGPP's getcwd() returns a path with forward slashes
       {
         int l = strlen (new_path);
@@ -295,8 +295,12 @@ realpath (const char *path, char *full_path)
   n = strlen (full_path) - 1;
   // remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
-  if (full_path[n] == DIR_SEPARATOR &&
-      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == '\0')) // && full_path[2] == DIR_SEPARATOR
+  if ((full_path[n] == DIR_SEPARATOR
+#ifdef  __MINGW32__
+       || full_path[n] == '/'
+#endif
+      ) &&
+      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == '\0'))
     full_path[n] = '\0';
 
   return full_path;
@@ -320,10 +324,12 @@ realpath2 (const char *path, char *full_path)
       if (path[1] == DIR_SEPARATOR
 #ifdef  __CYGWIN__
           || path[1] == '\\'
+#elif   defined __MINGW32__
+          || path[1] == '/'
 #endif
          )
         sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
-      else if (path[1] == '\0')
+      else
         strcpy (path1, getenv2 ("HOME"));
       path2 = path1;
     }
@@ -336,7 +342,7 @@ realpath2 (const char *path, char *full_path)
     /*
       According to "The Open Group Base Specifications Issue 7" realpath() is
       supposed to fail if path refers to a file that does not exist. uCON64
-      however, expects the behaviour of realpath() on Linux (which sets
+      however, expects the behavior of realpath() on Linux (which sets
       full_path to a reasonable path for a nonexisting file).
     */
     {
@@ -344,7 +350,7 @@ realpath2 (const char *path, char *full_path)
         strcpy (full_path, path2);
       else
         full_path = strdup (path2);
-#ifdef  DJGPP
+#if     defined DJGPP || defined __MINGW32__
       // with DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
       //  returns a path with forward slashes)
       {
@@ -364,15 +370,15 @@ char *
 dirname2 (const char *path, char *dir)
 {
   char *p1;
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   char *p2;
 #endif
 
-  if (path == NULL)
+  if (path == NULL || dir == NULL)
     return NULL;
 
   strcpy (dir, path);
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   // yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
   // Cygwin has no dirname()
   p1 = strrchr (dir, '/');
@@ -384,23 +390,18 @@ dirname2 (const char *path, char *dir)
 #endif
 
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
-  if (p1 == NULL)                               // no slash, perhaps a drive?
+  if (p1 == NULL && (p1 = strrchr (dir, ':')) != NULL) // no (back)slash, perhaps a drive?
     {
-      if ((p1 = strrchr (dir, ':')) != NULL)
-        {
-          p1[1] = '.';
-          p1 += 2;
-        }
+      p1[1] = '.';
+      p1 += 2;
     }
 #endif
 
   while (p1 > dir &&                            // find first of last separators (we have to strip trailing ones)
-#if     defined DJGPP || defined __CYGWIN__
-         ((*(p1 - 1) == '/' && (*p1 == '/' || *p1 == '\\'))
-          ||
-          (*(p1 - 1) == '\\' && (*p1 == '\\' || *p1 == '/'))))
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
+         (*(p1 - 1) == '/' || *(p1 - 1) == '\\') && (*p1 == '/' || *p1 == '\\'))
 #else
-         (*(p1 - 1) == DIR_SEPARATOR && *p1 == DIR_SEPARATOR))
+         *(p1 - 1) == DIR_SEPARATOR && *p1 == DIR_SEPARATOR)
 #endif
     p1--;
 
@@ -428,14 +429,14 @@ const char *
 basename2 (const char *path)
 {
   char *p1;
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   char *p2;
 #endif
 
   if (path == NULL)
     return NULL;
 
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   // yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
   // Cygwin has no basename()
   p1 = strrchr (path, '/');
@@ -457,17 +458,18 @@ basename2 (const char *path)
 
 const char *
 get_suffix (const char *filename)
-// Note that get_suffix() never returns NULL. Other code relies on that!
+// Note that get_suffix() does not return NULL unless filename is NULL. Other
+//  code relies on that!
 {
   const char *p, *s;
 
+  if (filename == NULL)
+    return NULL;
   if ((p = basename2 (filename)) == NULL)
     p = filename;
-  if ((s = strrchr (p, '.')) == NULL)
+  if ((s = strrchr (p, '.')) == NULL || s == p) // files can start with '.'
     s = strchr (p, '\0');                       // strchr(p, '\0') and NOT "" is the
-  if (s == p)                                   //  suffix of a file without suffix
-    s = strchr (p, '\0');                       // files can start with '.'
-
+                                                //  suffix of a file without suffix
   return s;
 }
 
@@ -475,6 +477,8 @@ get_suffix (const char *filename)
 char *
 set_suffix (char *filename, const char *suffix)
 {
+  if (filename == NULL || suffix == NULL)
+    return filename;
   // always use set_suffix() and NEVER the code below
   strcpy ((char *) get_suffix (filename), suffix);
 

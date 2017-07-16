@@ -220,16 +220,12 @@ extern int misc_digits (unsigned long value);
 #ifndef popen                                   // idem
 #define popen _popen
 #endif
-#ifndef __MINGW32__
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
-#endif
 #include <io.h>
 #include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
-#ifdef  _MSC_VER                                //  come after <sys/types.h>. Yep, that's M$.
-#pragma warning(pop)
-#endif
+#pragma warning(pop)                            //  come after <sys/types.h>. Yep, that's M$.
 #include <direct.h>
 
 #define S_IWUSR _S_IWRITE
@@ -250,17 +246,15 @@ extern int misc_digits (unsigned long value);
 #ifdef  DLL
 #define access _access
 #define chmod _chmod
-#define fileno _fileno
 #define getcwd _getcwd
 #define isatty _isatty
-#define rmdir _rmdir
 #define stat _stat
 #define strdup _strdup
 #define stricmp _stricmp
 #define strnicmp _strnicmp
 #endif // DLL
 
-#endif // !__MINGW32__
+#endif // _MSC_VER
 #define snprintf _snprintf
 
 #endif // _WIN32

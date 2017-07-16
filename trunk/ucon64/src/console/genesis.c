@@ -622,7 +622,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
     }
   else if (type == MGD_GEN)
     {
-      char *names[8], names_mem[8][9];
+      char *names[8], names_mem[8][9] = { 0 };
       const char *p0;
       unsigned int n, name_i = 0;
 
@@ -1357,7 +1357,7 @@ genesis_multi (unsigned int truncate_size, char *fname)
         }
       else
         {
-          printf ("ROM%d: %s\n", file_no, ucon64.fname);
+          printf ("ROM%u: %s\n", file_no, ucon64.fname);
           write_game_table_entry (destfile, file_no, ucon64.nfo, totalsize,
                                   size);
         }

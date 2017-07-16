@@ -78,7 +78,7 @@ readstdheader (void)
   char magic[N64APS_MAGICLENGTH], description[N64APS_DESCRIPTION_LEN + 1];
 
   fread (magic, 1, N64APS_MAGICLENGTH, n64aps_apsfile);
-  if (strncmp (magic, n64aps_magic, N64APS_MAGICLENGTH) != 0)
+  if (memcmp (magic, n64aps_magic, N64APS_MAGICLENGTH) != 0)
     {
       fprintf (stderr, "ERROR: Not a valid APS file\n");
       fclose (n64aps_modfile);
@@ -500,7 +500,7 @@ aps_create (const char *orgname, const char *modname)
   if (!n64aps_changefound)
     {
       printf ("%s and %s are identical\n"
-              "Removing: %s\n", orgname, modname, apsname);
+              "Removing %s\n", orgname, modname, apsname);
       remove (apsname);
       return -1;
     }

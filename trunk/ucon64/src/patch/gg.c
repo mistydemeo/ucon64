@@ -1032,7 +1032,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 
   if (address >= size)
     {
-      fprintf (stderr, "ERROR: Address is too high for this ROM (%d)\n", address);
+      fprintf (stderr, "ERROR: Address is too high for this ROM (%u)\n", address);
       return -1;
     }
 

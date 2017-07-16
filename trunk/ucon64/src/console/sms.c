@@ -290,15 +290,9 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
   n = strlen (p);
   if (n > 0x0b)
     n = 0x0b;
-  memcpy (name, p, n);
   memset (name + n, ' ', 0x0b - n);
-  for (n = 0; n < 0x0b; n++)
-    {
-      if (!isprint ((int) name[n]))
-        name[n] = '.';
-      else
-        name[n] = (unsigned char) toupper (name[n]); // loader only supports upper case characters
-    }
+  for (n--; n >= 0; n--)                        // loader only supports upper case characters
+    name[n] = isprint ((int) p[n]) ? (unsigned char) toupper (p[n]) : '.';
   // See comment in genesis.c/write_game_table_entry(). Avoid possible silliness.
   name[0x0b] = '\0';
   fwrite (name, 1, 0x0c, destfile);             // 0x01 - 0x0c = name
@@ -406,7 +400,7 @@ sms_multi (unsigned int truncate_size, char *fname)
         }
       else
         {
-          printf ("ROM%d: %s\n", file_no, ucon64.fname);
+          printf ("ROM%u: %s\n", file_no, ucon64.fname);
           write_game_table_entry (destfile, file_no, totalsize, size);
         }
       file_no++;

@@ -186,7 +186,7 @@ ppf_apply (const char *mod, const char *ppfname)
 
   // Is it a PPF File?
   fread (buffer, 3, 1, ppffile);
-  if (strncmp ("PPF", buffer, 3))
+  if (memcmp ("PPF", buffer, 3))
     {
       fprintf (stderr, "ERROR: %s is not a valid PPF file\n", ppfname);
       exit (1);
@@ -223,7 +223,7 @@ ppf_apply (const char *mod, const char *ppfname)
       fread (buffer, 4, 1, ppffile);
 
       // Is there a file id?
-      if (strncmp (".DIZ", buffer, 4))
+      if (memcmp (".DIZ", buffer, 4))
         printf ("FILE_ID.DIZ     : No\n\n");
       else
         {
@@ -279,6 +279,16 @@ ppf_apply (const char *mod, const char *ppfname)
       pos = bswap_32 (pos);
 #endif
       n_changes = fgetc (ppffile);              // How many bytes do we have to write?
+      if (n_changes == EOF)
+        {
+          fputs ("ERROR: Unexpected end of patch file\n", stderr);
+          fclose (ppffile);
+          fclose (modfile);
+
+          printf ("Removing %s\n", modname);
+          remove (modname);
+          return -1;
+        }
       fread (buffer, n_changes, 1, ppffile);    // And this is what we have to write
       fseek (modfile, pos, SEEK_SET);           // Go to the right position in the modfile
       fwrite (buffer, n_changes, 1, modfile);   // Write n_changes bytes to that pos
@@ -420,7 +430,7 @@ ppf_create (const char *orgname, const char *modname)
   if (total_changes == 0)
     {
       printf ("%s and %s are identical\n"
-              "Removing: %s\n", orgname, modname, ppfname);
+              "Removing %s\n", orgname, modname, ppfname);
       fclose (ppffile);
       remove (ppfname);
       return -1;

@@ -1,7 +1,7 @@
 /*
 map.c - a map (associative array) implementation
 
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 2002 - 2005, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -47,10 +47,12 @@ st_map_t *
 map_resize (st_map_t *map, int n_elements)
 {
   int size = sizeof (st_map_t) + n_elements * sizeof (st_map_element_t);
+  st_map_t *old_map = map;
 
-  if ((map = (st_map_t *) realloc (map, size)) == NULL)
+  if ((map = (st_map_t *) realloc (old_map, size)) == NULL)
     {
       fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", size);
+      free (old_map);
       exit (1);
     }
   map->data = (st_map_element_t *) (((unsigned char *) map) + sizeof (st_map_t));

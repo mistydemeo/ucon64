@@ -68,8 +68,11 @@ extern "C" {
 extern char *strtriml (char *str);
 extern char *strtrimr (char *str);
 extern int strarg (char **argv, char *str, const char *separator_s, int max_args);
+#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__) || \
+        defined __MINGW32__
 extern char *strlwr (char *str);
 extern char *strupr (char *str);
+#endif
 #define MEMCMP2_WCARD(WC) ((1 << 9) | ((WC) & 0xff))
 #define MEMCMP2_REL       (1 << 10)
 #define MEMCMP2_CASE      (1 << 11)

@@ -119,7 +119,7 @@ vboy_init (st_ucon64_nfo_t *rominfo)
       // misc stuff
       sprintf (rominfo->misc,
         "ID: %c%c%c%c\n"
-        "Version: v1.%d",
+        "Version: v1.%u",
         vboy_header.id[0], vboy_header.id[1], vboy_header.id[2], vboy_header.game_id_country,
         vboy_header.version);
     }

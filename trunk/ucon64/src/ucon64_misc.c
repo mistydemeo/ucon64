@@ -174,9 +174,9 @@ const char *ucon64_msg[] =
     "ERROR: Cannot open \"%s\" for writing\n",                          // OPEN_WRITE_ERROR
     "ERROR: Cannot read from \"%s\"\n",                                 // READ_ERROR
     "ERROR: Cannot write to \"%s\"\n",                                  // WRITE_ERROR
-    "ERROR: Not enough memory for buffer (%d bytes)\n",                 // BUFFER_ERROR
-    "ERROR: Not enough memory for ROM buffer (%d bytes)\n",             // ROM_BUFFER_ERROR
-    "ERROR: Not enough memory for file buffer (%d bytes)\n",            // FILE_BUFFER_ERROR
+    "ERROR: Not enough memory for buffer (%u bytes)\n",                 // BUFFER_ERROR
+    "ERROR: Not enough memory for ROM buffer (%u bytes)\n",             // ROM_BUFFER_ERROR
+    "ERROR: Not enough memory for file buffer (%u bytes)\n",            // FILE_BUFFER_ERROR
     "DAT info: No ROM found with checksum 0x%08x\n",                    // DAT_NOT_FOUND
     "WARNING: Support for DAT files is disabled, because \"ucon64_datdir\" (either\n" // DAT_NOT_ENABLED
     "         in the configuration file or the environment) points to an incorrect\n"
@@ -1628,10 +1628,10 @@ ucon64_pattern (const char *pattern_fname)
   else if (n_patterns < 0)
     {
       char dir1[FILENAME_MAX], dir2[FILENAME_MAX];
+
       dirname2 (pattern_fname, dir1);
       dirname2 (src_name, dir2);
-
-      fprintf (stderr, "ERROR: Could not read from %s, not in %s nor in %s\n",
+      fprintf (stderr, "ERROR: Could not read %s, neither in %s nor in %s\n",
                basename2 (pattern_fname), dir1, dir2);
       // when build_cm_patterns() returns -1, cleanup_cm_patterns() should not be called
       return -1;
@@ -1644,11 +1644,12 @@ ucon64_pattern (const char *pattern_fname)
       if (patterns[n].search_size > overlap)
         {
           overlap = patterns[n].search_size;
-          if (overlap > PATTERN_BUFSIZE)
+          if (overlap > PATTERN_BUFSIZE || overlap > ucon64.file_size)
             {
               fprintf (stderr,
-                       "ERROR: Pattern %d is too large, specify a shorter pattern\n",
-                       n + 1);
+                       "ERROR: Pattern %d is too large (for %s).\n"
+                       "       Specify a shorter pattern or disable it -- skipping file\n",
+                       n + 1, ucon64.fname);
               cleanup_cm_patterns (&patterns, n_patterns);
               return -1;
             }
@@ -1662,7 +1663,7 @@ ucon64_pattern (const char *pattern_fname)
     }
   overlap--;
 
-  puts ("Searching for patterns...");
+  printf ("Searching for patterns in %s...\n", ucon64.fname);
 
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);

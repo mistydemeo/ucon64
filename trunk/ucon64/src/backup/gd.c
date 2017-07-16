@@ -204,7 +204,7 @@ io_error (void)
   fputs ("ERROR: Communication with Game Doctor failed\n", stderr);
   fflush (stderr);
   // calling fflush() seems to be necessary in Msys in order to make the error
-  //  message be displayed before the "Removing: <filename>" message
+  //  message be displayed before the "Removing <filename>" message
   exit (1);
 }
 
@@ -225,7 +225,7 @@ remove_destfile (void)
 {
   if (gd_destfname)
     {
-      printf ("Removing: %s\n", gd_destfname);
+      printf ("Removing %s\n", gd_destfname);
       fclose (gd_destfile);
       remove (gd_destfname);
       gd_destfname = NULL;
@@ -599,7 +599,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
 {
   FILE *file = NULL;
   unsigned char *buffer;
-  char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
+  char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12] = { 0 },
        *filenames[GD3_MAX_UNITS], dir[FILENAME_MAX];
   int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
 

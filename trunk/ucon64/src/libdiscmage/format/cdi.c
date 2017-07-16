@@ -262,8 +262,11 @@ cdi_init (dm_image_t *image)
   image->desc = probe[x].version_s;
 
   image->header_start =
-    (image->version == CDI_V35 || image->version == CDI_V4 ?
-      size - image->header_start : image->header_start);
+                        image->version == CDI_V35
+#if     CDI_V35 != CDI_V4
+                        || image->version == CDI_V4
+#endif
+                        ? size - image->header_start : image->header_start;
 
 //TODO: get the correct header size when != (image->version == CDI_V35 || image->version == CDI_V4)
 //  image->header_len = size - image->header_start;

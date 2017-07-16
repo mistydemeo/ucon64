@@ -1,9 +1,9 @@
 /*
 ips.c - IPS support for uCON64
 
-Copyright (c) ???? - ???? madman
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) ???? - ????       madman
+Copyright (c) 1999 - 2001       NoisyB
+Copyright (c) 2002 - 2004, 2017 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -83,7 +83,7 @@ remove_destfile (void)
 {
   if (destfname)
     {
-      printf ("Removing: %s\n", destfname);
+      printf ("Removing %s\n", destfname);
       fclose (destfile);                        // necessary on DOS/Win9x for DJGPP port
       remove (destfname);
       destfname = NULL;
@@ -449,22 +449,23 @@ next_byte:
           buf[ndiffs++] = byte2;
 #ifdef  DEBUG_IPS
           printf ("[%02x] => %02x%s\n", filepos - 1, byte2,
-            rle_value != NO_RLE ? " *" : "");
+                  rle_value != NO_RLE ? " *" : "");
 #endif
           check_for_rle (byte2, buf);
         }
       else if (address >= 0)                    // byte == byte2 && !feof (orgfile)
         {
-          int n, n2, n_compare;
+          int n, n2, ncompare;
           unsigned char bridge[BRIDGE_LEN + 1];
 
           bridge[0] = byte;
           buf[ndiffs] = byte2;
           n = fread (bridge + 1, 1, BRIDGE_LEN, orgfile);
-          n2 = fread (&buf[ndiffs + 1], 1, MIN (BRIDGE_LEN, BUFSIZE - ndiffs), modfile);
-          n_compare = 1 + MIN (n, n2);
+          n2 = fread (buf + ndiffs + 1, 1,
+                      MIN (BRIDGE_LEN, BUFSIZE - 1 - ndiffs), modfile);
+          ncompare = 1 + MIN (n, n2);
 
-          for (i = 0; i < n_compare; i++)
+          for (i = 1; i < ncompare; i++)        // buf[ndiffs] == bridge[0]
             if (buf[ndiffs + i] != bridge[i])
               {
                 for (n = 0; n < i; n++)
@@ -473,7 +474,7 @@ next_byte:
                       goto next_byte;           // yep, ugly
 #ifdef  DEBUG_IPS
                     printf ("[%02x] => %02x b%s\n", filepos - 1,
-                      buf[ndiffs], rle_value != NO_RLE ? " *" : "");
+                            buf[ndiffs], rle_value != NO_RLE ? " *" : "");
 #endif
                     ndiffs++;
                     if (check_for_rle (buf[ndiffs - 1], buf))
@@ -489,7 +490,7 @@ next_byte:
           fseek (orgfile, filepos, SEEK_SET);
           fseek (modfile, filepos, SEEK_SET);
 
-          if (i == n_compare)                   // next few bytes are equal (between the files)
+          if (i == ncompare)                    // next few bytes are equal (between the files)
             address = -1;
         }
       if (ndiffs == BUFSIZE)
@@ -509,7 +510,7 @@ next_byte:
   if (totaldiffs == 0)
     {
       printf ("%s and %s are identical\n"
-              "Removing: %s\n", orgname, modname, ipsname);
+              "Removing %s\n", orgname, modname, ipsname);
       remove (ipsname);
       return -1;
     }

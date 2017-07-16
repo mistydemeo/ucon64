@@ -768,16 +768,17 @@ isupper2 (int c)
 char *
 set_suffix (char *filename, const char *suffix)
 {
-  char suffix2[FILENAME_MAX], *p, *p2;
+  char *p, suffix2[FILENAME_MAX];
 
+  if (filename == NULL || suffix == NULL)
+    return filename;
+  strcpy (suffix2, suffix);
+  // the next statement is repeating work that get_suffix() does, but that is
+  //  better than repeating the implementation of get_suffix() here
   if ((p = basename2 (filename)) == NULL)
     p = filename;
-  if ((p2 = strrchr (p, '.')) != NULL)
-    if (p2 != p)                                // files can start with '.'
-      *p2 = '\0';
-
-  strcpy (suffix2, suffix);
-  strcat (filename, is_func (p, strlen (p), isupper2) ? strupr (suffix2) : strlwr (suffix2));
+  strcpy ((char *) get_suffix (filename), is_func (p, strlen (p), isupper2) ?
+            strupr (suffix2) : strlwr (suffix2));
 
   return filename;
 }
@@ -786,15 +787,9 @@ set_suffix (char *filename, const char *suffix)
 char *
 set_suffix_i (char *filename, const char *suffix)
 {
-  char *p, *p2;
-
-  if ((p = basename2 (filename)) == NULL)
-    p = filename;
-  if ((p2 = strrchr (p, '.')) != NULL)
-    if (p2 != p)                                // files can start with '.'
-      *p2 = '\0';
-
-  strcat (filename, suffix);
+  if (filename == NULL || suffix == NULL)
+    return filename;
+  strcpy ((char *) get_suffix (filename), suffix);
 
   return filename;
 }
@@ -802,18 +797,19 @@ set_suffix_i (char *filename, const char *suffix)
 
 const char *
 get_suffix (const char *filename)
-// Note that get_suffix() never returns NULL. Other code relies on that!
+// Note that get_suffix() does not return NULL unless filename is NULL. Other
+//  code relies on that!
 {
-  char *p, *p2;
+  const char *p, *s;
 
+  if (filename == NULL)
+    return NULL;
   if ((p = basename2 (filename)) == NULL)
-    p = (char *) filename;
-  if ((p2 = strrchr (p, '.')) == NULL)
-    p2 = "";
-  if (p2 == p)
-    p2 = "";                                    // files can start with '.'; be
-                                                //  consistent with set_suffix{_i}()
-  return p2;
+    p = filename;
+  if ((s = strrchr (p, '.')) == NULL || s == p) // files can start with '.'
+    s = strchr (p, '\0');                       // strchr(p, '\0') and NOT "" is the
+                                                //  suffix of a file without suffix
+  return s;
 }
 
 
@@ -1038,14 +1034,14 @@ basename2 (const char *path)
 // basename() clone (differs from Linux's basename())
 {
   char *p1;
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   char *p2;
 #endif
 
   if (path == NULL)
     return NULL;
 
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   // yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
   // Cygwin has no basename()
   p1 = strrchr (path, '/');
@@ -1069,7 +1065,7 @@ dirname2 (const char *path)
 // dirname() clone (differs from Linux's dirname())
 {
   char *p1, *dir;
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   char *p2;
 #endif
 
@@ -1081,7 +1077,7 @@ dirname2 (const char *path)
     return NULL;
 
   strcpy (dir, path);
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   // yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
   // Cygwin has no dirname()
   p1 = strrchr (dir, '/');
@@ -1091,24 +1087,20 @@ dirname2 (const char *path)
 #else
   p1 = strrchr (dir, DIR_SEPARATOR);
 #endif
+
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
-  if (p1 == NULL)                               // no slash, perhaps a drive?
+  if (p1 == NULL && (p1 = strrchr (dir, ':')) != NULL) // no (back)slash, perhaps a drive?
     {
-      if ((p1 = strrchr (dir, ':')) != NULL)
-        {
-          p1[1] = '.';
-          p1 += 2;
-        }
+      p1[1] = '.';
+      p1 += 2;
     }
 #endif
 
   while (p1 > dir &&                            // find first of last separators (we have to strip trailing ones)
-#if     defined DJGPP || defined __CYGWIN__
-         ((*(p1 - 1) == '/' && (*p1 == '/' || *p1 == '\\'))
-          ||
-          (*(p1 - 1) == '\\' && (*p1 == '\\' || *p1 == '/'))))
+#if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
+         (*(p1 - 1) == '/' || *(p1 - 1) == '\\') && (*p1 == '/' || *p1 == '\\'))
 #else
-         (*(p1 - 1) == DIR_SEPARATOR && *p1 == DIR_SEPARATOR))
+         *(p1 - 1) == DIR_SEPARATOR && *p1 == DIR_SEPARATOR)
 #endif
     p1--;
 
@@ -1167,7 +1159,7 @@ realpath (const char *path, char *full_path)
     return NULL;
 
   strcpy (copy_path, path);
-#ifdef  DJGPP
+#if     defined DJGPP || defined __MINGW32__
   // with DJGPP path can contain (forward) slashes
   {
     int l = strlen (copy_path);
@@ -1192,7 +1184,7 @@ realpath (const char *path, char *full_path)
   if (*path != DIR_SEPARATOR)
     {
       getcwd (new_path, FILENAME_MAX);
-#ifdef  DJGPP
+#if     defined DJGPP || defined __MINGW32__
       // DJGPP's getcwd() returns a path with forward slashes
       {
         int l = strlen (new_path);
@@ -1333,7 +1325,11 @@ realpath (const char *path, char *full_path)
   n = strlen (full_path) - 1;
   // remove trailing separator if full_path is not the root dir of a drive,
   //  because Visual C++'s run-time system is *really* stupid
-  if (full_path[n] == DIR_SEPARATOR &&
+  if ((full_path[n] == DIR_SEPARATOR
+#ifdef  __MINGW32__
+       || full_path[n] == '/'
+#endif
+      ) &&
       !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == '\0')) // && full_path[2] == DIR_SEPARATOR
     full_path[n] = '\0';
 
@@ -1358,10 +1354,12 @@ realpath2 (const char *path, char *full_path)
       if (path[1] == DIR_SEPARATOR
 #ifdef  __CYGWIN__
           || path[1] == '\\'
+#elif   defined __MINGW32__
+          || path[1] == '/'
 #endif
          )
         sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
-      else if (path[1] == '\0')
+      else
         strcpy (path1, getenv2 ("HOME"));
       path2 = path1;
     }
@@ -1374,7 +1372,7 @@ realpath2 (const char *path, char *full_path)
     /*
       According to "The Open Group Base Specifications Issue 7" realpath() is
       supposed to fail if path refers to a file that does not exist. uCON64
-      however, expects the behaviour of realpath() on Linux (which sets
+      however, expects the behavior of realpath() on Linux (which sets
       full_path to a reasonable path for a nonexisting file).
     */
     {
@@ -1382,7 +1380,7 @@ realpath2 (const char *path, char *full_path)
         strcpy (full_path, path2);
       else
         full_path = strdup (path2);
-#ifdef  DJGPP
+#if     defined DJGPP || defined __MINGW32__
       // with DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
       //  returns a path with forward slashes)
       {
@@ -1605,7 +1603,12 @@ change_mem (char *buf, unsigned int bufsize, char *searchstr,
     if (searchstr[i] == esc)
       n_esc++;
 
-  sets = (st_cm_set_t *) malloc (n_esc * sizeof (st_cm_set_t));
+  if ((sets = (st_cm_set_t *) malloc (n_esc * sizeof (st_cm_set_t))) == NULL)
+    {
+      fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n",
+               n_esc * sizeof (st_cm_set_t));
+      return -1;
+    }
   va_start (argptr, offset);
   for (i = 0; i < n_esc; i++)
     {
@@ -1829,10 +1832,12 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       requiredsize1 += sizeof (st_cm_pattern_t);
       if (requiredsize1 > currentsize1)
         {
+          st_cm_pattern_t *old_patterns = *patterns;
           currentsize1 = requiredsize1 + 10 * sizeof (st_cm_pattern_t);
-          if ((*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)) == NULL)
+          if ((*patterns = (st_cm_pattern_t *) realloc (old_patterns, currentsize1)) == NULL)
             {
-              fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize1);
+              fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize1);
+              free (old_patterns);
               return -1;
             }
         }
@@ -1852,11 +1857,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
           requiredsize2++;
           if (requiredsize2 > currentsize2)
             {
+              char *old_search = (*patterns)[n_codes].search;
               currentsize2 = requiredsize2 + 10;
               if (((*patterns)[n_codes].search =
-                   (char *) realloc ((*patterns)[n_codes].search, currentsize2)) == NULL)
+                   (char *) realloc (old_search, currentsize2)) == NULL)
                 {
-                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize2);
+                  free (old_search);
                   free (*patterns);
                   *patterns = NULL;
                   return -1;
@@ -1875,8 +1882,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no wildcard value is specified\n",
-                  line_num);
+          printf ("WARNING: Line %u is invalid, no wildcard value is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].wildcard = (char) strtol (token, NULL, 16);
@@ -1888,8 +1894,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no escape value is specified\n",
-                  line_num);
+          printf ("WARNING: Line %u is invalid, no escape value is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].escape = (char) strtol (token, NULL, 16);
@@ -1901,7 +1906,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no replacement is specified\n", line_num);
+          printf ("WARNING: Line %u is invalid, no replacement is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].replace = NULL;
@@ -1913,11 +1918,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
           requiredsize2++;
           if (requiredsize2 > currentsize2)
             {
+              char *old_replace = (*patterns)[n_codes].replace;
               currentsize2 = requiredsize2 + 10;
               if (((*patterns)[n_codes].replace =
-                   (char *) realloc ((*patterns)[n_codes].replace, currentsize2)) == NULL)
+                   (char *) realloc (old_replace, currentsize2)) == NULL)
                 {
-                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize2);
+                  free (old_replace);
                   free ((*patterns)[n_codes].search);
                   free (*patterns);
                   *patterns = NULL;
@@ -1937,7 +1944,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no offset is specified\n", line_num);
+          printf ("WARNING: Line %u is invalid, no offset is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].offset = strtol (token, NULL, 10); // yes, offset is decimal
@@ -1977,11 +1984,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
           requiredsize2 += sizeof (st_cm_set_t);
           if (requiredsize2 > currentsize2)
             {
+              st_cm_set_t *old_sets = (*patterns)[n_codes].sets;
               currentsize2 = requiredsize2 + 10 * sizeof (st_cm_set_t);
               if (((*patterns)[n_codes].sets =
-                   (st_cm_set_t *) realloc ((*patterns)[n_codes].sets, currentsize2)) == NULL)
+                   (st_cm_set_t *) realloc (old_sets, currentsize2)) == NULL)
                 {
-                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize2);
+                  free (old_sets);
                   free ((*patterns)[n_codes].replace);
                   free ((*patterns)[n_codes].search);
                   free (*patterns);
@@ -2000,11 +2009,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
               requiredsize3++;
               if (requiredsize3 > currentsize3)
                 {
+                  char *old_data = (*patterns)[n_codes].sets[n_sets].data;
                   currentsize3 = requiredsize3 + 10;
                   if (((*patterns)[n_codes].sets[n_sets].data =
-                       (char *) realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)) == NULL)
+                       (char *) realloc (old_data, currentsize3)) == NULL)
                     {
-                      fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize3);
+                      fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize3);
+                      free (old_data);
                       free ((*patterns)[n_codes].sets);
                       free ((*patterns)[n_codes].replace);
                       free ((*patterns)[n_codes].search);
@@ -2336,7 +2347,7 @@ set_property (const char *filename, const char *propname, const char *value,
   if (stat (filename, &fstate) != 0)
     file_size = fstate.st_size;
 
-  if ((str = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))) == NULL)
+  if ((str = (char *) malloc ((file_size + MAXBUFSIZE))) == NULL)
     {
       errno = ENOMEM;
       return -1;

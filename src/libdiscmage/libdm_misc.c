@@ -830,7 +830,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
       if (!track->mode && track->sector_size == 2352)
         strcpy (buf, "AUDIO");
       else
-        sprintf (buf, "MODE%d/%d", track->mode, track->sector_size);
+        sprintf (buf, "MODE%d/%u", track->mode, track->sector_size);
 
       printf ("Track: %d %s", t + 1, buf);
 

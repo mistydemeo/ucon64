@@ -845,29 +845,32 @@ _getopt_internal (int argc, char *const *argv, const char *optstring,
              nameend++)
           /* Do nothing.  */ ;
 
-        /* Test all long options for either exact match
-           or abbreviated matches.  */
-        for (p = longopts, option_index = 0; p->name; p++, option_index++)
-          if (!strncmp (p->name, nextchar, nameend - nextchar))
-            {
-              if ((unsigned int) (nameend - nextchar) == strlen (p->name))
+        if (longopts != NULL)
+          {
+            /* Test all long options for either exact match
+               or abbreviated matches.  */
+            for (p = longopts, option_index = 0; p->name; p++, option_index++)
+              if (!strncmp (p->name, nextchar, nameend - nextchar))
                 {
-                  /* Exact match found.  */
-                  pfound = p;
-                  indfound = option_index;
-                  exact = 1;
-                  break;
+                  if ((unsigned int) (nameend - nextchar) == strlen (p->name))
+                    {
+                      /* Exact match found.  */
+                      pfound = p;
+                      indfound = option_index;
+                      exact = 1;
+                      break;
+                    }
+                  else if (pfound == NULL)
+                    {
+                      /* First nonexact match found.  */
+                      pfound = p;
+                      indfound = option_index;
+                    }
+                  else
+                    /* Second or later nonexact match found.  */
+                    ambig = 1;
                 }
-              else if (pfound == NULL)
-                {
-                  /* First nonexact match found.  */
-                  pfound = p;
-                  indfound = option_index;
-                }
-              else
-                /* Second or later nonexact match found.  */
-                ambig = 1;
-            }
+          }
         if (ambig && !exact)
           {
             if (opterr)

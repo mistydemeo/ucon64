@@ -205,7 +205,7 @@ string_code (char *d, const char *s)
 {
   char *p = d;
 
-  *p = 0;
+  *p = '\0';
   for (; *s; s++)
     switch (*s)
       {
@@ -218,9 +218,9 @@ string_code (char *d, const char *s)
         break;
 
       default:
-        p = strchr (p, 0);
+        p = strchr (p, '\0');
         *p = *s;
-        *(++p) = 0;
+        *(++p) = '\0';
       }
 
   return d;
@@ -279,7 +279,7 @@ getopt2_usage (const st_getopt2_t *usage)
             if (strlen (buf) < 16)
               {
                 strcat (buf, "                             ");
-                buf[16] = 0;
+                buf[16] = '\0';
               }
             fputs (buf, stdout);
           }
@@ -294,7 +294,7 @@ getopt2_usage (const st_getopt2_t *usage)
               for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
                 {
                   c = p2[1];
-                  p2[1] = 0;
+                  p2[1] = '\0';
                   fputs (p, stdout);
                   fputs ("                  ", stdout);
                   p2[1] = c;
@@ -373,7 +373,7 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
   getopt2_sanity_check (option);
 #endif
 
-  *p = 0;
+  *p = '\0';
   for (; option[i].name || option[i].help; i++)
     if ((int) strlen (short_option) + 3 < n && option[i].name) // IS option
       if (!option[i].name[1]) // IS short
@@ -393,7 +393,7 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
                 fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
 #endif // DEBUG
               }
-            *p = 0;
+            *p = '\0';
           }
 #ifdef  DEBUG
   printf ("%s\n", short_option);
@@ -476,7 +476,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       char c = (char) toupper ((int) path[0]);
       if (path[strlen (path) - 1] == DIR_SEPARATOR ||
-          (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == 0))
+          (c >= 'A' && c <= 'Z' && path[1] == ':' && path[2] == '\0'))
 #else
       if (path[strlen (path) - 1] == DIR_SEPARATOR)
 #endif

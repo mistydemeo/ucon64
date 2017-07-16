@@ -29,25 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-static inline int
-is_func (char *s, int len, int (*func) (int))
-{
-  char *p = s;
-
-  /*
-    Casting to unsigned char * is necessary to avoid differences between the
-    different compilers' run-time environments. At least for isprint(). Without
-    the cast the isprint() of (older versions of) DJGPP, MinGW, Cygwin and
-    Visual C++ returns nonzero values for ASCII characters > 126.
-  */
-  for (; len >= 0; p++, len--)
-    if (!func (*(unsigned char *) p))
-      return 0;
-
-  return 1;
-}
-
-
+#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__) || \
+        defined __MINGW32__
 static inline char *
 to_func (char *s, int len, int (*func) (int))
 {
@@ -72,6 +55,7 @@ strlwr (char *s)
 {
   return to_func (s, strlen (s), tolower);
 }
+#endif
 
 
 char *
@@ -118,10 +102,10 @@ static int
 strarg_debug (int argc, char **argv)
 {
   int pos;
+
   fprintf (stderr, "argc:     %d\n", argc);
   for (pos = 0; pos < argc; pos++)
     fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
-
   fflush (stderr);
 
   return 0;
@@ -134,11 +118,10 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
 {
   int argc = 0;
 
-  if (str)
-    if (*str)
-      for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL &&
-           (argc < (max_args - 1)); argc++)
-        ;
+  if (str && *str)
+    for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL &&
+         (argc < (max_args - 1)); argc++)
+      ;
 
 #ifdef  DEBUG
   strarg_debug (argc, argv);

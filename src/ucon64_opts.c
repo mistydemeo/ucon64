@@ -141,8 +141,7 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_VER:
       printf ("version:                           %s WIP (%s)\n"
               "platform:                          %s\n",
-              UCON64_VERSION_S, __DATE__,
-              CURRENT_OS_S);
+              UCON64_VERSION_S, __DATE__, CURRENT_OS_S);
 
 #ifdef  WORDS_BIGENDIAN
       puts ("endianess:                         big");
@@ -217,7 +216,8 @@ ucon64_switches (st_ucon64_t *p)
         {
           x = dm_get_version ();
           printf ("discmage version:                  %d.%d.%d (%s)\n",
-                  x >> 16, x >> 8, x, dm_get_version_s ());
+                  (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff,
+                  dm_get_version_s ());
         }
       else
         puts ("discmage version:                  not available");
@@ -225,7 +225,7 @@ ucon64_switches (st_ucon64_t *p)
 
       printf ("configuration directory:           %s\n"
               "DAT file directory:                %s\n"
-              "entries in DATabase:               %d\n"
+              "entries in DATabase:               %u\n"
               "DATabase enabled:                  %s\n",
               ucon64.configdir,
               ucon64.datdir,
@@ -443,7 +443,7 @@ ucon64_switches (st_ucon64_t *p)
             {
               char flagstr[100];
 
-              flagstr[0] = 0;
+              flagstr[0] = '\0';
               if (ucon64.io_mode & SWC_IO_FORCE_32MBIT)
                 strcat (flagstr, "force 32 Mbit dump, ");
               if (ucon64.io_mode & SWC_IO_ALT_ROM_SIZE)
@@ -464,7 +464,7 @@ ucon64_switches (st_ucon64_t *p)
                 strcat (flagstr, "dump BIOS, ");
 
               if (flagstr[0])
-                flagstr[strlen (flagstr) - 2] = 0;
+                flagstr[strlen (flagstr) - 2] = '\0';
               printf (" (%s)", flagstr);
             }
           fputc ('\n', stdout);
@@ -699,11 +699,8 @@ ucon64_options (st_ucon64_t *p)
   struct stat fstate;
   const char *option_arg = p->optarg;
 
-  if (ucon64.fname)
-    {
-      strcpy (src_name, ucon64.fname);
-      strcpy (dest_name, ucon64.fname);
-    }
+  strcpy (src_name, ucon64.fname);
+  strcpy (dest_name, ucon64.fname);
 
   switch (p->option)
     {

@@ -1437,9 +1437,11 @@ fal_main (int argc, char **argv)
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], fname);
           ProgramExit (1);
         }
-
-      BackupSRAM (fp, BackupMemOffset, BackupMemSize);
-      fclose (fp);
+      else
+        {
+          BackupSRAM (fp, BackupMemOffset, BackupMemSize);
+          fclose (fp);
+        }
     }
 
   if (OptD)
@@ -1458,9 +1460,11 @@ fal_main (int argc, char **argv)
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
           ProgramExit (1);
         }
-
-      RestoreSRAM (fp, BackupMemOffset);
-      fclose (fp);
+      else
+        {
+          RestoreSRAM (fp, BackupMemOffset);
+          fclose (fp);
+        }
     }
 
   if (OptP)
@@ -1470,17 +1474,19 @@ fal_main (int argc, char **argv)
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
           ProgramExit (1);
         }
-
-      if (Device == 0xe2)
-        ProgramSharpFlash (fp);
       else
         {
-          if (VisolyTurbo)
-            ProgramTurboIntelFlash (fp);
+          if (Device == 0xe2)
+            ProgramSharpFlash (fp);
           else
-            ProgramNonTurboIntelFlash (fp);
+            {
+              if (VisolyTurbo)
+                ProgramTurboIntelFlash (fp);
+              else
+                ProgramNonTurboIntelFlash (fp);
+            }
+          fclose (fp);
         }
-      fclose (fp);
     }
 
   if (OptS)
@@ -1490,9 +1496,11 @@ fal_main (int argc, char **argv)
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], fname);
           ProgramExit (1);
         }
-
-      BackupROM (fp, ChipSize << 16);
-      fclose (fp);
+      else
+        {
+          BackupROM (fp, ChipSize << 16);
+          fclose (fp);
+        }
     }
 
 #if 0
@@ -1503,9 +1511,11 @@ fal_main (int argc, char **argv)
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname2);
           ProgramExit (1);
         }
-
-      VerifyFlash (fp);
-      fclose (fp);
+      else
+        {
+          VerifyFlash (fp);
+          fclose (fp);
+        }
     }
 #endif
 
@@ -1530,7 +1540,7 @@ fal_args (unsigned int parport)
 
   fal_argv[fal_argc++] = "fl";
   fal_argv[fal_argc++] = "-l";
-  sprintf (parport_str, "%d", parport); // don't use %x, as Jeff Frohwein uses atoi()
+  sprintf (parport_str, "%u", parport); // don't use %x, as Jeff Frohwein uses atoi()
   fal_argv[fal_argc++] = parport_str;
 
   if (ucon64.parport_mode != PPMODE_EPP)

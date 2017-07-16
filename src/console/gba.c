@@ -449,18 +449,18 @@ gba_sram (void)
   minor = ptr[9] - '0';
   micro = ptr[10] - '0';
   if (ucon64.quiet < 0)
-    printf ("version: %d.%d.%d; offset: 0x%08x\n",
+    printf ("version: %u.%u.%u; offset: 0x%08x\n",
             major, minor, micro, (int) (ptr - buffer));
-  if (minor > 2)
+  if (minor - 1 >= 2)
     {
-      fputs ("ERROR: ROMs with an EEPROM minor version higher than 2 are not supported\n", stderr);
+      fputs ("ERROR: ROMs with an EEPROM minor version other than 1 or 2 are not supported\n", stderr);
       free (buffer);
       fclose (destfile);
       return -1;
     }
 
   ptr = (unsigned char *) memmem2 (bufferptr, fsize,
-                                   fl_orig[minor - 1], sizeof (fl_orig[minor - 1]), 0);
+                                   fl_orig[minor - 1], sizeof fl_orig[minor - 1], 0);
   if (ptr == 0)
     {
       fputs ("ERROR: Could not find fl pattern. Perhaps this file is already patched?\n", stderr);
@@ -471,7 +471,7 @@ gba_sram (void)
   if (ucon64.quiet < 0)
     printf ("fl offset: 0x%08x\n", (int) (ptr - buffer));
   fseek (destfile, ptr - buffer, SEEK_SET);
-  fwrite (fl_repl[minor - 1], 1, sizeof (fl_repl[minor - 1]), destfile);
+  fwrite (fl_repl[minor - 1], 1, sizeof fl_repl[minor - 1], destfile);
 
   ptr = buffer + fsize - 1;
   value = *ptr;
@@ -493,7 +493,7 @@ gba_sram (void)
     }
 
   ptr = (unsigned char *) memmem2 (bufferptr, fsize,
-                                   st_orig[minor - 1], sizeof (st_orig[minor - 1]), 0);
+                                   st_orig[minor - 1], sizeof st_orig[minor - 1], 0);
   if (ptr == 0)
     {
       fputs ("ERROR: Could not find st pattern\n", stderr);
@@ -538,7 +538,7 @@ gba_sram (void)
       break;
     }
   fseek (destfile, st_off, SEEK_SET);
-  fwrite (st_repl[minor - 1], 1, sizeof (st_repl[minor - 1]), destfile);
+  fwrite (st_repl[minor - 1], 1, sizeof st_repl[minor - 1], destfile);
   fseek (destfile, p_off, SEEK_SET);
   fwrite (p_repl[minor - 1], 1, p_size[minor - 1], destfile);
 
@@ -668,7 +668,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
     "Unknown country";
 
   // misc stuff
-  sprintf (buf, "Version: 1.%d\n", gba_header.version);
+  sprintf (buf, "Version: 1.%u\n", gba_header.version);
   strcat (rominfo->misc, buf);
 
   sprintf (buf, "Device type: 0x%02x\n", gba_header.device_type);
@@ -819,7 +819,7 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
       else
         {
           fname_ptr = ucon64.argv[n];
-          printf ("ROM%d: %s\n", file_no, fname_ptr);
+          printf ("ROM%u: %s\n", file_no, fname_ptr);
         }
 
       if ((srcfile = fopen (fname_ptr, "rb")) == NULL)
@@ -873,8 +873,8 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
 
   if (totalsize > 64 * MBIT && !truncate_size_ispow2)
     printf("\n"
-           "NOTE: This multi-game file can only be written to a card >= %d Mbit.\n"
-           "      Use -multi=%d to create a file truncated to %d Mbit.\n"
+           "NOTE: This multi-game file can only be written to a card >= %u Mbit.\n"
+           "      Use -multi=%u to create a file truncated to %u Mbit.\n"
            "      Current size is %.5f Mbit\n", // 5 digits to have 1 byte resolution
            size_pow2 / MBIT, size_pow2_lesser / MBIT, size_pow2_lesser / MBIT,
            totalsize / (float) MBIT);
@@ -1230,13 +1230,17 @@ gba_sc (void)
 
   printf ("Writing restart menu at offset: 0x%08x\n", fsize - padded);
 
-  // there is a 52232 bytes blank before the actual menu
-  if ((buffer = (unsigned char *) realloc (buffer, GBA_SCI_TEMPLATE_SIZE)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], GBA_SCI_TEMPLATE_SIZE);
-      fclose (destfile);
-      exit (1);
-    }
+  {
+    // there is a 52232 bytes blank before the actual menu
+    unsigned char *old_buffer = buffer;
+    if ((buffer = (unsigned char *) realloc (old_buffer, GBA_SCI_TEMPLATE_SIZE)) == NULL)
+      {
+        fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], GBA_SCI_TEMPLATE_SIZE);
+        free (old_buffer);
+        fclose (destfile);
+        exit (1);
+      }
+  }
   memset (buffer, 0, GBA_BLANK_SIZE);
   fwrite (buffer, 1, GBA_BLANK_SIZE, destfile);
 

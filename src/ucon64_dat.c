@@ -699,18 +699,18 @@ ucon64_dat_view (int console, int verbose)
       free (p);
     }
 
-  printf ("DAT files: %d; entries: %d; total entries: %d\n",
+  printf ("DAT files: %d; entries: %d; total entries: %u\n",
     n_datfiles, n_entries_sum, ucon64_dat_total_entries ());
 
   return 0;
 }
 
 
-unsigned int
+uint32_t
 ucon64_dat_total_entries (void)
 {
   uint32_t entries = 0;
-  int fsize;
+  off_t fsize;
   char fname[FILENAME_MAX];
 
   if (!ucon64.dat_enabled)
@@ -720,7 +720,7 @@ ucon64_dat_total_entries (void)
     {
       set_suffix (fname, ".idx");
       fsize = fsizeof (fname);
-      entries += (fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t));
+      entries += fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t);
     }
 
   return entries;

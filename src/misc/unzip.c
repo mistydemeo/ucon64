@@ -264,6 +264,10 @@ local int unzlocal_getLong (pzlib_filefunc_def,filestream,pX)
 
 
 /* My own strcmpi / strcasecmp */
+local int strcmpcasenosensitive_internal OF((
+    const char* fileName1,
+    const char* fileName2));
+
 local int strcmpcasenosensitive_internal (fileName1,fileName2)
     const char* fileName1;
     const char* fileName2;
@@ -297,6 +301,11 @@ local int strcmpcasenosensitive_internal (fileName1,fileName2)
 #ifndef STRCMPCASENOSENTIVEFUNCTION
 #define STRCMPCASENOSENTIVEFUNCTION strcmpcasenosensitive_internal
 #endif
+
+extern int ZEXPORT unzStringFileNameCompare OF((
+    const char* fileName1,
+    const char* fileName2,
+    int iCaseSensitivity));
 
 /*
    Compare two filename (fileName1,fileName2).
@@ -496,6 +505,9 @@ extern unzFile ZEXPORT unzOpen2 (path, pzlib_filefunc_def)
 
 
     s=(unz_s*)ALLOC(sizeof(unz_s));
+    if (s==NULL)
+        return NULL;
+
     *s=us;
     unzGoToFirstFile((unzFile)s);
     return (unzFile)s;
@@ -550,6 +562,10 @@ extern int ZEXPORT unzGetGlobalInfo (file,pglobal_info)
 /*
    Translate date/time from Dos format to tm_unz (readable more easilty)
 */
+local void unzlocal_DosDateToTmuDate OF((
+    uLong ulDosDate,
+    tm_unz* ptm));
+
 local void unzlocal_DosDateToTmuDate (ulDosDate, ptm)
     uLong ulDosDate;
     tm_unz* ptm;
@@ -957,6 +973,12 @@ extern int ZEXPORT unzGoToFilePos(file, file_pos)
 // Unzip Helper Functions - should be here?
 ///////////////////////////////////////////
 */
+
+local int unzlocal_CheckCurrentFileCoherencyHeader OF((
+    unz_s* s,
+    uInt* piSizeVar,
+    uLong *poffset_local_extrafield,
+    uInt  *psize_local_extrafield));
 
 /*
   Read the local header of the current zipfile

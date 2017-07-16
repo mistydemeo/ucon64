@@ -261,7 +261,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
 
   // misc stuff
   pos = strlen (rominfo->misc);
-  pos += sprintf (rominfo->misc + pos, "Version: 1.%d\n",
+  pos += sprintf (rominfo->misc + pos, "Version: 1.%u\n",
                   nds_header.romversion);
   pos += sprintf (rominfo->misc + pos, "Unit code: 0x%02x\n",
                   nds_header.unitcode);

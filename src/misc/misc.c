@@ -250,7 +250,12 @@ change_mem (char *buf, unsigned int bufsize, char *searchstr,
     if (searchstr[i] == esc)
       n_esc++;
 
-  sets = (st_cm_set_t *) malloc (n_esc * sizeof (st_cm_set_t));
+  if ((sets = (st_cm_set_t *) malloc (n_esc * sizeof (st_cm_set_t))) == NULL)
+    {
+      fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n",
+               n_esc * sizeof (st_cm_set_t));
+      return -1;
+    }
   va_start (argptr, offset);
   for (i = 0; i < n_esc; i++)
     {
@@ -475,10 +480,12 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       requiredsize1 += sizeof (st_cm_pattern_t);
       if (requiredsize1 > currentsize1)
         {
+          st_cm_pattern_t *old_patterns = *patterns;
           currentsize1 = requiredsize1 + 10 * sizeof (st_cm_pattern_t);
-          if ((*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)) == NULL)
+          if ((*patterns = (st_cm_pattern_t *) realloc (old_patterns, currentsize1)) == NULL)
             {
-              fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize1);
+              fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize1);
+              free (old_patterns);
               return -1;
             }
         }
@@ -498,11 +505,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
           requiredsize2++;
           if (requiredsize2 > currentsize2)
             {
+              char *old_search = (*patterns)[n_codes].search;
               currentsize2 = requiredsize2 + 10;
               if (((*patterns)[n_codes].search =
-                   (char *) realloc ((*patterns)[n_codes].search, currentsize2)) == NULL)
+                   (char *) realloc (old_search, currentsize2)) == NULL)
                 {
-                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize2);
+                  free (old_search);
                   free (*patterns);
                   *patterns = NULL;
                   return -1;
@@ -521,8 +530,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no wildcard value is specified\n",
-                  line_num);
+          printf ("WARNING: Line %u is invalid, no wildcard value is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].wildcard = (char) strtol (token, NULL, 16);
@@ -534,8 +542,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no escape value is specified\n",
-                  line_num);
+          printf ("WARNING: Line %u is invalid, no escape value is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].escape = (char) strtol (token, NULL, 16);
@@ -547,7 +554,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no replacement is specified\n", line_num);
+          printf ("WARNING: Line %u is invalid, no replacement is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].replace = NULL;
@@ -559,11 +566,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
           requiredsize2++;
           if (requiredsize2 > currentsize2)
             {
+              char *old_replace = (*patterns)[n_codes].replace;
               currentsize2 = requiredsize2 + 10;
               if (((*patterns)[n_codes].replace =
-                   (char *) realloc ((*patterns)[n_codes].replace, currentsize2)) == NULL)
+                   (char *) realloc (old_replace, currentsize2)) == NULL)
                 {
-                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize2);
+                  free (old_replace);
                   free ((*patterns)[n_codes].search);
                   free (*patterns);
                   *patterns = NULL;
@@ -583,7 +592,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no offset is specified\n", line_num);
+          printf ("WARNING: Line %u is invalid, no offset is specified\n", line_num);
           continue;
         }
       (*patterns)[n_codes].offset = strtol (token, NULL, 10); // yes, offset is decimal
@@ -623,11 +632,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
           requiredsize2 += sizeof (st_cm_set_t);
           if (requiredsize2 > currentsize2)
             {
+              st_cm_set_t *old_sets = (*patterns)[n_codes].sets;
               currentsize2 = requiredsize2 + 10 * sizeof (st_cm_set_t);
               if (((*patterns)[n_codes].sets =
-                   (st_cm_set_t *) realloc ((*patterns)[n_codes].sets, currentsize2)) == NULL)
+                   (st_cm_set_t *) realloc (old_sets, currentsize2)) == NULL)
                 {
-                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize2);
+                  free (old_sets);
                   free ((*patterns)[n_codes].replace);
                   free ((*patterns)[n_codes].search);
                   free (*patterns);
@@ -646,11 +657,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
               requiredsize3++;
               if (requiredsize3 > currentsize3)
                 {
+                  char *old_data = (*patterns)[n_codes].sets[n_sets].data;
                   currentsize3 = requiredsize3 + 10;
                   if (((*patterns)[n_codes].sets[n_sets].data =
-                       (char *) realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)) == NULL)
+                       (char *) realloc (old_data, currentsize3)) == NULL)
                     {
-                      fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize3);
+                      fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n", currentsize3);
+                      free (old_data);
                       free ((*patterns)[n_codes].sets);
                       free ((*patterns)[n_codes].replace);
                       free ((*patterns)[n_codes].search);

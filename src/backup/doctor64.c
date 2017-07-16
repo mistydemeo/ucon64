@@ -387,7 +387,7 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
       exit (1);
     }
 
-  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+  printf ("Send: %u Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   for (;;)
     {

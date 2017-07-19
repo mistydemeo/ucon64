@@ -45,19 +45,21 @@ Offset       Content
              4 Mbit, 0/2 kB SRAM: [0x13] = 05, [0x14] = 2A
                0 kB SRAM: [0x15] = 0, [0x16] = 0
                2 kB SRAM: [0x15] = 10, [0x16] = 3F
-             8 Mbit, 0/2 kB SRAM: [0x13] = 15, [0x14] = 28
-               0 kB SRAM: [0x15] = 0, [0x16] = 0
+             8 Mbit, 0/2/64 kB SRAM: [0x13] = 15, [0x14] = 28
+               0/64 kB SRAM (Wild Trax (J) (V1.1), 64): [0x15] = 0, [0x16] = 0
                2 kB SRAM: [0x15] = 20, [0x16] = 3F
-             8/10/16/24 Mbit, 0/2/8 kB SRAM (not: 8 Mbit, 0 kB SRAM): [0x13] = 55
-               8/24 Mbit, 8/32 kB SRAM: [0x14] = 0
+             8/10/16/24/32 Mbit, 0/2/8/32 kB SRAM (not: 8 Mbit, 0 kB SRAM): [0x13] = 55
+               8/24/32 Mbit, 8/32 kB SRAM: [0x14] = 0
                  8 Mbit, 32 kB SRAM (Star Fox (U) (V1.0)): [0x15] = 40, [0x16] = 0
                  8 Mbit, 8 kB SRAM: [0x15] = 50, [0x16] = BF
                  24 Mbit, 8 kB SRAM: [0x15] = 60, [0x16] = BF
+                 32 Mbit, 8 kB SRAM (Hoshi no Kirby Super Deluxe (J) (V1.1)): [0x15] = 80, [0x16] = 0
                10/16 Mbit, 0/2/8 kB SRAM: [0x14] = 20
                  10/16 Mbit, 0 kB SRAM: [0x15] = 0, [0x16] = 0
                  16 Mbit, 2/8 kB SRAM: [0x15] = 20, [0x16] = 3F
 
              HiROM:
+             4 Mbit, 2 kB SRAM (Super Mario Kart (J)): [0x13] = 09, [0x14] = 0, [0x15] = 0, [0x16] = 2C
              24 Mbit, 0 kB SRAM: [0x13] = F5, [0x14] = 0, [0x15] = 0, [0x16] = 0
              32 Mbit, 0/2 kB SRAM: [0x13] = 55, [0x14] = 0, [0x15] = 80
                0 kB SRAM: [0x16] = 0
@@ -82,7 +84,9 @@ Offset       Content
                                         11 = Address bit = 1 selects SRAM
   0x17       SRAM type: 0 = HiROM, 1 = LoROM
   0x18       0
-  0x19       For non-special chip cartridges: 0; for Star Fox (U) (V1.0): 0xFF
+  0x19       For non-special chip cartridges: 0; for
+             Hoshi no Kirby Super Deluxe (J) (V1.1), Star Fox (U) (V1.0),
+             Super Mario Kart (J), Wild Trax (J) (V1.1): 0xFF
   0x1A-0x1F  0
   0x20-0x3F  Copy of last 32 bytes of internal ROM header
   0x40-0x1FF 0

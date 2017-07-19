@@ -503,6 +503,49 @@ snes_get_file_type (void)
 }
 
 
+static unsigned char
+get_internal_size (void)
+{
+  unsigned int size = !bs_dump ?
+                        (1 << snes_header.rom_size) >> 7 :
+                        8 - (snes_header.bs_type >> (4 + 1)) * 4;
+  return size <= 128 ? (unsigned char) size : 128;
+}
+
+
+static unsigned int
+update_chksum (st_ucon64_nfo_t *rominfo, unsigned char *sum, unsigned int size,
+               const char *dest_name)
+{
+  unsigned int header_start;
+
+  /*
+    The internal checksum bytes have been included in the checksum
+    calculation, but they will be changed after this function returns. We
+    account for that. Otherwise we could have to run uCON64 on the ROM twice.
+  */
+  rominfo->current_internal_crc += -(snes_header.inverse_checksum_low +
+                                     snes_header.inverse_checksum_high +
+                                     snes_header.checksum_low +
+                                     snes_header.checksum_high) +
+                                   2 * 0xff; // + 2 * 0;
+  // change inverse checksum
+  sum[0] = (unsigned char) ~rominfo->current_internal_crc; // low byte
+  sum[1] = (unsigned char) (~rominfo->current_internal_crc >> 8); // high byte
+  // change checksum
+  sum[2] = (unsigned char) rominfo->current_internal_crc; // low byte
+  sum[3] = (unsigned char) (rominfo->current_internal_crc >> 8); // high byte
+  if (rominfo->interleaved)
+    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
+  else
+    header_start = rominfo->header_start;
+  ucon64_fwrite (sum, header_start + rominfo->backup_header_len + 44, 4,
+                 dest_name, "r+b");
+
+  return header_start;
+}
+
+
 int
 snes_col (const char *color)
 /*
@@ -1576,9 +1619,7 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
   header.size = (unsigned char) (size / MBIT);
   header.banktype = snes_hirom ? 0 : 1;
   memcpy (header.id, "SFCUFOSD", 8);
-  header.internal_size = !bs_dump ?
-                           1 << (snes_header.rom_size - 7) :
-                           8 - (snes_header.bs_type >> (4 + 1)) * 4;
+  header.internal_size = get_internal_size ();
 
   if (snes_header.rom_type == 3 || snes_header.rom_type == 5 || // DSP
       snes_header.rom_type == 0x13 ||           // SRAM + Super FX (Mario Chip 1)
@@ -1594,7 +1635,9 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
       snes_header.rom_type == 0xf6 ||           // Seta DSP
       snes_header.rom_type == 0xf9)             // SPC7110 + RTC
     header.special_chip = 0xff;
-  else
+
+  if (header.special_chip == 0 ||
+      snes_header.rom_type == 3 || snes_header.rom_type == 5) // DSP
     {
       if (snes_sram_size > 16 * 1024)
         header.sram_size = 7;
@@ -1609,11 +1652,20 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
 
   if (snes_hirom)
     {
-      if ((size == 20 * MBIT || size == 24 * MBIT) && snes_sram_size == 0)
-        memcpy (header.map_control, "\xf5\x00\x00\x00", 4);
-      else if (size == 32 * MBIT)
-        memcpy (header.map_control,
-                snes_sram_size ? "\x55\x00\x80\x2c" : "\x55\x00\x80\x00", 4);
+      if (snes_sram_size)
+        {
+          if (size == 4 * MBIT)
+            memcpy (header.map_control, "\x09\x00\x00\x2c", 4);
+          else if (size == 32 * MBIT)
+            memcpy (header.map_control, "\x55\x00\x80\x2c", 4);
+        }
+      else
+        {
+          if (size == 20 * MBIT || size == 24 * MBIT)
+            memcpy (header.map_control, "\xf5\x00\x00\x00", 4);
+          else if (size == 32 * MBIT)
+            memcpy (header.map_control, "\x55\x00\x80\x00", 4);
+        }
     }
   else
     {
@@ -1622,11 +1674,19 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
           if (size == 4 * MBIT)
             memcpy (header.map_control, "\x05\x2a\x10\x3f", 4);
           else if (size == 8 * MBIT)
-            memcpy (header.map_control, header.special_chip ?
-                      "\x55\x00\x40\x00" : snes_sram_size == 2 * 1024 ?
-                        "\x15\x28\x20\x3f" : "\x55\x00\x50\xbf", 4);
+            {
+              if (!header.special_chip)
+                memcpy (header.map_control, snes_sram_size == 2 * 1024 ?
+                          "\x15\x28\x20\x3f" : "\x55\x00\x50\xbf", 4);
+              else
+                memcpy (header.map_control, (snes_sfx_sram_size ?
+                          snes_sfx_sram_size : snes_sram_size) == 64 * 1024 ?
+                            "\x15\x28\x00\x00" : "\x55\x00\x40\x00", 4);
+            }
           else if (size == 20 * MBIT || size == 24 * MBIT)
             memcpy (header.map_control, "\x55\x00\x60\xbf", 4);
+          else if (size == 32 * MBIT)
+            memcpy (header.map_control, "\x55\x00\x80\x00", 4);
           else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
             memcpy (header.map_control, "\x55\x20\x20\x3f", 4);
         }
@@ -1664,6 +1724,17 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
     write_deinterleaved_data (rominfo, src_name, dest_name, UFOSD_HEADER_LEN);
   else
     fcopy (src_name, rominfo->backup_header_len, size, dest_name, "ab");
+
+  {
+    // The Super UFO Pro 8 SD refuses to load images with an incorrect checksum.
+    unsigned char sum[4];
+
+    rominfo->interleaved = 0;
+    rominfo->backup_header_len = UFOSD_HEADER_LEN;
+    update_chksum (rominfo, sum, size, dest_name);
+    // update the checksum in the backup unit header as well
+    ucon64_fwrite (sum, 0x3c, 4, dest_name, "r+b");
+  }
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -2840,38 +2911,17 @@ snes_n (st_ucon64_nfo_t *rominfo, const char *name)
 int
 snes_chk (st_ucon64_nfo_t *rominfo)
 {
-  char buf[4], dest_name[FILENAME_MAX];
-  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      header_start;
+  char dest_name[FILENAME_MAX];
+  unsigned char sum[4];
+  unsigned int header_start;
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
-  /*
-    The internal checksum bytes have been included in the checksum
-    calculation, but they will be changed after this function returns. We
-    account for that. Otherwise we could have to run uCON64 on the ROM twice.
-  */
-  rominfo->current_internal_crc += (-snes_header.inverse_checksum_low -
-                                    snes_header.inverse_checksum_high -
-                                    snes_header.checksum_low -
-                                    snes_header.checksum_high) +
-                                   2 * 0xff; // + 2 * 0;
-  // change inverse checksum
-  buf[0] = (char) (0xffff - rominfo->current_internal_crc); // low byte
-  buf[1] = (char) ((0xffff - rominfo->current_internal_crc) >> 8); // high byte
-  // change checksum
-  buf[2] = (char) rominfo->current_internal_crc; // low byte
-  buf[3] = (char) (rominfo->current_internal_crc >> 8); // high byte
-  if (rominfo->interleaved)
-    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
-  else
-    header_start = rominfo->header_start;
-  ucon64_fwrite (buf, header_start + rominfo->backup_header_len + 44, 4,
-                 dest_name, "r+b");
-
-  dumper (stdout, buf, 4, header_start + rominfo->backup_header_len + 44,
+  header_start = update_chksum (rominfo, sum, (unsigned int) ucon64.file_size -
+                                  rominfo->backup_header_len, dest_name);
+  dumper (stdout, sum, 4, header_start + rominfo->backup_header_len + 44,
           DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -3357,10 +3407,9 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
               y == 1 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
               matches_deviates ((snes_hirom ? 0 : 1) == y));
 
-      x = !bs_dump ?
-            1 << (snes_header.rom_size - 7) : 8 - (snes_header.bs_type >> (4 + 1)) * 4;
       y = header[0x11];
-      printf ("[11]     Internal size: %d Mb => %s\n", y, matches_deviates (x == y));
+      printf ("[11]     Internal size: %d Mb => %s\n",
+              y, matches_deviates (get_internal_size () == y));
 
       y = header[0x12] <= 3 ? sram_sizes[header[0x12]] : 128;
       printf ("[12]     SRAM size: %d kB => %s\n",
@@ -4018,7 +4067,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
 
       // misc stuff
       pos += sprintf (rominfo->misc + pos, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
-      pos += sprintf (rominfo->misc + pos, "Internal size: %d Mb\n", 1 << (snes_header.rom_size - 7));
+      pos += sprintf (rominfo->misc + pos, "Internal size: %u Mb\n", get_internal_size ());
 //      pos += sprintf (rominfo->misc + pos, "Map type: %x\n", snes_header.map_type);
       pos += sprintf (rominfo->misc + pos, "ROM type: (%x) %s", snes_header.rom_type,
                       snes_rom_type[(snes_header.rom_type & 7) % 3]);
@@ -4112,7 +4161,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
       pos += sprintf (rominfo->misc + pos, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
 
       // misc stuff
-      pos += sprintf (rominfo->misc + pos, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> (4 + 1)) * 4);
+      pos += sprintf (rominfo->misc + pos, "Internal size: %u Mb\n", get_internal_size ());
 //      pos += sprintf (rominfo->misc + pos, "Map type: %x\n", snes_header.bs_map_type);
       x = snes_header.bs_type >> 4;
       pos += sprintf (rominfo->misc + pos, "ROM type: (%x) %s\n", snes_header.bs_type,
@@ -4260,7 +4309,8 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer,
   unsigned int i, internal_rom_size, half_internal_rom_size, remainder;
   unsigned short int sum1, sum2;
 
-  if (!bs_dump && snes_header.rom_size <= 13)   // largest known cart size is 64 Mbit
+   // largest known cart size is 48 Mbit (internal size 64 Mbit)
+  if (!bs_dump && snes_header.rom_size > 0 && snes_header.rom_size <= 13)
     internal_rom_size = 1 << (snes_header.rom_size + 10);
   else
     internal_rom_size = st_dump ? rom_size - 8 * MBIT : rom_size;
@@ -4268,8 +4318,8 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer,
   half_internal_rom_size = internal_rom_size >> 1;
 
   sum1 = 0;
-  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30)
-      || snes_header.rom_type == 0xf9 || bs_dump)
+  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30) ||
+      snes_header.rom_type == 0xf9 || bs_dump)
     {
       for (i = 0; i < rom_size; i++)
         sum1 += (*rom_buffer)[i];               // Far East of Eden Zero (J)
@@ -4351,8 +4401,8 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer,
     }
 
   sum = 0;
-  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30)
-      || snes_header.rom_type == 0xf9 || bs_dump)
+  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30) ||
+      snes_header.rom_type == 0xf9 || bs_dump)
     {
       for (i = 0; i < rom_size; i++)
         sum += (*rom_buffer)[i];                // Far East of Eden Zero (J)
@@ -4843,8 +4893,8 @@ set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header)
 {
   int x;
 
-  if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
-      && !nsrt_header)                          // don't overwrite these values
+  if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2)) &&
+      !nsrt_header)                             // don't overwrite these values
     {
       if (rominfo->current_internal_crc != rominfo->internal_crc)
         {

@@ -253,7 +253,7 @@ change_mem (char *buf, unsigned int bufsize, char *searchstr,
   if ((sets = (st_cm_set_t *) malloc (n_esc * sizeof (st_cm_set_t))) == NULL)
     {
       fprintf (stderr, "ERROR: Not enough memory for buffer (%u bytes)\n",
-               n_esc * sizeof (st_cm_set_t));
+               (unsigned int) (n_esc * sizeof (st_cm_set_t)));
       return -1;
     }
   va_start (argptr, offset);

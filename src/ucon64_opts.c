@@ -692,9 +692,6 @@ ucon64_options (st_ucon64_t *p)
   unsigned int checksum;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        *ptr = NULL, *values[UCON64_MAX_ARGS];
-#ifdef  AMIGA
-  char tmpbuf[FILENAME_MAX];
-#endif
   static char rename_buf[FILENAME_MAX];
   struct stat fstate;
   const char *option_arg = p->optarg;
@@ -1047,39 +1044,63 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_RL:
+      {
 #ifdef  AMIGA
-      ptr = basename2 (tmpnam2 (tmpbuf));
-      rename2 (ucon64.fname, ptr);
+        char tmpbuf[FILENAME_MAX];
+
+        ptr = basename2 (tmpnam2 (tmpbuf));
+        rename2 (ucon64.fname, ptr);
 #endif
-      strcpy (rename_buf, basename2 (ucon64.fname));
-      printf ("Renaming \"%s\" to ", rename_buf);
-      strlwr (rename_buf);
-      ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      printf ("\"%s\"\n", rename_buf);
+        strcpy (rename_buf, basename2 (ucon64.fname));
+        printf ("Renaming \"%s\" to ", rename_buf);
+        strlwr (rename_buf);
+        ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+        printf ("\"%s\"\n", rename_buf);
 #ifdef  AMIGA
-      rename2 (ptr, rename_buf);
+        x = rename2 (ptr, rename_buf);
 #else
-      rename2 (ucon64.fname, rename_buf);
+        x = rename2 (ucon64.fname, rename_buf);
 #endif
-      ucon64.fname = (const char *) rename_buf;
+        if (x == 0)
+          ucon64.fname = (const char *) rename_buf;
+        else
+          {
+            fprintf (stderr, "ERROR: Could not rename \"%s\"\n", ucon64.fname);
+#ifdef  AMIGA
+            rename2 (ptr, ucon64.fname);
+#endif
+          }
+      }
       break;
 
     case UCON64_RU:
+      {
 #ifdef  AMIGA
-      ptr = basename2 (tmpnam2 (tmpbuf));
-      rename2 (ucon64.fname, ptr);
+        char tmpbuf[FILENAME_MAX];
+
+        ptr = basename2 (tmpnam2 (tmpbuf));
+        rename2 (ucon64.fname, ptr);
 #endif
-      strcpy (rename_buf, basename2 (ucon64.fname));
-      printf ("Renaming \"%s\" to ", rename_buf);
-      strupr (rename_buf);
-      ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      printf ("\"%s\"\n", rename_buf);
+        strcpy (rename_buf, basename2 (ucon64.fname));
+        printf ("Renaming \"%s\" to ", rename_buf);
+        strupr (rename_buf);
+        ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+        printf ("\"%s\"\n", rename_buf);
 #ifdef  AMIGA
-      rename2 (ptr, rename_buf);
+        x = rename2 (ptr, rename_buf);
 #else
-      rename2 (ucon64.fname, rename_buf);
+        x = rename2 (ucon64.fname, rename_buf);
 #endif
-      ucon64.fname = (const char *) rename_buf;
+        if (x == 0)
+          ucon64.fname = (const char *) rename_buf;
+        else
+          {
+            fprintf (stderr, "ERROR: Could not rename \"%s\"\n", ucon64.fname);
+#ifdef  AMIGA
+            rename2 (ptr, ucon64.fname);
+#endif
+          }
+      }
       break;
 
 #ifdef  USE_DISCMAGE

@@ -121,6 +121,8 @@ typedef struct st_symbol
   char *(*strdup) (const char *);
   char *(*strtok) (char *, const char *);
   char *(*strerror) (int);
+  char *(*strlwr) (char *);
+  char *(*strupr) (char *);
 
   int (*tolower) (int);
   int (*toupper) (int);

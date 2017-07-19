@@ -511,6 +511,20 @@ strerror (int error)
 }
 
 
+char *
+strlwr (char *str)
+{
+  return import_export.strlwr (str);
+}
+
+
+char *
+strupr (char *str)
+{
+  return import_export.strupr (str);
+}
+
+
 #undef  tolower
 int
 tolower (int character)

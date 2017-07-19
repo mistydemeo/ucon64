@@ -165,6 +165,8 @@ open_module (char *module_name)
   sym->strdup = strdup;
   sym->strtok = strtok;
   sym->strerror = strerror;
+  sym->strlwr = strlwr;
+  sym->strupr = strupr;
 
   sym->tolower = tolower;
   sym->toupper = toupper;

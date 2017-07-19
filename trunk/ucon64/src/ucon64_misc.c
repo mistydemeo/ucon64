@@ -1478,17 +1478,22 @@ ucon64_rename (int mode)
     printf ("Renaming \"%s\" to \"%s\"\n", p, p2);
   else
     printf ("Moving \"%s\"\n", p);
+
+  {
+    int result = 0;
+
 #ifndef DEBUG
-  if (rename2 (ucon64.fname, buf2) == -1)       // rename_2_() must be used!
-    {
-      fprintf (stderr, "ERROR: Could not rename \"%s\"\n", p);
-      return -1;
-    }
+    if (rename2 (ucon64.fname, buf2) != 0)      // rename_2_() must be used!
+      {
+        fprintf (stderr, "ERROR: Could not rename \"%s\"\n", ucon64.fname);
+        result = -1;
+      }
 #endif
 #ifdef  USE_ZLIB
-  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack
+    unzip_current_file_nr = 0x7fffffff - 1;     // dirty hack
 #endif
-  return 0;
+    return result;
+  }
 }
 
 

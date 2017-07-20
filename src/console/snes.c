@@ -1652,52 +1652,78 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
 
   if (snes_hirom)
     {
-      if (snes_sram_size)
+      switch (size)
         {
-          if (size == 4 * MBIT)
-            memcpy (header.map_control, "\x09\x00\x00\x2c", 4);
-          else if (size == 32 * MBIT)
-            memcpy (header.map_control, "\x55\x00\x80\x2c", 4);
+        case 4 * MBIT:
+          header.map_control[0] = 0x09;
+          break;
+        case 10 * MBIT:
+        case 12 * MBIT:
+        case 16 * MBIT:
+          header.map_control[0] = 0x95;
+          break;
+        case 20 * MBIT:
+        case 24 * MBIT:
+          header.map_control[0] = 0xf5;
+          break;
+        case 32 * MBIT:
+          memcpy (header.map_control, "\x55\x00\x80", 3);
+          break;
         }
-      else
-        {
-          if (size == 20 * MBIT || size == 24 * MBIT)
-            memcpy (header.map_control, "\xf5\x00\x00\x00", 4);
-          else if (size == 32 * MBIT)
-            memcpy (header.map_control, "\x55\x00\x80\x00", 4);
-        }
+      header.map_control[3] = snes_sram_size && header.map_control[0] ? 0x2c : 0;
     }
   else
     {
+      switch (size)
+        {
+        case 4 * MBIT:
+          memcpy (header.map_control, "\x05\x2a", 2);
+          break;
+        case 8 * MBIT:
+          memcpy (header.map_control, "\x15\x28", 2);
+          break;
+        case 10 * MBIT:
+        case 12 * MBIT:
+        case 16 * MBIT:
+          header.map_control[1] = 0x20;
+        case 20 * MBIT:                         // intentionally falling through
+        case 24 * MBIT:
+        case 32 * MBIT:
+          header.map_control[0] = 0x55;
+          break;
+        }
       if (snes_sram_size)
         {
-          if (size == 4 * MBIT)
-            memcpy (header.map_control, "\x05\x2a\x10\x3f", 4);
-          else if (size == 8 * MBIT)
+          switch (size)
             {
+            case 4 * MBIT:
+              memcpy (&header.map_control[2], "\x10\x3f", 2);
+              break;
+            case 8 * MBIT:
               if (!header.special_chip)
-                memcpy (header.map_control, snes_sram_size == 2 * 1024 ?
-                          "\x15\x28\x20\x3f" : "\x55\x00\x50\xbf", 4);
-              else
-                memcpy (header.map_control, (snes_sfx_sram_size ?
-                          snes_sfx_sram_size : snes_sram_size) == 64 * 1024 ?
-                            "\x15\x28\x00\x00" : "\x55\x00\x40\x00", 4);
+                {
+                  if (snes_sram_size == 2 * 1024)
+                    memcpy (&header.map_control[2], "\x20\x3f", 2);
+                  else
+                    memcpy (header.map_control, "\x55\x00\x50\xbf", 4);
+                }
+              else if ((snes_sfx_sram_size ?
+                          snes_sfx_sram_size : snes_sram_size) == 32 * 1024)
+                memcpy (header.map_control, "\x55\x00\x40\x00", 4);
+              break;
+            case 10 * MBIT:
+            case 12 * MBIT:
+            case 16 * MBIT:
+              memcpy (&header.map_control[2], "\x20\x3f", 2);
+              break;
+            case 20 * MBIT:
+            case 24 * MBIT:
+              memcpy (&header.map_control[2], "\x60\xbf", 2);
+              break;
+            case 32 * MBIT:
+              header.map_control[2] = 0x80;
+              break;
             }
-          else if (size == 20 * MBIT || size == 24 * MBIT)
-            memcpy (header.map_control, "\x55\x00\x60\xbf", 4);
-          else if (size == 32 * MBIT)
-            memcpy (header.map_control, "\x55\x00\x80\x00", 4);
-          else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
-            memcpy (header.map_control, "\x55\x20\x20\x3f", 4);
-        }
-      else
-        {
-          if (size == 4 * MBIT)
-            memcpy (header.map_control, "\x05\x2a\x00\x00", 4);
-          else if (size == 8 * MBIT)
-            memcpy (header.map_control, "\x15\x28\x00\x00", 4);
-          else if (size == 10 * MBIT || size == 12 * MBIT || size == 16 * MBIT)
-            memcpy (header.map_control, "\x55\x20\x00\x00", 4);
         }
     }
   if (header.map_control[0] == '\0')

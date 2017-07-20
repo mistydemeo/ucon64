@@ -59,7 +59,10 @@ Offset       Content
                  16 Mbit, 2/8 kB SRAM: [0x15] = 20, [0x16] = 3F
 
              HiROM:
-             4 Mbit, 2 kB SRAM (Super Mario Kart (J)): [0x13] = 09, [0x14] = 0, [0x15] = 0, [0x16] = 2C
+             4 Mbit, 0/2 kB SRAM: [0x13] = 09, [0x14] = 0, [0x15] = 0
+               0 kB SRAM: [0x16] = 0
+               2 kB SRAM (Super Mario Kart (J)): [0x16] = 2C
+             16 Mbit, 8 kB SRAM: [0x13] = 95, [0x14] = 0, [0x15] = 0, [0x16] = 2C
              24 Mbit, 0 kB SRAM: [0x13] = F5, [0x14] = 0, [0x15] = 0, [0x16] = 0
              32 Mbit, 0/2 kB SRAM: [0x13] = 55, [0x14] = 0, [0x15] = 80
                0 kB SRAM: [0x16] = 0

@@ -73,11 +73,12 @@ const st_getopt2_t doctor64_usage[] =
 static int
 parport_write (char src[], int len, unsigned short parport)
 {
-  int maxwait, i;
+  int i;
 
   for (i = 0; i < len; i++)
     {
-      maxwait = SEND_MAX_WAIT;
+      int maxwait = SEND_MAX_WAIT;
+
       if ((inportb (parport + 2) & 1) == 0)     // check ~strobe
         {
           while (((inportb (parport + 2) & 2) != 0) && maxwait--)
@@ -104,13 +105,14 @@ parport_write (char src[], int len, unsigned short parport)
 static int
 parport_read (char dest[], int len, unsigned short parport)
 {
-  int i, maxwait;
-  unsigned char c;
+  int i;
 
   for (i = 0; i < len; i++)
     {
+      int maxwait = REC_MAX_WAIT;
+      unsigned char c;
+
       outportb (parport, REC_HIGH_NIBBLE);
-      maxwait = REC_MAX_WAIT;
       while (((inportb (parport + 1) & 0x80) == 0) && maxwait--)
         ;                                       // wait for ~busy=1
       if (maxwait <= 0)
@@ -358,7 +360,7 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
-  unsigned int size, pos, bytessent = 0;
+  unsigned int size;
   time_t init_time;
 
 #ifdef  USE_PPDEV
@@ -391,6 +393,8 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
 
   for (;;)
     {
+      unsigned int pos, bytessent = 0;
+
       if ((pos = fread (buf, 1, sizeof buf, fh)) == 0)
         break;
       if (parport_write (buf, pos, parport) != 0)

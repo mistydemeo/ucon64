@@ -67,7 +67,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_LIB;_CRT_SECURE_NO_WARNINGS;HAVE_CONFIG_H;CD64_USE_RAWIO;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\..\backup\$(ProjectName)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\backup\libcd64</AdditionalIncludeDirectories>
       <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4710;4711</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -86,7 +86,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_LIB;_CRT_SECURE_NO_WARNINGS;HAVE_CONFIG_H;CD64_USE_RAWIO;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\..\backup\$(ProjectName)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\backup\libcd64</AdditionalIncludeDirectories>
       <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4710;4711</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

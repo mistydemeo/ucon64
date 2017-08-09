@@ -121,7 +121,7 @@ inportw2 (unsigned short port)
 int
 mccl_read (const char *filename, unsigned int parport)
 {
-  unsigned char buffer[0x1760], inbyte;
+  unsigned char buffer[0x1760];
   char dest_name[FILENAME_MAX];
   int count = 0;
   time_t starttime;
@@ -144,6 +144,8 @@ mccl_read (const char *filename, unsigned int parport)
   starttime = time (NULL);
   do
     {
+      unsigned char inbyte;
+
       outportb (CONTROL, 0x26);
       while ((inportb (STATUS) & 0x20) == 0)
         ;

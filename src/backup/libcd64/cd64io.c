@@ -855,14 +855,14 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 #define access  _access
 #endif
 	{
-		char fname[FILENAME_MAX+1];
+		char fname[FILENAME_MAX];
 		u_func_ptr_t sym;
 		io_driver_found = 0;
 
 		if (!cd64->io_driver_dir[0]) strcpy(cd64->io_driver_dir, ".");
-		snprintf(fname, FILENAME_MAX+1, "%s" DIR_SEPARATOR_S "%s",
+		snprintf(fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s",
 		         cd64->io_driver_dir, "dlportio.dll");
-		fname[FILENAME_MAX] = 0;
+		fname[FILENAME_MAX-1] = 0;
 		if (access(fname, F_OK) == 0) {
 			io_driver = open_module(fname, cd64);
 
@@ -879,9 +879,9 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		}
 
 		if (!io_driver_found) {
-			snprintf(fname, FILENAME_MAX+1, "%s" DIR_SEPARATOR_S "%s",
+			snprintf(fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s",
 			         cd64->io_driver_dir, "io.dll");
-			fname[FILENAME_MAX] = 0;
+			fname[FILENAME_MAX-1] = 0;
 			if (access(fname, F_OK) == 0) {
 				io_driver = open_module(fname, cd64);
 
@@ -903,9 +903,9 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		}
 
 		if (!io_driver_found) {
-			snprintf(fname, FILENAME_MAX+1, "%s" DIR_SEPARATOR_S "%s",
+			snprintf(fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s",
 			         cd64->io_driver_dir, "inpout32.dll");
-			fname[FILENAME_MAX] = 0;
+			fname[FILENAME_MAX-1] = 0;
 			if (access(fname, F_OK) == 0) {
 				io_driver = open_module(fname, cd64);
 
@@ -1040,7 +1040,6 @@ static INLINE int cd64_wait_rawio(struct cd64_t *cd64) {
 	int i = 0;
 	int reset_tries = 0;
 	uint8_t status;
-	uint8_t dir;
 	i = 0;
 
 	if (cd64->using_ppa) {
@@ -1051,7 +1050,7 @@ static INLINE int cd64_wait_rawio(struct cd64_t *cd64) {
 			if (i >= BUSY_THRESHOLD) {
 				/* The PPA is in a weird state.
 				 * Try to knock some sense into it. */
-				dir = 1;
+				uint8_t dir = 1;
 				status = 0x06 | (dir << 5);
 				outb(status, (uint16_t) (cd64->port+2));
 
@@ -1088,10 +1087,10 @@ static INLINE int cd64_wait_rawio(struct cd64_t *cd64) {
 
 int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) {
 
-	uint8_t ctl;
-	uint8_t dir;
-
 	if (cd64->using_ppa) {
+
+		uint8_t ctl;
+		uint8_t dir;
 
 		if (!cd64_wait_rawio(cd64)) { return 0; }
 

@@ -113,7 +113,7 @@ static void
 readN64header (void)
 {
   unsigned int n64aps_magictest;
-  unsigned char buffer[8], APSbuffer[8], cartid[2], temp, teritory, APSteritory;
+  unsigned char buffer[8], APSbuffer[8], cartid[2], teritory, APSteritory;
 
   fseek (n64aps_modfile, 0, SEEK_SET);
   fread (&n64aps_magictest, 4, 1, n64aps_modfile);
@@ -136,7 +136,7 @@ readN64header (void)
   fread (buffer, 1, 2, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
     {
-      temp = cartid[0];
+      unsigned char temp = cartid[0];
       cartid[0] = cartid[1];
       cartid[1] = temp;
     }
@@ -193,7 +193,7 @@ readN64header (void)
 static void
 readsizeheader (int modsize, const char *modname)
 {
-  int orgsize, i;
+  int orgsize;
 
   fread (&orgsize, 4, 1, n64aps_apsfile);
 #ifdef  WORDS_BIGENDIAN
@@ -214,6 +214,8 @@ readsizeheader (int modsize, const char *modname)
         }
       else
         {
+          int i;
+
           fseek (n64aps_modfile, 0, SEEK_END);
           for (i = 0; i < (orgsize - modsize); i++)
             fputc (0, n64aps_modfile);
@@ -227,10 +229,12 @@ static void
 readpatch (void)
 {
   int APSreadlen, offset;
-  unsigned char buffer[N64APS_BUFFERSIZE], size;
+  unsigned char buffer[N64APS_BUFFERSIZE];
 
   while ((APSreadlen = fread (&offset, 1, 4, n64aps_apsfile)) != 0)
     {
+      unsigned char size;
+
 #ifdef  WORDS_BIGENDIAN
       offset = bswap_32 (offset);
 #endif
@@ -339,7 +343,7 @@ static void
 writeN64header (void)
 {
   unsigned int n64aps_magictest;
-  unsigned char buffer[8], teritory, cartid[2], temp;
+  unsigned char buffer[8], teritory, cartid[2];
 
   fread (&n64aps_magictest, 4, 1, n64aps_orgfile);
 #ifdef  WORDS_BIGENDIAN
@@ -355,6 +359,8 @@ writeN64header (void)
   fread (cartid, 1, 2, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
     {
+      unsigned char temp;
+
       temp = cartid[0];
       cartid[0] = cartid[1];
       cartid[1] = temp;
@@ -398,8 +404,8 @@ static void
 writepatch (void)
 // currently RLE is not supported
 {
-  int orgreadlen, newreadlen, filepos, changedstart = 0, changedoffset = 0,
-      i, changedlen = 0, changefound = 0;
+  int newreadlen, filepos, changedstart = 0, changedoffset = 0, i,
+      changedlen = 0, changefound = 0;
   unsigned char orgbuffer[N64APS_BUFFERSIZE], newbuffer[N64APS_BUFFERSIZE];
 
   fseek (n64aps_orgfile, 0, SEEK_SET);
@@ -407,7 +413,7 @@ writepatch (void)
   filepos = 0;
   while ((newreadlen = fread (newbuffer, 1, N64APS_BUFFERSIZE, n64aps_modfile)) != 0)
     {
-      orgreadlen = fread (orgbuffer, 1, N64APS_BUFFERSIZE, n64aps_orgfile);
+      int orgreadlen = fread (orgbuffer, 1, N64APS_BUFFERSIZE, n64aps_orgfile);
       for (i = orgreadlen; i < newreadlen; i++)
         orgbuffer[i] = 0;
 

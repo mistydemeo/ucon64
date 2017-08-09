@@ -101,7 +101,7 @@ receive_rom_info (unsigned char *buffer)
 {
   unsigned short n;
   volatile int m;
-  unsigned char byte, size;
+  unsigned char size;
 
   ffe_send_command0 (0xe00c, 0);
 
@@ -109,6 +109,8 @@ receive_rom_info (unsigned char *buffer)
     hirom = ucon64.snes_hirom ? 1 : 0;
   else
     {
+      unsigned char byte;
+
       ffe_send_command (5, 3, 0);
       byte = ffe_send_command1 (0xbfd5);
       if ((byte & 1 && byte != 0x23) || byte == 0x3a) // & 1 => 0x21, 0x31, 0x35

@@ -179,18 +179,15 @@ static void
 lynxit_shift_out_byte (unsigned char data)
 {
   unsigned int loop;
-  unsigned char outbyte;
 #if 0
-  unsigned char dbgdata;
-
-  dbgdata = data;
+  unsigned char dbgdata = data;
 #endif
 
   OUTPUT (print_data, PORT_BASE);       // Set inactive
 
   for (loop = 0; loop < 8; loop++)
     {
-      outbyte = PORT_BASE;
+      unsigned char outbyte = PORT_BASE;
       outbyte |= (data & 0x80) ? DATA_OUT : 0;
       OUTPUT (print_data, outbyte);     // Output data; clock low
       data = data << 1;
@@ -418,7 +415,6 @@ cart_analyse (int cart)
 {
   unsigned char image[MAX_PAGE_SIZE];
   unsigned int page = 0;
-  unsigned char test = 0;
   unsigned int loop = 0;
 
   MESSAGE (("ANALYSE  : BANK%d ", cart));
@@ -426,6 +422,8 @@ cart_analyse (int cart)
   for (;;)
     {
       // Read a page - start at zero, try a max of 8 pages
+
+      unsigned char test = 0xff;
 
       if (page > 8)
         {
@@ -437,7 +435,6 @@ cart_analyse (int cart)
 
       // Explicit check for no bank
 
-      test = 0xff;
       for (loop = 0; loop < CART_PAGE_512K; loop++)
         test &= image[loop];
 

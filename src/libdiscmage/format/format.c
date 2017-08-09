@@ -108,14 +108,13 @@ callibrate (const char *s, int len, FILE *fh)
 int
 dm_track_init (dm_track_t *track, FILE *fh)
 {
-  int pos = 0, x = 0, identified = 0;
-  const char sync_data[] = {0, 0xff, 0xff,
-                               0xff, 0xff,
-                               0xff, 0xff,
-                               0xff, 0xff,
-                               0xff, 0xff, 0};
+  int x = 0, identified = 0;
+  const char sync_data[] = { 0, 0xff, 0xff,
+                                0xff, 0xff,
+                                0xff, 0xff,
+                                0xff, 0xff,
+                                0xff, 0xff, 0 };
   char value_s[32];
-  uint8_t value8 = 0;
 
   fseek (fh, track->track_start, SEEK_SET);
 #if 1
@@ -136,14 +135,14 @@ dm_track_init (dm_track_t *track, FILE *fh)
 
   if (!memcmp (sync_data, value_s, 12))
     {
-      value8 = (uint8_t) value_s[15];
+      uint8_t value8 = (uint8_t) value_s[15];
 
       for (x = 0; track_probe[x].sector_size; x++)
         if (track_probe[x].mode == value8)
           {
             // search for valid PVD in sector 16 of source image
-            pos = (track_probe[x].sector_size * 16) +
-                  track_probe[x].seek_header + track->track_start;
+            int pos = (track_probe[x].sector_size * 16) +
+                      track_probe[x].seek_header + track->track_start;
             fseek (fh, pos, SEEK_SET);
             fread (value_s, 1, 16, fh);
             if (!memcmp (pvd_magic, &value_s, 8) ||
@@ -229,14 +228,16 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 
   if (!image)
 #if 1
-    image = (dm_image_t *) malloc (sizeof (dm_image_t));
+    {
+      image = (dm_image_t *) malloc (sizeof (dm_image_t));
+      if (!image)
+        return NULL;
+    }
 #else
     image = (dm_image_t *) &image2;
 #endif
 
   memset (image, 0, sizeof (dm_image_t));
-  if (!image)
-    return NULL;
 
   image->desc = ""; // deprecated
 
@@ -299,7 +300,6 @@ dm_close (dm_image_t *image)
 #else
   memset (image, 0, sizeof (dm_image_t));
 #endif
-  image = NULL;
   return 0;
 }
 

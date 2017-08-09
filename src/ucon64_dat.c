@@ -281,11 +281,12 @@ get_next_file (char *fname)
         return fname;
       }
 #else
-  char search_pattern[FILENAME_MAX];
   WIN32_FIND_DATA find_data;
 
   if (!ddat)
     {
+      char search_pattern[FILENAME_MAX];
+
       // Note that FindFirstFile() & FindNextFile() are case insensitive
       sprintf (search_pattern, "%s" DIR_SEPARATOR_S "*.dat", ucon64.datdir);
       if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
@@ -317,7 +318,7 @@ get_next_file (char *fname)
 static st_ucon64_dat_t *
 get_dat_header (char *fname, st_ucon64_dat_t *dat)
 {
-  const char *p = NULL;
+  const char *p;
   int x = 0;
 
   p = get_property (fname, "author", PROPERTY_MODE_TEXT);
@@ -632,7 +633,6 @@ int
 ucon64_dat_view (int console, int verbose)
 {
   char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX];
-  const char *fname;
   unsigned char *p;
   static st_ucon64_dat_t dat;
   int n, fsize, n_entries, n_entries_sum = 0, n_datfiles = 0;
@@ -640,7 +640,7 @@ ucon64_dat_view (int console, int verbose)
 
   while (get_next_file (fname_dat))
     {
-      fname = basename2 (fname_dat);
+      const char *fname = basename2 (fname_dat);
       if (console != UCON64_UNKNOWN)
         if (fname_to_console (fname, &dat) != console)
           continue;
@@ -655,20 +655,20 @@ ucon64_dat_view (int console, int verbose)
       n_datfiles++;
 
       printf ("DAT info:\n"
-        "  %s\n"
-//        "  Console: %s\n"
-        "  Version: %s (%s, %s)\n"
-        "  Author: %s\n"
-        "  Comment: %s\n"
-        "  Entries: %d\n\n",
-        fname,
-//        dat.console_usage[0],
-        dat.version,
-        dat.date,
-        dat.refname,
-        dat.author,
-        dat.comment,
-        n_entries);
+              "  %s\n"
+//              "  Console: %s\n"
+              "  Version: %s (%s, %s)\n"
+              "  Author: %s\n"
+              "  Comment: %s\n"
+              "  Entries: %d\n\n",
+              fname,
+//              dat.console_usage[0],
+              dat.version,
+              dat.date,
+              dat.refname,
+              dat.author,
+              dat.comment,
+              n_entries);
 
       if ((p = (unsigned char *) malloc (fsize)) == NULL)
         {
@@ -700,7 +700,7 @@ ucon64_dat_view (int console, int verbose)
     }
 
   printf ("DAT files: %d; entries: %d; total entries: %u\n",
-    n_datfiles, n_entries_sum, ucon64_dat_total_entries ());
+          n_datfiles, n_entries_sum, ucon64_dat_total_entries ());
 
   return 0;
 }
@@ -745,7 +745,6 @@ st_ucon64_dat_t *
 ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 {
   char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX];
-  const char *fname;
   unsigned char *p = NULL;
   int32_t fsize = 0;
   st_idx_entry_t *idx_entry, key;
@@ -759,7 +758,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 
   while (get_next_file (fname_dat))
     {
-      fname = basename2 (fname_dat);
+      const char *fname = basename2 (fname_dat);
 
       if (ucon64.console != UCON64_UNKNOWN)
         if (fname_to_console (fname, &dat) != ucon64.console)
@@ -965,7 +964,7 @@ ucon64_dat_flush (st_ucon64_dat_t *dat)
 void
 ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 {
-  char buf[MAXBUFSIZE], *p = NULL;
+  char *p = NULL;
 
   if (!dat)
     {
@@ -977,6 +976,8 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   // console type?
   if (dat->console_usage != NULL)
     {
+      char buf[MAXBUFSIZE];
+
       strcpy (buf, dat->console_usage);
       // fix ugly multi-line console "usages" (PC-Engine)
       if ((p = strchr (buf, '\n')) != NULL)
@@ -1038,10 +1039,10 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 static void
 ucon64_close_datfile (void)
 {
-  int n;
-
   if (ucon64_datfile)
     {
+      int n;
+
       fclose (ucon64_datfile);
       printf (ucon64_msg[WROTE], ucon64_dat_fname);
       ucon64_datfile = NULL;
@@ -1065,10 +1066,10 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
   static char *console_name;
   char fname[FILENAME_MAX], *ptr;
   time_t time_t_val;
-  struct tm *t;
 
   if (first_file)
     {
+      struct tm *t;
       char *plugin = "";
 
       first_file = 0;

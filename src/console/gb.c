@@ -441,7 +441,7 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
 {
   st_unknown_backup_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  const char *p = NULL;
+  const char *p;
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   memset (&header, 0, UNKNOWN_BACKUP_HEADER_LEN);
@@ -478,54 +478,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value, x;
   char buf[MAXBUFSIZE];
-  static const char *gb_romtype1[0x20] =
-    {
-      "ROM only",
-      "ROM + MBC1",
-      "ROM + MBC1 + RAM",
-      "ROM + MBC1 + RAM + Battery",
-      NULL,
-      "ROM + MBC2",
-      "ROM + MBC2 + Battery",
-      NULL,
-      "ROM + RAM",                              // correct? - dbjh
-      "ROM + RAM + Battery",                    // correct? - dbjh
-      NULL,
-      "ROM + MMM01",
-      "ROM + MMM01 + SRAM",
-      "ROM + MMM01 + SRAM + Battery",
-      NULL,
-      "ROM + MBC3 + Battery + Timer",
-      "ROM + MBC3 + RAM + Battery + Timer",
-      "ROM + MBC3",
-      "ROM + MBC3 + RAM",
-      "ROM + MBC3 + RAM + Battery",
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      "ROM + MBC5",
-      "ROM + MBC5 + RAM",
-      "ROM + MBC5 + RAM + Battery",
-      "ROM + MBC5 + Rumble",
-      "ROM + MBC5 + SRAM + Rumble",
-      "ROM + MBC5 + SRAM + Battery + Rumble",
-      "Nintendo Pocket Camera"
-    },
-    *gb_romtype2[3] =
-    {
-      "Rocket Games",
-      NULL,
-      "Rocket Games 2-in-1"
-    },
-    *gb_romtype3[3] =
-    {
-      "Bandai TAMA5",
-      "Hudson HuC-3",
-      "Hudson HuC-1"
-    },
-    *str;
+  const char *str;
 
   rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
                                  ucon64.backup_header_len : 0;
@@ -559,7 +512,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
 
   // internal ROM name
   x = (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?
-        GB_NAME_LEN : GB_NAME_LEN + 1;
+         GB_NAME_LEN : GB_NAME_LEN + 1;
   strncpy (rominfo->name, (const char *) gb_header.name, x);
   rominfo->name[x] = 0;                         // terminate string
 
@@ -596,11 +549,64 @@ gb_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
   if (gb_header.rom_type <= 0x1f)
-    str = NULL_TO_UNKNOWN_S (gb_romtype1[gb_header.rom_type]);
+    {
+      const char *gb_romtype1[0x20] =
+        {
+          "ROM only",
+          "ROM + MBC1",
+          "ROM + MBC1 + RAM",
+          "ROM + MBC1 + RAM + Battery",
+          NULL,
+          "ROM + MBC2",
+          "ROM + MBC2 + Battery",
+          NULL,
+          "ROM + RAM",                          // correct? - dbjh
+          "ROM + RAM + Battery",                // correct? - dbjh
+          NULL,
+          "ROM + MMM01",
+          "ROM + MMM01 + SRAM",
+          "ROM + MMM01 + SRAM + Battery",
+          NULL,
+          "ROM + MBC3 + Battery + Timer",
+          "ROM + MBC3 + RAM + Battery + Timer",
+          "ROM + MBC3",
+          "ROM + MBC3 + RAM",
+          "ROM + MBC3 + RAM + Battery",
+          NULL,
+          NULL,
+          NULL,
+          NULL,
+          NULL,
+          "ROM + MBC5",
+          "ROM + MBC5 + RAM",
+          "ROM + MBC5 + RAM + Battery",
+          "ROM + MBC5 + Rumble",
+          "ROM + MBC5 + SRAM + Rumble",
+          "ROM + MBC5 + SRAM + Battery + Rumble",
+          "Nintendo Pocket Camera"
+        };
+      str = NULL_TO_UNKNOWN_S (gb_romtype1[gb_header.rom_type]);
+    }
   else if (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99)
-    str = gb_romtype2[gb_header.rom_type - 0x97];
+    {
+      const char *gb_romtype2[3] =
+        {
+          "Rocket Games",
+          NULL,
+          "Rocket Games 2-in-1"
+        };
+      str = NULL_TO_UNKNOWN_S (gb_romtype2[gb_header.rom_type - 0x97]);
+    }
   else if (gb_header.rom_type >= 0xfd)
-    str = gb_romtype3[gb_header.rom_type - 0xfd];
+    {
+      const char *gb_romtype3[3] =
+        {
+          "Bandai TAMA5",
+          "Hudson HuC-3",
+          "Hudson HuC-1"
+        };
+      str = gb_romtype3[gb_header.rom_type - 0xfd];
+    }
   else
     str = "Unknown";
   sprintf (buf, "ROM type: %s\n", str);
@@ -704,11 +710,13 @@ st_gb_chksum_t
 gb_chksum (st_ucon64_nfo_t *rominfo)
 {
   st_gb_chksum_t sum = { 0, 0 };
-  unsigned char *rom_buffer;
-  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len, i;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
 
   if (size > GB_HEADER_START + 0x4f)
     {
+      unsigned char *rom_buffer;
+      unsigned int i;
+
       if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);

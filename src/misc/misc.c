@@ -448,9 +448,9 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
 */
 {
   char src_name[FILENAME_MAX], line[MAXBUFSIZE], buffer[MAXBUFSIZE],
-       *token, *last, *ptr;
-  unsigned int line_num = 0, n_sets, n, currentsize1, requiredsize1,
-               currentsize2, requiredsize2, currentsize3, requiredsize3;
+       *token, *last;
+  unsigned int line_num = 0, n, currentsize1, requiredsize1, currentsize2,
+               requiredsize2, currentsize3, requiredsize3;
   int n_codes = 0;
   FILE *srcfile;
 
@@ -468,10 +468,11 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
   currentsize1 = requiredsize1 = 0;
   while (fgets (line, sizeof line, srcfile) != NULL)
     {
-      line_num++;
-      n_sets = 0;
+      char *ptr = line + strspn (line, "\t ");
+      unsigned int n_sets = 0;
 
-      ptr = line + strspn (line, "\t ");
+      line_num++;
+
       if (*ptr == '#' || *ptr == '\n' || *ptr == '\r')
         continue;
       if ((ptr = strpbrk (line, "\n\r#")) != NULL) // text after # is comment
@@ -524,7 +525,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].search_size = n;     // size in bytes
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -536,7 +537,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].wildcard = (char) strtol (token, NULL, 16);
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -548,7 +549,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].escape = (char) strtol (token, NULL, 16);
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -586,7 +587,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].replace_size = n;    // size in bytes
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -624,7 +625,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       currentsize2 = 0;
       requiredsize2 = 1;                        // for string terminator
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       last = token;
       while (token)
@@ -688,7 +689,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
             }
 
           strcpy (buffer, line);
-          token = strtok (last, ":");
+          strtok (last, ":");
           token = strtok (NULL, ":");
           last = token;
 

@@ -709,11 +709,9 @@ BackupROM (FILE *fp, int SizekW)
 void
 dump (u8 BaseAdr)
 {
-//   unsigned char low, high;
+//  unsigned char low, high;
   int i;
   u8 First = 1;
-  u16 v;
-  u8 val1, val2;
   u8 Display[17] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
   WriteFlash (0, INTEL28F_READARRAY);   // Set flash (intel 28F640J3A) Read Mode
@@ -725,6 +723,9 @@ dump (u8 BaseAdr)
 
   for (i = 0; i < 128; i++)
     {
+      u16 v;
+      u8 val1, val2;
+
       if (First == 1)
         {
           if (i * 2 < 256)
@@ -866,14 +867,12 @@ GetFileSize2 (FILE *fp)
   uCON64 already determined the file size at this point. - dbjh
 */
 {
-  int FileSize;
-
   if (RepairHeader)
     {
       int i;
       int j;
+      int FileSize = 0;
 
-      FileSize = 0;
       while (!feof (fp) && (FileSize < 0xc0))
         FileHeader[FileSize++] = fgetc (fp);
 
@@ -918,15 +917,9 @@ GetFileSize2 (FILE *fp)
 void
 ProgramNonTurboIntelFlash (FILE *fp)
 {
-  int i, j, k;
-  int addr = 0;
-  int FileSize;
   int Ready = 0;
-  int Timeout;
-  time_t starttime;
-
   // Get file size
-  FileSize = GetFileSize2 (fp);
+  int FileSize = GetFileSize2 (fp);
 
   puts ("Erasing Visoly non-turbo flash card...");
 
@@ -936,16 +929,20 @@ ProgramNonTurboIntelFlash (FILE *fp)
   clear_line ();                                // remove "erase gauge"
   if (Ready)
     {
+      int j;
+      int addr = 0;
+      time_t starttime = time (NULL);
+
       printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
 
       //403018
-      starttime = time (NULL);
       j = GetFileByte (fp);
 
       while (!feof (fp))
         {
+          int Timeout = 0x4000;
+
           Ready = 0;
-          Timeout = 0x4000;
 
           while ((Ready == 0) && (Timeout != 0))
             {
@@ -958,6 +955,8 @@ ProgramNonTurboIntelFlash (FILE *fp)
 
           if (Ready)
             {
+              int i;
+
               WriteFlash (addr, 15);    // Write 15+1 16bit words
 
               SetCartAddr (addr);       // Set cart base addr to 0
@@ -965,7 +964,8 @@ ProgramNonTurboIntelFlash (FILE *fp)
 
               for (i = 0; i < 16; i++)
                 {
-                  k = j;
+                  int k = j;
+
                   if (j != EOF)
                     j = GetFileByte (fp);
                   k += (j << 8);
@@ -1021,9 +1021,7 @@ ProgramNonTurboIntelFlash (FILE *fp)
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
-      if (Ready)
-        ;
-      else
+      if (!Ready)
         fputs ("\nERROR: Flash card write failed\n", stderr);
     }
   else
@@ -1036,17 +1034,9 @@ ProgramNonTurboIntelFlash (FILE *fp)
 void
 ProgramTurboIntelFlash (FILE *fp)
 {
-  int i, j = 0;
-  int k;                        //z;
-  int addr = 0;
-  int done1, done2;
-  int FileSize;
-  int Timeout;
   int Ready;                    //= 0;
-  time_t starttime;
-
   // Get file size
-  FileSize = GetFileSize2 (fp);
+  int FileSize = GetFileSize2 (fp);
 
   puts ("Erasing Visoly turbo flash card...");
 
@@ -1056,18 +1046,22 @@ ProgramTurboIntelFlash (FILE *fp)
   clear_line ();                                // remove "erase gauge"
   if (Ready)
     {
+      int j = 0;
+      int addr = 0;
+      time_t starttime = time (NULL);
+
       printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
 
       //403018
-      starttime = time (NULL);
       j = GetFileByte (fp);
 
       while (!feof (fp))
         {
-          done1 = 0;
-          done2 = 0;
+          int done1 = 0;
+          int done2 = 0;
+          int Timeout = 0x4000;
+
           Ready = 0;
-          Timeout = 0x4000;
 
           while ((!Ready) && (Timeout != 0))
             {
@@ -1089,6 +1083,9 @@ ProgramTurboIntelFlash (FILE *fp)
 
           if (Ready)
             {
+              int i;
+              int k;                    //z;
+
               WriteFlash (addr, 15);    // Write 15+1 16bit words
               PPWriteWord (15);
 
@@ -1140,9 +1137,7 @@ ProgramTurboIntelFlash (FILE *fp)
       WriteFlash (1, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
-      if (Ready)
-        ;
-      else
+      if (!Ready)
         {
           WriteFlash (0, INTEL28F_CLEARSR);
           PPWriteWord (INTEL28F_CLEARSR);
@@ -1158,15 +1153,9 @@ ProgramTurboIntelFlash (FILE *fp)
 void
 ProgramSharpFlash (FILE *fp)
 {
-  int i, j;
-  int k = 0;
-  int addr = 0;
-  int FileSize;
   int Ready;
-  time_t starttime;
-
   // Get file size
-  FileSize = GetFileSize2 (fp);
+  int FileSize = GetFileSize2 (fp);
 
   puts ("Erasing Nintendo flash card...");
 
@@ -1176,13 +1165,19 @@ ProgramSharpFlash (FILE *fp)
   clear_line ();                                // remove "erase gauge"
   if (Ready)
     {
+      int j;
+      int addr = 0;
+      time_t starttime = time (NULL);
+
       printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
 
-      starttime = time (NULL);
       j = GetFileByte (fp);
 
       while (!feof (fp))
         {
+          int i;
+          int k = 0;
+
           if (j != EOF)
             k = GetFileByte (fp);
 

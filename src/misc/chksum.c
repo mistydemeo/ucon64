@@ -86,7 +86,7 @@ sha1_compile (s_sha1_ctx_t ctx[1])
 #define PARITY(x,y,z) ((x) ^ (y) ^ (z))
 #define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
-  uint32_t w[80], i, a, b, c, d, e, t;
+  uint32_t w[80], i, a, b, c, d, e;
 
   /*
     note that words are compiled from the buffer into 32-bit
@@ -107,7 +107,7 @@ sha1_compile (s_sha1_ctx_t ctx[1])
 
   for (i = 0; i < 80; i++)
     {
-      t = a;
+      uint32_t t = a;
       a = ROTL32 (a, 5) + e + w[i];
       if (i < 20)
         a += CH (b, c, d) + 0x5a827999;
@@ -454,11 +454,11 @@ void
 init_crc_table (void *table, unsigned int polynomial)
 // works for CRC16 and CRC32
 {
-  unsigned int crc, i, j;
+  unsigned int i, j;
 
   for (i = 0; i < 256; i++)
     {
-      crc = i;
+      unsigned int crc = i;
       for (j = 8; j > 0; j--)
         if (crc & 1)
           crc = (crc >> 1) ^ polynomial;

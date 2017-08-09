@@ -69,7 +69,7 @@ typedef struct st_vboy_header
 int
 vboy_init (st_ucon64_nfo_t *rominfo)
 {
-  int result = -1, value = 0;
+  int result = -1;
   static st_vboy_header_t vboy_header;
 
   rominfo->console_usage = vboy_usage[0].help;
@@ -82,6 +82,8 @@ vboy_init (st_ucon64_nfo_t *rominfo)
 
   if (ucon64.console == UCON64_VBOY)
     {
+      int value = 0;
+
       result = 0;
 
       rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?

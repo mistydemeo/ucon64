@@ -217,14 +217,17 @@ unzip_get_number_entries (const char *filename)
 int
 unzip_goto_file (unzFile file, int file_index)
 {
-  int retval = unzGoToFirstFile (file), n = 0;
+  int retval = unzGoToFirstFile (file);
 
   if (file_index > 0)
-    while (n < file_index)
-      {
-        retval = unzGoToNextFile (file);
-        n++;
-      }
+    {
+      int n = 0;
+      while (n < file_index)
+        {
+          retval = unzGoToNextFile (file);
+          n++;
+        }
+    }
   return retval;
 }
 
@@ -233,7 +236,7 @@ static int
 unzip_seek_helper (FILE *file, int offset)
 {
   char buffer[MAXBUFSIZE];
-  int n, tmp, pos = unztell (file);             // returns ftell() of the "current file"
+  int n, pos = unztell (file);                  // returns ftell() of the "current file"
 
   if (pos == offset)
     return 0;
@@ -247,7 +250,7 @@ unzip_seek_helper (FILE *file, int offset)
   n = offset - pos;
   while (n > 0 && !unzeof (file))
     {
-      tmp = unzReadCurrentFile (file, buffer, n > MAXBUFSIZE ? MAXBUFSIZE : n);
+      int tmp = unzReadCurrentFile (file, buffer, n > MAXBUFSIZE ? MAXBUFSIZE : n);
       if (tmp < 0)
         return -1;
       n -= tmp;
@@ -304,12 +307,13 @@ fopen2 (const char *filename, const char *mode)
     {
 #undef  fread
 #undef  fclose
-      unsigned char magic[4] = { 0 };
       FILE *fh;
 
       // TODO?: check if mode is valid for fopen(), i.e., no 'f', 'h' or number
       if ((fh = fopen (filename, mode)) != NULL)
         {
+          unsigned char magic[4] = { 0 };
+
           fread (magic, sizeof (magic), 1, fh);
           if (magic[0] == 0x1f && magic[1] == 0x8b && magic[2] == 0x08)
             {                           // ID1, ID2 and CM. gzip uses Compression Method 8

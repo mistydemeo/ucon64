@@ -291,7 +291,7 @@ set_adr (unsigned int adr)
 static void
 set_adr_long (unsigned int adr, int ignore_xh)  // real address
 {
-  unsigned char xh, h, m, l;
+  unsigned char h, m, l;
 
   set_ai_data ((unsigned char) 2, 0x80);        // disable wr/rd inc.
   l = (unsigned char) adr;                      // a7-a0
@@ -302,7 +302,8 @@ set_adr_long (unsigned int adr, int ignore_xh)  // real address
 
   if (!ignore_xh)
     {
-      xh = (unsigned char) (adr >> 22) & 0x7;   // max. 256Mbit
+      unsigned char xh =
+        (unsigned char) (adr >> 22) & 0x7;      // max. 256Mbit
       if (xh)
         m |= 0x40;                              // > bank 0
       set_adr (0x3000);                         // write 3000:xh
@@ -446,13 +447,12 @@ data_polling_data (unsigned char last_data)
 static int
 data_polling (void)
 {
-  unsigned char predata, currdata;
   unsigned int timeout = 0;
+  unsigned char predata = read_byte () & 0x40;
 
-  predata = read_byte () & 0x40;
   while (timeout++ < 0x07ffffff)
     {
-      currdata = read_byte () & 0x40;
+      unsigned char currdata = read_byte () & 0x40;
       if (predata == currdata)
         return 0;
       predata = currdata;
@@ -965,16 +965,19 @@ verify_rom_16k (unsigned int bank)              // ROM or EEPROM
 static int
 win_write_eeprom_16k (unsigned int bank)
 {
-  int wr_done, err_cnt, idx = 0, i, j;
+  int idx = 0, j;
 
 //  disable_protection ();
 
   for (j = 0; j < 64; j++)
     {                                           // 16k bytes = 64 x 256 bytes
-      err_cnt = 16;                             // retry write counter
-      wr_done = 1;
+      int err_cnt = 16;                         // retry write counter
+      int wr_done = 1;
+
       while (wr_done)
         {
+          int i;
+
           enable_protection ();
           // write 256 bytes
           set_bank (0x2000, (unsigned char) bank); // for MCB1 16k bank
@@ -1039,10 +1042,12 @@ set_page_write (void)                           // start page write command
 static int
 page_write_128 (unsigned int bank, unsigned char hi_lo, int j, int idx)
 {
-  int retry = 3, verify_ok, i;
+  int retry = 3;
 
   while (retry)
     {
+      int verify_ok, i;
+
       set_page_write ();                        // each page is 128 bytes
       set_bank (0x2000, (unsigned char) bank);  // for MCB1 16k bank
       if (bank)
@@ -1200,7 +1205,7 @@ static int
 intel_write_eeprom_16k (unsigned int bank)
 {
   unsigned int block_adr = bank << 14;          // convert to real address
-  int idx, j;
+  int j;
 
   if ((bank & 0x07) == 0)
     if (intel_block_erase (block_adr))
@@ -1209,7 +1214,7 @@ intel_write_eeprom_16k (unsigned int bank)
 //  set_adr_long (block_adr, 0);                  // set real address
   for (j = 0; j < 512; j++)
     {                                           // 16k bytes = 512 x 32 bytes
-      idx = j * 32;
+      int idx = j * 32;
 //      if (intel_byte_write_32 (block_adr, idx)) return -1;
       if (intel_buffer_write_32 (block_adr, idx))
         {
@@ -1612,8 +1617,6 @@ verify_card_from_file (const char *filename, unsigned int parport)
 static void
 gbx_init (unsigned short parport, int read_header)
 {
-  int i;
-
   eeprom_type = UNKNOWN_EEPROM;
   rocket_game_no = 0;
 
@@ -1634,11 +1637,15 @@ gbx_init (unsigned short parport, int read_header)
   check_eeprom ();
 
   if (read_header)
-    for (i = 0x100; i < 0x150; i++)
-      {                                         // read 0x100-0x150 to buffer
-        set_adr (i);
-        buffer[i - 0x100] = read_data ();
-      }
+    {
+      int i;
+
+      for (i = 0x100; i < 0x150; i++)
+        {                                       // read 0x100-0x150 to buffer
+          set_adr (i);
+          buffer[i - 0x100] = read_data ();
+        }
+    }
   /*
     buffer is undefined if read_header == 0. This is not a problem as
     read_header is only 0 if a flash card should be programmed
@@ -1838,7 +1845,7 @@ sram_size_banks (int pocket_camera, unsigned char sram_size_byte)
 int
 gbx_read_sram (const char *filename, unsigned short parport, int start_bank)
 {
-  int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
+  int bank, n_banks, n_bytes = 0, totalbytes, i, j;
   time_t starttime;
   FILE *file;
 
@@ -1881,7 +1888,7 @@ gbx_read_sram (const char *filename, unsigned short parport, int start_bank)
   starttime = time (NULL);
   for (bank = start_bank; bank < start_bank + n_banks; bank++)
     {
-      idx = 0;
+      int idx = 0;
       set_sram_bank ((unsigned char) bank);
       for (j = 0; j < 32; j++)
         {                                       // 32 x 256 = 8192 (8 kbytes)
@@ -1909,7 +1916,7 @@ gbx_read_sram (const char *filename, unsigned short parport, int start_bank)
 int
 gbx_write_sram (const char *filename, unsigned short parport, int start_bank)
 {
-  unsigned int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
+  unsigned int bank, n_banks, n_bytes = 0, totalbytes, i, j;
   time_t starttime;
   FILE *file;
 
@@ -1955,7 +1962,7 @@ gbx_write_sram (const char *filename, unsigned short parport, int start_bank)
   starttime = time (NULL);
   for (bank = start_bank; bank < start_bank + n_banks; bank++)
     {
-      idx = 0;
+      unsigned int idx = 0;
       if (!fread (buffer, 1, 8192, file))
         { // handle/allow files that are not an exact multiple of 8 kB
           fprintf (stderr, ucon64_msg[READ_ERROR], filename);

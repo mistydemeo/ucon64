@@ -327,10 +327,10 @@ is_probably_3f (const unsigned char *image, unsigned int size)
 int
 atari_init (st_ucon64_nfo_t * rominfo)
 {
-  int i, j, bsmode, size = (int) ucon64.file_size;
+  int i, bsmode, size = (int) ucon64.file_size;
   unsigned int crc32;
   static char backup_usage[80];
-  unsigned char first, image[ATARI_ROM_SIZE], buffer[0x200];
+  unsigned char image[ATARI_ROM_SIZE], buffer[0x200];
   char md5[32];
 
   if (size > ATARI_ROM_SIZE)
@@ -350,6 +350,8 @@ atari_init (st_ucon64_nfo_t * rominfo)
 
   if (bsmode == -1)
     {
+      unsigned char first;
+
       if (!(size % 8448))
         bsmode = BSM_AR;
       else if (size == 2048 || !memcmp (image, image + 2048, 2048))
@@ -405,6 +407,8 @@ atari_init (st_ucon64_nfo_t * rominfo)
       // set game_page_count and empty_page[]
       for (i = 0; i < size / 0x100; i++)
         {
+          int j;
+
           ucon64_fread (buffer, i * 0x100, 0x100, ucon64.fname);
           atari_rominfo.empty_page[i] = 1;
 
@@ -434,7 +438,7 @@ atari_init (st_ucon64_nfo_t * rominfo)
       // "Cuttle Card (2)/Starpath) Supercharger/YOKO backup unit"
       snprintf (backup_usage, 80, "%s/%s/%s", cc2_usage[0].help,
                 spsc_usage[0].help, yoko_usage[0].help);
-      backup_usage[80 - 1] = 0;
+      backup_usage[80 - 1] = '\0';
       rominfo->backup_usage = backup_usage;
 
       sprintf (rominfo->misc,

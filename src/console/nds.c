@@ -187,14 +187,13 @@ nds_logo (st_ucon64_nfo_t *rominfo)
 int
 nds_chk (st_ucon64_nfo_t *rominfo)
 {
-  unsigned char *p = NULL;
+  unsigned char *p = (unsigned char *) &rominfo->current_internal_crc;
   char dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
 
-  p = (unsigned char *) &rominfo->current_internal_crc;
   ucon64_fwrite (p, NDS_HEADER_START + rominfo->backup_header_len + 0x15e, 2,
                  dest_name, "r+b");
 

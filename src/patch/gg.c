@@ -223,7 +223,6 @@ gameGenieDecodeGameBoy (const char *in, char *out)
 {
   int address = 0;
   int value = 0;
-  int check = 0;
   int haveCheck = 0;
   int i;
 
@@ -247,7 +246,7 @@ gameGenieDecodeGameBoy (const char *in, char *out)
 
   if (haveCheck)
     {
-      check = hexByteValue (in[8], in[10]);
+      int check = hexByteValue (in[8], in[10]);
       check = ~check;
       check = (((check & 0xfc) >> 2) | ((check & 0x03) << 6)) ^ 0x45;
       sprintf (out, "%04X:%02X:%02X", address, value, check);
@@ -262,7 +261,6 @@ gameGenieDecodeGameBoy (const char *in, char *out)
 static int
 gameGenieEncodeGameBoy (const char *in, char *out)
 {
-  int check = 0;
   int haveCheck = 0;
   int i;
 
@@ -289,7 +287,7 @@ gameGenieEncodeGameBoy (const char *in, char *out)
 
   if (haveCheck)
     {
-      check = hexByteValue (in[8], in[10]);
+      int check = hexByteValue (in[8], in[10]);
       check = ~check;
       check = (((check & 0xfc) >> 2) | ((check & 0x03) << 6)) ^ 0x45;
 
@@ -365,8 +363,8 @@ gameGenieDecodeMegadrive (const char *in, char *out)
 static int
 gameGenieEncodeMegadrive (const char *in, char *out)
 {
-  int address = 0;
-  int value = 0;
+  unsigned int address = 0;
+  unsigned int value = 0;
   int data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
   int i;
 
@@ -565,9 +563,9 @@ gameGenieDecodeNES (const char *in, char *out)
 static int
 gameGenieEncodeNES (const char *in, char *out)
 {
-  int address = 0;
-  int value = 0;
-  int check = 0;
+  unsigned int address = 0;
+  unsigned int value = 0;
+  unsigned int check = 0;
   int haveCheck = 0;
   int data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
   int i;
@@ -805,7 +803,8 @@ gameGenieDecodeSNES (const char *in, char *out)
 static int
 gameGenieEncodeSNES (const char *in, char *out)
 {
-  int value, address, transposed;
+  int value, transposed;
+  unsigned int address;
 
   if (!isxdigit ((int) in[0]) || !isxdigit ((int) in[1]) ||
       !isxdigit ((int) in[2]) || !isxdigit ((int) in[3]) ||
@@ -984,10 +983,12 @@ gg_display (st_ucon64_nfo_t *rominfo, const char *code)
 int
 gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
 {
-  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
+  unsigned int size = (unsigned int) ucon64.file_size -
+                         (rominfo ? rominfo->backup_header_len : 0),
                offset, address, value, writefile;
   int check = -1, result = -1;
-  char buf[GAME_GENIE_MAX_STRLEN], buf2[GAME_GENIE_MAX_STRLEN], dest_name[FILENAME_MAX];
+  char buf[GAME_GENIE_MAX_STRLEN], buf2[GAME_GENIE_MAX_STRLEN],
+       dest_name[FILENAME_MAX];
   FILE *destfile;
 
   if (rominfo && ucon64.file_size > 0)          /* check if rominfo contains valid ROM info */
@@ -1028,7 +1029,7 @@ gg_apply (st_ucon64_nfo_t *rominfo, const char *code)
     printf ("%s = %s (CPU address: %06X)\n", code, buf, CPUaddress);
   else
     printf ("%s = %s\n", code, buf);
-  sscanf (buf, "%x:%x:%x", &address, &value, &check);
+  sscanf (buf, "%x:%x:%x", &address, &value, (unsigned int *) &check);
 
   if (address >= size)
     {

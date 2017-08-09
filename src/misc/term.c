@@ -217,11 +217,9 @@ vprintf2 (const char *format, va_list argptr)
 {
 #undef  printf
 #undef  fprintf
-  int n_chars = 0, n_ctrl = 0, n_print, done = 0;
+  int n_chars = 0;
   char output[MAXBUFSIZE], *ptr, *ptr2;
-  HANDLE stdout_handle;
   CONSOLE_SCREEN_BUFFER_INFO info;
-  WORD org_attr, new_attr = 0;
 
   n_chars = _vsnprintf (output, MAXBUFSIZE, format, argptr);
   if (n_chars == -1)
@@ -230,24 +228,31 @@ vprintf2 (const char *format, va_list argptr)
                        "                Please send a bug report\n", MAXBUFSIZE);
       exit (1);
     }
-  output[MAXBUFSIZE - 1] = 0;
+  output[MAXBUFSIZE - 1] = '\0';
 
   if ((ptr = strchr (output, 0x1b)) == NULL)
     fputs (output, stdout);
   else
     {
+      int done = 0;
+      HANDLE stdout_handle;
+      WORD org_attr;
+
       stdout_handle = GetStdHandle (STD_OUTPUT_HANDLE);
       GetConsoleScreenBufferInfo (stdout_handle, &info);
       org_attr = info.wAttributes;
 
       if (ptr > output)
         {
-          *ptr = 0;
+          *ptr = '\0';
           fputs (output, stdout);
           *ptr = 0x1b;
         }
       while (!done)
         {
+          int n_ctrl = 0, n_print;
+          WORD new_attr = 0;
+
           if (memcmp (ptr, "\x1b[0m", 4) == 0)
             {
               new_attr = org_attr;
@@ -308,7 +313,7 @@ vprintf2 (const char *format, va_list argptr)
               done = 1;
             }
 
-          ptr[n_print] = 0;
+          ptr[n_print] = '\0';
           ptr += n_ctrl;
           fputs (ptr, stdout);
           (ptr - n_ctrl)[n_print] = 0x1b;

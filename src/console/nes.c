@@ -5316,7 +5316,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
     if (buf[n] == '\n' || buf[n] == '\r')
       break;
   strncpy (info->dumper_name, buf, n);
-  info->dumper_name[99] = 0;
+  info->dumper_name[99] = '\0';
 
   // handle newline, possibly in DOS format
   prev_n = n;
@@ -5329,7 +5329,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
     if (buf[n] == '-' || buf[n] == '/')
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
-  number[n - prev_n] = 0;
+  number[n - prev_n] = '\0';
   info->day = (unsigned char) strtol (number, NULL, 10);
 
   n++;
@@ -5338,7 +5338,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
     if (buf[n] == '-' || buf[n] == '/')
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
-  number[n - prev_n] = 0;
+  number[n - prev_n] = '\0';
   info->month = (unsigned char) strtol (number, NULL, 10);
 
   n++;
@@ -5347,7 +5347,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
     if (buf[n] == '\n' || buf[n] == '\r')
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
-  number[n - prev_n] = 0;
+  number[n - prev_n] = '\0';
   info->year = (unsigned short) strtol (number, NULL, 10);
 
   // handle newline, possibly in DOS format
@@ -5361,7 +5361,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
     if (buf[n] == '\n' || buf[n] == '\r')
       break;
   strncpy (info->dumper_agent, &buf[prev_n], n - prev_n);
-  info->dumper_agent[99] = 0;
+  info->dumper_agent[99] = '\0';
 
   return 0;
 #undef  SIZE_INFO
@@ -5405,7 +5405,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   if (unif_chunk.length > BOARDNAME_MAXLEN)
     {                                           // Should we give a warning?
       unif_chunk.length = BOARDNAME_MAXLEN;
-      ((char *) unif_chunk.data)[BOARDNAME_MAXLEN - 1] = 0;
+      ((char *) unif_chunk.data)[BOARDNAME_MAXLEN - 1] = '\0';
     }                                           // make it an ASCII-z string
   write_chunk (&unif_chunk, destfile);
 
@@ -5588,7 +5588,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       if (unif_chunk2.length > BOARDNAME_MAXLEN)
         {
           unif_chunk2.length = BOARDNAME_MAXLEN;
-          ((char *) unif_chunk2.data)[BOARDNAME_MAXLEN - 1] = 0;
+          ((char *) unif_chunk2.data)[BOARDNAME_MAXLEN - 1] = '\0';
         }                                       // make it an ASCII-z string
       write_chunk (&unif_chunk2, destfile);
     }
@@ -5872,7 +5872,7 @@ nes_unif (void)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
-  FILE *srcfile, *destfile;
+  FILE *destfile;
 
   if (type != INES && type != UNIF)
     {
@@ -5909,6 +5909,8 @@ nes_unif (void)
   */
   if (type == INES)
     {
+      FILE *srcfile;
+
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
@@ -6286,7 +6288,7 @@ nes_ines (void)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
-  FILE *srcfile, *destfile;
+  FILE *destfile;
 
   if (type == FFE)
     {
@@ -6319,6 +6321,8 @@ nes_ines (void)
   register_func (remove_destfile);
   if (type == INES)
     {
+      FILE *srcfile;
+
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
@@ -6877,7 +6881,7 @@ nes_s (void)
 {
   char dest_name[FILENAME_MAX];
   unsigned char *trainer_data = NULL, *prg_data = NULL, *chr_data = NULL;
-  int prg_size = 0, chr_size = 0, x;
+  int prg_size = 0, chr_size = 0;
   FILE *srcfile;
 
   if (type != INES)
@@ -6913,7 +6917,7 @@ nes_s (void)
 
   if (ucon64.mapr != NULL && strlen (ucon64.mapr) > 0) // mapper specified
     {
-      x = strtol (ucon64.mapr, NULL, 10);
+      int x = strtol (ucon64.mapr, NULL, 10);
       if (x == 0 || x == 2 || x == 4)
         set_mapper (&ines_header, x);
       else
@@ -6990,7 +6994,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
   int result = -1, size, x, y, n, crc = 0;
   // currently 92 bytes is enough for ctrl_str, but extra space avoids
   //  introducing bugs when controller type text would be changed
-  char buf[MAXBUFSIZE], ctrl_str[200], *str, *str_list[8];
+  char buf[MAXBUFSIZE], *str, *str_list[8];
   st_unif_chunk_t *unif_chunk, *unif_chunk2;
   st_nes_data_t *info, key;
 
@@ -7170,7 +7174,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
                     {
                       if (((char *) unif_chunk->data)[x] == WRTR_MARKER)
                         {
-                          ((char *) unif_chunk->data)[x] = 0;
+                          ((char *) unif_chunk->data)[x] = '\0';
                           break;
                         }
                       x++;
@@ -7322,6 +7326,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
       if ((unif_chunk = read_chunk (CTRL_ID, rom_buffer, 0)) != NULL)
         {
+          char ctrl_str[200];
+
           str_list[0] = "Regular joypad";
           str_list[1] = "Zapper";
           str_list[2] = "R.O.B.";
@@ -7330,7 +7336,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
           str_list[5] = "Four-score adapter";
           str_list[6] = "Unknown";              // bit 6 and 7 are reserved
           str_list[7] = str_list[6];
-          ctrl_str[0] = 0;
+          ctrl_str[0] = '\0';
 
           x = *((unsigned char *) unif_chunk->data);
           y = 0;
@@ -7557,12 +7563,12 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
   FILE *srcfile;
   unsigned char buffer[58];
   char name[16], str_list_mem[6], *str_list[4], info_mem[MAXBUFSIZE], *info, line[80];
-  int disk, n_disks, file, n_files, start, size, x, header_len = 0;
+  int disk, n_disks, start, size, x, header_len = 0;
 
   if (output_str == NULL)
     {
       info = info_mem;
-      info[0] = 0;
+      info[0] = '\0';
     }
   else
     info = output_str;
@@ -7587,6 +7593,8 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
     header_len = 0;                             //  contains the length of the trailer
   for (disk = 0; disk < n_disks; disk++)
     {
+      int file = 0, n_files;
+
       // go to the next disk
       fseek (srcfile, disk * 65500 + header_len, SEEK_SET);
 
@@ -7609,7 +7617,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
         strcat (info, "WARNING: Invalid file number header\n");
 
       memcpy (name, buffer + 16, 4);
-      name[4] = 0;
+      name[4] = '\0';
       if (disk == 0 && output_str != NULL)
         memcpy (rominfo->name, name, 4);
       n_files = buffer[57];
@@ -7617,7 +7625,6 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
                name, (buffer[21] & 1) + 'A', n_files, buffer[15], buffer[20]);
       strcat (info, line);
 
-      file = 0;
       while (file < n_files && fread (buffer, 1, 16, srcfile) == 16)
         {
           if (buffer[0] != 3)
@@ -7628,7 +7635,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
 
           // get name, data location, and size
           strncpy (name, (const char *) buffer + 3, 8);
-          name[8] = 0;
+          name[8] = '\0';
           start = buffer[11] + 256 * buffer[12];
           size = buffer[13] + 256 * buffer[14];
 

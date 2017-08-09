@@ -258,16 +258,18 @@ check_card (void)
 static int
 write_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
-  unsigned char unpass, pass1;
-  unsigned short int i, j, fix;
+  unsigned short int i;
 
   set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
   set_ai_data (2, (unsigned char) hi_word);
   for (i = 0; i < 0x40; i++)
     {
-      unpass = 3;
+      unsigned char unpass = 3;
+
       while (unpass)
         {
+          unsigned short int j, fix;
+
           set_ai_data (1, (unsigned char) ((i << 1) | lo_word));
           set_ai_data (0, 0);
           set_ai (4);                           // set address index=4
@@ -284,7 +286,8 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
             }
           else
             {
-              pass1 = 1;
+              unsigned char pass1 = 1;
+
               for (j = 0; j < 4; j++)
                 if (inportw (port_c) != buffer[j + fix])
                   {
@@ -494,7 +497,7 @@ doctor64jr_read (const char *filename, unsigned short parport)
 int
 doctor64jr_write (const char *filename, unsigned short parport)
 {
-  unsigned int enable_write = 0, size, bytesread, bytessent = 0, n_pages;
+  unsigned int enable_write = 0, size, bytessent = 0, n_pages;
   time_t init_time;
   unsigned short int page;
   FILE *file;
@@ -548,7 +551,7 @@ doctor64jr_write (const char *filename, unsigned short parport)
   init_time = time (0);
   for (page = 0; page < n_pages; page++)
     {
-      bytesread = fread ((unsigned char *) buffer, 1, BUFFERSIZE, file);
+      unsigned int bytesread = fread ((unsigned char *) buffer, 1, BUFFERSIZE, file);
       if (write_32k (page, 0))
         {
           fprintf (stderr, "ERROR: Transfer failed at address 0x%8lx", get_address ());

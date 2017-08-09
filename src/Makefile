@@ -228,6 +228,7 @@ backup/cd64.o: backup/cd64.c
 
 
 ifdef USE_DISCMAGE
+.PHONY: libdiscmage/$(FULLLIBNAME_DM)
 libdiscmage/$(FULLLIBNAME_DM):
 ifeq ($(GCC_WIN),1)
 	cd libdiscmage && CFLAGS=$(CFLAGS0) LDFLAGS=$(LDFLAGS0) $(MAKE)
@@ -246,6 +247,7 @@ endif                                   # USE_DISCMAGE
 
 
 ifdef USE_LIBCD64
+#.PHONY: backup/libcd64/libcd64.a  Do not force linking an executable.
 backup/libcd64/libcd64.a:
 ifeq ($(GCC_WIN),1)
 	cd backup/libcd64 && CFLAGS=$(CFLAGS0) LDFLAGS=$(LDFLAGS0) $(MAKE)
@@ -393,7 +395,8 @@ backup/f2a.o: config.h misc/usb.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) \
               misc/file.h $(MISC_H_DEPS) misc/parallel.h misc/property.h \
               $(UCON64_MISC_H_DEPS) console/gba.h backup/f2a.h $(GETOPT2_H_DEPS)
 backup/fal.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
-              $(UCON64_MISC_H_DEPS) console/gba.h backup/fal.h $(GETOPT2_H_DEPS)
+              $(UCON64_MISC_H_DEPS) console/gba.h backup/fal.h \
+              $(GETOPT2_H_DEPS) backup/cartlib.c
 backup/ffe.o: config.h $(MISC_H_DEPS) $(TERM_H_DEPS) $(UCON64_H_DEPS) \
               backup/ffe.h
 backup/fig.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \

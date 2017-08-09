@@ -374,15 +374,14 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
   u16 k;
   u16 Ready = 1;
   u32 i = 0;
-  u32 Timeout;
   time_t starttime = time (NULL);
 
   for (k = 0; k < BlockCount; k++)
     {
-      i = StartAddr + (k * 65536 * _MEM_INC);
+      u32 Timeout = FP_TIMEOUT2;
 
+      i = StartAddr + (k * 65536 * _MEM_INC);
       Ready = 0;
-      Timeout = FP_TIMEOUT2;
 
       while ((Ready == 0) && (Timeout != 0))
         {
@@ -433,8 +432,7 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
         }
       else
         break;
-      ucon64_gauge (starttime, (k + 1) * 128 * 1024,
-                     BlockCount * 128 * 1024);
+      ucon64_gauge (starttime, (k + 1) * 128 * 1024, BlockCount * 128 * 1024);
     }
 
   if (!Ready)
@@ -459,18 +457,16 @@ u32
 EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
 {
   u16 j, k;
-  u16 done1, done2;
   u16 Ready = 1;
   u32 i = 0;
-  u32 Timeout;
   time_t starttime = time (NULL);
 
   for (k = 0; k < BlockCount; k++)
     {
-      i = StartAddr + (k * 131072 * _MEM_INC);
+      u32 Timeout = FP_TIMEOUT2;
 
+      i = StartAddr + (k * 131072 * _MEM_INC);
       Ready = 0;
-      Timeout = FP_TIMEOUT2;
 
       while ((!Ready) && (Timeout != 0))
         {
@@ -481,8 +477,9 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
 
       if (Ready)
         {
-          done1 = 0;
-          done2 = 0;
+          u16 done1 = 0;
+          u16 done2 = 0;
+
           Ready = 0;
           Timeout = FP_TIMEOUT3;
 
@@ -524,8 +521,7 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
         }
       else
         break;
-      ucon64_gauge (starttime, (k + 1) * 256 * 1024,
-                     BlockCount * 256 * 1024);
+      ucon64_gauge (starttime, (k + 1) * 256 * 1024, BlockCount * 256 * 1024);
     }
 
   if (!Ready)
@@ -593,7 +589,6 @@ u32
 WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 {
   int Ready = 0;
-  int Timeout = 0;
   int LoopCount = 0;
   u16 *SrcAddr2 = (u16 *)
 #ifdef  __LP64__
@@ -603,8 +598,9 @@ WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 
   while (LoopCount < (int) Length)
     {
+      int Timeout = FP_TIMEOUT1;
+
       Ready = 0;
-      Timeout = FP_TIMEOUT1;
 
       while ((Ready == 0) && (Timeout != 0))
         {
@@ -682,8 +678,6 @@ u32
 WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 {
   int i, k;
-  int done1, done2;
-  int Timeout;
   int Ready = 0;
   int LoopCount = 0;
   u16 *SrcAddr2 = (u16 *)
@@ -694,10 +688,11 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 
   while (LoopCount < (int) Length)
     {
-      done1 = 0;
-      done2 = 0;
+      int done1 = 0;
+      int done2 = 0;
+      int Timeout = 0x4000;
+
       Ready = 0;
-      Timeout = 0x4000;
 
       while ((!Ready) && (Timeout != 0))
         {

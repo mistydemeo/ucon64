@@ -640,7 +640,7 @@ ucon64_switches (st_ucon64_t *p)
       break;
 
     case UCON64_REGION:
-      if (option_arg[1] == 0 && toupper ((int) option_arg[0]) == 'X') // be insensitive to case
+      if (option_arg[1] == '\0' && toupper ((int) option_arg[0]) == 'X') // be insensitive to case
         ucon64.region = 256;
       else
         ucon64.region = strtol (option_arg, NULL, 10);
@@ -919,11 +919,11 @@ ucon64_options (st_ucon64_t *p)
         }
       else
         {
-          int bytesleft = value, bytestowrite;
+          int bytesleft = value;
           memset (buf, 0, MAXBUFSIZE);
           while (bytesleft > 0)
             {
-              bytestowrite = bytesleft <= MAXBUFSIZE ? bytesleft : MAXBUFSIZE;
+              int bytestowrite = bytesleft <= MAXBUFSIZE ? bytesleft : MAXBUFSIZE;
               ucon64_fwrite (buf, 0, bytestowrite, dest_name,
                 bytesleft == value ? "wb" : "ab"); // we have to use "wb" for
               bytesleft -= bytestowrite;           //  the first iteration
@@ -1668,7 +1668,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_POKE:
-      sscanf (option_arg, "%x:%x", &x, &value);
+      sscanf (option_arg, "%x:%x", (unsigned int *) &x, (unsigned int *) &value);
       if ((unsigned int) x >= ucon64.file_size)
         {
           fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);

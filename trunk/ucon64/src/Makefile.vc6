@@ -120,7 +120,7 @@ distclean: clean
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6 distclean
 	cd ..\backup\libcd64
-# libcd64 Makefile has no distclean target
+# libcd64 makefile has no distclean target
 	$(MAKE) /NOLOGO /f Makefile.vc6 clean
 	cd ..\..
 
@@ -133,7 +133,7 @@ backup/cd64.obj:
 
 
 !ifdef USE_DISCMAGE
-libdiscmage/$(FULLLIBNAME_DM):
+libdiscmage/$(FULLLIBNAME_DM): .phony
 	cd libdiscmage
 !ifdef CFLAGS_SET
 	@set CFLAGS=%%CFLAGS0%%
@@ -178,6 +178,10 @@ uninstall:
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6 uninstall
 	cd ..
+
+
+# pseudotarget to force NMAKE to run discmage's makefile
+.phony:
 
 
 # Dependencies
@@ -262,7 +266,8 @@ backup/f2a.obj: config.h misc/usb.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) \
               misc/file.h $(MISC_H_DEPS) misc/parallel.h misc/property.h \
               $(UCON64_MISC_H_DEPS) console/gba.h backup/f2a.h $(GETOPT2_H_DEPS)
 backup/fal.obj: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \
-              $(UCON64_MISC_H_DEPS) console/gba.h backup/fal.h $(GETOPT2_H_DEPS)
+              $(UCON64_MISC_H_DEPS) console/gba.h backup/fal.h \
+              $(GETOPT2_H_DEPS) backup/cartlib.c
 backup/ffe.obj: config.h $(MISC_H_DEPS) $(TERM_H_DEPS) $(UCON64_H_DEPS) \
               backup/ffe.h
 backup/fig.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \

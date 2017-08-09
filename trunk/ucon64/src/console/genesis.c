@@ -780,11 +780,11 @@ int
 genesis_j (st_ucon64_nfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p;
-  int block_size, total_size = 0;
+  int block_size;
 
   if (type == SMD)
     {
-      unsigned char buf[3];
+      int total_size = 0;
 
       strcpy (dest_name, ucon64.fname);
       set_suffix (dest_name, ".smd");
@@ -805,6 +805,8 @@ genesis_j (st_ucon64_nfo_t *rominfo)
 
       if (rominfo->backup_header_len)
         {                                       // fix header
+          unsigned char buf[3];
+
           buf[0] = (unsigned char) (total_size / 16384); // # 16 kB blocks
           buf[1] = 3;                           // ID 0
           buf[2] = 0;                           // last file -> clear bit 6
@@ -983,7 +985,7 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
 {
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
-  int offset = 0, block_size, n = 0, n_extra_patterns, n2;
+  int offset = 0, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
   strcpy (fname, "genpal.txt");
@@ -1002,7 +1004,7 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
 
   while ((n2 = (int) ucon64.file_size - offset) > 0)
     {
-      block_size = n2 >= 16 * 1024 ? 16 * 1024 : n2;
+      int block_size = n2 >= 16 * 1024 ? 16 * 1024 : n2;
       for (n2 = 0; n2 < n_extra_patterns; n2++)
         n += change_mem2 ((char *) rom_buffer + offset, block_size,
                           patterns[n2].search,
@@ -1037,7 +1039,7 @@ genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
 {
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
-  int offset = 0, block_size, n = 0, n_extra_patterns, n2;
+  int offset = 0, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
   strcpy (fname, "mdntsc.txt");
@@ -1056,7 +1058,7 @@ genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
 
   while ((n2 = (int) ucon64.file_size - offset) > 0)
     {
-      block_size = n2 >= 16 * 1024 ? 16 * 1024 : n2;
+      int block_size = n2 >= 16 * 1024 ? 16 * 1024 : n2;
       for (n2 = 0; n2 < n_extra_patterns; n2++)
         n += change_mem2 ((char *) rom_buffer + offset, block_size,
                           patterns[n2].search,
@@ -1173,7 +1175,6 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
                         int totalsize, int size)
 {
   long int fpos = ftell (destfile);             // save file pointer
-  static int sram_page = 0, file_no_sram = 0;
   int n;
   unsigned char name[0x1c], flags = 0;          // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
 
@@ -1198,6 +1199,8 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
   flags = 0x80;                                 // set F (?, default)
   if (genesis_has_ram)
     {
+      static int sram_page = 0, file_no_sram = 0;
+
       if (sram_page == 3)
         file_no_sram = file_no;
       else if (sram_page > 3)
@@ -1416,7 +1419,7 @@ genesis_multi (unsigned int truncate_size, char *fname)
   //  multi-game file
   fseek (destfile, 0x83f4, SEEK_SET);
   strncpy ((char *) buffer, "uCON64 " UCON64_VERSION_S, 12);
-  buffer[12] = 0;
+  buffer[12] = '\0';
   fwrite (buffer, 1, strlen ((char *) buffer), destfile);
 
   fclose (destfile);
@@ -1457,86 +1460,8 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1],
                 smd_header_split;
   static char maker[9], country[200]; // 200 characters should be enough for 5 country names
-  static const char *genesis_maker[0x100] =
-    {
-      NULL, "Accolade/Infogrames", "Virgin Games", "Parker Brothers", "Westone",
-      NULL, NULL, NULL, NULL, "Westone",
-      "Takara", "Taito/Accolade", "Capcom", "Data East", "Namco/Tengen",
-      "Sunsoft", "Bandai", "Dempa", "Technosoft", "Technosoft",
-      "Asmik", NULL, "Extreme/Micronet", "Vic Tokai", "American Sammy",
-      "NCS", "Sigma Enterprises", "Toho", NULL, "Kyugo",
-      NULL, NULL, "Wolfteam", "Kaneko", NULL,
-      "Toaplan", "Tecmo", NULL, NULL, NULL,
-      "Toaplan", "Unipac", "UFL Company Ltd.", "Human", NULL,
-      "Game Arts", "Hot-B", "Sage's Creation", "Tengen/Time Warner",
-        "Renovation/Telenet",
-      "Electronic Arts", NULL, NULL, NULL, NULL,
-      "Psygnosis", "Razorsoft", NULL, "Mentrix", NULL,
-      "JVC/Victor Musical Industries", NULL, NULL, NULL, "IGS Corp.",
-      NULL, NULL, "CRI/Home Data", "Arena", "Virgin Games",
-      NULL, "Nichibutsu", NULL, "Soft Vision", "Palsoft",
-      NULL, "KOEI", NULL, NULL, "U.S. Gold",
-      NULL, "Acclaim/Flying Edge", NULL, "Gametek", NULL,
-      NULL, "Absolute", "Mindscape", "Domark", "Parker Brothers",
-      NULL, NULL, NULL, "Sony Imagesoft", "Sony Imagesoft",
-      "Konami", NULL, "Tradewest/Williams", NULL, "Codemasters",
-      "T*HQ Software", "TecMagik", NULL, "Takara", NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, "Hi Tech Entertainment/Designer Software", "Psygnosis", NULL,
-      NULL, NULL, NULL, NULL, "Accolade",
-      "Code Masters", NULL, NULL, NULL, "Spectrum HoloByte",
-      "Interplay", NULL, NULL, NULL, NULL,
-      "Activision", NULL, "Shiny & Playmates", NULL, NULL,
-      NULL, NULL, NULL, NULL, "Viacom International",
-      NULL, NULL, NULL, NULL, "Atlus",
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, "Infogrames", NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, "Fox Interactive", NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, "Psygnosis",
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, "Disney Interactive",
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL
-    },
-#define GENESIS_COUNTRY_MAX 0x57
-    *genesis_country[GENESIS_COUNTRY_MAX] =
-    {
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, "Brazil", NULL, NULL,         // Brazil NTSC
-      NULL, "Hong Kong", NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      "Asia", "Brazil", NULL, NULL, "Europe",   // Brazil PAL
-      "France", NULL, NULL, NULL, "Japan",
-      NULL, NULL, NULL, NULL, NULL,
-      NULL, NULL, NULL, NULL, NULL,
-      "U.S.A.", NULL
-    },
 #define GENESIS_IO_MAX 0x58
-    *genesis_io[GENESIS_IO_MAX] =
+  static const char *genesis_io[GENESIS_IO_MAX] =
     {
       NULL, NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL, NULL,
@@ -1674,12 +1599,69 @@ genesis_init (st_ucon64_nfo_t *rominfo)
 
   // internal ROM name
   memcpy (rominfo->name, &OFFSET (genesis_header, 80), GENESIS_NAME_LEN);
-  rominfo->name[GENESIS_NAME_LEN] = 0;
+  rominfo->name[GENESIS_NAME_LEN] = '\0';
 
   // ROM maker
   memcpy (maker, &OFFSET (genesis_header, 16), 8);
   if (maker[3] == 'T' && maker[4] == '-')
     {
+      static const char *genesis_maker[0x100] =
+        {
+          NULL, "Accolade/Infogrames", "Virgin Games", "Parker Brothers", "Westone",
+          NULL, NULL, NULL, NULL, "Westone",
+          "Takara", "Taito/Accolade", "Capcom", "Data East", "Namco/Tengen",
+          "Sunsoft", "Bandai", "Dempa", "Technosoft", "Technosoft",
+          "Asmik", NULL, "Extreme/Micronet", "Vic Tokai", "American Sammy",
+          "NCS", "Sigma Enterprises", "Toho", NULL, "Kyugo",
+          NULL, NULL, "Wolfteam", "Kaneko", NULL,
+          "Toaplan", "Tecmo", NULL, NULL, NULL,
+          "Toaplan", "Unipac", "UFL Company Ltd.", "Human", NULL,
+          "Game Arts", "Hot-B", "Sage's Creation", "Tengen/Time Warner",
+            "Renovation/Telenet",
+          "Electronic Arts", NULL, NULL, NULL, NULL,
+          "Psygnosis", "Razorsoft", NULL, "Mentrix", NULL,
+          "JVC/Victor Musical Industries", NULL, NULL, NULL, "IGS Corp.",
+          NULL, NULL, "CRI/Home Data", "Arena", "Virgin Games",
+          NULL, "Nichibutsu", NULL, "Soft Vision", "Palsoft",
+          NULL, "KOEI", NULL, NULL, "U.S. Gold",
+          NULL, "Acclaim/Flying Edge", NULL, "Gametek", NULL,
+          NULL, "Absolute", "Mindscape", "Domark", "Parker Brothers",
+          NULL, NULL, NULL, "Sony Imagesoft", "Sony Imagesoft",
+          "Konami", NULL, "Tradewest/Williams", NULL, "Codemasters",
+          "T*HQ Software", "TecMagik", NULL, "Takara", NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, "Hi Tech Entertainment/Designer Software", "Psygnosis", NULL,
+          NULL, NULL, NULL, NULL, "Accolade",
+          "Code Masters", NULL, NULL, NULL, "Spectrum HoloByte",
+          "Interplay", NULL, NULL, NULL, NULL,
+          "Activision", NULL, "Shiny & Playmates", NULL, NULL,
+          NULL, NULL, NULL, NULL, "Viacom International",
+          NULL, NULL, NULL, NULL, "Atlus",
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, "Infogrames", NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, "Fox Interactive", NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, "Psygnosis",
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, "Disney Interactive",
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL
+        };
+
       sscanf (&maker[5], "%03d", &value);
       rominfo->maker = NULL_TO_UNKNOWN_S (genesis_maker[value & 0xff]);
     }
@@ -1701,7 +1683,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
         (!strncmp (maker, "(C)WSTN", 7)) ? "Westone" : NULL;
       if (!rominfo->maker)
         {
-          maker[8] = 0;
+          maker[8] = '\0';
           rominfo->maker = maker;
         }
     }
@@ -1709,11 +1691,33 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   genesis_tv_standard = 1;              // default to PAL; NTSC has higher precedence
   genesis_japanese = 0;
 
-  country[0] = 0;
+  country[0] = '\0';
   // ROM country
   for (x = 0; x < 5; x++)
     {
       int country_code = OFFSET (genesis_header, 240 + x);
+#define GENESIS_COUNTRY_MAX 0x57
+      const char *genesis_country[GENESIS_COUNTRY_MAX] =
+        {
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, "Brazil", NULL, NULL,     // Brazil NTSC
+          NULL, "Hong Kong", NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          "Asia", "Brazil", NULL, NULL, "Europe", // Brazil PAL
+          "France", NULL, NULL, NULL, "Japan",
+          NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL,
+          "U.S.A.", NULL
+        };
 
       if ((x > 0 && country_code == 0) || country_code == ' ')
         continue;
@@ -1722,17 +1726,17 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       if (genesis_japanese || country_code == 'U' || country_code == '4')
         genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil ('4') use NTSC
       strcat (country, NULL_TO_UNKNOWN_S
-               (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
+                (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
       strcat (country, ", ");
     }
   x = strlen (country);
   if (x >= 2 && country[x - 2] == ',' && country[x - 1] == ' ')
-    country[x - 2] = 0;
+    country[x - 2] = '\0';
   rominfo->country = country;
 
   // misc stuff
   memcpy (name, &OFFSET (genesis_header, 32), GENESIS_NAME_LEN);
-  name[GENESIS_NAME_LEN] = 0;
+  name[GENESIS_NAME_LEN] = '\0';
   sprintf ((char *) buf, "Japanese game name: %s\n", name);
   strcat (rominfo->misc, (char *) buf);
 
@@ -1791,8 +1795,8 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   sprintf ((char *) buf, "I/O device(s): %s",
-    NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144),
-                         GENESIS_IO_MAX - 1)]));
+           NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144),
+                                GENESIS_IO_MAX - 1)]));
   for (x = 0; x < 3; x++)
     {
       const char *io_device = genesis_io[MIN (OFFSET (genesis_header, 145 + x),

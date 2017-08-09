@@ -279,7 +279,7 @@ static void
 write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 {
   long int fpos = ftell (destfile);             // save file pointer
-  static int sram_page = 0, sram_msg_printed = 0;
+  static int sram_page = 0;
   int n;
   unsigned char name[0x0c], flags = 0;  // x, D (reserved), x, x, x, x, S1, S0
   const char *p;
@@ -301,6 +301,8 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
   if (sram_page > 3)
     {
+      static int sram_msg_printed = 0;
+
       if (!sram_msg_printed)
         {
           puts ("NOTE: This ROM (and all following) will share SRAM with ROM 4");
@@ -315,12 +317,12 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 }
 
 
-int
-sms_multi (unsigned int truncate_size, char *fname)
-{
 #define BUFSIZE 0x20000
 // BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
 //  equal to 1 Mbit (for checksum calculation)
+int
+sms_multi (unsigned int truncate_size, char *fname)
+{
   unsigned int n, n_files, file_no, bytestowrite, byteswritten, done,
                truncated = 0, totalsize = 0, size,
                org_do_not_calc_crc = ucon64.do_not_calc_crc;
@@ -355,6 +357,7 @@ sms_multi (unsigned int truncate_size, char *fname)
   if ((destfile = fopen (destname, "w+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
+      free (buffer);
       return -1;
     }
 
@@ -477,11 +480,14 @@ sms_multi (unsigned int truncate_size, char *fname)
   fwrite (buffer + SMS_HEADER_START + 10, 1, 6, destfile);
 
   fclose (destfile);
+  free (buffer);
+
   ucon64.console = UCON64_SMS;
   ucon64.do_not_calc_crc = org_do_not_calc_crc;
 
   return 0;
 }
+#undef BUFSIZE
 
 
 static int
@@ -579,7 +585,7 @@ int
 sms_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x;
-  unsigned char buf[16384] = { 0 }, *rom_buffer;
+  unsigned char buf[16384] = { 0 };
 
   is_gamegear = 0;
   memset (&sms_header, 0, SMS_HEADER_LEN);
@@ -590,18 +596,19 @@ sms_init (st_ucon64_nfo_t *rominfo)
     rominfo->backup_header_len = sms_header_len ();
 
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-    ucon64.interleaved : sms_testinterleaved (rominfo);
+                           ucon64.interleaved : sms_testinterleaved (rominfo);
 
   if (rominfo->interleaved)
     {
       ucon64_fread (buf, rominfo->backup_header_len + 0x4000, // header in 2nd 16 kB block
-        0x2000 + (SMS_HEADER_START - 0x4000 + SMS_HEADER_LEN) / 2, ucon64.fname);
+                    0x2000 + (SMS_HEADER_START - 0x4000 + SMS_HEADER_LEN) / 2,
+                    ucon64.fname);
       smd_deinterleave (buf, 0x4000);
       memcpy (&sms_header, buf + SMS_HEADER_START - 0x4000, SMS_HEADER_LEN);
     }
   else
     ucon64_fread (&sms_header, rominfo->backup_header_len + SMS_HEADER_START,
-      SMS_HEADER_LEN, ucon64.fname);
+                  SMS_HEADER_LEN, ucon64.fname);
 
   rominfo->header_start = SMS_HEADER_START;
   rominfo->header_len = SMS_HEADER_LEN;
@@ -646,6 +653,8 @@ sms_init (st_ucon64_nfo_t *rominfo)
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
+      unsigned char *rom_buffer;
+
       if ((rom_buffer = (unsigned char *) malloc (size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
@@ -673,15 +682,16 @@ sms_init (st_ucon64_nfo_t *rominfo)
     }
 
   sprintf ((char *) buf, "Part number: 0x%04x\n",
-    sms_header.partno_low + (sms_header.partno_high << 8) +
-    ((sms_header.version & 0xf0) << 12));
+           sms_header.partno_low + (sms_header.partno_high << 8) +
+             ((sms_header.version & 0xf0) << 12));
   strcat (rominfo->misc, (char *) buf);
 
   sprintf ((char *) buf, "Version: %d", sms_header.version & 0xf);
   strcat (rominfo->misc, (char *) buf);
 
   rominfo->console_usage = sms_usage[0].help;
-  rominfo->backup_usage = !rominfo->backup_header_len ? mgd_usage[0].help : smd_usage[0].help;
+  rominfo->backup_usage = !rominfo->backup_header_len ?
+                            mgd_usage[0].help : smd_usage[0].help;
 
   return result;
 }

@@ -538,7 +538,7 @@ set_spc7110_map (unsigned short chunk)
 static void
 set_bank_and_page (unsigned char bank, unsigned char page)
 {
-  static unsigned char currentbank = 0, currentpage = 4; // Force update on first call
+  static unsigned char currentbank = 0, currentpage = 4; // force update on first call
 
   page &= 3;
 
@@ -570,7 +570,7 @@ set_bank_and_page (unsigned char bank, unsigned char page)
           ffe_send_command0 (0x0007, currentbank);
         }
       else
-        ffe_send_command (5, (unsigned short) ((currentbank << 2) | currentpage), 0);
+        ffe_send_command (5, (currentbank << 2) | currentpage, 0);
     }
 }
 

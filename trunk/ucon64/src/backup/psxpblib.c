@@ -75,13 +75,6 @@ psx_clk (int base, int conport, int on)
 void
 psx_att (int base, int conport, int on)
 {
-  /* bits 3-7 base + 0 (pins 5 to 9 parallel port) */
-  const int power = LPT_D3 | LPT_D4 | LPT_D5 | LPT_D6 | LPT_D7;
-  /* bits 1-6 base + 0 (pins 3, 5, 6, 7 and 8 parallel port) */
-  unsigned char att_array[] =
-    { LPT_D1, LPT_D1, LPT_D3, LPT_D4, LPT_D5, LPT_D6, LPT_D7 };
-  unsigned char att;
-
   if (conport == 8)
     {
       if (on)
@@ -99,10 +92,15 @@ psx_att (int base, int conport, int on)
     }
   else
     {
+      /* bits 3-7 base + 0 (pins 5 to 9 parallel port) */
+      const int power = LPT_D3 | LPT_D4 | LPT_D5 | LPT_D6 | LPT_D7;
+      /* bits 1-6 base + 0 (pins 3, 5, 6, 7 and 8 parallel port) */
+      unsigned char att_array[] =
+        { LPT_D1, LPT_D1, LPT_D3, LPT_D4, LPT_D5, LPT_D6, LPT_D7 };
+      unsigned char att = att_array[conport - 1];
+
       /* powers up all parallel port driven conports */
       psx_parallel_out_0 |= power;
-
-      att = att_array[conport - 1];
 
       if (on)
         {
@@ -764,11 +762,11 @@ int
 psx_memcard_write_block (int base, int conport, int tap, int delay, int block,
                          unsigned char *data_b)
 {
-  int i, xor_val;
+  int i;
 
   for (i = 0; i < 64; i++)
     {
-      xor_val =
+      int xor_val =
         psx_memcard_write_frame (base, conport, tap, delay, (block * 64) + i,
                                  &(data_b[128 * i]));
 

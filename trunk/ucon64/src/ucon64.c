@@ -858,7 +858,6 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int result = 0;
   int x = 0, y = 0, c = 0;
   const char *p = NULL;
   struct stat fstate;
@@ -946,6 +945,7 @@ main (int argc, char **argv)
   realpath2 (PROPERTY_HOME_RC ("ucon64"), ucon64.configfile);
 
   {
+    int result = 0;
     char org_configfile[FILENAME_MAX];
 
     strncpy (org_configfile, ucon64.configfile, FILENAME_MAX - 1)
@@ -1804,9 +1804,9 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
       // the internal checksum of GBA ROMs stores only the checksum of the
       //  internal header
       if (ucon64.console != UCON64_GBA)
-        fstr = "Checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)\n";
+        fstr = "Checksum: %%s, 0x%%0%ulx (calculated) %%c= 0x%%0%ulx (internal)\n";
       else
-        fstr = "Header checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)\n";
+        fstr = "Header checksum: %%s, 0x%%0%ulx (calculated) %%c= 0x%%0%ulx (internal)\n";
 
       sprintf (buf, fstr,
         nfo->internal_crc_len * 2, nfo->internal_crc_len * 2);

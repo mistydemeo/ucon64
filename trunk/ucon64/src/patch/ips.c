@@ -97,7 +97,7 @@ ips_apply (const char *mod, const char *ipsname)
 {
   unsigned char byte, byte2, byte3;
   char modname[FILENAME_MAX], magic[6];
-  unsigned int offset, length, i;
+  unsigned int length, i;
 
   strcpy (modname, mod);
   ucon64_file_handler (modname, NULL, 0);
@@ -128,6 +128,8 @@ ips_apply (const char *mod, const char *ipsname)
   puts ("Applying IPS patch...");
   while (!feof (ipsfile))
     {
+      unsigned int offset;
+
       byte = read_byte (ipsfile);
       byte2 = read_byte (ipsfile);
       byte3 = read_byte (ipsfile);
@@ -273,7 +275,7 @@ rle_end (int value, unsigned char *buffer)
 static int
 check_for_rle (unsigned char byte, unsigned char *buf)
 {
-  int use_rle, i, retval = 0;
+  int retval = 0;
 
   if (rle_value == NO_RLE)
     {
@@ -285,6 +287,8 @@ check_for_rle (unsigned char byte, unsigned char *buf)
         RLE_RESTART_THRESHOLD only make the IPS file larger than if no RLE
         compression would be used.
       */
+      int use_rle, i;
+
       if (ndiffs > RLE_RESTART_THRESHOLD)
         {
           use_rle = 1;

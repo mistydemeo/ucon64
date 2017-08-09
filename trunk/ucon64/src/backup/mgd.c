@@ -101,8 +101,8 @@ fread_mgd (void *buffer, size_t size, size_t number, FILE *fh)
   it can't be used for an arbitrary file.
 */
 {
-  int n = 0, bpos = 0, fpos, fpos_org, block_size, bytesread = 0,
-      len = number * size, fsize = (int) ucon64.file_size /* fsizeof (filename) */;
+  int n = 0, bpos = 0, fpos, fpos_org, bytesread = 0, len = number * size,
+      fsize = (int) ucon64.file_size /* fsizeof (filename) */;
   unsigned char tmp1[MAXBUFSIZE], tmp2[MAXBUFSIZE];
 
   fpos = fpos_org = ftell (fh);
@@ -129,7 +129,7 @@ fread_mgd (void *buffer, size_t size, size_t number, FILE *fh)
 
   while (len > 0 && !feof (fh))
     {
-      block_size = len > MAXBUFSIZE ? MAXBUFSIZE : len;
+      int block_size = len > MAXBUFSIZE ? MAXBUFSIZE : len;
 
       fseek (fh, fpos / 2, SEEK_SET);
       bytesread += fread (tmp1, 1, block_size / 2, fh); // read odd bytes
@@ -402,7 +402,7 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name)
 void
 mgd_write_index_file (void *ptr, int n_names)
 {
-  char buf[100 * 10], *p, name[9], dest_name[FILENAME_MAX];
+  char buf[100 * 10], name[9], dest_name[FILENAME_MAX];
   // one line in the index file takes 10 bytes at max (name (8) + "\r\n" (2)),
   //  so buf is large enough for 44 files of 1/4 Mbit (max for 1 diskette)
   int n = 0, offset = 0;
@@ -411,6 +411,8 @@ mgd_write_index_file (void *ptr, int n_names)
     return;
   for (; n < n_names; n++)
     {
+      char *p;
+
       strncpy (name, n_names > 1 ? ((char **) ptr)[n] : (char *) ptr, 8)[8] =
         '\0';
       if ((p = strrchr (name, '.')) != NULL)

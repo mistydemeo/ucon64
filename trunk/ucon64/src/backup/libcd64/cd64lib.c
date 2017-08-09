@@ -789,7 +789,6 @@ int cd64_download_cart(struct cd64_t *cd64, FILE *outfile, uint32_t length,
 	if (cd64->protocol == CD64BIOS) {
 		int ret;
 		unsigned int i;
-		int32_t curpos = 0;
 		int32_t origpos = cd64->tell_callback(outfile);
 		if (length == 0) {
 			cd64->notice_callback2("CD64 BIOS needs a file length.");
@@ -808,8 +807,7 @@ int cd64_download_cart(struct cd64_t *cd64, FILE *outfile, uint32_t length,
 			int j = 0;
 			int overdump = 1;
 			uint8_t buf[4];
-
-			curpos = cd64->tell_callback(outfile);
+			int32_t curpos = cd64->tell_callback(outfile);
 
 			while(i+j < length) {
 				cd64->read_callback(outfile, &buf, 4);

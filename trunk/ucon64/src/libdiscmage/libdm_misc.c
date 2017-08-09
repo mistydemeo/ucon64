@@ -751,8 +751,7 @@ void
 dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 {
 #define COLS 80
-  int t = 0, s = 0, x = 0, min = 0, sec = 0, frames = 0,
-      filesize = q_fsize (image->fname);
+  int t = 0, min = 0, sec = 0, frames = 0, filesize = q_fsize (image->fname);
   char buf[MAXBUFSIZE];
   st_iso_header_t iso_header;
   FILE *fh = NULL;
@@ -788,6 +787,8 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 
   if ((COLS / image->tracks) > 1 && image->sessions && image->tracks)
     {
+      int s = 0, x = 0;
+
       printf ("Layout: ");
 
       for (s = t = 0; s < image->sessions; s++)
@@ -836,26 +837,26 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 
       dm_lba_to_msf (track->track_len, &min, &sec, &frames);
       printf ("\n  %d Sectors, %d:%02d/%02d MSF, %d Bytes (%.4f MB)",
-        (int) track->total_len,
-        min, sec, frames,
-        (int) (track->total_len * track->sector_size),
-        (float) (track->total_len * track->sector_size) / (1024 * 1024));
+              (int) track->total_len,
+              min, sec, frames,
+              (int) (track->total_len * track->sector_size),
+              (float) (track->total_len * track->sector_size) / (1024 * 1024));
 
       fputc ('\n', stdout);
 
       if (verbose)
         {
           printf ("  Pregap: %d, Start Sector: %d, End Sector: %d, Postgap: %d\n",
-            track->pregap_len,
-            (int) (track->track_start / track->sector_size),
-            (int) ((track->track_start / track->sector_size) + track->total_len),
-            track->postgap_len);
+                  track->pregap_len,
+                  (int) (track->track_start / track->sector_size),
+                  (int) ((track->track_start / track->sector_size) + track->total_len),
+                  track->postgap_len);
 
           dm_lba_to_msf (track->track_len, &min, &sec, &frames);
           printf ("  Total Time: %d:%02d/%02d MSF, File Start Pos: %d, End Pos: %d\n",
-            min, sec, frames,
-            (int) track->track_start,
-            (int) track->track_end);
+                  min, sec, frames,
+                  (int) track->track_start,
+                  (int) track->track_end);
         }
 
       memset (&iso_header, 0, sizeof (st_iso_header_t));

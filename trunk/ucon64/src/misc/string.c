@@ -87,7 +87,7 @@ strtriml (char *str)
 
   j = strlen (str) - 1;
 
-  while (isspace ((int) str[i]) && (i <= j))
+  while (i <= j && isspace ((int) str[i]))
     i++;
 
   if (0 < i)
@@ -180,12 +180,14 @@ const void *
 memmem2 (const void *buffer, size_t bufferlen,
          const void *search, size_t searchlen, unsigned int flags)
 {
-  size_t i;
-
   if (bufferlen >= searchlen)
-    for (i = 0; i <= bufferlen - searchlen; i++)
-      if (!memcmp2 ((const unsigned char *) buffer + i, search, searchlen, flags))
-        return (const unsigned char *) buffer + i;
+    {
+      size_t i;
+
+      for (i = 0; i <= bufferlen - searchlen; i++)
+        if (!memcmp2 ((const unsigned char *) buffer + i, search, searchlen, flags))
+          return (const unsigned char *) buffer + i;
+    }
 
   return NULL;
 }

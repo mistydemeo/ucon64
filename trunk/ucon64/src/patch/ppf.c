@@ -164,9 +164,8 @@ int
 ppf_apply (const char *mod, const char *ppfname)
 {
   FILE *modfile, *ppffile;
-  char desc[50 + 1], diz[MAX_ID_SIZE + 1], buffer[1024], ppfblock[1024],
-       modname[FILENAME_MAX];
-  int x, method, dizlen = 0, modlen, ppfsize, bytes_to_skip = 0, n_changes;
+  char desc[50 + 1], buffer[1024], modname[FILENAME_MAX];
+  int x, method, dizlen = 0, ppfsize, bytes_to_skip = 0, n_changes;
   unsigned int pos;
 
   strcpy (modname, mod);
@@ -219,6 +218,9 @@ ppf_apply (const char *mod, const char *ppfname)
     }
   else // method == 1                           // PPF 2.0
     {
+      char ppfblock[1024];
+      int modlen;
+
       fseek (ppffile, ppfsize - 8, SEEK_SET);
       fread (buffer, 4, 1, ppffile);
 
@@ -227,6 +229,8 @@ ppf_apply (const char *mod, const char *ppfname)
         printf ("FILE_ID.DIZ     : No\n\n");
       else
         {
+          char diz[MAX_ID_SIZE + 1];
+
           printf ("FILE_ID.DIZ     : Yes, showing...\n");
           fread (&dizlen, 4, 1, ppffile);
 #ifdef  WORDS_BIGENDIAN

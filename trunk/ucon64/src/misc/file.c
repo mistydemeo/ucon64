@@ -190,19 +190,16 @@ realpath (const char *path, char *full_path)
               path++;
               continue;
             }
-          if (path[1] == '.')
+          if (path[1] == '.' && (path[2] == '\0' || path[2] == DIR_SEPARATOR))
             {
-              if (path[2] == '\0' || path[2] == DIR_SEPARATOR)
-                {
-                  path += 2;
-                  // ignore ".." at root
-                  if (new_path == got_path + 1)
-                    continue;
-                  // handle ".." by backing up
-                  while (*((--new_path) - 1) != DIR_SEPARATOR)
-                    ;
-                  continue;
-                }
+              path += 2;
+              // ignore ".." at root
+              if (new_path == got_path + 1)
+                continue;
+              // handle ".." by backing up
+              while (*((--new_path) - 1) != DIR_SEPARATOR)
+                ;
+              continue;
             }
         }
       // safely copy the next pathname component
@@ -408,9 +405,8 @@ dirname2 (const char *path, char *dir)
   if (p1 == dir)
     p1++;                                       // don't overwrite single separator (root dir)
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
-  else if (p1 > dir)
-    if (*(p1 - 1) == ':')
-      p1++;                                     // we must not overwrite the last separator if
+  else if (p1 > dir && *(p1 - 1) == ':')
+    p1++;                                       // we must not overwrite the last separator if
 #endif                                          //  it was directly preceded by a drive letter
 
   if (p1)
@@ -553,7 +549,6 @@ one_filesystem (const char *filename1, const char *filename2)
     return 0;
 #else
   DWORD fattrib1, fattrib2;
-  char path1[FILENAME_MAX], path2[FILENAME_MAX], *p, d1, d2;
   HANDLE file1, file2;
   BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
 
@@ -569,17 +564,19 @@ one_filesystem (const char *filename1, const char *filename2)
       handle to a directory.
     */
     {
+      char path1[FILENAME_MAX], path2[FILENAME_MAX], *p, d1, d2;
+
       if (GetFullPathName (filename1, FILENAME_MAX, path1, &p) == 0)
         return 0;
       if (GetFullPathName (filename2, FILENAME_MAX, path2, &p) == 0)
         return 0;
       d1 = (char) toupper (path1[0]);
       d2 = (char) toupper (path2[0]);
-      if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z')
-        if (strlen (path1) >= 2 && strlen (path2) >= 2)
+      if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z' &&
+          strlen (path1) >= 2 && strlen (path2) >= 2 &&
           // we don't handle unique volume names
-          if (path1[1] == ':' && path2[1] == ':')
-            return 1;
+          path1[1] == ':' && path2[1] == ':')
+        return 1;
       return 0;
     }
 
@@ -657,7 +654,6 @@ truncate2 (const char *filename, off_t new_size)
     {
       FILE *file;
       unsigned char padbuffer[MAXBUFSIZE];
-      int n_bytes;
 
       if ((file = fopen (filename, "ab")) == NULL)
         return -1;
@@ -666,7 +662,7 @@ truncate2 (const char *filename, off_t new_size)
 
       while (size < new_size)
         {
-          n_bytes = new_size - size > MAXBUFSIZE ? MAXBUFSIZE : new_size - size;
+          int n_bytes = new_size - size > MAXBUFSIZE ? MAXBUFSIZE : new_size - size;
           fwrite (padbuffer, 1, n_bytes, file);
           size += n_bytes;
         }
@@ -724,9 +720,8 @@ mkbak (const char *filename, backup_t type)
           fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
           exit (1);
         }
-      if (buf[0] != '\0')
-        if (buf[strlen (buf) - 1] != DIR_SEPARATOR)
-          strcat (buf, DIR_SEPARATOR_S);
+      if (buf[0] != '\0' && buf[strlen (buf) - 1] != DIR_SEPARATOR)
+        strcat (buf, DIR_SEPARATOR_S);
 
       strcat (buf, basename2 (tmpnam2 (buf2)));
       if (rename (filename, buf))
@@ -928,10 +923,12 @@ static inline int
 quick_io_func_inline (int (*func) (void *, int, void *), int func_maxlen,
                       void *object, void *buffer, int buffer_len)
 {
-  int i = 0, func_size = MIN (func_maxlen, buffer_len), func_result = 0;
+  int i = 0, func_size = MIN (func_maxlen, buffer_len);
 
   while (i < buffer_len)
     {
+      int func_result;
+
       func_size = MIN (func_size, buffer_len - i);
       func_result = func ((char *) buffer + i, func_size, object);
       i += func_result;

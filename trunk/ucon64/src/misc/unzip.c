@@ -739,18 +739,13 @@ local int unzlocal_GetCurrentFileInfoInternal (file,
 
         if (lSeek!=0)
         {
-            if (ZSEEK(s->z_filefunc, s->filestream,lSeek,ZLIB_FILEFUNC_SEEK_CUR)==0)
-                lSeek=0;
-            else
+            if (ZSEEK(s->z_filefunc, s->filestream,lSeek,ZLIB_FILEFUNC_SEEK_CUR)!=0)
                 err=UNZ_ERRNO;
         }
         if ((file_info.size_file_comment>0) && (commentBufferSize>0))
             if (ZREAD(s->z_filefunc, s->filestream,szComment,uSizeRead)!=uSizeRead)
                 err=UNZ_ERRNO;
-        lSeek+=file_info.size_file_comment - uSizeRead;
     }
-    else
-        lSeek+=file_info.size_file_comment;
 
     if ((err==UNZ_OK) && (pfile_info!=NULL))
         *pfile_info=file_info;
@@ -1092,9 +1087,7 @@ extern int ZEXPORT unzOpenCurrentFile3 (file, method, level, raw, password)
     file_in_zip_read_info_s* pfile_in_zip_read_info;
     uLong offset_local_extrafield;  /* offset of the local extra field */
     uInt  size_local_extrafield;    /* size of the local extra field */
-#    ifndef NOUNCRYPT
-    char source[12];
-#    else
+#    ifdef NOUNCRYPT
     if (password != NULL)
         return UNZ_PARAMERROR;
 #    endif
@@ -1201,6 +1194,7 @@ extern int ZEXPORT unzOpenCurrentFile3 (file, method, level, raw, password)
 #    ifndef NOUNCRYPT
     if (password != NULL)
     {
+        char source[12];
         int i;
         s->pcrc_32_tab = (unsigned long*)get_crc_table();
         init_keys(password,s->keys,s->pcrc_32_tab);

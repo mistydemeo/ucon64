@@ -332,15 +332,15 @@ lynx_init (st_ucon64_nfo_t *rominfo)
                "Version: %hd\n"
                "Rotation: %s",
 #ifdef  WORDS_BIGENDIAN
-               bswap_16 (lnx_header.page_size_bank0) * 256,
+               (short) (bswap_16 (lnx_header.page_size_bank0) * 256),
                TOMBIT_F (bswap_16 (lnx_header.page_size_bank0) * 256),
-               bswap_16 (lnx_header.page_size_bank1) * 256,
+               (short) (bswap_16 (lnx_header.page_size_bank1) * 256),
                TOMBIT_F (bswap_16 (lnx_header.page_size_bank1) * 256),
                bswap_16 (lnx_header.version),
 #else
-               lnx_header.page_size_bank0 * 256,
+               (short) (lnx_header.page_size_bank0 * 256),
                TOMBIT_F (lnx_header.page_size_bank0 * 256),
-               lnx_header.page_size_bank1 * 256,
+               (short) (lnx_header.page_size_bank1 * 256),
                TOMBIT_F (lnx_header.page_size_bank1 * 256),
                lnx_header.version,
 #endif

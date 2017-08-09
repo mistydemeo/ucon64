@@ -572,9 +572,7 @@ ucon64_load_discmage (void)
 {
   uint32_t version;
 #ifdef  DLOPEN
-  const char *p = NULL;
-
-  p = get_property (ucon64.configfile, "discmage_path", PROPERTY_MODE_FILENAME);
+  const char *p = get_property (ucon64.configfile, "discmage_path", PROPERTY_MODE_FILENAME);
   if (p)
     strcpy (ucon64.discmage_path, p);
   else
@@ -912,7 +910,7 @@ remove_temp_file (void)
 char *
 ucon64_output_fname (char *requested_fname, int flags)
 {
-  char suffix[SUFFIX_MAX + 1], fname[FILENAME_MAX];
+  char suffix[SUFFIX_MAX + 1];
 
   // We have to make a copy, because get_suffix() returns a pointer to a
   //  location in the original string.
@@ -924,6 +922,8 @@ ucon64_output_fname (char *requested_fname, int flags)
   //  archives with more than one file.
   if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
     {
+      char fname[FILENAME_MAX];
+
       strcpy (fname, basename2 (requested_fname));
       sprintf (requested_fname, "%s%s", ucon64.output_path, fname);
     }
@@ -961,7 +961,7 @@ ucon64_testpad (const char *filename)
   the zipped dump and 12 seconds for the gzipped dump.
 */
 {
-  int c = 0, blocksize, i, n = 0, start_n;
+  int c = 0, blocksize, i, n = 0;
   unsigned char buffer[MAXBUFSIZE];
   FILE *file = fopen (filename, "rb");
 
@@ -970,6 +970,8 @@ ucon64_testpad (const char *filename)
 
   while ((blocksize = fread (buffer, 1, MAXBUFSIZE, file)) != 0)
     {
+      int start_n;
+
       if (buffer[blocksize - 1] != c)
         {
           c = buffer[blocksize - 1];
@@ -1100,12 +1102,13 @@ int
 ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
 // test if ROM is split into parts based on the name of files
 {
-  int x, parts = 0, l;
-  char buf[FILENAME_MAX], *p = NULL;
+  int x;
 
   for (x = -1; x < 2; x += 2)
     {
-      parts = 0;
+      int parts = 0, l;
+      char buf[FILENAME_MAX], *p;
+
       strcpy (buf, filename);
       p = strrchr (buf, '.');
       l = strlen (buf);
@@ -1338,7 +1341,7 @@ ucon64_rename (int mode)
       {
         int len, len2;
         p = basename2 (ucon64.fname);
-        len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
+        len = strlen (p);               // it's safe to assume that len is < FILENAME_MAX
         if (len <= 64)                  // Joliet maximum file name length is 64 chars
           {
             printf ("Skipping \"%s\"\n", p);
@@ -1382,7 +1385,7 @@ ucon64_rename (int mode)
       {
         int len, len2;
         p = basename2 (ucon64.fname);
-        len = strlen (p);               // it's safe to assume that len is <= FILENAME_MAX
+        len = strlen (p);               // it's safe to assume that len is < FILENAME_MAX
         strcpy (buf, p);
         crc = crc32 (0, (unsigned char *) buf, len);
         len2 = strlen (suffix);
@@ -1500,7 +1503,7 @@ ucon64_rename (int mode)
 int
 ucon64_e (void)
 {
-  int result = 0, x = 0;
+  int result = 0;
   char buf[MAXBUFSIZE], name[MAXBUFSIZE];
   const char *value_p = NULL;
   typedef struct
@@ -1561,12 +1564,16 @@ ucon64_e (void)
     }
 
   if (value_p == NULL)
-    for (x = 0; s[x].s; x++)
-      if (s[x].id == ucon64.console)
-        {
-          value_p = get_property (ucon64.configfile, s[x].s, PROPERTY_MODE_TEXT);
-          break;
-        }
+    {
+      int x = 0;
+
+      for (x = 0; s[x].s; x++)
+        if (s[x].id == ucon64.console)
+          {
+            value_p = get_property (ucon64.configfile, s[x].s, PROPERTY_MODE_TEXT);
+            break;
+          }
+    }
 
   if (value_p == NULL)
     {
@@ -2191,12 +2198,12 @@ ucon64_filefile (const char *filename1, unsigned int start1,
 #else
 #define FILEFILE_LARGE_BUF
 // When verifying if the code produces the same output when FILEFILE_LARGE_BUF
-//  is defined as when it's not, be sure to use the same buffer size
+//  is defined as when it's not, be sure to use the same buffer size.
 void
 ucon64_filefile (const char *filename1, unsigned int start1,
                  unsigned int start2, int similar)
 {
-  unsigned int base, len, chunksize1, chunksize2, readok = 1;
+  unsigned int base, len, readok = 1;
   uint64_t fsize1, bytesread1, bytesread2, bytesleft1, bytesleft2, n_bytes = 0;
 #ifdef  FILEFILE_LARGE_BUF
   unsigned int bufsize = 1024 * 1024;
@@ -2265,7 +2272,7 @@ ucon64_filefile (const char *filename1, unsigned int start1,
 
   while (bytesleft1 > 0 && bytesread1 < ucon64.file_size && readok)
     {
-      chunksize1 = fread (buf1, 1, bufsize, file1);
+      unsigned int chunksize1 = fread (buf1, 1, bufsize, file1);
       if (chunksize1 == 0)
         readok = 0;
       else
@@ -2276,7 +2283,7 @@ ucon64_filefile (const char *filename1, unsigned int start1,
 
       while (bytesleft2 > 0 && bytesread2 < bytesread1 && readok)
         {
-          chunksize2 = fread (buf2, 1, chunksize1, file2);
+          unsigned int chunksize2 = fread (buf2, 1, chunksize1, file2);
           if (chunksize2 == 0)
             readok = 0;
           else

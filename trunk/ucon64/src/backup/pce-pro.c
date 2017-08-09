@@ -176,8 +176,8 @@ pce_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char buffer[0x4000], game_table[32 * 0x20];
-  int game_no, size, romsize = 0, startaddress, address = 0, bytesread,
-      bytessent = 0, bytesleft, multi_game;
+  int game_no, size, romsize = 0, address = 0, bytesread, bytessent = 0,
+      multi_game;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -240,6 +240,8 @@ pce_write_rom (const char *filename, unsigned short parport)
   game_no = -1;
   do
     {
+      int startaddress = address, bytesleft;
+
       if (game_no >= 0)                         // a game of a multi-game file
         romsize = game_table[game_no * 0x20 + 0x1e] * MBIT;
       else if (multi_game)
@@ -248,7 +250,6 @@ pce_write_rom (const char *filename, unsigned short parport)
       bytesleft = romsize;
       if (bytesleft == 4 * MBIT)
         bytesleft += 2 * MBIT;
-      startaddress = address;
 
       while (bytesleft > 0 && (bytesread = fread (buffer, 1, 0x4000, file)) != 0)
         {

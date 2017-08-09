@@ -118,7 +118,7 @@ const st_getopt2_t f2a_usage[] =
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+  };
 
 
 #ifdef  USE_USB
@@ -244,12 +244,13 @@ enum
 };
 
 static time_t starttime = 0;
-static const char *f2a_msg[] = {
-  "ERROR: Upload failed\n",
-  "ERROR: Cannot determine size of file \"%s\"\n",
-  "Uploading %s, %d kB, padded to %d kB\n",
-  NULL
-};
+static const char *f2a_msg[] =
+  {
+    "ERROR: Upload failed\n",
+    "ERROR: Cannot determine size of file \"%s\"\n",
+    "Uploading %s, %d kB, padded to %d kB\n",
+    NULL
+  };
 #endif
 
 
@@ -293,7 +294,7 @@ exec (const char *program, int argc, ...)
               exit (1);
             }
         }
-      argv[n] = 0;
+      argv[n] = NULL;
 
       setuid (geteuid ());
       setgid (getegid ());
@@ -315,7 +316,6 @@ static int
 f2a_init_usb (void)
 {
   f2a_recvmsg_t rm;
-  char iclientu_fname[FILENAME_MAX];
 
 #ifdef  _MSC_VER
 #pragma warning(push)
@@ -323,14 +323,14 @@ f2a_init_usb (void)
 #endif
   if (sizeof (f2a_recvmsg_t) != 64)
     {
-      fprintf (stderr, "ERROR: The size of f2a_recvmsg_t is not 64 bytes.\n"
-                       "       Please correct the source code or send a bug report\n");
+      fputs ("ERROR: The size of f2a_recvmsg_t is not 64 bytes.\n"
+             "       Please correct the source code or send a bug report\n", stderr);
       exit (1);
     }
   if (sizeof (f2a_sendmsg_t) != 64)
     {
-      fprintf (stderr, "ERROR: The size of f2a_sendmsg_t is not 64 bytes.\n"
-                       "       Please correct the source code or send a bug report\n");
+      fputs ("ERROR: The size of f2a_sendmsg_t is not 64 bytes.\n"
+             "       Please correct the source code or send a bug report\n", stderr);
       exit (1);
     }
 #ifdef  _MSC_VER
@@ -341,20 +341,22 @@ f2a_init_usb (void)
 
   if (f2a_connect_usb ())
     {
-      fprintf (stderr, "ERROR: Could not connect to F2A USB linker\n");
+      fputs ("ERROR: Could not connect to F2A USB linker\n", stderr);
       exit (1);                                 // fatal
     }
   f2a_info (&rm);
   if (rm.data[0] == 0)
     {
-      const char *p = NULL;
+      char iclientu_fname[FILENAME_MAX];
+      const char *p = get_property (ucon64.configfile, "iclientu",
+                                    PROPERTY_MODE_FILENAME);
 
-      p = get_property (ucon64.configfile, "iclientu", PROPERTY_MODE_FILENAME);
-      strncpy (iclientu_fname, p ? p : "iclientu.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+      strncpy (iclientu_fname, p ? p : "iclientu.bin", FILENAME_MAX - 1)
+        [FILENAME_MAX - 1] = '\0';
 
       if (f2a_boot_usb (iclientu_fname))
         {
-          fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
+          fputs ("ERROR: Booting GBA client binary was not successful\n", stderr);
           exit (1);                             // fatal
         }
       f2a_info (&rm);
@@ -373,10 +375,11 @@ f2a_connect_usb (void)
   int fp, firmware_loaded = 0;
   unsigned char f2afirmware[F2A_FIRM_SIZE];
   char f2afirmware_fname[FILENAME_MAX];
-  const char *p = NULL;
+  const char *p = get_property (ucon64.configfile, "f2afirmware",
+                                PROPERTY_MODE_FILENAME);
 
-  p = get_property (ucon64.configfile, "f2afirmware", PROPERTY_MODE_FILENAME);
-  strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX - 1)
+    [FILENAME_MAX - 1] = '\0';
 
   if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) <= 0)
     {
@@ -415,7 +418,7 @@ f2a_connect_usb (void)
 
                   snprintf (device_path, 160, "/proc/bus/usb/%s/%s",
                             bus->dirname, dev->filename);
-                  device_path[160 - 1] = 0;
+                  device_path[160 - 1] = '\0';
                   exitstatus = exec ("/sbin/fxload", 7, "-D", device_path, "-I",
                                      f2afirmware_fname, "-t", "an21",
                                      ucon64.quiet < 0 ? "-vv" : "-v");
@@ -427,7 +430,7 @@ f2a_connect_usb (void)
                                   "/sbin/fxload -D %s -I %s -t an21 -vv" :
                                   "/sbin/fxload -D %s -I %s -t an21 -v",
                                 device_path, f2afirmware_fname);
-                      cmd[10 * 80 - 1] = 0;
+                      cmd[10 * 80 - 1] = '\0';
                       fprintf (stderr, "ERROR: Could not upload EZUSB firmware using fxload. Command:\n"
                                        "       %s\n", cmd);
                       return -1;
@@ -490,7 +493,7 @@ f2a_connect_usb (void)
 
   if (f2adev == NULL)
     {
-      fprintf (stderr, "ERROR: Could not find F2A attached to USB\n");
+      fputs ("ERROR: Could not find F2A attached to USB\n", stderr);
       return -1;
     }
 
@@ -527,12 +530,12 @@ f2a_info (f2a_recvmsg_t *rm)
 
   if (usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
     {
-      fprintf (stderr, "ERROR: Could not send info request\n");
+      fputs ("ERROR: Could not send info request\n", stderr);
       exit (1);
     }
   if (usbport_read (f2a_handle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
     {
-      fprintf (stderr, "ERROR: Did not receive info request\n");
+      fputs ("ERROR: Did not receive info request\n", stderr);
       exit (1);
     }
 
@@ -544,7 +547,7 @@ f2a_info (f2a_recvmsg_t *rm)
 
     if (ucon64.quiet < 0)
       {
-        printf ("info:");
+        fputs ("info:", stdout);
         for (i = 0; i < (sizeof (f2a_sendmsg_t) / 4); i++)
           printf (" %08X", *(((unsigned int *) (rm)) + i));
         fputc ('\n', stdout);
@@ -560,12 +563,12 @@ static int
 f2a_boot_usb (const char *ilclient_fname)
 {
   f2a_sendmsg_t sm;
-  unsigned int ack[16], i;
+  unsigned int ack[16];
   char ilclient[16 * 1024];
 
-  printf ("Booting GBA\n"
-          "Uploading iLinker client\n"
-          "Please turn OFF, then ON your GBA with SELECT and START held down\n");
+  puts ("Booting GBA\n"
+        "Uploading iLinker client\n"
+        "Please turn OFF, then ON your GBA with SELECT and START held down");
 
   if (ucon64_fread (ilclient, 0, 16 * 1024, ilclient_fname) <= 0)
     {
@@ -584,7 +587,7 @@ f2a_boot_usb (const char *ilclient_fname)
   // send the multiboot image
   if (usbport_write (f2a_handle, ilclient, 16 * 1024) == -1)
     {
-      fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+      fputs (f2a_msg[UPLOAD_FAILED], stderr);
       return -1;
     }
 
@@ -593,7 +596,9 @@ f2a_boot_usb (const char *ilclient_fname)
 
   if (ucon64.quiet < 0)
     {
-      printf ("post-boot:");
+      unsigned int i;
+
+      fputs ("post-boot:", stdout);
       for (i = 0; i < 16; i++)
         printf (" %08X", ack[i]);
       fputc ('\n', stdout);
@@ -653,11 +658,7 @@ static int
 f2a_write_usb (int n_files, char **files, int address)
 {
   f2a_sendmsg_t sm;
-  int i, j, fsize, size, n, is_sram_data = address >= 0xe000000 ? 1 : 0;
-  char buffer[1024], loader_fname[FILENAME_MAX];
-  unsigned char loader[LOADER_SIZE];
-  const char *p = NULL;
-  FILE *file;
+  int j, is_sram_data = address >= 0xe000000 ? 1 : 0;
 
   // initialize command buffer
   memset (&sm, 0, sizeof (f2a_sendmsg_t));
@@ -667,10 +668,15 @@ f2a_write_usb (int n_files, char **files, int address)
 
   if (n_files > 1 && !is_sram_data)
     {
-      printf ("Uploading multiloader\n");
+      char loader_fname[FILENAME_MAX];
+      unsigned char loader[LOADER_SIZE];
+      const char *p = get_property (ucon64.configfile, "gbaloader",
+                                    PROPERTY_MODE_FILENAME);
 
-      p = get_property (ucon64.configfile, "gbaloader", PROPERTY_MODE_FILENAME);
-      strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+      puts ("Uploading multiloader");
+
+      strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX - 1)
+        [FILENAME_MAX - 1] = '\0';
 
       if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) <= 0)
         {
@@ -691,13 +697,16 @@ f2a_write_usb (int n_files, char **files, int address)
 
       if (usbport_write (f2a_handle, (char *) loader, LOADER_SIZE) == -1)
         {
-          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          fputs (f2a_msg[UPLOAD_FAILED], stderr);
           return -1;
         }
       address += LOADER_SIZE;
     }
   for (j = 0; j < n_files; j++)
     {
+      int i, fsize, size;
+      FILE *file;
+
       if ((fsize = fsizeof (files[j])) == -1)
         {
           fprintf (stderr, f2a_msg[CANNOT_GET_FILE_SIZE], files[j]);
@@ -727,6 +736,9 @@ f2a_write_usb (int n_files, char **files, int address)
 
       for (i = 0; i < size; i += 1024)
         {
+          int n;
+          char buffer[1024];
+
 //          printf ("writing chunk %d\n", i);
           n = fread (buffer, 1, 1024, file);
           memset (buffer + n, 0, 1024 - n);
@@ -759,26 +771,27 @@ static int
 f2a_init_par (unsigned short parport, int parport_delay)
 {
   char iclientp_fname[FILENAME_MAX], ilogo_fname[FILENAME_MAX];
-  const char *p = NULL;
+  const char *p = get_property (ucon64.configfile, "iclientp",
+                                PROPERTY_MODE_FILENAME);
 
   if (parport_init (parport, parport_delay))
     {
-      fprintf (stderr, "ERROR: Could not connect to F2A parport linker\n");
+      fputs ("ERROR: Could not connect to F2A parport linker\n", stderr);
       exit (1);                                 // fatal
     }
 
-  p = get_property (ucon64.configfile, "iclientp", PROPERTY_MODE_FILENAME);
-  strncpy (iclientp_fname, p ? p : "iclientp.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  strncpy (iclientp_fname, p ? p : "iclientp.bin", FILENAME_MAX - 1)
+    [FILENAME_MAX - 1] = '\0';
 
   p = get_property (ucon64.configfile, "ilogo", PROPERTY_MODE_FILENAME);
   if (p)
-    strncpy (ilogo_fname, p, FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+    strncpy (ilogo_fname, p, FILENAME_MAX - 1)[FILENAME_MAX - 1] = '\0';
   else
-    *ilogo_fname = 0;
+    *ilogo_fname = '\0';
 
   if (f2a_boot_par (iclientp_fname, ilogo_fname))
     {
-      fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
+      fputs ("ERROR: Booting GBA client binary was not successful\n", stderr);
       exit (1);                                 // fatal
     }
   return 0;
@@ -869,14 +882,14 @@ parport_init_delay (int n_micros)
 #else
   struct timeval t0, t1;
 #endif
-  int n_ticks = 0, n, n_hits = 0, loop = 10000, loop_sum = 0;
+  int n, n_hits = 0, loop = 10000, loop_sum = 0;
   volatile int m;                               // volatile is necessary for Visual C++...
 
   printf ("Determining delay loop value for %d microseconds...", n_micros);
   fflush (stdout);
   while (n_hits < N_HITSMAX)
     {
-      n_ticks = 0;
+      int n_ticks = 0;
       for (n = 0; n < N_CHECKS; n++)
         {
           m = loop;
@@ -961,19 +974,19 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 {
   unsigned char recv[4], iclientp[BOOT_SIZE];
 
-  printf ("Booting GBA\n"
-          "Please turn OFF, then ON your GBA with SELECT and START held down\n");
+  puts ("Booting GBA\n"
+        "Please turn OFF, then ON your GBA with SELECT and START held down");
 
   if (f2a_send_head_par (PP_HEAD_BOOT, 1))
     return -1;
   if (f2a_receive_raw_par (recv, 4))
     return -1;
 
-  if (ilogo_fname[0] != 0)
+  if (ilogo_fname[0] != '\0')
     {
       unsigned char ilogo[LOGO_SIZE];
 
-      printf ("Uploading iLinker logo\n");
+      puts ("Uploading iLinker logo");
       if (ucon64_fread (ilogo, 0, LOGO_SIZE, ilogo_fname) <= 0)
         {
           fprintf (stderr, "ERROR: Could not load logo file (%s)\n", ilogo_fname);
@@ -982,12 +995,12 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
       if (f2a_send_buffer_par (CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, ilogo,
                                0, 0, 0, 0))
         {
-          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          fputs (f2a_msg[UPLOAD_FAILED], stderr);
           return -1;
         }
     }
 
-  printf ("Uploading iLinker client\n");
+  puts ("Uploading iLinker client");
   if (ucon64_fread (iclientp, 0, BOOT_SIZE, iclientp_fname) <= 0)
     {
       fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", iclientp_fname);
@@ -996,7 +1009,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
   if (f2a_send_buffer_par (CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, iclientp,
                            HEAD, FLIP, EXEC, 0))
     {
-      fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+      fputs (f2a_msg[UPLOAD_FAILED], stderr);
       return -1;
     }
   return 0;
@@ -1006,17 +1019,19 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 static int
 f2a_write_par (int n_files, char **files, unsigned int address)
 {
-  int j, fsize, size, is_sram_data = address >= 0xe000000 ? 1 : 0;
-  char loader_fname[FILENAME_MAX];
-  unsigned char loader[LOADER_SIZE];
-  const char *p = NULL;
+  int j, is_sram_data = address >= 0xe000000 ? 1 : 0;
 
   if (n_files > 1 && !is_sram_data)
     {
-      printf ("Uploading multiloader\n");
+      char loader_fname[FILENAME_MAX];
+      unsigned char loader[LOADER_SIZE];
+      const char *p = get_property (ucon64.configfile, "gbaloader",
+                                    PROPERTY_MODE_FILENAME);
 
-      p = get_property (ucon64.configfile, "gbaloader", PROPERTY_MODE_FILENAME);
-      strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+      puts ("Uploading multiloader");
+
+      strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX - 1)
+        [FILENAME_MAX - 1] = '\0';
 
       if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) <= 0)
         {
@@ -1029,13 +1044,15 @@ f2a_write_par (int n_files, char **files, unsigned int address)
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, LOADER_SIZE, loader,
                                HEAD, FLIP, 0, 0))
         {
-          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          fputs (f2a_msg[UPLOAD_FAILED], stderr);
           return -1;
         }
       address += LOADER_SIZE;
     }
   for (j = 0; j < n_files; j++)
     {
+      int fsize, size;
+
       if ((fsize = fsizeof (files[j])) == -1)
         {
           fprintf (stderr, f2a_msg[CANNOT_GET_FILE_SIZE], files[j]);
@@ -1049,7 +1066,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, size,
                                (unsigned char *) files[j], HEAD, FLIP, 0, 1))
         {
-          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          fputs (f2a_msg[UPLOAD_FAILED], stderr);
           return -1;
         }
 
@@ -1372,12 +1389,7 @@ parport_dump_byte (unsigned char byte)
   char i;
 
   for (i = 7; i >= 0; i--)
-    {
-      if ((byte >> i) & 1)
-        fprintf (stderr, "1");
-      else
-        fprintf (stderr, "0");
-    }
+    fputc ((byte >> i) & 1 ? '1' : '0', stderr);
   fputc ('\n', stderr);
 }
 #endif
@@ -1387,7 +1399,7 @@ static int
 f2a_receive_raw_par (unsigned char *buffer, int len)
 {
   int err, i;
-  unsigned char *ptr, nibble;
+  unsigned char *ptr;
 
   ptr = buffer;
   if (parport_debug)
@@ -1396,7 +1408,8 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
   *ptr = 0;
   for (err = 0, i = 0; i < len * 2; i++)
     {
-      nibble = 0;
+      unsigned char nibble;
+
       outportb (f2a_pport + PARPORT_CONTROL, 0x04);
       parport_nop ();
       while (inportb (f2a_pport + PARPORT_STATUS) & PARPORT_IBUSY)
@@ -1430,15 +1443,15 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
 static int
 f2a_send_raw_par (unsigned char *buffer, int len)
 {
-  int timeout, i;
-  unsigned char *pc;
+  int i;
+  unsigned char *pc = buffer;
 
-  pc = buffer;
   if (parport_debug)
     fprintf (stderr, "\nsend:\n%04x: ", 0);
   for (i = 0; i < len; i++)
     {
-      timeout = 2000;
+      int timeout = 2000;
+
       if (parport_debug)
         {
           fprintf (stderr, "%02x ", (unsigned char) *pc);
@@ -1463,7 +1476,7 @@ f2a_send_raw_par (unsigned char *buffer, int len)
       pc++;
       if (timeout < 0)
         {
-          fprintf (stderr, "\nERROR: Time-out\n");
+          fputs ("\nERROR: Time-out\n", stderr);
           return -1;
         }
     }
@@ -1477,10 +1490,10 @@ f2a_send_raw_par (unsigned char *buffer, int len)
 static int
 f2a_wait_par (void)
 {
-  int stat;
-
   for (;;)
     {
+      int stat;
+
       outportb (f2a_pport + PARPORT_CONTROL, 0x04);
       parport_nop ();
       stat = inportb (f2a_pport + PARPORT_STATUS);
@@ -1526,9 +1539,8 @@ f2a_read_rom (const char *filename, int size)
 int
 f2a_write_rom (const char *filename, int size)
 {
-  int offset = 0, n, n_files, n_files_max = 0, fsize, totalsize = LOADER_SIZE;
+  int n_files;
   char **files = NULL, *file_mem[1];
-  struct stat fstate;
 
   if (filename)                                 // -xf2a
     {
@@ -1538,9 +1550,14 @@ f2a_write_rom (const char *filename, int size)
     }
   else                                          // -xf2amulti=SIZE
     {
+      int n, n_files_max = 0, totalsize = LOADER_SIZE;
+      struct stat fstate;
+
       n_files = 0;
       for (n = 1; n < ucon64.argc; n++)
         {
+          int fsize;
+
           if (access (ucon64.argv[n], F_OK))
             continue;                           // "file" does not exist (option)
           stat (ucon64.argv[n], &fstate);
@@ -1582,7 +1599,7 @@ f2a_write_rom (const char *filename, int size)
   if (ucon64.usbport)
     {
       f2a_init_usb ();
-      f2a_write_usb (n_files, files, 0x8000000 + offset * MBIT);
+      f2a_write_usb (n_files, files, 0x8000000);
       usbport_close (f2a_handle);
     }
 #endif
@@ -1593,7 +1610,7 @@ f2a_write_rom (const char *filename, int size)
     {
       f2a_init_par (ucon64.parport, 10);
 //      f2a_erase_par (0x08000000, size * MBIT);
-      f2a_write_par (n_files, files, 0x8000000 + offset * MBIT);
+      f2a_write_par (n_files, files, 0x8000000);
     }
 #endif
 
@@ -1618,7 +1635,7 @@ f2a_read_sram (const char *filename, int bank)
     {
       if (bank < 1)
         {
-          fprintf (stderr, "ERROR: Bank must be a number larger than or equal to 1\n");
+          fputs ("ERROR: Bank must be a number larger than or equal to 1\n", stderr);
           exit (1);
         }
       size = 64 * 1024;
@@ -1659,7 +1676,7 @@ f2a_write_sram (const char *filename, int bank)
   else
     if (bank < 1)
       {
-        fprintf (stderr, "ERROR: Bank must be a number larger than or equal to 1\n");
+        fputs ("ERROR: Bank must be a number larger than or equal to 1\n", stderr);
         exit (1);
       }
   bank--;

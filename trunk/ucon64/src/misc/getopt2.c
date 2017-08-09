@@ -93,15 +93,15 @@ void
 getopt2_sanity_check_output (const st_getopt2_t *p)
 {
   printf ("{\"%s\", %d, 0, %d, \"%s\", \"%s\", %d}, // console: %d workflow: %d\n",
-    p->name,
-    p->has_arg,
-    p->val,
-    p->arg_name,
-    p->help ? "usage" : p->help, // i (nb) mean it
-//    p->help,
-    0,
-    p->object ? ((st_ucon64_obj_t *) p->object)->console : 0,
-    p->object ? ((st_ucon64_obj_t *) p->object)->flags : 0);
+          p->name,
+          p->has_arg,
+          p->val,
+          p->arg_name,
+          p->help ? "usage" : p->help, // i (nb) mean it
+//          p->help,
+          0,
+          p->object ? ((st_ucon64_obj_t *) p->object)->console : 0,
+          p->object ? ((st_ucon64_obj_t *) p->object)->flags : 0);
 }
 
 
@@ -113,14 +113,12 @@ getopt2_sanity_check (const st_getopt2_t *option)
   for (x = 0; option[x].name || option[x].help; x++)
     if (option[x].name)
       for (y = 0; option[y].name || option[y].help; y++)
-        if (option[y].name)
-          if (!strcmp (option[x].name, option[y].name))
-            if (option[x].val != option[y].val ||
-                option[x].has_arg != option[y].has_arg)
-              {
-                fprintf (stderr, "ERROR: getopt2_sanity_check(): found dupe %s%s with different has_arg, or val\n",
-                  option[x].name[1] ? OPTION_LONG_S : OPTION_S, option[x].name);
-              }
+        if (option[y].name && !strcmp (option[x].name, option[y].name) &&
+            (option[x].val != option[y].val || option[x].has_arg != option[y].has_arg))
+          {
+            fprintf (stderr, "ERROR: getopt2_sanity_check(): found dupe %s%s with different has_arg, or val\n",
+                     option[x].name[1] ? OPTION_LONG_S : OPTION_S, option[x].name);
+          }
 }
 
 
@@ -176,7 +174,6 @@ getopt2_parse_usage (const char *usage_output)
             }
         }
 
-
       if (usage.name)
         {
           printf ("{\"%s\", ", usage.name);
@@ -187,7 +184,6 @@ getopt2_parse_usage (const char *usage_output)
             fputs ("0, NULL, ", stdout);
 
           printf ("\"%s\", NULL},", strtrimr (strtriml (strtok (NULL, "\n"))));
-
         }
       else
         printf ("{NULL, 0, NULL, \"%s\", NULL},", strtrimr (strtriml (strtok (s, "\n"))));
@@ -238,19 +234,19 @@ getopt2_usage_code (const st_getopt2_t *usage)
   for (; usage[i].name || usage[i].help; i++)
     {
       printf ("{\n  %s%s%s, %d, 0, %d, // %d\n  %s%s%s, %s%s%s,\n  (void *) %d\n},\n",
-        usage[i].name ? "\"" : "",
-        usage[i].name ? usage[i].name : "NULL",
-        usage[i].name ? "\"" : "",
-        usage[i].has_arg,
-        usage[i].val,
-        i,
-        usage[i].arg_name ? "\"" : "",
-        usage[i].arg_name ? usage[i].arg_name : "NULL",
-        usage[i].arg_name ? "\"" : "",
-        usage[i].help ? "\"" : "",
-        usage[i].help ? string_code (buf, usage[i].help) : "NULL",
-        usage[i].help ? "\"" : "",
-        (int) usage[i].object);
+              usage[i].name ? "\"" : "",
+              usage[i].name ? usage[i].name : "NULL",
+              usage[i].name ? "\"" : "",
+              usage[i].has_arg,
+              usage[i].val,
+              i,
+              usage[i].arg_name ? "\"" : "",
+              usage[i].arg_name ? usage[i].arg_name : "NULL",
+              usage[i].arg_name ? "\"" : "",
+              usage[i].help ? "\"" : "",
+              usage[i].help ? string_code (buf, usage[i].help) : "NULL",
+              usage[i].help ? "\"" : "",
+              (int) usage[i].object);
     }
 }
 #endif // DEBUG
@@ -268,13 +264,13 @@ getopt2_usage (const st_getopt2_t *usage)
         if (usage[i].name)
           {
             sprintf (buf, "%s%s%s%s%s%s ",
-              // long or short name?
-              (usage[i].name[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
-              usage[i].name,
-              usage[i].has_arg == 2 ? "[" : "", // == 2 arg is optional
-              usage[i].arg_name ? OPTARG_S : "",
-              usage[i].arg_name ? usage[i].arg_name : "",
-              usage[i].has_arg == 2 ? "]" : ""); // == 2 arg is optional
+                     // long or short name?
+                     (usage[i].name[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
+                     usage[i].name,
+                     usage[i].has_arg == 2 ? "[" : "", // == 2 arg is optional
+                     usage[i].arg_name ? OPTARG_S : "",
+                     usage[i].arg_name ? usage[i].arg_name : "",
+                     usage[i].has_arg == 2 ? "]" : ""); // == 2 arg is optional
 
             if (strlen (buf) < 16)
               {
@@ -286,19 +282,22 @@ getopt2_usage (const st_getopt2_t *usage)
 
         if (usage[i].help)
           {
-            char c, *p = buf, *p2 = NULL;
+            char *p = buf;
 
             strcpy (buf, usage[i].help);
-
             if (usage[i].name)
-              for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
-                {
-                  c = p2[1];
-                  p2[1] = '\0';
-                  fputs (p, stdout);
-                  fputs ("                  ", stdout);
-                  p2[1] = c;
-                }
+              {
+                char *p2;
+
+                for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
+                  {
+                    char c = p2[1];
+                    p2[1] = '\0';
+                    fputs (p, stdout);
+                    fputs ("                  ", stdout);
+                    p2[1] = c;
+                  }
+              }
 
             fputs (p, stdout);
             fputc ('\n', stdout);
@@ -320,30 +319,28 @@ getopt2_long_internal (struct option *long_option, const st_getopt2_t *option,
   memset (long_option, 0, sizeof (struct option) * n);
 
   for (; option[i].name || option[i].help; i++)
-    if (option[i].name) // IS option
-      if (long_only || option[i].name[1]) // IS long
-                                          // if (long_only) also one char options are long
-        {
-          for (j = 0; j < i; j++)
-            if (option[j].name)
-              if (!strcmp (option[i].name, option[j].name))
-                break; // no dupes
+    if (option[i].name &&                 // IS option
+        (long_only || option[i].name[1])) // IS long
+      {                                   // if (long_only) also one char options are long
+        for (j = 0; j < i; j++)
+          if (option[j].name && !strcmp (option[i].name, option[j].name))
+            break; // no dupes
 
-          if (j == i && x < n)
-            {
+        if (j == i && x < n)
+          {
 #ifdef  _MSC_VER
-              (char *)
+            (char *)
 #endif
-              long_option[x].name =
+            long_option[x].name =
 #ifdef  _MSC_VER
-                                    (char *)
+                                  (char *)
 #endif
-                                    option[i].name;
-              long_option[x].has_arg = option[i].has_arg;
-              long_option[x].flag = option[i].flag;
-              long_option[x++].val = option[i].val;
-            }
-      }
+                                  option[i].name;
+            long_option[x].has_arg = option[i].has_arg;
+            long_option[x].flag = option[i].flag;
+            long_option[x++].val = option[i].val;
+          }
+    }
 
   return x < n ? x + 1 : 0;
 }
@@ -375,26 +372,26 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
 
   *p = '\0';
   for (; option[i].name || option[i].help; i++)
-    if ((int) strlen (short_option) + 3 < n && option[i].name) // IS option
-      if (!option[i].name[1]) // IS short
-        if (!strchr (short_option, option[i].name[0])) // no dupes
+    if ((int) strlen (short_option) + 3 < n && option[i].name && // IS option
+        !option[i].name[1] && // IS short
+        !strchr (short_option, option[i].name[0])) // no dupes
+      {
+        *p++ = option[i].name[0];
+        switch (option[i].has_arg)
           {
-            *p++ = option[i].name[0];
-            switch (option[i].has_arg)
-              {
-              case 2:
-                *p++ = ':';
-              case 1:                           // falling through
-                *p++ = ':';
-              case 0:
-                break;
+          case 2:
+            *p++ = ':';
+          case 1:                               // falling through
+            *p++ = ':';
+          case 0:
+            break;
 #ifdef  DEBUG
-              default:
-                fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
+          default:
+            fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
 #endif // DEBUG
-              }
-            *p = '\0';
           }
+        *p = '\0';
+      }
 #ifdef  DEBUG
   printf ("%s\n", short_option);
   fflush (stdout);
@@ -462,7 +459,6 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
   if (S_ISDIR (fstate.st_mode) &&
       (flags & (GETOPT2_FILE_RECURSIVE | GETOPT2_FILE_RECURSIVE_ONCE)))
     {
-      int result = 0;
 #ifndef _WIN32
       struct dirent *ep;
       DIR *dp;
@@ -471,7 +467,7 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       WIN32_FIND_DATA find_data;
       HANDLE dp;
 #endif
-      char buf[FILENAME_MAX], *p;
+      char *p;
 
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
       char c = (char) toupper ((int) path[0]);
@@ -488,13 +484,13 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       if ((dp = opendir (path)))
         {
           while ((ep = readdir (dp)))
-            if (strcmp (ep->d_name, ".") != 0 &&
-                strcmp (ep->d_name, "..") != 0)
+            if (strcmp (ep->d_name, ".") && strcmp (ep->d_name, ".."))
               {
+                char buf[FILENAME_MAX];
+
                 sprintf (buf, "%s%s%s", path, p, ep->d_name);
-                result = getopt2_file_recursion (buf, callback_func, calls,
-                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
-                if (result != 0)
+                if (getopt2_file_recursion (buf, callback_func, calls,
+                                            flags & ~GETOPT2_FILE_RECURSIVE_ONCE) != 0)
                   break;
               }
           closedir (dp);
@@ -504,13 +500,14 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
       if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
         {
           do
-            if (strcmp (find_data.cFileName, ".") != 0 &&
-                strcmp (find_data.cFileName, "..") != 0)
+            if (strcmp (find_data.cFileName, ".") &&
+                strcmp (find_data.cFileName, ".."))
               {
+                char buf[FILENAME_MAX];
+
                 sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
-                result = getopt2_file_recursion (buf, callback_func, calls,
-                           flags & ~GETOPT2_FILE_RECURSIVE_ONCE);
-                if (result != 0)
+                if (getopt2_file_recursion (buf, callback_func, calls,
+                                            flags & ~GETOPT2_FILE_RECURSIVE_ONCE) != 0)
                   break;
               }
           while (FindNextFile (dp, &find_data));
@@ -526,11 +523,11 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
 int
 getopt2_file (int argc, char **argv, int (*callback_func) (const char *), int flags)
 {
-  int x = optind, calls = 0, result = 0;
+  int x = optind, calls = 0;
 
   for (; x < argc; x++)
     {
-      result = getopt2_file_recursion (argv[x], callback_func, &calls, flags);
+      int result = getopt2_file_recursion (argv[x], callback_func, &calls, flags);
       if (result != 0)
         break;
     }
@@ -614,7 +611,8 @@ main (int argc, char **argv)
       switch (c)
         {
         case OPTION_A:
-          printf ("option a with object '%s'\n", (const char *) getopt2_get_index_by_val (option, OPTION_A)->object);
+          printf ("option a with object '%s'\n",
+                  (const char *) getopt2_get_index_by_val (option, OPTION_A)->object);
           break;
 
         case OPTION_BBB:

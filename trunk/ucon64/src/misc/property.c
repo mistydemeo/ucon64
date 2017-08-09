@@ -169,12 +169,14 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
 const char *
 get_property (const char *filename, const char *propname, int mode)
 {
-  char line[MAXBUFSIZE], *p = NULL;
+  char *p = NULL;
   FILE *fh;
   const char *value_s = NULL;
 
   if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
+      char line[MAXBUFSIZE];
+
       while (fgets (line, sizeof line, fh) != NULL)
         if ((value_s = get_property_from_string (line, propname,
                PROPERTY_SEPARATOR, PROPERTY_COMMENT)) != NULL)
@@ -205,10 +207,10 @@ get_property (const char *filename, const char *propname, int mode)
 int
 get_property_int (const char *filename, const char *propname)
 {
-  const char *value_s = NULL;                   // MAXBUFSIZE is enough for a *very* large number
-  int value = 0;                                //  and people who might not get the idea that
-                                                //  get_property_int() is ONLY about numbers
-  value_s = get_property (filename, propname, PROPERTY_MODE_TEXT);
+  // MAXBUFSIZE is enough for a *very* large number and people who might not
+  //  get the idea that get_property_int() is ONLY about numbers
+  int value = 0;
+  const char *value_s = get_property (filename, propname, PROPERTY_MODE_TEXT);
 
   if (!value_s)
     value_s = "0";
@@ -221,6 +223,7 @@ get_property_int (const char *filename, const char *propname)
           return 0;
       }
 
+  value = strtol (value_s, NULL, 10);
   return value ? value : 1;                     // if value_s was only text like 'Yes'
 }                                               //  we'll return at least 1
 
@@ -230,8 +233,7 @@ set_property (const char *filename, const char *propname,
               const char *value_s, const char *comment_s)
 {
   int found = 0, result = 0, file_size = 0;
-  char line[MAXBUFSIZE], line2[MAXBUFSIZE], *str = NULL, *p = NULL,
-       line_end[6];
+  char line[MAXBUFSIZE], *str = NULL, *p = NULL, line_end[6];
   FILE *fh;
   struct stat fstate;
 
@@ -246,6 +248,8 @@ set_property (const char *filename, const char *propname,
   *str = '\0';
   if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
+      char line2[MAXBUFSIZE];
+
       // update existing properties
       while (fgets (line, sizeof line, fh) != NULL)
         {
@@ -300,9 +304,13 @@ set_property (const char *filename, const char *propname,
     }
 
   if ((fh = fopen (filename, "w")) == NULL)     // open in text mode
-    return -1;
+    {
+      free (str);
+      return -1;
+    }
   result = fwrite (str, 1, strlen (str), fh);
   fclose (fh);
+  free (str);
 
   return result;
 }

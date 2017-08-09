@@ -365,8 +365,7 @@ parse_templ (const char *templ_file, char *ip)
   memset (filled_in, 0, sizeof (filled_in));
   for (i = 0; templ[i].name; i++)
     {
-      char *p = NULL;
-      p = (char *) get_property (templ_file, templ[i].name, PROPERTY_MODE_TEXT);
+      char *p = (char *) get_property (templ_file, templ[i].name, PROPERTY_MODE_TEXT);
       if (!p)
         p = templ[i].def;
 

@@ -328,12 +328,12 @@ static int
 gd6_sync_hardware (void)
 // sets the SF7 up for an SF6/SF7 protocol transfer
 {
-  int timeout, retries;
+  int retries;
   volatile int delay;
 
   for (retries = GD6_SYNC_RETRIES; retries > 0; retries--)
     {
-      timeout = GD6_TIMEOUT_ATTEMPTS;
+      int timeout = GD6_TIMEOUT_ATTEMPTS;
 
       outportb (gd_port + PARPORT_CONTROL, 4);
       outportb (gd_port, 0);
@@ -475,12 +475,13 @@ static int
 gd6_receive_bytes (unsigned char *buffer, int len)
 {
   int i;
-  unsigned char nibble1, nibble2;
   unsigned int timeout = 0x1e0000;
 
   outportb (gd_port, 0x80);                     // signal the SF6/SF7 to send the next nibble
   for (i = 0; i < len; i++)
     {
+      unsigned char nibble1, nibble2;
+
       while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0)
         if (--timeout == 0)
           return GD_ERROR;
@@ -503,10 +504,10 @@ gd6_receive_bytes (unsigned char *buffer, int len)
 int
 gd_add_filename (const char *filename)
 {
-  char buf[FILENAME_MAX], *p;
-
   if (gd_name_i < GD3_MAX_UNITS)
     {
+      char buf[FILENAME_MAX], *p;
+
       strcpy (buf, filename);
       p = strrchr (buf, '.');
       if (p)
@@ -601,7 +602,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   unsigned char *buffer;
   char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12] = { 0 },
        *filenames[GD3_MAX_UNITS], dir[FILENAME_MAX];
-  int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
+  int num_units, i, split = 1, hirom = snes_get_snes_hirom();
 
   init_io (parport);
 
@@ -621,6 +622,8 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   gd_fsize = 0;
   for (i = 0; i < num_units; i++)
     {
+      int x;
+
       // No suffix is necessary but the name entry must be upper case and MUST
       //  be 11 characters long, padded at the end with spaces if necessary.
       memset (gd3_dram_unit[i].name, ' ', 11);  // "pad" with spaces
@@ -685,6 +688,8 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   puts ("Press q to abort\n");
   for (i = 0; i < num_units; i++)
     {
+      int send_header = i == 0 ? 1 : 0;
+
 #ifdef  DEBUG
       printf ("\nfilename (%d): \"%s\", ", split, (split ? (char *) filenames[i] : filename));
       printf ("name: \"%s\", size: %d\n", gd3_dram_unit[i].name, gd3_dram_unit[i].size);
@@ -719,7 +724,6 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
       */
       wait2 (100);                              // 100 ms seems a good value
 
-      send_header = i == 0 ? 1 : 0;
       if (gd_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)
         io_error ();
       if (gd_send_prolog_bytes ((unsigned char *) gd3_dram_unit[i].name, 11) == GD_ERROR)

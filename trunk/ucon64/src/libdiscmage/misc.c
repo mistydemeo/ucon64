@@ -133,14 +133,12 @@ getopt2_sanity_check (const st_getopt2_t *option)
   for (x = 0; option[x].name || option[x].help; x++)
     if (option[x].name)
       for (y = 0; option[y].name || option[y].help; y++)
-        if (option[y].name)
-          if (!strcmp (option[x].name, option[y].name))
-            if (option[x].val != option[y].val ||
-                option[x].has_arg != option[y].has_arg)
-              {
-                fprintf (stderr, "ERROR: getopt2_sanity_check(): found dupe %s%s with different has_arg, or val\n",
-                  option[x].name[1] ? OPTION_LONG_S : OPTION_S, option[x].name);
-              }
+        if (option[y].name && !strcmp (option[x].name, option[y].name) &&
+            (option[x].val != option[y].val || option[x].has_arg != option[y].has_arg))
+          {
+            fprintf (stderr, "ERROR: getopt2_sanity_check(): found dupe %s%s with different has_arg, or val\n",
+                     option[x].name[1] ? OPTION_LONG_S : OPTION_S, option[x].name);
+          }
 }
 
 
@@ -258,19 +256,19 @@ getopt2_usage_code (const st_getopt2_t *usage)
   for (; usage[i].name || usage[i].help; i++)
     {
       printf ("{\n  %s%s%s, %d, 0, %d, // %d\n  %s%s%s, %s%s%s,\n  (void *) %d\n},\n",
-        usage[i].name ? "\"" : "",
-        usage[i].name ? usage[i].name : "NULL",
-        usage[i].name ? "\"" : "",
-        usage[i].has_arg,
-        usage[i].val,
-        i,
-        usage[i].arg_name ? "\"" : "",
-        usage[i].arg_name ? usage[i].arg_name : "NULL",
-        usage[i].arg_name ? "\"" : "",
-        usage[i].help ? "\"" : "",
-        usage[i].help ? string_code (buf, usage[i].help) : "NULL",
-        usage[i].help ? "\"" : "",
-        (int) usage[i].object);
+              usage[i].name ? "\"" : "",
+              usage[i].name ? usage[i].name : "NULL",
+              usage[i].name ? "\"" : "",
+              usage[i].has_arg,
+              usage[i].val,
+              i,
+              usage[i].arg_name ? "\"" : "",
+              usage[i].arg_name ? usage[i].arg_name : "NULL",
+              usage[i].arg_name ? "\"" : "",
+              usage[i].help ? "\"" : "",
+              usage[i].help ? string_code (buf, usage[i].help) : "NULL",
+              usage[i].help ? "\"" : "",
+              (int) usage[i].object);
     }
 }
 #endif // DEBUG
@@ -291,13 +289,13 @@ getopt2_usage (const st_getopt2_t *usage)
         if (usage[i].name)
           {
             sprintf (buf, "%s%s%s%s%s%s ",
-              // long or short name?
-              (usage[i].name[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
-              usage[i].name,
-              usage[i].has_arg == 2 ? "[" : "", // == 2 arg is optional
-              usage[i].arg_name ? OPTARG_S : "",
-              usage[i].arg_name ? usage[i].arg_name : "",
-              usage[i].has_arg == 2 ? "]" : ""); // == 2 arg is optional
+                     // long or short name?
+                     (usage[i].name[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
+                     usage[i].name,
+                     usage[i].has_arg == 2 ? "[" : "", // == 2 arg is optional
+                     usage[i].arg_name ? OPTARG_S : "",
+                     usage[i].arg_name ? usage[i].arg_name : "",
+                     usage[i].has_arg == 2 ? "]" : ""); // == 2 arg is optional
 
             if (strlen (buf) < 16)
               {
@@ -309,19 +307,22 @@ getopt2_usage (const st_getopt2_t *usage)
 
         if (usage[i].help)
           {
-            char c, *p = buf, *p2 = NULL;
+            char *p = buf;
 
             strcpy (buf, usage[i].help);
-
             if (usage[i].name)
-              for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
-                {
-                  c = p2[1];
-                  p2[1] = '\0';
-                  fputs (p, stdout);
-                  fputs ("                  ", stdout);
-                  p2[1] = c;
-                }
+              {
+                char *p2;
+
+                for (; (p2 = strchr (p, '\n')) != NULL; p = p2 + 1)
+                  {
+                    char c = p2[1];
+                    p2[1] = '\0';
+                    fputs (p, stdout);
+                    fputs ("                  ", stdout);
+                    p2[1] = c;
+                  }
+              }
 
             fputs (p, stdout);
             fputc ('\n', stdout);
@@ -346,9 +347,8 @@ getopt2_long (struct option *long_option, const st_getopt2_t *option, int n)
     if (option[i].name)                         // IS option
       {
         for (j = 0; j < i; j++)
-          if (option[j].name)
-            if (!strcmp (option[i].name, option[j].name))
-              break;                            // no dupes
+          if (option[j].name && !strcmp (option[i].name, option[j].name))
+            break;                              // no dupes
 
         if (j == i && x < n)
           {
@@ -382,26 +382,26 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
 
   *p = '\0';
   for (; option[i].name || option[i].help; i++)
-    if ((int) strlen (short_option) + 3 < n && option[i].name) // IS option
-      if (!option[i].name[1])                   // IS short
-        if (!strchr (short_option, option[i].name[0])) // no dupes
+    if ((int) strlen (short_option) + 3 < n && option[i].name && // IS option
+        !option[i].name[1] && // IS short
+        !strchr (short_option, option[i].name[0])) // no dupes
+      {
+        *p++ = option[i].name[0];
+        switch (option[i].has_arg)
           {
-            *p++ = option[i].name[0];
-            switch (option[i].has_arg)
-              {
-              case 2:
-                *p++ = ':';
-              case 1:                           // falling through
-                *p++ = ':';
-              case 0:
-                break;
+          case 2:
+            *p++ = ':';
+          case 1:                               // falling through
+            *p++ = ':';
+          case 0:
+            break;
 #ifdef  DEBUG
-              default:
-                fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
+          default:
+            fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
 #endif // DEBUG
-              }
-            *p = '\0';
           }
+        *p = '\0';
+      }
 #ifdef  DEBUG
   printf ("%s\n", short_option);
   fflush (stdout);
@@ -417,9 +417,9 @@ getopt2_get_index_by_val (const st_getopt2_t *option, int val)
   int x = 0;
 
   for (; option[x].name || option[x].help; x++)
-    if (option[x].name)                         // it IS an option
-      if (option[x].val == val)
-        return &option[x];
+    if (option[x].name &&                       // it IS an option
+        option[x].val == val)
+      return &option[x];
 
   return NULL;
 }
@@ -433,11 +433,9 @@ vprintf2 (const char *format, va_list argptr)
 {
 #undef  printf
 #undef  fprintf
-  int n_chars = 0, n_ctrl = 0, n_print, done = 0;
+  int n_chars = 0;
   char output[MAXBUFSIZE], *ptr, *ptr2;
-  HANDLE stdout_handle;
   CONSOLE_SCREEN_BUFFER_INFO info;
-  WORD org_attr, new_attr = 0;
 
   n_chars = _vsnprintf (output, MAXBUFSIZE, format, argptr);
   if (n_chars == -1)
@@ -446,11 +444,16 @@ vprintf2 (const char *format, va_list argptr)
                        "                Please send a bug report\n", MAXBUFSIZE);
       exit (1);
     }
+  output[MAXBUFSIZE - 1] = '\0';
 
   if ((ptr = strchr (output, 0x1b)) == NULL)
     fputs (output, stdout);
   else
     {
+      int done = 0;
+      HANDLE stdout_handle;
+      WORD org_attr;
+
       stdout_handle = GetStdHandle (STD_OUTPUT_HANDLE);
       GetConsoleScreenBufferInfo (stdout_handle, &info);
       org_attr = info.wAttributes;
@@ -463,6 +466,9 @@ vprintf2 (const char *format, va_list argptr)
         }
       while (!done)
         {
+          int n_ctrl = 0, n_print;
+          WORD new_attr = 0;
+
           if (memcmp (ptr, "\x1b[0m", 4) == 0)
             {
               new_attr = org_attr;
@@ -844,7 +850,7 @@ strtriml (char *str)
 
   j = strlen (str) - 1;
 
-  while (isspace ((int) str[i]) && (i <= j))
+  while (i <= j && isspace ((int) str[i]))
     i++;
 
   if (0 < i)
@@ -900,11 +906,9 @@ mem_search (const void *buffer, uint32_t buflen,
 void *
 mem_swap_b (void *buffer, uint32_t n)
 {
-  uint8_t *a = (uint8_t *) buffer, byte;
-
   for (; n > 1; n -= 2)
     {
-      byte = *a;
+      uint8_t *a = (uint8_t *) buffer, byte = *a;
       *a = *(a + 1);
       *(a + 1) = byte;
       a += 2;
@@ -917,12 +921,10 @@ mem_swap_b (void *buffer, uint32_t n)
 void *
 mem_swap_w (void *buffer, uint32_t n)
 {
-  uint16_t *a = (uint16_t *) buffer, word;
-
   n >>= 1;                                      // # words = # bytes / 2
   for (; n > 1; n -= 2)
     {
-      word = *a;
+      uint16_t *a = (uint16_t *) buffer, word = *a;
       *a = *(a + 1);
       *(a + 1) = word;
       a += 2;
@@ -1107,9 +1109,8 @@ dirname2 (const char *path)
   if (p1 == dir)
     p1++;                                       // don't overwrite single separator (root dir)
 #if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
-  else if (p1 > dir)
-    if (*(p1 - 1) == ':')
-      p1++;                                     // we must not overwrite the last separator if
+  else if (p1 > dir && *(p1 - 1) == ':')
+    p1++;                                       // we must not overwrite the last separator if
 #endif                                          //  it was directly preceded by a drive letter
 
   if (p1)
@@ -1220,19 +1221,16 @@ realpath (const char *path, char *full_path)
               path++;
               continue;
             }
-          if (path[1] == '.')
+          if (path[1] == '.' && (path[2] == '\0' || path[2] == DIR_SEPARATOR))
             {
-              if (path[2] == '\0' || path[2] == DIR_SEPARATOR)
-                {
-                  path += 2;
-                  // ignore ".." at root
-                  if (new_path == got_path + 1)
-                    continue;
-                  // handle ".." by backing up
-                  while (*((--new_path) - 1) != DIR_SEPARATOR)
-                    ;
-                  continue;
-                }
+              path += 2;
+              // ignore ".." at root
+              if (new_path == got_path + 1)
+                continue;
+              // handle ".." by backing up
+              while (*((--new_path) - 1) != DIR_SEPARATOR)
+                ;
+              continue;
             }
         }
       // safely copy the next pathname component
@@ -1317,7 +1315,6 @@ realpath (const char *path, char *full_path)
 #elif   defined _WIN32
   char *p, c;
   int n;
-
   if (GetFullPathName (path, FILENAME_MAX, full_path, &p) == 0)
     return NULL;
 
@@ -1463,7 +1460,6 @@ one_filesystem (const char *filename1, const char *filename2)
     return 0;
 #else
   DWORD fattrib1, fattrib2;
-  char path1[FILENAME_MAX], path2[FILENAME_MAX], *p, d1, d2;
   HANDLE file1, file2;
   BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
 
@@ -1479,17 +1475,19 @@ one_filesystem (const char *filename1, const char *filename2)
       handle to a directory.
     */
     {
+      char path1[FILENAME_MAX], path2[FILENAME_MAX], *p, d1, d2;
+
       if (GetFullPathName (filename1, FILENAME_MAX, path1, &p) == 0)
         return 0;
       if (GetFullPathName (filename2, FILENAME_MAX, path2, &p) == 0)
         return 0;
       d1 = (char) toupper (path1[0]);
       d2 = (char) toupper (path2[0]);
-      if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z')
-        if (strlen (path1) >= 2 && strlen (path2) >= 2)
+      if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z' &&
+          strlen (path1) >= 2 && strlen (path2) >= 2 &&
           // we don't handle unique volume names
-          if (path1[1] == ':' && path2[1] == ':')
-            return 1;
+          path1[1] == ':' && path2[1] == ':')
+        return 1;
       return 0;
     }
 
@@ -1566,7 +1564,6 @@ truncate2 (const char *filename, off_t new_size)
     {
       FILE *file;
       unsigned char padbuffer[MAXBUFSIZE];
-      int n_bytes;
 
       if ((file = fopen (filename, "ab")) == NULL)
         return -1;
@@ -1575,7 +1572,7 @@ truncate2 (const char *filename, off_t new_size)
 
       while (size < new_size)
         {
-          n_bytes = new_size - size > MAXBUFSIZE ? MAXBUFSIZE : new_size - size;
+          int n_bytes = new_size - size > MAXBUFSIZE ? MAXBUFSIZE : new_size - size;
           fwrite (padbuffer, 1, n_bytes, file);
           size += n_bytes;
         }
@@ -1800,9 +1797,9 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
 */
 {
   char src_name[FILENAME_MAX], line[MAXBUFSIZE], buffer[MAXBUFSIZE],
-       *token, *last, *ptr;
-  unsigned int line_num = 0, n_sets, n, currentsize1, requiredsize1,
-               currentsize2, requiredsize2, currentsize3, requiredsize3;
+       *token, *last;
+  unsigned int line_num = 0, n, currentsize1, requiredsize1, currentsize2,
+               requiredsize2, currentsize3, requiredsize3;
   int n_codes = 0;
   FILE *srcfile;
 
@@ -1820,10 +1817,11 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
   currentsize1 = requiredsize1 = 0;
   while (fgets (line, sizeof line, srcfile) != NULL)
     {
-      line_num++;
-      n_sets = 0;
+      char *ptr = line + strspn (line, "\t ");
+      unsigned int n_sets = 0;
 
-      ptr = line + strspn (line, "\t ");
+      line_num++;
+
       if (*ptr == '#' || *ptr == '\n' || *ptr == '\r')
         continue;
       if ((ptr = strpbrk (line, "\n\r#")) != NULL) // text after # is comment
@@ -1876,7 +1874,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].search_size = n;     // size in bytes
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -1888,7 +1886,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].wildcard = (char) strtol (token, NULL, 16);
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -1900,7 +1898,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].escape = (char) strtol (token, NULL, 16);
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -1938,7 +1936,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       (*patterns)[n_codes].replace_size = n;    // size in bytes
 
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       token = strtok (token, " ");
       last = token;
@@ -1976,7 +1974,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       currentsize2 = 0;
       requiredsize2 = 1;                        // for string terminator
       strcpy (buffer, line);
-      token = strtok (last, ":");
+      strtok (last, ":");
       token = strtok (NULL, ":");
       last = token;
       while (token)
@@ -2040,7 +2038,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
             }
 
           strcpy (buffer, line);
-          token = strtok (last, ":");
+          strtok (last, ":");
           token = strtok (NULL, ":");
           last = token;
 
@@ -2237,15 +2235,18 @@ char *
 get_property (const char *filename, const char *propname, char *buffer,
               const char *def)
 {
-  char line[MAXBUFSIZE], *p = NULL;
+  char *p = NULL;
   FILE *fh;
-  int prop_found = 0, i, whitespace_len;
+  int prop_found = 0;
 
   if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
+      char line[MAXBUFSIZE];
+
       while (fgets (line, sizeof line, fh) != NULL)
         {
-          whitespace_len = strspn (line, "\t ");
+          int i;
+          int whitespace_len = strspn (line, "\t ");
           p = line + whitespace_len;            // ignore leading whitespace
           if (*p == '#' || *p == '\n' || *p == '\r')
             continue;                           // text after # is comment
@@ -2339,8 +2340,8 @@ int
 set_property (const char *filename, const char *propname, const char *value,
               const char *comment)
 {
-  int found = 0, result = 0, file_size = 0, i;
-  char line[MAXBUFSIZE], line2[MAXBUFSIZE], *str = NULL, *p = NULL;
+  int found = 0, result = 0, file_size = 0;
+  char line[MAXBUFSIZE], *str = NULL, *p = NULL;
   FILE *fh;
   struct stat fstate;
 
@@ -2356,6 +2357,9 @@ set_property (const char *filename, const char *propname, const char *value,
 
   if ((fh = fopen (filename, "r")) != NULL)     // opening the file in text mode
     {                                           //  avoids trouble on DOS
+      int i;
+      char line2[MAXBUFSIZE];
+
       while (fgets (line, sizeof line, fh) != NULL)
         {
           strcpy (line2, line);
@@ -2410,9 +2414,13 @@ set_property (const char *filename, const char *propname, const char *value,
     }
 
   if ((fh = fopen (filename, "w")) == NULL)     // open in text mode
-    return -1;
+    {
+      free (str);
+      return -1;
+    }
   result = fwrite (str, 1, strlen (str), fh);
   fclose (fh);
+  free (str);
 
   return result;
 }
@@ -2758,9 +2766,8 @@ q_fbackup (const char *filename, int mode)
           exit (1);
         }
       strcpy (buf, dir);
-      if (buf[0] != '\0')
-        if (buf[strlen (buf) - 1] != DIR_SEPARATOR)
-          strcat (buf, DIR_SEPARATOR_S);
+      if (buf[0] != '\0' && buf[strlen (buf) - 1] != DIR_SEPARATOR)
+        strcat (buf, DIR_SEPARATOR_S);
 
       strcat (buf, basename2 (tmpnam2 (buf2)));
       if (rename (filename, buf))
@@ -2922,7 +2929,7 @@ q_fncmp (const char *filename, int start, int len, const char *search,
 #define BUFSIZE 8192
   char buf[BUFSIZE];
   FILE *fh;
-  int seglen, maxsearchlen, searchpos, filepos = 0, matchlen = 0;
+  int seglen, searchpos, filepos = 0, matchlen = 0;
 
   if ((fh = fopen (filename, "rb")) == NULL)
     {
@@ -2935,7 +2942,7 @@ q_fncmp (const char *filename, int start, int len, const char *search,
   while ((seglen = fread (buf, 1, BUFSIZE + filepos > start + len ?
                             start + len - filepos : BUFSIZE, fh)) != 0)
     {
-      maxsearchlen = searchlen - matchlen;
+      int maxsearchlen = searchlen - matchlen;
       for (searchpos = 0; searchpos <= seglen; searchpos++)
         {
           if (searchpos + maxsearchlen >= seglen)
@@ -3032,7 +3039,8 @@ quick_io_c (int value, size_t start, const char *filename, const char *mode)
 
 #if 0
 int
-process_file (const char *src, int start, int len, const char *dest, const char *mode, int (*func) (char *, int))
+process_file (const char *src, int start, int len, const char *dest,
+              const char *mode, int (*func) (char *, int))
 {
   int seg_len;
   char buf[MAXBUFSIZE];
@@ -3085,8 +3093,9 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
   if (!*str)
     return 0;
 
-  for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL &&
-       (argc < (max_args - 1)); argc++)
+  for (; argc < max_args - 1 &&
+         (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL;
+       argc++)
     ;
 
 #ifdef  DEBUG

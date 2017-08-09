@@ -48,8 +48,7 @@ int
 bsl_apply (const char *mod, const char *bslname)
 {
   FILE *modfile, *bslfile;
-  unsigned char byte;
-  char buf[4096], modname[FILENAME_MAX];
+  char modname[FILENAME_MAX];
   int data, nbytes, offset;
 
   strcpy (modname, mod);
@@ -87,15 +86,14 @@ bsl_apply (const char *mod, const char *bslname)
     {
       while (nbytes > 4096)
         {
+          char buf[4096];
+
           fread (buf, 4096, 1, bslfile);
           fwrite (buf, 4096, 1, modfile);
           nbytes -= 4096;
         }
       while (nbytes-- >= 0)                     // yes, one byte more than the
-        {                                       //  _value_ read from the BSL file
-          byte = (unsigned char) fgetc (bslfile);
-          fputc (byte, modfile);
-        }
+        fputc (fgetc (bslfile), modfile);       //  _value_ read from the BSL file
     }
 
   printf ("Patching complete\n\n");

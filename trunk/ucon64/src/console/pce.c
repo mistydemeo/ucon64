@@ -676,15 +676,16 @@ pce_compare (const void *key, const void *found)
 static void
 swapbits (unsigned char *buffer, int size)
 {
-  int n, byte, bit;
+  int n;
 
   for (n = 0; n < size; n++)
     {
-      byte = 0;
+      unsigned char byte = 0, bit;
+
       for (bit = 0; bit < 8; bit++)
         if (buffer[n] & (1 << bit))
           byte |= 1 << (7 - bit);
-      buffer[n] = (unsigned char) byte;
+      buffer[n] = byte;
     }
 }
 

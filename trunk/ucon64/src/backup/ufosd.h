@@ -48,7 +48,7 @@ Offset       Content
              8 Mbit, 0/2/64 kB SRAM: [0x13] = 15, [0x14] = 28
                0/64 kB SRAM (Wild Trax (J) (V1.1), 64): [0x15] = 0, [0x16] = 0
                2 kB SRAM: [0x15] = 20, [0x16] = 3F
-             8/10/16/24/32 Mbit, 0/2/8/32 kB SRAM (not: 8 Mbit, 0 kB SRAM): [0x13] = 55
+             8/10/16/24/32 Mbit, 0/2/8/32 kB SRAM (not: 8 Mbit, 0/2 kB SRAM): [0x13] = 55
                8/24/32 Mbit, 8/32 kB SRAM: [0x14] = 0
                  8 Mbit, 32 kB SRAM (Star Fox (U) (V1.0)): [0x15] = 40, [0x16] = 0
                  8 Mbit, 8 kB SRAM: [0x15] = 50, [0x16] = BF
@@ -64,9 +64,9 @@ Offset       Content
                2 kB SRAM (Super Mario Kart (J)): [0x16] = 2C
              16 Mbit, 8 kB SRAM: [0x13] = 95, [0x14] = 0, [0x15] = 0, [0x16] = 2C
              24 Mbit, 0 kB SRAM: [0x13] = F5, [0x14] = 0, [0x15] = 0, [0x16] = 0
-             32 Mbit, 0/2 kB SRAM: [0x13] = 55, [0x14] = 0, [0x15] = 80
+             32 Mbit, 0/2/8 kB SRAM: [0x13] = 55, [0x14] = 0, [0x15] = 80
                0 kB SRAM: [0x16] = 0
-               2 kB SRAM: [0x16] = 2C
+               2/8 kB SRAM: [0x16] = 2C
 
              0x15 SRAM A15 control:
                     00 = A15 not used for SRAM control?
@@ -74,7 +74,7 @@ Offset       Content
                     10 = A15=x selects SRAM
                     20 = A15=0 selects SRAM
                     30 = A15=1 selects SRAM
-                    40/50/60/80 = ? (see LoROM 8/24 Mbit, SRAM & HiROM 32 Mbit)
+                    40/50/60/80 = ? (see LoROM 8/24/32 Mbit, SRAM & HiROM 32 Mbit)
              0x16 SRAM A20 - A23 control:
                   Bit 7 6 5 4 3 2 1 0
                       x x             : A23

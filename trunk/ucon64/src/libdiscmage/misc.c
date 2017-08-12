@@ -3088,15 +3088,11 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
 #endif
   int argc = 0;
 
-  if (!str)
-    return 0;
-  if (!*str)
-    return 0;
-
-  for (; argc < max_args - 1 &&
-         (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL;
-       argc++)
-    ;
+  if (str && *str)
+    for (; argc < max_args - 1 &&
+           (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) != NULL;
+         argc++)
+      ;
 
 #ifdef  DEBUG
   fprintf (stderr, "argc:     %d\n", argc);

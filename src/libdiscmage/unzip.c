@@ -1576,15 +1576,17 @@ extern int ZEXPORT unzGetGlobalComment (file, szComment, uSizeBuf)
     if (ZSEEK(s->z_filefunc,s->filestream,s->central_pos+22,ZLIB_FILEFUNC_SEEK_SET)!=0)
         return UNZ_ERRNO;
 
-    if (uReadThis>0)
+    if (szComment!=NULL)
     {
-      *szComment='\0';
-      if (ZREAD(s->z_filefunc,s->filestream,szComment,uReadThis)!=uReadThis)
-        return UNZ_ERRNO;
-    }
-
-    if ((szComment != NULL) && (uSizeBuf > s->gi.size_comment))
+      if (uReadThis>0)
+      {
+        *szComment='\0';
+        if (ZREAD(s->z_filefunc, s->filestream, szComment, uReadThis)!=uReadThis)
+          return UNZ_ERRNO;
+      }
+      if (uSizeBuf>s->gi.size_comment)
         *(szComment+s->gi.size_comment)='\0';
+    }
     return (int)uReadThis;
 }
 

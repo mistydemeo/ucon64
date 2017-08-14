@@ -1159,7 +1159,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
 
 
 static void
-snes_set_gd3_header (unsigned int total4Mbparts, char *header)
+snes_set_gd3_header (unsigned int total4Mbparts, unsigned char *header)
 {
   memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
@@ -1382,14 +1382,15 @@ static void
 write_gd3_file (st_ucon64_nfo_t *rominfo, unsigned char *buffer,
                 unsigned int newsize, unsigned int total4Mbparts)
 {
-  char header[GD_HEADER_LEN], dest_name[FILENAME_MAX];
+  unsigned char header[GD_HEADER_LEN];
+  char dest_name[FILENAME_MAX];
 
   // create the header
   ucon64_fread (header, 0, rominfo->backup_header_len > GD_HEADER_LEN ?
                   GD_HEADER_LEN : rominfo->backup_header_len, ucon64.fname);
   reset_header (header);
   snes_set_gd3_header (total4Mbparts, header);
-  set_nsrt_info (rominfo, (unsigned char *) &header);
+  set_nsrt_info (rominfo, header);
 
   gd_make_name (ucon64.fname, rominfo, dest_name, buffer, newsize);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
@@ -2460,7 +2461,11 @@ when it has been patched with -f.
   strcpy (src_name, "snescopy.txt");
   // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" DIR_SEPARATOR_S "snescopy.txt", ucon64.configdir);
+    {
+      snprintf (src_name, FILENAME_MAX, "%s" DIR_SEPARATOR_S "snescopy.txt",
+                ucon64.configdir);
+      src_name[FILENAME_MAX - 1] = '\0';
+    }
   n_extra_patterns = build_cm_patterns (&patterns, src_name);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -2618,7 +2623,11 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   strcpy (src_name, "snespal.txt");
   // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" DIR_SEPARATOR_S "snespal.txt", ucon64.configdir);
+    {
+      snprintf (src_name, FILENAME_MAX, "%s" DIR_SEPARATOR_S "snespal.txt",
+                ucon64.configdir);
+      src_name[FILENAME_MAX - 1] = '\0';
+    }
   n_extra_patterns = build_cm_patterns (&patterns, src_name);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -2729,7 +2738,11 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   strcpy (src_name, "snesntsc.txt");
   // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" DIR_SEPARATOR_S "snesntsc.txt", ucon64.configdir);
+    {
+      snprintf (src_name, FILENAME_MAX, "%s" DIR_SEPARATOR_S "snesntsc.txt",
+                ucon64.configdir);
+      src_name[FILENAME_MAX - 1] = '\0';
+    }
   n_extra_patterns = build_cm_patterns (&patterns, src_name);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -2868,7 +2881,11 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   strcpy (src_name, "snesslow.txt");
   // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" DIR_SEPARATOR_S "snesslow.txt", ucon64.configdir);
+    {
+      snprintf (src_name, FILENAME_MAX, "%s" DIR_SEPARATOR_S "snesslow.txt",
+                ucon64.configdir);
+      src_name[FILENAME_MAX - 1] = '\0';
+    }
   n_extra_patterns = build_cm_patterns (&patterns, src_name);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",

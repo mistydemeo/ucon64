@@ -134,7 +134,7 @@ parport_read (char dest[], int len, unsigned short parport)
 }
 
 
-int
+static int
 syncHeader (unsigned short baseport)
 {
   int i = 0;
@@ -187,10 +187,11 @@ syncHeader (unsigned short baseport)
 }
 
 
-int
+static int
 initCommunication (unsigned short port)
 {
   int i;
+
   for (i = 0; i < SYNC_MAX_TRY; i++)
     {
       if (syncHeader (port) == 0)
@@ -202,7 +203,7 @@ initCommunication (unsigned short port)
 }
 
 
-int
+static int
 checkSync (unsigned short baseport)
 {
   int i, j;
@@ -227,26 +228,17 @@ checkSync (unsigned short baseport)
 }
 
 
-int
+static int
 sendFilename (unsigned short baseport, char name[])
 {
   int i;
-  char *c, mname[12];
+  char *c = strrchr(name, DIR_SEPARATOR), mname[11];
 
   memset (mname, ' ', 11);
-  c = (strrchr (name, DIR_SEPARATOR));
-  if (c == NULL)
-    {
-      c = name;
-    }
-  else
-    {
-      c++;
-    }
+  c = c == NULL ? name : c++;
   for (i = 0; i < 8 && *c != '.' && *c != '\0'; i++, c++)
     mname[i] = (char) toupper ((int) *c);
-  c = strrchr (c, '.');
-  if (c != NULL)
+  if ((c = strrchr(c, '.')) != NULL)
     {
       c++;
       for (i = 8; i < 11 && *c != '\0'; i++, c++)
@@ -257,11 +249,10 @@ sendFilename (unsigned short baseport, char name[])
 }
 
 
-int
+static int
 sendUploadHeader (unsigned short baseport, char name[], int len)
 {
-  char mname[12], lenbuffer[4];
-  static char protocolId[] = "GD6R\1";
+  char lenbuffer[4], protocolId[] = "GD6R\1";
 
   if (parport_write (protocolId, strlen (protocolId), baseport) != 0)
     return 1;
@@ -273,18 +264,16 @@ sendUploadHeader (unsigned short baseport, char name[], int len)
   if (parport_write (lenbuffer, 4, baseport) != 0)
     return 1;
 
-  memset (mname, ' ', 11);
   if (sendFilename (baseport, name) != 0)
     return 1;
   return 0;
 }
 
 
-int
+static int
 sendDownloadHeader (unsigned short baseport, int *len)
 {
-  char mname[12];
-  static char protocolId[] = "GD6W";
+  char mname[11], protocolId[] = "GD6W";
   unsigned char recbuffer[15];
 
   if (parport_write (protocolId, strlen (protocolId), baseport) != 0)

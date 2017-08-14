@@ -60,7 +60,7 @@ const st_getopt2_t ips_usage[] =
 
 static FILE *orgfile, *modfile, *ipsfile, *destfile;
 static int ndiffs = 0, totaldiffs = 0, address = -1, rle_value = NO_RLE, filepos = 0;
-static const char *destfname = NULL;
+static char destfname[FILENAME_MAX] = "";
 
 
 static unsigned char
@@ -81,12 +81,12 @@ read_byte (FILE *file)
 static void
 remove_destfile (void)
 {
-  if (destfname)
+  if (destfname[0])
     {
       printf ("Removing %s\n", destfname);
       fclose (destfile);                        // necessary on DOS/Win9x for DJGPP port
       remove (destfname);
-      destfname = NULL;
+      destfname[0] = '\0';
     }
 }
 
@@ -99,6 +99,19 @@ ips_apply (const char *mod, const char *ipsname)
   char modname[FILENAME_MAX], magic[6];
   unsigned int length, i;
 
+  if ((ipsfile = fopen (ipsname, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ipsname);
+      exit (1);
+    }
+  fgets (magic, 6, ipsfile);
+  if (strcmp (magic, "PATCH") != 0)
+    {                                           // perform at least one test for validity
+      fprintf (stderr, "ERROR: %s is not a valid IPS file\n", ipsname);
+      fclose (ipsfile);
+      exit (1);
+    }
+
   strcpy (modname, mod);
   ucon64_file_handler (modname, NULL, 0);
   fcopy (mod, 0, fsizeof (mod), modname, "wb"); // no copy if one file
@@ -106,24 +119,13 @@ ips_apply (const char *mod, const char *ipsname)
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
-      exit (1);
-    }
-  if ((ipsfile = fopen (ipsname, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ipsname);
+      fclose (ipsfile);
       exit (1);
     }
 
-  destfname = modname;
+  strcpy (destfname, modname);
   destfile = modfile;
   register_func (remove_destfile);
-
-  fgets (magic, 6, ipsfile);
-  if (strcmp (magic, "PATCH") != 0)
-    {                                           // do at least one check for validity
-      fprintf (stderr, "ERROR: %s is not a valid IPS file\n", ipsname);
-      exit (1);
-    }
 
   puts ("Applying IPS patch...");
   while (!feof (ipsfile))
@@ -386,7 +388,7 @@ ips_create (const char *orgname, const char *modname)
       exit (1);
     }
 
-  destfname = ipsname;
+  strcpy (destfname, ipsname);
   destfile = ipsfile;
   register_func (remove_destfile);
 

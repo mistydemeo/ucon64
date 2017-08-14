@@ -151,7 +151,7 @@ static int gd_bytessent, gd_fsize, gd_name_i = 0;
 static time_t gd_starttime;
 static char **gd_names;
 static unsigned char gd6_send_toggle;
-static const char *gd_destfname = NULL;
+static char gd_destfname[FILENAME_MAX] = "";
 static FILE *gd_destfile;
 
 
@@ -223,12 +223,12 @@ gd_checkabort (int status)
 static void
 remove_destfile (void)
 {
-  if (gd_destfname)
+  if (gd_destfname[0])
     {
       printf ("Removing %s\n", gd_destfname);
       fclose (gd_destfile);
       remove (gd_destfname);
-      gd_destfname = NULL;
+      gd_destfname[0] = '\0';
     }
 }
 
@@ -795,7 +795,7 @@ gd6_read_sram (const char *filename, unsigned short parport)
     }
 
   // be nice to the user and automatically remove the file on an error (or abortion)
-  gd_destfname = filename;
+  strcpy (gd_destfname, filename);
   gd_destfile = file;
   register_func (remove_destfile);
 
@@ -997,7 +997,7 @@ gd6_read_saver (const char *filename, unsigned short parport)
     }
 
   // be nice to the user and automatically remove the file on an error (or abortion)
-  gd_destfname = filename;
+  strcpy (gd_destfname, filename);
   gd_destfile = file;
   register_func (remove_destfile);
 

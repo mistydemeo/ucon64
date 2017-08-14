@@ -993,36 +993,37 @@ psx_mcb_read_dat (int base, int conport, int tap, int delay, int block)
  *
  */
 PSX_MCB_INFO *
-psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
-                    PSX_MCB_INFO_DAT mcb_info_dat, PSX_MCB_INFO * mcb_info)
+psx_mcb_info_merge (const PSX_MCB_INFO_DIR *mcb_info_dir,
+                    const PSX_MCB_INFO_DAT *mcb_info_dat,
+                    PSX_MCB_INFO *mcb_info)
 {
   mcb_info->read = 1;
 
-  if (!mcb_info_dir.read)
+  if (!mcb_info_dir->read)
     {
       mcb_info->read = 0;
       return mcb_info;
     }
 
-  if ((mcb_info_dir.linktype == PSX_MCB_LTYPE_FIRST) && (!mcb_info_dat.read))
+  if ((mcb_info_dir->linktype == PSX_MCB_LTYPE_FIRST) && (!mcb_info_dat->read))
     {
       mcb_info->read = 0;
       return mcb_info;
     }
 
-  strcpy (mcb_info->filename, mcb_info_dir.filename);
-  strcpy (mcb_info->code, mcb_info_dir.code);
-  mcb_info->territory = mcb_info_dir.territory;
-  mcb_info->bytes = mcb_info_dir.bytes;
-  mcb_info->state = mcb_info_dir.state;
-  mcb_info->linktype = mcb_info_dir.linktype;
-  mcb_info->next = mcb_info_dir.next;
-  if (mcb_info_dir.linktype == PSX_MCB_LTYPE_FIRST)
+  strcpy (mcb_info->filename, mcb_info_dir->filename);
+  strcpy (mcb_info->code, mcb_info_dir->code);
+  mcb_info->territory = mcb_info_dir->territory;
+  mcb_info->bytes = mcb_info_dir->bytes;
+  mcb_info->state = mcb_info_dir->state;
+  mcb_info->linktype = mcb_info_dir->linktype;
+  mcb_info->next = mcb_info_dir->next;
+  if (mcb_info_dir->linktype == PSX_MCB_LTYPE_FIRST)
     {
-      strcpy (mcb_info->name, mcb_info_dat.name);
-      mcb_info->blocks = mcb_info_dat.blocks;
-      mcb_info->icon_valid = mcb_info_dat.icon_valid;
-      mcb_info->icon_frames = mcb_info_dat.icon_frames;
+      strcpy (mcb_info->name, mcb_info_dat->name);
+      mcb_info->blocks = mcb_info_dat->blocks;
+      mcb_info->icon_valid = mcb_info_dat->icon_valid;
+      mcb_info->icon_frames = mcb_info_dat->icon_frames;
     }
   else
     {
@@ -1044,13 +1045,13 @@ psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
 PSX_MCB_INFO *
 psx_mcb_read_info (int base, int conport, int tap, int delay, int block)
 {
-  PSX_MCB_INFO_DIR *mcb_info_dir;
-  PSX_MCB_INFO_DAT *mcb_info_dat;
   static PSX_MCB_INFO mcb_info;
+  PSX_MCB_INFO_DIR *mcb_info_dir = psx_mcb_read_dir (base, conport, tap, delay,
+                                                     block);
+  PSX_MCB_INFO_DAT *mcb_info_dat = psx_mcb_read_dat (base, conport, tap, delay,
+                                                     block);
 
-  mcb_info_dir = psx_mcb_read_dir (base, conport, tap, delay, block);
-  mcb_info_dat = psx_mcb_read_dat (base, conport, tap, delay, block);
-  return psx_mcb_info_merge (*mcb_info_dir, *mcb_info_dat, &mcb_info);
+  return psx_mcb_info_merge (mcb_info_dir, mcb_info_dat, &mcb_info);
 }
 
 #endif /* USE_PARALLEL */

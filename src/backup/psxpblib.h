@@ -215,9 +215,9 @@ PSX_MCB_INFO_DIR *psx_mcb_read_dir (int base, int conport, int tap, int delay,
 PSX_MCB_INFO_DAT *psx_mcb_read_dat (int base, int conport, int tap, int delay,
                                     int block);
 /* Merges the info associated with block from the directory and it's data */
-PSX_MCB_INFO *psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
-                                  PSX_MCB_INFO_DAT mcb_info_dat,
-                                  PSX_MCB_INFO * mcb_info);
+PSX_MCB_INFO *psx_mcb_info_merge (const PSX_MCB_INFO_DIR *mcb_info_dir,
+                                  const PSX_MCB_INFO_DAT *mcb_info_dat,
+                                  PSX_MCB_INFO *mcb_info);
 /* Reads the info associated with block from the directory and it's data */
 PSX_MCB_INFO *psx_mcb_read_info (int base, int conport, int tap, int delay,
                                  int block);

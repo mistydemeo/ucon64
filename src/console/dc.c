@@ -362,14 +362,14 @@ parse_templ (const char *templ_file, char *ip)
   static char buf[MAXBUFSIZE];
   int i;
 
-  memset (filled_in, 0, sizeof (filled_in));
+  memset (filled_in, 0, sizeof filled_in);
   for (i = 0; templ[i].name; i++)
     {
       char *p = (char *) get_property (templ_file, templ[i].name, PROPERTY_MODE_TEXT);
       if (!p)
         p = templ[i].def;
 
-      strncpy (buf, p, MAXBUFSIZE)[MAXBUFSIZE - 1] = 0;
+      strncpy (buf, p, MAXBUFSIZE - 1)[MAXBUFSIZE - 1] = '\0';
       p = strtriml (strtrimr (buf));
 
       if (!(*p))
@@ -381,7 +381,7 @@ parse_templ (const char *templ_file, char *ip)
         {
           fprintf (stderr, "ERROR: Data for field \"%s\" is too long... stripping to %d chars\n",
                    templ[i].name, templ[i].len);
-          p[templ[i].len] = 0;
+          p[templ[i].len] = '\0';
         }
 
       memcpy (ip + templ[i].pos, p, strlen (p));

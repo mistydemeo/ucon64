@@ -992,13 +992,17 @@ lynxit_main (int argc, char **argv)
           MESSAGE (("ERROR    : Missing Cartname/Manufacturer arguments\n"));
           return FALSE;
         }
-      strcpy (cartname, argv[argc - 2]);
-      strcpy (manufname, argv[argc - 1]);
+      strncpy (cartname, argv[argc - 2], sizeof cartname - 1)
+        [sizeof cartname - 1] = '\0';
+      strncpy (manufname, argv[argc - 1], sizeof manufname - 1)
+        [sizeof manufname - 1] = '\0';
+#if 0
       if (strlen (cartname) > 32 || strlen (manufname) > 16)
         {
           MESSAGE (("ERROR    : Cartname/Manufacturer arguments too long (32/16)\n"));
           return FALSE;
         }
+#endif
 
       strcpy (buf, argv[++loop]);
       if (cart_read (buf) == FALSE)

@@ -875,10 +875,10 @@ genesis_j (st_ucon64_nfo_t *rominfo)
                     "ab") != -1)
         {
           printf ("Joined %s\n", src_name);
+          (*p)++;
           if (tried_r00)
             break;                              // quit after joining last file
-          (*p)++;
-          if (!tried_r00 && access (src_name, F_OK) != 0)
+          else if (access (src_name, F_OK) != 0)
             {                                   // file does not exist -> try .r00
               *p = '0';
               tried_r00 = 1;
@@ -991,7 +991,11 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
   strcpy (fname, "genpal.txt");
   // first try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
-    sprintf (fname, "%s" DIR_SEPARATOR_S "genpal.txt", ucon64.configdir);
+    {
+      snprintf (fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "genpal.txt",
+                ucon64.configdir);
+      fname[FILENAME_MAX - 1] = '\0';
+    }
   n_extra_patterns = build_cm_patterns (&patterns, fname);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
@@ -1045,7 +1049,11 @@ genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
   strcpy (fname, "mdntsc.txt");
   // first try the current directory, then the configuration directory
   if (access (fname, F_OK | R_OK) == -1)
-    sprintf (fname, "%s" DIR_SEPARATOR_S "mdntsc.txt", ucon64.configdir);
+    {
+      snprintf (fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "mdntsc.txt",
+                ucon64.configdir);
+      fname[FILENAME_MAX - 1] = '\0';
+    }
   n_extra_patterns = build_cm_patterns (&patterns, fname);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",

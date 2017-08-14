@@ -115,7 +115,7 @@ sha1_compile (s_sha1_ctx_t ctx[1])
         a += PARITY (b, c, d) + 0x6ed9eba1;
       else if (i < 60)
         a += MAJ (b, c, d) + 0x8f1bbcdc;
-      else if (i < 80)
+      else // if (i < 80)
         a += PARITY (b, c, d) + 0xca62c1d6;
       e = d;
       d = c;

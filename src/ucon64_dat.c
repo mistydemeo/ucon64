@@ -268,12 +268,11 @@ get_next_file (char *fname)
 #ifndef _WIN32
   struct dirent *ep;
 
-  if (!ddat)
-    if (!(ddat = opendir (ucon64.datdir)))
-      {
-        fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
-        return NULL;
-      }
+  if (!ddat && !(ddat = opendir(ucon64.datdir)))
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
+      return NULL;
+    }
   while ((ep = readdir (ddat)) != NULL)
     if (!stricmp (get_suffix (ep->d_name), ".dat"))
       {
@@ -288,7 +287,9 @@ get_next_file (char *fname)
       char search_pattern[FILENAME_MAX];
 
       // Note that FindFirstFile() & FindNextFile() are case insensitive
-      sprintf (search_pattern, "%s" DIR_SEPARATOR_S "*.dat", ucon64.datdir);
+      snprintf (search_pattern, FILENAME_MAX, "%s" DIR_SEPARATOR_S "*.dat",
+                ucon64.datdir);
+      fname[FILENAME_MAX - 1] = '\0';
       if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
         {
           // Not being able to find a DAT file is not a real error
@@ -300,13 +301,15 @@ get_next_file (char *fname)
         }
       else
         {
-          sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+          sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.datdir,
+                   find_data.cFileName);
           return fname;
         }
     }
-  while (FindNextFile (ddat, &find_data))
+  else if (FindNextFile (ddat, &find_data))
     {
-      sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+      sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.datdir,
+               find_data.cFileName);
       return fname;
     }
 #endif
@@ -323,33 +326,33 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
 
   p = get_property (fname, "author", PROPERTY_MODE_TEXT);
   x = sizeof (dat->author);
-  strncpy (dat->author, p ? p : "Unknown", x)[x - 1] = 0;
+  strncpy (dat->author, p ? p : "Unknown", x - 1)[x - 1] = '\0';
 
   p = get_property (fname, "version", PROPERTY_MODE_TEXT);
   x = sizeof (dat->version);
-  strncpy (dat->version, p ? p : "?", x)[x - 1] = 0;
+  strncpy (dat->version, p ? p : "?", x - 1)[x - 1] = '\0';
 
   p = get_property (fname, "refname", PROPERTY_MODE_TEXT);
   if (p)
     {
       x = sizeof (dat->refname);
-      strncpy (dat->refname, p, x)[x - 1] = 0;
+      strncpy (dat->refname, p, x - 1)[x - 1] = '\0';
     }
   else
-    *(dat->refname) = 0;
+    *(dat->refname) = '\0';
 
   p = get_property (fname, "comment", PROPERTY_MODE_TEXT);
   if (p)
     {
       x = sizeof (dat->comment);
-      strncpy (dat->comment, p, x)[x - 1] = 0;
+      strncpy (dat->comment, p, x - 1)[x - 1] = '\0';
     }
   else
-    *(dat->comment) = 0;
+    *(dat->comment) = '\0';
 
   p = get_property (fname, "date", PROPERTY_MODE_TEXT);
   x = sizeof (dat->date);
-  strncpy (dat->date, p ? p : "?", x)[x - 1] = 0;
+  strncpy (dat->date, p ? p : "?", x - 1)[x - 1] = '\0';
 
   return dat;
 }
@@ -546,14 +549,14 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
   else
     sscanf (dat_field[6], "%d", (int *) &dat->fsize);
 
-  *buf = 0;
+  *buf = '\0';
   for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
     if (strstr (dat->name, dat_flags[x][0]))
       sprintf (p, "%s, ", dat_flags[x][1]);
   if (buf[0])
     {
       if ((p = strrchr (buf, ',')) != NULL)
-        *p = 0;
+        *p = '\0';
       sprintf (dat->misc, "Flags: %s", buf);
     }
 
@@ -579,7 +582,7 @@ line_to_crc (const char *dat_entry)
 {
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE];
   unsigned int crc32 = 0;                       // has to be unsigned int to
-                                                //  avoid a stupid gcc warning
+                                                //  avoid a GCC warning
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return 0;
 
@@ -981,7 +984,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
       strcpy (buf, dat->console_usage);
       // fix ugly multi-line console "usages" (PC-Engine)
       if ((p = strchr (buf, '\n')) != NULL)
-        *p = 0;
+        *p = '\0';
       printf ("  %s\n", buf);
     }
 
@@ -1009,7 +1012,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
         stricmp (p, ".gg") &&                   // Game Gear
         stricmp (p, ".smd") &&                  // Genesis
         stricmp (p, ".v64")))                   // Nintendo 64
-    ((char *) dat->fname)[strlen (dat->fname) - strlen (p)] = 0;
+    ((char *) dat->fname)[strlen (dat->fname) - strlen (p)] = '\0';
 
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);
@@ -1291,7 +1294,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
 
   ptr = (char *) get_suffix (fname);
   if (*ptr)
-    *ptr = 0;
+    *ptr = '\0';
   fprintf (ucon64_datfile, DAT_FIELD_SEPARATOR_S "%s" // set file name
                            DAT_FIELD_SEPARATOR_S "%s" // set full name
                            DAT_FIELD_SEPARATOR_S "%s" // clone file name

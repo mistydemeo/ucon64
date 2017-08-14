@@ -235,7 +235,10 @@ sendFilename (unsigned short baseport, char name[])
   char *c = strrchr(name, DIR_SEPARATOR), mname[11];
 
   memset (mname, ' ', 11);
-  c = c == NULL ? name : c++;
+  if (c == NULL)
+    c = name;
+  else
+    c++;
   for (i = 0; i < 8 && *c != '.' && *c != '\0'; i++, c++)
     mname[i] = (char) toupper ((int) *c);
   if ((c = strrchr(c, '.')) != NULL)

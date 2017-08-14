@@ -289,7 +289,7 @@ get_next_file (char *fname)
       // Note that FindFirstFile() & FindNextFile() are case insensitive
       snprintf (search_pattern, FILENAME_MAX, "%s" DIR_SEPARATOR_S "*.dat",
                 ucon64.datdir);
-      fname[FILENAME_MAX - 1] = '\0';
+      search_pattern[FILENAME_MAX - 1] = '\0';
       if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
         {
           // Not being able to find a DAT file is not a real error

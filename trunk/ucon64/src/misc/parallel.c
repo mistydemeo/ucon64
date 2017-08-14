@@ -725,7 +725,9 @@ parport_open (unsigned short port)
 
   io_driver = NULL;
 
-  sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "dlportio.dll");
+  snprintf (fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir,
+            "dlportio.dll");
+  fname[FILENAME_MAX - 1] = '\0';
 #if 0 // we must not do this for Cygwin or access() won't "find" the file
   change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
 #endif
@@ -753,7 +755,9 @@ parport_open (unsigned short port)
 
   if (!driver_found)
     {
-      sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "io.dll");
+      snprintf (fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir,
+                "io.dll");
+      fname[FILENAME_MAX - 1] = '\0';
       if (access (fname, F_OK) == 0)
         {
           io_driver = open_module (fname);
@@ -784,7 +788,9 @@ parport_open (unsigned short port)
 
   if (!driver_found)
     {
-      sprintf (fname, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
+      snprintf (fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir,
+                "inpout32.dll");
+      fname[FILENAME_MAX - 1] = '\0';
       if (access (fname, F_OK) == 0)
         {
           io_driver = open_module (fname);

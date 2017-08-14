@@ -225,14 +225,15 @@ gameGenieDecodeGameBoy (const char *in, char *out)
   int value = 0;
   int haveCheck = 0;
   int i;
+  int in_len = (int) strlen (in);
 
-  if (strlen (in) == 11 && in[3] == '-' && in[7] == '-')
+  if (in_len == 11 && in[3] == '-' && in[7] == '-')
     haveCheck = 1;
-  else if (strlen (in) == 7 && in[3] == '-')
+  else if (in_len == 7 && in[3] == '-')
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < (int) strlen (in); ++i)
+  for (i = 0; i < in_len; ++i)
     if (in[i] != '-' && !isxdigit ((int) in[i]))
       return -1;
   if (hexValue (in[6]) < 8)
@@ -263,14 +264,15 @@ gameGenieEncodeGameBoy (const char *in, char *out)
 {
   int haveCheck = 0;
   int i;
+  int in_len = (int) strlen (in);
 
-  if (strlen (in) == 10 && in[4] == ':' && in[7] == ':')
+  if (in_len == 10 && in[4] == ':' && in[7] == ':')
     haveCheck = 1;
-  else if (strlen (in) == 7 && in[4] == ':')
+  else if (in_len == 7 && in[4] == ':')
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < (int) strlen (in); ++i)
+  for (i = 0; i < in_len; ++i)
     if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
   if (hexValue (in[0]) > 7)
@@ -506,14 +508,15 @@ gameGenieDecodeNES (const char *in, char *out)
   int haveCheck = 0;
   int data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
   int i;
+  int in_len = (int) strlen (in);
 
-  if (strlen (in) == 8)
+  if (in_len == 8)
     haveCheck = 1;
-  else if (strlen (in) == 6)
+  else if (in_len == 6)
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < (int) strlen (in); ++i)
+  for (i = 0; i < in_len; ++i)
     if (!isNesChar (in[i]))
       return -1;
 
@@ -569,14 +572,15 @@ gameGenieEncodeNES (const char *in, char *out)
   int haveCheck = 0;
   int data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
   int i;
+  int in_len = (int) strlen (in);
 
-  if (strlen (in) == 10 && in[4] == ':' && in[7] == ':')
+  if (in_len == 10 && in[4] == ':' && in[7] == ':')
     haveCheck = 1;
-  else if (strlen (in) == 7 && in[4] == ':')
+  else if (in_len == 7 && in[4] == ':')
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < (int) strlen (in); ++i)
+  for (i = 0; i < in_len; ++i)
     if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
 

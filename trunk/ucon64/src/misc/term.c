@@ -149,14 +149,7 @@ term_open (void)
 int
 term_close (void)
 {
-  st_term_t *t = &term;
-
-  if (t)
-    {
-      memset (t, 0, sizeof (st_term_t));
-//      free (t);
-    }
-
+  memset (&term, 0, sizeof term);
   return 0;
 }
 
@@ -164,48 +157,42 @@ term_close (void)
 int
 term_w (void)
 {
-  st_term_t *t = &term;
-  return t->w;
+  return term.w;
 }
 
 
 int
 term_h (void)
 {
-  st_term_t *t = &term;
-  return t->h;
+  return term.h;
 }
 
 
 const char *
 term_up (void)
 {
-  st_term_t *t = &term;
-  return t->up;
+  return term.up;
 }
 
 
 const char *
 term_clreoln (void)
 {
-  st_term_t *t = &term;
-  return t->clreoln;
+  return term.clreoln;
 }
 
 
 const char *
 term_emph (void)
 {
-  st_term_t *t = &term;
-  return t->emph;
+  return term.emph;
 }
 
 
 const char *
 term_norm (void)
 {
-  st_term_t *t = &term;
-  return t->norm;
+  return term.norm;
 }
 
 

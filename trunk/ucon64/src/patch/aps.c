@@ -80,7 +80,7 @@ readstdheader (void)
   fread (magic, 1, N64APS_MAGICLENGTH, n64aps_apsfile);
   if (memcmp (magic, n64aps_magic, N64APS_MAGICLENGTH) != 0)
     {
-      fprintf (stderr, "ERROR: Not a valid APS file\n");
+      fputs ("ERROR: Not a valid APS file\n", stderr);
       fclose (n64aps_modfile);
       fclose (n64aps_apsfile);
       exit (1);
@@ -88,7 +88,7 @@ readstdheader (void)
   n64aps_patchtype = (unsigned char) fgetc (n64aps_apsfile);
   if (n64aps_patchtype != 1)                    // N64 patch
     {
-      fprintf (stderr, "ERROR: Could not process patch file\n");
+      fputs ("ERROR: Could not process patch file\n", stderr);
       fclose (n64aps_modfile);
       fclose (n64aps_apsfile);
       exit (1);
@@ -96,7 +96,7 @@ readstdheader (void)
   n64aps_encodingmethod = (unsigned char) fgetc (n64aps_apsfile);
   if (n64aps_encodingmethod != 0)               // simple encoding
     {
-      fprintf (stderr, "ERROR: Unknown or new encoding method\n");
+      fputs ("ERROR: Unknown or new encoding method\n", stderr);
       fclose (n64aps_modfile);
       fclose (n64aps_apsfile);
       exit (1);
@@ -104,7 +104,7 @@ readstdheader (void)
 
   memset (description, ' ', N64APS_DESCRIPTION_LEN);
   fread (description, 1, N64APS_DESCRIPTION_LEN, n64aps_apsfile);
-  description[N64APS_DESCRIPTION_LEN] = 0;
+  description[N64APS_DESCRIPTION_LEN] = '\0';
   printf ("Description: %s\n", description);
 }
 
@@ -125,7 +125,7 @@ readN64header (void)
       ((n64aps_magictest != 0x12408037 && (buffer[0] == 0))))
       // 0 for Doctor format, 1 for everything else
     {
-      fprintf (stderr, "ERROR: Image is in the wrong format\n");
+      fputs ("ERROR: Image is in the wrong format\n", stderr);
       fclose (n64aps_modfile);
       fclose (n64aps_apsfile);
       exit (1);
@@ -142,7 +142,7 @@ readN64header (void)
     }
   if ((buffer[0] != cartid[0]) || (buffer[1] != cartid[1]))
     {
-      fprintf (stderr, "ERROR: This patch does not belong to this image\n");
+      fputs ("ERROR: This patch does not belong to this image\n", stderr);
       fclose (n64aps_modfile);
       fclose (n64aps_apsfile);
       exit (1);
@@ -156,7 +156,7 @@ readN64header (void)
   APSteritory = (unsigned char) fgetc (n64aps_apsfile);
   if (teritory != APSteritory)
     {
-      printf ("WARNING: Wrong country\n");
+      puts ("WARNING: Wrong country");
 #if 0
       if (!force)
         {
@@ -174,7 +174,7 @@ readN64header (void)
     ucon64_bswap16_n (buffer, 8);
   if (memcmp (APSbuffer, buffer, 8))
     {
-      printf ("WARNING: Incorrect image\n");
+      puts ("WARNING: Incorrect image");
 #if 0
       if (!force)
         {
@@ -205,7 +205,7 @@ readsizeheader (int modsize, const char *modname)
         {
           fclose (n64aps_modfile);
           if (truncate (modname, orgsize) != 0)
-            fprintf (stderr, "ERROR: Truncate failed\n");
+            fputs ("ERROR: Truncate failed\n", stderr);
           if ((n64aps_modfile = fopen (modname, "rb")) == NULL)
             {
               fprintf (stderr, "ERROR: Could not open %s after truncation\n", modname);
@@ -243,7 +243,7 @@ readpatch (void)
           fread (buffer, 1, size, n64aps_apsfile);
           if ((fseek (n64aps_modfile, offset, SEEK_SET)) != 0)
             {
-              fprintf (stderr, "ERROR: Seek failed\n");
+              fputs ("ERROR: Seek failed\n", stderr);
               exit (1);
             }
           fwrite (buffer, 1, size, n64aps_modfile);
@@ -258,7 +258,7 @@ readpatch (void)
 
           if ((fseek (n64aps_modfile, offset, SEEK_SET)) != 0)
             {
-              fprintf (stderr, "ERROR: Seek failed\n");
+              fputs ("ERROR: Seek failed\n", stderr);
               exit (1);
             }
           for (i = 0; i < len; i++)
@@ -494,10 +494,10 @@ aps_create (const char *orgname, const char *modname)
   writeN64header ();
   writesizeheader (fsizeof (orgname), fsizeof (modname));
 
-  printf ("Searching differences...");
+  fputs ("Searching differences...", stdout);
   fflush (stdout);
   writepatch ();
-  printf (" done\n");
+  puts (" done\n");
 
   fclose (n64aps_modfile);
   fclose (n64aps_orgfile);

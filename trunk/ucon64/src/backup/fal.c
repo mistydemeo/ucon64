@@ -577,7 +577,7 @@ ReadStatusRegister (int addr)   // 402dd8
   int v;
   WriteFlash (addr, INTEL28F_READSR);
   outpb (SPPCtrlPort, 0);
-  v = PPReadWord ();            // & 0xff;
+  PPReadWord ();
   v = PPReadWord ();            // & 0xff;
   return v;
 }
@@ -728,8 +728,7 @@ dump (u8 BaseAdr)
 
       if (First == 1)
         {
-          if (i * 2 < 256)
-            fputc ('0', stdout);
+          fputc ('0', stdout);
           if (i * 2 < 16)
             fputc ('0', stdout);
           printf ("%hx - ", (i * 2));
@@ -1523,16 +1522,17 @@ fal_main (int argc, char **argv)
   It will save you some work if you don't fully integrate the code above with
   uCON64's code, because it is a project separate from the uCON64 project.
 */
-int fal_argc = 0;
-char *fal_argv[128];
+static int fal_argc = 0;
+static char *fal_argv[128];
 
-void
+static void
 fal_args (unsigned int parport)
 {
-  char parport_str[80];
+  static char parport_str[80];
 
   parport_print_info ();
 
+  fal_argc = 0;
   fal_argv[fal_argc++] = "fl";
   fal_argv[fal_argc++] = "-l";
   sprintf (parport_str, "%u", parport); // don't use %x, as Jeff Frohwein uses atoi()
@@ -1606,7 +1606,7 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
           exit (1);
         }
       bank_str[0] = (char) ('0' + bank);
-      bank_str[1] = 0;                          // terminate string
+      bank_str[1] = '\0';                       // terminate string
       fal_argv[fal_argc++] = bank_str;
       fal_argv[fal_argc++] = "2";               // 64 kB
     }
@@ -1637,7 +1637,7 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
           exit (1);
         }
       bank_str[0] = (char) ('0' + bank);
-      bank_str[1] = 0;                          // terminate string
+      bank_str[1] = '\0';                       // terminate string
       fal_argv[fal_argc++] = bank_str;
     }
   fal_argv[fal_argc++] = (char *) filename;

@@ -1505,12 +1505,12 @@ ucon64_rom_handling (void)
             if (ucon64.dat && ucon64.nfo)
               {
                 if (!ucon64.nfo->name[0])
-                  strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                  strcpy (ucon64.nfo->name, ((st_ucon64_dat_t *) ucon64.dat)->name);
                 else if (ucon64.console == UCON64_NES)
                   { // override the three-character FDS or FAM name
                     nes_file_t type = nes_get_file_type ();
                     if (type == FDS || type == FAM)
-                      strcpy (ucon64.nfo->name, NULL_TO_EMPTY (((st_ucon64_dat_t *) ucon64.dat)->name));
+                      strcpy (ucon64.nfo->name, ((st_ucon64_dat_t *) ucon64.dat)->name);
                   }
 
                 if (!ucon64.nfo->country)

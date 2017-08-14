@@ -5101,24 +5101,25 @@ static const char unif_ucon64_sig[] =
 #else
 static const char unif_ucon64_sig[] = STD_COMMENT UCON64_VERSION_S " " CURRENT_OS_S;
 #endif
-static const int unif_prg_ids[] = {PRG0_ID, PRG1_ID, PRG2_ID, PRG3_ID,
-                                   PRG4_ID, PRG5_ID, PRG6_ID, PRG7_ID,
-                                   PRG8_ID, PRG9_ID, PRGA_ID, PRGB_ID,
-                                   PRGC_ID, PRGD_ID, PRGE_ID, PRGF_ID};
-static const int unif_pck_ids[] = {PCK0_ID, PCK1_ID, PCK2_ID, PCK3_ID,
-                                   PCK4_ID, PCK5_ID, PCK6_ID, PCK7_ID,
-                                   PCK8_ID, PCK9_ID, PCKA_ID, PCKB_ID,
-                                   PCKC_ID, PCKD_ID, PCKE_ID, PCKF_ID};
-static const int unif_chr_ids[] = {CHR0_ID, CHR1_ID, CHR2_ID, CHR3_ID,
-                                   CHR4_ID, CHR5_ID, CHR6_ID, CHR7_ID,
-                                   CHR8_ID, CHR9_ID, CHRA_ID, CHRB_ID,
-                                   CHRC_ID, CHRD_ID, CHRE_ID, CHRF_ID};
-static const int unif_cck_ids[] = {CCK0_ID, CCK1_ID, CCK2_ID, CCK3_ID,
-                                   CCK4_ID, CCK5_ID, CCK6_ID, CCK7_ID,
-                                   CCK8_ID, CCK9_ID, CCKA_ID, CCKB_ID,
-                                   CCKC_ID, CCKD_ID, CCKE_ID, CCKF_ID};
+static const int unif_prg_ids[] = { PRG0_ID, PRG1_ID, PRG2_ID, PRG3_ID,
+                                    PRG4_ID, PRG5_ID, PRG6_ID, PRG7_ID,
+                                    PRG8_ID, PRG9_ID, PRGA_ID, PRGB_ID,
+                                    PRGC_ID, PRGD_ID, PRGE_ID, PRGF_ID };
+static const int unif_pck_ids[] = { PCK0_ID, PCK1_ID, PCK2_ID, PCK3_ID,
+                                    PCK4_ID, PCK5_ID, PCK6_ID, PCK7_ID,
+                                    PCK8_ID, PCK9_ID, PCKA_ID, PCKB_ID,
+                                    PCKC_ID, PCKD_ID, PCKE_ID, PCKF_ID };
+static const int unif_chr_ids[] = { CHR0_ID, CHR1_ID, CHR2_ID, CHR3_ID,
+                                    CHR4_ID, CHR5_ID, CHR6_ID, CHR7_ID,
+                                    CHR8_ID, CHR9_ID, CHRA_ID, CHRB_ID,
+                                    CHRC_ID, CHRD_ID, CHRE_ID, CHRF_ID };
+static const int unif_cck_ids[] = { CCK0_ID, CCK1_ID, CCK2_ID, CCK3_ID,
+                                    CCK4_ID, CCK5_ID, CCK6_ID, CCK7_ID,
+                                    CCK8_ID, CCK9_ID, CCKA_ID, CCKB_ID,
+                                    CCKC_ID, CCKD_ID, CCKE_ID, CCKF_ID };
 
-static const char *nes_destfname = NULL, *internal_name;
+static char nes_destfname[FILENAME_MAX] = "";
+static const char *internal_name;
 static int rom_size;
 static FILE *nes_destfile;
 
@@ -5154,12 +5155,12 @@ nes_get_file_type (void)
 static void
 remove_destfile (void)
 {
-  if (nes_destfname)
+  if (nes_destfname[0])
     {
       printf ("Removing %s\n", nes_destfname);
       fclose (nes_destfile);                    // necessary on DOS/Win9x for DJGPP port
       remove (nes_destfname);
-      nes_destfname = NULL;
+      nes_destfname[0] = '\0';
     }
 }
 
@@ -5395,7 +5396,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   fwrite (&unif_header, 1, UNIF_HEADER_LEN, destfile);
 
   unif_chunk.id = MAPR_ID;
-  if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0)
+  if (ucon64.mapr == NULL || ucon64.mapr[0] == '\0')
     {
       fputs ("ERROR: No board name specified\n", stderr);
       return -1;
@@ -5410,7 +5411,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   write_chunk (&unif_chunk, destfile);
 
 #if     UNIF_REVISION > 7
-  if (ucon64.comment != NULL && strlen (ucon64.comment) > 0)
+  if (ucon64.comment != NULL && ucon64.comment[0] != '\0')
     {
       unif_chunk.id = READ_ID;
       unif_chunk.length = strlen (ucon64.comment) + 1; // +1 to include ASCII-z
@@ -5443,7 +5444,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   if (UCON64_ISSET (ucon64.use_dump_info))
     {
       st_dumper_info_t info;
-      if (ucon64.dump_info != NULL && strlen (ucon64.dump_info) > 0)
+      if (ucon64.dump_info != NULL && ucon64.dump_info[0] != '\0')
         {
           if (access (ucon64.dump_info, F_OK) == 0)
             {
@@ -5573,10 +5574,10 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   fwrite (&unif_header, 1, UNIF_HEADER_LEN, destfile);
 
   if ((unif_chunk1 = read_chunk (MAPR_ID, rom_buffer, 0)) == NULL || // no MAPR chunk
-      (ucon64.mapr != NULL && strlen (ucon64.mapr) > 0))             // MAPR, but has to change
+      (ucon64.mapr != NULL && ucon64.mapr[0] != '\0'))               // MAPR, but has to change
     {
       unif_chunk2.id = MAPR_ID;
-      if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0) // unif_chunk1 == NULL
+      if (ucon64.mapr == NULL || ucon64.mapr[0] == '\0') // unif_chunk1 == NULL
         {
           fputs ("ERROR: File has no MAPR chunk, but no board name was specified\n", stderr);
           return -1;
@@ -5600,7 +5601,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   free (unif_chunk1);                           // case NULL is valid
 
 #if     UNIF_REVISION > 7
-  if (ucon64.comment != NULL && strlen (ucon64.comment) > 0)
+  if (ucon64.comment != NULL && ucon64.comment[0] != '\0')
     {
       unif_chunk2.id = READ_ID;
       unif_chunk2.length = strlen (ucon64.comment) + 1; // +1 to include ASCII-z
@@ -5623,11 +5624,12 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   else
     {
       char ucon64_name[] = "uCON64";
+      size_t ucon64_name_len = strlen (ucon64_name);
       int sig_added = 0;
       // find uCON64 WRTR chunk and modify it if it is present
       do
         {
-          if (!strncmp ((const char *) unif_chunk1->data, ucon64_name, strlen (ucon64_name)))
+          if (!strncmp ((const char *) unif_chunk1->data, ucon64_name, ucon64_name_len))
             {
               unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
               unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -5696,7 +5698,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   if (UCON64_ISSET (ucon64.use_dump_info))
     {
       st_dumper_info_t info;
-      if (ucon64.dump_info != NULL && strlen (ucon64.dump_info) > 0)
+      if (ucon64.dump_info != NULL && ucon64.dump_info[0] != '\0')
         {
           if (access (ucon64.dump_info, F_OK) == 0)
             {
@@ -5900,7 +5902,7 @@ nes_unif (void)
     nes_ines_unif() and nes_unif_unif() might exit() so we use register_func()
   */
   register_func (remove_temp_file);
-  nes_destfname = dest_name;
+  strcpy (nes_destfname, dest_name);
   nes_destfile = destfile;
   register_func (remove_destfile);
   /*
@@ -6038,7 +6040,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
     }
 
   // write iNES file
-  if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0)
+  if (ucon64.mapr == NULL || ucon64.mapr[0] == '\0')
     puts ("WARNING: No mapper number specified, using old value");
   else                                          // mapper specified
     set_mapper (&ines_header, strtol (ucon64.mapr, NULL, 10));
@@ -6158,7 +6160,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   memset (&ines_header, 0, INES_HEADER_LEN);
   memcpy (&ines_header.signature, INES_SIG_S, 4);
 
-  if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0)
+  if (ucon64.mapr == NULL || ucon64.mapr[0] == '\0')
     {                                           // no mapper specified, try autodetection
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
@@ -6316,7 +6318,7 @@ nes_ines (void)
     }
 
   register_func (remove_temp_file);
-  nes_destfname = dest_name;
+  strcpy (nes_destfname, dest_name);
   nes_destfile = destfile;
   register_func (remove_destfile);
   if (type == INES)
@@ -6585,7 +6587,7 @@ nes_dint (void)
     }
 
   register_func (remove_temp_file);
-  nes_destfname = dest_name;
+  strcpy (nes_destfname, dest_name);
   nes_destfile = destfile;
   register_func (remove_destfile);
   // type == INES
@@ -6757,7 +6759,7 @@ nes_j (unsigned char **mem_image)
     }
   ines_header.chr_size = (unsigned char) (chr_size >> 13);
 
-  if (ucon64.mapr == NULL || strlen (ucon64.mapr) == 0)
+  if (ucon64.mapr == NULL || ucon64.mapr[0] == '\0')
     {                                           // maybe .PRM contained mapper
       if (write_file)                           // Don't print this from nes_init()
         printf ("WARNING: No mapper number specified, writing \"%d\"\n",
@@ -6915,7 +6917,7 @@ nes_s (void)
     chr_size = read_block (&chr_data, chr_size, srcfile,
                            "ERROR: Not enough memory for CHR buffer (%d bytes)\n", chr_size);
 
-  if (ucon64.mapr != NULL && strlen (ucon64.mapr) > 0) // mapper specified
+  if (ucon64.mapr != NULL && ucon64.mapr[0] != '\0') // mapper specified
     {
       int x = strtol (ucon64.mapr, NULL, 10);
       if (x == 0 || x == 2 || x == 4)
@@ -6978,7 +6980,7 @@ nes_n (const char *name)
       return -1;
     }
 
-  if (name != NULL && strlen (name) > 0)
+  if (name != NULL && name[0] != '\0')
     internal_name = name;
   else
     internal_name = NULL;
@@ -7145,6 +7147,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       if ((unif_chunk = read_chunk (WRTR_ID, rom_buffer, 0)) != NULL)
         {
           char ucon64_name[] = "uCON64";
+          size_t ucon64_name_len = strlen (ucon64_name);
           strcat (rominfo->misc, "Processed by: ");
           y = 0;
           do
@@ -7159,7 +7162,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
               */
               y = strlen ((const char *) unif_chunk->data);
               x = 0;
-              if (!strncmp ((const char *) unif_chunk->data, ucon64_name, strlen (ucon64_name)))
+              if (!strncmp ((const char *) unif_chunk->data, ucon64_name, ucon64_name_len))
                 {
                   while (x < y)
                     {

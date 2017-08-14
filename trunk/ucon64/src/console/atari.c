@@ -400,6 +400,8 @@ atari_init (st_ucon64_nfo_t * rominfo)
 
   if (bsmode > 0)
     {
+      st_atari_bsmode_t *bsmode_data;
+
       memset (&atari_rominfo, 0, sizeof (st_atari_rominfo_t));
 
       atari_rominfo.bsm = bsmode;
@@ -422,16 +424,21 @@ atari_init (st_ucon64_nfo_t * rominfo)
         }
 
       atari_rominfo.speed_hi = (unsigned char) (atari_rominfo.game_page_count / 21 + 1);
-      atari_rominfo.speed_low = (unsigned char) (atari_rominfo.game_page_count * 0x100 / 21 - (atari_rominfo.speed_hi - 1) * 0x100);
+      atari_rominfo.speed_low = (unsigned char) (atari_rominfo.game_page_count *
+                                0x100 / 21 - (atari_rominfo.speed_hi - 1) * 0x100);
 
-      atari_rominfo.ctrl_byte = get_bsmode_by_id (atari_rominfo.bsm)->ctrl_byte;
-
-      // the first two bytes of data indicate the beginning address of the code
-      if (atari_rominfo.bsm != BSM_3F)
+      bsmode_data = get_bsmode_by_id (atari_rominfo.bsm);
+      if (bsmode_data)
         {
-          ucon64_fread (buffer, get_bsmode_by_id (atari_rominfo.bsm)->start_page * 0x100, 0x100, ucon64.fname);
-          atari_rominfo.start_low = buffer[0xfc];
-          atari_rominfo.start_hi = buffer[0xfd];
+          atari_rominfo.ctrl_byte = bsmode_data->ctrl_byte;
+
+          // the first two bytes of data indicate the beginning address of the code
+          if (atari_rominfo.bsm != BSM_3F)
+          {
+            ucon64_fread (buffer, bsmode_data->start_page * 0x100, 0x100, ucon64.fname);
+            atari_rominfo.start_low = buffer[0xfc];
+            atari_rominfo.start_hi = buffer[0xfd];
+          }
         }
 
       rominfo->console_usage = atari_usage[0].help;
@@ -441,23 +448,38 @@ atari_init (st_ucon64_nfo_t * rominfo)
       backup_usage[80 - 1] = '\0';
       rominfo->backup_usage = backup_usage;
 
-      sprintf (rominfo->misc,
-               "Bankswitch type: %s\n"
-               "Start address: 0x%02x%02x\n"
-               "Speed: 0x%02x%02x\n"
-               "Control byte: 0x%02x\n"
-               "Page count: %d\n"
-               "Blank pages: %d\n"
-               "Start page: %d",
-               get_bsmode_by_id (atari_rominfo.bsm)->bsm_s,
-               atari_rominfo.start_hi,
-               atari_rominfo.start_low,
-               atari_rominfo.speed_hi,
-               atari_rominfo.speed_low,
-               atari_rominfo.ctrl_byte,
-               atari_rominfo.game_page_count,
-               size / 0x100 - atari_rominfo.game_page_count,
-               get_bsmode_by_id (atari_rominfo.bsm)->start_page);
+      {
+        char *bankswitch_type;
+        int start_page;
+
+        if (bsmode_data)
+          {
+            bankswitch_type = bsmode_data->bsm_s;
+            start_page = bsmode_data->start_page;
+          }
+        else
+          {
+            bankswitch_type = "n/a";
+            start_page = 0;
+          }
+        sprintf (rominfo->misc,
+                 "Bankswitch type: %s\n"
+                 "Start address: 0x%02x%02x\n"
+                 "Speed: 0x%02x%02x\n"
+                 "Control byte: 0x%02x\n"
+                 "Page count: %d\n"
+                 "Blank pages: %d\n"
+                 "Start page: %d",
+                 bankswitch_type,
+                 atari_rominfo.start_hi,
+                 atari_rominfo.start_low,
+                 atari_rominfo.speed_hi,
+                 atari_rominfo.speed_low,
+                 atari_rominfo.ctrl_byte,
+                 atari_rominfo.game_page_count,
+                 size / 0x100 - atari_rominfo.game_page_count,
+                 start_page);
+      }
       return 0;
     }
 

@@ -1291,7 +1291,7 @@ ucon64_rename (int mode)
   switch (mode)
     {
     case UCON64_RROM:
-      if (ucon64.nfo && ucon64.nfo->name)
+      if (ucon64.nfo && ucon64.nfo->name[0])
         {
           strcpy (buf, ucon64.nfo->name);
           strtriml (strtrimr (buf));
@@ -1299,7 +1299,7 @@ ucon64_rename (int mode)
       break;
 
     case UCON64_RDAT:                           // GoodXXXX style rename
-      if (ucon64.dat && ((st_ucon64_dat_t *) ucon64.dat)->fname)
+      if (ucon64.dat && ((st_ucon64_dat_t *) ucon64.dat)->fname[0])
         {
           p = (char *) get_suffix (((st_ucon64_dat_t *) ucon64.dat)->fname);
           strcpy (buf, ((st_ucon64_dat_t *) ucon64.dat)->fname);
@@ -1628,8 +1628,11 @@ ucon64_pattern (const char *pattern_fname)
   realpath2 (pattern_fname, src_name);
   // first try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" DIR_SEPARATOR_S "%s", ucon64.configdir,
-             basename2 (pattern_fname));
+    {
+      snprintf (src_name, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s",
+                ucon64.configdir, basename2 (pattern_fname));
+      src_name[FILENAME_MAX - 1] = '\0';
+    }
   n_patterns = build_cm_patterns (&patterns, src_name);
   if (n_patterns == 0)
     {

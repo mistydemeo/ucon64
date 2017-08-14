@@ -863,39 +863,41 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 
       if (track->iso_header_start != -1)
         if ((fh = fopen (image->fname, "rb")) != NULL)
-          if (fread (&iso_header, track->iso_header_start, sizeof (st_iso_header_t), fh))
+          if (fread (&iso_header, track->iso_header_start,
+                     sizeof (st_iso_header_t), fh))
             {
               if (verbose)
-                mem_hexdump (&iso_header, sizeof (st_iso_header_t), track->iso_header_start);
+                mem_hexdump (&iso_header, sizeof (st_iso_header_t),
+                             track->iso_header_start);
 
               // name, maker, country and size
               // some have a name with control chars in it -> replace control chars
-              strncpy2 (buf, NULL_TO_EMPTY (iso_header.volume_id),
-                sizeof (iso_header.volume_id));
+              strncpy2 (buf, iso_header.volume_id,
+                        sizeof iso_header.volume_id);
               to_func (buf, strlen (buf), toprint2);
               if (*strtrim (buf))
                 printf ("  %s\n", buf);
 
-              strncpy2 (buf, NULL_TO_EMPTY (iso_header.publisher_id),
-                sizeof (iso_header.publisher_id));
+              strncpy2 (buf, iso_header.publisher_id,
+                        sizeof iso_header.publisher_id);
               to_func (buf, strlen (buf), toprint2);
               if (*strtrim (buf))
                 printf ("  %s\n", buf);
 
-              strncpy2 (buf, NULL_TO_EMPTY (iso_header.preparer_id),
-                sizeof (iso_header.preparer_id));
+              strncpy2 (buf, iso_header.preparer_id,
+                        sizeof iso_header.preparer_id);
               to_func (buf, strlen (buf), toprint2);
               if (*strtrim (buf))
                 printf ("  %s\n", buf);
 #if 0
-              strncpy2 (buf, NULL_TO_EMPTY (iso_header.logical_block_size),
-                sizeof (iso_header.logical_block_size));
+              strncpy2 (buf, iso_header.logical_block_size,
+                        sizeof iso_header.logical_block_size);
               to_func (buf, strlen (buf), toprint2);
               if (*strtrim (buf))
                 printf ("  %s\n", buf);
 #endif
-              strncpy2 (buf, NULL_TO_EMPTY (iso_header.application_id),
-                sizeof (iso_header.application_id));
+              strncpy2 (buf, iso_header.application_id,
+                        sizeof iso_header.application_id);
               to_func (buf, strlen (buf), toprint2);
               if (*strtrim (buf))
                 printf ("  %s\n", buf);

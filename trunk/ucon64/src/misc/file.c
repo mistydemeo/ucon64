@@ -321,7 +321,7 @@ realpath2 (const char *path, char *full_path)
       if (path[1] == DIR_SEPARATOR
 #ifdef  __CYGWIN__
           || path[1] == '\\'
-#elif   defined __MINGW32__
+#elif   defined DJGPP || defined __MINGW32__
           || path[1] == '/'
 #endif
          )

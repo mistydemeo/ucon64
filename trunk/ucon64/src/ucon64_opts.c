@@ -512,14 +512,24 @@ ucon64_switches (st_ucon64_t *p)
 
     case UCON64_O:
       {
+        char path[FILENAME_MAX], dir_name[FILENAME_MAX];
         struct stat fstate;
         int dir = 0;
 
-        if (!stat (option_arg, &fstate) && S_ISDIR (fstate.st_mode))
+        /*
+          MinGW's stat() does not accept a trailing slash or backslash, but
+          dirname2() only recognizes a path as directory if it ends with a slash
+          or backslash.
+        */
+        snprintf (path, FILENAME_MAX, "%s" DIR_SEPARATOR_S, option_arg);
+        path[FILENAME_MAX - 1] = '\0';
+        dirname2 (path, dir_name);
+        if (!stat (dir_name, &fstate) && S_ISDIR (fstate.st_mode))
           {
-            strcpy (ucon64.output_path, option_arg);
-            if (ucon64.output_path[strlen (ucon64.output_path) - 1] != DIR_SEPARATOR)
-              strcat (ucon64.output_path, DIR_SEPARATOR_S);
+            // dirname2() strips trailing slashes and/or backslashes.
+            snprintf (ucon64.output_path, FILENAME_MAX, "%s" DIR_SEPARATOR_S,
+                      dir_name);
+            ucon64.output_path[FILENAME_MAX - 1] = '\0';
             dir = 1;
           }
 

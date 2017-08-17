@@ -1163,6 +1163,7 @@ main (int argc, char **argv)
   else
     {
       int flags = GETOPT2_FILE_FILES_ONLY;
+
       if (ucon64.recursive)
         flags |= GETOPT2_FILE_RECURSIVE;
       else
@@ -1177,17 +1178,27 @@ main (int argc, char **argv)
               ucon64 file dir1\* dir2\*
             Once the flag is set it is not necessary to check the remaining
             parameters.
-
-            TODO: Find a solution for the fact that the stat() implementation
-                  of MinGW and VC++ don't accept a path with an ending slash.
           */
           int i = optind;
+
           for (; i < argc; i++)
-            if (!stat (argv[i], &fstate) && S_ISDIR (fstate.st_mode))
-              {
-                flags |= GETOPT2_FILE_RECURSIVE_ONCE;
-                break;
-              }
+            {
+              char path[FILENAME_MAX], dir_name[FILENAME_MAX];
+
+              /*
+                MinGW's stat() does not accept a trailing slash or backslash,
+                but dirname2() only recognizes a path as directory if it ends
+                with a slash or backslash.
+              */
+              snprintf (path, FILENAME_MAX, "%s" DIR_SEPARATOR_S, argv[i]);
+              path[FILENAME_MAX - 1] = '\0';
+              dirname2 (path, dir_name);
+              if (!stat (dir_name, &fstate) && S_ISDIR (fstate.st_mode))
+                {
+                  flags |= GETOPT2_FILE_RECURSIVE_ONCE;
+                  break;
+                }
+            }
         }
       getopt2_file (argc, argv, ucon64_process_rom, flags);
     }

@@ -371,46 +371,48 @@ f2a_connect_usb (void)
   int result;
   struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
-#ifdef  __linux__
-  int fp, firmware_loaded = 0;
-  unsigned char f2afirmware[F2A_FIRM_SIZE];
-  char f2afirmware_fname[FILENAME_MAX];
-  const char *p = get_property (ucon64.configfile, "f2afirmware",
-                                PROPERTY_MODE_FILENAME);
-
-  strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX - 1)
-    [FILENAME_MAX - 1] = '\0';
-
-  if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) <= 0)
-    {
-      fprintf (stderr, "ERROR: Could not load F2A firmware (%s)\n", f2afirmware_fname);
-      exit (1);                                 // fatal
-    }
-#endif
 
   usb_init ();
   usb_find_busses ();
-#ifdef  __linux__
   usb_find_devices ();
-  for (bus = usb_busses; bus; bus = bus->next) // usb_busses is present in libusb
+  for (bus = usb_busses; bus; bus = bus->next)  // usb_busses is present in libusb
     {
+      int f2a_found = 0;
+
       for (dev = bus->devices; dev; dev = dev->next)
         {
           if (dev->descriptor.idVendor == 0x547 && dev->descriptor.idProduct == 0x2131)
             {
+              unsigned char f2afirmware[F2A_FIRM_SIZE];
+              char f2afirmware_fname[FILENAME_MAX];
+              const char *p = get_property (ucon64.configfile, "f2afirmware",
+                                            PROPERTY_MODE_FILENAME);
+#ifdef  __linux__
               struct utsname info;
-              int version;
+              unsigned int version_major, version_minor;
+#endif
 
+              f2a_found = 1;
+
+              strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX - 1)
+                [FILENAME_MAX - 1] = '\0';
+              if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) <= 0)
+                {
+                  fprintf (stderr, "ERROR: Could not load F2A firmware (%s)\n",
+                           f2afirmware_fname);
+                  exit (1);                     // fatal
+                }
+
+#ifdef  __linux__
               if (uname (&info) == -1)
                 {
                   fputs ("ERROR: Could not determine version of the running kernel\n", stderr);
                   return -1;
                 }
 
-              version = strtol (&info.release[0], NULL, 10) * 10 +
-                        strtol (&info.release[2], NULL, 10);
               // example contents of info.release: "2.4.18-14custom"
-              if (version >= 25)                // Linux kernel 2.5 or later
+              sscanf (info.release, "%u.%u", &version_major, &version_minor);
+              if (version_major * 10 + version_minor >= 25) // Linux kernel 2.5 or later
                 {
                   // use fxload to upload the F2A firmware
                   char device_path[160];
@@ -438,7 +440,7 @@ f2a_connect_usb (void)
                 }
               else
                 {
-                  int wrote, w;
+                  int fp, wrote, w;
 
                   // Linux kernel version 2.4 or older (2.2.16 is supported by
                   //  the EZUSB2131 driver). It is possible to use fxload on
@@ -466,15 +468,14 @@ f2a_connect_usb (void)
                     }
                   close (fp);
                 }
-              firmware_loaded = 1;
               wait2 (2000);                     // give the EZUSB some time to renumerate
+#endif // __linux__
               break;
             }
         }
-      if (firmware_loaded)
+      if (f2a_found)
         break;
     }
-#endif // __linux__
 
   usb_find_devices ();
   for (bus = usb_busses; bus; bus = bus->next)
@@ -1568,9 +1569,11 @@ f2a_write_rom (const char *filename, int size)
             {
               char **old_files = files;
               n_files_max += 20;                // allocate mem for 20 extra pointers
-              if ((files = (char **) realloc (old_files, n_files_max * 4)) == NULL)
+              if ((files = (char **) realloc (old_files, n_files_max *
+                                                sizeof (char **))) == NULL)
                 {
-                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], n_files_max * 4);
+                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], n_files_max *
+                             sizeof (char **));
                   free (old_files);
                   exit (1);
                 }

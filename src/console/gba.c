@@ -279,8 +279,8 @@ gba_n (st_ucon64_nfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (buf, GBA_HEADER_START + rominfo->backup_header_len + 0xa0, GBA_NAME_LEN,
-            dest_name, "r+b");
+  ucon64_fwrite (buf, GBA_HEADER_START + rominfo->backup_header_len + 0xa0,
+                 GBA_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -295,8 +295,8 @@ gba_logo (st_ucon64_nfo_t *rominfo)
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (gba_logodata, GBA_HEADER_START + rominfo->backup_header_len + 0x04,
-            GBA_LOGODATA_LEN, dest_name, "r+b");
+  ucon64_fwrite (gba_logodata, GBA_HEADER_START + rominfo->backup_header_len +
+                 0x04, GBA_LOGODATA_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -314,9 +314,10 @@ gba_chk (st_ucon64_nfo_t *rominfo)
 
   buf = (char) rominfo->current_internal_crc;
   ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->backup_header_len + 0xbd,
-    buf, "r+b");
+                buf, "r+b");
 
-  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->backup_header_len + 0xbd, DUMPER_HEX);
+  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->backup_header_len + 0xbd,
+          DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -438,7 +439,7 @@ gba_sram (void)
   bufferptr = buffer + 160 + 12 + 4;
 
   ptr = (unsigned char *) memmem2 (bufferptr, fsize, "EEPROM_", 7, 0);
-  if (ptr == 0)
+  if (ptr == NULL)
     {
       printf ("This ROM does not appear to use EEPROM saving\n");
       free (buffer);
@@ -461,7 +462,7 @@ gba_sram (void)
 
   ptr = (unsigned char *) memmem2 (bufferptr, fsize,
                                    fl_orig[minor - 1], sizeof fl_orig[minor - 1], 0);
-  if (ptr == 0)
+  if (ptr == NULL)
     {
       fputs ("ERROR: Could not find fl pattern. Perhaps this file is already patched?\n", stderr);
       free (buffer);
@@ -494,7 +495,7 @@ gba_sram (void)
 
   ptr = (unsigned char *) memmem2 (bufferptr, fsize,
                                    st_orig[minor - 1], sizeof st_orig[minor - 1], 0);
-  if (ptr == 0)
+  if (ptr == NULL)
     {
       fputs ("ERROR: Could not find st pattern\n", stderr);
       free (buffer);
@@ -581,7 +582,7 @@ gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
       fclose (srcfile);
       return -1;
     }
-  if (rominfo->backup_header_len)                    // copy header (if present)
+  if (rominfo->backup_header_len)               // copy header (if present)
     {
       fread (buffer, 1, rominfo->backup_header_len, srcfile);
       fwrite (buffer, 1, rominfo->backup_header_len, destfile);
@@ -646,7 +647,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
 
   // internal ROM name
   strncpy (rominfo->name, (const char *) gba_header.name, GBA_NAME_LEN);
-  rominfo->name[GBA_NAME_LEN] = 0;
+  rominfo->name[GBA_NAME_LEN] = '\0';
 
   // ROM maker
   {
@@ -798,7 +799,8 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
           if (multi_fname != NULL)              // -xfalmulti
             {
               p = get_property (ucon64.configfile, "gbaloader", PROPERTY_MODE_FILENAME);
-              strncpy (fname, p ? p : "loader.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+              strncpy (fname, p ? p : "loader.bin", FILENAME_MAX - 1)
+                [FILENAME_MAX - 1] = '\0';
               if (access (fname, F_OK))
                 {
                   fprintf (stderr, "ERROR: Cannot open loader binary (%s)\n", fname);
@@ -1257,7 +1259,8 @@ gba_sc (void)
   */
   // write the menu (the formulas will NOT be optimized)
   p = get_property (ucon64.configfile, "gbaloader_sc", PROPERTY_MODE_FILENAME);
-  strncpy (fname, p ? p : "sc_menu.bin", FILENAME_MAX)[FILENAME_MAX - 1] = 0;
+  strncpy (fname, p ? p : "sc_menu.bin", FILENAME_MAX - 1)[FILENAME_MAX - 1] =
+    '\0';
   if (ucon64_fread (buffer, 0, GBA_MENU_SIZE, fname) <= 0)
     {
       fprintf (stderr, "ERROR: Could not load Super Card loader (%s)\n", fname);

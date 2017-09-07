@@ -689,9 +689,9 @@ TEST_BREAK
         }
 
       sprintf (buf, "option: %4d crc: 0x%08x calc: 0x%08x status: ",
-        test[x].val,
-        test[x].crc32,
-        crc);
+               test[x].val,
+               test[x].crc32,
+               crc);
 
       if (test[x].crc32 == TEST_BUG)
         state = "BUG!";
@@ -726,15 +726,15 @@ void
 ucon64_runtime_debug_output (st_getopt2_t *p)
 {
   printf ("{\"%s\", %d, 0, %d, \"%s\", \"%s\", %d}, // console: %d workflow: %d\n",
-    p->name,
-    p->has_arg,
-    p->val,
-    p->arg_name,
-    p->help ? "usage" : p->help, // i (nb) mean it
-//    p->help,
-    0,
-    p->object ? ((st_ucon64_obj_t *) p->object)->console : 0,
-    p->object ? ((st_ucon64_obj_t *) p->object)->flags : 0);
+          p->name,
+          p->has_arg,
+          p->val,
+          p->arg_name,
+          p->help ? "usage" : p->help, // i (nb) mean it
+//          p->help,
+          0,
+          p->object ? ((st_ucon64_obj_t *) p->object)->console : 0,
+          p->object ? ((st_ucon64_obj_t *) p->object)->flags : 0);
 }
 
 
@@ -753,7 +753,7 @@ ucon64_runtime_debug (void)
       y++;
   printf ("DEBUG: Total options (with dupes): %d\n", y);
   printf ("DEBUG: UCON64_MAX_ARGS == %d, %s\n", UCON64_MAX_ARGS,
-    (y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options"));
+          y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options");
 #endif
 
 #if 1
@@ -868,8 +868,8 @@ main (int argc, char **argv)
     ucon64_test ();
 #else
   printf ("uCON64 " UCON64_VERSION_S " WIP " CURRENT_OS_S " 1999-2017\n"
-    "Uses code from various people. See 'developers.html' for more!\n"
-    "This may be freely redistributed under the terms of the GNU Public License\n\n");
+          "Uses code from various people. See 'developers.html' for more!\n"
+          "This may be freely redistributed under the terms of the GNU Public License\n\n");
 #endif
 
   if (atexit (ucon64_exit) == -1)
@@ -1454,7 +1454,8 @@ ucon64_rom_handling (void)
     */
     if ((ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
          ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG) &&
-        (UCON64_ISSET (ucon64.split) ? ucon64.split : ucon64_testsplit (ucon64.fname, NULL)))
+        (UCON64_ISSET (ucon64.split) ?
+           ucon64.split : ucon64_testsplit (ucon64.fname, NULL, NULL)))
       {
         fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
                  basename2 (ucon64.fname));
@@ -1705,10 +1706,10 @@ static void
 ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 {
   unsigned int padded = ucon64_testpad (ucon64.fname),
-               intro = ((ucon64.file_size - nfo->backup_header_len) > MBIT) ?
-                         ((ucon64.file_size - nfo->backup_header_len) % MBIT) : 0;
-  int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
-                   ucon64_testsplit (ucon64.fname, NULL);
+               intro = ucon64.file_size - nfo->backup_header_len > MBIT ?
+                         (ucon64.file_size - nfo->backup_header_len) % MBIT : 0;
+  int x, split = UCON64_ISSET (ucon64.split) ? ucon64.split :
+                   ucon64_testsplit (ucon64.fname, NULL, NULL);
   char buf[MAXBUFSIZE];
 
   // backup unit header
@@ -1784,7 +1785,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   // backup unit header?
   if (nfo->backup_header_len)
     printf ("Backup unit/emulator header: Yes, %d Bytes\n",
-      nfo->backup_header_len);
+            nfo->backup_header_len);
   else
 // for NoisyB: <read only mode ON>
     puts ("Backup unit/emulator header: No");   // printing No is handy for SNES ROMs
@@ -1793,7 +1794,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   // split?
   if (split)
     {
-      printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
+      printf ("Split: Yes, %d part%s\n", split, split != 1 ? "s" : "");
       // nes.c calculates the correct checksum for split ROMs (=Pasofami
       //  format), so there is no need to join the files
       if (ucon64.console != UCON64_NES)
@@ -1820,23 +1821,23 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
         fstr = "Header checksum: %%s, 0x%%0%ulx (calculated) %%c= 0x%%0%ulx (internal)\n";
 
       sprintf (buf, fstr,
-        nfo->internal_crc_len * 2, nfo->internal_crc_len * 2);
+               nfo->internal_crc_len * 2, nfo->internal_crc_len * 2);
 #ifdef  USE_ANSI_COLOR
       printf (buf,
-        ucon64.ansi_color ?
-          ((nfo->current_internal_crc == nfo->internal_crc) ?
-            "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
-          :
-          ((nfo->current_internal_crc == nfo->internal_crc) ? "OK" : "Bad"),
-        nfo->current_internal_crc,
-        (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
-        nfo->internal_crc);
+              ucon64.ansi_color ?
+                (nfo->current_internal_crc == nfo->internal_crc ?
+                   "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
+                :
+                nfo->current_internal_crc == nfo->internal_crc ? "OK" : "Bad",
+              nfo->current_internal_crc,
+              nfo->current_internal_crc == nfo->internal_crc ? '=' : '!',
+              nfo->internal_crc);
 #else
       printf (buf,
-        (nfo->current_internal_crc == nfo->internal_crc) ? "OK" : "Bad",
-        nfo->current_internal_crc,
-        (nfo->current_internal_crc == nfo->internal_crc) ? '=' : '!',
-        nfo->internal_crc);
+              nfo->current_internal_crc == nfo->internal_crc ? "OK" : "Bad",
+              nfo->current_internal_crc,
+              nfo->current_internal_crc == nfo->internal_crc ? '=' : '!',
+              nfo->internal_crc);
 #endif
 
       if (nfo->internal_crc2[0])

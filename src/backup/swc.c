@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/archive.h"
 #include "misc/misc.h"
 #include "ucon64_misc.h"
-#include "console/snes.h"                       // for snes_get_file_type ()
+#include "console/snes.h"                       // for snes_get_copier_type()
 #include "backup/ffe.h"
 #include "backup/swc.h"
 
@@ -851,7 +851,7 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
   ffe_send_command0 (0xc008, 0);
   fread (buffer, 1, SWC_HEADER_LEN, file);
 
-  if (snes_get_file_type () == FIG)
+  if (snes_get_copier_type () == FIG)
     handle_fig_header (buffer);
 #if 1
   /*

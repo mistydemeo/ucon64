@@ -26,11 +26,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 
 
-typedef enum { SMD = 1, BIN, MGD_GEN } genesis_file_t;
+typedef enum { SMD = 1, BIN, MGD_GEN } genesis_copier_t;
 
 extern const st_getopt2_t genesis_usage[];
 
-extern genesis_file_t genesis_get_file_type (void);
+extern genesis_copier_t genesis_get_copier_type (void);
 extern int genesis_1991 (st_ucon64_nfo_t *rominfo);
 extern int genesis_chk (st_ucon64_nfo_t *rominfo);
 extern int genesis_j (st_ucon64_nfo_t *rominfo);

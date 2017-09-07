@@ -1923,7 +1923,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    "lp" have access to /dev/parport&#60;n&#62;. So, you should add yourself to
    that group. Say your login name is helanren. User root could use the
    following command to give you the privilege to use /dev/parport0:<br>
-   &nbsp;&nbsp;usermod -G `echo \`id -Gn helanren\` | sed "s/ /,/g"`,lp helanren<br>
+   &nbsp;&nbsp;usermod -G `id -Gn helanren | sed "s/ /,/g"`,lp helanren<br>
    Explanation:<br>
    <b>usermod -G &#60;groups&#62; helanren</b> is used to make helanren a member
    of those groups.<br>

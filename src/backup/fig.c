@@ -368,7 +368,6 @@ fig_read_rom (const char *filename, unsigned short parport)
 
   fflush (file);
   snes_init (&rominfo);
-  memset (buffer, 0, FIG_HEADER_LEN);
   snes_set_fig_header (&rominfo, (st_fig_header_t *) buffer);
   fseek (file, 0, SEEK_SET);
   fwrite (buffer, 1, FIG_HEADER_LEN, file);     // write correct header
@@ -409,7 +408,7 @@ fig_write_rom (const char *filename, unsigned short parport)
   ffe_send_command0 (0xc008, 0);
   fread (buffer, 1, FIG_HEADER_LEN, file);
 
-  if (snes_get_file_type () == SWC)
+  if (snes_get_copier_type () == SWC)
     handle_swc_header (buffer);
   emu_mode_select = buffer[2];                  // this byte is needed later
 

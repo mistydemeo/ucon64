@@ -126,7 +126,7 @@ static int gd6_send_prolog_byte (unsigned char data);
 static int gd6_send_prolog_bytes (unsigned char *data, int len);
 static int gd6_send_bytes (unsigned char *data, int len);
 static int gd6_receive_bytes (unsigned char *buffer, int len);
-static int gd_send_unit_prolog (int header, unsigned size);
+static int gd_send_unit_prolog (unsigned char header, unsigned int size);
 static int gd_write_rom (const char *filename, unsigned short parport,
                          st_ucon64_nfo_t *rominfo, const char *prolog_str);
 static int gd_write_sram (const char *filename, unsigned short parport,
@@ -142,14 +142,19 @@ typedef struct st_gd3_memory_unit
   unsigned int size;                            // usually either 0x100000 or 0x80000
 } st_gd3_memory_unit_t;
 
+typedef struct st_add_filename_data
+{
+  int index;
+  char **names;
+} st_add_filename_data_t;
+
 static int (*gd_send_prolog_byte) (unsigned char data);
 static int (*gd_send_prolog_bytes) (unsigned char *data, int len);
 static int (*gd_send_bytes) (unsigned char *data, int len);
 static st_gd3_memory_unit_t gd3_dram_unit[GD3_MAX_UNITS];
 static unsigned short gd_port;
-static int gd_bytessent, gd_fsize, gd_name_i = 0;
+static int gd_bytessent, gd_fsize;
 static time_t gd_starttime;
-static char **gd_names;
 static unsigned char gd6_send_toggle;
 static char gd_destfname[FILENAME_MAX] = "";
 static FILE *gd_destfile;
@@ -267,21 +272,6 @@ gd3_send_prolog_bytes (unsigned char *data, int len)
   for (i = 0; i < len; i++)
     if (gd3_send_prolog_byte (data[i]) == GD_ERROR)
       return GD_ERROR;
-  return GD_OK;
-}
-
-
-static int
-gd_send_unit_prolog (int header, unsigned size)
-{
-  if (gd_send_prolog_byte (0x00) == GD_ERROR)
-    return GD_ERROR;
-  if (gd_send_prolog_byte ((unsigned char) ((header != 0) ? 0x02 : 0x00)) == GD_ERROR)
-    return GD_ERROR;
-  if (gd_send_prolog_byte ((unsigned char) (size >> 16)) == GD_ERROR) // 0x10 = 8 Mbit
-    return GD_ERROR;
-  if (gd_send_prolog_byte (0x00) == GD_ERROR)
-    return GD_ERROR;
   return GD_OK;
 }
 
@@ -501,22 +491,37 @@ gd6_receive_bytes (unsigned char *buffer, int len)
 }
 
 
-int
-gd_add_filename (const char *filename)
+static int
+gd_send_unit_prolog (unsigned char header, unsigned int size)
 {
-  if (gd_name_i < GD3_MAX_UNITS)
-    {
-      char buf[FILENAME_MAX], *p;
+  if (gd_send_prolog_byte (0x00) == GD_ERROR)
+    return GD_ERROR;
+  if (gd_send_prolog_byte (header ? 0x02 : 0x00) == GD_ERROR)
+    return GD_ERROR;
+  if (gd_send_prolog_byte ((unsigned char) (size >> 16)) == GD_ERROR) // 0x10 = 8 Mbit
+    return GD_ERROR;
+  if (gd_send_prolog_byte (0x00) == GD_ERROR)
+    return GD_ERROR;
+  return GD_OK;
+}
 
-      strcpy (buf, filename);
+
+static void
+gd_add_filename (const char *filename, void *cb_data)
+{
+  st_add_filename_data_t *add_filename_data = (st_add_filename_data_t *) cb_data;
+
+  if (add_filename_data->index < GD3_MAX_UNITS)
+    {
+      char buf[12], *p;
+
+      strncpy (buf, basename2 (filename), 11)[11] = '\0';
       p = strrchr (buf, '.');
       if (p)
-        *p = 0;
-      strncpy (gd_names[gd_name_i], basename2 (buf), 11);
-      gd_names[gd_name_i][11] = 0;
-      gd_name_i++;
+        *p = '\0';
+      strcpy (add_filename_data->names[add_filename_data->index], buf);
+      add_filename_data->index++;
     }
-  return 0;
 }
 
 
@@ -533,32 +538,10 @@ gd3_read_rom (const char *filename, unsigned short parport)
 int
 gd6_read_rom (const char *filename, unsigned short parport)
 {
-#if 0
-  FILE *file;
-  unsigned char *buffer;
-
-  init_io (parport);
-  if ((file = fopen (filename, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
-      exit (1);
-    }
-
-  free (buffer);
-  fclose (file);
-
-  return 0;
-#else
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
   fputs ("ERROR: The function for dumping a cartridge is not yet implemented for the SF6\n", stderr);
   return -1;
-#endif
 }
 
 
@@ -592,7 +575,7 @@ gd6_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *ro
   NOTE: On most Game Doctor's the way you enter link mode to be able to upload
         the ROM to the unit is to hold down the R key on the controller while
         resetting the SNES. You will see the Game Doctor menu has a message that
-        says "LINKING.."
+        says "LINKING..".
 */
 static int
 gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo,
@@ -602,20 +585,23 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   unsigned char *buffer;
   char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12] = { 0 },
        *filenames[GD3_MAX_UNITS], dir[FILENAME_MAX];
-  int num_units, i, split = 1, hirom = snes_get_snes_hirom();
+  int num_units, i, split, hirom = snes_get_snes_hirom ();
+  st_add_filename_data_t add_filename_data = { 0 };
 
   init_io (parport);
 
   // we don't want to malloc() ridiculously small chunks (of 12 bytes)
   for (i = 0; i < GD3_MAX_UNITS; i++)
     names[i] = names_mem[i];
+  add_filename_data.names = names;
 
-  gd_names = (char **) names;
-  num_units = ucon64.split = ucon64_testsplit (filename, gd_add_filename);
-  if (!ucon64.split)
+  split = ucon64_testsplit (filename, gd_add_filename, &add_filename_data);
+  if (UCON64_ISSET (ucon64.split) ? ucon64.split : split)
+    num_units = split;
+  else
     {
       split = 0;
-      num_units = snes_gd_make_names (filename, rominfo, (char **) names);
+      num_units = snes_gd_make_names (filename, rominfo, names);
     }
 
   dirname2 (filename, dir);
@@ -627,7 +613,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
       // No suffix is necessary but the name entry must be upper case and MUST
       //  be 11 characters long, padded at the end with spaces if necessary.
       memset (gd3_dram_unit[i].name, ' ', 11);  // "pad" with spaces
-      gd3_dram_unit[i].name[11] = 0;            // terminate string so we can print it (debug)
+      gd3_dram_unit[i].name[11] = '\0';         // terminate string so we can print it (debug)
       // Use memcpy() instead of strcpy() so that the string terminator in
       //  names[i] won't be copied.
       memcpy (gd3_dram_unit[i].name, strupr (names[i]), strlen (names[i]));
@@ -688,10 +674,10 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   puts ("Press q to abort\n");
   for (i = 0; i < num_units; i++)
     {
-      int send_header = i == 0 ? 1 : 0;
+      unsigned char send_header = i == 0 ? 1 : 0;
 
 #ifdef  DEBUG
-      printf ("\nfilename (%d): \"%s\", ", split, (split ? (char *) filenames[i] : filename));
+      printf ("\nfilename (%d): \"%s\", ", split, split ? (char *) filenames[i] : filename);
       printf ("name: \"%s\", size: %d\n", gd3_dram_unit[i].name, gd3_dram_unit[i].size);
 #endif
       if (split)
@@ -736,7 +722,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
             io_error ();
           gd_bytessent += GD_HEADER_LEN;
         }
-      if (split == 0)                           // not pre-split -- have to split it ourselves
+      if (!split)                               // not pre-split -- have to split it ourselves
         {
           if (hirom)
             fseek (file, i * gd3_dram_unit[0].size + GD_HEADER_LEN, SEEK_SET);
@@ -1135,7 +1121,7 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
 
   // make a GD filename from the real one
   memset (gdfilename, ' ', 11);                 // "pad" with spaces
-  gdfilename[11] = 0;                           // terminate string
+  gdfilename[11] = '\0';                        // terminate string
   memcpy (gdfilename, p, fn_length - 4);        // copy name except extension
   memcpy (&gdfilename[8], "S00", 3);            // copy extension S00
   strupr ((char *) gdfilename);

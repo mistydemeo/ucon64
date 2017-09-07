@@ -32,11 +32,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_HIROM 0x8000
 #define SNES_EROM 0x400000                      // "Extended" ROM, Hi or Lo
 
-typedef enum { SWC = 1, GD3, UFO, UFOSD, FIG, MGD_SNES, SMC } snes_file_t;
+typedef enum { SWC = 1, GD3, UFO, UFOSD, FIG, MGD_SNES, SMC } snes_copier_t;
 
 extern const st_getopt2_t snes_usage[];
 
-extern snes_file_t snes_get_file_type (void);
 extern int snes_backup_header_info (st_ucon64_nfo_t *rominfo);
 extern int snes_chk (st_ucon64_nfo_t *rominfo);
 extern int snes_col (const char *color);
@@ -47,15 +46,16 @@ extern int snes_dint (st_ucon64_nfo_t *rominfo);
 extern int snes_f (st_ucon64_nfo_t *rominfo);
 extern int snes_fig (st_ucon64_nfo_t *rominfo);
 extern int snes_figs (st_ucon64_nfo_t *rominfo);
+extern int snes_gd_make_names (const char *filename, st_ucon64_nfo_t *rominfo,
+                               char **names);
 extern int snes_gd3 (st_ucon64_nfo_t *rominfo);
 extern int snes_gd3s (st_ucon64_nfo_t *rominfo);
+extern snes_copier_t snes_get_copier_type (void);
 extern int snes_get_snes_hirom (void);
 extern int snes_init (st_ucon64_nfo_t *rominfo);
 extern int snes_j (st_ucon64_nfo_t *rominfo);
 extern int snes_k (st_ucon64_nfo_t *rominfo);
 extern int snes_l (st_ucon64_nfo_t *rominfo);
-extern int snes_gd_make_names (const char *filename, st_ucon64_nfo_t *rominfo,
-                               char **names);
 extern int snes_mgd (st_ucon64_nfo_t *rominfo);
 extern int snes_mgh (st_ucon64_nfo_t *rominfo);
 extern int snes_multi (unsigned int truncate_size, char *fname);

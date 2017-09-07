@@ -2195,7 +2195,7 @@ ucon64_options (st_ucon64_t *p)
           if (ucon64.nfo->backup_header_len)    // binary with header is possible
             fputs ("ERROR: This ROM has a header. Remove it with " OPTION_LONG_S "stp or " OPTION_LONG_S "bin\n",
                    stderr);
-          else if (genesis_get_file_type () != BIN)
+          else if (genesis_get_copier_type () != BIN)
             fputs ("ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
                    "       binary files to the MD-PRO. Convert ROM with " OPTION_LONG_S "bin\n",
                    stderr);

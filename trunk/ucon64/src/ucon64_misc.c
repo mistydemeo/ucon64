@@ -1099,7 +1099,8 @@ ucon64_gauge (time_t start_time, int pos, int size)
 
 
 int
-ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
+ucon64_testsplit (const char *filename,
+                  void (*testsplit_cb) (const char *, void *), void *cb_data)
 // test if ROM is split into parts based on the name of files
 {
   int x;
@@ -1124,14 +1125,17 @@ ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
 
       while (!access (buf, F_OK))
         (*p)--;                                 // "rewind" (find the first part)
-      (*p)++;
-
-      while (!access (buf, F_OK))               // count split parts
+      *p += 2;
+      if (!access (buf, F_OK))                  // test if at least 2 parts
         {
-          if (testsplit_cb)
-            testsplit_cb (buf);
-          (*p)++;
-          parts++;
+          (*p)--;
+          while (!access (buf, F_OK))           // count split parts
+            {
+              if (testsplit_cb)
+                testsplit_cb (buf, cb_data);
+              (*p)++;
+              parts++;
+            }
         }
 
       if (parts > 1)
@@ -1143,7 +1147,7 @@ ucon64_testsplit (const char *filename, int (*testsplit_cb) (const char *))
 
 
 static void
-ucon64_set_property (st_property_t* prop, const char *org_configfile,
+ucon64_set_property (st_property_t *prop, const char *org_configfile,
                      const char *propname, const char *value_s,
                      const char *comment_s)
 {

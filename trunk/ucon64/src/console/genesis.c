@@ -232,15 +232,15 @@ typedef struct st_genesis_header
 } st_genesis_header_t;
 
 static st_genesis_header_t genesis_header;
-static genesis_file_t type;
+static genesis_copier_t copier_type;
 static unsigned int genesis_rom_size, genesis_has_ram, genesis_tv_standard,
                     genesis_japanese;
 
 
-genesis_file_t
-genesis_get_file_type (void)
+genesis_copier_t
+genesis_get_copier_type (void)
 {
-  return type;
+  return copier_type;
 }
 
 
@@ -567,7 +567,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
     }
   else
     {
-      if (type == SMD)
+      if (copier_type == SMD)
         part_size = 4 * MBIT;                   // SMD uses 4 Mb parts
       else
         part_size = 8 * MBIT;                   // MGD2 and Magicom ("BIN") use
@@ -583,7 +583,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
   nparts = size / part_size;
   surplus = size % part_size;
 
-  if (type == SMD)
+  if (copier_type == SMD)
     {
       ucon64_fread (&smd_header, 0, SMD_HEADER_LEN, ucon64.fname);
 
@@ -620,7 +620,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
-  else if (type == MGD_GEN)
+  else if (copier_type == MGD_GEN)
     {
       char *names[8], names_mem[8][9] = { 0 };
       const char *p0;
@@ -667,7 +667,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
         }
       mgd_write_index_file (names, name_i);
     }
-  else // type == BIN
+  else // copier_type == BIN
     {
       strcpy (dest_name, ucon64.fname);
       set_suffix (dest_name, ".r01");
@@ -782,7 +782,7 @@ genesis_j (st_ucon64_nfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p;
   int block_size;
 
-  if (type == SMD)
+  if (copier_type == SMD)
     {
       int total_size = 0;
 
@@ -819,7 +819,7 @@ genesis_j (st_ucon64_nfo_t *rominfo)
 
       printf (ucon64_msg[WROTE], dest_name);
     }
-  else if (type == MGD_GEN)
+  else if (copier_type == MGD_GEN)
     {
       /*
         file1 file2 file3 file4
@@ -857,7 +857,7 @@ genesis_j (st_ucon64_nfo_t *rominfo)
 
       printf (ucon64_msg[WROTE], dest_name);
     }
-  else if (type == BIN)
+  else if (copier_type == BIN)
     {
       int tried_r00 = 0;
 
@@ -1127,14 +1127,14 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
   if (bytesread < genesis_rom_size)
     memset (rom_buffer + bytesread, 0, genesis_rom_size - bytesread);
 
-  if (type != BIN)
+  if (copier_type != BIN)
     {
       if (ucon64.fcrc32 == 0)
         ucon64.fcrc32 = crc32 (ucon64.fcrc32, rom_buffer, genesis_rom_size);
 
-      if (type == SMD)
+      if (copier_type == SMD)
         smd_deinterleave (rom_buffer, bytesread);
-      else // type == MGD_GEN
+      else // copier_type == MGD_GEN
         mgd_deinterleave (&rom_buffer, bytesread, genesis_rom_size);
     }
 
@@ -1149,7 +1149,7 @@ load_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 static int
 save_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char **buffer, int size)
 {
-  if (type == SMD)
+  if (copier_type == SMD)
     {
       int n;
 
@@ -1168,12 +1168,12 @@ save_rom (st_ucon64_nfo_t *rominfo, const char *name, unsigned char **buffer, in
         truncate2 (name, rominfo->backup_header_len + size);
       return n;
     }
-  else if (type == MGD_GEN)
+  else if (copier_type == MGD_GEN)
     {
       mgd_interleave (buffer, size);            // allocates new buffer
       return ucon64_fwrite (*buffer, 0, size, name, "wb");
     }
-  else // type == BIN
+  else // copier_type == BIN
     return ucon64_fwrite (*buffer, 0, size, name, "wb");
 }
 
@@ -1461,12 +1461,22 @@ genesis_testinterleaved (st_ucon64_nfo_t *rominfo)
 }
 
 
+static void
+check_split (const char *filename, void *cb_data)
+{
+  // byte at offset 2 is for SMD header "split"
+  int *nsplit = (int *) cb_data, multi = ucon64_fgetc (filename, 2);
+
+  if (multi != EOF && multi & 0x40)
+    (*nsplit)++;
+}
+
+
 int
 genesis_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value = 0, x, y;
-  unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1],
-                smd_header_split;
+  unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1];
   static char maker[9], country[200]; // 200 characters should be enough for 5 country names
 #define GENESIS_IO_MAX 0x58
   static const char *genesis_io[GENESIS_IO_MAX] =
@@ -1492,7 +1502,6 @@ genesis_init (st_ucon64_nfo_t *rominfo)
     };
 
   ucon64_fread (buf, 0, 11, ucon64.fname);
-  smd_header_split = buf[2];
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 7)
     {
       rominfo->backup_header_len = SMD_HEADER_LEN;
@@ -1504,13 +1513,13 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       rominfo->has_internal_crc = 0;
       strcat (rominfo->misc, "Type: Super Magic Drive SRAM file\n");
       ucon64.split = 0;                         // SRAM files are never split
-      type = SMD;
+      copier_type = SMD;
       return 0;                                 // rest is nonsense for SRAM file
     }
 
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6)
     {
-      type = SMD;
+      copier_type = SMD;
       rominfo->backup_header_len = SMD_HEADER_LEN;
     }
 
@@ -1521,13 +1530,13 @@ genesis_init (st_ucon64_nfo_t *rominfo)
                            ucon64.interleaved : genesis_testinterleaved (rominfo);
 
   if (rominfo->interleaved == 0)
-    type = BIN;
+    copier_type = BIN;
   else if (rominfo->interleaved == 1)
-    type = SMD;
+    copier_type = SMD;
   else if (rominfo->interleaved == 2)
-    type = MGD_GEN;
+    copier_type = MGD_GEN;
 
-  if (type == SMD)
+  if (copier_type == SMD)
     {
       genesis_rom_size = (((unsigned int) ucon64.file_size - rominfo->backup_header_len) /
                             16384) * 16384;
@@ -1541,7 +1550,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       smd_deinterleave (buf, 16384);            // buf will contain the deinterleaved data
       memcpy (&genesis_header, buf + GENESIS_HEADER_START, GENESIS_HEADER_LEN);
     }
-  else if (type == MGD_GEN)
+  else if (copier_type == MGD_GEN)
     {
       // We use rominfo->backup_header_len to make it user definable. Normally it
       //  should be 0 for MGD_GEN.
@@ -1549,7 +1558,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       q_fread_mgd (&genesis_header, rominfo->backup_header_len +
                    GENESIS_HEADER_START, GENESIS_HEADER_LEN, ucon64.fname);
     }
-  else // type == BIN
+  else // copier_type == BIN
     {
       // We use rominfo->backup_header_len to make it user definable.
       genesis_rom_size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
@@ -1559,15 +1568,14 @@ genesis_init (st_ucon64_nfo_t *rominfo)
 
   if (!UCON64_ISSET (ucon64.split))
     {
-      if (type == SMD)
+      if (copier_type == SMD)
         {
-          // this code does not work for the last part of a file
-          int split = 0;
-          if (smd_header_split & 0x40)
-            split = ucon64_testsplit (ucon64.fname, NULL);
-          ucon64.split = split;                 // force displayed info to be correct
-        }                                       //  if not split (see ucon64.c)
-      else if (type == BIN)
+          int nsplit = 0,
+              nparts = ucon64_testsplit (ucon64.fname, check_split, &nsplit);
+          // force displayed info to be correct if not split (see ucon64.c)
+          ucon64.split = nparts == nsplit + 1 ? nparts : 0;
+        }
+      else if (copier_type == BIN)
         {
           // this code isn't fool-proof, but it's not that important
           const char *ptr = get_suffix (ucon64.fname);
@@ -1589,7 +1597,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
                 }
               while (n_parts < 100);
 
-              if (n_parts)
+              if (n_parts > 1)
                 ucon64.split = n_parts;
             }
         }
@@ -1853,11 +1861,11 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       free (rom_buffer);
     }
   rominfo->console_usage = genesis_usage[0].help;
-  if (type == SMD)
+  if (copier_type == SMD)
     rominfo->backup_usage = smd_usage[0].help;
-  else if (type == MGD_GEN)
+  else if (copier_type == MGD_GEN)
     rominfo->backup_usage = mgd_usage[0].help;
-  else // type == BIN
+  else // copier_type == BIN
     rominfo->backup_usage = bin_usage[0].help;
 
   return result;

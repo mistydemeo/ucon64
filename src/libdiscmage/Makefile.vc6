@@ -13,7 +13,7 @@ CFLAGS=$(CFLAGS) /DDLOPEN
 !endif
 !ifdef WINXP_TARGETING
 CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
-       /D_USING_V110_SDK71_
+       /D_USING_V110_SDK71_ /arch:IA32
 !endif
 
 LIBNAME=discmage
@@ -26,7 +26,8 @@ LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
 !endif
 
 !ifdef USE_ZLIB
-LDFLAGS=$(LDFLAGS) zdll.lib
+# Compile zlib with -MT instead of the default -MD!
+LDFLAGS=$(LDFLAGS) zlib.lib # zdll.lib
 !endif
 
 

@@ -3134,16 +3134,6 @@ sync (void)
 }
 
 
-#if     defined __MINGW32__ && defined DLL
-// Ugly hack in order to fix something in zlib (yep, it's that bad)
-FILE *
-fdopen (int fd, const char *mode)
-{
-  return _fdopen (fd, mode);
-}
-#endif
-
-
 #elif   defined AMIGA                           // _WIN32
 int
 truncate (const char *path, off_t size)

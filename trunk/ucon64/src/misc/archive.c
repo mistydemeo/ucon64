@@ -660,4 +660,57 @@ pclose2 (FILE *stream)
 #define pclose  pclose2
 }
 
+
+#if     defined __MINGW32__ && defined DLL
+// fix unresolved external symbols in static library of zlib
+int
+open (const char *filename, int flags, ...)
+{
+  // NOTE: We do the same as djlsr205.zip/src/libc/posix/fcntl/open.c.
+  mode_t mode = *(&flags + 1);
+  return _open (filename, flags, mode);
+}
+
+
+int
+snprintf (char *buffer, size_t size, const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  n_chars = _vsnprintf (buffer, size, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+ssize_t
+read (int fd, void *buffer, size_t size)
+{
+  return _read (fd, buffer, size);
+}
+
+
+ssize_t
+write (int fd, const void *buffer, size_t size)
+{
+  return _write (fd, buffer, size);
+}
+
+
+int
+close (int fd)
+{
+  return _close (fd);
+}
+
+
+off_t
+lseek (int fd, off_t offset, int whence)
+{
+  return _lseek (fd, offset, whence);
+}
+#endif
+
 #endif // USE_ZLIB

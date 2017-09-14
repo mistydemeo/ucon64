@@ -120,32 +120,35 @@ misc_wav_write_header (FILE *fh, int channels, int freq,
 
 
 void
-misc_wav_generator (unsigned char *bit, int bitLength, float volume, int wavType)
+misc_wav_generator (unsigned char *bit, int bit_length, float volume, int wav_type)
 {
   int i;
 
 #ifndef  USE_LIBMATH
-  (void) wavType;
+  (void) wav_type;
 #else
-  if (wavType == SQUARE_WAVE)
+  if (wav_type == SQUARE_WAVE)
 #endif // USE_LIBMATH
     {
-      int halfBitLength = (int) (floor ((float) bitLength) / 2.0);
-      int isOdd = (int) (ceil ((float) bitLength / 2.0) - halfBitLength);
+      int half_bit_length = bit_length / 2;
+      unsigned char vol_byte = (unsigned char) (0xfc * volume);
+      for (i = 0; i < half_bit_length; i++)
+        bit[i] = vol_byte;
 
-      for (i = 0; i < halfBitLength; i++)
-        bit[i] = (unsigned char) floor (0xfc * volume);
-
-      if (isOdd)
+      if (bit_length & 1)                       // Is bit_length odd?
         bit[i++] = 0x80;
 
-      for (; i < bitLength; i++)
-        bit[i] = (unsigned char) floor (0x06 * volume);
+      vol_byte = (unsigned char) (0x06 * volume);
+      for (; i < bit_length; i++)
+        bit[i] = vol_byte;
     }
 #ifdef  USE_LIBMATH
   else // SINE_WAV
-    for (i = 0; i < bitLength; i++)
-      bit[i] = (unsigned char) floor
-        (((sin ((((double) 2 * (double) M_PI) / (double) bitLength) * (double) i) * volume + 1) * 128));
+    {
+      double v = volume;
+      for (i = 0; i < bit_length; i++)
+        bit[i] = (unsigned char)
+                   ((sin (((2 * M_PI) / bit_length) * i) * v + 1) * 128);
+    }
 #endif // USE_LIBMATH
 }

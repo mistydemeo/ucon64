@@ -917,16 +917,7 @@ handle_registered_funcs (void)
 }
 
 
-#if     defined __MINGW32__ && defined DLL
-// ugly hack in order to fix something in zlib
-FILE *
-fdopen (int fd, const char *mode)
-{
-  return _fdopen (fd, mode);
-}
-
-
-#elif   defined AMIGA                           // __MINGW32__ && DLL
+#ifdef  AMIGA
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
 FILE *

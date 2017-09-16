@@ -65,7 +65,7 @@ endif                                   # USE_ZLIB
 ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
 
 FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/lib/gcc/i686-pc-cygwin/6.3.0/
+GCCA_DIR=/lib/gcc/i686-pc-cygwin/6.4.0/
 
 ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12
@@ -80,7 +80,7 @@ else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/mingw/lib/gcc/mingw32/5.3.0/
+GCCA_DIR=/mingw/lib/gcc/mingw32/6.3.0/
 LDFLAGS+=-L$(GCCA_DIR) -lgcc -L/mingw/lib -lkernel32 -lmsvcrt --dll -e _DllMain@12
 # MSYS problem: Specifying the library directory is necessary when compiling on
 # a different filesystem than the filesystem that MinGW is installed on.

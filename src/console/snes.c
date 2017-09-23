@@ -2106,7 +2106,8 @@ snes_s (st_ucon64_nfo_t *rominfo)
                       part_size;
 
   if (UCON64_ISSET (ucon64.part_size) &&
-      !(copier_type == GD3 || copier_type == UFO || copier_type == UFOSD))
+      !(copier_type == GD3 || (copier_type == UFO && snes_hirom) ||
+        copier_type == UFOSD))
     {
       part_size = ucon64.part_size;
       /*

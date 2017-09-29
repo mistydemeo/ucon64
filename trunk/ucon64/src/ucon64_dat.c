@@ -322,21 +322,27 @@ static st_ucon64_dat_t *
 get_dat_header (char *fname, st_ucon64_dat_t *dat)
 {
   const char *p;
-  int x = 0;
+  size_t len;
 
   p = get_property (fname, "author", PROPERTY_MODE_TEXT);
-  x = sizeof (dat->author);
-  strncpy (dat->author, p ? p : "Unknown", x - 1)[x - 1] = '\0';
+  len = strlen (p);
+  if (len >= sizeof dat->author)
+    len = sizeof dat->author - 1;
+  strncpy (dat->author, p ? p : "Unknown", len)[len] = '\0';
 
   p = get_property (fname, "version", PROPERTY_MODE_TEXT);
-  x = sizeof (dat->version);
-  strncpy (dat->version, p ? p : "?", x - 1)[x - 1] = '\0';
+  len = strlen (p);
+  if (len >= sizeof dat->version)
+    len = sizeof dat->version - 1;
+  strncpy (dat->version, p ? p : "?", len)[len] = '\0';
 
   p = get_property (fname, "refname", PROPERTY_MODE_TEXT);
   if (p)
     {
-      x = sizeof (dat->refname);
-      strncpy (dat->refname, p, x - 1)[x - 1] = '\0';
+      len = strlen (p);
+      if (len >= sizeof dat->refname)
+        len = sizeof dat->refname - 1;
+      strncpy (dat->refname, p, len)[len] = '\0';
     }
   else
     *(dat->refname) = '\0';
@@ -344,15 +350,19 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
   p = get_property (fname, "comment", PROPERTY_MODE_TEXT);
   if (p)
     {
-      x = sizeof (dat->comment);
-      strncpy (dat->comment, p, x - 1)[x - 1] = '\0';
+      len = strlen (p);
+      if (len >= sizeof dat->comment)
+        len = sizeof dat->comment - 1;
+      strncpy (dat->comment, p, len)[len] = '\0';
     }
   else
     *(dat->comment) = '\0';
 
   p = get_property (fname, "date", PROPERTY_MODE_TEXT);
-  x = sizeof (dat->date);
-  strncpy (dat->date, p ? p : "?", x - 1)[x - 1] = '\0';
+  len = strlen (p);
+  if (len >= sizeof dat->date)
+    len = sizeof dat->date - 1;
+  strncpy (dat->date, p ? p : "?", len)[len] = '\0';
 
   return dat;
 }
@@ -535,10 +545,22 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
   strcpy (dat->datfile, basename2 (fname));
 
   if (dat_field[3])
-    strcpy (dat->name, dat_field[3]);
+    {
+      size_t len = strlen (dat_field[3]);
+
+      if (len >= sizeof dat->name)
+        len = sizeof dat->name - 1;
+      strncpy (dat->name, dat_field[3], len)[len] = '\0';
+    }
 
   if (dat_field[4])
-    strcpy (dat->fname, dat_field[4]);
+    {
+      size_t len = strlen (dat_field[4]);
+
+      if (len >= sizeof dat->fname)
+        len = sizeof dat->fname - 1;
+      strncpy (dat->fname, dat_field[4], len)[len] = '\0';
+    }
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", (unsigned int *) &dat->crc32);

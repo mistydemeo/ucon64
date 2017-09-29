@@ -119,7 +119,7 @@ realpath (const char *path, char *full_path)
 #endif
   int n;
 
-  memset (got_path, 0, sizeof (got_path));
+  memset (got_path, 0, sizeof got_path);
 
   // make a copy of the source path since we may need to modify it
   n = strlen (path);
@@ -313,7 +313,7 @@ char *
 realpath2 (const char *path, char *full_path)
 // enhanced realpath() which returns the absolute path of a file
 {
-  char path1[FILENAME_MAX];
+  char path1[FILENAME_MAX] = { '\0' };
   const char *path2;
 
   if (path[0] == '~')
@@ -325,13 +325,27 @@ realpath2 (const char *path, char *full_path)
           || path[1] == '/'
 #endif
          )
-        sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
+        {
+          snprintf (path1, sizeof path1, "%s" DIR_SEPARATOR_S "%s",
+                    getenv2 ("HOME"), &path[2]);
+          path1[sizeof path1 - 1] = '\0';
+          path2 = "";
+        }
       else
-        strcpy (path1, getenv2 ("HOME"));
-      path2 = path1;
+        path2 = getenv2 ("HOME");
     }
   else
     path2 = path;
+
+  if (path1[0] == '\0')
+    {
+      size_t len = strlen (path2);
+
+      if (len >= sizeof path1)
+        len = sizeof path1 - 1;
+      strncpy (path1, path2, len)[len] = '\0';
+    }
+  path2 = path1;
 
   if (access (path2, F_OK) == 0)
     return realpath (path2, full_path);
@@ -473,10 +487,22 @@ get_suffix (const char *filename)
 char *
 set_suffix (char *filename, const char *suffix)
 {
+  const char *p;
+  size_t len2;
+
   if (filename == NULL || suffix == NULL)
     return filename;
   // always use set_suffix() and NEVER the code below
-  strcpy ((char *) get_suffix (filename), suffix);
+  p = get_suffix (filename);
+  len2 = strlen (filename) - strlen (p);
+  if (len2 < FILENAME_MAX - 1)
+    {
+      size_t len = strlen (suffix);
+
+      if (len + len2 >= FILENAME_MAX)
+        len = FILENAME_MAX - 1 - len2;
+      strncpy ((char *) p, suffix, len)[len] = '\0';
+    }
 
   return filename;
 }

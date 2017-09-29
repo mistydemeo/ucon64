@@ -756,10 +756,7 @@ char *
 strncpy2 (char *dest, const char *src, size_t size)
 {
   if (dest)
-    {
-      strncpy (dest, src ? src : "", size);
-      dest[size] = '\0';
-    }
+    strncpy (dest, src ? src : "", size)[size] = '\0';
   return dest;
 }
 
@@ -774,17 +771,34 @@ isupper2 (int c)
 char *
 set_suffix (char *filename, const char *suffix)
 {
+  size_t len;
   char *p, suffix2[FILENAME_MAX];
 
   if (filename == NULL || suffix == NULL)
     return filename;
-  strcpy (suffix2, suffix);
+  len = strlen (suffix);
+  if (len >= FILENAME_MAX)
+    len = FILENAME_MAX - 1;
+  strncpy (suffix2, suffix, len)[len] = '\0';
   // the next statement is repeating work that get_suffix() does, but that is
   //  better than repeating the implementation of get_suffix() here
   if ((p = basename2 (filename)) == NULL)
     p = filename;
-  strcpy ((char *) get_suffix (filename), is_func (p, strlen (p), isupper2) ?
-            strupr (suffix2) : strlwr (suffix2));
+
+  {
+    size_t len2;
+    int basename_isupper = is_func (p, strlen (p), isupper2);
+
+    p = (char *) get_suffix (p);
+    len2 = strlen (filename) - strlen (p);
+    if (len2 < FILENAME_MAX - 1)
+      {
+        if (len + len2 >= FILENAME_MAX)
+          len = FILENAME_MAX - 1 - len2;
+        strncpy (p, basename_isupper ? strupr (suffix2) : strlwr (suffix2), len)
+          [len] = '\0';
+      }
+  }
 
   return filename;
 }
@@ -793,9 +807,21 @@ set_suffix (char *filename, const char *suffix)
 char *
 set_suffix_i (char *filename, const char *suffix)
 {
+  const char *p;
+  size_t len2;
+
   if (filename == NULL || suffix == NULL)
     return filename;
-  strcpy ((char *) get_suffix (filename), suffix);
+  p = get_suffix (filename);
+  len2 = strlen (filename) - strlen (p);
+  if (len2 < FILENAME_MAX - 1)
+    {
+      size_t len = strlen (suffix);
+
+      if (len + len2 >= FILENAME_MAX)
+        len = FILENAME_MAX - 1 - len2;
+      strncpy ((char *) p, suffix, len)[len] = '\0';
+    }
 
   return filename;
 }
@@ -1150,7 +1176,7 @@ realpath (const char *path, char *full_path)
 #endif
   int n;
 
-  memset (got_path, 0, sizeof (got_path));
+  memset (got_path, 0, sizeof got_path);
 
   // make a copy of the source path since we may need to modify it
   n = strlen (path);
@@ -1343,7 +1369,7 @@ char *
 realpath2 (const char *path, char *full_path)
 // enhanced realpath() which returns the absolute path of a file
 {
-  char path1[FILENAME_MAX];
+  char path1[FILENAME_MAX] = { '\0' };
   const char *path2;
 
   if (path[0] == '~')
@@ -1355,13 +1381,27 @@ realpath2 (const char *path, char *full_path)
           || path[1] == '/'
 #endif
          )
-        sprintf (path1, "%s" DIR_SEPARATOR_S "%s", getenv2 ("HOME"), &path[2]);
+        {
+          snprintf (path1, sizeof path1, "%s" DIR_SEPARATOR_S "%s",
+                    getenv2 ("HOME"), &path[2]);
+          path1[sizeof path1 - 1] = '\0';
+          path2 = "";
+        }
       else
-        strcpy (path1, getenv2 ("HOME"));
-      path2 = path1;
+        path2 = getenv2 ("HOME");
     }
   else
     path2 = path;
+
+  if (path1[0] == '\0')
+    {
+      size_t len = strlen (path2);
+
+      if (len >= sizeof path1)
+        len = sizeof path1 - 1;
+      strncpy (path1, path2, len)[len] = '\0';
+    }
+  path2 = path1;
 
   if (access (path2, F_OK) == 0)
     return realpath (path2, full_path);
@@ -1849,7 +1889,6 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       token = strtok (token, " ");
 //      printf ("token: \"%s\"\n", token);
       last = token;
-      // token is never NULL here (yes, tested with empty files and such)
       do
         {
           requiredsize2++;
@@ -2141,6 +2180,7 @@ getenv2 (const char *variable)
 {
   char *tmp;
   static char value[MAXBUFSIZE];
+  size_t len;
 #ifdef  __MSDOS__
 /*
   On DOS and Windows the environment variables are not stored in a case
@@ -2153,25 +2193,42 @@ getenv2 (const char *variable)
 */
   char tmp2[MAXBUFSIZE];
 
-  strcpy (tmp2, variable);
+  len = strlen (variable);
+  if (len >= sizeof tmp2)
+    len = sizeof tmp2 - 1;
+  strncpy (tmp2, variable, len)[len] = '\0';
   variable = strupr (tmp2);                     // DON'T copy the string into variable
 #endif                                          //  (variable itself is local)
 
   *value = '\0';
 
   if ((tmp = getenv (variable)) != NULL)
-    strcpy (value, tmp);
+    {
+      len = strlen (tmp);
+      if (len >= sizeof value)
+        len = sizeof value - 1;
+      strncpy (value, tmp, len)[len] = '\0';
+    }
   else
     {
       if (!strcmp (variable, "HOME"))
         {
           if ((tmp = getenv ("USERPROFILE")) != NULL)
-            strcpy (value, tmp);
+            {
+              len = strlen (tmp);
+              if (len >= sizeof value)
+                len = sizeof value - 1;
+              strncpy (value, tmp, len)[len] = '\0';
+            }
           else if ((tmp = getenv ("HOMEDRIVE")) != NULL)
             {
-              strcpy (value, tmp);
-              tmp = getenv ("HOMEPATH");
-              strcat (value, tmp ? tmp : DIR_SEPARATOR_S);
+              char *p = getenv ("HOMEPATH");
+
+              len = strlen (tmp) + strlen (p ? p : DIR_SEPARATOR_S);
+              if (len >= sizeof value)
+                len = sizeof value - 1;
+              snprintf (value, len + 1, "%s%s", tmp, p);
+              value[len] = '\0';
             }
           else
             /*
@@ -2185,6 +2242,7 @@ getenv2 (const char *variable)
             */
             {
               char c;
+
               getcwd (value, FILENAME_MAX);
               c = (char) toupper ((int) *value);
               // if current dir is root dir strip problematic ending slash (DJGPP)
@@ -2233,7 +2291,7 @@ getenv2 (const char *variable)
 
 char *
 get_property (const char *filename, const char *propname, char *buffer,
-              const char *def)
+              size_t bufsize, const char *def)
 {
   char *p = NULL;
   FILE *fh;
@@ -2247,6 +2305,7 @@ get_property (const char *filename, const char *propname, char *buffer,
         {
           int i;
           int whitespace_len = strspn (line, "\t ");
+
           p = line + whitespace_len;            // ignore leading whitespace
           if (*p == '#' || *p == '\n' || *p == '\r')
             continue;                           // text after # is comment
@@ -2269,11 +2328,18 @@ get_property (const char *filename, const char *propname, char *buffer,
             {
               if (p)
                 {
+                  char *p2;
+                  size_t len;
+
                   p++;
+                  p2 = p + strspn (p, "\t ");
+                  len = strlen (p2);
+                  if (len >= bufsize)
+                    len = bufsize - 1;
                   // strip leading whitespace from value
-                  strcpy (buffer, p + strspn (p, "\t "));
+                  strncpy (buffer, p2, len)[len] = '\0';
                   // strip trailing whitespace from value
-                  for (i = strlen (buffer) - 1;
+                  for (i = len - 1;
                        i >= 0 && (buffer[i] == '\t' || buffer[i] == ' ');
                        i--)
                     ;
@@ -2292,13 +2358,25 @@ get_property (const char *filename, const char *propname, char *buffer,
       if (!prop_found)
         {
           if (def)
-            strcpy (buffer, def);
+            {
+              size_t len = strlen (def);
+
+              if (len >= bufsize)
+                len = bufsize - 1;
+              strncpy (buffer, def, len)[len] = '\0';
+            }
           else
             buffer = NULL;                      // buffer won't be changed
         }                                       //  after this func (=OK)
     }
   else
-    strcpy (buffer, p);
+    {
+      size_t len = strlen (p);
+
+      if (len >= bufsize)
+        len = bufsize - 1;
+      strncpy (buffer, p, len)[len] = '\0';
+    }
   return buffer;
 }
 
@@ -2309,7 +2387,7 @@ get_property_int (const char *filename, const char *propname)
   char buf[160];                                // 159 is enough for a *very* large number
   int32_t value = 0;
 
-  get_property (filename, propname, buf, NULL);
+  get_property (filename, propname, buf, sizeof buf, NULL);
 
   if (buf[0])
     switch (tolower ((int) buf[0]))
@@ -2331,7 +2409,7 @@ get_property_fname (const char *filename, const char *propname, char *buffer,
 {
   char tmp[FILENAME_MAX];
 
-  get_property (filename, propname, tmp, def);
+  get_property (filename, propname, tmp, sizeof tmp, def);
   return realpath2 (tmp, buffer);
 }
 

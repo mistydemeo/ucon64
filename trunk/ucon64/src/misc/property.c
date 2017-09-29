@@ -123,7 +123,7 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
                           const char comment_sep)
 {
   static char value_s[MAXBUFSIZE];
-  char str_end[8], *p = NULL, buf[MAXBUFSIZE];
+  char str_end[4], *p = NULL, buf[MAXBUFSIZE];
   int len = strlen (str);
 
   if (len >= MAXBUFSIZE)
@@ -196,6 +196,7 @@ get_property (const char *filename, const char *propname, int mode)
     {
       static char tmp[FILENAME_MAX];
 
+      tmp[0] = '\0';
       realpath2 (value_s, tmp);
       value_s = tmp;
     }
@@ -233,7 +234,7 @@ set_property (const char *filename, const char *propname,
               const char *value_s, const char *comment_s)
 {
   int found = 0, result = 0, file_size = 0;
-  char line[MAXBUFSIZE], *str = NULL, *p = NULL, line_end[6];
+  char line[MAXBUFSIZE], *str = NULL, *p = NULL, line_end[4];
   FILE *fh;
   struct stat fstate;
 

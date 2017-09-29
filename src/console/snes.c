@@ -520,9 +520,11 @@ update_chksum (st_ucon64_nfo_t *rominfo, unsigned char *sum, unsigned int size,
   unsigned int header_start;
 
   /*
-    The internal checksum bytes have been included in the checksum
-    calculation, but they will be changed after this function returns. We
-    account for that. Otherwise we could have to run uCON64 on the ROM twice.
+    The internal checksum bytes have been included in the checksum calculation,
+    but they may be changed after this function returns. Usually the bytes add
+    up to 0x1fe (because the bytes consist of the checksum and its inverse
+    (one's complement)), but they may have been corrupted. We account for that.
+    Otherwise we would have to run uCON64 on the ROM twice.
   */
   rominfo->current_internal_crc += -(snes_header.inverse_checksum_low +
                                      snes_header.inverse_checksum_high +
@@ -1141,17 +1143,15 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
   else
     p = (char *) basename2 (filename);
 
-  sprintf (name, newsize / MBIT <= 99 ? "sf%d%.3s" : "sf%d%.2s", newsize / MBIT, p);
+  snprintf (name, 8, "sf%d%.3s%s", newsize / MBIT, p, "__");
+  name[7] = '\0';
   if (!strnicmp (name, p, newsize < 10 * MBIT ? 3 : 4))
-    strncpy (name, p, 8)[8] = '\0';
-  if ((p = strrchr (name, '.')) != NULL)
-    *p = '\0';
-  strcat (name, "__");
+    snprintf (name, 8, "%s%s", p, "___");
   n = newsize < 10 * MBIT ? 6 : 7;
   name[n] = '\0';
   // avoid trouble with filenames containing spaces
   for (n--; n >= 3; n--)                        // skip "sf" and first digit
-    if (name[n] == ' ')
+    if (name[n] == ' ' || name[n] == '.')
       name[n] = '_';
 }
 
@@ -1611,7 +1611,7 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
                       ufosd_size = 0, n, rom_sizes[] =
                         { 4 * MBIT,  8 * MBIT, 10 * MBIT, 12 * MBIT,
-                         16 * MBIT, 20 * MBIT, 24 * MBIT };
+                         16 * MBIT, 20 * MBIT, 24 * MBIT, 32 * MBIT };
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   // The Super UFO Pro 8 SD only accepts files with certain sizes.
@@ -1626,8 +1626,6 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
         ufosd_size = rom_sizes[n];
         break;
       }
-  if (ufosd_size == 0)
-    ufosd_size = 32 * MBIT;
 
   ucon64_fread (&header, 0, rominfo->backup_header_len > UFOSD_HEADER_LEN ?
                   UFOSD_HEADER_LEN : rominfo->backup_header_len, ucon64.fname);

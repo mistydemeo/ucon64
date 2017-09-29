@@ -146,7 +146,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
   char buf[17];
   const unsigned char *p = (const unsigned char *) buffer;
 
-  memset (buf, 0, sizeof (buf));
+  memset (buf, 0, sizeof buf);
   for (pos = 0; pos < bufferlen; pos++, p++)
     if (flags & DUMPER_PRINT)
       {
@@ -500,7 +500,6 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
       token = strtok (token, " ");
 //      printf ("token: \"%s\"\n", token);
       last = token;
-      // token is never NULL here (yes, tested with empty files and such)
       do
         {
           requiredsize2++;
@@ -744,6 +743,7 @@ getenv2 (const char *variable)
 {
   char *tmp;
   static char value[MAXBUFSIZE];
+  size_t len;
 #ifdef  __MSDOS__
 /*
   On DOS and Windows the environment variables are not stored in a case
@@ -756,7 +756,10 @@ getenv2 (const char *variable)
 */
   char tmp2[MAXBUFSIZE];
 
-  strcpy (tmp2, variable);
+  len = strlen (variable);
+  if (len >= sizeof tmp2)
+    len = sizeof tmp2 - 1;
+  strncpy (tmp2, variable, len)[len] = '\0';
   variable = strupr (tmp2);                     // DON'T copy the string into variable
 #endif                                          //  (variable itself is local)
 
@@ -765,16 +768,35 @@ getenv2 (const char *variable)
   if (!strcmp (variable, "HOME"))
     {
       if ((tmp = getenv ("UCON64_HOME")) != NULL)
-        strcpy (value, tmp);
+        {
+          len = strlen (tmp);
+          if (len >= sizeof value)
+            len = sizeof value - 1;
+          strncpy (value, tmp, len)[len] = '\0';
+        }
       else if ((tmp = getenv ("HOME")) != NULL)
-        strcpy (value, tmp);
+        {
+          len = strlen (tmp);
+          if (len >= sizeof value)
+            len = sizeof value - 1;
+          strncpy (value, tmp, len)[len] = '\0';
+        }
       else if ((tmp = getenv ("USERPROFILE")) != NULL)
-        strcpy (value, tmp);
+        {
+          len = strlen (tmp);
+          if (len >= sizeof value)
+            len = sizeof value - 1;
+          strncpy (value, tmp, len)[len] = '\0';
+        }
       else if ((tmp = getenv ("HOMEDRIVE")) != NULL)
         {
-          strcpy (value, tmp);
-          tmp = getenv ("HOMEPATH");
-          strcat (value, tmp ? tmp : DIR_SEPARATOR_S);
+          char *p = getenv ("HOMEPATH");
+
+          len = strlen (tmp) + strlen (p ? p : DIR_SEPARATOR_S);
+          if (len >= sizeof value)
+            len = sizeof value - 1;
+          snprintf (value, len + 1, "%s%s", tmp, p);
+          value[len] = '\0';
         }
       else
         /*
@@ -788,6 +810,7 @@ getenv2 (const char *variable)
         */
         {
           char c;
+
           getcwd (value, FILENAME_MAX);
           c = (char) toupper ((int) *value);
           // if current dir is root dir strip problematic ending slash (DJGPP)
@@ -797,7 +820,12 @@ getenv2 (const char *variable)
         }
     }
   else if ((tmp = getenv (variable)) != NULL)
-    strcpy (value, tmp);
+    {
+      len = strlen (tmp);
+      if (len >= sizeof value)
+        len = sizeof value - 1;
+      strncpy (value, tmp, len)[len] = '\0';
+    }
   else
     {
       if (!strcmp (variable, "TEMP") || !strcmp (variable, "TMP"))

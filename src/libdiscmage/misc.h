@@ -502,7 +502,7 @@ extern off_t q_fsize (const char *filename);
 #define PROPERTY_COMMENT '#'
 #define PROPERTY_COMMENT_S "#"
 extern char *get_property (const char *filename, const char *propname,
-                           char *value, const char *def);
+                           char *buffer, size_t bufsize, const char *def);
 extern int32_t get_property_int (const char *filename, const char *propname);
 extern char *get_property_fname (const char *filename, const char *propname,
                                  char *buffer, const char *def);

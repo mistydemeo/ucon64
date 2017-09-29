@@ -190,7 +190,7 @@ void
 mgd_make_name (const char *filename, int console, unsigned int size, char *name)
 // these characters are also valid in MGD file names: !@#$%^&_
 {
-  char *prefix = NULL, *p, *suffix = NULL;
+  char *prefix = NULL, *suffix = NULL;
   const char *fname;
   unsigned int size_mbit = 0, n;
 
@@ -371,17 +371,15 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name)
 
   fname = basename2 (filename);
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
-  sprintf (name, "%s%u%.3s", prefix, size_mbit, fname);
+  snprintf (name, 8, "%s%u%.3s%s", prefix, size_mbit, fname, "XX");
+  name[7] = '\0';
   if (!strnicmp (name, fname, size < 10 * MBIT ? 3 : 4))
-    strncpy (name, fname, 8)[8] = '\0';
-  if ((p = strchr (name, '.')) != NULL)
-    *p = '\0';
-  strcat (name, "XX");
+    snprintf (name, 8, "%s%s", fname, "XXX");
   n = size < 10 * MBIT ? 6 : 7;
   name[n] = '0';                                // last character must be a number
   name[n + 1] = '\0';
   for (n--; n >= 3; n--)                        // skip prefix and first digit
-    if (name[n] == ' ')
+    if (name[n] == ' ' || name[n] == '.')
       name[n] = 'X';
 
   /*

@@ -710,7 +710,7 @@ tmpnam2 (char *temp)
 
   srand ((int) time (0));
 
-  *temp = 0;
+  *temp = '\0';
   while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs
     sprintf (temp, "%s%s%08x.tmp", p, DIR_SEPARATOR_S, rand());
 

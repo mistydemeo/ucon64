@@ -237,9 +237,12 @@ int
 n64_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[N64_NAME_LEN], dest_name[FILENAME_MAX];
+  size_t len = strlen (name);
 
   memset (buf, ' ', N64_NAME_LEN);
-  strncpy (buf, name, strlen (name) > N64_NAME_LEN ? N64_NAME_LEN : strlen (name));
+  if (len > N64_NAME_LEN)
+    len = N64_NAME_LEN;
+  strncpy (buf, name, len);
 
   if (rominfo->interleaved)
     ucon64_bswap16_n (buf, N64_NAME_LEN);
@@ -592,6 +595,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 #ifdef  CALC_CRC32
   unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32
   unsigned char *crc32_mem;
+  int swap_data = ucon64.n64_dat_v64 ? !rominfo->interleaved : rominfo->interleaved;
 #endif
 
   rlen -= rlen >= CHECKSUM_START ? CHECKSUM_START : rlen;
@@ -604,7 +608,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
           return -1;
         }
       ucon64_fread (crc32_mem, rominfo->backup_header_len, n, filename);
-      if (!rominfo->interleaved)
+      if (swap_data)
         {
           ucon64.fcrc32 = crc32 (0, crc32_mem, n);
           ucon64_bswap16_n (crc32_mem, n);
@@ -619,7 +623,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     return -1;
 
 #ifdef  CALC_CRC32
-  if (!rominfo->interleaved)
+  if (swap_data)
     {
       if ((crc32_mem = (unsigned char *) malloc (MAXBUFSIZE)) == NULL)
         {
@@ -634,20 +638,18 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
   fseek (file, rominfo->backup_header_len, SEEK_SET);
   fread (crc32_mem, 1, CHECKSUM_START, file);
   memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
-  if (!rominfo->interleaved)
+  if (swap_data)
     {
       fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
       ucon64_bswap16_n (crc32_mem, CHECKSUM_START);
     }
-  else
-    ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
   scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
 #else
   fseek (file, rominfo->backup_header_len + N64_HEADER_LEN, SEEK_SET);
   fread (bootcode_buf, 1, N64_BC_SIZE, file);
+#endif
   if (rominfo->interleaved)
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
-#endif
   n = crc32 (0, bootcode_buf, N64_BC_SIZE);
   if (n == 0x0b050ee0)
     {
@@ -684,7 +686,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
           if ((n = fread (chunk, 1, MIN (sizeof chunk, clen), file)) != 0)
             {
 #ifdef  CALC_CRC32
-              if (!rominfo->interleaved)
+              if (swap_data)
                 {
                   memcpy (crc32_mem, chunk, n);
                   fcrc32 = crc32 (fcrc32, crc32_mem, n);
@@ -751,14 +753,14 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     }
 
 #ifdef  CALC_CRC32
-  if (!rominfo->interleaved)
+  if (swap_data)
     {
       free (crc32_mem);
       crc32_mem = chunk;
     }
   while ((n = fread (crc32_mem, 1, sizeof chunk, file)) != 0)
     {
-      if (!rominfo->interleaved)
+      if (swap_data)
         {
           fcrc32 = crc32 (fcrc32, crc32_mem, n);
           ucon64_bswap16_n (crc32_mem, n);
@@ -767,7 +769,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     }
 
   ucon64.crc32 = scrc32;
-  if (!rominfo->interleaved)
+  if (swap_data)
     ucon64.fcrc32 = fcrc32;
 #endif
 

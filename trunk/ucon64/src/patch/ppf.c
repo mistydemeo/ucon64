@@ -205,7 +205,7 @@ ppf_apply (const char *mod, const char *ppfname)
   // Show PPF information
   fseek (ppffile, 6, SEEK_SET);                 // Read description line
   fread (desc, 50, 1, ppffile);
-  desc[50] = 0;                                 // terminate string
+  desc[50] = '\0';                              // terminate string
   printf ("\n"                                  // print a newline between
           "Filename        : %s\n", ppfname);   //  backup message and PPF info
   printf ("Encoding method : %d (PPF %d.0)\n", method, method + 1);
@@ -468,10 +468,13 @@ int
 ppf_set_desc (const char *ppf, const char *description)
 {
   char desc[50], ppfname[FILENAME_MAX];
+  size_t len = strlen (description);
 
   strcpy (ppfname, ppf);
   memset (desc, ' ', 50);
-  strncpy (desc, description, strlen (description));
+  if (len > sizeof desc)
+    len = sizeof desc;
+  strncpy (desc, description, len);
   ucon64_file_handler (ppfname, NULL, 0);
   fcopy (ppf, 0, fsizeof (ppf), ppfname, "wb"); // no copy if one file
   ucon64_fwrite (desc, 6, 50, ppfname, "r+b");

@@ -1,5 +1,5 @@
 /*
-coleco.c - Colecovision support for uCON64
+coleco.c - ColecoVision support for uCON64
 
 Copyright (c) 2005 NoisyB
 
@@ -138,10 +138,10 @@ coleco_init (st_ucon64_nfo_t *rominfo)
 
       // misc stuff
       sprintf (rominfo->misc,
-        "Start address: %04x\n"
-        "Type: %s",
-        coleco_header.start,
-        coleco_header.type == 0xaa55 ? "Coleco" : "ColecoVision");
+               "Start address: %04x\n"
+               "Type: %s",
+               coleco_header.start,
+               coleco_header.type == 0xaa55 ? "Coleco" : "ColecoVision");
     }
 
   return result;

@@ -350,9 +350,14 @@ f2a_init_usb (void)
       char iclientu_fname[FILENAME_MAX];
       const char *p = get_property (ucon64.configfile, "iclientu",
                                     PROPERTY_MODE_FILENAME);
+      size_t len;
 
-      strncpy (iclientu_fname, p ? p : "iclientu.bin", FILENAME_MAX - 1)
-        [FILENAME_MAX - 1] = '\0';
+      if (!p)
+        p = "iclientu.bin";
+      len = strlen (p);
+      if (len >= sizeof iclientu_fname)
+        len = sizeof iclientu_fname - 1;
+      strncpy (iclientu_fname, p, len)[len] = '\0';
 
       if (f2a_boot_usb (iclientu_fname))
         {
@@ -387,6 +392,7 @@ f2a_connect_usb (void)
               char f2afirmware_fname[FILENAME_MAX];
               const char *p = get_property (ucon64.configfile, "f2afirmware",
                                             PROPERTY_MODE_FILENAME);
+              size_t len;
 #ifdef  __linux__
               struct utsname info;
               unsigned int version_major, version_minor;
@@ -394,8 +400,12 @@ f2a_connect_usb (void)
 
               f2a_found = 1;
 
-              strncpy (f2afirmware_fname, p ? p : "f2afirm.hex", FILENAME_MAX - 1)
-                [FILENAME_MAX - 1] = '\0';
+              if (!p)
+                p = "f2afirm.hex";
+              len = strlen (p);
+              if (len >= sizeof f2afirmware_fname)
+                len = sizeof f2afirmware_fname - 1;
+              strncpy (f2afirmware_fname, p, len)[len] = '\0';
               if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) <= 0)
                 {
                   fprintf (stderr, "ERROR: Could not load F2A firmware (%s)\n",
@@ -673,11 +683,16 @@ f2a_write_usb (int n_files, char **files, int address)
       unsigned char loader[LOADER_SIZE];
       const char *p = get_property (ucon64.configfile, "gbaloader",
                                     PROPERTY_MODE_FILENAME);
+      size_t len;
 
       puts ("Uploading multiloader");
 
-      strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX - 1)
-        [FILENAME_MAX - 1] = '\0';
+      if (!p)
+        p = "loader.bin";
+      len = strlen (p);
+      if (len >= sizeof loader_fname)
+        len = sizeof loader_fname - 1;
+      strncpy (loader_fname, p, len)[len] = '\0';
 
       if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) <= 0)
         {
@@ -774,6 +789,7 @@ f2a_init_par (unsigned short parport, int parport_delay)
   char iclientp_fname[FILENAME_MAX], ilogo_fname[FILENAME_MAX];
   const char *p = get_property (ucon64.configfile, "iclientp",
                                 PROPERTY_MODE_FILENAME);
+  size_t len;
 
   if (parport_init (parport, parport_delay))
     {
@@ -781,14 +797,20 @@ f2a_init_par (unsigned short parport, int parport_delay)
       exit (1);                                 // fatal
     }
 
-  strncpy (iclientp_fname, p ? p : "iclientp.bin", FILENAME_MAX - 1)
-    [FILENAME_MAX - 1] = '\0';
+  if (!p)
+    p = "iclientp.bin";
+  len = strlen (p);
+  if (len >= sizeof iclientp_fname)
+    len = sizeof iclientp_fname - 1;
+  strncpy (iclientp_fname, p, len)[len] = '\0';
 
   p = get_property (ucon64.configfile, "ilogo", PROPERTY_MODE_FILENAME);
-  if (p)
-    strncpy (ilogo_fname, p, FILENAME_MAX - 1)[FILENAME_MAX - 1] = '\0';
-  else
-    *ilogo_fname = '\0';
+  if (!p)
+    p = "";
+  len = strlen (p);
+  if (len >= sizeof ilogo_fname)
+    len = sizeof ilogo_fname - 1;
+  strncpy (ilogo_fname, p, len)[len] = '\0';
 
   if (f2a_boot_par (iclientp_fname, ilogo_fname))
     {
@@ -1028,11 +1050,16 @@ f2a_write_par (int n_files, char **files, unsigned int address)
       unsigned char loader[LOADER_SIZE];
       const char *p = get_property (ucon64.configfile, "gbaloader",
                                     PROPERTY_MODE_FILENAME);
+      size_t len;
 
       puts ("Uploading multiloader");
 
-      strncpy (loader_fname, p ? p : "loader.bin", FILENAME_MAX - 1)
-        [FILENAME_MAX - 1] = '\0';
+      if (!p)
+        p = "loader.bin";
+      len = strlen (p);
+      if (len >= sizeof loader_fname)
+        len = sizeof loader_fname - 1;
+      strncpy (loader_fname, p, len)[len] = '\0';
 
       if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) <= 0)
         {

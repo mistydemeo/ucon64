@@ -97,7 +97,7 @@ vboy_init (st_ucon64_nfo_t *rominfo)
 
       // internal ROM name
       strncpy (rominfo->name, (const char *) vboy_header.name, VBOY_NAME_LEN);
-      rominfo->name[VBOY_NAME_LEN] = 0;
+      rominfo->name[VBOY_NAME_LEN] = '\0';
 
       // ROM maker
       {
@@ -119,11 +119,18 @@ vboy_init (st_ucon64_nfo_t *rominfo)
         "Unknown country";
 
       // misc stuff
+      {
+        size_t n;
+
+        for (n = 0; n < sizeof vboy_header.id; n++)
+          if (vboy_header.id[n] == '\0')
+            vboy_header.id[n] = '.';
+      }
       sprintf (rominfo->misc,
-        "ID: %c%c%c%c\n"
-        "Version: v1.%u",
-        vboy_header.id[0], vboy_header.id[1], vboy_header.id[2], vboy_header.game_id_country,
-        vboy_header.version);
+               "ID: %c%c%c%c\n"
+               "Version: v1.%u",
+               vboy_header.id[0], vboy_header.id[1], vboy_header.id[2],
+               vboy_header.game_id_country, vboy_header.version);
     }
 
   return result;

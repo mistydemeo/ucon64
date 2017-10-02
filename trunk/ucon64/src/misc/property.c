@@ -124,7 +124,7 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
 {
   static char value_s[MAXBUFSIZE];
   char str_end[4], *p = NULL, buf[MAXBUFSIZE];
-  int len = strlen (str);
+  size_t len = strlen (str);
 
   if (len >= MAXBUFSIZE)
     len = MAXBUFSIZE - 1;
@@ -153,7 +153,10 @@ get_property_from_string (char *str, const char *propname, const char prop_sep,
       //  (present or not present)
       if (p)
         {
-          strncpy (value_s, p, MAXBUFSIZE - 1)[MAXBUFSIZE - 1] = '\0';
+          len = strlen (p);
+          if (len >= sizeof value_s)
+            len = sizeof value_s - 1;
+          strncpy (value_s, p, len)[len] = '\0';
           strtriml (strtrimr (value_s));
         }
       else

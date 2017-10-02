@@ -34,7 +34,7 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
   need a filename<br>
 - added CD32, CD-i and Real 3DO support<br>
 - added -bin and -ffe option for Sega Master System/Game Gear<br>
-- added database for NES roms (that enlarged the ucon64 executable by 190kb
+- added database for NES roms (that enlarged the uCON64 executable by 190kb
   grnnn...) "You gotta do what you gotta do." (Futurama)<br>
 - added -db and -dbv database commands... now everyone can check if the
   uCON64 version he uses has new database entries for a console system<br>
@@ -72,7 +72,7 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
 <a name="195">1.9.5</a><br>
 - after the update release of 1.9.4 I had a closer look at my sources
   and realized that my style heavily changed since 1.9.3 the result is
-  that I had to make more changes in the source starting from ucon64.c<br>
+  that I had to make more changes in the source starting from uCON64.c<br>
 - Gilligan wrote a nice routine to read out NeoGeo Pocket roms (added)<br>
 - reorganized the whole source<br>
 - added Game Boy Advance support<br>
@@ -883,6 +883,11 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   for sending the output of --dbuh for dumps made with his UFO SD)<br>
 - updated (SNES) --ufosd fixes the checksum and pads the output to a valid size
   for the UFO SD (by dbjh, thanks to Mystic_Merlin for information and testing)<br>
+- added (N64) support for Nintendo 64 DAT files containing CRC32 values of ROMs
+  in Mr. Backup Z64 format, like what
+  <a href="http://datomatic.no-intro.org/">DAT-o-MATIC</a> produces. It can be
+  turned on by setting the  property variable n64_dat_v64 to 0. See the FAQ
+  question 57 (by dbjh)<br>
 <br>
 <br>
 <br>

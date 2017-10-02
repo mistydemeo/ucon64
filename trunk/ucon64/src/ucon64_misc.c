@@ -911,11 +911,16 @@ char *
 ucon64_output_fname (char *requested_fname, int flags)
 {
   char suffix[SUFFIX_MAX + 1];
+  const char *p;
+  size_t len;
 
   // We have to make a copy, because get_suffix() returns a pointer to a
   //  location in the original string.
-  strncpy (suffix, get_suffix (requested_fname), sizeof suffix - 1)
-    [sizeof suffix - 1] = '\0';                 // in case suffix is >= SUFFIX_MAX chars
+  p = get_suffix (requested_fname);
+  len = strlen (p);
+  if (len >= sizeof suffix)
+    len = sizeof suffix - 1;
+  strncpy (suffix, p, len)[len] = '\0';         // in case suffix is >= SUFFIX_MAX chars
 
   // OF_FORCE_BASENAME is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
@@ -923,9 +928,9 @@ ucon64_output_fname (char *requested_fname, int flags)
   if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
     {
       const char *requested_fname_base = basename2 (requested_fname);
-      size_t len = strlen (requested_fname_base);
       char fname[FILENAME_MAX];
 
+      len = strlen (requested_fname_base);
       if (len >= FILENAME_MAX)
         len = FILENAME_MAX - 1;
       strncpy (fname, requested_fname_base, len)[len] = '\0';
@@ -937,8 +942,7 @@ ucon64_output_fname (char *requested_fname, int flags)
     }
   else                                          // an archive (for now: zip file)
     {
-      size_t len = strlen (ucon64.output_path) + strlen (ucon64.fname_arch);
-
+      len = strlen (ucon64.output_path) + strlen (ucon64.fname_arch);
       if (len >= FILENAME_MAX)
         len = FILENAME_MAX - 1;
       snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, ucon64.fname_arch);
@@ -1178,14 +1182,14 @@ ucon64_set_property (st_property_t *prop, const char *org_configfile,
 int
 ucon64_set_property_array (const char *org_configfile)
 {
-  st_property_t props[44];
+  st_property_t props[45];
   int i = 0, result;
 
   ucon64_set_property (&props[i++], org_configfile, "backups", "1",
-                       "create backups of files? (1=yes; 0=no)\n"
+                       "Create backups of files? (1=yes; 0=no)\n"
                        "before processing a ROM uCON64 will make a backup of it");
   ucon64_set_property (&props[i++], org_configfile, "ansi_color", "1",
-                       "use ANSI colors in output? (1=yes; 0=no)");
+                       "Use ANSI colors in output? (1=yes; 0=no)");
 #ifdef  USE_PPDEV
   ucon64_set_property (&props[i++], org_configfile, "parport_dev", "/dev/parport0",
                        "parallel port");
@@ -1201,6 +1205,9 @@ ucon64_set_property_array (const char *org_configfile)
                        "offset of ECP Extended Control register relative to Data register (parport)");
 #endif
 #endif
+  ucon64_set_property (&props[i++], org_configfile, "n64_dat_v64", "1",
+                       "calculate CRC32 value of N64 ROM in Doctor V64 format for DAT files\n"
+                       "(1=Doctor V64; 0=Mr. Backup Z64)");
   ucon64_set_property (&props[i++], org_configfile, "discmage_path",
 #ifdef  __MSDOS__
                        PROPERTY_MODE_DIR ("ucon64") "discmage.dxe",
@@ -1303,8 +1310,14 @@ ucon64_rename (int mode)
   int good_name;
 
   *buf = '\0';
-  strncpy (suffix, get_suffix (ucon64.fname), sizeof suffix - 1)
-    [sizeof suffix - 1] = '\0';                 // in case suffix is >= SUFFIX_MAX chars
+  p = get_suffix (ucon64.fname);
+  {
+    size_t len = strlen (p);
+
+    if (len >= sizeof suffix)
+      len = sizeof suffix - 1;
+    strncpy (suffix, p, len)[len] = '\0';       // in case suffix is >= SUFFIX_MAX chars
+  }
 
   switch (mode)
     {
@@ -1319,23 +1332,39 @@ ucon64_rename (int mode)
     case UCON64_RDAT:                           // GoodXXXX style rename
       if (ucon64.dat && ((st_ucon64_dat_t *) ucon64.dat)->fname[0])
         {
-          p = (char *) get_suffix (((st_ucon64_dat_t *) ucon64.dat)->fname);
+          p = get_suffix (((st_ucon64_dat_t *) ucon64.dat)->fname);
           strcpy (buf, ((st_ucon64_dat_t *) ucon64.dat)->fname);
 
-          // get_suffix() never returns NULL
+          // the following condition should match with the one in ucon64_dat_nfo()
           if (p[0] && strlen (p) < 5)
-            if (!(stricmp (p, ".nes") &&        // NES
+            if (!(stricmp (p, ".a26") &&        // Atari 2600
+                  stricmp (p, ".a52") &&        // Atari 5200
+                  stricmp (p, ".a78") &&        // Atari 7800
+                  stricmp (p, ".j64") &&        // Jaguar
+                  stricmp (p, ".lnx") &&        // Lynx
+                  stricmp (p, ".ws") &&         // WonderSwan
+                  stricmp (p, ".wsc") &&        // WonderSwan Color
+                  stricmp (p, ".col") &&        // ColecoVision
+                  stricmp (p, ".vec") &&        // Vectrex
+                  stricmp (p, ".pce") &&        // PC-Engine / TurboGrafx-16
+                  stricmp (p, ".bin") &&        // BIOS dumps
                   stricmp (p, ".fds") &&        // NES FDS
                   stricmp (p, ".gb") &&         // Game Boy
-                  stricmp (p, ".gbc") &&        // Game Boy Color
                   stricmp (p, ".gba") &&        // Game Boy Advance
+                  stricmp (p, ".gbc") &&        // Game Boy Color
+                  stricmp (p, ".v64") &&        // Nintendo 64
+                  stricmp (p, ".z64") &&        // Nintendo 64
+                  stricmp (p, ".ndd") &&        // Nintendo 64DD
+                  stricmp (p, ".nes") &&        // NES
                   stricmp (p, ".smc") &&        // SNES
+                  stricmp (p, ".sfc") &&        // SNES
+                  stricmp (p, ".vb") &&         // Virtual Boy
+                  stricmp (p, ".gg") &&         // Game Gear
                   stricmp (p, ".sc") &&         // Sega Master System
                   stricmp (p, ".sg") &&         // Sega Master System
                   stricmp (p, ".sms") &&        // Sega Master System
-                  stricmp (p, ".gg") &&         // Game Gear
                   stricmp (p, ".smd") &&        // Genesis
-                  stricmp (p, ".v64")))         // Nintendo 64
+                  stricmp (p, ".md")))          // Genesis
               buf[strlen (buf) - strlen (p)] = '\0';
         }
       break;
@@ -1357,7 +1386,8 @@ ucon64_rename (int mode)
         digits of the CRC32 value of the full name.
       */
       {
-        int len, len2;
+        size_t len, len2;
+
         p = basename2 (ucon64.fname);
         len = strlen (p);               // it's safe to assume that len is < FILENAME_MAX
         if (len <= 64)                  // Joliet maximum file name length is 64 chars
@@ -1401,7 +1431,8 @@ ucon64_rename (int mode)
         valid file name on a FAT file system) doesn't get special treatment.
       */
       {
-        int len, len2;
+        size_t len, len2;
+
         p = basename2 (ucon64.fname);
         len = strlen (p);               // it's safe to assume that len is < FILENAME_MAX
         strcpy (buf, p);
@@ -1433,7 +1464,7 @@ ucon64_rename (int mode)
   strcpy (buf2, to_func (buf, strlen (buf), tofname));
   strcpy (buf, basename2 (ucon64.fname));
 
-  p = (char *) get_suffix (buf);
+  p = get_suffix (buf);
   // Remove the suffix from buf (ucon64.fname). Note that this isn't fool-proof.
   //  However, this is the best solution, because several DAT files contain
   //  "canonical" file names with a suffix. That is a STUPID bug.

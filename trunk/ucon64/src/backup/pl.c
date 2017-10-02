@@ -252,6 +252,7 @@ select_address (unsigned int addr, int inc)
 {
   unsigned char data = (((addr >> 14) & 0x3c) | ((addr >> 13) & 0x80) |
                         (inc ? 0x01 : 0x00));   // a[20..16], auto-increment
+
   if (data != ai_value[2])
     set_ai_data (2, data);
   set_ai_data (1, (unsigned char) ((addr >> 8) & 0xff)); // a[15..8]
@@ -395,8 +396,7 @@ same_header (unsigned char *header, unsigned char *buf)
 static unsigned int
 game_info (unsigned int cart_size, char name[13], int *type)
 {
-  unsigned char header[0x100];
-  unsigned char buf[0x8000];
+  unsigned char header[0x100], buf[0x8000];
 
   select_chip (0x000000);
   read_blocks (0x000000, header, 1);
@@ -533,6 +533,7 @@ static int
 write_block (unsigned int addr, unsigned char *buf)
 {
   int count;
+
   select_address (addr, 1);
   for (count = 0; count < 0x100; count++)
     {

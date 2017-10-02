@@ -520,14 +520,17 @@ aps_create (const char *orgname, const char *modname)
 int
 aps_set_desc (const char *aps, const char *description)
 {
-  char desc[50], apsname[FILENAME_MAX];
+  char desc[N64APS_DESCRIPTION_LEN], apsname[FILENAME_MAX];
+  size_t len = strlen (description);
 
   strcpy (apsname, aps);
-  memset (desc, ' ', 50);
-  strncpy (desc, description, strlen (description));
+  memset (desc, ' ', N64APS_DESCRIPTION_LEN);
+  if (len > sizeof desc)
+    len = sizeof desc;
+  strncpy (desc, description, len);
   ucon64_file_handler (apsname, NULL, 0);
   fcopy (aps, 0, fsizeof (aps), apsname, "wb"); // no copy if one file
-  ucon64_fwrite (desc, 7, 50, apsname, "r+b");
+  ucon64_fwrite (desc, 7, N64APS_DESCRIPTION_LEN, apsname, "r+b");
 
   printf (ucon64_msg[WROTE], apsname);
   return 0;

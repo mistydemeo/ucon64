@@ -379,7 +379,6 @@ gb_n (st_ucon64_nfo_t *rominfo, const char *name)
     (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?
       GB_NAME_LEN : GB_NAME_LEN + 1;
 
-  memset (buf, 0, gb_name_len);
   strncpy (buf, name, gb_name_len);
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -514,7 +513,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
   x = (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?
          GB_NAME_LEN : GB_NAME_LEN + 1;
   strncpy (rominfo->name, (const char *) gb_header.name, x);
-  rominfo->name[x] = 0;                         // terminate string
+  rominfo->name[x] = '\0';                      // terminate string
 
   // ROM maker
   if (gb_header.maker == 0x33)

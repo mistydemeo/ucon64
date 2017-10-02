@@ -904,17 +904,23 @@ genesis_name (st_ucon64_nfo_t *rominfo, const char *name1, const char *name2)
 
   if (name1)
     {
+      size_t len = strlen (name1);
+
       memset (buf, ' ', GENESIS_NAME_LEN);
-      strncpy (buf, name1, strlen (name1) > GENESIS_NAME_LEN ?
-                 GENESIS_NAME_LEN : strlen (name1));
+      if (len > GENESIS_NAME_LEN)
+        len = GENESIS_NAME_LEN;
+      strncpy (buf, name1, len);
       memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + GENESIS_NAME_LEN], buf,
                 GENESIS_NAME_LEN);
     }
   if (name2)
     {
+      size_t len = strlen (name2);
+
       memset (buf, ' ', GENESIS_NAME_LEN);
-      strncpy (buf, name2, strlen (name2) > GENESIS_NAME_LEN ?
-                 GENESIS_NAME_LEN : strlen (name2));
+      if (len > GENESIS_NAME_LEN)
+        len = GENESIS_NAME_LEN;
+      strncpy (buf, name2, len);
       memcpy (&rom_buffer[GENESIS_HEADER_START + 32], buf, GENESIS_NAME_LEN);
     }
 

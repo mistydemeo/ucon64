@@ -116,8 +116,8 @@ static DIR *ddat = NULL;
 static HANDLE ddat = NULL;
 #endif
 static FILE *fdat = NULL;
-static int ucon64_n_files = 0, filepos_line = 0, warning = 1; // show the warning only
-static FILE *ucon64_datfile;                                  //  once when indexing
+static int ucon64_n_files = 0, filepos_line = 0;
+static FILE *ucon64_datfile;
 static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
@@ -325,51 +325,51 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
   size_t len;
 
   p = get_property (fname, "author", PROPERTY_MODE_TEXT);
+  if (!p)
+    p = "Unknown";
   len = strlen (p);
   if (len >= sizeof dat->author)
     len = sizeof dat->author - 1;
-  strncpy (dat->author, p ? p : "Unknown", len)[len] = '\0';
+  strncpy (dat->author, p, len)[len] = '\0';
 
   p = get_property (fname, "version", PROPERTY_MODE_TEXT);
+  if (!p)
+    p = "?";
   len = strlen (p);
   if (len >= sizeof dat->version)
     len = sizeof dat->version - 1;
-  strncpy (dat->version, p ? p : "?", len)[len] = '\0';
+  strncpy (dat->version, p, len)[len] = '\0';
 
   p = get_property (fname, "refname", PROPERTY_MODE_TEXT);
-  if (p)
-    {
-      len = strlen (p);
-      if (len >= sizeof dat->refname)
-        len = sizeof dat->refname - 1;
-      strncpy (dat->refname, p, len)[len] = '\0';
-    }
-  else
-    *(dat->refname) = '\0';
+  if (!p)
+    p = "";
+  len = strlen (p);
+  if (len >= sizeof dat->refname)
+    len = sizeof dat->refname - 1;
+  strncpy (dat->refname, p, len)[len] = '\0';
 
   p = get_property (fname, "comment", PROPERTY_MODE_TEXT);
-  if (p)
-    {
-      len = strlen (p);
-      if (len >= sizeof dat->comment)
-        len = sizeof dat->comment - 1;
-      strncpy (dat->comment, p, len)[len] = '\0';
-    }
-  else
-    *(dat->comment) = '\0';
+  if (!p)
+    p = "";
+  len = strlen (p);
+  if (len >= sizeof dat->comment)
+    len = sizeof dat->comment - 1;
+  strncpy (dat->comment, p, len)[len] = '\0';
 
   p = get_property (fname, "date", PROPERTY_MODE_TEXT);
+  if (!p)
+    p = "?";
   len = strlen (p);
   if (len >= sizeof dat->date)
     len = sizeof dat->date - 1;
-  strncpy (dat->date, p ? p : "?", len)[len] = '\0';
+  strncpy (dat->date, p, len)[len] = '\0';
 
   return dat;
 }
 
 
 static int
-fname_to_console (const char *fname, st_ucon64_dat_t *dat)
+fname_to_console (const char *fname, st_ucon64_dat_t *dat, int warning)
 {
   int pos;
   // We use the filename to find out for what console a DAT file is meant.
@@ -448,27 +448,45 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     };
 
   for (pos = 0; console_type[pos].id; pos++)
-    {
-      if (!console_type[pos].compare (fname, console_type[pos].id))
-        {
-          dat->console = console_type[pos].console;
-          dat->console_usage = (console_type[pos].console_usage[0].help);
-          break;
-        }
-    }
+    if (!console_type[pos].compare (fname, console_type[pos].id))
+      {
+        dat->console = console_type[pos].console;
+        dat->console_usage = (console_type[pos].console_usage[0].help);
+        break;
+      }
 
   if (console_type[pos].id == 0)
     {
       if (warning)
-        {
-          printf ("WARNING: \"%s\" is meant for a console unknown to uCON64\n\n", fname);
-          warning = 0;
-        }
+        printf ("WARNING: \"%s\" is meant for a console unknown to uCON64\n"
+                "         Please see the FAQ, question 56\n\n", fname);
       dat->console = UCON64_UNKNOWN;
       dat->console_usage = NULL;
     }
 
   return dat->console;
+}
+
+
+static void
+reset_dat (st_ucon64_dat_t *dat)
+{
+  dat->crc32 = 0;
+  dat->console = 0;
+  dat->name[0] = '\0';
+  dat->maker = NULL;
+  dat->country = NULL;
+  dat->misc[0] = '\0';
+  dat->fname[0] = '\0';
+  dat->fsize = 0;
+  dat->datfile[0] = '\0';
+  dat->author[0] = '\0';
+  dat->version[0] = '\0';
+  dat->date[0] = '\0';
+  dat->comment[0] = '\0';
+  dat->refname[0] = '\0';
+  dat->console_usage = NULL;
+  dat->backup_usage = NULL;
 }
 
 
@@ -530,8 +548,6 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
       {NULL, NULL}
     };
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE], *p = NULL;
-  uint32_t pos = 0;
-  int x = 0;
 
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return NULL;
@@ -540,7 +556,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   strarg (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
 
-  memset (dat, 0, sizeof (st_ucon64_dat_t));
+  reset_dat (dat);
 
   strcpy (dat->datfile, basename2 (fname));
 
@@ -572,9 +588,13 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     sscanf (dat_field[6], "%d", (int *) &dat->fsize);
 
   *buf = '\0';
-  for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
-    if (strstr (dat->name, dat_flags[x][0]))
-      sprintf (p, "%s, ", dat_flags[x][1]);
+  {
+    int x = 0;
+
+    for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
+      if (strstr (dat->name, dat_flags[x][0]))
+        sprintf (p, "%s, ", dat_flags[x][1]);
+  }
   if (buf[0])
     {
       if ((p = strrchr (buf, ',')) != NULL)
@@ -584,14 +604,18 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   p = dat->name;
   dat->country = NULL;
-  for (pos = 0; dat_country[pos][0]; pos++)
-    if (stristr (p, dat_country[pos][0]))
-      {
-        dat->country = dat_country[pos][1];
-        break;
-      }
+  {
+    uint32_t pos = 0;
 
-  fname_to_console (dat->datfile, dat);
+    for (pos = 0; dat_country[pos][0]; pos++)
+      if (stristr (p, dat_country[pos][0]))
+        {
+          dat->country = dat_country[pos][1];
+          break;
+        }
+  }
+
+  fname_to_console (dat->datfile, dat, 0);
   dat->backup_usage = unknown_backup_usage[0].help;
 
   return dat;
@@ -666,15 +690,18 @@ ucon64_dat_view (int console, int verbose)
   while (get_next_file (fname_dat))
     {
       const char *fname = basename2 (fname_dat);
+
       if (console != UCON64_UNKNOWN)
-        if (fname_to_console (fname, &dat) != console)
+        if (fname_to_console (fname, &dat, 0) != console)
           continue;
 
       get_dat_header (fname_dat, &dat);
       strcpy (fname_index, fname_dat);
       set_suffix (fname_index, ".idx");
-
+      if (access (fname_index, F_OK) != 0)      // for a "bad" DAT file
+        continue;
       fsize = fsizeof (fname_index);
+
       n_entries = fsize / sizeof (st_idx_entry_t);
       n_entries_sum += n_entries;
       n_datfiles++;
@@ -682,7 +709,7 @@ ucon64_dat_view (int console, int verbose)
       printf ("DAT info:\n"
               "  %s\n"
 //              "  Console: %s\n"
-              "  Version: %s (%s, %s)\n"
+              "  Version: %s (%s%s%s)\n"
               "  Author: %s\n"
               "  Comment: %s\n"
               "  Entries: %d\n\n",
@@ -690,6 +717,7 @@ ucon64_dat_view (int console, int verbose)
 //              dat.console_usage[0],
               dat.version,
               dat.date,
+              dat.date[0] ? ", " : "",
               dat.refname,
               dat.author,
               dat.comment,
@@ -786,7 +814,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
       const char *fname = basename2 (fname_dat);
 
       if (ucon64.console != UCON64_UNKNOWN)
-        if (fname_to_console (fname, &dat) != ucon64.console)
+        if (fname_to_console (fname, &dat, 0) != ucon64.console)
           continue;
 
       strcpy (fname_index, fname_dat);
@@ -854,18 +882,21 @@ ucon64_dat_indexer (void)
   int update = 0, n_duplicates, n, size = 0, pos;
   st_idx_entry_t *idx_entries, *idx_entry;
 
-  warning = 1; // enable warning again for DATs with unrecognized console systems
-
   if ((idx_entries = (st_idx_entry_t *)
-        malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t))) == NULL)
+         malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t))) == NULL)
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR],
-        MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t));
+               MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t));
       exit (1);
     }
 
   while (get_next_file (fname_dat))
     {
+      const char *fname = basename2 (fname_dat);
+
+      if (fname_to_console (fname, &dat, 1) == UCON64_UNKNOWN)
+        continue;
+
       strcpy (fname_index, fname_dat);
       set_suffix (fname_index, ".idx");
 
@@ -987,7 +1018,7 @@ ucon64_dat_flush (st_ucon64_dat_t *dat)
 
 
 void
-ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
+ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_dat_file_line)
 {
   char *p = NULL;
 
@@ -1016,24 +1047,40 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
     printf ("  %s\n", dat->country);
 
   /*
-    The DAT files are not consistent. Some include the file suffix, but
-    others don't. We want to display the canonical file name only if it
-    really differs from the canonical game name (usually file name without
-    suffix).
+    The DAT files are not consistent. Some include the file suffix, but others
+    don't. We want to display the canonical filename only if it really differs
+    from the canonical game name (usually filename without suffix).
+    The following condition should match with the one in ucon64_rename().
   */
   p = (char *) get_suffix (dat->fname);
-  if (!(stricmp (p, ".nes") &&                  // NES
+  if (!(stricmp (p, ".a26") &&                  // Atari 2600
+        stricmp (p, ".a52") &&                  // Atari 5200
+        stricmp (p, ".a78") &&                  // Atari 7800
+        stricmp (p, ".j64") &&                  // Jaguar
+        stricmp (p, ".lnx") &&                  // Lynx
+        stricmp (p, ".ws") &&                   // WonderSwan
+        stricmp (p, ".wsc") &&                  // WonderSwan Color
+        stricmp (p, ".col") &&                  // ColecoVision
+        stricmp (p, ".vec") &&                  // Vectrex
+        stricmp (p, ".pce") &&                  // PC-Engine / TurboGrafx-16
+        stricmp (p, ".bin") &&                  // BIOS dumps
         stricmp (p, ".fds") &&                  // NES FDS
         stricmp (p, ".gb") &&                   // Game Boy
-        stricmp (p, ".gbc") &&                  // Game Boy Color
         stricmp (p, ".gba") &&                  // Game Boy Advance
+        stricmp (p, ".gbc") &&                  // Game Boy Color
+        stricmp (p, ".v64") &&                  // Nintendo 64
+        stricmp (p, ".z64") &&                  // Nintendo 64
+        stricmp (p, ".ndd") &&                  // Nintendo 64DD
+        stricmp (p, ".nes") &&                  // NES
         stricmp (p, ".smc") &&                  // SNES
+        stricmp (p, ".sfc") &&                  // SNES
+        stricmp (p, ".vb") &&                   // Virtual Boy
+        stricmp (p, ".gg") &&                   // Game Gear
         stricmp (p, ".sc") &&                   // Sega Master System
         stricmp (p, ".sg") &&                   // Sega Master System
         stricmp (p, ".sms") &&                  // Sega Master System
-        stricmp (p, ".gg") &&                   // Game Gear
         stricmp (p, ".smd") &&                  // Genesis
-        stricmp (p, ".v64")))                   // Nintendo 64
+        stricmp (p, ".md")))                    // Genesis
     ((char *) dat->fname)[strlen (dat->fname) - strlen (p)] = '\0';
 
   if (stricmp (dat->name, dat->fname) != 0)
@@ -1044,19 +1091,15 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   if (dat->misc[0])
     printf ("  %s\n", dat->misc);
 
-  if (display_version)
+  if (display_dat_file_line)
     {
-      if (stristr (dat->datfile, dat->version))
-        printf ("  %s (%s, %s)\n",
-          dat->datfile,
-          dat->date,
-          dat->refname);
-      else
-        printf ("  %s (%s, %s, %s)\n",
-          dat->datfile,
-          dat->version,
-          dat->date,
-          dat->refname);
+      char format[80];
+      int display_version = stristr (dat->datfile, dat->version) ? 0 : 1;
+
+      sprintf (format, "  %%s (%s%s%s%s%%s)\n",
+               display_version ? dat->version : "", display_version ? ", " : "",
+               dat->date, dat->date[0] ? ", " : "");
+      printf (format, dat->datfile, dat->refname);
     }
 }
 
@@ -1205,7 +1248,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t))) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR],
-            MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t));
+                   MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t));
           exit (1);
         }
 
@@ -1295,7 +1338,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
       return -1;
     }
 
-  // Store the CRC32 to check if a file is unique
+  // store the CRC32 to check if a file is unique
   ucon64_mkdat_entries[ucon64_n_files].crc32 = ucon64.crc32;
   /*
     Also store the name of the file to display a helpful error message if a
@@ -1317,15 +1360,15 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
   ptr = (char *) get_suffix (fname);
   if (*ptr)
     *ptr = '\0';
-  fprintf (ucon64_datfile, DAT_FIELD_SEPARATOR_S "%s" // set file name
+  fprintf (ucon64_datfile, DAT_FIELD_SEPARATOR_S "%s" // set filename
                            DAT_FIELD_SEPARATOR_S "%s" // set full name
-                           DAT_FIELD_SEPARATOR_S "%s" // clone file name
+                           DAT_FIELD_SEPARATOR_S "%s" // clone filename
                            DAT_FIELD_SEPARATOR_S "%s" // clone full name
-                           DAT_FIELD_SEPARATOR_S "%s" // rom file name
+                           DAT_FIELD_SEPARATOR_S "%s" // ROM filename
                            DAT_FIELD_SEPARATOR_S "%08x" // RC quirck: leading zeroes are required
                            DAT_FIELD_SEPARATOR_S "%u"
                            DAT_FIELD_SEPARATOR_S // merged clone name
-                           DAT_FIELD_SEPARATOR_S // merged rom name
+                           DAT_FIELD_SEPARATOR_S // merged ROM name
                            DAT_FIELD_SEPARATOR_S "\r\n",
                            fname,
                            fname,

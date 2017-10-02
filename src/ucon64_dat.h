@@ -36,7 +36,7 @@ typedef struct
 {
   uint32_t crc32;                               // "official" CRC32 checksum of the ROM
   int8_t console;                               // integer for the console system
-  char name[2 * 80];                            // name of the ROM
+  char name[256];                               // name of the ROM
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -50,11 +50,11 @@ typedef struct
   char fname[FILENAME_MAX];                     // filename of the ROM
   uint32_t fsize;                               // size in bytes
 
-  char datfile[FILENAME_MAX];                   // name of the dat file
-  char author[100];                             // author of dat file
-  char version[100];                            // version of dat file
-  char date[20];                                // date of dat file
-  char comment[25 * 80];                        // comment of dat file
+  char datfile[FILENAME_MAX];                   // name of the DAT file
+  char author[100];                             // author of DAT file
+  char version[100];                            // version of DAT file
+  char date[20];                                // date of DAT file
+  char comment[25 * 80];                        // comment of DAT file
   char refname[100];                            // ref name
 
   const char *console_usage;                    // console system usage
@@ -62,10 +62,10 @@ typedef struct
 } st_ucon64_dat_t;
 
 /*
-  ucon64_dat_search()         search dat files for crc and return ucon64_dat_t
-  ucon64_dat_total_entries()  return # of ROMs in all DAT's
-  ucon64_dat_view()           display the complete dat collection
-  ucon64_dat_indexer()        create or update index file for DAT's
+  ucon64_dat_search()         search DAT files for crc and return ucon64_dat_t
+  ucon64_dat_total_entries()  return # of ROMs in all DATs
+  ucon64_dat_view()           display the complete DAT collection
+  ucon64_dat_indexer()        create or update index file for DATs
   ucon64_dat_flush()          flush contents of ucon64_dat_t
   ucon64_dat_nfo()            view contents of ucon64_dat_t
 */
@@ -74,7 +74,7 @@ extern uint32_t ucon64_dat_total_entries (void);
 extern int ucon64_dat_view (int console, int verbose);
 extern int ucon64_dat_indexer (void);
 //extern st_ucon64_dat_t *ucon64_dat_flush (st_ucon64_dat_t *dat);
-extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version);
+extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_dat_file_line);
 extern int ucon64_create_dat (const char *dat_file_name, const char *filename,
                               int backup_header_len);
 

@@ -366,10 +366,14 @@ parse_templ (const char *templ_file, char *ip)
   for (i = 0; templ[i].name; i++)
     {
       char *p = (char *) get_property (templ_file, templ[i].name, PROPERTY_MODE_TEXT);
+      size_t len;
+
       if (!p)
         p = templ[i].def;
-
-      strncpy (buf, p, MAXBUFSIZE - 1)[MAXBUFSIZE - 1] = '\0';
+      len = strlen (p);
+      if (len >= sizeof buf)
+        len = sizeof buf - 1;
+      strncpy (buf, p, len)[len] = '\0';
       p = strtriml (strtrimr (buf));
 
       if (!(*p))

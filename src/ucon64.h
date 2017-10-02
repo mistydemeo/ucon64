@@ -106,8 +106,8 @@ typedef struct
 
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   uint64_t file_size;                           // (uncompressed) ROM file size (NOT console specific)
-  unsigned int crc32;                           // crc32 value of ROM (used for DAT files) (NOT console specific)
-  unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk (NOT console specific)
+  unsigned int crc32;                           // CRC32 value of ROM (used for DAT files) (NOT console specific)
+  unsigned int fcrc32;                          // if non-zero: CRC32 of ROM as it is on disk (NOT console specific)
 
   /*
     if console == UCON64_UNKNOWN or st_ucon64_nfo_t == NULL ucon64_rom_nfo() won't
@@ -155,6 +155,7 @@ typedef struct
   int discmage_enabled;                         // flag if discmage DLL is loaded
 #endif
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
+  int n64_dat_v64;                              // base .crc32 on ROM in V64 (1) or Z64 (0) format
   int quiet;                                    // quiet == -1 means verbose + 1
 
   int force_disc;                               // --disc was used

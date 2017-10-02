@@ -165,6 +165,13 @@ Q54: <a href="#54">My PCI parallel port card has its ECP Extended Control
 Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    Game Doctor SF6/SF7?</a><br>
 <br>
+Q56: <a href="#56">I installed a DAT file, but every time I run uCON64 it warns
+   that the DAT file is meant for a console unknown to it. What is wrong?</a><br>
+<br>
+Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
+   converting it to RomCenter 2.50 format, but uCON64 does not display DAT
+   information for verified Nintento 64 ROMs. What is wrong?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -445,10 +452,10 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    &nbsp;&nbsp;gunzip -c ucon64-1.9.8-1-linux-bin.tar.gz | tar xvf -<br>
    To unzip a .zip file use a command like this:<br>
    &nbsp;&nbsp;unzip ucon64-1.9.8-1-beos-bin.zip<br>
-   You should replace the file name with the name of the file you downloaded
-   for your operating system. Unpacking or extracting a package does not have
-   to be done on the command line. You could also use a program with a GUI
-   (Graphical User Interface) like KDE's ark or a similar program.<br>
+   You should replace the filename with the name of the file you downloaded for
+   your operating system. Unpacking or extracting a package does not have to be
+   done on the command line. You could also use a program with a GUI (Graphical
+   User Interface) like KDE's ark or a similar program.<br>
    After you have extracted the package install uCON64 by running the install
    script. On UNIX, if you do not have root access, copy the uCON64 executable
    to a directory in your PATH. If you do have root access (i.e., know the root
@@ -607,7 +614,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    versions). If you are using GNU/Linux and uCON64 crashes see
    <a href="#46">question 46</a>.<br>
    Then search for the line that starts with "configuration file". It should
-   say "present" between the parentheses. The file name after the colon is the
+   say "present" between the parentheses. The filename after the colon is the
    name of the configuration file. The configuration file may contain names of
    variables that influence the behaviour of uCON64. Here follows a table of
    the variable names uCON64 recognises:<br>
@@ -639,7 +646,13 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
   </tr>
   <tr>
     <td><tt>ecr_offset</tt></td>
-    <td><tt>offset of ECP Extended Control register relative to Data register (parport)</tt></td>
+    <td><tt>offset of ECP Extended Control register relative to Data register
+   (parport)</tt></td>
+  </tr>
+  <tr>
+    <td><tt>n64_dat_v64</tt></td>
+    <td><tt>calculate CRC32 value of Nintendo 64 ROM in Doctor V64 format for
+   DAT files if it is 1. Use Mr. Backup Z64 format if it is 0</tt></td>
   </tr>
   <tr>
     <td><tt>discmage_path</tt></td>
@@ -782,7 +795,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    text "DAT info:" then the ROM dump could not be identified. It could be that
    you  have an unknown ROM dump, but it is more likely that you have a modified
    (i.e. bad) dump or an overdump. GoodSNES 0.999.5 does not use the CRC32 to
-   identify files, so if uCON64 does not display DAT info, but GoodSNES
+   identify files, so if uCON64 does not display DAT information, but GoodSNES
    identified it as good then uCON64 is right. For reasons see
    <a href="#42">question 42</a>.<br>
 <br>
@@ -1213,7 +1226,10 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    <a href="http://www.rommanager.com/">http://www.rommanager.com/</a>. You can
    also find some DAT files on
    <a href="http://ucon64.sourceforge.net/index.html#ucon64dat">
-   the uCON64 homepage</a>.<br>
+   the uCON64 homepage</a>. A more up-to-date resource is the nice DAT-o-MATIC at
+   <a href="http://datomatic.no-intro.org/">http://datomatic.no-intro.org/</a>,
+   but you have to convert the DAT files before uCON64 can use them. See
+   <a href="#56">question 56</a>.<br>
    uCON64 will automatically create index files which speed up the access to
    the DAT files dramatically. Now uCON64 uses the information inside the DAT
    files to identify or rename ROMs without an internal header.<br>
@@ -1443,7 +1459,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
 <table border="1">
   <tr>
     <th><tt>console</tt></th>
-    <th><tt>DAT file name prefix</tt></th>
+    <th><tt>DAT filename prefix</tt></th>
   </tr>
   <tr>
     <td><tt>"Atari hardware"</tt></td>
@@ -2034,7 +2050,7 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    or Game Doctor SF6/SF7?</a><br>
 <b>A</b>: The communication protocols of the Doctor V64 and Game Doctor SF6/SF7
    involve reading specific values from the parallel port Control register.
-   However, the Control register was intended as a write only register. Many old
+   However, the Control register was intended as a write-only register. Many old
    parallel ports support input from this register, but most newer ones do not.
    You may happen to have a parallel port that does not support using the
    Control register for input.<br>
@@ -2048,6 +2064,35 @@ Q55: <a href="#55">Why is uCON64 unable to communicate with my Doctor V64 or
    Doctor SF3 protocol, but you will lose the saver (RTS) transfer
    functionality. Of course, you can also avoid this by not configuring uCON64
    to use ppdev.<br>
+<br>
+<p>
+<a name="56"><b>Q56</b>: I installed a DAT file, but every time I run uCON64 it
+   warns that the DAT file is meant for a console unknown to it. What is wrong?</a><br>
+<b>A</b>: The name of the DAT file. See <a href="#43">question 43</a>.<br>
+   In case you downloaded a DAT file from
+   <a href="http://datomatic.no-intro.org/">DAT-o-MATIC</a>, do not only rename
+   the file, but convert it first. You can use
+   <a href="http://www.logiqx.com/Tools/DatUtil/">DatUtil</a> to convert such a
+   DAT file to RomCenter 2.50 format, which is the only format uCON64 supports.
+   For example, to convert the file
+   "Nintendo - Super Nintendo Entertainment System (20170927-100457).dat" in
+   order to use it with uCON64, use a command like:<br>
+   &nbsp;&nbsp;datutil -f rc2 -o snes-20170927.dat "Nintendo - Super Nintendo Entertainment System (20170927-100457).dat"<br>
+   You can then move snes-20170927.dat to uCON64's DAT directory.<br>
+<br>
+<p>
+<a name="57"><b>Q57</b>: I installed a Nintendo 64 DAT file from
+   <a href="http://datomatic.no-intro.org/">DAT-o-MATIC</a>, after converting it
+   to RomCenter 2.50 format, but uCON64 does not display DAT information for
+   verified Nintento 64 ROMs. What is wrong?</a><br>
+<b>A</b>: Nintendo 64 DAT files used to contain CRC32 values of ROMs in Doctor
+   V64 format. However, <a href="http://datomatic.no-intro.org/">DAT-o-MATIC</a>
+   produces Nintendo 64 DAT files with CRC32 values of ROMs in Mr. Backup Z64
+   format. Starting with version 2.1.0 you can control what format uCON64 uses
+   to calculate CRC32 values with the variable n64_dat_v64. By default it is 1,
+   meaning Doctor V64 format, for backward compatibility. Set it to 0 for Mr.
+   Backup Z64 format if you want to use a Nintendo 64 DAT file produced by
+   <a href="http://datomatic.no-intro.org/">DAT-o-MATIC</a>.<br>
 <br>
 <p>
 <br>

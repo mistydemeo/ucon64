@@ -945,11 +945,13 @@ main (int argc, char **argv)
   realpath2 (PROPERTY_HOME_RC ("ucon64"), ucon64.configfile);
 
   {
-    int result = 0;
+    size_t len = strlen (ucon64.configfile);
     char org_configfile[FILENAME_MAX];
+    int result = 0;
 
-    strncpy (org_configfile, ucon64.configfile, FILENAME_MAX - 1)
-      [FILENAME_MAX - 1] = '\0';
+    if (len >= sizeof org_configfile)
+      len = sizeof org_configfile - 1;
+    strncpy (org_configfile, ucon64.configfile, len)[len] = '\0';
     result = property_check (org_configfile, UCON64_CONFIG_VERSION, 1);
     if (result == 1)                            // update needed
       result = ucon64_set_property_array (strcmp (ucon64.configfile, org_configfile) ?
@@ -968,12 +970,19 @@ main (int argc, char **argv)
   // parallel port?
 #if     defined USE_PPDEV || defined AMIGA
   p = get_property (ucon64.configfile, "parport_dev", PROPERTY_MODE_FILENAME);
-  x = sizeof ucon64.parport_dev;
+  if (!p)
 #ifdef  USE_PPDEV
-  strncpy (ucon64.parport_dev, p ? p : "/dev/parport0", x - 1)[x - 1] = '\0';
-#elif   defined AMIGA
-  strncpy (ucon64.parport_dev, p ? p : "parallel.device", x - 1)[x - 1] = '\0';
+    p = "/dev/parport0";
+#else // defined AMIGA
+    p = "parallel.device";
 #endif
+  {
+    size_t len = strlen (p);
+
+    if (len >= sizeof ucon64.parport_dev)
+      len = sizeof ucon64.parport_dev - 1;
+    strncpy (ucon64.parport_dev, p, len)[len] = '\0';
+  }
 #endif
 
   p = get_property (ucon64.configfile, "parport", PROPERTY_MODE_TEXT);
@@ -984,15 +993,19 @@ main (int argc, char **argv)
     //  doesn't contain a parport line
     ucon64.parport = (uint16_t) UCON64_UNKNOWN; // PARPORT_UNKNOWN depends on USE_PARALLEL
 
-  // make backups?
+  // Make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups");
 
   // $HOME/.ucon64/ ?
   p = get_property (ucon64.configfile, "ucon64_configdir", PROPERTY_MODE_FILENAME);
   if (p)
     {
-      x = sizeof ucon64.configdir;
-      strncpy (ucon64.configdir, p, x - 1)[x - 1] = '\0';
+      size_t len = strlen (p);
+
+      len = strlen (p);
+      if (len >= sizeof ucon64.configdir)
+        len = sizeof ucon64.configdir - 1;
+      strncpy (ucon64.configdir, p, len)[len] = '\0';
     }
   else
     *ucon64.configdir = '\0';
@@ -1002,8 +1015,12 @@ main (int argc, char **argv)
   p = get_property (ucon64.configfile, "ucon64_datdir", PROPERTY_MODE_FILENAME);
   if (p)
     {
-      x = sizeof ucon64.datdir;
-      strncpy (ucon64.datdir, p, x - 1)[x - 1] = '\0';
+      size_t len = strlen (p);
+
+      len = strlen (p);
+      if (len >= sizeof ucon64.datdir)
+        len = sizeof ucon64.datdir - 1;
+      strncpy (ucon64.datdir, p, len)[len] = '\0';
     }
   else
     *ucon64.datdir = '\0';
@@ -1030,6 +1047,9 @@ main (int argc, char **argv)
       strcpy (ucon64.datdir, ucon64.configdir); // use .ucon64/ instead of .ucon64/dat/
       ucon64.dat_enabled = 1;
     }
+
+  // Calculate CRC32 value of N64 ROM in Doctor V64 or Mr. Backup Z64 format?
+  ucon64.n64_dat_v64 = get_property_int (ucon64.configfile, "n64_dat_v64");
 
 #ifdef  USE_DISCMAGE
   // load libdiscmage (should be done before handling the switches (--ver), but
@@ -1858,16 +1878,23 @@ ucon64_fname_arch (const char *fname)
   unzip_goto_file (file, unzip_current_file_nr);
   unzGetCurrentFileInfo (file, NULL, name, FILENAME_MAX, NULL, 0, NULL, 0);
   unzClose (file);
-#if     defined _WIN32 || defined __MSDOS__
+#ifdef  _MSC_VER
   {
-    int n, l = strlen (name);
+    size_t n, l = strlen (name);
+
     for (n = 0; n < l; n++)
       if (name[n] == '/')
         name[n] = DIR_SEPARATOR;
   }
 #endif
-  strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX - 1)
-    [FILENAME_MAX - 1] = '\0';
+  {
+    const char *p = basename2 (name);
+    size_t len = strlen (p);
+
+    if (len >= FILENAME_MAX)
+      len = FILENAME_MAX - 1;
+    strncpy (ucon64.fname_arch, p, len)[len] = '\0';
+  }
 }
 #endif
 

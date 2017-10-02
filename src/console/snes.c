@@ -2963,11 +2963,13 @@ snes_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      header_start,
-                      name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
+                      header_start;
+  size_t name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN, len = strlen (name);
 
   memset (buf, ' ', name_len);
-  strncpy (buf, name, strlen (name) > name_len ? name_len : strlen (name));
+  if (len > name_len)
+    len = name_len;
+  strncpy (buf, name, len);
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
 

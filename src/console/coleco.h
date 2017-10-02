@@ -1,5 +1,5 @@
 /*
-coleco.h - Colecovision support for uCON64
+coleco.h - ColecoVision support for uCON64
 
 Copyright (c) 2005 NoisyB
 

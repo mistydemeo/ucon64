@@ -155,7 +155,6 @@ nds_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[NDS_NAME_LEN], dest_name[FILENAME_MAX];
 
-  memset (buf, 0, NDS_NAME_LEN);
   strncpy (buf, name, NDS_NAME_LEN);
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -237,7 +236,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
 
   // internal ROM name
   strncpy (rominfo->name, (const char *) nds_header.title, NDS_NAME_LEN);
-  rominfo->name[NDS_NAME_LEN] = 0;
+  rominfo->name[NDS_NAME_LEN] = '\0';
 
   // ROM maker
   {

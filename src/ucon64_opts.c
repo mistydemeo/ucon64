@@ -1058,8 +1058,8 @@ ucon64_options (st_ucon64_t *p)
 #ifdef  AMIGA
         char tmpbuf[FILENAME_MAX];
 
-        ptr = basename2 (tmpnam2 (tmpbuf));
-        rename2 (ucon64.fname, ptr);
+        tmpnam2 (tmpbuf, ".");
+        rename2 (ucon64.fname, tmpbuf);
 #endif
         strcpy (rename_buf, basename2 (ucon64.fname));
         printf ("Renaming \"%s\" to ", rename_buf);
@@ -1067,7 +1067,7 @@ ucon64_options (st_ucon64_t *p)
         ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
         printf ("\"%s\"\n", rename_buf);
 #ifdef  AMIGA
-        x = rename2 (ptr, rename_buf);
+        x = rename2 (tmpbuf, rename_buf);
 #else
         x = rename2 (ucon64.fname, rename_buf);
 #endif
@@ -1077,7 +1077,7 @@ ucon64_options (st_ucon64_t *p)
           {
             fprintf (stderr, "ERROR: Could not rename \"%s\"\n", ucon64.fname);
 #ifdef  AMIGA
-            rename2 (ptr, ucon64.fname);
+            rename2 (tmpbuf, ucon64.fname);
 #endif
           }
       }
@@ -1088,8 +1088,8 @@ ucon64_options (st_ucon64_t *p)
 #ifdef  AMIGA
         char tmpbuf[FILENAME_MAX];
 
-        ptr = basename2 (tmpnam2 (tmpbuf));
-        rename2 (ucon64.fname, ptr);
+        tmpnam2 (tmpbuf, ".");
+        rename2 (ucon64.fname, tmpbuf);
 #endif
         strcpy (rename_buf, basename2 (ucon64.fname));
         printf ("Renaming \"%s\" to ", rename_buf);
@@ -1097,7 +1097,7 @@ ucon64_options (st_ucon64_t *p)
         ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
         printf ("\"%s\"\n", rename_buf);
 #ifdef  AMIGA
-        x = rename2 (ptr, rename_buf);
+        x = rename2 (tmpbuf, rename_buf);
 #else
         x = rename2 (ucon64.fname, rename_buf);
 #endif
@@ -1107,7 +1107,7 @@ ucon64_options (st_ucon64_t *p)
           {
             fprintf (stderr, "ERROR: Could not rename \"%s\"\n", ucon64.fname);
 #ifdef  AMIGA
-            rename2 (ptr, ucon64.fname);
+            rename2 (tmpbuf, ucon64.fname);
 #endif
           }
       }
@@ -1961,7 +1961,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_XFALMULTI:
-      tmpnam2 (src_name);
+      tmpnam2 (src_name, NULL);
       ucon64.temp_file = src_name;
       register_func (remove_temp_file);
       // gba_multi() calls ucon64_file_handler() so the directory part will be

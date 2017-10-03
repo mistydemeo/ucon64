@@ -314,7 +314,8 @@ extern int strarg (char **argv, char *str, const char *separator_s, int max_args
                   it can be used for procedures which take some time to
                   inform the user about the actual progress
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
-  tmpnam2()       replacement for tmpnam() temp must have the size of FILENAME_MAX
+  tmpnam2()       replacement for tmpnam() first argument must be at least
+                  FILENAME_MAX bytes large
   renlwr()        renames all files tolower()
   drop_privileges() switch to the real user and group ID (leave "root mode")
   register_func() atexit() replacement
@@ -360,7 +361,7 @@ extern int ansi_init (void);
 extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);
 extern char *getenv2 (const char *variable);
-extern char *tmpnam2 (char *temp);
+extern char *tmpnam2 (char *tmpname, const char *basedir);
 //extern int renlwr (const char *path);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);

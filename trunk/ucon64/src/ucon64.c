@@ -1002,7 +1002,6 @@ main (int argc, char **argv)
     {
       size_t len = strlen (p);
 
-      len = strlen (p);
       if (len >= sizeof ucon64.configdir)
         len = sizeof ucon64.configdir - 1;
       strncpy (ucon64.configdir, p, len)[len] = '\0';
@@ -1017,7 +1016,6 @@ main (int argc, char **argv)
     {
       size_t len = strlen (p);
 
-      len = strlen (p);
       if (len >= sizeof ucon64.datdir)
         len = sizeof ucon64.datdir - 1;
       strncpy (ucon64.datdir, p, len)[len] = '\0';

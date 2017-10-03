@@ -320,7 +320,7 @@ doctor64_read (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  init_time = time (0);
+  init_time = time (NULL);
 
   if (sendDownloadHeader (parport, &size) != 0)
     {
@@ -366,7 +366,7 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
       fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
       exit (1);
     }
-  init_time = time (0);
+  init_time = time (NULL);
 
   strcpy (buf, filename);
   if (sendUploadHeader (parport, buf, size) != 0)

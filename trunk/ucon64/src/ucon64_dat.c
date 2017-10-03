@@ -532,21 +532,6 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
       {"(F)", "France"},
       {NULL, NULL}
     };
-  static const char *dat_flags[][2] =
-    {
-      // Often flags contain numbers, so don't search for the closing bracket
-      {"[a", "Alternate"},
-      {"[p", "Pirate"},
-      {"[b", "Bad dump"},
-      {"[t", "Trained"},
-      {"[f", "Fixed"},
-      {"[T", "Translation"},
-      {"[h", "Hack"},
-      {"[x", "Bad checksum"},
-      {"[o", "Overdump"},
-      {"[!]", "Verified good dump"}, // [!] is OK
-      {NULL, NULL}
-    };
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE], *p = NULL;
 
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
@@ -589,6 +574,21 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   *buf = '\0';
   {
+    static const char *dat_flags[][2] =
+      {
+        // Often flags contain numbers, so don't search for the closing bracket
+        {"[a", "Alternate"},
+        {"[p", "Pirate"},
+        {"[b", "Bad dump"},
+        {"[t", "Trained"},
+        {"[f", "Fixed"},
+        {"[T", "Translation"},
+        {"[h", "Hack"},
+        {"[x", "Bad checksum"},
+        {"[o", "Overdump"},
+        {"[!]", "Verified good dump"}, // [!] is OK
+        {NULL, NULL}
+      };
     int x = 0;
 
     for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
@@ -907,7 +907,7 @@ ucon64_dat_indexer (void)
           update = 1;
         }
 
-      start_time = time (0);
+      start_time = time (NULL);
       size = fsizeof (fname_dat);
 
       printf ("%s: %s\n", (update ? "Update" : "Create"), basename2 (fname_index));

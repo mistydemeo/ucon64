@@ -2132,7 +2132,7 @@ gauge (time_t init_time, int pos, int size)
   if (pos > size || !size)
     return -1;
 
-  if ((curr = (int) difftime (time (0), init_time)) == 0)
+  if ((curr = (int) difftime (time (NULL), init_time)) == 0)
     curr = 1;                                   // `round up' to at least 1 sec (no division
                                                 //  by zero below)
   bps = pos / curr;                             // # bytes/second (average transfer speed)
@@ -2505,23 +2505,23 @@ set_property (const char *filename, const char *propname, const char *value,
 
 
 char *
-tmpnam2 (char *temp)
-// tmpnam() clone
+tmpnam2 (char *tmpname, const char *basedir)
 {
-  char *p = getenv2 ("TEMP");
   static time_t init = 0;
+  const char *p = basedir ? basedir : getenv2 ("TEMP");
 
   if (!init)
     {
-      init = time (0);
-      srand ((int) init);
+      init = time (NULL);
+      srand ((unsigned) init);
     }
 
-  *temp = '\0';
-  while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs
-    sprintf (temp, "%s%s%08x.tmp", p, DIR_SEPARATOR_S, rand());
+  *tmpname = '\0';
+  do
+    sprintf (tmpname, "%s%s%08x.tmp", p, DIR_SEPARATOR_S, rand ());
+  while (!access (tmpname, F_OK));              // must work for files AND dirs
 
-  return temp;
+  return tmpname;
 }
 
 
@@ -2826,16 +2826,9 @@ q_fbackup (const char *filename, int mode)
   strcpy (buf, filename);
   set_suffix (buf, ".BAK");
   if (strcmp (filename, buf) != 0)
-    {
-      remove (buf);                             // *try* to remove or rename() will fail
-      if (rename (filename, buf))               // keep file attributes like date, etc.
-        {
-          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
-          exit (1);
-        }
-    }
-  else // handle the case where filename has the suffix ".BAK".
-    {
+    remove (buf);                               // *try* to remove or rename() will fail
+  else                                          // keep file attributes like date, etc. 
+    {                                           // handle the case where filename has the suffix ".BAK".
       char *dir = dirname2 (filename), buf2[FILENAME_MAX];
 
       if (dir == NULL)
@@ -2843,17 +2836,14 @@ q_fbackup (const char *filename, int mode)
           fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
           exit (1);
         }
-      strcpy (buf, dir);
-      if (buf[0] != '\0' && buf[strlen (buf) - 1] != DIR_SEPARATOR)
-        strcat (buf, DIR_SEPARATOR_S);
-
-      strcat (buf, basename2 (tmpnam2 (buf2)));
-      if (rename (filename, buf))
-        {
-          fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
-          exit (1);
-        }
+      strcpy (buf2, dir);
       free (dir);
+      tmpnam2 (buf, buf2);
+    }
+  if (rename (filename, buf))
+    {
+      fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
+      exit (1);
     }
 
   switch (mode)
@@ -3277,7 +3267,7 @@ _popen (const char *path, const char *mode)
   if (!apipe)
     return NULL;
 
-  sprintf (apipe, "PIPE:%08lx.%08lx", (ULONG) FindTask (NULL), (ULONG) time (0));
+  sprintf (apipe, "PIPE:%08lx.%08lx", (ULONG) FindTask (NULL), (ULONG) time (NULL));
 
   if (*mode == 'w')
     fhflags = MODE_NEWFILE;

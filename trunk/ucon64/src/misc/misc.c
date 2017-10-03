@@ -91,7 +91,7 @@ misc_digits (unsigned long v)
 int
 bytes_per_second (time_t start_time, int nbytes)
 {
-  int curr = (int) difftime (time (0), start_time);
+  int curr = (int) difftime (time (NULL), start_time);
 
   if (curr < 1)
     curr = 1;                                   // "round up" to at least 1 sec (no division
@@ -958,7 +958,7 @@ _popen (const char *path, const char *mode)
   if (!apipe)
     return NULL;
 
-  sprintf (apipe, "PIPE:%08lx.%08lx", (ULONG) FindTask (NULL), (ULONG) time (0));
+  sprintf (apipe, "PIPE:%08lx.%08lx", (ULONG) FindTask (NULL), (ULONG) time (NULL));
 
   if (*mode == 'w')
     fhflags = MODE_NEWFILE;

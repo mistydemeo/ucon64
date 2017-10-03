@@ -548,7 +548,7 @@ doctor64jr_write (const char *filename, unsigned short parport)
 #endif
 
   n_pages = (size + (64 * 1024 - 1)) / (64 * 1024); // "+ (64 * 1024 - 1)" to round up
-  init_time = time (0);
+  init_time = time (NULL);
   for (page = 0; page < n_pages; page++)
     {
       unsigned int bytesread = fread ((unsigned char *) buffer, 1, BUFFERSIZE, file);

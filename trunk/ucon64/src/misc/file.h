@@ -60,12 +60,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                 on one file system
   truncate2() don't use truncate() to enlarge files, because the result is
                 undefined (by POSIX) use truncate2() instead which does both
-  tmpnam2()   replacement for tmpnam() temp must have the size of FILENAME_MAX
+  tmpnam2()   replacement for tmpnam() first argument must be at least
+                FILENAME_MAX bytes large
   mkbak()     modes
                 BAK_DUPE (default)
                   rename file to keep attributes and copy it back to old name
                   and return new name
-                  filename -> rename() -> buf -> f_cpy() -> filename -> return buf
+                  filename -> rename() -> buf -> fcopy() -> filename -> return buf
                 BAK_MOVE
                  just rename file and return new name (static)
                  filename -> rename() -> buf -> return buf
@@ -97,7 +98,7 @@ extern int one_file (const char *filename1, const char *filename2);
 extern int one_filesystem (const char *filename1, const char *filename2);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, off_t new_size);
-extern char *tmpnam2 (char *temp);
+extern char *tmpnam2 (char *tmpname, const char *basedir);
 typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
 extern char *mkbak (const char *filename, backup_t type);
 extern int fcopy (const char *src, size_t start, size_t len, const char *dest,

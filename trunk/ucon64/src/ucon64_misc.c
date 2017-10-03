@@ -661,10 +661,16 @@ ucon64_load_discmage (void)
     */
     extern char djimport_path[FILENAME_MAX];
     char dir[FILENAME_MAX];
-    int n, l;
+    size_t n, l;
 
-    dirname2 (ucon64.argv[0], dir);
-    sprintf (djimport_path, "%s" DIR_SEPARATOR_S "%s", dir, "discmage.dxe");
+    l = strlen (ucon64.argv[0]);
+    if (l >= sizeof djimport_path)
+      l = sizeof djimport_path - 1;
+    strncpy (djimport_path, ucon64.argv[0], l)[l] = '\0'; // use djimport_path as tmp buf
+    dirname2 (djimport_path, dir);
+    snprintf (djimport_path, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s", dir,
+              "discmage.dxe");
+    djimport_path[FILENAME_MAX - 1] = '\0';
     // this is specific to DJGPP - not necessary, but prevents confusion
     l = strlen (djimport_path);
     for (n = 0; n < l; n++)
@@ -698,7 +704,7 @@ discmage_gauge (int pos, int size)
   static time_t init_time = 0;
 
   if (!init_time || !pos /* || !size */)
-    init_time = time (0);
+    init_time = time (NULL);
 
   return ucon64_gauge (init_time, pos, size);
 }
@@ -1097,7 +1103,7 @@ ucon64_gauge (time_t start_time, int pos, int size)
 
   if (pos == size)
     {
-      int curr = (int) difftime (time (0), start_time);
+      int curr = (int) difftime (time (NULL), start_time);
       // "round up" to at least 1 sec (to be consistent with ETA)
       if (curr < 1)
         curr = 1;

@@ -380,6 +380,7 @@ realpath2 (const char *path, char *full_path)
 char *
 dirname2 (const char *path, char *dir)
 {
+  size_t len;
   char *p1;
 #if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   char *p2;
@@ -388,7 +389,10 @@ dirname2 (const char *path, char *dir)
   if (path == NULL || dir == NULL)
     return NULL;
 
-  strcpy (dir, path);
+  len = strlen (path);
+  if (len >= FILENAME_MAX)
+    len = FILENAME_MAX - 1;
+  strncpy (dir, path, len)[len] = '\0';
 #if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
   // yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
   // Cygwin has no dirname()
@@ -603,7 +607,8 @@ one_filesystem (const char *filename1, const char *filename2)
           // we don't handle unique volume names
           path1[1] == ':' && path2[1] == ':')
         return 1;
-      return 0;
+      else
+        return 0;
     }
 
   file1 = CreateFile (filename1, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
@@ -688,7 +693,9 @@ truncate2 (const char *filename, off_t new_size)
 
       while (size < new_size)
         {
-          int n_bytes = new_size - size > MAXBUFSIZE ? MAXBUFSIZE : new_size - size;
+          int n_bytes = new_size - size > MAXBUFSIZE ?
+                          MAXBUFSIZE : new_size - size;
+
           fwrite (padbuffer, 1, n_bytes, file);
           size += n_bytes;
         }
@@ -716,7 +723,11 @@ tmpnam2 (char *tmpname, const char *basedir)
 
   *tmpname = '\0';
   do
-    sprintf (tmpname, "%s%s%08x.tmp", p, DIR_SEPARATOR_S, rand ());
+    {
+      snprintf (tmpname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%08x.tmp", p,
+                (int) time (NULL) * rand ());
+      tmpname[FILENAME_MAX - 1] = '\0';
+    }
   while (!access (tmpname, F_OK));              // must work for files AND dirs
 
   return tmpname;
@@ -727,11 +738,15 @@ char *
 mkbak (const char *filename, backup_t type)
 {
   static char buf[FILENAME_MAX];
+  size_t len;
 
   if (access (filename, R_OK) != 0)
     return (char *) filename;
 
-  strcpy (buf, filename);
+  len = strlen (filename);
+  if (len >= sizeof buf)
+    len = sizeof buf - 1;
+  strncpy (buf, filename, len)[len] = '\0';
   set_suffix (buf, ".bak");
   if (strcmp (filename, buf) != 0)
     remove (buf);                               // *try* to remove or rename() will fail
@@ -777,7 +792,8 @@ fcopy_func (void *buffer, int n, void *object)
 
 
 int
-fcopy (const char *src, size_t start, size_t len, const char *dest, const char *mode)
+fcopy (const char *src, size_t start, size_t len, const char *dest,
+       const char *mode)
 {
   FILE *output;
   int result = 0;

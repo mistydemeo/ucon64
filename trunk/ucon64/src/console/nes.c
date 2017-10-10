@@ -5180,7 +5180,7 @@ read_block (unsigned char **data, unsigned int size, FILE *file, const char *for
   real_size = fread (*data, 1, size, file);
   if (real_size != size)
     printf ("WARNING: Could not read %u bytes, only %u bytes were available\n",
-      size, real_size);
+            size, real_size);
 
   va_end (argptr);
   return real_size;
@@ -5254,7 +5254,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
          malloc (sizeof (st_unif_chunk_t) + chunk_header.length)) == NULL)
     {
       fprintf (stderr, "ERROR: Not enough memory for chunk (%u bytes)\n",
-        (int) sizeof (st_unif_chunk_t) + chunk_header.length);
+               (int) sizeof (st_unif_chunk_t) + chunk_header.length);
       exit (1);
     }
   unif_chunk->id = me2le_32 (chunk_header.id);
@@ -6583,6 +6583,7 @@ nes_dint (void)
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
 
@@ -7071,27 +7072,27 @@ nes_init (st_ucon64_nfo_t *rominfo)
       ucon64.split = 0;                         // iNES files are never split
 
       sprintf (buf, "Internal size: %.4f Mb\n",
-        TOMBIT_F ((ines_header.prg_size << 14) + (ines_header.chr_size << 13)));
+               TOMBIT_F ((ines_header.prg_size << 14) + (ines_header.chr_size << 13)));
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Internal PRG size: %.4f Mb\n",     // ROM
-        TOMBIT_F (ines_header.prg_size << 14));
+               TOMBIT_F (ines_header.prg_size << 14));
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Internal CHR size: %.4f Mb\n",     // VROM
-        TOMBIT_F (ines_header.chr_size << 13));
+               TOMBIT_F (ines_header.chr_size << 13));
       strcat (rominfo->misc, buf);
 
       x = (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0);
       if (ines_header.ctrl2 & 0xf)
         sprintf (buf, "Memory mapper (iNES): %d (%d)\n", x,
-          x | ((ines_header.ctrl2 & 0xf) << 8));
+                 x | ((ines_header.ctrl2 & 0xf) << 8));
       else
         sprintf (buf, "Memory mapper (iNES): %d\n", x);
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Television standard: %s\n",
-        ines_header.ctrl3 & INES_TVID ? "PAL" : "NTSC");
+               ines_header.ctrl3 & INES_TVID ? "PAL" : "NTSC");
       strcat (rominfo->misc, buf);
 
       if (ines_header.ctrl1 & INES_MIRROR)
@@ -7104,14 +7105,14 @@ nes_init (st_ucon64_nfo_t *rominfo)
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Cartridge RAM: %d kBytes\n", ines_header.ram_size ?
-        ines_header.ram_size * 8 : 8);
+               ines_header.ram_size * 8 : 8);
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Save RAM: %s\n", (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "512-byte trainer: %s\n",
-        (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
+               (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "VS-System: %s", (ines_header.ctrl2 & 0x01) ? "Yes" : "No");
@@ -7234,7 +7235,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
                 free (unif_chunk2);
               }
             sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n", n,
-              TOMBIT_F (unif_chunk->length), str);
+                     TOMBIT_F (unif_chunk->length), str);
             strcat (rominfo->misc, buf);
             free (unif_chunk);
           }
@@ -7266,7 +7267,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
                 free (unif_chunk2);
               }
             sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n", n,
-              TOMBIT_F (unif_chunk->length), str);
+                     TOMBIT_F (unif_chunk->length), str);
             strcat (rominfo->misc, buf);
             free (unif_chunk);
           }
@@ -7407,28 +7408,28 @@ nes_init (st_ucon64_nfo_t *rominfo)
       sprintf (buf, "Size: %.4f Mb\n", TOMBIT_F (rominfo->data_size));
       strcat (rominfo->misc, buf);
 
-      sprintf (buf, "PRG size: %.4f Mb\n",      // ROM, don't say internal,
-        TOMBIT_F (ines_header.prg_size << 14)); //  because it's not
+      sprintf (buf, "PRG size: %.4f Mb\n",             // ROM, don't say internal,
+               TOMBIT_F (ines_header.prg_size << 14)); //  because it's not
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "CHR size: %.4f Mb\n",      // VROM
-        TOMBIT_F (ines_header.chr_size << 13));
+               TOMBIT_F (ines_header.chr_size << 13));
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Memory mapper (iNES): %d\n",
-        (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0));
+               (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0));
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Mirroring: %s\n",
-        (ines_header.ctrl1 & INES_MIRROR) ? "Vertical" : "Horizontal");
+               (ines_header.ctrl1 & INES_MIRROR) ? "Vertical" : "Horizontal");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Save RAM: %s\n",
-        (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
+               (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "512-byte trainer: %s",
-        (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
+               (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
       break;
     case FFE:
@@ -7463,7 +7464,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       rominfo->backup_header = &ffe_header;
 
       sprintf (buf, "512-byte trainer: %s",
-        (ffe_header.emulation1 & SMC_TRAINER) ? "Yes" : "No");
+               (ffe_header.emulation1 & SMC_TRAINER) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
       break;
     case FDS:

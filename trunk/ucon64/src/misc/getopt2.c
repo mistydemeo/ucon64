@@ -408,9 +408,6 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
   char path[FILENAME_MAX];
   struct stat fstate;
 
-  if (strlen (fname) >= FILENAME_MAX - 2)
-    return 0;
-
   realpath2 (fname, path);
 
   /*

@@ -577,16 +577,26 @@ descramble (const char *src, uint32_t sz, char *dst)
     return -1;
 
   if ((ptr = (unsigned char *) malloc (sz)) == NULL)
-    return -1;
+    {
+      fclose (fh);
+      return -1;
+    }
 
   load_file (fh, ptr, sz);
   fclose (fh);
 
   if ((fh = fopen (dst, "wb")) == NULL)
-    return -1;
+    {
+      free (ptr);
+      return -1;
+    }
 
   if (fwrite (ptr, 1, sz, fh) != sz)
-    return -1;
+    {
+      fclose (fh);
+      free (ptr);
+      return -1;
+    }
 
   fclose (fh);
   free (ptr);
@@ -604,19 +614,28 @@ scramble (const char *src, uint32_t sz, char *dst)
     return -1;
 
   if ((ptr = (unsigned char *) malloc (sz)) == NULL)
-    return -1;
+    {
+      fclose (fh);
+      return -1;
+    }
 
   if (fread (ptr, 1, sz, fh) != sz)
-    return -1;
+    {
+      free (ptr);
+      fclose (fh);
+      return -1;
+    }
 
   fclose (fh);
 
-  if (!(fh == fopen (dst, "wb")))
-    return -1;
+  if ((fh = fopen (dst, "wb")) == NULL)
+    {
+      free (ptr);
+      return -1;
+    }
   save_file (fh, ptr, sz);
 
   fclose (fh);
-
   free (ptr);
   return 0;
 }

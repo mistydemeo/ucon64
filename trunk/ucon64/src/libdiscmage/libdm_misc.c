@@ -551,7 +551,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 
       if (!result)
         {
-          fprintf (stderr, "ERROR: writing sector %d\n", x);
+          fprintf (stderr, "ERROR: writing sector %u\n", x);
           fclose (fh);
           fclose (fh2);
           return -1;
@@ -672,10 +672,10 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
         }
 
       printf ("Found %s at sector %d\n",
-        !memcmp (pvd_magic, buf, 8) ? "PVD" :
-        !memcmp (svd_magic, buf, 8) ? "SVD" :
-        !memcmp (vdt_magic, buf, 8) ? "VDT" : "unknown Volume Descriptor",
-        last_pos / track->sector_size);
+              !memcmp (pvd_magic, buf, 8) ? "PVD" :
+              !memcmp (svd_magic, buf, 8) ? "SVD" :
+              !memcmp (vdt_magic, buf, 8) ? "VDT" : "unknown Volume Descriptor",
+              last_pos / track->sector_size);
 
       if (mac)
         fwrite (sub_header, 8, 1, dest);
@@ -776,14 +776,15 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
     }
 #endif
 
-  printf ("%d Bytes (%.4f MB)\n\n", filesize, (float) filesize / (1024 * 1024));
-  printf ("Type: %s\n", image->desc);
+  printf ("%d Bytes (%.4f MB)\n"
+          "\n"
+          "Type: %s\n", filesize, (float) filesize / (1024 * 1024), image->desc);
 
   if (image->misc[0])
     puts (image->misc);
 
-  printf ("Sessions: %d\n", image->sessions);
-  printf ("Tracks: %d\n", image->tracks);
+  printf ("Sessions: %d\n"
+          "Tracks: %d\n", image->sessions, image->tracks);
 
   if ((COLS / image->tracks) > 1 && image->sessions && image->tracks)
     {
@@ -863,44 +864,47 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 
       if (track->iso_header_start != -1)
         if ((fh = fopen (image->fname, "rb")) != NULL)
-          if (fread (&iso_header, track->iso_header_start,
-                     sizeof (st_iso_header_t), fh))
-            {
-              if (verbose)
-                mem_hexdump (&iso_header, sizeof (st_iso_header_t),
-                             track->iso_header_start);
+          {
+            if (fread (&iso_header, track->iso_header_start,
+                       sizeof (st_iso_header_t), fh))
+              {
+                if (verbose)
+                  mem_hexdump (&iso_header, sizeof (st_iso_header_t),
+                               track->iso_header_start);
 
-              // name, maker, country and size
-              // some have a name with control chars in it -> replace control chars
-              strncpy2 (buf, iso_header.volume_id,
-                        sizeof iso_header.volume_id);
-              to_func (buf, strlen (buf), toprint2);
-              if (*strtrim (buf))
-                printf ("  %s\n", buf);
+                // name, maker, country and size
+                // some have a name with control chars in it -> replace control chars
+                strncpy2 (buf, iso_header.volume_id,
+                          sizeof iso_header.volume_id);
+                to_func (buf, strlen (buf), toprint2);
+                if (*strtrim (buf))
+                  printf ("  %s\n", buf);
 
-              strncpy2 (buf, iso_header.publisher_id,
-                        sizeof iso_header.publisher_id);
-              to_func (buf, strlen (buf), toprint2);
-              if (*strtrim (buf))
-                printf ("  %s\n", buf);
+                strncpy2 (buf, iso_header.publisher_id,
+                          sizeof iso_header.publisher_id);
+                to_func (buf, strlen (buf), toprint2);
+                if (*strtrim (buf))
+                  printf ("  %s\n", buf);
 
-              strncpy2 (buf, iso_header.preparer_id,
-                        sizeof iso_header.preparer_id);
-              to_func (buf, strlen (buf), toprint2);
-              if (*strtrim (buf))
-                printf ("  %s\n", buf);
+                strncpy2 (buf, iso_header.preparer_id,
+                          sizeof iso_header.preparer_id);
+                to_func (buf, strlen (buf), toprint2);
+                if (*strtrim (buf))
+                  printf ("  %s\n", buf);
 #if 0
-              strncpy2 (buf, iso_header.logical_block_size,
-                        sizeof iso_header.logical_block_size);
-              to_func (buf, strlen (buf), toprint2);
-              if (*strtrim (buf))
-                printf ("  %s\n", buf);
+                strncpy2 (buf, iso_header.logical_block_size,
+                          sizeof iso_header.logical_block_size);
+                to_func (buf, strlen (buf), toprint2);
+                if (*strtrim (buf))
+                  printf ("  %s\n", buf);
 #endif
-              strncpy2 (buf, iso_header.application_id,
-                        sizeof iso_header.application_id);
-              to_func (buf, strlen (buf), toprint2);
-              if (*strtrim (buf))
-                printf ("  %s\n", buf);
-            }
+                strncpy2 (buf, iso_header.application_id,
+                          sizeof iso_header.application_id);
+                to_func (buf, strlen (buf), toprint2);
+                if (*strtrim (buf))
+                  printf ("  %s\n", buf);
+              }
+            fclose (fh);
+          }
     }
 }

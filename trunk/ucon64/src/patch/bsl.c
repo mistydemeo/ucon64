@@ -63,12 +63,13 @@ bsl_apply (const char *mod, const char *bslname)
   if ((bslfile = fopen (bslname, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], bslname);
+      fclose (modfile);
       return -1;
     }
 
-  printf ("Applying BSL/Baseline patch...\n");
+  puts ("Applying BSL/Baseline patch...");
 
-  while (!feof (bslfile))                       // we could use 1, but feof() makes it fail-safe
+  while (!feof (bslfile))
     {
       fscanf (bslfile, "%d\n", &offset);
       fscanf (bslfile, "%d\n", &data);
@@ -96,12 +97,12 @@ bsl_apply (const char *mod, const char *bslname)
         fputc (fgetc (bslfile), modfile);       //  _value_ read from the BSL file
     }
 
-  printf ("Patching complete\n\n");
+  puts ("Patching complete\n");
   printf (ucon64_msg[WROTE], modname);
-  printf ("\n"
-          "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-          "      This means you must modify for example a SNES ROM with -swc or -stp or\n"
-          "      the patch will not work\n");
+  puts ("\n"
+        "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+        "      This means you must modify for example a SNES ROM with -swc or -stp or\n"
+        "      the patch will not work");
 
   fclose (bslfile);
   fclose (modfile);

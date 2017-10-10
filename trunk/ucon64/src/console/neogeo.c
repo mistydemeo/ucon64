@@ -153,11 +153,18 @@ sam2wav (const char *filename)
   set_suffix ((char *) buf, ".wav");
 
   if ((fh2 = fopen ((char *) buf, "wb")) == NULL)
-    return -1;
+    {
+      fclose (fh);
+      return -1;
+    }
   fread (buf, 1, 4, fh);
 
   if (strncmp ((char *) buf, "MAME", 4) != 0)
-    return -1;
+    {
+      fclose (fh2);
+      fclose (fh);
+      return -1;
+    }
   fread (buf, 1, 4, fh);
 
   datasize = buf[0] + (buf[1] << 8) + (buf[2] << 16) + (buf[3] << 24);

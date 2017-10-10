@@ -1076,7 +1076,7 @@ ucon64_gauge (time_t start_time, int pos, int size)
 
   if (ucon64.frontend)
     {
-      fprintf (stdout, "%u\n", percentage);
+      fprintf (stdout, "%d\n", percentage);
       fflush (stdout);
 
       return 0;
@@ -1789,7 +1789,7 @@ ucon64_pattern (const char *pattern_fname)
   fclose (destfile);
   cleanup_cm_patterns (&patterns, n_patterns);
 
-  printf ("Found %d pattern%s\n", n_found, n_found != 1 ? "s" : "");
+  printf ("Found %u pattern%s\n", n_found, n_found != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return n_found;

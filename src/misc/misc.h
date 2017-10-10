@@ -245,6 +245,7 @@ extern int misc_digits (unsigned long value);
 #else
 #ifdef  DLL
 #define access _access
+#define chdir _chdir
 #define chmod _chmod
 #define getcwd _getcwd
 #define isatty _isatty

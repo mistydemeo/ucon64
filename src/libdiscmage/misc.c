@@ -1155,60 +1155,78 @@ dirname2 (const char *path)
 }
 
 
+#if     defined DJGPP || defined __MINGW32__
+static inline void
+strchrreplace (char *str, char find, char replace)
+{
+  char *p;
+
+  for (p = str; *p; p++)
+    if (*p == find)
+      *p = replace;
+}
+#endif
+
+
 #ifndef HAVE_REALPATH
 #undef  realpath
 char *
 realpath (const char *path, char *full_path)
 {
 #if     defined __unix__ || defined __BEOS__ || defined __MSDOS__
-/*
-  Keep the "defined _WIN32"'s in this code in case GetFullPathName() turns out
-  to have some unexpected problems. This code works for Visual C++, but it
-  doesn't return the same paths as GetFullPathName() does. Most notably,
-  GetFullPathName() expands <drive letter>:. to the current directory of
-  <drive letter>: while this code doesn't.
-*/
-#define MAX_READLINKS 32
+// Keep the "defined _WIN32"s in this code in case GetFullPathName() turns out
+//  to have some unexpected problems.
+#define MAX_READLINKS 256
   char copy_path[FILENAME_MAX], got_path[FILENAME_MAX], *new_path = got_path,
-       *max_path;
+       *max_path = copy_path + FILENAME_MAX - 1;
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
   char c;
 #endif
 #ifdef  S_IFLNK
-  char link_path[FILENAME_MAX];
   int readlinks = 0;
 #endif
-  int n;
 
-  memset (got_path, 0, sizeof got_path);
+  {
+    size_t len = strlen (path);
+
+    if (len >= FILENAME_MAX)
+      return NULL;
+    else if (len == 0)
+      return NULL;
+  }
 
   // make a copy of the source path since we may need to modify it
-  n = strlen (path);
-  if (n >= FILENAME_MAX - 2)
-    return NULL;
-  else if (n == 0)
-    return NULL;
-
   strcpy (copy_path, path);
 #if     defined DJGPP || defined __MINGW32__
   // with DJGPP path can contain (forward) slashes
-  {
-    int l = strlen (copy_path);
-    for (n = 0; n < l; n++)
-      if (copy_path[n] == '/')
-        copy_path[n] = DIR_SEPARATOR;
-  }
+  strchrreplace (copy_path, '/', DIR_SEPARATOR);
 #endif
   path = copy_path;
-  max_path = copy_path + FILENAME_MAX - 1;
+
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
-  c = toupper (*path);
+  c = (char) toupper (*path);
   if (c >= 'A' && c <= 'Z' && path[1] == ':')
     {
       *new_path++ = *path++;
       *new_path++ = *path++;
       if (*path == DIR_SEPARATOR)
         *new_path++ = *path++;
+      else
+        {
+          char drive[3] = ".:";
+
+          drive[0] = c;
+          chdir (drive);
+          new_path -= 2;
+          getcwd (new_path, FILENAME_MAX);
+#if     defined DJGPP || defined __MINGW32__
+          // DJGPP's getcwd() returns a path with forward slashes
+          strchrreplace (new_path, '/', DIR_SEPARATOR);
+#endif
+          new_path += strlen (new_path);
+          if (*(new_path - 1) != DIR_SEPARATOR)
+            *new_path++ = DIR_SEPARATOR;
+        }
     }
   else
 #endif
@@ -1217,12 +1235,7 @@ realpath (const char *path, char *full_path)
       getcwd (new_path, FILENAME_MAX);
 #if     defined DJGPP || defined __MINGW32__
       // DJGPP's getcwd() returns a path with forward slashes
-      {
-        int l = strlen (new_path);
-        for (n = 0; n < l; n++)
-          if (new_path[n] == '/')
-            new_path[n] = DIR_SEPARATOR;
-      }
+      strchrreplace (new_path, '/', DIR_SEPARATOR);
 #endif
       new_path += strlen (new_path);
       if (*(new_path - 1) != DIR_SEPARATOR)
@@ -1237,6 +1250,11 @@ realpath (const char *path, char *full_path)
   // expand each (back)slash-separated pathname component
   while (*path != '\0')
     {
+#ifdef  S_IFLNK
+      char link_path[FILENAME_MAX];
+      ssize_t n;
+#endif
+
       // ignore stray DIR_SEPARATOR
       if (*path == DIR_SEPARATOR)
         {
@@ -1268,7 +1286,6 @@ realpath (const char *path, char *full_path)
         {
           if (path > max_path)
             return NULL;
-
           *new_path++ = *path++;
         }
 #ifdef  S_IFLNK
@@ -1306,10 +1323,10 @@ realpath (const char *path, char *full_path)
             // otherwise back up over this component
             while (*(--new_path) != DIR_SEPARATOR)
               ;
-          if (strlen (path) + n >= FILENAME_MAX - 2)
+          if (strlen (path) + n >= FILENAME_MAX)
             return NULL;
           // insert symlink contents into path
-          strcat (link_path, path);
+          strcat (link_path + n, path);
           strcpy (copy_path, link_path);
           path = copy_path;
         }
@@ -1324,7 +1341,7 @@ realpath (const char *path, char *full_path)
         {
           if (*(new_path - 2) == ':')
             {
-              c = toupper (*(new_path - 3));
+              c = (char) toupper (*(new_path - 3));
               if (!(c >= 'A' && c <= 'Z'))
                 new_path--;
             }
@@ -1344,7 +1361,8 @@ realpath (const char *path, char *full_path)
   return full_path;
 #elif   defined _WIN32
   char *p, c;
-  int n;
+  size_t n;
+
   if (GetFullPathName (path, FILENAME_MAX, full_path, &p) == 0)
     return NULL;
 
@@ -1357,7 +1375,7 @@ realpath (const char *path, char *full_path)
        || full_path[n] == '/'
 #endif
       ) &&
-      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == '\0')) // && full_path[2] == DIR_SEPARATOR
+      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == '\0'))
     full_path[n] = '\0';
 
   return full_path;
@@ -1424,12 +1442,7 @@ realpath2 (const char *path, char *full_path)
 #if     defined DJGPP || defined __MINGW32__
       // with DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
       //  returns a path with forward slashes)
-      {
-        int n, l = strlen (full_path);
-        for (n = 0; n < l; n++)
-          if (full_path[n] == '/')
-            full_path[n] = DIR_SEPARATOR;
-      }
+      strchrreplace (full_path, '/', DIR_SEPARATOR);
 #endif
       errno = ENOENT;
       return NULL;

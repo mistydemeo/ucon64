@@ -667,6 +667,7 @@ snes_convert_sramfile (int org_header_len, const void *new_header)
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
 
@@ -788,6 +789,7 @@ snes_ufosds (st_ucon64_nfo_t *rominfo)
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      fclose (srcfile);
       return -1;
     }
 

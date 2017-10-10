@@ -809,6 +809,7 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
               if (access (fname, F_OK))
                 {
                   fprintf (stderr, "ERROR: Cannot open loader binary (%s)\n", fname);
+                  fclose (destfile);
                   return -1;
                 }
               fname_ptr = fname;

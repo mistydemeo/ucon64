@@ -1784,12 +1784,12 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   if (!padded)
     puts ("Padded: No");
   else
-    printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded, TOMBIT_F (padded));
+    printf ("Padded: Maybe, %u Bytes (%.4f Mb)\n", padded, TOMBIT_F (padded));
 
   // intro, trainer?
   // nes.c determines itself whether or not there is a trainer
   if (intro && ucon64.console != UCON64_NES)
-    printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
+    printf ("Intro/Trainer: Maybe, %u Bytes\n", intro);
 
   // interleaved?
   if (nfo->interleaved != UCON64_UNKNOWN)
@@ -1802,7 +1802,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 
   // backup unit header?
   if (nfo->backup_header_len)
-    printf ("Backup unit/emulator header: Yes, %d Bytes\n",
+    printf ("Backup unit/emulator header: Yes, %u Bytes\n",
             nfo->backup_header_len);
   else
 // for NoisyB: <read only mode ON>
@@ -2002,7 +2002,7 @@ ucon64_usage (int argc, char *argv[], int view)
 
   fputc ('\n', stdout);
 
-  printf ("DATabase: %d known ROMs (DAT files: %s)\n\n",
+  printf ("DATabase: %u known ROMs (DAT files: %s)\n\n",
           ucon64_dat_total_entries (), ucon64.datdir);
 
 #ifdef  USE_DISCMAGE

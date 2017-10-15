@@ -514,10 +514,27 @@ get_internal_size (void)
 
 
 static unsigned int
+get_header_start (st_ucon64_nfo_t *rominfo, unsigned int size)
+{
+  unsigned int header_start;
+
+  if (rominfo->interleaved)
+    header_start = SNES_HEADER_START + (snes_hirom ?
+                     (copier_type == UFO ? snes_header_base / 2u : 0) :
+                     size / 2);                 // (Ext.) HiROM : LoROM
+  else if (st_dump)                             // ignore interleaved ST dumps
+    header_start = 8 * MBIT;
+  else
+    header_start = rominfo->header_start;
+  return header_start;
+}
+
+
+static unsigned int
 update_chksum (st_ucon64_nfo_t *rominfo, unsigned char *sum, unsigned int size,
                const char *dest_name)
 {
-  unsigned int header_start;
+  unsigned int header_start = get_header_start (rominfo, size);
 
   /*
     The internal checksum bytes have been included in the checksum calculation,
@@ -537,10 +554,6 @@ update_chksum (st_ucon64_nfo_t *rominfo, unsigned char *sum, unsigned int size,
   // change checksum
   sum[2] = (unsigned char) rominfo->current_internal_crc; // low byte
   sum[3] = (unsigned char) (rominfo->current_internal_crc >> 8); // high byte
-  if (rominfo->interleaved)
-    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
-  else
-    header_start = rominfo->header_start;
   ucon64_fwrite (sum, header_start + rominfo->backup_header_len + 44, 4,
                  dest_name, "r+b");
 
@@ -1145,10 +1158,10 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
   else
     p = (char *) basename2 (filename);
 
-  snprintf (name, 8, "sf%d%.3s%s", newsize / MBIT, p, "__");
+  snprintf (name, 8, "sf%d%.3s__", newsize / MBIT, p);
   name[7] = '\0';
   if (!strnicmp (name, p, newsize < 10 * MBIT ? 3 : 4))
-    snprintf (name, 8, "%s%s", p, "___");
+    snprintf (name, 8, "%s___", p);
   n = newsize < 10 * MBIT ? 6 : 7;
   name[n] = '\0';
   // avoid trouble with filenames containing spaces
@@ -2964,9 +2977,8 @@ int
 snes_n (st_ucon64_nfo_t *rominfo, const char *name)
 {
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
-  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      header_start;
-  size_t name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN, len = strlen (name);
+  size_t name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN,
+         len = strlen (name);
 
   memset (buf, ' ', name_len);
   if (len > name_len)
@@ -2976,15 +2988,11 @@ snes_n (st_ucon64_nfo_t *rominfo, const char *name)
   ucon64_file_handler (dest_name, NULL, 0);
 
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
-
-  if (rominfo->interleaved)
-    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
-  else if (st_dump)                             // ignore interleaved ST dumps
-    header_start = 8 * MBIT;
-  else
-    header_start = rominfo->header_start;
-  ucon64_fwrite (buf, header_start + rominfo->backup_header_len + 16, name_len,
-                 dest_name, "r+b");
+  ucon64_fwrite (buf,
+                 get_header_start (rominfo, (unsigned int) ucon64.file_size -
+                                     rominfo->backup_header_len) +
+                   rominfo->backup_header_len + 16,
+                 name_len, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -4545,7 +4553,7 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer,
 #endif
 
 
-static int
+static inline int
 snes_isprint (char *s, int len)
 {
   unsigned char *p = (unsigned char *) s;
@@ -4916,8 +4924,7 @@ snes_multi (unsigned int truncate_size, char *fname)
 int
 snes_densrt (st_ucon64_nfo_t *rominfo)
 {
-  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      header_start;
+  unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char backup_header[512], *buffer;
 
@@ -4936,11 +4943,7 @@ snes_densrt (st_ucon64_nfo_t *rominfo)
     }
   ucon64_fread (buffer, rominfo->backup_header_len, size, ucon64.fname);
 
-  if (rominfo->interleaved)
-    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
-  else
-    header_start = rominfo->header_start;
-  get_nsrt_info (buffer, header_start, backup_header);
+  get_nsrt_info (buffer, get_header_start (rominfo, size), backup_header);
   memset (backup_header + 0x1d0, 0, 32);        // remove NSRT header
 
   strcpy (src_name, ucon64.fname);

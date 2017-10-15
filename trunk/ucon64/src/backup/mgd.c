@@ -371,10 +371,10 @@ mgd_make_name (const char *filename, int console, unsigned int size, char *name)
 
   fname = basename2 (filename);
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
-  snprintf (name, 8, "%s%u%.3s%s", prefix, size_mbit, fname, "XX");
+  snprintf (name, 8, "%s%u%.3sXX", prefix, size_mbit, fname);
   name[7] = '\0';
   if (!strnicmp (name, fname, size < 10 * MBIT ? 3 : 4))
-    snprintf (name, 8, "%s%s", fname, "XXX");
+    snprintf (name, 8, "%sXXX", fname);
   n = size < 10 * MBIT ? 6 : 7;
   name[n] = '0';                                // last character must be a number
   name[n + 1] = '\0';

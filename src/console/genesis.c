@@ -622,7 +622,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
     }
   else if (copier_type == MGD_GEN)
     {
-      char *names[8], names_mem[8][9] = { 0 };
+      char *names[8], names_mem[8][9] = { { 0 } };
       const char *p0;
       unsigned int n, name_i = 0;
 

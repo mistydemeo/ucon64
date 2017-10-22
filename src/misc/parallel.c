@@ -914,6 +914,7 @@ parport_setup (unsigned short port, parport_mode_t mode)
       exit (1);
     }
 #ifdef  USE_PPDEV
+  (void) port;
   if (mode == PPMODE_SPP)
     parport_io_mode = IEEE1284_MODE_COMPAT | IEEE1284_DATA;
   else if (mode == PPMODE_SPP_BIDIR)

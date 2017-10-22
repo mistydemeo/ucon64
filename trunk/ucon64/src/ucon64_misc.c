@@ -1761,10 +1761,10 @@ ucon64_pattern (const char *pattern_fname)
 
           if (ucon64.quiet < 0)
             printf ("Scanning offset 0x%08x-0x%08x (%u bytes) for pattern %d\n",
-                    (unsigned int) totalbytesread - effective_overlap +
-                      (buffer_start - buffer),
-                    (unsigned int) totalbytesread - effective_overlap +
-                      (buffer_start - buffer) + buffer_size - 1,
+                    (unsigned int) (totalbytesread - effective_overlap +
+                      (buffer_start - buffer)),
+                    (unsigned int) (totalbytesread - effective_overlap +
+                      (buffer_start - buffer)) + buffer_size - 1,
                     buffer_size, n + 1);
           n_found += change_mem2 (buffer_start, buffer_size, patterns[n].search,
                                   patterns[n].search_size, patterns[n].wildcard,
@@ -2393,7 +2393,7 @@ ucon64_filefile (const char *filename1, unsigned int start1,
 #endif
 
   printf ("Found %llu %s\n\n",
-          n_bytes,
+          (long long unsigned int) n_bytes,
           similar ? (n_bytes == 1 ? "similarity" : "similarities") :
                     (n_bytes == 1 ? "difference" : "differences"));
 

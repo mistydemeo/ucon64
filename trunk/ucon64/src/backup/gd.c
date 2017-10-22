@@ -583,10 +583,10 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
 {
   FILE *file = NULL;
   unsigned char *buffer;
-  char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12] = { 0 },
+  char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12] = { { 0 } },
        *filenames[GD3_MAX_UNITS], dir[FILENAME_MAX];
   int num_units, i, split, hirom = snes_get_snes_hirom ();
-  st_add_filename_data_t add_filename_data = { 0 };
+  st_add_filename_data_t add_filename_data = { 0, NULL };
 
   init_io (parport);
 

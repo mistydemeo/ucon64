@@ -1857,7 +1857,7 @@ static void
 snes_split_gd3 (st_ucon64_nfo_t *rominfo, int size)
 {
   char dest_name[FILENAME_MAX], *names[GD3_MAX_UNITS],
-       names_mem[GD3_MAX_UNITS][9] = { 0 };
+       names_mem[GD3_MAX_UNITS][9] = { { 0 } };
   unsigned int nparts, surplus, n, name_i = 0;
 
   if (UCON64_ISSET (ucon64.part_size))

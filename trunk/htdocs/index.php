@@ -87,7 +87,7 @@ require_once ("misc/widget.php");
   <tr>
     <td valign="top"><font size="-1">
 <!-- keep them in one line or they'll look fucked up in mozilla -->
-<a href="ucon64/readme.html">ReadME</a>|<a href="ucon64/faq.html#4">Install</a>|<a href="ucon64/hardware.html">Hardware</a>|<a href="ucon64/faq.html">FAQ</a>|<a href="ucon64/changes.html">Changes</a>|<a href="ucon64/license.html">License</a>|<a href="ucon64/developers.html#3">CVS</a>|<a href="mailto:ucon64-main@lists.sf.net">Bugs?</a>|<a href="mailto:ucon64-main@lists.sf.net">Contact</a>
+<a href="ucon64/readme.html">ReadME</a>|<a href="ucon64/faq.html#4">Install</a>|<a href="ucon64/hardware.html">Hardware</a>|<a href="ucon64/faq.html">FAQ</a>|<a href="ucon64/changes.html">Changes</a>|<a href="ucon64/license.html">License</a>|<a href="ucon64/developers.html#3">SVN</a>|<a href="mailto:ucon64-main@lists.sf.net">Bugs?</a>|<a href="mailto:ucon64-main@lists.sf.net">Contact</a>
 <br>
 <center>
 <img src="images/black.png" height="10" width="590">
@@ -132,8 +132,8 @@ Screenshots: <a href="images/ucon64_ss1.png">1</a>|<a href="images/ucon64_ss2.pn
 </center>
 <a name="download"></a>
 <img src="images/download.png"><br>
-<b>CVS</b><br>
-To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3">this</a> or click <a href="http://ucon64.cvs.sourceforge.net/viewvc/ucon64/ucon64/?view=tar">here</a> to download a GNU tarball<br>
+<b>SVN</b><br>
+To get the latest uCON64 version from SVN read <a href="ucon64/developers.html#3">this</a><br>
 <br>
 <b>Sources</b><br><font size="-1">
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-src.tar.gz/download">ucon64-2.0.3-src.tar.gz</a><br>
@@ -186,7 +186,7 @@ To get the latest uCON64 version from CVS read <a href="ucon64/developers.html#3
   <tr>
     <td valign="top"><font size="-1">
 <!-- keep them in one line or they'll look fucked up in mozilla -->
-<a href="ucon64/faq.html">FAQ</a>|<a href="ucon64/developers.html#3">CVS</a>|<a href="mailto:ucon64-main@lists.sf.net">Bugs?</a>|<a href="mailto:ucon64-main@lists.sf.net">Contact</a>
+<a href="ucon64/faq.html">FAQ</a>|<a href="ucon64/developers.html#3">SVN</a>|<a href="mailto:ucon64-main@lists.sf.net">Bugs?</a>|<a href="mailto:ucon64-main@lists.sf.net">Contact</a>
 <br>
 <center>
 <img src="images/black.png" height="10" width="590">

@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uCON64", "uCON64.vcxproj", "{67EBC7CB-5499-483E-A82F-DAAF9F366B86}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "discmage", "discmage\discmage.vcxproj", "{2DA837DB-09CE-4FA3-A88D-350E9A6E01E2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdiscmage", "libdiscmage\libdiscmage.vcxproj", "{2DA837DB-09CE-4FA3-A88D-350E9A6E01E2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcd64", "libcd64\libcd64.vcxproj", "{3193CC27-BBCE-4D57-B203-59C333623AF0}"
 EndProject

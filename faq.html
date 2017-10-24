@@ -118,7 +118,7 @@ Q38: <a href="#38">uCON64 displays too many lines for my DOS-box. What can I do
 <br>
 Q39: <a href="#39">When will the next version of uCON64 be released? I have
    heard the next version is able to crack my favourite SNES game, but I do not
-   know how to use CVS or a compiler.</a><br>
+   know how to use Subversion or a compiler.</a><br>
 <br>
 Q40: <a href="#40">What is the format of the snes*.txt files?</a><br>
 <br>
@@ -154,11 +154,11 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
 Q52: <a href="#52">What is the option --xreset for? In what case should it be
    used?</a><br>
 <br>
-Q53: <a href="#53">I am trying to use a PCI parallel port card, but while
+Q53: <a href="#53">I am trying to use a PCIe parallel port card, but while
    uCON64 can communicate with an older backup unit like my Super Wild Card it
    cannot communicate with my MD-PRO, which requires EPP. Can this be solved?</a><br>
 <br>
-Q54: <a href="#54">My PCI parallel port card has its ECP Extended Control
+Q54: <a href="#54">My PCIe parallel port card has its ECP Extended Control
    register at a lower I/O address than its Data register. How do I specify a
    negative ECP Extended Control register offset in the configuration file?</a><br>
 <br>
@@ -1113,10 +1113,10 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
    How do I know what board name to use?</a><br>
 <b>A</b>: The file
-   <a href="http://ucon64.cvs.sourceforge.net/viewvc/ucon64/ucon64/src/console/boardtable.txt">
+   <a href="https://sourceforge.net/p/ucon64/svn/HEAD/tree/trunk/ucon64/src/console/boardtable.txt">
    boardtable.txt</a> contains a table where you can find what game uses what
    board. The file
-   <a href="http://ucon64.cvs.sourceforge.net/viewvc/ucon64/ucon64/src/console/boardnames">
+   <a href="https://sourceforge.net/p/ucon64/svn/HEAD/tree/trunk/ucon64/src/console/boardnames">
    boardnames</a> contains a list of all known board names.<br>
 <br>
 <p>
@@ -1277,19 +1277,20 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
 <p>
 <a name="39"><b>Q39</b>: When will the next version of uCON64 be released? I
    have heard the next version is able to crack my favourite SNES game, but I
-   do not know how to use CVS or a compiler.</a><br>
+   do not know how to use Subversion or a compiler.</a><br>
 <b>A</b>: We know when we will release a new version only just before we do so.
    But starting with uCON64 1.9.8beta8 this is not a problem for you at all.
    The only requirement is that you are able to read and use a text editor ;-)<br>
    First visit the uCON64 homepage and from there follow a link to the
    <a href="http://sourceforge.net/projects/ucon64">uCON64 SourceForge page</a>.
-   You should be able to find a page where you can browse the CVS repository.
-   Download the latest version of the file snes.c. Open the file in an editor
-   and search for the text snes_k. If you are looking for NTSC or PAL fixes
-   search either for snes_fix_pal_protection or snes_fix_ntsc_protection,
-   depending on what you need. For example, you will have to search for
-   snes_fix_pal_protection, if you want to fix a game so that it will run on an
-   NTSC SNES.<br>
+   You should be able to find a page where you can browse the SVN repository.
+   Download the latest version of the file
+   <a href="https://sourceforge.net/p/ucon64/svn/HEAD/tree/trunk/ucon64/src/console/snes.c">
+   snes.c</a>. Open the file in an editor and search for the text snes_k. If you
+   are looking for NTSC or PAL fixes search either for snes_fix_pal_protection
+   or snes_fix_ntsc_protection, depending on what you need. For example, you
+   will have to search for snes_fix_pal_protection, if you want to fix a game
+   so that it will run on an NTSC SNES.<br>
    Then read the comment to see what "code" your game requires. However, surely
    not every game will be mentioned in the comments. In that case search for
    the corresponding "line" a bit below. For example, for Mega Man X you will
@@ -2005,16 +2006,16 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    power to be re-applied to the parallel port -- a back-feed hazard.<br>
 <br>
 <p>
-<a name="53"><b>Q53</b>: I am trying to use a PCI parallel port card, but while
+<a name="53"><b>Q53</b>: I am trying to use a PCIe parallel port card, but while
    uCON64 can communicate with an older backup unit like my Super Wild Card it
    cannot communicate with my MD-PRO, which requires EPP. Can this be solved?</a><br>
-<b>A</b>: First make sure EPP is enabled for your PCI parallel port card. Try
+<b>A</b>: First make sure EPP is enabled for your PCIe parallel port card. Try
    different settings for the parallel port in the BIOS, UEFI or configuration
    software. "ECP and EPP 1.9" should give the best results. This may already
    solve the problem.<br>
    If the above did not solve the problem and you are using ppdev on GNU/Linux
-   then it looks like your PCI parallel port card is not fully supported by the
-   version of GNU/Linux you are using. The problem could be caused by your PCI
+   then it looks like your PCIe parallel port card is not fully supported by the
+   version of GNU/Linux you are using. The problem could be caused by your PCIe
    parallel port card requiring to enable EPP through the ECP Extended Control
    register while that register is mapped to a non-standard offset relative to
    the Data register. Fortunately, starting with uCON64 2.1.0 this problem can
@@ -2023,7 +2024,7 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    10), MS-DOS, FreeBSD, OpenBSD and BeOS. First determine the offset of the ECP
    Extended Control register relative to the Data register.<br>
    On GNU/Linux use lspci -v to find out what I/O ports are being used by your
-   PCI parallel port card. On Windows you can use Device Manager. You should
+   PCIe parallel port card. On Windows you can use Device Manager. You should
    see two I/O ranges. One of them should start with the I/O port you specified
    when communicating with your Super Wild Card. That is the I/O address of the
    Data register. The other starts with the I/O port of the first ECP
@@ -2035,7 +2036,7 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    it with the value you just calculated.<br>
 <br>
 <p>
-<a name="54"><b>Q54</b>: My PCI parallel port card has its ECP Extended Control
+<a name="54"><b>Q54</b>: My PCIe parallel port card has its ECP Extended Control
    register at a lower I/O address than its Data register. How do I specify a
    negative ECP Extended Control register offset in the configuration file?</a><br>
 <b>A</b>: See <a href="#53">question 53</a>. Use a calculator and set it to

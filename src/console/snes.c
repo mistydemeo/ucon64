@@ -3154,14 +3154,13 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   else
     {
 #ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
-      if (size > SNES_HEADER_START + SNES_HIROM + 0x4d)
-        if (check_banktype (rom_buffer, size / 2) > banktype_score)
-          {
-            interleaved = 1;
-            snes_hirom = 0;
-            snes_hirom_ok = 1;                  // keep snes_deinterleave()
-            check_map_type = 0;                 //  from changing snes_hirom
-          }
+      if (check_banktype (rom_buffer, size / 2) > banktype_score)
+        {
+          interleaved = 1;
+          snes_hirom = 0;
+          snes_hirom_ok = 1;                    // keep snes_deinterleave()
+          check_map_type = 0;                   //  from changing snes_hirom
+        }
 #endif
 #ifdef  DETECT_INSNEST_FUCKED_UP_LOROM
       /*

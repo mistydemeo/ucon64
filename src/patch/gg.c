@@ -58,10 +58,10 @@ Portions copyright (c) 2002, 2016 - 2017 dbjh
 
 #define GAME_GENIE_MAX_STRLEN 12 /* longest string is "XXX-XXX-XXX" */
 
-#define encodeNES(v, n, m, s) data[n] |= (v >> s) & m
-#define decodeNES(v, n, m, s) v |= (data[n] & m) << s
-#define encodeSNES(x, y) transposed |= (((address & (0xc00000 >> (2*y))) << (2*y)) >> (2*x))
-#define decodeSNES(x, y) address |= (((transposed & (0xc00000 >> (2*x))) << (2*x)) >> (2*y))
+#define encodeNES(v, n, m, s) (data[(n)] |= ((v) >> (s)) & (m))
+#define decodeNES(v, n, m, s) (v |= (data[(n)] & (m)) << (s))
+#define encodeSNES(x, y) (transposed |= (((address & (0xc00000 >> (2*(y)))) << (2*(y))) >> (2*(x))))
+#define decodeSNES(x, y) (address |= (((transposed & (0xc00000 >> (2*(x)))) << (2*(x))) >> (2*(y))))
 
 
 static st_ucon64_obj_t gg_obj[] =
@@ -749,11 +749,11 @@ gameGenieDecodeSNES (const char *in, char *out)
   value = hexByteValue (unmapSnesChar (in[0]), unmapSnesChar (in[1]));
 
   transposed = hexValue (unmapSnesChar (in[8])) +
-    (hexValue (unmapSnesChar (in[7])) << 4) +
-    (hexValue (unmapSnesChar (in[6])) << 8) +
-    (hexValue (unmapSnesChar (in[5])) << 12) +
-    (hexValue (unmapSnesChar (in[3])) << 16) +
-    (hexValue (unmapSnesChar (in[2])) << 20);
+               (hexValue (unmapSnesChar (in[7])) << 4) +
+               (hexValue (unmapSnesChar (in[6])) << 8) +
+               (hexValue (unmapSnesChar (in[5])) << 12) +
+               (hexValue (unmapSnesChar (in[3])) << 16) +
+               (hexValue (unmapSnesChar (in[2])) << 20);
 
   address = 0;
   decodeSNES (0, 4);
@@ -782,7 +782,7 @@ gameGenieDecodeSNES (const char *in, char *out)
   CPUaddress = address;
   if (hirom)
     {
-      if (address >= 0xc00000 && address <= 0xffffff)
+      if (address >= 0xc00000 /* && address <= 0xffffff */)
         address -= 0xc00000;
       else if (address >= 0x800000 && address <= 0xbfffff)
         address -= 0x800000;

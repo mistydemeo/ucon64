@@ -69,7 +69,7 @@ const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
 const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
 
-#define ISODCL(from, to) (to - from + 1)
+#define ISODCL(from, to) ((to) - (from) + 1)
 typedef struct
   {
     char type[ISODCL (1, 1)];   /* 711 */
@@ -293,7 +293,7 @@ dm_lba_to_msf (int lba, int *m0, int *s0, int *f0)
       f = (lba + 150 - m * CD_SECS * CD_FRAMES - s * CD_FRAMES);
 
     }
-  else if (lba >= -45150 && lba <= -151)
+  else if (lba >= -45150 /* && lba <= -151 */)
     {
       m = (lba + 450150) / CD_SECS / CD_FRAMES;
       s = (lba + 450150 - m * CD_SECS * CD_FRAMES) / CD_FRAMES;

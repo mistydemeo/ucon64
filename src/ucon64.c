@@ -1253,7 +1253,7 @@ ucon64_process_rom (const char *fname)
           ucon64_fname_arch (fname);
           /*
             There seems to be no other way to detect directories in ZIP files
-            than by looking at the file name. Paths in ZIP files should contain
+            than by looking at the filename. Paths in ZIP files should contain
             forward slashes. ucon64_fname_arch() changes forward slashes into
             backslashes (DIR_SEPARATORs) when uCON64 is compiled with Visual
             C++ or MinGW so that basename2() always produces a correct base
@@ -1530,15 +1530,14 @@ ucon64_rom_handling (void)
             break;
 
           default:
-            // Use ucon64.dat instead of ucon64.dat_enabled in case the index
-            //  file could not be created/opened => no segmentation fault
-            if (ucon64.dat && ucon64.nfo)
+            if (ucon64.nfo)
               {
                 if (!ucon64.nfo->name[0])
                   strcpy (ucon64.nfo->name, ((st_ucon64_dat_t *) ucon64.dat)->name);
                 else if (ucon64.console == UCON64_NES)
                   { // override the three-character FDS or FAM name
                     nes_file_t type = nes_get_file_type ();
+
                     if (type == FDS || type == FAM)
                       strcpy (ucon64.nfo->name, ((st_ucon64_dat_t *) ucon64.dat)->name);
                   }

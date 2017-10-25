@@ -732,7 +732,7 @@ check_mbc (void)
         mbc_type = ROCKET;                      // rom_type == 0x97 || rom_type == 0x99
       else if (rom_type == 0)
         mbc_type = ROM;
-      else if ((rom_type >= 1 && rom_type <= 3) || rom_type == 0xff)
+      else if ((/* rom_type >= 1 && */ rom_type <= 3) || rom_type == 0xff)
         mbc_type = MBC1;
       else if (rom_type == 5 || rom_type == 6)
         mbc_type = MBC2;

@@ -270,7 +270,7 @@ set_property (const char *filename, const char *propname,
             {
               found = 1;
               if (value_s)
-                sprintf (line, "%s%c%s\n", propname, PROPERTY_SEPARATOR, value_s ? value_s : "1");
+                sprintf (line, "%s%c%s\n", propname, PROPERTY_SEPARATOR, value_s);
             }
           strcat (str, line);
         }

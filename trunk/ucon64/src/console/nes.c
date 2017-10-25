@@ -5443,11 +5443,12 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
 
   if (UCON64_ISSET (ucon64.use_dump_info))
     {
-      st_dumper_info_t info;
       if (ucon64.dump_info != NULL && ucon64.dump_info[0] != '\0')
         {
           if (access (ucon64.dump_info, F_OK) == 0)
             {
+              st_dumper_info_t info;
+
               parse_info_file (&info, ucon64.dump_info);
 #ifdef  WORDS_BIGENDIAN
               info.year = bswap_16 (info.year);
@@ -5697,11 +5698,12 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
 
   if (UCON64_ISSET (ucon64.use_dump_info))
     {
-      st_dumper_info_t info;
       if (ucon64.dump_info != NULL && ucon64.dump_info[0] != '\0')
         {
           if (access (ucon64.dump_info, F_OK) == 0)
             {
+              st_dumper_info_t info;
+
               parse_info_file (&info, ucon64.dump_info);
 /*
               printf ("Dump info:\n"

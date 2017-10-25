@@ -939,6 +939,7 @@ parport_setup (unsigned short port, parport_mode_t mode)
 #elif   defined __i386__ || defined __x86_64__ || defined _WIN32
   {
     const char *p = get_property (ucon64.configfile, "ecr_offset", PROPERTY_MODE_TEXT);
+
     if (p)
       sscanf (p, "%hx", &ucon64.ecr_offset);
     else
@@ -962,11 +963,12 @@ parport_setup (unsigned short port, parport_mode_t mode)
   if (port != 0x3bc) // The ECP registers are not available if port is 0x3bc.
     {
       unsigned char ecr = inportb (port + ucon64.ecr_offset) & 0x1f;
+
       if (mode == PPMODE_SPP)
         outportb (port + ucon64.ecr_offset, ecr);
       else if (mode == PPMODE_SPP_BIDIR)
         outportb (port + ucon64.ecr_offset, ecr | 0x20);
-      else if (mode == PPMODE_EPP)
+      else // if (mode == PPMODE_EPP)
         outportb (port + ucon64.ecr_offset, ecr | 0x80);
     }
   else if (mode == PPMODE_EPP)

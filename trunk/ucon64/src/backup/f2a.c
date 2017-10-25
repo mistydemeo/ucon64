@@ -1452,7 +1452,7 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
           if (parport_debug)
             {
               fprintf (stderr, "%02x ", (unsigned char) *ptr);
-              if (!(((i / 2) + 1) % 32) && i && (i / 2) < len - 1)
+              if (!(((i / 2) + 1) % 32) && (i / 2) < len - 1)
                 fprintf (stderr, "\n%04x: ", (i / 2) + 1);
             }
           *ptr = 0;

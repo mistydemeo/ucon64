@@ -1004,7 +1004,9 @@ local int unzlocal_CheckCurrentFileCoherencyHeader (s,piSizeVar,
         return UNZ_ERRNO;
 
 
+/*
     if (err==UNZ_OK)
+*/
     {
         if (unzlocal_getLong(&s->z_filefunc, s->filestream,&uMagic) != UNZ_OK)
             err=UNZ_ERRNO;
@@ -1297,8 +1299,10 @@ extern int ZEXPORT unzReadCurrentFile  (file, buf, len)
             uInt uReadThis = UNZ_BUFSIZE;
             if (pfile_in_zip_read_info->rest_read_compressed<uReadThis)
                 uReadThis = (uInt)pfile_in_zip_read_info->rest_read_compressed;
+/*
             if (uReadThis == 0)
                 return UNZ_EOF;
+*/
             if (ZSEEK(pfile_in_zip_read_info->z_filefunc,
                       pfile_in_zip_read_info->filestream,
                       pfile_in_zip_read_info->pos_in_zipfile +

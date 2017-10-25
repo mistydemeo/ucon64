@@ -35,8 +35,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"                     // MAXBUFSIZE, etc..
 
 
-#define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
-#define UCON64_ISSET2(x, y) (x != (y) UCON64_UNKNOWN)
+#define UCON64_ISSET(x) ((x) != UCON64_UNKNOWN)
+#define UCON64_ISSET2(x, y) ((x) != (y) UCON64_UNKNOWN)
 
 
 /*

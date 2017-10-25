@@ -727,8 +727,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_SHA1:
-      if (!value)
-        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+      value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
@@ -739,8 +738,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MD5:
-      if (!value)
-        value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
+      value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));

@@ -202,21 +202,21 @@ set_ai_data (unsigned char ai, unsigned char data)
 
 
 static void
-init_port (int enable_write)
+init_port (unsigned char enable_write)
 {
   set_ai_data (6, 0x0a);
   set_ai_data (7, 0x05);                        // 6==0x0a, 7==0x05 is pc_control mode
 //  set_ai (5);
 //  set_data_read
 //  enable_write = inportb (port_c);
-  set_ai_data (5, (unsigned char) enable_write); // d0=0 is write protect mode
+  set_ai_data (5, enable_write);                // d0=0 is write protect mode
 }
 
 
 static void
-end_port (int enable_write)
+end_port (unsigned char enable_write)
 {
-  set_ai_data (5, (unsigned char) enable_write); // d0=0 is write protect mode
+  set_ai_data (5, enable_write);                // d0=0 is write protect mode
   set_ai_data (7, 0);                           // release pc mode
   set_ai_data (6, 0);                           // 6==0x0a, 7==0x05 is pc_control mode
   outportb (port_a, 4);                         // ninit=1, nwrite=1
@@ -407,7 +407,7 @@ test_dram (void)
   if (verify_32k (0x100, 0) == 0)               // find upper 128 Mbits
     n_pages = 0x200;
 
-  printf ("Testing DRAM...\n");
+  puts ("Testing DRAM...");
 
   for (page = 0; page < n_pages; page++)
     {
@@ -489,15 +489,16 @@ doctor64jr_read (const char *filename, unsigned short parport)
 {
   (void) filename;
   (void) parport;
-  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented for the\n"
-                          "       Doctor V64 Junior\n");
+  return fputs ("ERROR: The function for dumping a cartridge is not yet implemented for the\n"
+                "       Doctor V64 Junior\n", stderr);
 }
 
 
 int
 doctor64jr_write (const char *filename, unsigned short parport)
 {
-  unsigned int enable_write = 0, size, bytessent = 0, n_pages;
+#define ENABLE_WRITE 0
+  unsigned int size, bytessent = 0, n_pages;
   time_t init_time;
   unsigned short int page;
   FILE *file;
@@ -510,12 +511,12 @@ doctor64jr_write (const char *filename, unsigned short parport)
   port_b = parport + 3;
   port_c = parport + 4;
 
-  init_port (enable_write);
+  init_port (ENABLE_WRITE);
 
   if (check_card () != 0)
     {
-      fprintf (stderr, "ERROR: No Doctor V64 Junior card present\n");
-      end_port (enable_write);
+      fputs ("ERROR: No Doctor V64 Junior card present\n", stderr);
+      end_port (ENABLE_WRITE);
       exit (1);
     }
 
@@ -542,7 +543,7 @@ doctor64jr_write (const char *filename, unsigned short parport)
       if (dram_size)
         printf ("\nDRAM size=%dMbits\n", (dram_size / 2));
       else
-        fprintf (stderr, "\nERROR: DRAM test failed\n");
+        fputs ("\nERROR: DRAM test failed\n", stderr);
       return 0;
     }
 #endif
@@ -570,15 +571,18 @@ doctor64jr_write (const char *filename, unsigned short parport)
     }
   fputc ('\n', stdout);
 
-  if (enable_write)                             // 1 or 3
-    printf ("DRAM write protect disabled\n");
-  if (enable_write & 2)                         // 3
-    printf ("Run cartridge enabled\n");
+#if     ENABLE_WRITE                            // 1 or 3
+  puts ("DRAM write protect disabled");
+#endif
+#if     ENABLE_WRITE & 2                        // 3
+  puts ("Run cartridge enabled");
+#endif
 
-//  set_ai_data(5, enable_write);                 // d0=0 is write protect mode
-  end_port (enable_write);
+//  set_ai_data(5, ENABLE_WRITE);                 // d0=0 is write protect mode
+  end_port (ENABLE_WRITE);
 
   return 0;
+#undef  ENABLE_WRITE
 }
 
 #endif // USE_PARALLEL

@@ -55,22 +55,10 @@ require_once ("misc/widget.php");
 <center><img src="images/new.png" border="0" width="200"></center>
 <br>
 <!--NEWS-->
+20171026 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">moved to SVN</a><br>
 20170121 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.3 released</a><br>
 20160227 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.2 released</a><br>
 20151231 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.1 released</a><br>
-20081010 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">The uCON64 CVS has been restored to the last working version</a><br>
-20061110 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">The uCON64 CVS version is currently broken due to heavy<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;development</a><br>
-<a name="flc">20060923 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://flc.berlios.de">flc has been moved to its own site</a><br>
-20060914 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">flc 1.4.1 has been released</a><br>
-20060412 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">flc 1.4.0 has been released</a><br>
-20050312 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64gui">uCON64 frontend 1.1 released (including a Mac OS X binary)</a><br>
-20050126 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#download">Amiga binaries of uCON64 2.0.0 available</a><br>
-20050107 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64gui">uCON64 frontend 1.0 released</a><br>
-20050107 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.0 released</a><br>
-20041028 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="ucon64/hardware.html">updated hardware list (current CVS version of uCON64)</a><br>
-20041028 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#flc">unexpected release of flc 1.2.0</a><br>
-20040319 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 1.9.8-4 released</a><br>
 <br>
     </td>
   </tr>

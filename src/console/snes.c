@@ -520,7 +520,7 @@ get_header_start (st_ucon64_nfo_t *rominfo, unsigned int size)
 
   if (rominfo->interleaved)
     header_start = SNES_HEADER_START + (snes_hirom ?
-                     (copier_type == UFO ? snes_header_base / 2u : 0) :
+                     (copier_type == UFO ? snes_header_base / 2U : 0) :
                      size / 2);                 // (Ext.) HiROM : LoROM
   else if (st_dump)                             // ignore interleaved ST dumps
     header_start = 8 * MBIT;
@@ -3021,7 +3021,7 @@ snes_chk (st_ucon64_nfo_t *rominfo)
 
 
 static int
-snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
+snes_check_interleaved (unsigned char *rom_buffer, int size, int banktype_score)
 /*
   The only way to determine whether a HiROM dump is interleaved or not seems to
   be to check the value of the map type byte. Valid HiROM values (hexadecimal):
@@ -3070,7 +3070,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0xd7470b37/0x9f1d6284: Dai Kaiju Monogatari 2 (J) (GD3/UFO)
     0xa2c5fd29/0xfe536fc9: Tales of Phantasia (J) (GD3/UFO)
     These are Extended HiROM games. By "coincidence" ToP can be detected in
-    another way, but DKM2 (40 Mbit) can't. The CRC32's are checked for below.
+    another way, but DKM2 (40 Mbit) can't. The CRC32s are checked for below.
 
     0xdbc88ebf: BS Satella2 1 (J)
     This game has a LoROM map type byte while it is a HiROM game.
@@ -3983,7 +3983,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
     }
 
   /*
-    snes_testinterleaved() needs the correct value for snes_hirom and
+    snes_check_interleaved() needs the correct value for snes_hirom and
     rominfo->header_start. snes_hirom may be used only after the check for
     -hi/-nhi has been done. However, rominfo->backup_header_len must have the
     correct value in order to determine the value for snes_hirom. This can only
@@ -3992,7 +3992,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
     1. - rominfo->backup_header_len
     2. - snes_hirom
     3. - check for -hi/-nhi
-    4. - snes_testinterleaved()
+    4. - snes_check_interleaved()
   */
 
   snes_handle_backup_header (rominfo, &header); // step 1. & first part of step 2.
@@ -4043,13 +4043,13 @@ snes_init (st_ucon64_nfo_t *rominfo)
 
   rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
   rominfo->header_len = SNES_HEADER_LEN;
-  // set snes_header before calling snes_testinterleaved()
+  // set snes_header before calling snes_check_interleaved()
   memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
   rominfo->header = &snes_header;
 
   // step 4.
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-    ucon64.interleaved : snes_testinterleaved (rom_buffer, size, x);
+    ucon64.interleaved : snes_check_interleaved (rom_buffer, size, x);
 
   calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
   // we want the CRC32 of the "raw" data (too)

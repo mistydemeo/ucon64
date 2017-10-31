@@ -58,8 +58,8 @@ Portions copyright (c) 2002, 2016 - 2017 dbjh
 
 #define GAME_GENIE_MAX_STRLEN 12 /* longest string is "XXX-XXX-XXX" */
 
-#define encodeNES(v, n, m, s) (data[(n)] |= ((v) >> (s)) & (m))
-#define decodeNES(v, n, m, s) (v |= (data[(n)] & (m)) << (s))
+#define encodeNES(v, n, m, s) (data[n] |= ((v) >> (s)) & (m))
+#define decodeNES(v, n, m, s) (v |= (data[n] & (m)) << (s))
 #define encodeSNES(x, y) (transposed |= (((address & (0xc00000 >> (2*(y)))) << (2*(y))) >> (2*(x))))
 #define decodeSNES(x, y) (address |= (((transposed & (0xc00000 >> (2*(x)))) << (2*(x))) >> (2*(y))))
 
@@ -784,9 +784,9 @@ gameGenieDecodeSNES (const char *in, char *out)
     {
       if (address >= 0xc00000 /* && address <= 0xffffff */)
         address -= 0xc00000;
-      else if (address >= 0x800000 && address <= 0xbfffff)
+      else if (address >= 0x800000 /* && address <= 0xbfffff */)
         address -= 0x800000;
-      else if (address >= 0x400000 && address <= 0x7fffff)
+      else if (address >= 0x400000 /* && address <= 0x7fffff */)
         address -= 0x400000;
     }
   else

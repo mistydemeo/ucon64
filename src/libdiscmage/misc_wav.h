@@ -30,8 +30,8 @@ extern int misc_wav_write_header (FILE *fh, int channels, int freq,
                                   int bytespersecond, int blockalign,
                                   int bitspersample, int data_length);
 // TODO: remove these
-#define misc_wav_write_header_v2(fh,c,f,bit,dl) misc_wav_write_header(fh, (c), (f),     ((bit)*(c)*(f))/8, ((bit)*(c))/8, (bit), (dl))
-#define misc_wav_write_header_v3(fh,dl) misc_wav_write_header        (fh, 2, 44100, 176400,      4,         16,  dl)
+#define misc_wav_write_header_v2(fh,c,f,bit,dl) misc_wav_write_header(fh, c, f, ((bit)*(c)*(f))/8, ((bit)*(c))/8, bit, dl)
+#define misc_wav_write_header_v3(fh,dl) misc_wav_write_header(fh, 2, 44100, 176400, 4, 16, dl)
 
 
 #define SQUARE_WAVE 0

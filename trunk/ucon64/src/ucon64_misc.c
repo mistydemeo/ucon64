@@ -1231,7 +1231,7 @@ ucon64_set_property_array (const char *org_configfile)
                        PROPERTY_MODE_DIR ("ucon64"),
                        "directory with additional config files");
   ucon64_set_property (&props[i++], org_configfile, "ucon64_datdir",
-                       PROPERTY_MODE_DIR ("ucon64/dat"),
+                       PROPERTY_MODE_DIR ("ucon64" DIR_SEPARATOR_S "dat"),
                        "directory with DAT files");
   ucon64_set_property (&props[i++], org_configfile, "f2afirmware", "f2afirm.hex",
                        "F2A support files\n"

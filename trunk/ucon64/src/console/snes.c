@@ -1075,10 +1075,10 @@ snes_mirror (unsigned char *dstbuf, unsigned int start, unsigned int data_end,
 
 static void
 gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
-              unsigned char *buffer, int newsize)
+              unsigned char *buffer, unsigned int newsize)
 {
   char *p, id_str[4];
-  int n;
+  unsigned int n;
 
   if (UCON64_ISSET (ucon64.id))
     {
@@ -1114,7 +1114,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
             SNES checksum, because several beta ROM dumps have an internal
             checksum of 0 or 0xffff.
           */
-          int size, local_buffer = !buffer, id = 0;
+          unsigned int size, local_buffer = !buffer, id = 0;
           const char *base50_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()-@^_{}~";
 
           if (local_buffer)
@@ -1131,7 +1131,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
             size = newsize;
 
           /*
-            With the (hashing) algorithm below there are 5 collisions between
+            With the (hashing) algorithm below there are 5 "collisions" between
             proper dumps in a GoodSNES 2.04 set:
             - Battle Dodgeball (J) / BS Sousa Sentai Wappers 2 (J)
             - Dokapon Gaiden - Honoo no Audition (J) / BS Super Earth Defense Force (J)
@@ -1141,7 +1141,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
           */
           for (n = 0; n < size; n++)
             id += (id << 1) + (buffer[n] ^ n);
-          id &= 0x7fffffff;
+          id &= 0x7fffffff;                     // reduces # "collisions" from 7 to 5
           id %= 50 * 50 * 50;                   // ensure value can be encoded with 3 base 50 digits
 
           if (local_buffer)
@@ -1158,7 +1158,7 @@ gd_make_name (const char *filename, st_ucon64_nfo_t *rominfo, char *name,
   else
     p = (char *) basename2 (filename);
 
-  snprintf (name, 8, "sf%d%.3s__", newsize / MBIT, p);
+  snprintf (name, 8, "sf%u%.3s__", newsize / MBIT, p);
   name[7] = '\0';
   if (!strnicmp (name, p, newsize < 10 * MBIT ? 3 : 4))
     snprintf (name, 8, "%s___", p);

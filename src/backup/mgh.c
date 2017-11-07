@@ -45,7 +45,7 @@ mgh_make_name (const char *filename, int console, unsigned int size, char *name)
     name[7] = '\0';
 
   for (n--; n >= 2; n--)                        // skip prefix
-    if (name[n] == ' ')
+    if (name[n] == ' ' || name[n] == '.')
       name[n] = '_';
 
   sprintf (suffix, ".%03u", size / MBIT);

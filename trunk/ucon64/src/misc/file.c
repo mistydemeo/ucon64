@@ -152,7 +152,9 @@ realpath (const char *path, char *full_path)
         *new_path++ = *path++;
       else
         {
-          char drive[3] = ".:";
+          char org_wd[FILENAME_MAX], drive[3] = ".:";
+
+          getcwd (org_wd, FILENAME_MAX);
 
           drive[0] = c;
           chdir (drive);
@@ -165,6 +167,8 @@ realpath (const char *path, char *full_path)
           new_path += strlen (new_path);
           if (*(new_path - 1) != DIR_SEPARATOR)
             *new_path++ = DIR_SEPARATOR;
+
+          chdir (org_wd);
         }
     }
   else

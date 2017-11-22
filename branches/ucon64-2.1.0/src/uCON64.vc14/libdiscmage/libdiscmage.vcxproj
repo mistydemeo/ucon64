@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2DA837DB-09CE-4FA3-A88D-350E9A6E01E2}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libdiscmage</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>discmage</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>discmage</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;DDL;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;HAVE_CONFIG_H;DLOPEN;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\..\$(ProjectName)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>4710;4711</DisableSpecificWarnings>
+      <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/DEF:..\..\$(ProjectName)\$(TargetName).def %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>zdll.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;DDL;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;HAVE_CONFIG_H;DLOPEN;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\..\$(ProjectName)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>4710;4711</DisableSpecificWarnings>
+      <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/DEF:..\..\$(ProjectName)\$(TargetName).def %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>zdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\libdiscmage\config.h" />
+    <ClInclude Include="..\..\libdiscmage\crypt.h" />
+    <ClInclude Include="..\..\libdiscmage\format\cdi.h" />
+    <ClInclude Include="..\..\libdiscmage\format\cue.h" />
+    <ClInclude Include="..\..\libdiscmage\format\format.h" />
+    <ClInclude Include="..\..\libdiscmage\format\nero.h" />
+    <ClInclude Include="..\..\libdiscmage\format\other.h" />
+    <ClInclude Include="..\..\libdiscmage\format\toc.h" />
+    <ClInclude Include="..\..\libdiscmage\getopt.h" />
+    <ClInclude Include="..\..\libdiscmage\ioapi.h" />
+    <ClInclude Include="..\..\libdiscmage\libdiscmage.h" />
+    <ClInclude Include="..\..\libdiscmage\libdm_misc.h" />
+    <ClInclude Include="..\..\libdiscmage\map.h" />
+    <ClInclude Include="..\..\libdiscmage\misc.h" />
+    <ClInclude Include="..\..\libdiscmage\misc_wav.h" />
+    <ClInclude Include="..\..\libdiscmage\misc_z.h" />
+    <ClInclude Include="..\..\libdiscmage\unzip.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\libdiscmage\dllinit.c" />
+    <ClCompile Include="..\..\libdiscmage\format\cdi.c" />
+    <ClCompile Include="..\..\libdiscmage\format\cue.c" />
+    <ClCompile Include="..\..\libdiscmage\format\format.c" />
+    <ClCompile Include="..\..\libdiscmage\format\nero.c" />
+    <ClCompile Include="..\..\libdiscmage\format\other.c" />
+    <ClCompile Include="..\..\libdiscmage\format\toc.c" />
+    <ClCompile Include="..\..\libdiscmage\ioapi.c" />
+    <ClCompile Include="..\..\libdiscmage\libdm_misc.c" />
+    <ClCompile Include="..\..\libdiscmage\map.c" />
+    <ClCompile Include="..\..\libdiscmage\misc.c" />
+    <ClCompile Include="..\..\libdiscmage\misc_wav.c" />
+    <ClCompile Include="..\..\libdiscmage\misc_z.c" />
+    <ClCompile Include="..\..\libdiscmage\unzip.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

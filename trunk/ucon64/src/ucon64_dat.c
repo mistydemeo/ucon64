@@ -150,7 +150,7 @@ const st_getopt2_t ucon64_dat_usage[] =
     },
     {
       "dbs", 1, 0, UCON64_DBS,
-      "CRC32", "search ROM with CRC32 in DATabase",
+      "CRC32", "search ROM with CRC32 value in DATabase",
       &ucon64_dat_obj[0]
     },
     {
@@ -564,7 +564,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     }
 
   if (dat_field[5])
-    sscanf (dat_field[5], "%x", (unsigned int *) &dat->crc32);
+    sscanf (dat_field[5], "%x", &dat->crc32);
 
   if (dat_field[6][0] == 'N' && dat_field[7][0] == 'O')
     // e.g. GoodSNES bad crc & Nintendo FDS DAT
@@ -624,11 +624,11 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
 uint32_t
 line_to_crc (const char *dat_entry)
-// get crc32 of current line
+// get CRC32 value of current line
 {
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE];
-  unsigned int crc32 = 0;                       // has to be unsigned int to
-                                                //  avoid a GCC warning
+  uint32_t crc32 = 0;
+
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return 0;
 
@@ -639,7 +639,7 @@ line_to_crc (const char *dat_entry)
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &crc32);
 
-  return (uint32_t) crc32;
+  return crc32;
 }
 
 
@@ -648,17 +648,16 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
 {
   char buf[MAXBUFSIZE];
 
-  if (!fdat)
-    if ((fdat = fopen (fname, "rb")) == NULL)
-      {
-        fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
+  if (!fdat && (fdat = fopen (fname, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
 #if     defined _WIN32 || defined __CYGWIN__ || defined __MSDOS__
-        if (!stricmp (basename2 (fname), "ntuser.dat"))
-          fputs ("       Please see the FAQ, question 47 & 36\n", stderr);
-          //     "ERROR: "
+      if (!stricmp (basename2 (fname), "ntuser.dat"))
+        fputs ("       Please see the FAQ, question 47 & 36\n", stderr);
+        //     "ERROR: "
 #endif
-        return NULL;
-      }
+      return NULL;
+    }
 
   if (start >= 0)
     fseek (fdat, start, SEEK_SET);
@@ -666,10 +665,10 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
   filepos_line = ftell (fdat);
   while (fgets (buf, MAXBUFSIZE, fdat) != NULL)
     {
-      if ((unsigned char) buf[0] == DAT_FIELD_SEPARATOR)
-        if (!crc32 || line_to_crc (buf) == crc32)
-          if (line_to_dat (fname, buf, dat))
-            return dat;
+      if ((unsigned char) buf[0] == DAT_FIELD_SEPARATOR &&
+          (!crc32 || line_to_crc (buf) == crc32) &&
+          line_to_dat (fname, buf, dat))
+        return dat;
       filepos_line = ftell (fdat);
     }
 
@@ -691,9 +690,9 @@ ucon64_dat_view (int console, int verbose)
     {
       const char *fname = basename2 (fname_dat);
 
-      if (console != UCON64_UNKNOWN)
-        if (fname_to_console (fname, &dat, 0) != console)
-          continue;
+      if (console != UCON64_UNKNOWN &&
+          fname_to_console (fname, &dat, 0) != console)
+        continue;
 
       get_dat_header (fname_dat, &dat);
       strcpy (fname_index, fname_dat);
@@ -742,7 +741,7 @@ ucon64_dat_view (int console, int verbose)
           for (n = 0; n < n_entries; n++)
             {
               idx_entry = &((st_idx_entry_t *) p)[n];
-              printf ("Checksum (CRC32): 0x%08x\n", (unsigned int) idx_entry->crc32);
+              printf ("Checksum (CRC32): 0x%08x\n", idx_entry->crc32);
               if (get_dat_entry (fname_dat, &dat, idx_entry->crc32, idx_entry->filepos))
                 ucon64_dat_nfo (&dat, 0);
               fputc ('\n', stdout);
@@ -813,9 +812,9 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
     {
       const char *fname = basename2 (fname_dat);
 
-      if (ucon64.console != UCON64_UNKNOWN)
-        if (fname_to_console (fname, &dat, 0) != ucon64.console)
-          continue;
+      if (ucon64.console != UCON64_UNKNOWN &&
+          fname_to_console (fname, &dat, 0) != ucon64.console)
+        continue;
 
       strcpy (fname_index, fname_dat);
       set_suffix (fname_index, ".idx");
@@ -839,11 +838,11 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
           return NULL;
         }
 
-      // search index for crc
+      // search index for CRC32 value
       key.crc32 = crc32;
       idx_entry = (st_idx_entry_t *) bsearch (&key, p, fsize / sizeof (st_idx_entry_t),
                                               sizeof (st_idx_entry_t), idx_compare);
-      if (idx_entry)                            // crc32 found
+      if (idx_entry)                            // CRC32 value found
         {
           if (!datinfo)
             dat_p = (st_ucon64_dat_t *) &dat;   // TODO?: malloc()
@@ -851,16 +850,16 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
             dat_p = (st_ucon64_dat_t *) &datinfo;
 
           // open dat file and read entry
-          if (get_dat_entry (fname_dat, dat_p, crc32, idx_entry->filepos))
-            if (crc32 == dat_p->crc32)
-              {
-                strcpy (dat_p->datfile, basename2 (fname_dat));
-                get_dat_header (fname_dat, dat_p);
-                closedir_ddat ();
-                fclose_fdat ();
-                free (p);
-                return dat_p;
-              }
+          if (get_dat_entry (fname_dat, dat_p, crc32, idx_entry->filepos) &&
+              crc32 == dat_p->crc32)
+            {
+              strcpy (dat_p->datfile, basename2 (fname_dat));
+              get_dat_header (fname_dat, dat_p);
+              closedir_ddat ();
+              fclose_fdat ();
+              free (p);
+              return dat_p;
+            }
           fclose_fdat ();
         }
       free (p);
@@ -956,10 +955,10 @@ ucon64_dat_indexer (void)
               get_dat_entry (fname_dat, &dat, 0, idx_entry->filepos);
               fprintf (errorfile,
                        "\n"
-                       "WARNING: DAT file contains a duplicate CRC32 (0x%x)!\n"
-                       "  First game with this CRC32: \"%s\"\n"
-                       "  Ignoring game:              \"%s\"\n",
-                       (unsigned int) dat.crc32, dat.name, current_name);
+                       "WARNING: DAT file contains a duplicate CRC32 value (0x%x)!\n"
+                       "  First game with this CRC32 value: \"%s\"\n"
+                       "  Ignoring game:                    \"%s\"\n",
+                       dat.crc32, dat.name, current_name);
 
               n_duplicates++;
               fseek (fdat, current_filepos, SEEK_SET);
@@ -990,8 +989,8 @@ ucon64_dat_indexer (void)
       if (n_duplicates > 0)
         printf ("\n"
                 "\n"
-                "WARNING: DAT file contains %d duplicate CRC32%s\n"
-                "         Warnings have been written to \"%s\"",
+                "WARNING: DAT file contains %d duplicate CRC32 value%s\n"
+                "         Warnings have been written to %s",
                 n_duplicates, n_duplicates != 1 ? "s" : "", errorfname);
       if (errorfile)
         {
@@ -1306,10 +1305,10 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     }
   else
     {
-      // Check if the CRC32 is unique. We don't want to be as stupid as
+      // Check if the CRC32 value is unique. We don't want to be as stupid as
       //  the tool used to create the GoodDAT files.
-      // Yes, a plain and simple linear search. Analysing the files is orders
-      //  of magnitude slower than this search
+      // Yes, a plain and simple linear search. Analyzing the files is orders
+      //  of magnitude slower than this search.
       for (; n < ucon64_n_files; n++)
         if (ucon64_mkdat_entries[n].crc32 == ucon64.crc32)
           break;
@@ -1323,9 +1322,8 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     }
 
   fputs (filename, stdout);
-  if (ucon64.quiet < 0)                         // -v was specified
-    if (ucon64.fname_arch[0])
-      printf (" (%s)", ucon64.fname_arch);
+  if (ucon64.quiet < 0 && ucon64.fname_arch[0]) // -v was specified
+    printf (" (%s)", ucon64.fname_arch);
   fputc ('\n', stdout);
 
   if (ucon64.console != console)                // ucon64.quiet < 0 (-1)
@@ -1333,12 +1331,12 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
   if (n != ucon64_n_files)
     {
       if (ucon64.quiet < 1)                     // better print this by default
-        printf ("         First file with this CRC32 (0x%x) is:\n"
+        printf ("         First file with this CRC32 value (0x%x) is:\n"
                 "         \"%s\"\n", ucon64.crc32, ucon64_mkdat_entries[n].fname);
       return -1;
     }
 
-  // store the CRC32 to check if a file is unique
+  // store the CRC32 value to check if a file is unique
   ucon64_mkdat_entries[ucon64_n_files].crc32 = ucon64.crc32;
   /*
     Also store the name of the file to display a helpful error message if a

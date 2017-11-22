@@ -501,7 +501,7 @@ ppf_set_fid (const char *ppf, const char *fidname)
 
   ppfsize = fsizeof (ppfname);
   pos = ucon64_find (ppfname, 0, ppfsize, "@BEGIN_FILE_ID.DIZ", 18,
-    (uint32_t) (MEMCMP2_CASE | UCON64_FIND_QUIET));
+                     (uint32_t) (MEMCMP2_CASE | UCON64_FIND_QUIET));
   if (pos == -1)
     pos = ppfsize;
   truncate (ppfname, pos);

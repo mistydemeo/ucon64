@@ -139,7 +139,7 @@ ucon64_switches (st_ucon64_t *p)
       so we can't use preprocessor directives in the argument list.
     */
     case UCON64_VER:
-      printf ("version:                           %s WIP (%s)\n"
+      printf ("version:                           %s (%s)\n"
               "platform:                          %s\n",
               UCON64_VERSION_S, __DATE__, CURRENT_OS_S);
 
@@ -179,7 +179,8 @@ ucon64_switches (st_ucon64_t *p)
 #endif
 
 #ifdef  USE_ZLIB
-      puts ("gzip and zip support:              yes");
+      printf ("gzip and zip support:              yes, zlib %d.%d.%d\n",
+              ZLIB_VER_MAJOR, ZLIB_VER_MINOR, ZLIB_VER_REVISION);
 #else
       puts ("gzip and zip support:              no");
 #endif
@@ -209,18 +210,15 @@ ucon64_switches (st_ucon64_t *p)
       puts (", dynamically linked");
 #endif // DLOPEN
 
-      printf ("discmage enabled:                  %s\n",
-              ucon64.discmage_enabled ? "yes" : "no");
-
       if (ucon64.discmage_enabled)
         {
           x = dm_get_version ();
-          printf ("discmage version:                  %d.%d.%d (%s)\n",
+          printf ("discmage enabled:                  yes, %d.%d.%d (%s)\n",
                   (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff,
                   dm_get_version_s ());
         }
       else
-        puts ("discmage version:                  not available");
+        puts ("discmage enabled:                  no");
 #endif // USE_DISCMAGE
 
       printf ("configuration directory:           %s\n"

@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{67EBC7CB-5499-483E-A82F-DAAF9F366B86}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>uCON64</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>ucon64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>ucon64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;HAVE_CONFIG_H;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..;..\backup\libcd64</AdditionalIncludeDirectories>
+      <EnableParallelCodeGeneration>
+      </EnableParallelCodeGeneration>
+      <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4710;4711;4774</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>setargv.obj;$(OutDir)cd64.lib;zdll.lib;libusb.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;HAVE_CONFIG_H;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;..\backup\libcd64</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4710;4711;4774</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>setargv.obj;$(OutDir)cd64.lib;zdll.lib;libusb.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\backup\backup.h" />
+    <ClInclude Include="..\backup\cc2.h" />
+    <ClInclude Include="..\backup\cd64.h" />
+    <ClInclude Include="..\backup\cmc.h" />
+    <ClInclude Include="..\backup\dex.h" />
+    <ClInclude Include="..\backup\doctor64.h" />
+    <ClInclude Include="..\backup\doctor64jr.h" />
+    <ClInclude Include="..\backup\f2a.h" />
+    <ClInclude Include="..\backup\fal.h" />
+    <ClInclude Include="..\backup\ffe.h" />
+    <ClInclude Include="..\backup\fig.h" />
+    <ClInclude Include="..\backup\gbx.h" />
+    <ClInclude Include="..\backup\gd.h" />
+    <ClInclude Include="..\backup\interceptor.h" />
+    <ClInclude Include="..\backup\lynxit.h" />
+    <ClInclude Include="..\backup\mccl.h" />
+    <ClInclude Include="..\backup\mcd.h" />
+    <ClInclude Include="..\backup\md-pro.h" />
+    <ClInclude Include="..\backup\mgd.h" />
+    <ClInclude Include="..\backup\mgh.h" />
+    <ClInclude Include="..\backup\msg.h" />
+    <ClInclude Include="..\backup\nfc.h" />
+    <ClInclude Include="..\backup\pce-pro.h" />
+    <ClInclude Include="..\backup\pl.h" />
+    <ClInclude Include="..\backup\psxpblib.h" />
+    <ClInclude Include="..\backup\quickdev16.h" />
+    <ClInclude Include="..\backup\sc.h" />
+    <ClInclude Include="..\backup\sflash.h" />
+    <ClInclude Include="..\backup\smc.h" />
+    <ClInclude Include="..\backup\smd.h" />
+    <ClInclude Include="..\backup\smsgg-pro.h" />
+    <ClInclude Include="..\backup\spsc.h" />
+    <ClInclude Include="..\backup\ssc.h" />
+    <ClInclude Include="..\backup\swc.h" />
+    <ClInclude Include="..\backup\tototek.h" />
+    <ClInclude Include="..\backup\ufo.h" />
+    <ClInclude Include="..\backup\ufosd.h" />
+    <ClInclude Include="..\backup\yoko.h" />
+    <ClInclude Include="..\backup\z64.h" />
+    <ClInclude Include="..\config.h" />
+    <ClInclude Include="..\console\atari.h" />
+    <ClInclude Include="..\console\coleco.h" />
+    <ClInclude Include="..\console\console.h" />
+    <ClInclude Include="..\console\dc.h" />
+    <ClInclude Include="..\console\gb.h" />
+    <ClInclude Include="..\console\gba.h" />
+    <ClInclude Include="..\console\genesis.h" />
+    <ClInclude Include="..\console\jaguar.h" />
+    <ClInclude Include="..\console\lynx.h" />
+    <ClInclude Include="..\console\n64.h" />
+    <ClInclude Include="..\console\nds.h" />
+    <ClInclude Include="..\console\neogeo.h" />
+    <ClInclude Include="..\console\nes.h" />
+    <ClInclude Include="..\console\ngp.h" />
+    <ClInclude Include="..\console\pce.h" />
+    <ClInclude Include="..\console\psx.h" />
+    <ClInclude Include="..\console\sms.h" />
+    <ClInclude Include="..\console\snes.h" />
+    <ClInclude Include="..\console\swan.h" />
+    <ClInclude Include="..\console\vboy.h" />
+    <ClInclude Include="..\misc\archive.h" />
+    <ClInclude Include="..\misc\bswap.h" />
+    <ClInclude Include="..\misc\chksum.h" />
+    <ClInclude Include="..\misc\crypt.h" />
+    <ClInclude Include="..\misc\dlopen.h" />
+    <ClInclude Include="..\misc\file.h" />
+    <ClInclude Include="..\misc\getopt.h" />
+    <ClInclude Include="..\misc\getopt2.h" />
+    <ClInclude Include="..\misc\ioapi.h" />
+    <ClInclude Include="..\misc\itypes.h" />
+    <ClInclude Include="..\misc\map.h" />
+    <ClInclude Include="..\misc\misc.h" />
+    <ClInclude Include="..\misc\parallel.h" />
+    <ClInclude Include="..\misc\property.h" />
+    <ClInclude Include="..\misc\string.h" />
+    <ClInclude Include="..\misc\term.h" />
+    <ClInclude Include="..\misc\unzip.h" />
+    <ClInclude Include="..\misc\usb.h" />
+    <ClInclude Include="..\patch\aps.h" />
+    <ClInclude Include="..\patch\bsl.h" />
+    <ClInclude Include="..\patch\gg.h" />
+    <ClInclude Include="..\patch\ips.h" />
+    <ClInclude Include="..\patch\patch.h" />
+    <ClInclude Include="..\patch\ppf.h" />
+    <ClInclude Include="..\ucon64.h" />
+    <ClInclude Include="..\ucon64_dat.h" />
+    <ClInclude Include="..\ucon64_defines.h" />
+    <ClInclude Include="..\ucon64_misc.h" />
+    <ClInclude Include="..\ucon64_opts.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\backup\backup.c" />
+    <ClCompile Include="..\backup\cc2.c" />
+    <ClCompile Include="..\backup\cd64.c" />
+    <ClCompile Include="..\backup\cmc.c" />
+    <ClCompile Include="..\backup\dex.c" />
+    <ClCompile Include="..\backup\doctor64.c" />
+    <ClCompile Include="..\backup\doctor64jr.c" />
+    <ClCompile Include="..\backup\f2a.c" />
+    <ClCompile Include="..\backup\fal.c" />
+    <ClCompile Include="..\backup\ffe.c" />
+    <ClCompile Include="..\backup\fig.c" />
+    <ClCompile Include="..\backup\gbx.c" />
+    <ClCompile Include="..\backup\gd.c" />
+    <ClCompile Include="..\backup\interceptor.c" />
+    <ClCompile Include="..\backup\lynxit.c" />
+    <ClCompile Include="..\backup\mccl.c" />
+    <ClCompile Include="..\backup\mcd.c" />
+    <ClCompile Include="..\backup\md-pro.c" />
+    <ClCompile Include="..\backup\mgd.c" />
+    <ClCompile Include="..\backup\mgh.c" />
+    <ClCompile Include="..\backup\msg.c" />
+    <ClCompile Include="..\backup\nfc.c" />
+    <ClCompile Include="..\backup\pce-pro.c" />
+    <ClCompile Include="..\backup\pl.c" />
+    <ClCompile Include="..\backup\psxpblib.c" />
+    <ClCompile Include="..\backup\quickdev16.c" />
+    <ClCompile Include="..\backup\sc.c" />
+    <ClCompile Include="..\backup\sflash.c" />
+    <ClCompile Include="..\backup\smc.c" />
+    <ClCompile Include="..\backup\smd.c" />
+    <ClCompile Include="..\backup\smsgg-pro.c" />
+    <ClCompile Include="..\backup\spsc.c" />
+    <ClCompile Include="..\backup\ssc.c" />
+    <ClCompile Include="..\backup\swc.c" />
+    <ClCompile Include="..\backup\tototek.c" />
+    <ClCompile Include="..\backup\ufo.c" />
+    <ClCompile Include="..\backup\ufosd.c" />
+    <ClCompile Include="..\backup\yoko.c" />
+    <ClCompile Include="..\backup\z64.c" />
+    <ClCompile Include="..\console\atari.c" />
+    <ClCompile Include="..\console\coleco.c" />
+    <ClCompile Include="..\console\console.c" />
+    <ClCompile Include="..\console\dc.c" />
+    <ClCompile Include="..\console\gb.c" />
+    <ClCompile Include="..\console\gba.c" />
+    <ClCompile Include="..\console\genesis.c" />
+    <ClCompile Include="..\console\jaguar.c" />
+    <ClCompile Include="..\console\lynx.c" />
+    <ClCompile Include="..\console\n64.c" />
+    <ClCompile Include="..\console\nds.c" />
+    <ClCompile Include="..\console\neogeo.c" />
+    <ClCompile Include="..\console\nes.c" />
+    <ClCompile Include="..\console\ngp.c" />
+    <ClCompile Include="..\console\pce.c" />
+    <ClCompile Include="..\console\psx.c" />
+    <ClCompile Include="..\console\sms.c" />
+    <ClCompile Include="..\console\snes.c" />
+    <ClCompile Include="..\console\swan.c" />
+    <ClCompile Include="..\console\vboy.c" />
+    <ClCompile Include="..\misc\archive.c" />
+    <ClCompile Include="..\misc\chksum.c" />
+    <ClCompile Include="..\misc\dlopen.c" />
+    <ClCompile Include="..\misc\file.c" />
+    <ClCompile Include="..\misc\getopt.c" />
+    <ClCompile Include="..\misc\getopt2.c" />
+    <ClCompile Include="..\misc\ioapi.c" />
+    <ClCompile Include="..\misc\map.c" />
+    <ClCompile Include="..\misc\misc.c" />
+    <ClCompile Include="..\misc\parallel.c" />
+    <ClCompile Include="..\misc\property.c" />
+    <ClCompile Include="..\misc\string.c" />
+    <ClCompile Include="..\misc\term.c" />
+    <ClCompile Include="..\misc\unzip.c" />
+    <ClCompile Include="..\misc\usb.c" />
+    <ClCompile Include="..\patch\aps.c" />
+    <ClCompile Include="..\patch\bsl.c" />
+    <ClCompile Include="..\patch\gg.c" />
+    <ClCompile Include="..\patch\ips.c" />
+    <ClCompile Include="..\patch\patch.c" />
+    <ClCompile Include="..\patch\ppf.c" />
+    <ClCompile Include="..\ucon64.c" />
+    <ClCompile Include="..\ucon64_dat.c" />
+    <ClCompile Include="..\ucon64_misc.c" />
+    <ClCompile Include="..\ucon64_opts.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

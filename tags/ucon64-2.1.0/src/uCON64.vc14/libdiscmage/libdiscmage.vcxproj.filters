@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\format">
+      <UniqueIdentifier>{831edb54-c75b-4c87-8581-13b66918cc7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\format">
+      <UniqueIdentifier>{8c1948a9-e056-408a-a4db-ffc97396ad2d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\libdiscmage\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\crypt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\getopt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\ioapi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\libdiscmage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\libdm_misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\misc_wav.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\misc_z.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\unzip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\format\cdi.h">
+      <Filter>Header Files\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\format\cue.h">
+      <Filter>Header Files\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\format\format.h">
+      <Filter>Header Files\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\format\nero.h">
+      <Filter>Header Files\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\format\other.h">
+      <Filter>Header Files\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libdiscmage\format\toc.h">
+      <Filter>Header Files\format</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\libdiscmage\dllinit.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\ioapi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\libdm_misc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\misc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\misc_wav.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\misc_z.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\unzip.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\format\cdi.c">
+      <Filter>Source Files\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\format\cue.c">
+      <Filter>Source Files\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\format\format.c">
+      <Filter>Source Files\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\format\nero.c">
+      <Filter>Source Files\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\format\other.c">
+      <Filter>Source Files\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\format\toc.c">
+      <Filter>Source Files\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libdiscmage\map.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1686,6 +1686,9 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
         case 4 * MBIT:
           header.map_control[0] = 0x09;
           break;
+        case 8 * MBIT:
+          header.map_control[0] = 0x25;
+          break;
         case 10 * MBIT:
         case 12 * MBIT:
         case 16 * MBIT:
@@ -1755,11 +1758,6 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
             }
         }
     }
-  if (header.map_control[0] == '\0')
-    puts ("WARNING: Conversion of this ROM is not yet fully supported by uCON64 and the\n"
-          "         output will not work on a Super UFO Pro 8 SD unless you set the bytes\n"
-          "         at offsets 0x13-0x16 to the right values\n"
-          "         Check with " OPTION_LONG_S "dbuh, modify with " OPTION_LONG_S "poke");
 
   header.sram_type = snes_hirom ? 0 : 1;
 

@@ -672,11 +672,11 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
   </tr>
   <tr>
     <td><tt>emulate_&#60;CRC32&#62;</tt></td>
-    <td><tt>command line to use to start emulator for file with that CRC32</tt></td>
+    <td><tt>command line to use to start emulator for file with that CRC32 value</tt></td>
   </tr>
   <tr>
     <td><tt>emulate_0x&#60;CRC32&#62;</tt></td>
-    <td><tt>command line to use to start emulator for file with that CRC32</tt></td>
+    <td><tt>command line to use to start emulator for file with that CRC32 value</tt></td>
   </tr>
   <tr>
     <td><tt>f2afirmware</tt></td>
@@ -793,10 +793,10 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    uCON64 displays DAT file information. If you installed a SNES DAT file (see
    <a href="#36">question 36</a>) and uCON64 does not display a line with the
    text "DAT info:" then the ROM dump could not be identified. It could be that
-   you  have an unknown ROM dump, but it is more likely that you have a modified
-   (i.e. bad) dump or an overdump. GoodSNES 0.999.5 does not use the CRC32 to
-   identify files, so if uCON64 does not display DAT information, but GoodSNES
-   identified it as good then uCON64 is right. For reasons see
+   you have an unknown ROM dump, but it is more likely that you have a modified,
+   i.e. bad, dump or an overdump. GoodSNES 0.999.5 does not use the CRC32
+   algorithm to identify files, so if uCON64 does not display DAT information,
+   but GoodSNES identified it as good then uCON64 is right. For reasons see
    <a href="#42">question 42</a>.<br>
 <br>
 <p>
@@ -1226,20 +1226,21 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    <a href="http://www.rommanager.com/">http://www.rommanager.com/</a>. You can
    also find some DAT files on
    <a href="http://ucon64.sourceforge.net/index.html#ucon64dat">
-   the uCON64 homepage</a>. A more up-to-date resource is the nice DAT-o-MATIC at
+   the uCON64 homepage</a>. A more up-to-date resource is the nice DAT-o-MATIC
+   at
    <a href="http://datomatic.no-intro.org/">http://datomatic.no-intro.org/</a>,
    but you have to convert the DAT files before uCON64 can use them. See
    <a href="#56">question 56</a>.<br>
-   uCON64 will automatically create index files which speed up the access to
-   the DAT files dramatically. Now uCON64 uses the information inside the DAT
-   files to identify or rename ROMs without an internal header.<br>
+   uCON64 will automatically create index files which speed up access to the DAT
+   files dramatically. Now uCON64 uses the information inside the DAT files to
+   identify or rename ROMs without an internal header.<br>
    Starting with version 1.9.8beta8 uCON64 does not have an internal database
    anymore, so you will <i>need</i> DAT files for files like NES ROM dumps.<br>
-   You can check which DAT files are used by uCON64 with the option -db. You
-   can view or list all DAT entries with the option -dbv. You can search for a
-   specific CRC32 value with the option -dbs. The force-console-type options
-   can be used in combination with -db, -dbv and -dbs. For example, to see
-   which DAT files are used to identify SNES ROM dumps, type:<br>
+   You can check which DAT files are used by uCON64 with the option -db. You can
+   view or list all DAT entries with the option -dbv. You can search for a
+   specific CRC32 value with the option -dbs. The force-console-type options can
+   be used in combination with -db, -dbv and -dbs. For example, to see which DAT
+   files are used to identify SNES ROM dumps, type:<br>
    &nbsp;&nbsp;ucon64 -db -snes<br>
    If uCON64 reports that it found 0 DAT files you did not install the DAT
    file(s) correctly.<br>
@@ -1422,14 +1423,13 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    uCON64 solves these problems as it uses the CRC32 algorithm for file
    identification. The CRC32 algorithm will produce a different checksum if
    bytes are swapped or if the range is different. When uCON64 is run on a ROM
-   dump it first calculates the CRC32 of that file and then searches in its DAT
-   files for that CRC32. If the CRC32 is present uCON64 will display the
-   information it found in the DAT file. If uCON64 could not find the CRC32 it
-   will not display DAT information.<br>
-   At the risk of labouring the obvious I might add that even if all formats
-   used a checksum algorithm like CRC32, DAT files would still be necessary as
-   it is not possible to reliably identify a file without an external
-   reference.<br>
+   dump it first calculates the CRC32 value of that file and then searches in
+   its DAT files for that CRC32 value. If it is present uCON64 will display the
+   information it found in the DAT file. If uCON64 could not find the CRC32
+   value it will not display DAT information.<br>
+   At the risk of stating the obvious I might add that even if all formats used
+   a checksum algorithm like CRC32, DAT files would still be necessary as it is
+   not possible to reliably identify a file without an external reference.<br>
 <br>
 <p>
 <a name="43"><b>Q43</b>: How should the option --mkdat be used?</a><br>
@@ -1586,8 +1586,8 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    with the switches -v and -q. --mkdat uses three levels of verbosity:<br>
    1.) When the switch -v is specified uCON64 will display a warning if it
    could not determine the console type for a file. uCON64 will also display a
-   warning if it encounters a file that has the same CRC32 as a file uCON64
-   already processed (a "duplicate").<br>
+   warning if it encounters a file that has the same CRC32 value as a file
+   uCON64 already processed (a "duplicate").<br>
    2.) When neither -v nor -q is specified uCON64 will display a warning only
    if it finds a duplicate or if the console type of the first file could not
    be determined.<br>

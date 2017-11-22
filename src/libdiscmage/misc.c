@@ -2248,7 +2248,9 @@ getenv2 (const char *variable)
             {
               char *p = getenv ("HOMEPATH");
 
-              len = strlen (tmp) + strlen (p ? p : DIR_SEPARATOR_S);
+              if (!p)
+                p = DIR_SEPARATOR_S;
+              len = strlen (tmp) + strlen (p);
               if (len >= sizeof value)
                 len = sizeof value - 1;
               snprintf (value, len + 1, "%s%s", tmp, p);

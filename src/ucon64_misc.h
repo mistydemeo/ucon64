@@ -155,7 +155,7 @@ extern void ucon64_fwswap32 (const char *fname, size_t start, size_t len);
 extern void ucon64_dump (FILE *output, const char *filename, size_t start,
                          size_t len, uint32_t flags);
 // Be sure the following constant doesn't conflict with the MEMCMP2_* constants
-#define UCON64_FIND_QUIET (1 << 31)
+#define UCON64_FIND_QUIET (1U << 31)
 extern int ucon64_find (const char *filename, size_t start, size_t len,
                         const char *search, int searchlen, uint32_t flags);
 extern int ucon64_chksum (char *sha1, char *md5, unsigned int *crc32, // uint16_t *crc16,

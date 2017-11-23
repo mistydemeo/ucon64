@@ -1,7 +1,7 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - ReadMe</title></head><body bgcolor="#ffffff"><tt><pre>
-uCON64 2.0.3 UNIX (Linux) 1999-2017
+uCON64 2.1.0 UNIX (Linux) 1999-2017
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -12,7 +12,7 @@ Options
    -r           process subdirectories recursively
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
-  --port=PORT   specify USB or parallel PORT={USB0, USB1, ... 3bc, 378, 278}
+  --port=PORT   specify USB or parallel PORT={USB0,USB1,... 3bc,378,278,...}
                   In order to connect a backup unit to a PC's parallel port
                   you need a standard bidirectional parallel cable
   --xreset      reset parallel port
@@ -74,7 +74,7 @@ Padding
 DATabase (support for DAT files)
   --db          DATabase statistics
   --dbv         like --db but more verbose
-  --dbs=CRC32   search ROM with CRC32 in DATabase
+  --dbs=CRC32   search ROM with CRC32 value in DATabase
   --scan        generate ROM list for all ROMs using DATabase
                   like: GoodXXXX scan ...
   --lsd         same as --scan
@@ -200,7 +200,7 @@ Flash Advance Linker
   --xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK
                   BANK can be 1, 2, 3 or 4; --port=PORT
                   receives automatically when SRAM does not exist
-  --xfalm       try to enable EPP mode, default is SPP mode
+  --xfalm       use SPP mode, default is EPP mode
 
 Nintendo DS
   --nds         force recognition
@@ -270,15 +270,19 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --fig         convert to *Pro Fighter*/FIG
   --figs        convert *.srm (SRAM) file to *Pro Fighter*/FIG
   --gd3         convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
-  --idnum=NUM   make --gd3 produce file names where first file has numerical
+  --id          force --gd3 to produce a unique filename
+  --idnum=NUM   make --gd3 produce filenames where first file has numerical
                   identifier NUM, next NUM + 1, etc.
   --gd3s        convert *.srm (SRAM) file to GD SF3(SF6/SF7)/Professor SF*
-  --mgd         convert to Multi Game*/MGD2/MGH/RAW
+  --mgd         convert to Multi Game Doctor 2/MGD2/RAW
+  --mgh         convert to Multi Game Hunter/MGH
   --smc         convert to Super Magicom/SMC
   --swc         convert to Super Wild Card*/SWC
   --swcs        convert *.srm (SRAM) file to Super Wild Card*/SWC
   --ufo         convert to Super UFO
   --ufos        convert *.srm (SRAM) file to Super UFO
+  --ufosd       convert to Super UFO Pro 8 SD
+  --ufosds      convert *.srm (SRAM) file to Super UFO Pro 8 SD
   --ctrl=TYPE   specify type of controller in port 1 for emu when converting
                   TYPE=0 gamepad
                   TYPE=1 mouse
@@ -295,11 +299,12 @@ Super Nintendo Entertainment System/SNES/Super Famicom
                   TYPE=7 mouse / super scope / gamepad
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
-  --dbuh        display (relevant part of) backup unit header
+  --dbuh        display (relevant part of) backup unit header and interpret it
   --dint        deinterleave ROM (regardless whether the ROM is interleaved)
   --col=0xCOLOR convert 0xRRGGBB (HTML) &#60;-&#62; 0xXXXX (SNES)
    -j           join split ROM
-   -s           split ROM; default part size is 8 Mb
+   -s           split ROM (not for UFO Pro 8 SD); default part size is 8 Mb
+  --smgh        split ROM for Multi Game Hunter/MGH
   --ssize=SIZE  specify split part size in Mbit (not for Game Doctor SF3)
    -k           remove protection (crack)
    -f           remove NTSC/PAL protection
@@ -353,12 +358,10 @@ Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)
   --xfigc       send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;
                   --port=PORT
                   receives automatically when SRAM does not exist
-Super Flash flash card programmer
-  --xsf         send/receive ROM to/from Super Flash flash card programmer
-                  --port=PORT
+Super Flash
+  --xsf         send/receive ROM to/from Super Flash; --port=PORT
                   receives automatically (64 Mbits) when ROM does not exist
-  --xsfs        send/receive SRAM to/from Super Flash flash card programmer
-                  --port=PORT
+  --xsfs        send/receive SRAM to/from Super Flash; --port=PORT
                   receives automatically when SRAM does not exist
 Quickdev16
   --xqd16       send ROM to Quickdev16
@@ -371,18 +374,20 @@ Neo Geo/Neo Geo CD(Z)/MVS
 Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --gen         force recognition
   --int         force ROM is in interleaved format (SMD)
-  --int2        force ROM is in interleaved format 2 (MGD)
+  --int2        force ROM is in interleaved format 2 (MGD2)
   --nint        force ROM is not in interleaved format (BIN/RAW)
    -n=NEW_NAME  change foreign ROM name to NEW_NAME
   --n2=NEW_NAME change Japanese ROM name to NEW_NAME
   --smd         convert to Super Magic Drive/SMD
   --smds        convert *.srm (SRAM) file to Super Magic Drive/SMD
   --bin         convert to Magicom/BIN/RAW
-  --mgd         convert to Multi Game*/MGD2/MGH
+  --mgd         convert to Multi Game Doctor 2/MGD2
+  --mgh         convert to Multi Game Hunter/MGH
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
    -j           join split ROM
    -s           split ROM; default part size is 8 Mb (4 Mb for SMD)
+  --smgh        split ROM for Multi Game Hunter/MGH
   --ssize=SIZE  specify split part size in Mbit
    -f           remove NTSC/PAL protection
   --chk         fix ROM checksum
@@ -401,12 +406,10 @@ Super Com Pro/Super Magic Drive/SMD
                   receives automatically when ROM does not exist
   --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when SRAM does not exist
-MD-PRO flash card programmer
-  --xmd         send/receive ROM to/from MD-PRO flash card programmer
-                  --port=PORT
+MD-PRO
+  --xmd         send/receive ROM to/from MD-PRO; --port=PORT
                   receives automatically (32/64 Mbits) when ROM does not exist
-  --xmds        send/receive SRAM to/from MD-PRO flash card programmer
-                  --port=PORT
+  --xmds        send/receive SRAM to/from MD-PRO; --port=PORT
                   receives automatically when SRAM does not exist
   --xmdb=BANK   send/receive SRAM to/from MD-PRO BANK
                   BANK can be a number from 1 to 4; --port=PORT
@@ -444,7 +447,7 @@ Game Boy Xchanger/GBDoctor
   --xgbxb=BANK  send/receive 64 kbits SRAM to/from GB Xchanger BANK
                   BANK can be a number from 0 to 15; --port=PORT
                   receives automatically when ROM does not exist
-  --xgbxm       try to enable EPP mode, default is SPP mode
+  --xgbxm       use SPP mode, default is EPP mode
 Mad Catz Camera Link (Game Boy Camera)
   --xmccl       receives from Mad Catz Camera Link; --port=PORT
 
@@ -477,9 +480,8 @@ Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
 Magic Super Griffin/MSG
   --xmsg        send/receive ROM to/from Magic Super Griffin/MSG; --port=PORT
                   receives automatically when ROM does not exist
-PCE-PRO flash card programmer
-  --xpce        send/receive ROM to/from PCE-PRO flash card programmer
-                  --port=PORT
+PCE-PRO
+  --xpce        send/receive ROM to/from PCE-PRO; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
 
 Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
@@ -537,12 +539,10 @@ Sega Master System(II/III)/Game Gear (Handheld)
   --multi=SIZE  make multi-game file for use with SMS-PRO/GG-PRO flash card,
                   truncated to SIZE Mbit; file with loader must be specified
                   first, then all the ROMs, multi-game file to create last
-SMS-PRO/GG-PRO flash card programmer
-  --xgg         send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer
-                  --port=PORT
+SMS-PRO/GG-PRO
+  --xgg         send/receive ROM to/from SMS-PRO/GG-PRO; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
-  --xggs        send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer
-                  --port=PORT
+  --xggs        send/receive SRAM to/from SMS-PRO/GG-PRO; --port=PORT
                   receives automatically when SRAM does not exist
   --xggb=BANK   send/receive SRAM to/from SMS-PRO/GG-PRO BANK
                   BANK can be a number from 1 to 4; --port=PORT
@@ -561,7 +561,7 @@ Pocket Linker
   --xpl         send/receive ROM to/from Pocket Linker; --port=PORT
                   receives automatically when ROM does not exist
   --xpli        show information about inserted cartridge; --port=PORT
-  --xplm        try to enable EPP mode, default is SPP mode
+  --xplm        use SPP mode, default is EPP mode
 
 Atari VCS 2600/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
   --ata         force recognition

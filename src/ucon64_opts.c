@@ -139,7 +139,7 @@ ucon64_switches (st_ucon64_t *p)
       so we can't use preprocessor directives in the argument list.
     */
     case UCON64_VER:
-      printf ("version:                           %s (%s)\n"
+      printf ("version:                           %s WIP (%s)\n"
               "platform:                          %s\n",
               UCON64_VERSION_S, __DATE__, CURRENT_OS_S);
 

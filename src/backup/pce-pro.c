@@ -192,7 +192,7 @@ pce_write_rom (const char *filename, unsigned short parport)
   fseek (file, 0xb3f4, SEEK_SET);
   buffer[0] = 0;
   fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
-  // currently we ignore the version string (full string is "uCON64 2.1.0")
+  // currently we ignore the version string (full string is "uCON64 2.1.1")
   multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
 
   if (multi_game)

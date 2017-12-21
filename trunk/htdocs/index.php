@@ -55,6 +55,7 @@ require_once ("misc/widget.php");
 <center><img src="images/new.png" border="0" width="200"></center>
 <br>
 <!--NEWS-->
+20171221 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox Megabuild 6b released</a><br>
 20171123 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.1.0 released</a><br>
 20171026 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">moved to SVN</a><br>
 20170121 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.3 released</a><br>
@@ -263,6 +264,15 @@ can be found <a href="http://www.planetmir.de/html/softw.htm#ucon64">here</a> (t
   <tr>
     <td><font size="-1">
 <img src="images/ucon64misc.png" border="0" height="50"><font size="-1"><br>
+<br>
+<a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_Megabuild6b-win32.zip?download">DOSBox_Megabuild6b-win32.zip</a><br>
+Enhanced DOSBox Megabuild 6 Win32<br>
+<a href="http://prdownloads.sourceforge.net/ucon64/dosbox-mb6b.tar.gz?download">dosbox-mb6b.tar.gz</a><br>
+Enhanced DOSBox Megabuild 6 soure code<br>
+<a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_Megabuild6-win32.zip?download">DOSBox_Megabuild6-win32.zip</a><br>
+Original DOSBox Megabuild 6 Win32 (repackaged to include PortTalk)<br>
+<a href="http://prdownloads.sourceforge.net/ucon64/dosbox-mb6.tar.gz?download">dosbox-mb6.tar.gz</a><br>
+Original DOSBox Megabuild 6 soure code<br>
 <br>
 <a href="ucon64misc/conn.html">conn.html</a> (html)<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/conn.pdf?download">conn.pdf</a> (pdf)<br>

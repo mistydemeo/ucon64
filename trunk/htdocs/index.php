@@ -268,11 +268,11 @@ can be found <a href="http://www.planetmir.de/html/softw.htm#ucon64">here</a> (t
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_Megabuild6b-win32.zip?download">DOSBox_Megabuild6b-win32.zip</a><br>
 Enhanced DOSBox Megabuild 6 Win32<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-mb6b.tar.gz?download">dosbox-mb6b.tar.gz</a><br>
-Enhanced DOSBox Megabuild 6 soure code<br>
+Enhanced DOSBox Megabuild 6 source code<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_Megabuild6-win32.zip?download">DOSBox_Megabuild6-win32.zip</a><br>
 Original DOSBox Megabuild 6 Win32 (repackaged to include PortTalk)<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-mb6.tar.gz?download">dosbox-mb6.tar.gz</a><br>
-Original DOSBox Megabuild 6 soure code<br>
+Original DOSBox Megabuild 6 source code<br>
 <br>
 <a href="ucon64misc/conn.html">conn.html</a> (html)<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/conn.pdf?download">conn.pdf</a> (pdf)<br>

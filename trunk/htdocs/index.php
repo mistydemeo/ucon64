@@ -55,6 +55,7 @@ require_once ("misc/widget.php");
 <center><img src="images/new.png" border="0" width="200"></center>
 <br>
 <!--NEWS-->
+20180106 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox SVN revision 4067 with Megabuild 6b changes released</a><br>
 20171221 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox Megabuild 6b released</a><br>
 20171123 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.1.0 released</a><br>
 20171026 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">moved to SVN</a><br>
@@ -265,6 +266,10 @@ can be found <a href="http://www.planetmir.de/html/softw.htm#ucon64">here</a> (t
     <td><font size="-1">
 <img src="images/ucon64misc.png" border="0" height="50"><font size="-1"><br>
 <br>
+<a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_SVN4067_Megabuild6b-win32.zip?download">DOSBox_SVN4067_Megabuild6b-win32.zip</a><br>
+DOSBox SVN revision 4067 with changes of Megabuild 6b Win32<br>
+<a href="http://prdownloads.sourceforge.net/ucon64/dosbox-r4067-mb6b.tar.gz?download">dosbox-r4067-mb6b.tar.gz</a><br>
+DOSBox SVN revision 4067 with changes of Megabuild 6b source code<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_Megabuild6b-win32.zip?download">DOSBox_Megabuild6b-win32.zip</a><br>
 Enhanced DOSBox Megabuild 6 Win32<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-mb6b.tar.gz?download">dosbox-mb6b.tar.gz</a><br>

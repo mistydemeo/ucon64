@@ -2,7 +2,7 @@
 ucon64_misc.c - miscellaneous functions for uCON64
 
 Copyright (c) 1999 - 2006              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 Copyright (c) 2001                     Caz
 Copyright (c) 2002 - 2003              Jan-Erik Karlsson (Amiga)
 
@@ -932,28 +932,14 @@ ucon64_output_fname (char *requested_fname, int flags)
   //  code should handle archives and come up with unique filenames for
   //  archives with more than one file.
   if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
-    {
-      const char *requested_fname_base = basename2 (requested_fname);
-      char fname[FILENAME_MAX];
-
-      len = strlen (requested_fname_base);
-      if (len >= FILENAME_MAX)
-        len = FILENAME_MAX - 1;
-      strncpy (fname, requested_fname_base, len)[len] = '\0';
-      len += strlen (ucon64.output_path);
-      if (len >= FILENAME_MAX)
-        len = FILENAME_MAX - 1;
-      snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, fname);
-      requested_fname[len] = '\0';
-    }
+    p = basename2 (requested_fname);
   else                                          // an archive (for now: zip file)
-    {
-      len = strlen (ucon64.output_path) + strlen (ucon64.fname_arch);
-      if (len >= FILENAME_MAX)
-        len = FILENAME_MAX - 1;
-      snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, ucon64.fname_arch);
-      requested_fname[len] = '\0';
-    }
+    p = ucon64.fname_arch;
+  len = strlen (ucon64.output_path) + strlen (p);
+  if (len >= FILENAME_MAX)
+    len = FILENAME_MAX - 1;
+  snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, p);
+  requested_fname[len] = '\0';
 
   /*
     Keep the requested suffix, but only if it isn't ".zip" or ".gz". This
@@ -2248,7 +2234,7 @@ ucon64_filefile (const char *filename1, unsigned int start1,
 
   free (o.buffer);
 
-  printf ("Found %llu %s\n\n",
+  printf ("Found %llu %s\n",
           o.found,
           similar ? (o.found == 1 ? "similarity" : "similarities") :
                     (o.found == 1 ? "difference" : "differences"));
@@ -2392,7 +2378,7 @@ ucon64_filefile (const char *filename1, unsigned int start1,
   free (buf2);
 #endif
 
-  printf ("Found %llu %s\n\n",
+  printf ("Found %llu %s\n",
           (long long unsigned int) n_bytes,
           similar ? (n_bytes == 1 ? "similarity" : "similarities") :
                     (n_bytes == 1 ? "difference" : "differences"));

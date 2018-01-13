@@ -1,10 +1,10 @@
 /*
 parallel.c - miscellaneous parallel port functions
 
-Copyright (c) 1999 - 2004             NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 dbjh
-Copyright (c) 2001                    Caz (original BeOS code)
-Copyright (c) 2002 - 2004             Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2004                    NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 - 2018 dbjh
+Copyright (c) 2001                           Caz (original BeOS code)
+Copyright (c) 2002 - 2004                    Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -835,7 +835,7 @@ parport_open (unsigned short port)
 
           sym.void_ptr = has_symbol (io_driver, "DlPortWritePortUshort");
           DlPortWritePortUshort = (void (__stdcall *) (unsigned short, unsigned short)) sym.func_ptr;
-          if (DlPortReadPortUshort != (void *) -1)
+          if (DlPortWritePortUshort != (void *) -1)
             output_word = dlportio_output_word;
         }
     }
@@ -919,7 +919,7 @@ parport_setup (unsigned short port, parport_mode_t mode)
     parport_io_mode = IEEE1284_MODE_COMPAT | IEEE1284_DATA;
   else if (mode == PPMODE_SPP_BIDIR)
     parport_io_mode = IEEE1284_MODE_BYTE | IEEE1284_DATA;
-  else if (mode == PPMODE_EPP)
+  else // if (mode == PPMODE_EPP)
     {
       int capabilities = 0;
 

@@ -2,6 +2,7 @@
 gb.h - Game Boy support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB
+Copyright (c) 2018        dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -33,6 +34,7 @@ extern const unsigned char gb_logodata[], rocket_logodata[];
 
 extern int gb_chk (st_ucon64_nfo_t *rominfo);
 extern int gb_gbx (st_ucon64_nfo_t *rominfo);
+extern int gb_gp2bmp (void);
 extern int gb_mgd (st_ucon64_nfo_t *rominfo);
 extern int gb_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int gb_n2gb (st_ucon64_nfo_t *rominfo, const char *emu_rom);

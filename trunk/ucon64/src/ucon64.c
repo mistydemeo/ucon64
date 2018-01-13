@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units.
 
 Copyright (c) 1999 - 2005              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1685,8 +1685,6 @@ ucon64_nfo (void)
   if (ucon64.file_size > 0 && ucon64.dat_enabled && ucon64.dat)
     ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
 
-  fputc ('\n', stdout);
-
   return 0;
 }
 
@@ -2030,5 +2028,5 @@ ucon64_usage (int argc, char *argv[], int view)
 #endif
 
   puts ("Please report problems, fixes or ideas to ucon64-main@lists.sf.net or visit\n"
-        "http://ucon64.sourceforge.net\n");
+        "http://ucon64.sourceforge.net");
 }

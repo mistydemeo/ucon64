@@ -2,7 +2,7 @@
 gb.c - Game Boy support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,8 @@ static st_ucon64_obj_t gb_obj[] =
   {
     {0, WF_DEFAULT},
     {UCON64_GB, WF_SWITCH},
-    {UCON64_GB, WF_DEFAULT}
+    {UCON64_GB, WF_DEFAULT},
+    {UCON64_GB, WF_NO_CRC32}
   };
 
 const st_getopt2_t gb_usage[] =
@@ -101,6 +102,11 @@ const st_getopt2_t gb_usage[] =
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
       &gb_obj[0]
+    },
+    {
+      "gp2bmp", 0, 0, UCON64_GP2BMP,
+      NULL, "convert Game Boy Printer data (produced by " OPTION_LONG_S "xmccl) to BMP",
+      &gb_obj[3]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -455,11 +461,14 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
 
   strcpy (src_name, ucon64.fname);
   p = basename2 (ucon64.fname);
-  // TODO: find out if this is correct (giving the file name a prefix)
+  // TODO: find out if this is correct (adding a prefix)
   if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
     strcpy (dest_name, p);
   else
-    sprintf (dest_name, "gb%s", p);
+    {
+      snprintf (dest_name, FILENAME_MAX, "gb%s", p);
+      dest_name[FILENAME_MAX - 1] = '\0';
+    }
   set_suffix (dest_name, ".gb");
 
   ucon64_file_handler (dest_name, src_name, 0);
@@ -469,6 +478,177 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return 0;
+}
+
+
+#define GPWIDTH 160
+#define GPHEIGHT 144
+#define ROWLENGTH (GPWIDTH + (4 - (GPWIDTH * 3) % 4) % 4) // row length must be a multiple of 4 bytes
+#define DATAOFFSET (54 + 16 * 4) // headers + palette for 4 bpp image data
+#define FILESIZE (DATAOFFSET + (ROWLENGTH * GPHEIGHT) / 2)
+#define NOCOLOR 0x0f
+
+static int
+write_bmp_file (unsigned char *image_data)
+{
+  char dest_name[FILENAME_MAX];
+  unsigned char *bmp_buffer = NULL;
+  uint32_t i, j;
+
+  if ((bmp_buffer = (unsigned char *) malloc (FILESIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], FILESIZE);
+      return -1;
+    }
+
+  strcpy (dest_name, basename2 (ucon64.fname));
+  set_suffix (dest_name, ".bmp");
+  ucon64_file_handler (dest_name, NULL, 0);
+
+  memset (bmp_buffer, 0, FILESIZE);
+
+  // Windows 3.x BMP file format
+  bmp_buffer[0] = 'B';
+  bmp_buffer[1] = 'M';
+  bmp_buffer[2] = FILESIZE & 0xff;
+  bmp_buffer[3] = (FILESIZE >> 8) & 0xff;
+  bmp_buffer[10] = DATAOFFSET;
+  bmp_buffer[14] = 40;
+  bmp_buffer[18] = GPWIDTH;
+  bmp_buffer[22] = GPHEIGHT;
+  bmp_buffer[26] = 1;
+  bmp_buffer[28] = 4;
+  bmp_buffer[54] = bmp_buffer[55] = bmp_buffer[56] = 255; // color 0
+  bmp_buffer[58] = bmp_buffer[59] = bmp_buffer[60] = 191; // color 1
+  bmp_buffer[62] = bmp_buffer[63] = bmp_buffer[64] = 127; // color 2
+
+  for (i = 0; i < GPHEIGHT; i++)
+    for (j = 0; j < GPWIDTH; j++)
+      {
+        unsigned int pixel_offset = (GPHEIGHT - i - 1) * ROWLENGTH + j;
+        unsigned char color = image_data[i * GPWIDTH + j];
+        if (color == NOCOLOR)
+          {
+//            printf ("WARNING: image_data[0x%08x] missing, using black\n",
+//                    i * GPWIDTH + j);
+            color = 3;
+          }
+        bmp_buffer[DATAOFFSET + pixel_offset / 2] |=
+          color << (pixel_offset % 2 ? 0 : 4);
+      }
+
+  ucon64_fwrite (bmp_buffer, 0, FILESIZE, dest_name, "wb");
+  free (bmp_buffer);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}
+
+
+static inline void
+add_pixel (unsigned char *image_data, unsigned int x_pos, unsigned int y_pos,
+           unsigned char color)
+{
+  unsigned int index;
+#if 0
+  static int pixelno = 0;
+
+  printf ("(%3d, %3d) = %02x  ", x_pos, y_pos, color);
+  if (++pixelno % 8 == 0)
+    fputc ('\n', stdout);
+#endif
+  if (y_pos >= GPHEIGHT || x_pos >= GPWIDTH)
+    return;
+
+  index = y_pos * GPWIDTH + x_pos;
+
+  if (image_data[index] != NOCOLOR)
+    {
+      // make wraparound to 128 work, because the "wrong" bytes are written later
+      if (x_pos < 16 && y_pos == 128)
+        return;
+
+      if (y_pos >= 24)
+        {
+//          y_pos -= 8; // move up 1 white line
+          y_pos -= 24; // move up 2 white lines
+          if (y_pos == 0)
+            y_pos = 128; // wraparound
+        }
+      index = y_pos * GPWIDTH + x_pos;
+//      printf ("NOTE: Replacing %02x with %02x at index %d (%d, %d)\n",
+//              image_data[index], color, index, x_pos, y_pos);
+    }
+
+  image_data[index] = color;
+}
+
+
+#define GPDATASIZE 0x1760
+
+int
+gb_gp2bmp (void)
+{
+  unsigned char gp_data[GPDATASIZE] = { 0 }, image_data[GPWIDTH * GPHEIGHT];
+  uint32_t n = 0, x_pos = 0, y_pos = 1, extended_block = 0, header = 0,
+           y_adjusted = 0;
+
+  printf ("Converting Game Boy Printer data in %s to BMP\n", ucon64.fname);
+
+  memset (image_data, NOCOLOR, GPWIDTH * GPHEIGHT);
+  ucon64_fread (gp_data, 0, sizeof gp_data, ucon64.fname);
+  for (n = 0; n < sizeof gp_data - 1; n += 2)
+    {
+      if (gp_data[n] == 0x88 && gp_data[n + 1] == 0x33 && sizeof gp_data - n > 2)
+        {
+#if 0
+          printf ("%08x  header type %2u: %02x %02x %02x %02x  %02x %02x %02x   %02x %02x %02x\n",
+                  n, gp_data[n + 2],
+                  gp_data[n + 3], gp_data[n + 4], gp_data[n + 5], gp_data[n + 6], gp_data[n + 7],
+                  gp_data[n + 8], gp_data[n + 9], gp_data[n + 10], gp_data[n + 11], gp_data[n + 12]);
+#endif
+          if (gp_data[n + 2] == 4)
+            n += 6;
+          else // type is 1, 2 or 15
+            n += 8;
+          header = 1;
+        }
+      else
+        { // support format of "Gameboy Printer Emulator"
+          if (!header && !y_adjusted)
+            {
+              y_pos = 0;
+              y_adjusted = 1;
+            }
+
+          add_pixel (image_data, x_pos + 0, y_pos, ((gp_data[n + 1] & 0x80) >> 6) | ((gp_data[n] & 0x80) >> 7));
+          add_pixel (image_data, x_pos + 1, y_pos, ((gp_data[n + 1] & 0x40) >> 5) | ((gp_data[n] & 0x40) >> 6));
+          add_pixel (image_data, x_pos + 2, y_pos, ((gp_data[n + 1] & 0x20) >> 4) | ((gp_data[n] & 0x20) >> 5));
+          add_pixel (image_data, x_pos + 3, y_pos, ((gp_data[n + 1] & 0x10) >> 3) | ((gp_data[n] & 0x10) >> 4));
+
+          add_pixel (image_data, x_pos + 4, y_pos, ((gp_data[n + 1] & 0x08) >> 2) | ((gp_data[n] & 0x08) >> 3));
+          add_pixel (image_data, x_pos + 5, y_pos, ((gp_data[n + 1] & 0x04) >> 1) | ((gp_data[n] & 0x04) >> 2));
+          add_pixel (image_data, x_pos + 6, y_pos, ((gp_data[n + 1] & 0x02) >> 0) | ((gp_data[n] & 0x02) >> 1));
+          add_pixel (image_data, x_pos + 7, y_pos, ((gp_data[n + 1] & 0x01) << 1) | ((gp_data[n] & 0x01) >> 0));
+
+          y_pos++;
+          if ((y_pos + 8) % 16 == 0 && x_pos == 0 && y_pos > 8 && header)
+            {
+              extended_block = 1;
+              continue;
+            }
+          if (y_pos % 8 == 0 || extended_block)
+            {
+              x_pos += 8;
+              if (x_pos == GPWIDTH)
+                x_pos = 0;
+              else
+                y_pos -= extended_block ? 9 : 8;
+              extended_block = 0;
+            }
+        }
+    }
+  return write_bmp_file (image_data);
 }
 
 

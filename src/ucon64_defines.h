@@ -2,7 +2,7 @@
 ucon64_defines.h - definitions for uCON64
 
 Copyright (c) 2002 - 2005              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -197,6 +197,7 @@ enum
   UCON64_GG,
   UCON64_GGD,
   UCON64_GGE,
+  UCON64_GP2BMP,
   UCON64_HD,
   UCON64_HDN,
   UCON64_HELP,

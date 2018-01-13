@@ -1,8 +1,8 @@
 /*
 mccl.c - Mad Catz Camera Link (Game Boy Camera) support for uCON64
 
-Copyright (c) 2002             NoisyB
-Copyright (c) 2004, 2015, 2017 dbjh
+Copyright (c) 2002                    NoisyB
+Copyright (c) 2004, 2015, 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@ Reset Procedure:
 2. Wait for bit 5 of status port to become 1
 3. Read lower 4 bits of data port
 4. If read data != 4, then go to step 1.
-5. (Useless read of control port?)
+5. (Useless read of status port?)
 6. Output 0x22 to control (tristate data and set control to 0010)
 7. Wait for bit 5 of status port to become 0
 8. Output 0x26 to control (tristate data and set control to 0110)
@@ -49,7 +49,7 @@ Data Read Procedure:
 1. Output 0x26 to control (tristate data and set control to 0110)
 2. Wait for bit 5 of status port to become 1
 3. Read lower 4 bits of data port, store to lower 4 bits of received byte
-4. (Useless read of control port?)
+4. (Useless read of status port?)
 5. Output 0x22 to control (tristate data and set control to 0010)
 6. Wait for bit 5 of status port to become 0
 7. Output 0x26 to control (tristate data and set control to 0110)
@@ -74,7 +74,7 @@ Data Read Procedure:
 #ifdef  USE_PARALLEL
 static st_ucon64_obj_t mccl_obj[] =
   {
-    {UCON64_GB, WF_DEFAULT | WF_STOP | WF_NO_ROM}
+    {UCON64_GB, WF_STOP | WF_NO_ROM}
   };
 #endif
 
@@ -169,7 +169,7 @@ mccl_read (const char *filename, unsigned int parport)
   strcpy (dest_name, filename);
   ucon64_file_handler (dest_name, NULL, 0);
   ucon64_fwrite (buffer, 0, count, dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
+  printf ("\n\nYou can convert %s to BMP with " OPTION_LONG_S "gp2bmp\n", dest_name);
   return 0;
 }
 

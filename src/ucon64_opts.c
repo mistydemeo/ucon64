@@ -2,7 +2,7 @@
 ucon64_opts.c - switches for all uCON64 options
 
 Copyright (c) 2002 - 2005              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
 Copyright (c) 2005                     Jan-Erik Karlsson (Amiga)
 
 
@@ -1485,6 +1485,10 @@ ucon64_options (st_ucon64_t *p)
       gg_display (ucon64.nfo, option_arg);
       break;
 
+    case UCON64_GP2BMP:
+      gb_gp2bmp ();
+      break;
+
     case UCON64_INES:
       nes_ines ();
       break;
@@ -2166,14 +2170,12 @@ ucon64_options (st_ucon64_t *p)
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
         printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
       lynxit_read_rom (ucon64.fname, ucon64.parport);
-      fputc ('\n', stdout);
       break;
 
     case UCON64_XMCCL:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
         printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
       mccl_read (ucon64.fname, ucon64.parport);
-      fputc ('\n', stdout);
       break;
 
     case UCON64_XMCD:

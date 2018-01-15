@@ -932,14 +932,28 @@ ucon64_output_fname (char *requested_fname, int flags)
   //  code should handle archives and come up with unique filenames for
   //  archives with more than one file.
   if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
-    p = basename2 (requested_fname);
+    {
+      const char *requested_fname_base = basename2 (requested_fname);
+      char fname[FILENAME_MAX];
+
+      len = strlen (requested_fname_base);
+      if (len >= FILENAME_MAX)
+        len = FILENAME_MAX - 1;
+      strncpy (fname, requested_fname_base, len)[len] = '\0';
+      len += strlen (ucon64.output_path);
+      if (len >= FILENAME_MAX)
+        len = FILENAME_MAX - 1;
+      snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, fname);
+      requested_fname[len] = '\0';
+    }
   else                                          // an archive (for now: zip file)
-    p = ucon64.fname_arch;
-  len = strlen (ucon64.output_path) + strlen (p);
-  if (len >= FILENAME_MAX)
-    len = FILENAME_MAX - 1;
-  snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, p);
-  requested_fname[len] = '\0';
+    {
+      len = strlen (ucon64.output_path) + strlen (ucon64.fname_arch);
+      if (len >= FILENAME_MAX)
+        len = FILENAME_MAX - 1;
+      snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, ucon64.fname_arch);
+      requested_fname[len] = '\0';
+    }
 
   /*
     Keep the requested suffix, but only if it isn't ".zip" or ".gz". This

@@ -493,7 +493,7 @@ write_bmp_file (unsigned char *image_data)
 {
   char dest_name[FILENAME_MAX];
   unsigned char *bmp_buffer = NULL;
-  uint32_t i, j;
+  unsigned int i, j;
 
   if ((bmp_buffer = (unsigned char *) malloc (FILESIZE)) == NULL)
     {
@@ -533,8 +533,7 @@ write_bmp_file (unsigned char *image_data)
 //                    i * GPWIDTH + j);
             color = 3;
           }
-        bmp_buffer[DATAOFFSET + pixel_offset / 2] |=
-          color << (pixel_offset % 2 ? 0 : 4);
+        bmp_buffer[DATAOFFSET + pixel_offset / 2] |= color << (~pixel_offset & 1) * 4;
       }
 
   ucon64_fwrite (bmp_buffer, 0, FILESIZE, dest_name, "wb");
@@ -590,8 +589,8 @@ int
 gb_gp2bmp (void)
 {
   unsigned char gp_data[GPDATASIZE] = { 0 }, image_data[GPWIDTH * GPHEIGHT];
-  uint32_t n = 0, x_pos = 0, y_pos = 1, extended_block = 0, header = 0,
-           y_adjusted = 0;
+  unsigned int n = 0, x_pos = 0, y_pos = 1, extended_block = 0, header = 0,
+               y_adjusted = 0;
 
   printf ("Converting Game Boy Printer data in %s to BMP\n", ucon64.fname);
 

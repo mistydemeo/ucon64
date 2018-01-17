@@ -27,6 +27,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 
 
+#define GPDATASIZE 0x1760
+
 extern const st_getopt2_t mccl_usage[];
 
 #ifdef  USE_PARALLEL

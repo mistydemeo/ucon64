@@ -121,7 +121,7 @@ inportw2 (unsigned short port)
 int
 mccl_read (const char *filename, unsigned int parport)
 {
-  unsigned char buffer[0x1760];
+  unsigned char buffer[GPDATASIZE];
   char dest_name[FILENAME_MAX];
   int count = 0;
   time_t starttime;
@@ -140,7 +140,8 @@ mccl_read (const char *filename, unsigned int parport)
     ;
   outportb (CONTROL, 0x26);
 
-  printf ("Receive: %d Bytes (%.4f Mb)\n\n", 0x1760, (float) 0x1760 / MBIT);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", GPDATASIZE,
+          (float) GPDATASIZE / MBIT);
   starttime = time (NULL);
   do
     {
@@ -162,9 +163,9 @@ mccl_read (const char *filename, unsigned int parport)
         ;
       buffer[count++] = inbyte;
       if ((count & 0x1f) == 0)
-        ucon64_gauge (starttime, count, 0x1760);
+        ucon64_gauge (starttime, count, GPDATASIZE);
     }
-  while (count < 0x1760);
+  while (count < GPDATASIZE);
 
   strcpy (dest_name, filename);
   ucon64_file_handler (dest_name, NULL, 0);

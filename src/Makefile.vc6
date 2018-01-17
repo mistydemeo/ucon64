@@ -342,8 +342,8 @@ console/gba.obj: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) misc/file.h \
                backup/backup.h backup/fal.h
 console/gb.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
               misc/string.h $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) \
-              console/gb.h console/nes.h backup/backup.h backup/mgd.h \
-              backup/ssc.h
+              console/gb.h console/nes.h backup/backup.h backup/mccl.h \
+              backup/mgd.h backup/ssc.h
 console/genesis.obj: config.h $(ARCHIVE_H_DEPS) $(CHKSUM_H_DEPS) misc/file.h \
                    $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) console/genesis.h \
                    backup/md-pro.h backup/mgd.h backup/mgh.h backup/smd.h \

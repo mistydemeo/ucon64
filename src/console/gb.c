@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gb.h"
 #include "console/nes.h"
 #include "backup/backup.h"
+#include "backup/mccl.h"
 #include "backup/mgd.h"
 #include "backup/ssc.h"
 
@@ -483,9 +484,8 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
 
 #define GPWIDTH 160
 #define GPHEIGHT 144
-#define ROWLENGTH (GPWIDTH + (4 - (GPWIDTH * 3) % 4) % 4) // row length must be a multiple of 4 bytes
-#define DATAOFFSET (54 + 16 * 4) // headers + palette for 4 bpp image data
-#define FILESIZE (DATAOFFSET + (ROWLENGTH * GPHEIGHT) / 2)
+#define DATAOFFSET (14 + 40 + 16 * 4) // headers + palette for 4 bpp image data
+#define FILESIZE (DATAOFFSET + (GPWIDTH * GPHEIGHT) / 2)
 #define NOCOLOR 0x0f
 
 static int
@@ -525,12 +525,13 @@ write_bmp_file (unsigned char *image_data)
   for (i = 0; i < GPHEIGHT; i++)
     for (j = 0; j < GPWIDTH; j++)
       {
-        unsigned int pixel_offset = (GPHEIGHT - i - 1) * ROWLENGTH + j;
+        unsigned int pixel_offset = (GPHEIGHT - i - 1) * GPWIDTH + j;
         unsigned char color = image_data[i * GPWIDTH + j];
+
         if (color == NOCOLOR)
           {
-//            printf ("WARNING: image_data[0x%08x] missing, using black\n",
-//                    i * GPWIDTH + j);
+            printf ("WARNING: image_data[0x%08x] missing, using black\n",
+                    i * GPWIDTH + j);
             color = 3;
           }
         bmp_buffer[DATAOFFSET + pixel_offset / 2] |= color << (~pixel_offset & 1) * 4;
@@ -544,107 +545,88 @@ write_bmp_file (unsigned char *image_data)
 }
 
 
-static inline void
-add_pixel (unsigned char *image_data, unsigned int x_pos, unsigned int y_pos,
-           unsigned char color)
+static inline unsigned int
+process_gp_data (unsigned char *image_data, unsigned char *gp_data,
+                 unsigned char *gp_data_end, unsigned int *x_pos, unsigned int *y_pos)
 {
-  unsigned int index;
-#if 0
-  static int pixelno = 0;
+  unsigned char *old_gp_data = gp_data;
+  unsigned int x_pos2 = *x_pos, y_pos2 = *y_pos;
 
-  printf ("(%3d, %3d) = %02x  ", x_pos, y_pos, color);
-  if (++pixelno % 8 == 0)
-    fputc ('\n', stdout);
-#endif
-  if (y_pos >= GPHEIGHT || x_pos >= GPWIDTH)
-    return;
-
-  index = y_pos * GPWIDTH + x_pos;
-
-  if (image_data[index] != NOCOLOR)
+  while (gp_data + 1 < gp_data_end &&
+         y_pos2 * GPWIDTH + x_pos2 + 7 < GPWIDTH * GPHEIGHT)
     {
-      // make wraparound to 128 work, because the "wrong" bytes are written later
-      if (x_pos < 16 && y_pos == 128)
-        return;
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 0] = (gp_data[1] & 0x80) >> 6 | (*gp_data & 0x80) >> 7;
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 1] = (gp_data[1] & 0x40) >> 5 | (*gp_data & 0x40) >> 6;
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 2] = (gp_data[1] & 0x20) >> 4 | (*gp_data & 0x20) >> 5;
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 3] = (gp_data[1] & 0x10) >> 3 | (*gp_data & 0x10) >> 4;
 
-      if (y_pos >= 24)
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 4] = (gp_data[1] & 0x08) >> 2 | (*gp_data & 0x08) >> 3;
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 5] = (gp_data[1] & 0x04) >> 1 | (*gp_data & 0x04) >> 2;
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 6] = (gp_data[1] & 0x02) >> 0 | (*gp_data & 0x02) >> 1;
+      image_data[y_pos2 * GPWIDTH + x_pos2 + 7] = (gp_data[1] & 0x01) << 1 | (*gp_data & 0x01) >> 0;
+
+      y_pos2++;
+      if (y_pos2 % 8 == 0)
         {
-//          y_pos -= 8; // move up 1 white line
-          y_pos -= 24; // move up 2 white lines
-          if (y_pos == 0)
-            y_pos = 128; // wraparound
+          x_pos2 += 8;
+          if (x_pos2 == GPWIDTH)
+            x_pos2 = 0;
+          else
+            y_pos2 -= 8;
         }
-      index = y_pos * GPWIDTH + x_pos;
-//      printf ("NOTE: Replacing %02x with %02x at index %d (%d, %d)\n",
-//              image_data[index], color, index, x_pos, y_pos);
+
+      gp_data += 2;
     }
 
-  image_data[index] = color;
+  *x_pos = x_pos2;
+  *y_pos = y_pos2;
+//  printf ("# bytes processed = %d\n", gp_data - old_gp_data);
+  return gp_data - old_gp_data;
 }
 
-
-#define GPDATASIZE 0x1760
 
 int
 gb_gp2bmp (void)
 {
   unsigned char gp_data[GPDATASIZE] = { 0 }, image_data[GPWIDTH * GPHEIGHT];
-  unsigned int n = 0, x_pos = 0, y_pos = 1, extended_block = 0, header = 0,
-               y_adjusted = 0;
+  unsigned int n = 0, x_pos = 0, y_pos = 0;
 
   printf ("Converting Game Boy Printer data in %s to BMP\n", ucon64.fname);
 
   memset (image_data, NOCOLOR, GPWIDTH * GPHEIGHT);
   ucon64_fread (gp_data, 0, sizeof gp_data, ucon64.fname);
-  for (n = 0; n < sizeof gp_data - 1; n += 2)
+  while (n < sizeof gp_data - 1)
     {
-      if (gp_data[n] == 0x88 && gp_data[n + 1] == 0x33 && sizeof gp_data - n > 2)
+      if (gp_data[n] == 0x88 && gp_data[n + 1] == 0x33 && sizeof gp_data - n > 5)
         {
 #if 0
-          printf ("%08x  header type %2u: %02x %02x %02x %02x  %02x %02x %02x   %02x %02x %02x\n",
+          printf ("%08x  command %2u: %02x %02x %02x %02x  %02x %02x %02x %02x  %02x %02x %02x %02x\n",
                   n, gp_data[n + 2],
-                  gp_data[n + 3], gp_data[n + 4], gp_data[n + 5], gp_data[n + 6], gp_data[n + 7],
-                  gp_data[n + 8], gp_data[n + 9], gp_data[n + 10], gp_data[n + 11], gp_data[n + 12]);
+                  gp_data[n + 3], gp_data[n + 4], gp_data[n + 5], gp_data[n + 6],
+                  gp_data[n + 7], gp_data[n + 8], gp_data[n + 9], gp_data[n + 10],
+                  gp_data[n + 11], gp_data[n + 12], gp_data[n + 13], gp_data[n + 14]);
 #endif
-          if (gp_data[n + 2] == 4)
-            n += 6;
-          else // type is 1, 2 or 15
-            n += 8;
-          header = 1;
+          if (gp_data[n + 2] == 2)
+            n += 14;
+          else if (gp_data[n + 2] == 4)
+            {
+              unsigned int blocksize = gp_data[n + 4] | gp_data[n + 5] << 8;
+
+              n += 6;
+              if (n + blocksize > GPDATASIZE)
+                blocksize = GPDATASIZE - 1 - n;
+              n += process_gp_data (image_data, gp_data + n,
+                                    gp_data + n + blocksize, &x_pos, &y_pos);
+              n += 4;
+            }
+          else // type is 1 or 15
+            n += 10;
         }
       else
         { // support format of "Gameboy Printer Emulator"
-          if (!header && !y_adjusted)
-            {
-              y_pos = 0;
-              y_adjusted = 1;
-            }
-
-          add_pixel (image_data, x_pos + 0, y_pos, ((gp_data[n + 1] & 0x80) >> 6) | ((gp_data[n] & 0x80) >> 7));
-          add_pixel (image_data, x_pos + 1, y_pos, ((gp_data[n + 1] & 0x40) >> 5) | ((gp_data[n] & 0x40) >> 6));
-          add_pixel (image_data, x_pos + 2, y_pos, ((gp_data[n + 1] & 0x20) >> 4) | ((gp_data[n] & 0x20) >> 5));
-          add_pixel (image_data, x_pos + 3, y_pos, ((gp_data[n + 1] & 0x10) >> 3) | ((gp_data[n] & 0x10) >> 4));
-
-          add_pixel (image_data, x_pos + 4, y_pos, ((gp_data[n + 1] & 0x08) >> 2) | ((gp_data[n] & 0x08) >> 3));
-          add_pixel (image_data, x_pos + 5, y_pos, ((gp_data[n + 1] & 0x04) >> 1) | ((gp_data[n] & 0x04) >> 2));
-          add_pixel (image_data, x_pos + 6, y_pos, ((gp_data[n + 1] & 0x02) >> 0) | ((gp_data[n] & 0x02) >> 1));
-          add_pixel (image_data, x_pos + 7, y_pos, ((gp_data[n + 1] & 0x01) << 1) | ((gp_data[n] & 0x01) >> 0));
-
-          y_pos++;
-          if ((y_pos + 8) % 16 == 0 && x_pos == 0 && y_pos > 8 && header)
-            {
-              extended_block = 1;
-              continue;
-            }
-          if (y_pos % 8 == 0 || extended_block)
-            {
-              x_pos += 8;
-              if (x_pos == GPWIDTH)
-                x_pos = 0;
-              else
-                y_pos -= extended_block ? 9 : 8;
-              extended_block = 0;
-            }
+          n += process_gp_data (image_data, gp_data,
+                                gp_data + GPWIDTH * GPHEIGHT / 4, &x_pos, &y_pos);
+          break;
         }
     }
   return write_bmp_file (image_data);

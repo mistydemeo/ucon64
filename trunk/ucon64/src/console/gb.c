@@ -27,12 +27,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/file.h"
 #include "misc/misc.h"
 #include "misc/string.h"
+#include "misc/term.h"
 #include "ucon64_misc.h"
 #include "console/console.h"
 #include "console/gb.h"
 #include "console/nes.h"
 #include "backup/backup.h"
-#include "backup/mccl.h"
 #include "backup/mgd.h"
 #include "backup/ssc.h"
 
@@ -483,21 +483,21 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
 
 
 #define GPWIDTH 160
-#define GPHEIGHT 144
+#define GPMAXHEIGHT 512
 #define DATAOFFSET (14 + 40 + 16 * 4) // headers + palette for 4 bpp image data
-#define FILESIZE (DATAOFFSET + (GPWIDTH * GPHEIGHT) / 2)
 #define NOCOLOR 0x0f
 
 static int
-write_bmp_file (unsigned char *image_data)
+write_bmp_file (unsigned char *image_data, unsigned int size)
 {
   char dest_name[FILENAME_MAX];
   unsigned char *bmp_buffer = NULL;
-  unsigned int i, j;
+  unsigned int x_pos, y_pos, height = size / GPWIDTH,
+               file_size = DATAOFFSET + size / 2;
 
-  if ((bmp_buffer = (unsigned char *) malloc (FILESIZE)) == NULL)
+  if ((bmp_buffer = (unsigned char *) malloc (file_size)) == NULL)
     {
-      fprintf (stderr, ucon64_msg[BUFFER_ERROR], FILESIZE);
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], file_size);
       return -1;
     }
 
@@ -505,39 +505,40 @@ write_bmp_file (unsigned char *image_data)
   set_suffix (dest_name, ".bmp");
   ucon64_file_handler (dest_name, NULL, 0);
 
-  memset (bmp_buffer, 0, FILESIZE);
+  memset (bmp_buffer, 0, file_size);
 
   // Windows 3.x BMP file format
   bmp_buffer[0] = 'B';
   bmp_buffer[1] = 'M';
-  bmp_buffer[2] = FILESIZE & 0xff;
-  bmp_buffer[3] = (FILESIZE >> 8) & 0xff;
+  bmp_buffer[2] = file_size & 0xff;
+  bmp_buffer[3] = (file_size >> 8) & 0xff;
   bmp_buffer[10] = DATAOFFSET;
   bmp_buffer[14] = 40;
   bmp_buffer[18] = GPWIDTH;
-  bmp_buffer[22] = GPHEIGHT;
+  bmp_buffer[22] = height & 0xff;
+  bmp_buffer[23] = (height >> 8) & 0xff;
   bmp_buffer[26] = 1;
   bmp_buffer[28] = 4;
   bmp_buffer[54] = bmp_buffer[55] = bmp_buffer[56] = 255; // color 0
   bmp_buffer[58] = bmp_buffer[59] = bmp_buffer[60] = 191; // color 1
   bmp_buffer[62] = bmp_buffer[63] = bmp_buffer[64] = 127; // color 2
 
-  for (i = 0; i < GPHEIGHT; i++)
-    for (j = 0; j < GPWIDTH; j++)
+  for (y_pos = 0; y_pos < height; y_pos++)
+    for (x_pos = 0; x_pos < GPWIDTH; x_pos++)
       {
-        unsigned int pixel_offset = (GPHEIGHT - i - 1) * GPWIDTH + j;
-        unsigned char color = image_data[i * GPWIDTH + j];
+        unsigned int pixel_offset = (height - y_pos - 1) * GPWIDTH + x_pos;
+        unsigned char color = image_data[y_pos * GPWIDTH + x_pos];
 
         if (color == NOCOLOR)
           {
             printf ("WARNING: image_data[0x%08x] missing, using black\n",
-                    i * GPWIDTH + j);
+                    y_pos * GPWIDTH + x_pos);
             color = 3;
           }
         bmp_buffer[DATAOFFSET + pixel_offset / 2] |= color << (~pixel_offset & 1) * 4;
       }
 
-  ucon64_fwrite (bmp_buffer, 0, FILESIZE, dest_name, "wb");
+  ucon64_fwrite (bmp_buffer, 0, file_size, dest_name, "wb");
   free (bmp_buffer);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -553,7 +554,7 @@ process_gp_data (unsigned char *image_data, unsigned char *gp_data,
   unsigned int x_pos2 = *x_pos, y_pos2 = *y_pos;
 
   while (gp_data + 1 < gp_data_end &&
-         y_pos2 * GPWIDTH + x_pos2 + 7 < GPWIDTH * GPHEIGHT)
+         y_pos2 * GPWIDTH + x_pos2 + 7 < GPWIDTH * GPMAXHEIGHT)
     {
       image_data[y_pos2 * GPWIDTH + x_pos2 + 0] = (gp_data[1] & 0x80) >> 6 | (*gp_data & 0x80) >> 7;
       image_data[y_pos2 * GPWIDTH + x_pos2 + 1] = (gp_data[1] & 0x40) >> 5 | (*gp_data & 0x40) >> 6;
@@ -588,12 +589,12 @@ process_gp_data (unsigned char *image_data, unsigned char *gp_data,
 int
 gb_gp2bmp (void)
 {
-  unsigned char gp_data[GPDATASIZE] = { 0 }, image_data[GPWIDTH * GPHEIGHT];
-  unsigned int n = 0, x_pos = 0, y_pos = 0;
+  unsigned char gp_data[GPWIDTH * GPMAXHEIGHT / 4] = { 0 }, image_data[GPWIDTH * GPMAXHEIGHT];
+  unsigned int n = 0, x_pos = 0, y_pos = 0, image_data_size = 0;
 
   printf ("Converting Game Boy Printer data in %s to BMP\n", ucon64.fname);
 
-  memset (image_data, NOCOLOR, GPWIDTH * GPHEIGHT);
+  memset (image_data, NOCOLOR, GPWIDTH * GPMAXHEIGHT);
   ucon64_fread (gp_data, 0, sizeof gp_data, ucon64.fname);
   while (n < sizeof gp_data - 1)
     {
@@ -610,13 +611,29 @@ gb_gp2bmp (void)
             n += 14;
           else if (gp_data[n + 2] == 4)
             {
-              unsigned int blocksize = gp_data[n + 4] | gp_data[n + 5] << 8;
+              unsigned int n2 = n + 2, m = gp_data[n + 5] << 8 | gp_data[n + 4];
 
               n += 6;
-              if (n + blocksize > GPDATASIZE)
-                blocksize = GPDATASIZE - 1 - n;
-              n += process_gp_data (image_data, gp_data + n,
-                                    gp_data + n + blocksize, &x_pos, &y_pos);
+              if (n + m > sizeof gp_data)
+                m = sizeof gp_data - 1 - n;
+              n += process_gp_data (image_data, gp_data + n, gp_data + n + m,
+                                    &x_pos, &y_pos);
+              image_data_size += (n - n2 - 4) * 4; // 4 pixels per byte of src data
+
+              printf ("Checksum of image data at 0x%04x: ", n2 + 4);
+              for (m = 0; n2 < n; n2++)
+                m += gp_data[n2];
+              m = ((unsigned int) (gp_data[n + 1] << 8) | gp_data[n]) ==
+                    (m & 0xffff);
+              printf ("%s\n", // NOTE: We have to use printf2() for ANSI colors.
+#ifdef  USE_ANSI_COLOR
+                      ucon64.ansi_color ?
+                        (m ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
+                        (m ? "OK" : "Bad")
+#else
+                      m ? "OK" : "Bad"
+#endif
+                     );
               n += 4;
             }
           else // type is 1 or 15
@@ -624,12 +641,18 @@ gb_gp2bmp (void)
         }
       else
         { // support format of "Gameboy Printer Emulator"
-          n += process_gp_data (image_data, gp_data,
-                                gp_data + GPWIDTH * GPHEIGHT / 4, &x_pos, &y_pos);
+          if (n == 0)
+            {
+              unsigned int m = (unsigned int) (ucon64.file_size > sizeof gp_data ?
+                                 sizeof gp_data : ucon64.file_size);
+
+              n = process_gp_data (image_data, gp_data, gp_data + m, &x_pos, &y_pos);
+              image_data_size = n * 4; // 4 pixels per byte of src data
+            }
           break;
         }
     }
-  return write_bmp_file (image_data);
+  return n ? write_bmp_file (image_data, image_data_size) : -1;
 }
 
 

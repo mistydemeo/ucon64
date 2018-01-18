@@ -98,6 +98,7 @@ const st_getopt2_t mccl_usage[] =
 
 #ifdef USE_PARALLEL
 
+#define GPDATASIZE 0x1760
 #define DATA ((unsigned short) (parport + PARPORT_DATA))
 #define STATUS ((unsigned short) (parport + PARPORT_STATUS))
 #define CONTROL ((unsigned short) (parport + PARPORT_CONTROL))

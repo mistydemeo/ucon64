@@ -488,12 +488,12 @@ gb_ssc (st_ucon64_nfo_t *rominfo)
 #define NOCOLOR 0x0f
 
 static int
-write_bmp_file (unsigned char *image_data, unsigned int size)
+write_bmp_file (unsigned char *image_data, unsigned int image_data_size)
 {
   char dest_name[FILENAME_MAX];
   unsigned char *bmp_buffer = NULL;
-  unsigned int x_pos, y_pos, height = size / GPWIDTH,
-               file_size = DATAOFFSET + size / 2;
+  unsigned int x_pos, y_pos, height = image_data_size / GPWIDTH,
+               file_size = DATAOFFSET + image_data_size / 2;
 
   if ((bmp_buffer = (unsigned char *) malloc (file_size)) == NULL)
     {
@@ -589,7 +589,8 @@ process_gp_data (unsigned char *image_data, unsigned char *gp_data,
 int
 gb_gp2bmp (void)
 {
-  unsigned char gp_data[GPWIDTH * GPMAXHEIGHT / 4] = { 0 }, image_data[GPWIDTH * GPMAXHEIGHT];
+  unsigned char gp_data[GPWIDTH * GPMAXHEIGHT / 4] = { 0 },
+                image_data[GPWIDTH * GPMAXHEIGHT];
   unsigned int n = 0, x_pos = 0, y_pos = 0, image_data_size = 0;
 
   printf ("Converting Game Boy Printer data in %s to BMP\n", ucon64.fname);
@@ -614,26 +615,29 @@ gb_gp2bmp (void)
               unsigned int n2 = n + 2, m = gp_data[n + 5] << 8 | gp_data[n + 4];
 
               n += 6;
-              if (n + m > sizeof gp_data)
-                m = sizeof gp_data - 1 - n;
+              if (n + m + 2 > sizeof gp_data)
+                m = sizeof gp_data - n - 2;
               n += process_gp_data (image_data, gp_data + n, gp_data + n + m,
                                     &x_pos, &y_pos);
               image_data_size += (n - n2 - 4) * 4; // 4 pixels per byte of src data
 
-              printf ("Checksum of image data at 0x%04x: ", n2 + 4);
-              for (m = 0; n2 < n; n2++)
-                m += gp_data[n2];
-              m = ((unsigned int) (gp_data[n + 1] << 8) | gp_data[n]) ==
-                    (m & 0xffff);
-              printf ("%s\n", // NOTE: We have to use printf2() for ANSI colors.
+              if (n - n2 > 4) // display checksum info only if actual data size > 0
+                {
+                  printf ("Checksum of image data at 0x%04x: ", n2 + 4);
+                  for (m = 0; n2 < n; n2++)
+                    m += gp_data[n2];
+                  m = ((unsigned int) (gp_data[n + 1] << 8) | gp_data[n]) ==
+                        (m & 0xffff);
+                  printf ("%s\n", // NOTE: We have to use printf2() for ANSI colors.
 #ifdef  USE_ANSI_COLOR
-                      ucon64.ansi_color ?
-                        (m ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
-                        (m ? "OK" : "Bad")
+                          ucon64.ansi_color ?
+                            (m ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
+                            (m ? "OK" : "Bad")
 #else
-                      m ? "OK" : "Bad"
+                          m ? "OK" : "Bad"
 #endif
-                     );
+                         );
+                }
               n += 4;
             }
           else // type is 1 or 15
@@ -643,8 +647,8 @@ gb_gp2bmp (void)
         { // support format of "Gameboy Printer Emulator"
           if (n == 0)
             {
-              unsigned int m = (unsigned int) (ucon64.file_size > sizeof gp_data ?
-                                 sizeof gp_data : ucon64.file_size);
+              unsigned int m = (unsigned int) (ucon64.file_size <= sizeof gp_data ?
+                                 ucon64.file_size : sizeof gp_data);
 
               n = process_gp_data (image_data, gp_data, gp_data + m, &x_pos, &y_pos);
               image_data_size = n * 4; // 4 pixels per byte of src data

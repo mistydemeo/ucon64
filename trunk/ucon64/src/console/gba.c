@@ -2,7 +2,7 @@
 gba.c - Game Boy Advance support for uCON64
 
 Copyright (c) 2001 - 2005              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -740,13 +740,12 @@ int
 gba_multi (unsigned int truncate_size, char *multi_fname)
 // TODO: Check if 1024 Mbit multi-game files are supported by the FAL code
 {
-#define BUFSIZE (32 * 1024)
   unsigned int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0,
                done, truncated = 0, size_pow2_lesser = 1, size_pow2 = 1,
                truncate_size_ispow2 = 0;
   struct stat fstate;
   FILE *srcfile, *destfile;
-  char buffer[BUFSIZE], fname[FILENAME_MAX], *fname_ptr;
+  char buffer[32 * 1024], fname[FILENAME_MAX], *fname_ptr;
   const char *p = NULL;
 
   if (truncate_size == 0)
@@ -839,7 +838,7 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
       byteswritten = 0;                         // # of bytes written per file
       while (!done)
         {
-          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+          bytestowrite = fread (buffer, 1, sizeof buffer, srcfile);
           if (totalsize + bytestowrite > truncate_size)
             {
               bytestowrite = truncate_size - totalsize;

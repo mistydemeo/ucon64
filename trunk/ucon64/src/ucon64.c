@@ -867,9 +867,9 @@ main (int argc, char **argv)
   if (argc == 1)
     ucon64_test ();
 #else
-  printf ("uCON64 " UCON64_VERSION_S " WIP " CURRENT_OS_S " 1999-2017\n"
-          "Uses code from various people. See 'developers.html' for more!\n"
-          "This may be freely redistributed under the terms of the GNU Public License\n\n");
+  puts ("uCON64 " UCON64_VERSION_S " WIP " CURRENT_OS_S " 1999-2018\n"
+        "Uses code from various people. See 'developers.html' for more!\n"
+        "This may be freely redistributed under the terms of the GNU Public License\n");
 #endif
 
   if (atexit (ucon64_exit) == -1)
@@ -1040,7 +1040,7 @@ main (int argc, char **argv)
                                                         R_OK | X_OK) &&
       !stat (ucon64.configdir, &fstate) && S_ISDIR (fstate.st_mode))
     {
-//      fprintf (stderr, "Please move your DAT files from %s to %s\n\n",
+//      fprintf (stderr, "Please move your DAT files from %s to %s\n",
 //               ucon64.configdir, ucon64.datdir);
       strcpy (ucon64.datdir, ucon64.configdir); // use .ucon64/ instead of .ucon64/dat/
       ucon64.dat_enabled = 1;
@@ -1266,7 +1266,6 @@ ucon64_process_rom (const char *fname)
           ucon64.fname = fname;
 
           ucon64_execute_options();
-
           if (ucon64.flags & WF_STOP)
             break;
         }
@@ -1300,6 +1299,7 @@ ucon64_execute_options (void)
 */
 {
   int c = 0, result = 0, x = 0, opts = 0;
+  static int first_file = 1;
 
   // these members of ucon64 can change per file
   ucon64.dat = NULL;
@@ -1327,28 +1327,26 @@ ucon64_execute_options (void)
 
         opts++;
 
+        if (!first_file)
+          fputc ('\n', stdout);
+        first_file = 0;
         // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
         result = ucon64_rom_handling ();
-
         if (result == -1)                       // no rom, but WF_NO_ROM
           return -1;
 
+        if ((ucon64.flags & WF_NFO) && ucon64.quiet < 1)
+          fputc ('\n', stdout);
         if (ucon64_options (&ucon64) == -1)
           {
             const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
             const char *opt = p ? p->name : NULL;
 
-            fprintf (stderr, "ERROR: %s%s encountered a problem\n",
+            fprintf (stderr, "ERROR: %s%s encountered a problem\n"
+                             "       Is the option you used available for the current console system?\n"
+                             "       Please report bugs to ucon64-main@lists.sf.net or http://ucon64.sf.net\n",
                      opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
                      opt ? opt : "uCON64");
-
-//            if (p)
-//              getopt2_usage (p);
-
-            fputs ("       Is the option you used available for the current console system?\n"
-                   "       Please report bugs to ucon64-main@lists.sf.net or http://ucon64.sf.net\n\n",
-                   stderr);
-
             return -1;
           }
 
@@ -1367,7 +1365,10 @@ ucon64_execute_options (void)
   if (!opts) // no options => just display ROM info
     {
       ucon64.flags = WF_DEFAULT;
-      // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
+      if (!first_file && ucon64.quiet < 1)
+        fputc ('\n', stdout);
+      first_file = 0;
+      // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       if (ucon64_rom_handling () == -1)
         return -1;                              // no rom, but WF_NO_ROM
     }
@@ -1854,10 +1855,9 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
               nfo->current_internal_crc == nfo->internal_crc ? '=' : '!',
               nfo->internal_crc);
 #endif
-
-      if (nfo->internal_crc2[0])
-        printf ("%s\n", nfo->internal_crc2);
     }
+  if (nfo->internal_crc2[0])
+    printf ("%s\n", nfo->internal_crc2);
 
   fflush (stdout);
 }

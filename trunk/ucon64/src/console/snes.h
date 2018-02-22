@@ -1,9 +1,9 @@
 /*
 snes.h - Super NES support for uCON64
 
-Copyright (c) 1999 - 2001             NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 dbjh
-Copyright (c) 2002 - 2003             John Weidman
+Copyright (c) 1999 - 2001                    NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 - 2018 dbjh
+Copyright (c) 2002 - 2003                    John Weidman
 
 
 This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_HIROM 0x8000
 #define SNES_EROM 0x400000                      // "Extended" ROM, Hi or Lo
 
-typedef enum { SWC = 1, GD3, UFO, UFOSD, FIG, MGD_SNES, SMC } snes_copier_t;
+typedef enum { SWC = 1, GD3, UFO, UFOSD, FIG, MGD_SNES, SMC, SMINI } snes_copier_t;
 
 extern const st_getopt2_t snes_usage[];
 
@@ -58,13 +58,17 @@ extern int snes_k (st_ucon64_nfo_t *rominfo);
 extern int snes_l (st_ucon64_nfo_t *rominfo);
 extern int snes_mgd (st_ucon64_nfo_t *rominfo);
 extern int snes_mgh (st_ucon64_nfo_t *rominfo);
-extern int snes_multi (unsigned int truncate_size, char *fname);
+extern int snes_multi (unsigned int truncate_size);
 extern int snes_n (st_ucon64_nfo_t *rominfo, const char *name);
 extern int snes_s (st_ucon64_nfo_t *rominfo);
-extern int snes_smgh (st_ucon64_nfo_t *rominfo);
 extern void snes_set_fig_header (st_ucon64_nfo_t *rominfo,
                                  st_fig_header_t *header);
 extern int snes_smc (st_ucon64_nfo_t *rominfo);
+extern int snes_smgh (st_ucon64_nfo_t *rominfo);
+extern int snes_smini2srm (void);
+#ifdef  USE_ZLIB
+extern int snes_sminis (st_ucon64_nfo_t *rominfo, const char *id);
+#endif
 extern int snes_swc (st_ucon64_nfo_t *rominfo);
 extern int snes_swcs (st_ucon64_nfo_t *rominfo);
 extern int snes_ufo (st_ucon64_nfo_t *rominfo);

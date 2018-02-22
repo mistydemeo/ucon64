@@ -2065,8 +2065,8 @@ ucon64_find (const char *filename, size_t start, size_t len,
 
 typedef struct
 {
-  s_sha1_ctx_t *m_sha1;
-  s_md5_ctx_t *m_md5;
+  s_sha1_ctx_t *sha1_ctx;
+  s_md5_ctx_t *md5_ctx;
 //  uint16_t *crc16;
   unsigned int *crc32;
 } st_ucon64_chksum_t;
@@ -2077,11 +2077,11 @@ ucon64_chksum_func (void *buffer, int n, void *object)
 {
   st_ucon64_chksum_t *o = (st_ucon64_chksum_t *) object;
 
-  if (o->m_sha1)
-    sha1 (o->m_sha1, (const unsigned char *) buffer, n);
+  if (o->sha1_ctx)
+    sha1 (o->sha1_ctx, (const unsigned char *) buffer, n);
 
-  if (o->m_md5)
-    md5_update (o->m_md5, (unsigned char *) buffer, n);
+  if (o->md5_ctx)
+    md5_update (o->md5_ctx, (unsigned char *) buffer, n);
 
 //  if (o->crc16)
 //    *(o->crc16) = crc16 (*(o->crc16), (const unsigned char *) buffer, n);
@@ -2098,17 +2098,17 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *cr
                const char *filename, int file_size, size_t start)
 {
   int i = 0, result;
-  s_sha1_ctx_t m_sha1;
-  s_md5_ctx_t m_md5;
+  s_sha1_ctx_t sha1_ctx;
+  s_md5_ctx_t md5_ctx;
   st_ucon64_chksum_t o;
 
   memset (&o, 0, sizeof (st_ucon64_chksum_t));
 
   if (sha1_s)
-    sha1_begin (o.m_sha1 = &m_sha1);
+    sha1_begin (o.sha1_ctx = &sha1_ctx);
 
   if (md5_s)
-    md5_init (o.m_md5 = &m_md5, 0);
+    md5_init (o.md5_ctx = &md5_ctx, 0);
 
 //  if (crc16_i)
 //    o.crc16 = crc16_i;
@@ -2123,16 +2123,16 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *cr
     {
       unsigned char buf[MAXBUFSIZE];
 
-      sha1_end (buf, &m_sha1);
-      for (*sha1_s = 0, i = 0; i < 20; i++, sha1_s = strchr (sha1_s, 0))
-        sprintf (sha1_s, "%02x", buf[i] & 0xff);
+      sha1_end (buf, &sha1_ctx);
+      for (i = 0; i < 20; i++, sha1_s = strchr (sha1_s, 0))
+        sprintf (sha1_s, "%02x", buf[i]);
     }
 
   if (md5_s)
     {
-      md5_final (&m_md5);
-      for (*md5_s = 0, i = 0; i < 16; i++, md5_s = strchr (md5_s, 0))
-        sprintf (md5_s, "%02x", m_md5.digest[i]);
+      md5_final (&md5_ctx);
+      for (i = 0; i < 16; i++, md5_s = strchr (md5_s, 0))
+        sprintf (md5_s, "%02x", md5_ctx.digest[i]);
     }
 
 //  if (crc16_i)

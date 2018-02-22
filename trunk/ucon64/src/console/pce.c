@@ -2,7 +2,7 @@
 pce.c - PC-Engine support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -871,16 +871,15 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 
 
 int
-pce_multi (unsigned int truncate_size, char *fname)
+pce_multi (unsigned int truncate_size)
 {
-#define BUFSIZE (32 * 1024)
   unsigned int n, n_files, file_no, bytestowrite, byteswritten, done,
                truncated = 0, totalsize = 0, size,
                org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
-  unsigned char buffer[BUFSIZE];
+  unsigned char buffer[32 * 1024];
 
   if (truncate_size == 0)
     {
@@ -888,16 +887,8 @@ pce_multi (unsigned int truncate_size, char *fname)
       return -1;
     }
 
-  if (fname != NULL)
-    {
-      strcpy (destname, fname);
-      n_files = ucon64.argc;
-    }
-  else
-    {
-      strcpy (destname, ucon64.argv[ucon64.argc - 1]);
-      n_files = ucon64.argc - 1;
-    }
+  strcpy (destname, ucon64.argv[ucon64.argc - 1]);
+  n_files = ucon64.argc - 1;
 
   ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (destname, "wb")) == NULL)
@@ -957,7 +948,7 @@ pce_multi (unsigned int truncate_size, char *fname)
       byteswritten = 0;                         // # of bytes written per file
       while (!done)
         {
-          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+          bytestowrite = fread (buffer, 1, sizeof buffer, srcfile);
           if (totalsize + bytestowrite > truncate_size)
             {
               bytestowrite = truncate_size - totalsize;

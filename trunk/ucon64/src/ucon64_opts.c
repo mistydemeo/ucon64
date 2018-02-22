@@ -721,7 +721,7 @@ ucon64_options (st_ucon64_t *p)
         fputc ('\n', stdout);
       checksum = 0;
       ucon64_chksum (NULL, NULL, &checksum, ucon64.fname, (int) ucon64.file_size, value);
-      printf ("Checksum (CRC32): 0x%08x\n\n", checksum);
+      printf ("Checksum (CRC32): 0x%08x\n", checksum);
       break;
 
     case UCON64_SHA1:
@@ -732,7 +732,7 @@ ucon64_options (st_ucon64_t *p)
       else
         fputc ('\n', stdout);
       ucon64_chksum (buf, NULL, NULL, ucon64.fname, (int) ucon64.file_size, value);
-      printf ("Checksum (SHA1): 0x%s\n\n", buf);
+      printf ("Checksum (SHA1): 0x%s\n", buf);
       break;
 
     case UCON64_MD5:
@@ -743,7 +743,7 @@ ucon64_options (st_ucon64_t *p)
       else
         fputc ('\n', stdout);
       ucon64_chksum (NULL, buf, NULL, ucon64.fname, (int) ucon64.file_size, value);
-      printf ("Checksum (MD5): 0x%s\n\n", buf);
+      printf ("Checksum (MD5): 0x%s\n", buf);
       break;
 
     case UCON64_HEX:
@@ -876,9 +876,9 @@ ucon64_options (st_ucon64_t *p)
       if ((padded = ucon64_testpad (ucon64.fname)) != -1)
         {
           if (!padded)
-            puts ("Padded: No\n");
+            puts ("Padded: No");
           else
-            printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n\n", padded,
+            printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
                     (float) padded / MBIT);
         }
       break;
@@ -999,7 +999,7 @@ ucon64_options (st_ucon64_t *p)
             }
         }
       else
-        printf (ucon64_msg[DAT_NOT_ENABLED]);
+        fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
       break;
 
     case UCON64_LSV:
@@ -1207,7 +1207,7 @@ ucon64_options (st_ucon64_t *p)
             {
               ucon64_dat_view (ucon64.console, 0);
               printf ("TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes"
-                      " would show only information about known NES ROMs\n\n",
+                      " would show only information about known NES ROMs\n",
                       basename2 (ucon64.argv[0]));
             }
           else
@@ -1220,7 +1220,7 @@ ucon64_options (st_ucon64_t *p)
         {
           ucon64_dat_view (ucon64.console, 1);
           printf ("TIP: %s " OPTION_LONG_S "dbv " OPTION_LONG_S "nes"
-                  " would show only information about known NES ROMs\n\n",
+                  " would show only information about known NES ROMs\n",
                   basename2 (ucon64.argv[0]));
         }
       else
@@ -1245,7 +1245,7 @@ ucon64_options (st_ucon64_t *p)
               ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
               printf ("\n"
                       "TIP: %s " OPTION_LONG_S "dbs" OPTARG_S "0x%08x " OPTION_LONG_S
-                      "nes would search only for a NES ROM\n\n",
+                      "nes would search only for a NES ROM\n",
                       basename2 (ucon64.argv[0]), ucon64.crc32);
             }
         }
@@ -1265,16 +1265,16 @@ ucon64_options (st_ucon64_t *p)
           gba_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
           break;
         case UCON64_GEN:
-          genesis_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
+          genesis_multi (strtol (option_arg, NULL, 10) * MBIT);
           break;
         case UCON64_PCE:
-          pce_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
+          pce_multi (strtol (option_arg, NULL, 10) * MBIT);
           break;
         case UCON64_SMS:                        // Sega Master System *and* Game Gear
-          sms_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
+          sms_multi (strtol (option_arg, NULL, 10) * MBIT);
           break;
         case UCON64_SNES:
-          snes_multi (strtol (option_arg, NULL, 10) * MBIT, NULL);
+          snes_multi (strtol (option_arg, NULL, 10) * MBIT);
           break;
         default:
           return -1;
@@ -1792,6 +1792,16 @@ ucon64_options (st_ucon64_t *p)
         }
       break;
 
+    case UCON64_SMINI2SRM:
+      snes_smini2srm ();
+      break;
+
+#ifdef  USE_ZLIB
+    case UCON64_SMINIS:
+      snes_sminis (ucon64.nfo, option_arg);
+      break;
+#endif
+
     case UCON64_SRAM:
       gba_sram ();
       break;
@@ -1860,7 +1870,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XCD64C:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
-        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+        printf ("Wrote backup to %s\n", mkbak (ucon64.fname, BAK_MOVE));
       cd64_read_rom (ucon64.fname, strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;
@@ -1917,7 +1927,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XCMC:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
-        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+        printf ("Wrote backup to %s\n", mkbak (ucon64.fname, BAK_MOVE));
       cmc_read_rom (ucon64.fname, ucon64.parport, ucon64.io_mode); // ucon64.io_mode contains speed value
       fputc ('\n', stdout);
       break;
@@ -1986,7 +1996,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XFALC:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
-        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+        printf ("Wrote backup to %s\n", mkbak (ucon64.fname, BAK_MOVE));
       fal_read_rom (ucon64.fname, ucon64.parport,
                     strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
@@ -2168,19 +2178,19 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XLIT:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
-        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+        printf ("Wrote backup to %s\n", mkbak (ucon64.fname, BAK_MOVE));
       lynxit_read_rom (ucon64.fname, ucon64.parport);
       break;
 
     case UCON64_XMCCL:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
-        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+        printf ("Wrote backup to %s\n", mkbak (ucon64.fname, BAK_MOVE));
       mccl_read (ucon64.fname, ucon64.parport);
       break;
 
     case UCON64_XMCD:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
-        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+        printf ("Wrote backup to %s\n", mkbak (ucon64.fname, BAK_MOVE));
       mcd_read_rom (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
@@ -2401,7 +2411,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XF2AC:
       if (!access (ucon64.fname, F_OK) && ucon64.backup)
-        printf ("Wrote backup to: %s\n", mkbak (ucon64.fname, BAK_MOVE));
+        printf ("Wrote backup to %s\n", mkbak (ucon64.fname, BAK_MOVE));
       f2a_read_rom (ucon64.fname, strtol (option_arg, NULL, 10));
       fputc ('\n', stdout);
       break;

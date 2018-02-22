@@ -100,7 +100,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
     }
 
   fseek (fh, 4, SEEK_CUR);     //     4    discjuggler settings        no idea of internal bit fields
-  fread (&value8, 1, 1, fh);    //     1    filename_lenght
+  fread (&value8, 1, 1, fh);    //     1    filename_length
   fread (&value_s, 1, value8, fh); //  [fl]    [filename]
 #ifdef  DEBUG
   value_s[value8] = 0;

@@ -2,7 +2,7 @@
 quickdev16.c - Quickdev16 support for uCON64
 
 Copyright (c) 2009        david@optixx.org
-Copyright (c) 2015 - 2017 dbjh
+Copyright (c) 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -23,14 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <stdlib.h>
-#ifdef  _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
-#endif
-#include <time.h>
-#ifdef  _MSC_VER
-#pragma warning(pop)
-#endif
 #include "misc/archive.h"
 #include "misc/itypes.h"
 #include "misc/misc.h"
@@ -184,6 +176,7 @@ quickdev16_write_rom (const char *filename)
   while ((bytesread = fread (buffer, 1, READ_BUFFER_SIZE, file)) > 0)
     {
       int quit = 0, offset = 0;
+
       while (offset < bytesread && (quit = check_quit ()) == 0)
         {
           numbytes = usb_control_msg (handle, TARGET,

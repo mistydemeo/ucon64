@@ -2,7 +2,7 @@
 sms.c - Sega Master System/Game Gear support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -321,7 +321,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
 // BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
 //  equal to 1 Mbit (for checksum calculation)
 int
-sms_multi (unsigned int truncate_size, char *fname)
+sms_multi (unsigned int truncate_size)
 {
   unsigned int n, n_files, file_no, bytestowrite, byteswritten, done,
                truncated = 0, totalsize = 0, size,
@@ -342,16 +342,8 @@ sms_multi (unsigned int truncate_size, char *fname)
       return -1;
     }
 
-  if (fname != NULL)
-    {
-      strcpy (destname, fname);
-      n_files = ucon64.argc;
-    }
-  else
-    {
-      strcpy (destname, ucon64.argv[ucon64.argc - 1]);
-      n_files = ucon64.argc - 1;
-    }
+  strcpy (destname, ucon64.argv[ucon64.argc - 1]);
+  n_files = ucon64.argc - 1;
 
   ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (destname, "w+b")) == NULL)

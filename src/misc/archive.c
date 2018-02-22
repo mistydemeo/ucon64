@@ -1,7 +1,7 @@
 /*
 archive.c - g(un)zip and unzip support
 
-Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ fsizeof (const char *filename)
 #undef  fclose
   if ((file = fopen (filename, "rb")) == NULL)
     return -1;
-  fread (magic, 1, sizeof (magic), file);
+  fread (magic, 1, sizeof magic, file);
   fclose (file);
 #define fopen   fopen2
 #define fclose  fclose2
@@ -173,13 +173,6 @@ get_finfo (FILE *file)
 }
 
 
-static fmode2_t
-get_fmode (FILE *file)
-{
-  return get_finfo (file)->fmode;
-}
-
-
 int
 unzip_get_number_entries (const char *filename)
 {
@@ -194,7 +187,7 @@ unzip_get_number_entries (const char *filename)
       errno = ENOENT;
       return -1;
     }
-  fread (magic, 1, sizeof (magic), file);
+  fread (magic, 1, sizeof magic, file);
   fclose (file);
 #define fopen   fopen2
 #define fclose  fclose2
@@ -263,7 +256,8 @@ FILE *
 fopen2 (const char *filename, const char *mode)
 {
 #undef  fopen
-  int n, len = strlen (mode), read = 0, compressed = 0;
+  const char *p = mode;
+  int read = 0, compressed = 0;
   fmode2_t fmode = FM_UNDEF;
   st_finfo_t *finfo;
   FILE *file = NULL;
@@ -272,9 +266,9 @@ fopen2 (const char *filename, const char *mode)
   if (fh_map == NULL)
     init_fh_map ();
 
-  for (n = 0; n < len; n++)
+  for (; *p; p++)
     {
-      switch (mode[n])
+      switch (*p)
         {
         case 'r':
           read = 1;
@@ -307,14 +301,11 @@ fopen2 (const char *filename, const char *mode)
     {
 #undef  fread
 #undef  fclose
-      FILE *fh;
-
-      // TODO?: check if mode is valid for fopen(), i.e., no 'f', 'h' or number
-      if ((fh = fopen (filename, mode)) != NULL)
+      if ((file = fopen (filename, "rb")) != NULL)
         {
           unsigned char magic[4] = { 0 };
 
-          fread (magic, sizeof (magic), 1, fh);
+          fread (magic, sizeof magic, 1, file);
           if (magic[0] == 0x1f && magic[1] == 0x8b && magic[2] == 0x08)
             {                           // ID1, ID2 and CM. gzip uses Compression Method 8
               fmode = FM_GZIP;
@@ -334,15 +325,13 @@ fopen2 (const char *filename, const char *mode)
               shouldn't introduce needless overhead.
             */
             fmode = FM_NORMAL;
-          fclose (fh);
+          fclose (file);
         }
 #define fread   fread2
 #define fclose  fclose2
     }
 
-  if (fmode == FM_NORMAL)
-    file = fopen (filename, mode);
-  else if (fmode == FM_GZIP)
+  if (fmode == FM_GZIP)
     file = (FILE *) gzopen (filename, mode);
   else if (fmode == FM_ZIP)
     {
@@ -353,6 +342,8 @@ fopen2 (const char *filename, const char *mode)
           unzOpenCurrentFile (file);
         }
     }
+  else // if (fmode == FM_NORMAL)
+    file = fopen (filename, mode);
 
   if (file == NULL)
     return NULL;
@@ -362,9 +353,9 @@ fopen2 (const char *filename, const char *mode)
 
 /*
   printf (", ptr = %p, mode = %s, fmode = %s\n", file, mode,
-    fmode == FM_NORMAL ? "FM_NORMAL" :
-      (fmode == FM_GZIP ? "FM_GZIP" :
-        (fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
+          fmode == FM_NORMAL ? "FM_NORMAL" :
+            (fmode == FM_GZIP ? "FM_GZIP" :
+              (fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
   map_dump (fh_map);
 */
   return file;
@@ -376,7 +367,7 @@ int
 fclose2 (FILE *file)
 {
 #undef  fclose
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   map_del (fh_map, file);
   if (fmode == FM_NORMAL)
@@ -398,18 +389,18 @@ int
 fseek2 (FILE *file, long offset, int mode)
 {
 #undef  fseek
-  st_finfo_t *finfo = get_finfo (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
 /*
 //  if (fmode != FM_NORMAL)
-  printf ("fmode = %s\n", finfo->fmode == FM_NORMAL ? "FM_NORMAL" :
-                            (finfo->fmode == FM_GZIP ? "FM_GZIP" :
-                              (finfo->fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
+  printf ("fmode = %s\n", fmode == FM_NORMAL ? "FM_NORMAL" :
+                            (fmode == FM_GZIP ? "FM_GZIP" :
+                              (fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
 */
 
-  if (finfo->fmode == FM_NORMAL)
+  if (fmode == FM_NORMAL)
     return fseek (file, offset, mode);
-  else if (finfo->fmode == FM_GZIP)
+  else if (fmode == FM_GZIP)
     {
       if (mode == SEEK_END)                     // zlib doesn't support SEEK_END
         {
@@ -422,7 +413,7 @@ fseek2 (FILE *file, long offset, int mode)
         }
       return gzseek ((gzFile) file, offset, mode) == -1 ? -1 : 0;
     }
-  else if (finfo->fmode == FM_ZIP)
+  else if (fmode == FM_ZIP)
     {
       int base;
       if (mode != SEEK_SET && mode != SEEK_CUR && mode != SEEK_END)
@@ -453,7 +444,7 @@ size_t
 fread2 (void *buffer, size_t size, size_t number, FILE *file)
 {
 #undef  fread
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   if (size == 0 || number == 0)
     return 0;
@@ -479,7 +470,7 @@ int
 fgetc2 (FILE *file)
 {
 #undef  fgetc
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   if (fmode == FM_NORMAL)
     return fgetc (file);
@@ -501,7 +492,7 @@ char *
 fgets2 (char *buffer, int maxlength, FILE *file)
 {
 #undef  fgets
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   if (fmode == FM_NORMAL)
     return fgets (buffer, maxlength, file);
@@ -537,7 +528,7 @@ int
 feof2 (FILE *file)
 {
 #undef  feof
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   if (fmode == FM_NORMAL)
     return feof (file);
@@ -555,7 +546,7 @@ size_t
 fwrite2 (const void *buffer, size_t size, size_t number, FILE *file)
 {
 #undef  fwrite
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   if (size == 0 || number == 0)
     return 0;
@@ -577,7 +568,7 @@ int
 fputc2 (int character, FILE *file)
 {
 #undef  fputc
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   if (fmode == FM_NORMAL)
     return fputc (character, file);
@@ -593,7 +584,7 @@ long
 ftell2 (FILE *file)
 {
 #undef  ftell
-  fmode2_t fmode = get_fmode (file);
+  fmode2_t fmode = get_finfo (file)->fmode;
 
   if (fmode == FM_NORMAL)
     return ftell (file);
@@ -648,7 +639,7 @@ pclose2 (FILE *stream)
 #if     defined _WIN32 || defined AMIGA
 #define pclose _pclose
 #endif
-  fmode2_t fmode = get_fmode (stream);
+  fmode2_t fmode = get_finfo (stream)->fmode;
 
   if (fmode == FM_NORMAL)
     return pclose (stream);

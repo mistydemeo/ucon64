@@ -2,7 +2,7 @@
 snes.c - Super NES support for uCON64
 
 Copyright (c) 1999 - 2002              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 Copyright (c) 2002 - 2003              John Weidman
 Copyright (c) 2004                     JohnDie
 
@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
@@ -248,6 +249,20 @@ const st_getopt2_t snes_usage[] =
       NULL, "convert *.srm (SRAM) file to Super UFO Pro 8 SD",
       &snes_obj[10]
     },
+#ifdef  USE_ZLIB
+    {
+      "sminis", 1, 0, UCON64_SMINIS,
+      "ID", "convert *.srm (SRAM) file to SNES/Super Famicom Classic Mini\n"
+      "format for game with identifier ID",
+      &snes_obj[10]
+    },
+#endif
+    {
+      "smini2srm", 0, 0, UCON64_SMINI2SRM,
+      NULL, "convert SNES/Super Famicom Classic Mini SRAM data to *.srm\n"
+      "(SRAM) file",
+      &snes_obj[7]
+    },
     {
       "ctrl", 1, 0, UCON64_CTRL,
       "TYPE", "specify type of controller in port 1 for emu when converting\n"
@@ -418,6 +433,26 @@ typedef struct st_snes_header
   unsigned char checksum_low;                   // 46
   unsigned char checksum_high;                  // 47
 } st_snes_header_t;
+
+typedef struct st_ustar_header
+{
+  char name[100];
+  char file_mode[8];
+  char uid[8];
+  char gid[8];
+  char file_size[12];
+  char mtime[12];
+  char header_checksum[8];
+  char file_type;
+  char link_name[100];
+  char magic[8];
+  char uname[32];
+  char gname[32];
+  char dev_major[8];
+  char dev_minor[8];
+  char name_prefix[155];
+  char pad[12];
+} st_ustar_header_t;
 
 static st_snes_header_t snes_header;
 static int snes_sram_size, snes_sfx_sram_size, snes_header_base, snes_hirom,
@@ -662,11 +697,12 @@ snes_convert_sramfile (int org_header_len, const void *new_header)
       int n;
 
       new_header_len = 0;
-      sprintf (dest_name, "SF8%.3s", basename2 (ucon64.fname));
+      snprintf (dest_name, 6, "SF8%.3s__", basename2 (ucon64.fname));
+      dest_name[6] = '\0';
       strupr (dest_name);
       // avoid trouble with filenames containing spaces
       for (n = 3; n < 6; n++)                   // skip "SF" and first digit
-        if (dest_name[n] == ' ')
+        if (dest_name[n] == ' ' || dest_name[n] == '.')
           dest_name[n] = '_';
       set_suffix (dest_name, ".B00");
     }
@@ -836,6 +872,319 @@ int
 snes_gd3s (st_ucon64_nfo_t *rominfo)
 {
   return snes_convert_sramfile (rominfo->backup_header_len, NULL);
+}
+
+
+static unsigned int
+ustar_chksum (st_ustar_header_t *header)
+{
+  unsigned int n, sum = 0;
+
+  for (n = 0; n < sizeof (st_ustar_header_t); n++)
+    sum += ((unsigned char *) header)[n];
+  return sum;
+}
+
+
+#ifdef  USE_ZLIB
+static void
+set_ustar_header (st_ustar_header_t *header, const char *filename, int mode,
+                  size_t file_size, time_t mtime)
+{
+  unsigned int sum;
+
+  strncpy (header->name, filename, sizeof header->name - 1)
+    [sizeof header->name - 1] = '\0';
+
+  snprintf (header->file_mode, sizeof header->file_mode, "%07o", mode);
+  header->file_mode[sizeof header->file_mode - 1] = '\0';
+
+  strcpy (header->uid, "0000000");
+  strcpy (header->gid, "0000000");
+
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4777)
+#endif
+  snprintf (header->file_size, sizeof header->file_size, "%011o",
+            (unsigned int) file_size);
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
+  header->file_size[sizeof header->file_size - 1] = '\0';
+
+  snprintf (header->mtime, sizeof header->mtime, "%011o", (unsigned int) mtime);
+  header->mtime[sizeof header->mtime - 1] = '\0';
+
+  header->file_type = file_size > 0 ? '0' : '5';
+  memset (header->link_name, 0, 100);
+
+  strncpy (header->magic, "ustar  ", sizeof header->magic - 1)
+    [sizeof header->magic - 1] = '\0';
+
+  strncpy (header->uname, "root", sizeof header->uname);
+  strncpy (header->gname, "root", sizeof header->gname);
+  memset (header->dev_major, 0, sizeof header->dev_major);
+  memset (header->dev_minor, 0, sizeof header->dev_minor);
+  memset (header->name_prefix, 0, sizeof header->name_prefix);
+  memset (header->pad, 0, sizeof header->pad);
+
+  memcpy (header->header_checksum, "        ", 8);
+  sum = ustar_chksum (header);
+  snprintf (header->header_checksum, 7, "%06o", sum);
+  header->header_checksum[6] = '\0';
+  header->header_checksum[7] = ' ';
+}
+#endif
+
+
+static unsigned int
+get_value (const char *octal_string)
+{
+  unsigned int result;
+
+  errno = 0;
+  result = (unsigned int) strtol (octal_string, NULL, 8);
+  if (errno)
+    printf ("WARNING: Invalid octal string: %s\n", octal_string);
+  return result;
+}
+
+
+//#define DISPLAY_USTAR_HEADER
+#ifdef  DISPLAY_USTAR_HEADER
+static void
+display_ustar_header (st_ustar_header_t *header)
+{
+  printf ("\n"
+          "name: \"%s\"\n", header->name);
+  printf ("file_mode: %03o (%s)\n", get_value (header->file_mode), header->file_mode);
+  printf ("uid: %u (%s)\n", get_value (header->uid), header->uid);
+  printf ("gid: %u (%s)\n", get_value (header->gid), header->gid);
+  printf ("file_size: %u (%s)\n", get_value (header->file_size), header->file_size);
+  {
+    char buf[21];
+    time_t file_mtype = (time_t) get_value (header->mtime);
+
+    strftime (buf, sizeof buf - 1, "%Y-%m-%d %H:%M:%S", localtime (&file_mtype));
+    printf ("mtime: %s (%s)\n", buf, header->mtime);
+  }
+  {
+    char org_header_checksum[8];
+    unsigned int sum;
+
+    memcpy (org_header_checksum, header->header_checksum, 8);
+    memcpy (header->header_checksum, "        ", 8);
+    sum = ustar_chksum (header);
+    memcpy (header->header_checksum, org_header_checksum, 8);
+    printf ("header_checksum: %s, %s\n",
+            get_value (header->header_checksum) == sum ? "OK" : "Bad",
+            header->header_checksum);
+  }
+  printf ("file_type: %s\n", &header->file_type);
+  printf ("link_name: \"%s\"\n", header->link_name);
+  printf ("magic: \"%s\"\n", header->magic);
+  printf ("uname: \"%s\"\n", header->uname);
+  printf ("gname: \"%s\"\n", header->gname);
+  printf ("dev_major: %u\n", get_value (header->dev_major));
+  printf ("dev_minor: %u\n", get_value (header->dev_minor));
+  printf ("name_prefix: \"%s\"\n", header->name_prefix);
+}
+#endif
+
+
+#ifdef  USE_ZLIB
+int
+snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
+{
+  unsigned char *buffer;
+  int sram_data_size;
+  s_sha1_ctx_t sha1_ctx;
+  char dest_name[FILENAME_MAX], buffer2[sizeof (st_ustar_header_t)];
+  FILE *destfile;
+  st_ustar_header_t header;
+  struct stat fstate;
+
+  if ((buffer = (unsigned char *) malloc (128 * 1024 + 20)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], 128 * 1024 + 20);
+      exit (1);
+    }
+  sram_data_size = ucon64_fread (buffer, rominfo->backup_header_len,
+                                 128 * 1024, ucon64.fname);
+  if (sram_data_size <= 0)
+    {
+      fprintf (stderr, ucon64_msg[READ_ERROR], ucon64.fname);
+      free (buffer);
+      return -1;
+    }
+
+  sha1_begin (&sha1_ctx);
+  sha1 (&sha1_ctx, buffer, sram_data_size);
+  sha1_end (buffer + sram_data_size, &sha1_ctx);
+
+  strcpy (dest_name, ucon64.fname);
+  set_suffix (dest_name, ".clvs");
+  ucon64_file_handler (dest_name, NULL, 0);
+
+  // NOTE: We actually open a gzip stream by specifying a compression level.
+  if ((destfile = fopen (dest_name, "wb9")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      free (buffer);
+      return -1;
+    }
+
+  // directory
+  snprintf (buffer2, 100, "%s/", id);
+  buffer2[100 - 1] = '\0';
+  set_ustar_header (&header, buffer2, 0755, 0, time (NULL));
+#ifdef  DISPLAY_USTAR_HEADER
+  display_ustar_header (&header);
+#endif
+  fwrite (&header, 1, sizeof header, destfile);
+
+  // hash file (optional, same data is also appended to SRAM file)
+  snprintf (buffer2, 100, "%s/cartridge.sram.hash", id);
+  buffer2[100 - 1] = '\0';
+  set_ustar_header (&header, buffer2, 0644, 20, time (NULL));
+#ifdef  DISPLAY_USTAR_HEADER
+  display_ustar_header (&header);
+#endif
+  fwrite (&header, 1, sizeof header, destfile);
+  fwrite (buffer + sram_data_size, 1, 20, destfile);
+  // pad to multiple of st_ustar_header_t
+  memset (buffer2, 0, sizeof buffer2 - 20);
+  fwrite (buffer2, 1, sizeof buffer2 - 20, destfile);
+
+  // SRAM file (including the 20-byte SHA-1 hash)
+  snprintf (buffer2, 100, "%s/cartridge.sram", id);
+  buffer2[100 - 1] = '\0';
+  stat (ucon64.fname, &fstate);
+  set_ustar_header (&header, buffer2, 0644, sram_data_size + 20, fstate.st_mtime);
+#ifdef  DISPLAY_USTAR_HEADER
+  display_ustar_header (&header);
+#endif
+  fwrite (&header, 1, sizeof header, destfile);
+  fwrite (buffer, 1, sram_data_size + 20, destfile);
+  // pad to multiple of st_ustar_header_t
+  memset (buffer2, 0, sizeof buffer2);
+  fwrite (buffer2, 1, sizeof buffer2 - (sram_data_size + 20) % sizeof buffer2,
+          destfile);
+  // EOF is marked by 2 empty blocks
+  fwrite (buffer2, 1, sizeof buffer2, destfile);
+  fwrite (buffer2, 1, sizeof buffer2, destfile);
+
+  fclose (destfile);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  free (buffer);
+  return 0;
+}
+#endif
+
+
+static int
+get_smini_sram_data (const char *src_name, unsigned char *sram_data,
+                     size_t max_sram_data_size, unsigned char *sram_chksum)
+{
+  FILE *srcfile;
+  size_t file_pos = 0, sram_data_size = 0;
+
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+
+  if (ucon64.file_size >= 3 * sizeof (st_ustar_header_t))
+    for (;;)
+      {
+        st_ustar_header_t header;
+        size_t file_size, bytesread = fread (&header, 1, sizeof header, srcfile);
+        char org_header_checksum[8], *p;
+        unsigned int sum;
+
+        file_pos += bytesread;
+        if (bytesread < sizeof header)
+          break;
+#ifdef  DISPLAY_USTAR_HEADER
+        display_ustar_header (&header);
+#endif
+
+        memcpy (org_header_checksum, header.header_checksum, 8);
+        memcpy (header.header_checksum, "        ", 8);
+        sum = ustar_chksum (&header);
+        memcpy (header.header_checksum, org_header_checksum, 8);
+        if (get_value (header.header_checksum) != sum)
+          break;
+
+        file_size = get_value (header.file_size);
+        p = strrchr (header.name, '/');
+        if (p != NULL)
+          {
+            if (!strcmp (p + 1, "cartridge.sram"))
+              {
+                sram_data_size = file_size > max_sram_data_size ?
+                                   max_sram_data_size : file_size;
+                fread (sram_data, 1, sram_data_size, srcfile);
+              }
+            else if (sram_chksum && !strcmp (p + 1, "cartridge.sram.hash"))
+              fread (sram_chksum, 1, file_size > 20 ? 20 : file_size, srcfile);
+          }
+
+        // align on 512-byte boundary (size of st_ustar_header_t)
+        file_pos = (file_pos + file_size + 0x1ff) & ~0x1ff;
+        if (file_pos >= ucon64.file_size - 2 * sizeof (st_ustar_header_t))
+          break;
+        fseek (srcfile, file_pos, SEEK_SET);
+      }
+
+  fclose (srcfile);
+  return sram_data_size;
+}
+
+
+int
+snes_smini2srm (void)
+{
+  unsigned char *buffer;
+  int sram_data_size = 0;
+
+  if ((buffer = (unsigned char *) malloc (128 * 1024 + 20)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], 128 * 1024 + 20);
+      exit (1);
+    }
+
+  sram_data_size = get_smini_sram_data (ucon64.fname, buffer, 128 * 1024 + 20,
+                                        NULL);
+  if (sram_data_size > 20)
+    {
+      char dest_name[FILENAME_MAX];
+
+      strcpy (dest_name, ucon64.fname);
+      set_suffix (dest_name, ".srm");
+      ucon64_file_handler (dest_name, NULL, 0);
+
+      if (ucon64_fwrite (buffer, 0, sram_data_size - 20, dest_name, "wb") <
+            sram_data_size - 20)
+        {
+          fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name);
+          free (buffer);
+          return -1;
+        }
+
+      printf (ucon64_msg[WROTE], dest_name);
+      free (buffer);
+      return 0;
+    }
+  else
+    {
+      fputs ("ERROR: Cannot find SRAM data\n", stderr);
+      free (buffer);
+      return -1;
+    }
 }
 
 
@@ -1702,7 +2051,7 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
           memcpy (header.map_control, "\x55\x00\x80", 3);
           break;
         }
-      header.map_control[3] = snes_sram_size && header.map_control[0] ? 0x2c : 0;
+      header.map_control[3] = snes_sram_size ? 0x2c : 0;
     }
   else
     {
@@ -3829,8 +4178,6 @@ check_ufosd_sram (int *sram_size)
   FILE *file;
   char buffer[32 * 1024], pattern[128];
 
-  *sram_size = 0;
-
   if (ucon64.file_size != MBIT)
     return result;
 
@@ -3839,6 +4186,8 @@ check_ufosd_sram (int *sram_size)
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.fname);
       return -1;
     }
+
+  *sram_size = 0;
   set_ufosd_sram_pattern (pattern, sizeof pattern);
 
   fseek (file, (long) ucon64.file_size - 64 * 1024, SEEK_SET);
@@ -3887,6 +4236,88 @@ check_ufosd_sram (int *sram_size)
     }
   fclose (file);
 
+  return result;
+}
+
+
+static int
+check_smini_sram (int *sram_size, st_ucon64_nfo_t *rominfo)
+{
+  unsigned char *buffer, sram_checksum[20] = { 0 };
+  int result, sram_data_size = 0;
+
+  if ((buffer = (unsigned char *) malloc (128 * 1024 + 20)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], 128 * 1024 + 20);
+      exit (1);
+    }
+
+  sram_data_size = get_smini_sram_data (ucon64.fname, buffer, 128 * 1024 + 20,
+                                        sram_checksum);
+  if (sram_data_size > 20)
+    {
+      s_sha1_ctx_t sha1_ctx;
+      unsigned char calculated_hash[20];
+      char calculated_hash_str[41], internal_hash_str[41],
+           internal_hash2_str[41], *p;
+      int i;
+
+      // get the game ID and put it in rominfo->name
+      strcpy (rominfo->name, "Game ID: ");
+      if (ucon64_fread (rominfo->name + 9, 0, 100, ucon64.fname) < 100)
+        {
+          fprintf (stderr, ucon64_msg[READ_ERROR], ucon64.fname);
+          rominfo->name[0] = '\0';
+          free (buffer);
+          return -1;
+        }
+      rominfo->name[9 + 100] = '\0';
+      p = strchr (rominfo->name, '/');
+      if (p)
+        *p = '\0';
+
+      *sram_size = sram_data_size - 20;
+
+      sha1_begin (&sha1_ctx);
+      sha1 (&sha1_ctx, buffer, *sram_size);
+      sha1_end (calculated_hash, &sha1_ctx);
+
+      p = calculated_hash_str;
+      for (i = 0; i < 20; i++, p = strchr (p, 0))
+        sprintf (p, "%02x", calculated_hash[i]);
+
+      p = internal_hash_str;
+      for (i = 0; i < 20; i++, p = strchr (p, 0))
+        sprintf (p, "%02x", (buffer + *sram_size)[i]);
+
+      p = internal_hash2_str;
+      for (i = 0; i < 20; i++, p = strchr (p, 0))
+        sprintf (p, "%02x", sram_checksum[i]);
+
+      i = !memcmp (calculated_hash, buffer + *sram_size, 20);
+      sprintf (rominfo->internal_crc2,
+               "SRAM checksum: %s, 0x%s (calculated)\n"
+               "               %s  0x%s (internal)\n"
+               "Checksum file:     %s0x%s",
+#ifdef  USE_ANSI_COLOR
+               ucon64.ansi_color ?
+                 (i ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
+                 (i ? "OK" : "Bad"),
+#else
+               i ? "OK" : "Bad",
+#endif
+               calculated_hash_str, i ? "==" : "!= ", internal_hash_str,
+               i ? "" : " ", internal_hash2_str);
+
+      result = SMINI;
+    }
+  else
+    {
+      *sram_size = 0;
+      result = 0;
+    }
+
+  free (buffer);
   return result;
 }
 
@@ -3940,13 +4371,23 @@ snes_init (st_ucon64_nfo_t *rominfo)
     x = SWC;
   else if (!strncmp ((char *) &header + 8, "SUPERUFO", 8))
     x = UFO;
-  else if ((x = check_ufosd_sram (&y)) < 0)
-    return -1;
+  else if ((x = check_ufosd_sram (&y)) != 0)
+    {
+      if (x < 0)
+        return -1;
+    }
+  else if ((x = check_smini_sram (&y, rominfo)) != 0)
+    {
+      if (x < 0)
+        return -1;
+    }
   if ((x == SWC && (header.type == 5 || header.type == 8)) ||
       (x == UFO && OFFSET (header, 0x10) == 0) ||
-      (x == UFOSD && y > 0))
+      (x == UFOSD && y > 0) ||
+      (x == SMINI))
     {
-      strcpy (rominfo->name, "Name: N/A");
+      if (!*rominfo->name)
+        strcpy (rominfo->name, "Name: N/A");
       rominfo->console_usage = NULL;
       rominfo->maker = "Publisher: You?";
       rominfo->country = "Country: Your country?";
@@ -3958,16 +4399,16 @@ snes_init (st_ucon64_nfo_t *rominfo)
           rominfo->backup_usage = swc_usage[0].help;
           copier_type = SWC;
           if (header.type == 5)
-            pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card SRAM file\n");
+            pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card SRAM file");
           else if (header.type == 8)
-            pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card RTS file\n");
+            pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card RTS file");
         }
       else if (x == UFO)
         {
           rominfo->backup_header_len = UFO_HEADER_LEN;
           rominfo->backup_usage = ufo_usage[0].help;
           copier_type = UFO;
-          pos += sprintf (rominfo->misc + pos, "Type: Super UFO SRAM file\n");
+          pos += sprintf (rominfo->misc + pos, "Type: Super UFO SRAM file");
         }
       else if (x == UFOSD)
         {
@@ -3975,7 +4416,15 @@ snes_init (st_ucon64_nfo_t *rominfo)
           rominfo->backup_usage = ufosd_usage[0].help;
           copier_type = UFOSD;
           pos += sprintf (rominfo->misc + pos, "Type: Super UFO Pro 8 SD SRAM file\n");
-          pos += sprintf (rominfo->misc + pos, "SRAM size: %d kBytes\n", y / 1024);
+          pos += sprintf (rominfo->misc + pos, "SRAM size: %d kBytes", y / 1024);
+        }
+      else if (x == SMINI)
+        {
+          rominfo->backup_header_len = 0;
+          rominfo->backup_usage = "SNES/Super Famicom Classic Mini";
+          copier_type = SMINI;
+          pos += sprintf (rominfo->misc + pos, "Type: SNES/Super Famicom Classic Mini SRAM/save state file\n");
+          pos += sprintf (rominfo->misc + pos, "SRAM size: %d kBytes", y / 1024);
         }
       return 0;                                 // rest is nonsense for SRAM/RTS file
     }
@@ -4089,8 +4538,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
                "Inverse checksum: %s, 0x%04x (calculated) %c= 0x%04x (internal)",
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
-                 ((y == x) ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
-                 :
+                 ((y == x) ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
                  ((y == x) ? "OK" : "Bad"),
 #else
                (y == x) ? "OK" : "Bad",
@@ -4704,10 +5152,11 @@ snes_demirror (st_ucon64_nfo_t *rominfo)        // nice verb :-)
   strcpy (src_name, ucon64.fname);
   strcpy (dest_name, ucon64.fname);
   ucon64_file_handler (dest_name, src_name, 0);
+
   fcopy (src_name, 0, rominfo->backup_header_len, dest_name, "wb");
   ucon64_fwrite (buffer, rominfo->backup_header_len, size, dest_name, "ab");
-  printf (ucon64_msg[WROTE], dest_name);
 
+  printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   free (buffer);
   return 0;
@@ -4773,16 +5222,15 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
 
 
 int
-snes_multi (unsigned int truncate_size, char *fname)
+snes_multi (unsigned int truncate_size)
 {
-#define BUFSIZE (32 * 1024)
   unsigned int n, n_files, file_no, bytestowrite, byteswritten, done,
                truncated = 0, totalsize_disk = 0, totalsize_card = 0,
                org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
-  unsigned char buffer[BUFSIZE];
+  unsigned char buffer[32 * 1024];
 
   if (truncate_size == 0)
     {
@@ -4790,16 +5238,8 @@ snes_multi (unsigned int truncate_size, char *fname)
       return -1;
     }
 
-  if (fname != NULL)
-    {
-      strcpy (destname, fname);
-      n_files = ucon64.argc;
-    }
-  else
-    {
-      strcpy (destname, ucon64.argv[ucon64.argc - 1]);
-      n_files = ucon64.argc - 1;
-    }
+  strcpy (destname, ucon64.argv[ucon64.argc - 1]);
+  n_files = ucon64.argc - 1;
 
   ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (destname, "wb")) == NULL)
@@ -4862,7 +5302,7 @@ snes_multi (unsigned int truncate_size, char *fname)
       byteswritten = 0;                         // # of bytes written per file
       while (!done)
         {
-          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+          bytestowrite = fread (buffer, 1, sizeof buffer, srcfile);
           if (totalsize_disk + bytestowrite > truncate_size)
             {
               bytestowrite = truncate_size - totalsize_disk;
@@ -5181,9 +5621,10 @@ snes_create_sram (void)
     }
   memset (buffer, 0, size);
   fwrite (buffer, 1, size, destfile);
-  free (buffer);
-
   fclose (destfile);
+
   printf (ucon64_msg[WROTE], dest_name);
+  free (buffer);
   return 0;
 }
+

@@ -2,7 +2,7 @@
 misc.h - miscellaneous functions
 
 Copyright (c) 1999 - 2004              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 Copyright (c) 2002 - 2004              Jan-Erik Karlsson (Amiga code)
 
 
@@ -602,6 +602,7 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #define chmod _chmod
 #define getcwd _getcwd
 #define isatty _isatty
+#define snprintf _snprintf
 #define stat _stat
 #define strdup _strdup
 #define stricmp _stricmp

@@ -1,8 +1,8 @@
 /*
 genesis.h - Sega Genesis/Mega Drive support for uCON64
 
-Copyright (c) 1999 - 2001             NoisyB
-Copyright (c) 2002 - 2004, 2015, 2017 dbjh
+Copyright (c) 1999 - 2001                    NoisyB
+Copyright (c) 2002 - 2004, 2015, 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ extern int genesis_smds (void);
 extern int genesis_bin (st_ucon64_nfo_t *rominfo);
 extern int genesis_mgd (st_ucon64_nfo_t *rominfo);
 extern int genesis_mgh (st_ucon64_nfo_t *rominfo);
-extern int genesis_multi (unsigned int truncate_size, char *fname);
+extern int genesis_multi (unsigned int truncate_size);
 extern int genesis_init (st_ucon64_nfo_t *rominfo);
 extern int genesis_f (st_ucon64_nfo_t *rominfo);
 

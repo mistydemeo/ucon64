@@ -2,7 +2,7 @@
 genesis.c - Sega Genesis/Mega Drive support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1257,16 +1257,15 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
 
 
 int
-genesis_multi (unsigned int truncate_size, char *fname)
+genesis_multi (unsigned int truncate_size)
 {
-#define BUFSIZE (32 * 1024)                     // must be a multiple of 16 kB
   unsigned int n, n_files, file_no, bytestowrite, byteswritten, done,
                truncated = 0, totalsize = 0, size,
                org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char destname[FILENAME_MAX];
-  unsigned char buffer[BUFSIZE];
+  unsigned char buffer[32 * 1024];              // must be a multiple of 16 kB
 
   if (truncate_size == 0)
     {
@@ -1274,16 +1273,8 @@ genesis_multi (unsigned int truncate_size, char *fname)
       return -1;
     }
 
-  if (fname != NULL)
-    {
-      strcpy(destname, fname);
-      n_files = ucon64.argc;
-    }
-  else
-    {
-      strcpy(destname, ucon64.argv[ucon64.argc - 1]);
-      n_files = ucon64.argc - 1;
-    }
+  strcpy(destname, ucon64.argv[ucon64.argc - 1]);
+  n_files = ucon64.argc - 1;
 
   ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (destname, "wb")) == NULL)
@@ -1385,13 +1376,13 @@ genesis_multi (unsigned int truncate_size, char *fname)
       while (!done)
         {
           if (ucon64.nfo->interleaved == 2)
-            bytestowrite = fread_mgd (buffer, 1, BUFSIZE, srcfile);
+            bytestowrite = fread_mgd (buffer, 1, sizeof buffer, srcfile);
           else
             {
-              bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+              bytestowrite = fread (buffer, 1, sizeof buffer, srcfile);
               if (ucon64.nfo->interleaved)
-                smd_deinterleave (buffer, BUFSIZE);
-                // yes, BUFSIZE. bytestowrite might not be n * 16 kB
+                smd_deinterleave (buffer, sizeof buffer);
+                // yes, sizeof buffer. bytestowrite might not be n * 16 kB
             }
           if (totalsize + bytestowrite > truncate_size)
             {

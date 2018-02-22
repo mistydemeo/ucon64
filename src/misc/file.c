@@ -1,9 +1,9 @@
 /*
 file.c - miscellaneous file functions
 
-Copyright (c) 1999 - 2004             NoisyB
-Copyright (c) 2001 - 2005, 2015, 2017 dbjh
-Copyright (c) 2002 - 2004             Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2004                    NoisyB
+Copyright (c) 2001 - 2005, 2015, 2017 - 2018 dbjh
+Copyright (c) 2002 - 2004                    Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 isfname (int c)
 {
-  // characters that are allowed in filenames (pre UTF-8)
+  // characters that are allowed in filenames
   return isalnum (c) || (c &&
 #ifndef __MSDOS__
            strchr (" !#$%&'()-@^_`{}~+,;=[].", c));
@@ -129,9 +129,15 @@ realpath (const char *path, char *full_path)
     size_t len = strlen (path);
 
     if (len >= FILENAME_MAX)
-      return NULL;
+      {
+        errno = ENAMETOOLONG;
+        return NULL;
+      }
     else if (len == 0)
-      return NULL;
+      {
+        errno = ENOENT;
+        return NULL;
+      }
   }
 
   // make a copy of the source path since we may need to modify it
@@ -228,13 +234,19 @@ realpath (const char *path, char *full_path)
       while (*path != '\0' && *path != DIR_SEPARATOR)
         {
           if (path > max_path)
-            return NULL;
+            {
+              errno = ENAMETOOLONG;
+              return NULL;
+            }
           *new_path++ = *path++;
         }
 #ifdef  S_IFLNK
       // protect against infinite loops
       if (readlinks++ > MAX_READLINKS)
-        return NULL;
+        {
+          errno = ELOOP;
+          return NULL;
+        }
 
       // see if latest pathname component is a symlink
       *new_path = '\0';
@@ -267,7 +279,10 @@ realpath (const char *path, char *full_path)
             while (*(--new_path) != DIR_SEPARATOR)
               ;
           if (strlen (path) + n >= FILENAME_MAX)
-            return NULL;
+            {
+              errno = ENAMETOOLONG;
+              return NULL;
+            }
           // insert symlink contents into path
           strcat (link_path + n, path);
           strcpy (copy_path, link_path);
@@ -379,14 +394,14 @@ realpath2 (const char *path, char *full_path)
     */
     {
       if (full_path)
-        strcpy (full_path, path2);
-      else
-        full_path = strdup (path2);
+        {
+          strcpy (full_path, path2);
 #if     defined DJGPP || defined __MINGW32__
-      // with DJGPP full_path may contain (forward) slashes (DJGPP's getcwd()
-      //  returns a path with forward slashes)
-      strchrreplace (full_path, '/', DIR_SEPARATOR);
+          // with DJGPP full_path may contain (forward) slashes (DJGPP's
+          //  getcwd() returns a path with forward slashes)
+          strchrreplace (full_path, '/', DIR_SEPARATOR);
 #endif
+        }
       errno = ENOENT;
       return NULL;
     }

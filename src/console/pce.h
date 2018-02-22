@@ -1,8 +1,8 @@
 /*
 pce.h - PC-Engine support for uCON64
 
-Copyright (c) 1999 - 2001             NoisyB
-Copyright (c) 2003 - 2004, 2015, 2017 dbjh
+Copyright (c) 1999 - 2001                    NoisyB
+Copyright (c) 2003 - 2004, 2015, 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,6 @@ extern int pce_mgd (st_ucon64_nfo_t *rominfo);
 extern int pce_msg (st_ucon64_nfo_t *rominfo);
 extern int pce_swap (st_ucon64_nfo_t *rominfo);
 extern int pce_f (st_ucon64_nfo_t *rominfo);
-extern int pce_multi (unsigned int truncate_size, char *fname);
+extern int pce_multi (unsigned int truncate_size);
 
 #endif

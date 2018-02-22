@@ -602,7 +602,9 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #define chmod _chmod
 #define getcwd _getcwd
 #define isatty _isatty
+#ifndef USE_ZLIB
 #define snprintf _snprintf
+#endif
 #define stat _stat
 #define strdup _strdup
 #define stricmp _stricmp

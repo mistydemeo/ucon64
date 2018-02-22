@@ -249,7 +249,9 @@ extern int misc_digits (unsigned long value);
 #define chmod _chmod
 #define getcwd _getcwd
 #define isatty _isatty
+#ifndef USE_ZLIB
 #define snprintf _snprintf
+#endif
 #define stat _stat
 #define strdup _strdup
 #define stricmp _stricmp

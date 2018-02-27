@@ -876,7 +876,7 @@ snes_gd3s (st_ucon64_nfo_t *rominfo)
 
 
 static unsigned int
-ustar_chksum (st_ustar_header_t *header)
+ustar_chksum (const st_ustar_header_t *header)
 {
   unsigned int n, sum = 0;
 
@@ -919,9 +919,7 @@ set_ustar_header (st_ustar_header_t *header, const char *filename, int mode,
   header->file_type = file_size > 0 ? '0' : '5';
   memset (header->link_name, 0, 100);
 
-  strncpy (header->magic, "ustar  ", sizeof header->magic - 1)
-    [sizeof header->magic - 1] = '\0';
-
+  strcpy (header->magic, "ustar  ");
   strncpy (header->uname, "root", sizeof header->uname);
   strncpy (header->gname, "root", sizeof header->gname);
   memset (header->dev_major, 0, sizeof header->dev_major);
@@ -938,57 +936,97 @@ set_ustar_header (st_ustar_header_t *header, const char *filename, int mode,
 #endif
 
 
-static unsigned int
-get_value (const char *octal_string)
-{
-  unsigned int result;
-
-  errno = 0;
-  result = (unsigned int) strtol (octal_string, NULL, 8);
-  if (errno)
-    printf ("WARNING: Invalid octal string: %s\n", octal_string);
-  return result;
-}
-
-
 //#define DISPLAY_USTAR_HEADER
 #ifdef  DISPLAY_USTAR_HEADER
 static void
-display_ustar_header (st_ustar_header_t *header)
+ustar_field_mkprint (const char *field, size_t size, char *buffer)
 {
-  printf ("\n"
-          "name: \"%s\"\n", header->name);
-  printf ("file_mode: %03o (%s)\n", get_value (header->file_mode), header->file_mode);
-  printf ("uid: %u (%s)\n", get_value (header->uid), header->uid);
-  printf ("gid: %u (%s)\n", get_value (header->gid), header->gid);
-  printf ("file_size: %u (%s)\n", get_value (header->file_size), header->file_size);
-  {
-    char buf[21];
-    time_t file_mtype = (time_t) get_value (header->mtime);
+  size_t n;
 
-    strftime (buf, sizeof buf - 1, "%Y-%m-%d %H:%M:%S", localtime (&file_mtype));
-    printf ("mtime: %s (%s)\n", buf, header->mtime);
+  for (n = 0; n < size - 1; n++)
+    buffer[n] = isprint ((int) field[n]) ? field[n] : '.';
+  buffer[n] = '\0';
+}
+
+
+static void
+ustar_string_mkprint (const char *field, size_t size, char *buffer)
+{
+  size_t n;
+
+  for (n = 0; n < size - 1 && field[n] != '\0'; n++)
+    buffer[n] = isprint ((int) field[n]) ? field[n] : '.';
+  buffer[n] = '\0';
+}
+
+
+static void
+display_ustar_header (const st_ustar_header_t *header)
+{
+  char buffer[100];
+
+  fputc ('\n', stdout);
+
+  ustar_string_mkprint (header->name, sizeof header->name, buffer);
+  printf ("name: \"%s\"\n", buffer);
+
+  ustar_field_mkprint (header->file_mode, sizeof header->file_mode, buffer);
+  printf ("file_mode: %03o (%s)\n",
+          (unsigned int) strtol (header->file_mode, NULL, 8), buffer);
+
+  ustar_field_mkprint (header->uid, sizeof header->uid, buffer);
+  printf ("uid: %u (%s)\n", (unsigned int) strtol (header->uid, NULL, 8), buffer);
+
+  ustar_field_mkprint (header->gid, sizeof header->gid, buffer);
+  printf ("gid: %u (%s)\n", (unsigned int) strtol (header->gid, NULL, 8), buffer);
+
+  ustar_field_mkprint (header->file_size, sizeof header->file_size, buffer);
+  printf ("file_size: %u (%s)\n",
+          (unsigned int) strtol (header->file_size, NULL, 8), buffer);
+
+  {
+    char str[20];
+    time_t file_mtype = (time_t) strtol (header->mtime, NULL, 8);
+
+    ustar_field_mkprint (header->mtime, sizeof header->mtime, buffer);
+    strftime (str, sizeof str, "%Y-%m-%d %H:%M:%S", localtime (&file_mtype));
+    printf ("mtime: %s (%s)\n", str, buffer);
   }
   {
-    char org_header_checksum[8];
-    unsigned int sum;
+    unsigned int n, sum = ustar_chksum (header);
 
-    memcpy (org_header_checksum, header->header_checksum, 8);
-    memcpy (header->header_checksum, "        ", 8);
-    sum = ustar_chksum (header);
-    memcpy (header->header_checksum, org_header_checksum, 8);
+    for (n = 0; n < 8; n++)
+      sum -= header->header_checksum[n];
+    sum += 8 * ' ';
+
+    ustar_field_mkprint (header->header_checksum,
+                         sizeof header->header_checksum, buffer);
+    buffer[6] = '\0';
     printf ("header_checksum: %s, %s\n",
-            get_value (header->header_checksum) == sum ? "OK" : "Bad",
-            header->header_checksum);
+            (unsigned int) strtol (header->header_checksum, NULL, 8) == sum ?
+              "OK" : "Bad", buffer);
   }
-  printf ("file_type: %s\n", &header->file_type);
+
+  buffer[0] = isprint ((int) header->file_type) ? header->file_type : '.';
+  printf ("file_type: %c\n", buffer[0]);
+
+  ustar_string_mkprint (header->link_name, sizeof header->link_name, buffer);
   printf ("link_name: \"%s\"\n", header->link_name);
-  printf ("magic: \"%s\"\n", header->magic);
-  printf ("uname: \"%s\"\n", header->uname);
-  printf ("gname: \"%s\"\n", header->gname);
-  printf ("dev_major: %u\n", get_value (header->dev_major));
-  printf ("dev_minor: %u\n", get_value (header->dev_minor));
-  printf ("name_prefix: \"%s\"\n", header->name_prefix);
+
+  ustar_field_mkprint (header->magic, sizeof header->magic, buffer);
+  printf ("magic: \"%s\"\n", buffer);
+
+  ustar_string_mkprint (header->uname, sizeof header->uname, buffer);
+  printf ("uname: \"%s\"\n", buffer);
+
+  ustar_string_mkprint (header->gname, sizeof header->gname, buffer);
+  printf ("gname: \"%s\"\n", buffer);
+
+  printf ("dev_major: %u\n", (unsigned int) strtol (header->dev_major, NULL, 8));
+  printf ("dev_minor: %u\n", (unsigned int) strtol (header->dev_minor, NULL, 8));
+
+  ustar_string_mkprint (header->name_prefix, sizeof header->name_prefix, buffer);
+  printf ("name_prefix: \"%s\"\n", buffer);
 }
 #endif
 
@@ -1036,8 +1074,8 @@ snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
     }
 
   // directory
-  snprintf (buffer2, 100, "%s/", id);
-  buffer2[100 - 1] = '\0';
+  snprintf (buffer2, sizeof header.name, "%s/", id);
+  buffer2[sizeof header.name - 1] = '\0';
   set_ustar_header (&header, buffer2, 0755, 0, time (NULL));
 #ifdef  DISPLAY_USTAR_HEADER
   display_ustar_header (&header);
@@ -1045,8 +1083,8 @@ snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
   fwrite (&header, 1, sizeof header, destfile);
 
   // hash file (optional, same data is also appended to SRAM file)
-  snprintf (buffer2, 100, "%s/cartridge.sram.hash", id);
-  buffer2[100 - 1] = '\0';
+  snprintf (buffer2, sizeof header.name, "%s/cartridge.sram.hash", id);
+  buffer2[sizeof header.name - 1] = '\0';
   set_ustar_header (&header, buffer2, 0644, 20, time (NULL));
 #ifdef  DISPLAY_USTAR_HEADER
   display_ustar_header (&header);
@@ -1058,8 +1096,8 @@ snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
   fwrite (buffer2, 1, sizeof buffer2 - 20, destfile);
 
   // SRAM file (including the 20-byte SHA-1 hash)
-  snprintf (buffer2, 100, "%s/cartridge.sram", id);
-  buffer2[100 - 1] = '\0';
+  snprintf (buffer2, sizeof header.name , "%s/cartridge.sram", id);
+  buffer2[sizeof header.name - 1] = '\0';
   stat (ucon64.fname, &fstate);
   set_ustar_header (&header, buffer2, 0644, sram_data_size + 20, fstate.st_mtime);
 #ifdef  DISPLAY_USTAR_HEADER
@@ -1102,8 +1140,8 @@ get_smini_sram_data (const char *src_name, unsigned char *sram_data,
       {
         st_ustar_header_t header;
         size_t file_size, bytesread = fread (&header, 1, sizeof header, srcfile);
-        char org_header_checksum[8], *p;
-        unsigned int sum;
+        char *p;
+        unsigned int n, sum;
 
         file_pos += bytesread;
         if (bytesread < sizeof header)
@@ -1112,16 +1150,25 @@ get_smini_sram_data (const char *src_name, unsigned char *sram_data,
         display_ustar_header (&header);
 #endif
 
-        memcpy (org_header_checksum, header.header_checksum, 8);
-        memcpy (header.header_checksum, "        ", 8);
         sum = ustar_chksum (&header);
-        memcpy (header.header_checksum, org_header_checksum, 8);
-        if (get_value (header.header_checksum) != sum)
+        for (n = 0; n < 8; n++)
+          sum -= header.header_checksum[n];
+        sum += 8 * ' ';
+        if ((unsigned int) strtol (header.header_checksum, NULL, 8) != sum)
           break;
 
-        file_size = get_value (header.file_size);
+        file_size = (unsigned int) strtol (header.file_size, NULL, 8);
+        header.name[sizeof header.name - 1] = '\0';
         p = strrchr (header.name, '/');
-        if (p != NULL)
+        /*
+          header->name is 100 bytes large, but should also store the string
+          terminator, which leaves 99 bytes for the name. There should be
+          enough space after the slash to store the string
+          "cartridge.sram.hash" (19 bytes). We are comparing offsets, so
+          subtract 1 more (the highest valid offset for a character is 98),
+          hence > instead of >=.
+        */
+        if (p != NULL && sizeof header.name - 1 - (p - header.name) > 19)
           {
             if (!strcmp (p + 1, "cartridge.sram"))
               {

@@ -882,6 +882,9 @@ ustar_chksum (const st_ustar_header_t *header)
 
   for (n = 0; n < sizeof (st_ustar_header_t); n++)
     sum += ((unsigned char *) header)[n];
+  for (n = 0; n < 8; n++)
+    sum -= (unsigned char) header->header_checksum[n];
+  sum += 8 * ' ';
   return sum;
 }
 
@@ -891,8 +894,6 @@ static void
 set_ustar_header (st_ustar_header_t *header, const char *filename, int mode,
                   size_t file_size, time_t mtime)
 {
-  unsigned int sum;
-
   strncpy (header->name, filename, sizeof header->name - 1)
     [sizeof header->name - 1] = '\0';
 
@@ -905,6 +906,12 @@ set_ustar_header (st_ustar_header_t *header, const char *filename, int mode,
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4777)
+/*
+  In this case Visual Studio Community 2015 warns with: '_snprintf' : format
+  string '%011o' requires an argument of type 'unsigned int', but variadic
+  argument 1 has type 'size_t'
+  This is a bug in Visual Studio Community 2015.
+*/
 #endif
   snprintf (header->file_size, sizeof header->file_size, "%011o",
             (unsigned int) file_size);
@@ -927,9 +934,7 @@ set_ustar_header (st_ustar_header_t *header, const char *filename, int mode,
   memset (header->name_prefix, 0, sizeof header->name_prefix);
   memset (header->pad, 0, sizeof header->pad);
 
-  memcpy (header->header_checksum, "        ", 8);
-  sum = ustar_chksum (header);
-  snprintf (header->header_checksum, 7, "%06o", sum);
+  snprintf (header->header_checksum, 7, "%06o", ustar_chksum (header));
   header->header_checksum[6] = '\0';
   header->header_checksum[7] = ' ';
 }
@@ -993,18 +998,12 @@ display_ustar_header (const st_ustar_header_t *header)
     printf ("mtime: %s (%s)\n", str, buffer);
   }
   {
-    unsigned int n, sum = ustar_chksum (header);
-
-    for (n = 0; n < 8; n++)
-      sum -= header->header_checksum[n];
-    sum += 8 * ' ';
-
     ustar_field_mkprint (header->header_checksum,
                          sizeof header->header_checksum, buffer);
     buffer[6] = '\0';
     printf ("header_checksum: %s, %s\n",
-            (unsigned int) strtol (header->header_checksum, NULL, 8) == sum ?
-              "OK" : "Bad", buffer);
+            (unsigned int) strtol (header->header_checksum, NULL, 8) ==
+              ustar_chksum (header) ? "OK" : "Bad", buffer);
   }
 
   buffer[0] = isprint ((int) header->file_type) ? header->file_type : '.';
@@ -1141,7 +1140,6 @@ get_smini_sram_data (const char *src_name, unsigned char *sram_data,
         st_ustar_header_t header;
         size_t file_size, bytesread = fread (&header, 1, sizeof header, srcfile);
         char *p;
-        unsigned int n, sum;
 
         file_pos += bytesread;
         if (bytesread < sizeof header)
@@ -1150,11 +1148,8 @@ get_smini_sram_data (const char *src_name, unsigned char *sram_data,
         display_ustar_header (&header);
 #endif
 
-        sum = ustar_chksum (&header);
-        for (n = 0; n < 8; n++)
-          sum -= header.header_checksum[n];
-        sum += 8 * ' ';
-        if ((unsigned int) strtol (header.header_checksum, NULL, 8) != sum)
+        if ((unsigned int) strtol (header.header_checksum, NULL, 8) !=
+            ustar_chksum (&header))
           break;
 
         file_size = (unsigned int) strtol (header.file_size, NULL, 8);
@@ -1171,11 +1166,10 @@ get_smini_sram_data (const char *src_name, unsigned char *sram_data,
         if (p != NULL && sizeof header.name - 1 - (p - header.name) > 19)
           {
             if (!strcmp (p + 1, "cartridge.sram"))
-              {
-                sram_data_size = file_size > max_sram_data_size ?
-                                   max_sram_data_size : file_size;
-                fread (sram_data, 1, sram_data_size, srcfile);
-              }
+              sram_data_size = fread (sram_data, 1,
+                                      file_size > max_sram_data_size ?
+                                        max_sram_data_size : file_size,
+                                      srcfile);
             else if (sram_chksum && !strcmp (p + 1, "cartridge.sram.hash"))
               fread (sram_chksum, 1, file_size > 20 ? 20 : file_size, srcfile);
           }

@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   st_ucon64_nfo_t this struct contains very specific informations only
                     <console>_init() can supply after the correct console
                     type was identified.
-  st_ucon64_t     this struct containes st_ucon64_nfo_t and unspecific
+  st_ucon64_t     this struct contains st_ucon64_nfo_t and unspecific
                     informations and some workflow stuff
   st_ucon64_obj_t ucon64 object for use in st_getopt2_t
 */

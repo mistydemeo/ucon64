@@ -924,8 +924,8 @@ set_ustar_header (st_ustar_header_t *header, const char *filename, int mode,
   header->mtime[sizeof header->mtime - 1] = '\0';
 
   header->file_type = file_size > 0 ? '0' : '5';
-  memset (header->link_name, 0, 100);
 
+  memset (header->link_name, 0, sizeof header->link_name);
   strcpy (header->magic, "ustar  ");
   strncpy (header->uname, "root", sizeof header->uname);
   strncpy (header->gname, "root", sizeof header->gname);
@@ -968,7 +968,7 @@ ustar_string_mkprint (const char *field, size_t size, char *buffer)
 static void
 display_ustar_header (const st_ustar_header_t *header)
 {
-  char buffer[100];
+  char buffer[155];
 
   fputc ('\n', stdout);
 
@@ -4305,14 +4305,14 @@ check_smini_sram (int *sram_size, st_ucon64_nfo_t *rominfo)
 
       // get the game ID and put it in rominfo->name
       strcpy (rominfo->name, "Game ID: ");
-      if (ucon64_fread (rominfo->name + 9, 0, 100, ucon64.fname) < 100)
+      if (ucon64_fread (rominfo->name + 9, 0, 100 - 1, ucon64.fname) < 100 - 1)
         {
           fprintf (stderr, ucon64_msg[READ_ERROR], ucon64.fname);
           rominfo->name[0] = '\0';
           free (buffer);
           return -1;
         }
-      rominfo->name[9 + 100] = '\0';
+      rominfo->name[9 + 100 - 1] = '\0';
       p = strchr (rominfo->name, '/');
       if (p)
         *p = '\0';

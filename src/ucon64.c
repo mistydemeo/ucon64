@@ -120,7 +120,7 @@ static int ucon64_rom_handling (void);
 static int ucon64_process_rom (const char *fname);
 
 
-st_ucon64_t ucon64;                             // containes ptr to image, dat and nfo
+st_ucon64_t ucon64;                             // contains ptr to image, dat and nfo
 
 #ifdef  AMIGA
 unsigned long __stacksize = 102400;             // doesn't work on PPC? is StormC specific?

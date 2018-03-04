@@ -253,14 +253,14 @@ const st_getopt2_t snes_usage[] =
     {
       "sminis", 1, 0, UCON64_SMINIS,
       "ID", "convert *.srm (SRAM) file to SNES/Super Famicom Classic Mini\n"
-      "format for game with identifier ID",
+      "(hakchi2) format for game with identifier ID",
       &snes_obj[10]
     },
 #endif
     {
       "smini2srm", 0, 0, UCON64_SMINI2SRM,
-      NULL, "convert SNES/Super Famicom Classic Mini SRAM data to *.srm\n"
-      "(SRAM) file",
+      NULL, "convert SNES/Super Famicom Classic Mini (hakchi2) SRAM data to\n"
+      "*.srm (SRAM) file",
       &snes_obj[7]
     },
     {

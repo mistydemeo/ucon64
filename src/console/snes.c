@@ -697,7 +697,7 @@ snes_convert_sramfile (int org_header_len, const void *new_header)
       int n;
 
       new_header_len = 0;
-      snprintf (dest_name, 6, "SF8%.3s__", basename2 (ucon64.fname));
+      snprintf (dest_name, 7, "SF8%.3s__", basename2 (ucon64.fname));
       dest_name[6] = '\0';
       strupr (dest_name);
       // avoid trouble with filenames containing spaces
@@ -1149,7 +1149,7 @@ get_smini_sram_data (const char *src_name, unsigned char *sram_data,
 #endif
 
         if ((unsigned int) strtol (header.header_checksum, NULL, 8) !=
-            ustar_chksum (&header))
+              ustar_chksum (&header))
           break;
 
         file_size = (unsigned int) strtol (header.file_size, NULL, 8);
@@ -4284,8 +4284,17 @@ check_ufosd_sram (int *sram_size)
 static int
 check_smini_sram (int *sram_size, st_ucon64_nfo_t *rominfo)
 {
+  st_ustar_header_t header;
   unsigned char *buffer, sram_checksum[20] = { 0 };
   int result, sram_data_size = 0;
+
+  if (ucon64_fread (&header, 0, sizeof header, ucon64.fname) <
+        (int) sizeof header)
+    {
+      *sram_size = 0;
+      return 0; // not necessarily an error, just not a .clvs file
+    }
+  header.name[sizeof header.name - 1] = '\0';
 
   if ((buffer = (unsigned char *) malloc (128 * 1024 + 20)) == NULL)
     {
@@ -4295,7 +4304,7 @@ check_smini_sram (int *sram_size, st_ucon64_nfo_t *rominfo)
 
   sram_data_size = get_smini_sram_data (ucon64.fname, buffer, 128 * 1024 + 20,
                                         sram_checksum);
-  if (sram_data_size > 20)
+  if (sram_data_size >= 20) // some .clvs files contain a 20 byte cartridge.sram
     {
       s_sha1_ctx_t sha1_ctx;
       unsigned char calculated_hash[20];
@@ -4304,15 +4313,9 @@ check_smini_sram (int *sram_size, st_ucon64_nfo_t *rominfo)
       int i;
 
       // get the game ID and put it in rominfo->name
-      strcpy (rominfo->name, "Game ID: ");
-      if (ucon64_fread (rominfo->name + 9, 0, 100 - 1, ucon64.fname) < 100 - 1)
-        {
-          fprintf (stderr, ucon64_msg[READ_ERROR], ucon64.fname);
-          rominfo->name[0] = '\0';
-          free (buffer);
-          return -1;
-        }
-      rominfo->name[9 + 100 - 1] = '\0';
+      snprintf (rominfo->name, sizeof header.name + 9, "Game ID: %.99s",
+                header.name);
+      rominfo->name[sizeof header.name + 9 - 1] = '\0';
       p = strchr (rominfo->name, '/');
       if (p)
         *p = '\0';
@@ -4354,8 +4357,27 @@ check_smini_sram (int *sram_size, st_ucon64_nfo_t *rominfo)
     }
   else
     {
+      // some valid .clvs files do not contain cartridge.sram
       *sram_size = 0;
-      result = 0;
+      if (strncmp (header.name, "CLV-", 4) == 0 &&
+          strlen (header.name) == 12 && // include the trailing slash
+          (unsigned int) strtol (header.header_checksum, NULL, 8) ==
+            ustar_chksum (&header))
+        {
+          char *p;
+
+          // get the game ID and put it in rominfo->name
+          snprintf (rominfo->name, sizeof header.name + 9, "Game ID: %.99s",
+                    header.name);
+          rominfo->name[sizeof header.name + 9 - 1] = '\0';
+          p = strchr (rominfo->name, '/');
+          if (p)
+            *p = '\0';
+
+          result = SMINI;
+        }
+      else
+        result = 0;
     }
 
   free (buffer);

@@ -54,9 +54,14 @@ endif
 
 else                                    # UNIX, BeOS or Mac OS X (Darwin)
 
+ifdef USE_PARALLEL
 ifeq ($(findstring openbsd,$(OSTYPE)),openbsd) # for example "openbsd3.4"
-# i386_iopl() is located in libi386.a
-LDFLAGS+=$(LIBI386)
+# i386_iopl() is located in libi386.a. Use -lamd64 for amd64_iopl().
+LDFLAGS+=$(LIBIOPL_OPENBSD)
+endif
+ifeq ($(findstring netbsd,$(OSTYPE)),netbsd)
+LDFLAGS+=$(LIBIOPL_NETBSD)
+endif
 endif
 
 ifdef USE_DISCMAGE
@@ -72,7 +77,9 @@ ifdef DLOPEN
 ifneq ($(OSTYPE),beos)
 ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
 ifeq ($(findstring openbsd,$(OSTYPE)),) # false if OSTYPE contains "openbsd"
+ifeq ($(findstring netbsd,$(OSTYPE)),)  # false if OSTYPE contains "netbsd"
 LDFLAGS+=-ldl
+endif
 endif
 endif
 endif

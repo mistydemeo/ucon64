@@ -2,9 +2,9 @@ CC=gcc
 
 ifdef DEBUG
 # I think we only use gnu99 instead of c99 due to va_args extensions.
-CFLAGS+=-I. -Wall -W -pg -g -pedantic -ansi -DDEBUG
+CFLAGS+=-I. -Wall -W -std=gnu99 -pg -g -pedantic -ansi -DDEBUG
 else
-CFLAGS+=-I. -Wall -W -O6 -funroll-loops -fexpensive-optimizations
+CFLAGS+=-I. -Wall -W -std=gnu99 -O6 -funroll-loops -fexpensive-optimizations
 endif
 
 ifndef DJGPP
@@ -37,14 +37,6 @@ CFLAGS+=-fPIC
 else
 # Cygwin and MinGW need an import library for a DLL
 LDFLAGS+=-Wl,--out-implib,libcd64dll.a
-endif
-endif
-
-# The next check is not really specific to FreeBSD or OpenBSD -- the version of
-#  gcc I use is just old.
-ifeq ($(findstring FreeBSD,$(OSTYPE)),)
-ifeq ($(findstring OpenBSD,$(OSTYPE)),)
-CFLAGS+=-std=gnu99
 endif
 endif
 
@@ -90,8 +82,18 @@ endif
 
 ifeq ($(findstring OpenBSD,$(OSTYPE)),OpenBSD)
 # i386_iopl() is located in libi386.a (note the .a)
-LIBS+=/usr/lib/libi386.a
-LDFLAGS+=-L/usr/lib -li386
+#LIBS+=/usr/lib/libi386.a
+#LDFLAGS+=-li386
+LIBS+=/usr/lib/libamd64.a
+LDFLAGS+=-lamd64
+RAWIO=1
+endif
+
+ifeq ($(findstring NetBSD,$(OSTYPE)),NetBSD)
+#LIBS+=/usr/lib/libi386.a
+#LDFLAGS+=-li386
+LIBS+=/usr/lib/libx86_64.a
+LDFLAGS+=-lx86_64
 RAWIO=1
 endif
 

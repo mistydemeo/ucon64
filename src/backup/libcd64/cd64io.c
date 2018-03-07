@@ -5,7 +5,8 @@
  * I/O routines for CD64 device
  *
  * (c) 2004 Ryan Underwood
- * Portions (c) 2004 - 2005, 2015 - 2017 Daniel Horchner (OpenBSD, FreeBSD, BeOS, Win32, DOS)
+ * Portions (c) 2004 - 2005, 2015 - 2018 Daniel Horchner (OpenBSD, NetBSD,
+ *                                       FreeBSD, BeOS, Win32, DOS)
  *
  * May be distributed under the terms of the GNU Lesser/Library General Public
  * License, or any later version of the same, as published by the Free Software
@@ -731,14 +732,11 @@ static LONG new_exception_filter(LPEXCEPTION_POINTERS exception_pointers) {
 #endif
 #endif /* _WIN32 || __CYGWIN__ */
 
-#if ((defined _WIN32 || defined __CYGWIN__ || defined __BEOS__ || \
-     defined __MSDOS__) && \
+#if ((defined _WIN32 || defined __CYGWIN__ || defined __BEOS__) && \
     (defined __i386__ || defined __x86_64__)) || defined _MSC_VER
 static INLINE uint8_t inb(uint16_t port) {
 
-#ifdef __MSDOS__
-	return inportb(port);
-#elif defined __BEOS__
+#ifdef __BEOS__
 	st_ioport_t temp;
 
 	temp.port = port;
@@ -765,9 +763,7 @@ static INLINE uint8_t inb(uint16_t port) {
 
 static INLINE void outb(uint8_t byte, uint16_t port) {
 
-#ifdef __MSDOS__
-	outportb(port, byte);
-#elif defined __BEOS__
+#ifdef __BEOS__
 	st_ioport_t temp;
 
 	temp.port = port;
@@ -827,14 +823,29 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 			return 0;
 		}
 	}
-#elif defined __OpenBSD__
-	/* I cannot test i386_set_ioperm(), so I only use i386_iopl() */
+#elif (defined __OpenBSD__ || defined __NetBSD__) && defined __i386__
 	ret = i386_iopl(3);
 	if (ret == -1) {
 		cd64->notice_callback2("i386_iopl: %s", strerror(errno));
 		return 0;
 	}
-#elif defined __FreeBSD__
+#endif
+#ifdef __x86_64__
+#ifdef __OpenBSD__
+	ret = amd64_iopl(3);
+	if (ret == -1) {
+		cd64->notice_callback2("amd64_iopl: %s", strerror(errno));
+		return 0;
+	}
+#elif defined __NetBSD__
+	ret = x86_64_iopl(3);
+	if (ret == -1) {
+		cd64->notice_callback2("x86_64_iopl: %s", strerror(errno));
+		return 0;
+	}
+#endif
+#endif
+#ifdef __FreeBSD__
 	cd64->portdevfd = open("/dev/io", O_RDWR);
 	if (cd64->portdevfd == -1) {
 		cd64->portdevfd = 0;

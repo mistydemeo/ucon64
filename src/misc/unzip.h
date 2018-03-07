@@ -49,6 +49,11 @@
 extern "C" {
 #endif
 
+// On NetBSD, OF is not defined in zconf.h, which is included by zlib.h.
+#ifndef OF
+#define OF(x) x
+#endif
+ 
 #ifndef _ZLIB_H
 #include "zlib.h"
 #endif

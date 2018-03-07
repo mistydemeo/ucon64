@@ -34,10 +34,10 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #if defined __linux__ && (defined __i386__ || defined __x86_64__)
 #include <sys/io.h>
 #endif
-#ifdef __OpenBSD__
+#if (defined __OpenBSD__ || defined __NetBSD__) && (defined __i386__ || defined __x86_64__)
 #include <sys/types.h>
 #include <machine/sysarch.h>
-#include <i386/pio.h>
+#include <machine/pio.h>
 /* pio.h defines several I/O functions & macros, including the macros inb() and
  * outb(). This shows that using a bit of inline assembly is not such a bad idea
  * at all. */
@@ -70,6 +70,8 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #endif
 #ifdef __MSDOS__
 #include <pc.h>                                 /* inportb() & outportb() */
+#define inb(port) inportb(port)
+#define outb(data, port) outportb(port, data)
 #endif
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef _MSC_VER

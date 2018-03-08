@@ -238,7 +238,7 @@ ifdef USE_DISCMAGE
 .PHONY: libdiscmage/$(FULLLIBNAME_DM)
 libdiscmage/$(FULLLIBNAME_DM):
 ifeq ($(GCC_WIN),1)
-	cd libdiscmage && CFLAGS=$(CFLAGS0) LDFLAGS=$(LDFLAGS0) $(MAKE)
+	cd libdiscmage && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 else
 ifdef DJGPP
 	cd libdiscmage
@@ -247,7 +247,7 @@ ifdef DJGPP
 	$(MAKE)
 	cd ..
 else
-	cd libdiscmage && CFLAGS=$(CFLAGS0) LDFLAGS=$(LDFLAGS0) $(MAKE)
+	cd libdiscmage && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_DISCMAGE
@@ -257,7 +257,7 @@ ifdef USE_LIBCD64
 #.PHONY: backup/libcd64/libcd64.a  Do not force linking an executable.
 backup/libcd64/libcd64.a:
 ifeq ($(GCC_WIN),1)
-	cd backup/libcd64 && CFLAGS=$(CFLAGS0) LDFLAGS=$(LDFLAGS0) $(MAKE)
+	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 else
 ifdef DJGPP
 	cd backup/libcd64
@@ -266,7 +266,7 @@ ifdef DJGPP
 	$(MAKE)
 	cd ../..
 else
-	cd backup/libcd64 && CFLAGS=$(CFLAGS0) LDFLAGS=$(LDFLAGS0) $(MAKE)
+	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_LIBCD64

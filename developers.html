@@ -489,13 +489,13 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    corresponding #else, #elif or #endif should contain a comment that signifies
    to which #if or #ifdef it belongs. <a name="multiplatform">Example:</a><br>
 <pre>
-   #ifdef  __unix__                                // wait 32 milliseconds
-     usleep (32000);
-     ...
-   #elif   defined __MSDOS__                       // __unix__
+   #ifdef  __MSDOS__                               // wait 32 milliseconds
      delay (32);
      ...
-   #elif   defined __BEOS__                        // __MSDOS__
+   #elif   defined __unix__                        // __MSDOS__
+     usleep (32000);
+     ...
+   #elif   defined __BEOS__                        // __unix__
      snooze (32000);
      ...
    #endif                                          // __BEOS__

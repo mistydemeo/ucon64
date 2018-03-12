@@ -210,9 +210,9 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
-   uCON64 can be compiled for UNIX (GNU/Linux, FreeBSD, OpenBSD, Solaris,
-   Mac OS X), DOS, BeOS, Windows (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1/10) and
-   AmigaOS (PPC/68K).<br>
+   uCON64 can be compiled for UNIX (GNU/Linux, FreeBSD, OpenBSD, NetBSD,
+   Solaris, Mac OS X), DOS, BeOS, Windows
+   (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1/10) and AmigaOS (PPC/68K).<br>
    To compile uCON64 you need a compiler :-) You can use either GCC (GNU
    Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
    <a href="http://www.gnu.org/order/ftp.html">
@@ -443,7 +443,7 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    information specific for your operating system. Then continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>UNIX (GNU/Linux, FreeBSD, OpenBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
+   <b>UNIX (GNU/Linux, FreeBSD, OpenBSD, NetBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
    Start a command line shell like Bash. Then extract the binary package.
    To extract or unpack a package in .tar.gz format use a command like this:<br>
    &nbsp;&nbsp;tar xvzf ucon64-1.9.8-1-linux-bin.tar.gz<br>
@@ -2021,8 +2021,8 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    the Data register. Fortunately, starting with uCON64 2.1.0 this problem can
    be solved for all supported platforms on which the parallel port can be
    accessed directly. So, GNU/Linux, all Windows versions (including Windows
-   10), MS-DOS, FreeBSD, OpenBSD and BeOS. First determine the offset of the ECP
-   Extended Control register relative to the Data register.<br>
+   10), MS-DOS, FreeBSD, OpenBSD, NetBSD and BeOS. First determine the offset of
+   the ECP Extended Control register relative to the Data register.<br>
    On GNU/Linux use lspci -v to find out what I/O ports are being used by your
    PCIe parallel port card. On Windows you can use Device Manager. You should
    see two I/O ranges. One of them should start with the I/O port you specified

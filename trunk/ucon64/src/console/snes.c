@@ -1878,7 +1878,7 @@ int
 snes_mgh (st_ucon64_nfo_t *rominfo)
 {
   if (snes_hirom)
-    puts ("NOTE: This game has to be split with " OPTION_LONG_S "smgh in order to work with an MGH");
+    puts ("NOTE: This ROM has to be split with " OPTION_LONG_S "smgh in order to work with an MGH");
 
   return snes_convert_to_gd (rominfo, write_mgh_files);
 }
@@ -4282,7 +4282,7 @@ check_ufosd_sram (int *sram_size)
 
 
 static int
-check_smini_sram (int *sram_size, st_ucon64_nfo_t *rominfo)
+check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
 {
   st_ustar_header_t header;
   unsigned char *buffer, sram_checksum[20] = { 0 };
@@ -4439,11 +4439,9 @@ snes_init (st_ucon64_nfo_t *rominfo)
       if (x < 0)
         return -1;
     }
-  else if ((x = check_smini_sram (&y, rominfo)) != 0)
-    {
-      if (x < 0)
-        return -1;
-    }
+  else
+    x = check_smini_save (&y, rominfo);
+
   if ((x == SWC && (header.type == 5 || header.type == 8)) ||
       (x == UFO && OFFSET (header, 0x10) == 0) ||
       (x == UFOSD && y > 0) ||
@@ -5690,4 +5688,3 @@ snes_create_sram (void)
   free (buffer);
   return 0;
 }
-

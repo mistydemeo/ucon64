@@ -1050,7 +1050,7 @@ lynxit_read_rom (const char *filename, unsigned int parport)
 
   if (lynxit_main (3, argv) != 0)
     {
-      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      fputs (ucon64_msg[PARPORT_ERROR], stderr);
       exit (1);
     }
 

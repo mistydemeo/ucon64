@@ -203,13 +203,14 @@ const st_track_probe_t track_probe[] =
     {0, 0, 0, 0, 0, NULL}
   };
 
-const char *dm_msg[] = {
-  "ERROR: %s has been deprecated\n",
-  "ERROR: Unknown/unsupported track mode\n",
-  "ERROR: The images track mode is already MODE1/2048\n",
-  "WARNING: This function is still in ALPHA stage. It might not work properly\n",
-  NULL
-};
+const char *dm_msg[] =
+  {
+    "ERROR: %s has been deprecated\n",
+    "ERROR: Unknown/unsupported track mode\n",
+    "ERROR: The images track mode is already MODE1/2048\n",
+    "WARNING: This function is still in ALPHA stage. It might not work properly\n",
+    NULL
+  };
 
 static void (*dm_gauge_ptr) (int pos, int size) = NULL;
 
@@ -442,7 +443,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   FILE *fh = NULL, *fh2 = NULL;
 
   if (flags & DM_FIX || flags & DM_2048)
-    fprintf (stderr, dm_msg[ALPHA]);
+    fputs (dm_msg[ALPHA], stderr);
 
 // set dest. name
   strcpy (buf, basename (image->fname));
@@ -482,7 +483,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 // this is not a problem
   if (flags & DM_2048 && track->mode == 1 && track->sector_size == 2048)
     {
-      fprintf (stderr, dm_msg[ALREADY_2048]);
+      fputs (dm_msg[ALREADY_2048], stderr);
       return -1;
     }
 #endif

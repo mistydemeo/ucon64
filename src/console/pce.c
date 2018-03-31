@@ -860,7 +860,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
     n = 0x1c;
   memset (name + n, ' ', 0x1c - n);
   for (n--; n >= 0; n--)                        // loader only supports upper case characters
-    name[n] = isprint ((int) p[n]) ? (unsigned char) toupper (p[n]) : '.';
+    name[n] = isprint ((int) p[n]) ? (unsigned char) toupper ((int) p[n]) : '.';
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (totalsize / MBIT, destfile);           // 0x1d = bank code
   fputc (size / MBIT, destfile);                // 0x1e = ROM size (not used by loader, but by us)

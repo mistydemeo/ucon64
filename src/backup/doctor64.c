@@ -1,8 +1,8 @@
 /*
 doctor64.c - Bung Doctor V64 support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2015, 2017  dbjh
+Copyright (c) 1999 - 2001       NoisyB
+Copyright (c) 2015, 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -316,7 +316,7 @@ doctor64_read (const char *filename, unsigned short parport)
   parport_print_info ();
   if (initCommunication (parport) == -1)
     {
-      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      fputs (ucon64_msg[PARPORT_ERROR], stderr);
       exit (1);
     }
 
@@ -324,7 +324,7 @@ doctor64_read (const char *filename, unsigned short parport)
 
   if (sendDownloadHeader (parport, &size) != 0)
     {
-      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      fputs (ucon64_msg[PARPORT_ERROR], stderr);
       exit (1);
     }
   if ((fh = fopen (filename, "wb")) == NULL)
@@ -363,7 +363,7 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
   size = len - start;
   if (initCommunication (parport) == -1)
     {
-      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      fputs (ucon64_msg[PARPORT_ERROR], stderr);
       exit (1);
     }
   init_time = time (NULL);
@@ -371,7 +371,7 @@ doctor64_write (const char *filename, int start, int len, unsigned short parport
   strcpy (buf, filename);
   if (sendUploadHeader (parport, buf, size) != 0)
     {
-      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      fputs (ucon64_msg[PARPORT_ERROR], stderr);
       exit (1);
     }
 

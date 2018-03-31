@@ -5238,7 +5238,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo, i
   fputc (0xff, destfile);                       // 0x0 = 0xff
   for (n = 0; rominfo->name[n] != '\0'; n++)    // name is max 21 chars (< 28)
     name[n] = isprint ((int) rominfo->name[n]) ?
-                (unsigned char) toupper (rominfo->name[n]) : '.';
+                (unsigned char) toupper ((int) rominfo->name[n]) : '.';
   // the Super Flash loader (SFBOTX2.GS) only supports upper case characters
   memset (name + n, ' ', 0x1c - n);
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name

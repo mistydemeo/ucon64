@@ -1196,7 +1196,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_ucon64_nfo_t *rominfo,
   fputc (0xff, destfile);                       // 0x0 = 0xff
   for (n = 0; n < 0x1b; n++)
     name[n] = isprint ((int) rominfo->name[n]) ?
-                (unsigned char) toupper (rominfo->name[n]) : '.';
+                (unsigned char) toupper ((int) rominfo->name[n]) : '.';
   // according to Leo, MDPACKU4.BIN only supports upper case characters
   /*
     NOTE: uCON64 2.0.0 wrote 0 at offset 0x1d. uCON64 2.0.1 repurposed offset

@@ -1,8 +1,8 @@
 /*
 dex.c - DexDrive support for uCON64
 
-Copyright (c) 2002             NoisyB
-Copyright (c) 2004, 2015, 2017 dbjh
+Copyright (c) 2002                    NoisyB
+Copyright (c) 2004, 2015, 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -110,7 +110,7 @@ dex_read_block (const char *filename, int block_num, unsigned short parport)
 
   if ((data = read_block (block_num)) == NULL)
     {
-      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      fputs (ucon64_msg[PARPORT_ERROR], stderr);
       exit (1);
     }
 
@@ -132,7 +132,7 @@ dex_write_block (const char *filename, int block_num, unsigned short parport)
 
   if (write_block (block_num, data) == -1)
     {
-      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      fputs (ucon64_msg[PARPORT_ERROR], stderr);
       exit (1);
     }
 

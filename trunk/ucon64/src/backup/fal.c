@@ -3,7 +3,7 @@ fal.c - Flash Linker Advance support for uCON64
 
 Copyright (c) 2001                     Jeff Frohwein
 Copyright (c) 2001                     NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -731,7 +731,7 @@ dump (u8 BaseAdr)
           fputc ('0', stdout);
           if (i * 2 < 16)
             fputc ('0', stdout);
-          printf ("%hx - ", (i * 2));
+          printf ("%hx - ", (unsigned short) (i * 2));
           First = 0;
         }
 
@@ -746,7 +746,7 @@ dump (u8 BaseAdr)
 
       if (val1 < 16)
         fputc ('0', stdout);
-      printf ("%hx ", val1);
+      printf ("%hx ", (unsigned short) val1);
 
       if ((val2 > 31) & (val2 < 127))
 
@@ -756,7 +756,7 @@ dump (u8 BaseAdr)
 
       if (val2 < 16)
         fputc ('0', stdout);
-      printf ("%hx ", val2);
+      printf ("%hx ", (unsigned short) val2);
 
       if ((i & 7) == 7)
         {
@@ -1353,7 +1353,7 @@ fal_main (int argc, char **argv)
           SpaceCheck (argv[arg][2]);
           if (argv[++arg] != NULL)
             Base = (u8) (atoi (argv[arg]));
-          printf ("Base address: %hx\n", Base * 256);
+          printf ("Base address: %hx\n", (unsigned short) (Base * 256));
           OptD = 1;
           break;
         case 's':

@@ -292,7 +292,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
     n = 0x0b;
   memset (name + n, ' ', 0x0b - n);
   for (n--; n >= 0; n--)                        // loader only supports upper case characters
-    name[n] = isprint ((int) p[n]) ? (unsigned char) toupper (p[n]) : '.';
+    name[n] = isprint ((int) p[n]) ? (unsigned char) toupper ((int) p[n]) : '.';
   // See comment in genesis.c/write_game_table_entry(). Avoid possible silliness.
   name[0x0b] = '\0';
   fwrite (name, 1, 0x0c, destfile);             // 0x01 - 0x0c = name

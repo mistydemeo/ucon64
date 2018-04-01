@@ -613,7 +613,7 @@ int
 gba_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value;
-  char buf[MAXBUFSIZE];
+  unsigned int pos = strlen (rominfo->misc);
 
   rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
                                  ucon64.backup_header_len : 0;
@@ -668,11 +668,8 @@ gba_init (st_ucon64_nfo_t *rominfo)
     "Unknown country";
 
   // misc stuff
-  sprintf (buf, "Version: 1.%u\n", gba_header.version);
-  strcat (rominfo->misc, buf);
-
-  sprintf (buf, "Device type: 0x%02x\n", gba_header.device_type);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Version: 1.%u\n", gba_header.version);
+  pos += sprintf (rominfo->misc + pos, "Device type: 0x%02x\n", gba_header.device_type);
 
   /*
     start address = current address + (parameter of B instruction * 4) + 8
@@ -680,27 +677,26 @@ gba_init (st_ucon64_nfo_t *rominfo)
   */
   value = 0x8000008 +
           (gba_header.start[2] << 18 | gba_header.start[1] << 10 | gba_header.start[0] << 2);
-  sprintf (buf, "Start address: 0x%08x\n", value);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Start address: 0x%08x\n", value);
 
-  strcat (rominfo->misc, "Logo data: ");
+  pos += sprintf (rominfo->misc + pos, "Logo data: ");
   if (memcmp (gba_header.logo, gba_logodata, GBA_LOGODATA_LEN) == 0)
     {
 #ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
-        strcat (rominfo->misc, "\x1b[01;32mOK\x1b[0m");
+        pos += sprintf (rominfo->misc + pos, "\x1b[01;32mOK\x1b[0m");
       else
 #endif
-        strcat (rominfo->misc, "OK");
+        pos += sprintf (rominfo->misc + pos, "OK");
     }
   else
     {
 #ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
-        strcat (rominfo->misc, "\x1b[01;31mBad\x1b[0m");
+        pos += sprintf (rominfo->misc + pos, "\x1b[01;31mBad\x1b[0m");
       else
 #endif
-        strcat (rominfo->misc, "Bad");
+        pos += sprintf (rominfo->misc + pos, "Bad");
     }
 
   // internal ROM crc

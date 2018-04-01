@@ -1,7 +1,7 @@
 /*
 mgh.c - Multi Game Hunter support for uCON64
 
-Copyright (c) 2017 dbjh
+Copyright (c) 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@ mgh_make_name (const char *filename, int console, unsigned int size, char *name)
     if (name[n] == ' ' || name[n] == '.')
       name[n] = '_';
 
-  sprintf (suffix, ".%03u", size / MBIT);
+  snprintf (suffix, sizeof suffix, ".%03u", size / MBIT);
+  suffix[sizeof suffix - 1] = '\0';
   set_suffix (name, suffix);
 }

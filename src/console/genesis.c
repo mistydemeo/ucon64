@@ -1473,6 +1473,7 @@ int
 genesis_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value = 0, x, y;
+  unsigned int pos = strlen (rominfo->misc);
   unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1];
   static char maker[9], country[200]; // 200 characters should be enough for 5 country names
 #define GENESIS_IO_MAX 0x58
@@ -1508,7 +1509,7 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       rominfo->maker = "Publisher: You?";
       rominfo->country = "Country: Your country?";
       rominfo->has_internal_crc = 0;
-      strcat (rominfo->misc, "Type: Super Magic Drive SRAM file\n");
+      pos += sprintf (rominfo->misc + pos, "Type: Super Magic Drive SRAM file\n");
       ucon64.split = 0;                         // SRAM files are never split
       copier_type = SMD;
       return 0;                                 // rest is nonsense for SRAM file
@@ -1750,11 +1751,8 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   // misc stuff
   memcpy (name, &OFFSET (genesis_header, 32), GENESIS_NAME_LEN);
   name[GENESIS_NAME_LEN] = '\0';
-  sprintf ((char *) buf, "Japanese game name: %s\n", name);
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "Date: %.8s\n", &OFFSET (genesis_header, 24));
-  strcat (rominfo->misc, (char *) buf);
+  pos += sprintf (rominfo->misc + pos, "Japanese game name: %s\n", name);
+  pos += sprintf (rominfo->misc + pos, "Date: %.8s\n", &OFFSET (genesis_header, 24));
 
   x = (OFFSET (genesis_header, 160) << 24) +
       (OFFSET (genesis_header, 161) << 16) +
@@ -1764,14 +1762,9 @@ genesis_init (st_ucon64_nfo_t *rominfo)
       (OFFSET (genesis_header, 165) << 16) +
       (OFFSET (genesis_header, 166) << 8) +
        OFFSET (genesis_header, 167);
-  sprintf ((char *) buf, "Internal size: %.4f Mb\n", (float) (y - x + 1) / MBIT);
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "ROM start: %08x\n", x);
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "ROM end: %08x\n", y);
-  strcat (rominfo->misc, (char *) buf);
+  pos += sprintf (rominfo->misc + pos, "Internal size: %.4f Mb\n", (float) (y - x + 1) / MBIT);
+  pos += sprintf (rominfo->misc + pos, "ROM start: %08x\n", x);
+  pos += sprintf (rominfo->misc + pos, "ROM end: %08x\n", y);
 
   genesis_has_ram = OFFSET (genesis_header, 176) == 'R' &&
                     OFFSET (genesis_header, 177) == 'A';
@@ -1785,55 +1778,40 @@ genesis_init (st_ucon64_nfo_t *rominfo)
           (OFFSET (genesis_header, 185) << 16) +
           (OFFSET (genesis_header, 186) << 8) +
            OFFSET (genesis_header, 187);
-      sprintf ((char *) buf, "Cartridge RAM: Yes, %d kBytes (%s)\n",
-               (y - x + 1) >> 10,
-               OFFSET (genesis_header, 178) & 0x40 ? "backup" : "non-backup");
-      strcat (rominfo->misc, (char *) buf);
+      pos += sprintf (rominfo->misc + pos, "Cartridge RAM: Yes, %d kBytes (%s)\n",
+                      (y - x + 1) >> 10,
+                      OFFSET (genesis_header, 178) & 0x40 ? "backup" : "non-backup");
 
-      sprintf ((char *) buf, "RAM start: %08x\n", x);
-      strcat (rominfo->misc, (char *) buf);
-
-      sprintf ((char *) buf, "RAM end: %08x\n", y);
-      strcat (rominfo->misc, (char *) buf);
+      pos += sprintf (rominfo->misc + pos, "RAM start: %08x\n", x);
+      pos += sprintf (rominfo->misc + pos, "RAM end: %08x\n", y);
     }
   else
-    strcat (rominfo->misc, "Cartridge RAM: No\n");
+    pos += sprintf (rominfo->misc + pos, "Cartridge RAM: No\n");
 
   /*
     Only checking for 'G' seems to give better results than checking for "GM".
     "Officially" "GM" indicates it's a game and "Al" that it's educational.
   */
-  sprintf ((char *) buf, "Product type: %s\n",
-           (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Educational");
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "I/O device(s): %s",
-           NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144),
-                                GENESIS_IO_MAX - 1)]));
+  pos += sprintf (rominfo->misc + pos, "Product type: %s\n",
+                  (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Educational");
+  pos += sprintf (rominfo->misc + pos, "I/O device(s): %s",
+                  NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144),
+                                       GENESIS_IO_MAX - 1)]));
   for (x = 0; x < 3; x++)
     {
       const char *io_device = genesis_io[MIN (OFFSET (genesis_header, 145 + x),
                                 GENESIS_IO_MAX - 1)];
       if (!io_device)
         continue;
-      strcat ((char *) buf, ", ");
-      strcat ((char *) buf, io_device);
+      pos += sprintf (rominfo->misc + pos, ", %s", io_device);
     }
-  strcat ((char *) buf, "\n");
-  strcat (rominfo->misc, (char *) buf);
+  pos += sprintf (rominfo->misc + pos, "\n");
 
-  sprintf ((char *) buf, "Modem data: %.10s\n", &OFFSET (genesis_header, 188));
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "Memo: %.40s\n", &OFFSET (genesis_header, 200));
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "Product code: %.8s\n", &OFFSET (genesis_header, 131));
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "Version: 1.%c%c", OFFSET (genesis_header, 140),
-           OFFSET (genesis_header, 141));
-  strcat (rominfo->misc, (char *) buf);
+  pos += sprintf (rominfo->misc + pos, "Modem data: %.10s\n", &OFFSET (genesis_header, 188));
+  pos += sprintf (rominfo->misc + pos, "Memo: %.40s\n", &OFFSET (genesis_header, 200));
+  pos += sprintf (rominfo->misc + pos, "Product code: %.8s\n", &OFFSET (genesis_header, 131));
+  pos += sprintf (rominfo->misc + pos, "Version: 1.%c%c", OFFSET (genesis_header, 140),
+                  OFFSET (genesis_header, 141));
 
   // We can be stricter here than in ucon64.c/ucon64_rom_nfo(), because we know
   //  we shouldn't have ANSI escape sequences (which ucon64.c/toprint() allows).

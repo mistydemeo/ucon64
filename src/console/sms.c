@@ -577,6 +577,7 @@ int
 sms_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, x;
+  unsigned int pos = strlen (rominfo->misc);
   unsigned char buf[16384] = { 0 };
 
   is_gamegear = 0;
@@ -673,13 +674,10 @@ sms_init (st_ucon64_nfo_t *rominfo)
       free (rom_buffer);
     }
 
-  sprintf ((char *) buf, "Part number: 0x%04x\n",
-           sms_header.partno_low + (sms_header.partno_high << 8) +
-             ((sms_header.version & 0xf0) << 12));
-  strcat (rominfo->misc, (char *) buf);
-
-  sprintf ((char *) buf, "Version: %d", sms_header.version & 0xf);
-  strcat (rominfo->misc, (char *) buf);
+  pos += sprintf (rominfo->misc + pos, "Part number: 0x%04x\n",
+                  sms_header.partno_low + (sms_header.partno_high << 8) +
+                    ((sms_header.version & 0xf0) << 12));
+  pos += sprintf (rominfo->misc + pos, "Version: %d", sms_header.version & 0xf);
 
   rominfo->console_usage = sms_usage[0].help;
   rominfo->backup_usage = !rominfo->backup_header_len ?

@@ -65,8 +65,9 @@ int
 ngp_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1;
+  unsigned int pos = strlen (rominfo->misc);
   char *snk_code = "COPYRIGHT BY SNK CORPORATION",
-       *third_code = " LICENSED BY SNK CORPORATION", buf[MAXBUFSIZE];
+       *third_code = " LICENSED BY SNK CORPORATION";
 
   rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
                                  ucon64.backup_header_len : 0;
@@ -96,11 +97,10 @@ ngp_init (st_ucon64_nfo_t *rominfo)
       "SNK" : "Third party";
 
   // misc stuff
-  sprintf (buf, "Mode: %s",
-           (OFFSET (ngp_header, 0x23) == 0x00) ? "Mono" :
-           (OFFSET (ngp_header, 0x23) == 0x10) ? "Color" :
-           "Unknown");
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Mode: %s",
+                  (OFFSET (ngp_header, 0x23) == 0x00) ? "Mono" :
+                  (OFFSET (ngp_header, 0x23) == 0x10) ? "Color" :
+                  "Unknown");
 
   rominfo->console_usage = ngp_usage[0].help;
   rominfo->backup_usage = !rominfo->backup_header_len ? pl_usage[0].help : unknown_backup_usage[0].help;

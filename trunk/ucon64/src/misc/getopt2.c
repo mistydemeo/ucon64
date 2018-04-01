@@ -2,7 +2,7 @@
 getopt2.c - getopt1() extension
 
 Copyright (c) 2004 - 2005       NoisyB
-Copyright (c) 2005, 2015 - 2017 dbjh
+Copyright (c) 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -485,7 +485,8 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
               {
                 char buf[FILENAME_MAX];
 
-                sprintf (buf, "%s%s%s", path, p, ep->d_name);
+                snprintf (buf, FILENAME_MAX, "%s%s%s", path, p, ep->d_name);
+                buf[FILENAME_MAX - 1] = '\0';
                 if (getopt2_file_recursion (buf, callback_func, calls,
                                             flags & ~GETOPT2_FILE_RECURSIVE_ONCE) != 0)
                   break;
@@ -493,7 +494,8 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
           closedir (dp);
         }
 #else
-      sprintf (search_pattern, "%s%s*", path, p);
+      snprintf (search_pattern, FILENAME_MAX, "%s%s*", path, p);
+      search_pattern[FILENAME_MAX - 1] = '\0';
       if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
         {
           do
@@ -502,7 +504,8 @@ getopt2_file_recursion (const char *fname, int (*callback_func) (const char *),
               {
                 char buf[FILENAME_MAX];
 
-                sprintf (buf, "%s%s%s", path, p, find_data.cFileName);
+                snprintf (buf, FILENAME_MAX, "%s%s%s", path, p, find_data.cFileName);
+                buf[FILENAME_MAX - 1] = '\0';
                 if (getopt2_file_recursion (buf, callback_func, calls,
                                             flags & ~GETOPT2_FILE_RECURSIVE_ONCE) != 0)
                   break;

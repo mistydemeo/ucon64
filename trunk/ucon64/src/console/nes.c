@@ -2,7 +2,7 @@
 nes.c - Nintendo Entertainment System support for uCON64
 
 Copyright (c) 1999 - 2003              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -6997,9 +6997,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
 {
   unsigned char magic[15], *rom_buffer;
   int result = -1, size, x, y, n, crc = 0;
-  // currently 92 bytes is enough for ctrl_str, but extra space avoids
-  //  introducing bugs when controller type text would be changed
-  char buf[MAXBUFSIZE], *str, *str_list[8];
+  unsigned int pos = strlen (rominfo->misc);
+  char *str, *str_list[8];
   st_unif_chunk_t *unif_chunk, *unif_chunk2;
   st_nes_data_t *info, key;
 
@@ -7073,29 +7072,22 @@ nes_init (st_ucon64_nfo_t *rominfo)
       rominfo->backup_header = &ines_header;
       ucon64.split = 0;                         // iNES files are never split
 
-      sprintf (buf, "Internal size: %.4f Mb\n",
-               TOMBIT_F ((ines_header.prg_size << 14) + (ines_header.chr_size << 13)));
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "Internal PRG size: %.4f Mb\n",     // ROM
-               TOMBIT_F (ines_header.prg_size << 14));
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "Internal CHR size: %.4f Mb\n",     // VROM
-               TOMBIT_F (ines_header.chr_size << 13));
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Internal size: %.4f Mb\n",
+                      TOMBIT_F ((ines_header.prg_size << 14) + (ines_header.chr_size << 13)));
+      pos += sprintf (rominfo->misc + pos, "Internal PRG size: %.4f Mb\n", // ROM
+                      TOMBIT_F (ines_header.prg_size << 14));
+      pos += sprintf (rominfo->misc + pos, "Internal CHR size: %.4f Mb\n", // VROM
+                      TOMBIT_F (ines_header.chr_size << 13));
 
       x = (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0);
       if (ines_header.ctrl2 & 0xf)
-        sprintf (buf, "Memory mapper (iNES): %d (%d)\n", x,
-                 x | ((ines_header.ctrl2 & 0xf) << 8));
+        pos += sprintf (rominfo->misc + pos, "Memory mapper (iNES): %d (%d)\n", x,
+                        x | ((ines_header.ctrl2 & 0xf) << 8));
       else
-        sprintf (buf, "Memory mapper (iNES): %d\n", x);
-      strcat (rominfo->misc, buf);
+        pos += sprintf (rominfo->misc + pos, "Memory mapper (iNES): %d\n", x);
 
-      sprintf (buf, "Television standard: %s\n",
-               ines_header.ctrl3 & INES_TVID ? "PAL" : "NTSC");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Television standard: %s\n",
+                      ines_header.ctrl3 & INES_TVID ? "PAL" : "NTSC");
 
       if (ines_header.ctrl1 & INES_MIRROR)
         str = "Vertical";
@@ -7103,22 +7095,16 @@ nes_init (st_ucon64_nfo_t *rominfo)
         str = "Four screens of VRAM";
       else
         str = "Horizontal";
-      sprintf (buf, "Mirroring: %s\n", str);
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Mirroring: %s\n", str);
 
-      sprintf (buf, "Cartridge RAM: %d kBytes\n", ines_header.ram_size ?
-               ines_header.ram_size * 8 : 8);
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "Save RAM: %s\n", (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "512-byte trainer: %s\n",
-               (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "VS-System: %s", (ines_header.ctrl2 & 0x01) ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Cartridge RAM: %d kBytes\n",
+                      ines_header.ram_size ? ines_header.ram_size * 8 : 8);
+      pos += sprintf (rominfo->misc + pos, "Save RAM: %s\n",
+                      (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
+      pos += sprintf (rominfo->misc + pos, "512-byte trainer: %s\n",
+                      (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
+      pos += sprintf (rominfo->misc + pos, "VS-System: %s",
+                      (ines_header.ctrl2 & 0x01) ? "Yes" : "No");
       break;
     case UNIF:
       rominfo->backup_usage = unif_usage[0].help;
@@ -7137,13 +7123,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
       ucon64.split = 0;                         // UNIF files are never split
 
       x = me2le_32 (unif_header.revision);      // Don't modify header data
-      sprintf (buf, "UNIF revision: %d\n", x);
-      strcpy (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "UNIF revision: %d\n", x);
 
       if ((unif_chunk = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
         {
-          sprintf (buf, "Comment: %s\n", (char *) unif_chunk->data);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, "Comment: %s\n", (char *) unif_chunk->data);
           free (unif_chunk);
         }
 #if     UNIF_REVISION > 7
@@ -7151,12 +7135,12 @@ nes_init (st_ucon64_nfo_t *rominfo)
         {
           char ucon64_name[] = "uCON64";
           size_t ucon64_name_len = strlen (ucon64_name);
-          strcat (rominfo->misc, "Processed by: ");
+          pos += sprintf (rominfo->misc + pos, "Processed by: ");
           y = 0;
           do
             {
               if (y)
-                strcat (rominfo->misc, ", ");
+                pos += sprintf (rominfo->misc + pos, ", ");
               /*
                 The format of the uCON64 WRTR chunk is:
                 uCON64<marker><version string><marker><OS string>
@@ -7186,26 +7170,25 @@ nes_init (st_ucon64_nfo_t *rominfo)
                       x++;
                     }
                 }
-              strcat (rominfo->misc, (const char *) unif_chunk->data);
+              pos += sprintf (rominfo->misc + pos, (const char *) unif_chunk->data);
               y = 1;
               free (unif_chunk);
             }
           while ((unif_chunk = read_chunk (WRTR_ID, rom_buffer, 1)) != NULL);
-          strcat (rominfo->misc, "\n");
+          pos += sprintf (rominfo->misc + pos, "\n");
         }
 #endif
       if ((unif_chunk = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
         {
           st_dumper_info_t *dumper_info = (st_dumper_info_t *) unif_chunk->data;
-          sprintf (buf, "Dump info:\n"
-                        "  Dumper: %s\n"
-                        "  Date: %u-%u-%02u\n"
-                        "  Agent: %s\n",
-                        dumper_info->dumper_name,
-                        dumper_info->day, dumper_info->month,
-                          le2me_16 (dumper_info->year),
-                        dumper_info->dumper_agent);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, "Dump info:\n"
+                                               "  Dumper: %s\n"
+                                               "  Date: %u-%u-%02u\n"
+                                               "  Agent: %s\n",
+                                               dumper_info->dumper_name,
+                                               dumper_info->day, dumper_info->month,
+                                                 le2me_16 (dumper_info->year),
+                                               dumper_info->dumper_agent);
           free (unif_chunk);
         }
 
@@ -7236,9 +7219,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
 #endif
                 free (unif_chunk2);
               }
-            sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n", n,
-                     TOMBIT_F (unif_chunk->length), str);
-            strcat (rominfo->misc, buf);
+            pos += sprintf (rominfo->misc + pos, "PRG%X: %.4f Mb, checksum %s\n", n,
+                            TOMBIT_F (unif_chunk->length), str);
             free (unif_chunk);
           }
 
@@ -7268,29 +7250,25 @@ nes_init (st_ucon64_nfo_t *rominfo)
 #endif
                 free (unif_chunk2);
               }
-            sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n", n,
-                     TOMBIT_F (unif_chunk->length), str);
-            strcat (rominfo->misc, buf);
+            pos += sprintf (rominfo->misc + pos, "CHR%X: %.4f Mb, checksum %s\n", n,
+                            TOMBIT_F (unif_chunk->length), str);
             free (unif_chunk);
           }
       ucon64.crc32 = crc;
       rominfo->data_size = size;
       // Don't introduce extra code just to make this line be printed above
       //  the previous two line types (PRG & CHR)
-      sprintf (buf, "Size: %.4f Mb\n", TOMBIT_F (rominfo->data_size));
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Size: %.4f Mb\n", TOMBIT_F (rominfo->data_size));
 
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
-          sprintf (buf, "Board name: %s\n", (char *) unif_chunk->data);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, "Board name: %s\n", (char *) unif_chunk->data);
           free (unif_chunk);
         }
       if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
         {
 #if 0
-          sprintf (buf, "Internal name: %s\n", (char *) unif_chunk->data);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, "Internal name: %s\n", (char *) unif_chunk->data);
 #endif
           memcpy (rominfo->name, unif_chunk->data,
                   unif_chunk->length > sizeof rominfo->name ?
@@ -7303,8 +7281,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
           str_list[1] = "PAL";
           str_list[2] = "NTSC/PAL";
           x = *((unsigned char *) unif_chunk->data);
-          sprintf (buf, "Television standard: %s\n", x > 2 ? "Unknown" : str_list[x]);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, "Television standard: %s\n",
+                          x > 2 ? "Unknown" : str_list[x]);
           free (unif_chunk);
         }
       if ((unif_chunk = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
@@ -7316,8 +7294,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
           str_list[4] = "Four screens of VRAM (hard wired)";
           str_list[5] = "Controlled by mapper hardware";
           x = *((unsigned char *) unif_chunk->data);
-          sprintf (buf, "Mirroring: %s\n", x > 5 ? "Unknown" : str_list[x]);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, "Mirroring: %s\n",
+                          x > 5 ? "Unknown" : str_list[x]);
           free (unif_chunk);
         }
 
@@ -7327,11 +7305,12 @@ nes_init (st_ucon64_nfo_t *rominfo)
           x = 1;
           free (unif_chunk);
         }
-      sprintf (buf, "Save RAM: %s\n", x ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Save RAM: %s\n", x ? "Yes" : "No");
 
       if ((unif_chunk = read_chunk (CTRL_ID, rom_buffer, 0)) != NULL)
         {
+          // currently 92 bytes is enough for ctrl_str, but extra space avoids
+          //  introducing bugs when controller type text would be changed
           char ctrl_str[200];
 
           str_list[0] = "Regular joypad";
@@ -7354,8 +7333,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
                 strcat (ctrl_str, str_list[n]);
                 y = 1;
               }
-          sprintf (buf, "Supported controllers: %s\n", ctrl_str);
-          strcat (rominfo->misc, buf);
+          pos += sprintf (rominfo->misc + pos, "Supported controllers: %s\n", ctrl_str);
           free (unif_chunk);
         }
 
@@ -7365,8 +7343,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
           x = 1;
           free (unif_chunk);
         }
-      sprintf (buf, "VRAM override: %s", x ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "VRAM override: %s", x ? "Yes" : "No");
 
       free (rom_buffer);
       break;
@@ -7375,19 +7352,23 @@ nes_init (st_ucon64_nfo_t *rominfo)
         Either a *.PRM header file, a 512-byte *.700 trainer file, a *.PRG
         ROM data file or a *.CHR VROM data file.
       */
-      rominfo->backup_usage = pasofami_usage[0].help;
-      rominfo->backup_header_start = 0;
-      strcpy (buf, ucon64.fname);
-      set_suffix (buf, ".prm");
-      if (access (buf, F_OK) == 0)
-        {
-          rominfo->backup_header_len = fsizeof (buf);
-          // we use ffe_header to save some space
-          ucon64_fread (&ffe_header, 0, rominfo->backup_header_len, buf);
-          rominfo->backup_header = &ffe_header;
-        }
-      else
-        rominfo->backup_header_len = 0;
+      {
+        char prm_fname[FILENAME_MAX];
+
+        rominfo->backup_usage = pasofami_usage[0].help;
+        rominfo->backup_header_start = 0;
+        strcpy (prm_fname, ucon64.fname);
+        set_suffix (prm_fname, ".prm");
+        if (access (prm_fname, F_OK) == 0)
+          {
+            rominfo->backup_header_len = fsizeof (prm_fname);
+            // we use ffe_header to save some space
+            ucon64_fread (&ffe_header, 0, rominfo->backup_header_len, prm_fname);
+            rominfo->backup_header = &ffe_header;
+          }
+        else
+          rominfo->backup_header_len = 0;
+      }
 
       /*
         Build a temporary iNES image in memory from the Pasofami files.
@@ -7407,32 +7388,20 @@ nes_init (st_ucon64_nfo_t *rominfo)
           free (rom_buffer);
         }
 
-      sprintf (buf, "Size: %.4f Mb\n", TOMBIT_F (rominfo->data_size));
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "PRG size: %.4f Mb\n",             // ROM, don't say internal,
-               TOMBIT_F (ines_header.prg_size << 14)); //  because it's not
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "CHR size: %.4f Mb\n",      // VROM
-               TOMBIT_F (ines_header.chr_size << 13));
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "Memory mapper (iNES): %d\n",
-               (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0));
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "Mirroring: %s\n",
-               (ines_header.ctrl1 & INES_MIRROR) ? "Vertical" : "Horizontal");
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "Save RAM: %s\n",
-               (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
-
-      sprintf (buf, "512-byte trainer: %s",
-               (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "Size: %.4f Mb\n",
+                      TOMBIT_F (rominfo->data_size));
+      pos += sprintf (rominfo->misc + pos, "PRG size: %.4f Mb\n", // ROM, don't say internal,
+                      TOMBIT_F (ines_header.prg_size << 14));     //  because it's not
+      pos += sprintf (rominfo->misc + pos, "CHR size: %.4f Mb\n", // VROM
+                      TOMBIT_F (ines_header.chr_size << 13));
+      pos += sprintf (rominfo->misc + pos, "Memory mapper (iNES): %d\n",
+                      (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0));
+      pos += sprintf (rominfo->misc + pos, "Mirroring: %s\n",
+                      (ines_header.ctrl1 & INES_MIRROR) ? "Vertical" : "Horizontal");
+      pos += sprintf (rominfo->misc + pos, "Save RAM: %s\n",
+                      (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
+      pos += sprintf (rominfo->misc + pos, "512-byte trainer: %s",
+                      (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
       break;
     case FFE:
       if (magic[10] == 1)
@@ -7445,7 +7414,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
           rominfo->country = "Country: Your country?";
           rominfo->has_internal_crc = 0;
           ucon64.split = 0;                     // RTS files are never split
-          strcat (rominfo->misc, "Type: Super Magic Card RTS file\n");
+          pos += sprintf (rominfo->misc + pos, "Type: Super Magic Card RTS file\n");
           return 0;                             // rest is nonsense for RTS file
         }
 
@@ -7465,14 +7434,13 @@ nes_init (st_ucon64_nfo_t *rominfo)
       ucon64_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &ffe_header;
 
-      sprintf (buf, "512-byte trainer: %s",
-               (ffe_header.emulation1 & SMC_TRAINER) ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
+      pos += sprintf (rominfo->misc + pos, "512-byte trainer: %s",
+                      (ffe_header.emulation1 & SMC_TRAINER) ? "Yes" : "No");
       break;
     case FDS:
       rominfo->backup_usage = fds_usage[0].help;
       rominfo->country = "Japan";
-      strcat (rominfo->misc, "\n");
+      pos += sprintf (rominfo->misc + pos, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
       break;
     case FAM:
@@ -7486,7 +7454,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       // we use ffe_header to save some space
       ucon64_fread (&ffe_header, rominfo->backup_header_start, FAM_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &ffe_header;
-      strcat (rominfo->misc, "\n");
+      pos += sprintf (rominfo->misc + pos, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
 
       rom_size = (int) ucon64.file_size - FAM_HEADER_LEN;
@@ -7528,15 +7496,14 @@ nes_init (st_ucon64_nfo_t *rominfo)
             {
               sprintf (format, "\nDate: %%d/19%%d");
               strcat (format, (year == 8 || year == 9) ? "x" : "");
-              sprintf (buf, format, month, year);
+              pos += sprintf (rominfo->misc + pos, format, month, year);
             }
           else
             {
               sprintf (format, "\nDate: 19%%d");
               strcat (format, (year == 8 || year == 9) ? "x" : "");
-              sprintf (buf, format, year);
+              pos += sprintf (rominfo->misc + pos, format, year);
             }
-          strcat (rominfo->misc, buf);
         }
     }
 
@@ -7568,8 +7535,9 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
 {
   FILE *srcfile;
   unsigned char buffer[58];
-  char name[16], str_list_mem[6], *str_list[4], info_mem[MAXBUFSIZE], *info, line[80];
+  char name[16], str_list_mem[6], *str_list[4], info_mem[MAXBUFSIZE], *info;
   int disk, n_disks, start, size, x, header_len = 0;
+  unsigned int info_pos;
 
   if (output_str == NULL)
     {
@@ -7578,6 +7546,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
     }
   else
     info = output_str;
+  info_pos = strlen (info);
 
   if ((srcfile = fopen (ucon64.fname, "rb")) == NULL)
     {
@@ -7588,10 +7557,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
   n_disks = ((int) ucon64.file_size - rominfo->backup_header_len) / 65500;
   x = (ucon64.file_size - rominfo->backup_header_len) % 65500;
   if (x)
-    {
-      sprintf (line, "WARNING: %d excessive bytes\n", x);
-      strcat (info, line);
-    }
+    info_pos += sprintf (info + info_pos, "WARNING: %d excessive bytes\n", x);
 
   if (type == FDS)
     header_len = rominfo->backup_header_len;
@@ -7620,24 +7586,21 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
         }
 
       if (buffer[56] != 2)
-        strcat (info, "WARNING: Invalid file number header\n");
+        info_pos += sprintf (info + info_pos, "WARNING: Invalid file number header\n");
 
       memcpy (name, buffer + 16, 4);
       name[4] = '\0';
       if (disk == 0 && output_str != NULL)
         memcpy (rominfo->name, name, 4);
       n_files = buffer[57];
-      sprintf (line, "Disk: '%-4s'  Side: %c  Files: %d  Maker: 0x%02x  Version: 0x%02x\n",
-               name, (buffer[21] & 1) + 'A', n_files, buffer[15], buffer[20]);
-      strcat (info, line);
+      info_pos += sprintf (info + info_pos,
+                           "Disk: '%-4s'  Side: %c  Files: %d  Maker: 0x%02x  Version: 0x%02x\n",
+                           name, (buffer[21] & 1) + 'A', n_files, buffer[15], buffer[20]);
 
       while (file < n_files && fread (buffer, 1, 16, srcfile) == 16)
         {
           if (buffer[0] != 3)
-            {
-              sprintf (line, "WARNING: Invalid file header block ID (0x%02x)\n", buffer[0]);
-              strcat (info, line);
-            }
+            info_pos += sprintf (info + info_pos, "WARNING: Invalid file header block ID (0x%02x)\n", buffer[0]);
 
           // get name, data location, and size
           strncpy (name, (const char *) buffer + 3, 8);
@@ -7647,10 +7610,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
 
           x = fgetc (srcfile);
           if (x != 4)
-            {
-              sprintf (line, "WARNING: Invalid data block ID (0x%02x)\n", x);
-              strcat (info, line);
-            }
+            info_pos += sprintf (info + info_pos, "WARNING: Invalid data block ID (0x%02x)\n", x);
 
           str_list[0] = "Code";
           str_list[1] = "Tiles";
@@ -7666,17 +7626,16 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
             won't print those character so we have to use to_func() with
             toprint().
           */
-          sprintf (line, "%03u $%02x '%-8s' $%04x-$%04x [%s]\n",
-                   buffer[1], buffer[2],
-                   to_func (name, strlen (name), toprint),
-                   start, start + size - 1, str_list[buffer[15]]);
-          strcat (info, line);
+          info_pos += sprintf (info + info_pos, "%03u $%02x '%-8s' $%04x-$%04x [%s]\n",
+                               buffer[1], buffer[2],
+                               to_func (name, strlen (name), toprint),
+                               start, start + size - 1, str_list[buffer[15]]);
 
           fseek (srcfile, size, SEEK_CUR);
           file++;
         }
       if (disk != n_disks - 1)
-        strcat (info, "\n");                    // print newline between disk info blocks
+        info_pos += sprintf (info + info_pos, "\n");    // print newline between disk info blocks
     }
 
   if (output_str == NULL)

@@ -664,14 +664,13 @@ int
 gb_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, value, x;
-  char buf[MAXBUFSIZE];
+  unsigned int pos = strlen (rominfo->misc);
   const char *str;
 
   rominfo->backup_header_len = UCON64_ISSET2 (ucon64.backup_header_len, unsigned int) ?
                                  ucon64.backup_header_len : 0;
 
-  if (ucon64.file_size <
-        rominfo->backup_header_len + GB_HEADER_START + GB_HEADER_LEN)
+  if (ucon64.file_size < rominfo->backup_header_len + GB_HEADER_START + GB_HEADER_LEN)
     return -1;                                  // Don't continue if it makes no sense
 
   ucon64_fread (&gb_header, rominfo->backup_header_len + GB_HEADER_START,
@@ -732,8 +731,8 @@ gb_init (st_ucon64_nfo_t *rominfo)
 
   // misc stuff
   // don't move division by 4 to shift parameter (gb_header.rom_size can be < 2)
-  sprintf (buf, "Internal size: %.4f Mb\n", (1 << gb_header.rom_size) / 4.0f);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Internal size: %.4f Mb\n",
+                  (1 << gb_header.rom_size) / 4.0f);
 
   if (gb_header.rom_type <= 0x1f)
     {
@@ -796,23 +795,20 @@ gb_init (st_ucon64_nfo_t *rominfo)
     }
   else
     str = "Unknown";
-  sprintf (buf, "ROM type: %s\n", str);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "ROM type: %s\n", str);
 
   if (!gb_header.sram_size)
-    sprintf (buf, "Save RAM: No\n");
+    pos += sprintf (rominfo->misc + pos, "Save RAM: No\n");
   else
     {
       value = (gb_header.sram_size & 7) << 1; // 0/1/2/4/5
       if (value)
         value = 1 << (value - 1);
 
-      sprintf (buf, "Save RAM: Yes, %d kBytes\n", value);
+      pos += sprintf (rominfo->misc + pos, "Save RAM: Yes, %d kBytes\n", value);
     }
-  strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Version: 1.%u\n", gb_header.version);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Version: 1.%u\n", gb_header.version);
 
   if (gb_header.gb_type == 0x80)
     {
@@ -830,15 +826,13 @@ gb_init (st_ucon64_nfo_t *rominfo)
       else
         str = "Game Boy/Super Game Boy";
     }
-  sprintf (buf, "Game type: %s\n", str);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Game type: %s\n", str);
 
   value = gb_header.start_high << 8;
   value += gb_header.start_low;
-  sprintf (buf, "Start address: 0x%04x\n", value);
-  strcat (rominfo->misc, buf);
+  pos += sprintf (rominfo->misc + pos, "Start address: 0x%04x\n", value);
 
-  strcat (rominfo->misc, "Logo data: ");
+  pos += sprintf (rominfo->misc + pos, "Logo data: ");
   if (memcmp (gb_header.logo,
               (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99) ?
                 rocket_logodata : gb_logodata,
@@ -846,19 +840,19 @@ gb_init (st_ucon64_nfo_t *rominfo)
     {
 #ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
-        strcat (rominfo->misc, "\x1b[01;32mOK\x1b[0m");
+        pos += sprintf (rominfo->misc + pos, "\x1b[01;32mOK\x1b[0m");
       else
 #endif
-        strcat (rominfo->misc, "OK");
+        pos += sprintf (rominfo->misc + pos, "OK");
     }
   else
     {
 #ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
-        strcat (rominfo->misc, "\x1b[01;31mBad\x1b[0m");
+        pos += sprintf (rominfo->misc + pos, "\x1b[01;31mBad\x1b[0m");
       else
 #endif
-        strcat (rominfo->misc, "Bad");
+        pos += sprintf (rominfo->misc + pos, "Bad");
     }
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)

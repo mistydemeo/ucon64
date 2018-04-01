@@ -1073,7 +1073,7 @@ int
 pce_init (st_ucon64_nfo_t *rominfo)
 {
   int result = -1, swapped;
-  unsigned int size, x;
+  unsigned int size, x, pos = strlen (rominfo->misc);
   unsigned char *rom_buffer;
   st_pce_data_t *info, key;
 
@@ -1158,35 +1158,24 @@ pce_init (st_ucon64_nfo_t *rominfo)
             rominfo->maker = NULL_TO_UNKNOWN_S (pce_maker[MIN (info->maker,
                                                                PCE_MAKER_MAX - 1)]);
 
-          if (info->serial)
-            if (info->serial[0])
-              {
-                strcat (rominfo->misc, "\nSerial: ");
-                strcat (rominfo->misc, info->serial);
-              }
+          if (info->serial && info->serial[0])
+            pos += sprintf (rominfo->misc + pos, "\nSerial: %s", info->serial);
 
           if (info->date)
             {
               int day = info->date / 10000, month = (info->date % 10000) / 100,
                   year = info->date % 100;
-              char date[80];
 
-              date[0] = 0;
               if (day)
-                sprintf (date, "\nDate: %d/%d/19%d", day, month, year);
+                pos += sprintf (rominfo->misc + pos, "\nDate: %d/%d/19%d", day, month, year);
               else if (month)
-                sprintf (date, "\nDate: %d/19%d", month, year);
+                pos += sprintf (rominfo->misc + pos, "\nDate: %d/19%d", month, year);
               else if (year)
-                sprintf (date, "\nDate: 19%d", year);
-              strcat (rominfo->misc, date);
+                pos += sprintf (rominfo->misc + pos, "\nDate: 19%d", year);
             }
 
-          if (info->comment)
-            if (info->comment[0])
-              {
-                strcat (rominfo->misc, "\nComment: ");
-                strcat (rominfo->misc, info->comment);
-              }
+          if (info->comment && info->comment[0])
+            pos += sprintf (rominfo->misc + pos, "\nComment: %s", info->comment);
         }
     }
 

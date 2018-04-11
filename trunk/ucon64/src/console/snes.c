@@ -1095,7 +1095,7 @@ snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
   fwrite (buffer2, 1, sizeof buffer2 - 20, destfile);
 
   // SRAM file (including the 20-byte SHA-1 hash)
-  snprintf (buffer2, sizeof header.name , "%s/cartridge.sram", id);
+  snprintf (buffer2, sizeof header.name, "%s/cartridge.sram", id);
   buffer2[sizeof header.name - 1] = '\0';
   stat (ucon64.fname, &fstate);
   set_ustar_header (&header, buffer2, 0644, sram_data_size + 20, fstate.st_mtime);
@@ -2080,7 +2080,11 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
           header.map_control[0] = 0x25;
           break;
         case 10 * MBIT:
+          header.map_control[0] = 0x37;
+          break;
         case 12 * MBIT:
+          header.map_control[0] = 0x3d;
+          break;
         case 16 * MBIT:
           header.map_control[0] = 0x95;
           break;

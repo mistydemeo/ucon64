@@ -2,7 +2,7 @@
 misc.c - miscellaneous functions
 
 Copyright (c) 1999 - 2008              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 Copyright (c) 2002 - 2005              Jan-Erik Karlsson (Amiga code)
 
 
@@ -705,7 +705,7 @@ toprint2 (int c)
 
 
 int
-is_func (char *s, int size, int (*func) (int))
+isfunc (char *s, int size, int (*func) (int))
 {
   char *p = s;
 
@@ -724,7 +724,7 @@ is_func (char *s, int size, int (*func) (int))
 
 
 char *
-to_func (char *s, int size, int (*func) (int))
+tofunc (char *s, int size, int (*func) (int))
 {
   char *p = s;
 
@@ -787,7 +787,7 @@ set_suffix (char *filename, const char *suffix)
 
   {
     size_t len2;
-    int basename_isupper = is_func (p, strlen (p), isupper2);
+    int basename_isupper = isfunc (p, strlen (p), isupper2);
 
     p = (char *) get_suffix (p);
     len2 = strlen (filename) - strlen (p);

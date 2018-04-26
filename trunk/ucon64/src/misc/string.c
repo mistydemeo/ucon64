@@ -1,8 +1,8 @@
 /*
 string.c - some string functions
 
-Copyright (c) 1999 - 2004             NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 dbjh
+Copyright (c) 1999 - 2008                    NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -29,10 +29,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__) || \
-        defined __MINGW32__
+#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__)
 static inline char *
-to_func (char *s, int len, int (*func) (int))
+tofunc (char *s, int len, int (*func) (int))
 {
   char *p = s;
 
@@ -46,14 +45,14 @@ to_func (char *s, int len, int (*func) (int))
 char *
 strupr (char *s)
 {
-  return to_func (s, strlen (s), toupper);
+  return tofunc (s, strlen (s), toupper);
 }
 
 
 char *
 strlwr (char *s)
 {
-  return to_func (s, strlen (s), tolower);
+  return tofunc (s, strlen (s), tolower);
 }
 #endif
 

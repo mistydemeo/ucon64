@@ -5138,13 +5138,6 @@ nes_compare (const void *key, const void *found)
 }
 
 
-static int
-toprint (int c)
-{
-  return isprint (c) ? c : '-';
-}
-
-
 nes_file_t
 nes_get_file_type (void)
 {
@@ -7006,10 +6999,10 @@ nes_init (st_ucon64_nfo_t *rominfo)
   type = PASOFAMI;                              // reset type, see below
 
   ucon64_fread (magic, 0, 15, ucon64.fname);
-  if (memcmp (magic, "NES", 3) == 0)
+  if (memcmp (magic, INES_SIG_S, 4) == 0 ||
+      memcmp (magic, "NES\x19", 4) == 0 || memcmp (magic, "NES\x1b", 4) == 0)
     /*
-      Check for "NES" and not for INES_SIG_S ("NES\x1a"), because there are two
-      NES files floating around on the internet with a pseudo iNES header:
+      There exist at least 2 NES files with a pseudo iNES header:
       "Home Alone 2 - Lost in New York (U) [b3]" (magic: "NES\x19") and
       "Linus Music Demo (PD)" (magic: "NES\x1b")
     */
@@ -7514,7 +7507,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
 
 static inline char *
-to_func (char *s, int len, int (*func) (int))
+tofunc (char *s, int len, int (*func) (int))
 {
   char *p = s;
 
@@ -7522,6 +7515,13 @@ to_func (char *s, int len, int (*func) (int))
     *p = (char) func (*p);
 
   return s;
+}
+
+
+static inline int
+fdsl_toprint (int c)
+{
+  return isprint (c) ? c : '-';
 }
 
 
@@ -7623,12 +7623,12 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
             }
           /*
             Some FDS files contain control characters in their names. sprintf()
-            won't print those character so we have to use to_func() with
-            toprint().
+            won't print those character, so we have to use tofunc() with
+            fdsl_toprint().
           */
           info_pos += sprintf (info + info_pos, "%03u $%02x '%-8s' $%04x-$%04x [%s]\n",
                                buffer[1], buffer[2],
-                               to_func (name, strlen (name), toprint),
+                               tofunc (name, strlen (name), fdsl_toprint),
                                start, start + size - 1, str_list[buffer[15]]);
 
           fseek (srcfile, size, SEEK_CUR);

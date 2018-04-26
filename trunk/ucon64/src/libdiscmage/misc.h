@@ -224,13 +224,13 @@ extern void mem_hexdump (const void *buffer, uint32_t n, int virtual_start);
   tofname()   replaces chars that can not be used for filenames
   toprint2()  replaces chars that should not be used for stdout
 
-  is_func()   use all is*() functions on an array of char
-  to_func()   use all to*() functions on an array of char
+  isfunc()    use all is*() functions on an array of char
+  tofunc()    use all to*() functions on an array of char
 
   strtrim()   trim isspace()'s from start and end of string
   strncpy2()  a safer strncpy that DOES terminate a string
 
-  is_upper2() wrapper for is_upper() (DAMN stupid programmers!)
+  isupper2()  wrapper for isupper() (DAMN stupid programmers!)
   set_suffix() set/replace suffix of filename with suffix
               suffix means in this case the suffix INCLUDING the dot '.'
   set_suffix_i() like set_suffix(), but doesn't change the case
@@ -254,12 +254,11 @@ extern int isfname (int c);
 extern int isprint2 (int c);
 extern int tofname (int c);
 extern int toprint2 (int c);
-extern int is_func (char *s, int size, int (*func) (int));
-extern char *to_func (char *s, int size, int (*func) (int));
-#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__) || \
-        defined __MINGW32__
-#define strupr(s) (to_func(s, strlen(s), toupper))
-#define strlwr(s) (to_func(s, strlen(s), tolower))
+extern int isfunc (char *s, int size, int (*func) (int));
+extern char *tofunc (char *s, int size, int (*func) (int));
+#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__)
+#define strupr(s) (tofunc(s, strlen(s), toupper))
+#define strlwr(s) (tofunc(s, strlen(s), tolower))
 #endif
 //#ifndef HAVE_STRCASESTR
 // strcasestr is GNU only

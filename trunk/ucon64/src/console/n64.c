@@ -2,7 +2,7 @@
 n64.c - Nintendo 64 support for uCON64
 
 Copyright (c) 1999 - 2001             NoisyB
-Copyright (c) 2002 - 2005, 2015, 2017 dbjh
+Copyright (c) 2002 - 2005, 2015, 2018 dbjh
 Copyright (c) 2005                    Parasyte
 
 05-06-2005 / Parasyte:
@@ -194,17 +194,12 @@ n64_v64 (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
-  if (rominfo->interleaved)
-    {
-      fprintf (stderr, "ERROR: Already in V64 format\n");
-      exit (1);
-    }
-
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".v64");
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, (size_t) ucon64.file_size);
+  if (!rominfo->interleaved)
+    ucon64_fbswap16 (dest_name, 0, (size_t) ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -216,17 +211,12 @@ n64_z64 (st_ucon64_nfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
 
-  if (!rominfo->interleaved)
-    {
-      fprintf (stderr, "ERROR: Already in Z64 format\n");
-      exit (1);
-    }
-
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".z64");
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, (size_t) ucon64.file_size);
+  if (rominfo->interleaved)
+    ucon64_fbswap16 (dest_name, 0, (size_t) ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -566,7 +556,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
 
 
 /*
-  ROM check sum routine is based on chksum64 V1.2 by Andreas Sterbenz
+  ROM checksum routine is based on chksum64 V1.2 by Andreas Sterbenz
   <stan@sbox.tu-graz.ac.at>, a program to calculate the ROM checksum of
   Nintendo 64 ROMs.
 */

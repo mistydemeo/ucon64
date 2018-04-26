@@ -663,7 +663,7 @@ ucon64_switches (st_ucon64_t *p)
 
 
 static inline char *
-to_func (char *s, int len, int (*func) (int))
+tofunc (char *s, int len, int (*func) (int))
 {
   char *p = s;
 
@@ -675,18 +675,9 @@ to_func (char *s, int len, int (*func) (int))
 
 
 static inline int
-toprint (int c)
+ls_toprint (int c)
 {
-  if (isprint (c))
-    return c;
-
-  // characters that also work with printf()
-#ifdef  USE_ANSI_COLOR
-  if (c == '\x1b')
-    return ucon64.ansi_color ? c : '.';
-#endif
-
-  return strchr ("\t\n\r", c) ? c : '.';
+  return isprint (c) ? c : '.';
 }
 
 
@@ -700,7 +691,6 @@ ucon64_options (st_ucon64_t *p)
   unsigned int checksum;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        *ptr = NULL, *values[UCON64_MAX_ARGS];
-  static char rename_buf[FILENAME_MAX];
   struct stat fstate;
   const char *option_arg = p->optarg;
 
@@ -716,7 +706,7 @@ ucon64_options (st_ucon64_t *p)
         value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+        printf (" (%s)\n", ucon64.fname_arch);
       else
         fputc ('\n', stdout);
       checksum = 0;
@@ -728,7 +718,7 @@ ucon64_options (st_ucon64_t *p)
       value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+        printf (" (%s)\n", ucon64.fname_arch);
       else
         fputc ('\n', stdout);
       ucon64_chksum (buf, NULL, NULL, ucon64.fname, (int) ucon64.file_size, value);
@@ -739,7 +729,7 @@ ucon64_options (st_ucon64_t *p)
       value = ucon64.nfo ? ucon64.nfo->backup_header_len : ucon64.backup_header_len;
       fputs (ucon64.fname, stdout);
       if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+        printf (" (%s)\n", ucon64.fname_arch);
       else
         fputc ('\n', stdout);
       ucon64_chksum (NULL, buf, NULL, ucon64.fname, (int) ucon64.file_size, value);
@@ -988,14 +978,13 @@ ucon64_options (st_ucon64_t *p)
             {
               fputs (ucon64.fname, stdout);
               if (ucon64.fname_arch[0])
-                printf (" (%s)\n", basename2 (ucon64.fname_arch));
+                printf (" (%s)\n", ucon64.fname_arch);
               else
                 fputc ('\n', stdout);
               // use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
               printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ?
                       ucon64.fcrc32 : ucon64.crc32);
               ucon64_dat_nfo ((st_ucon64_dat_t *) ucon64.dat, 1);
-              fputc ('\n', stdout);
             }
         }
       else
@@ -1008,6 +997,8 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_LS:
+      ucon64.newline_before_rom = 0;
+
       if (ucon64.nfo)
         ptr = ucon64.nfo->name;
 
@@ -1024,89 +1015,43 @@ ucon64_options (st_ucon64_t *p)
           if (stat (ucon64.fname, &fstate) != 0)
             break;
           strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
-          printf ("%-31.31s %10u %s %s", to_func (ptr, strlen (ptr), toprint),
+          printf ("%-31.31s %10u %s %s", tofunc (ptr, strlen (ptr), ls_toprint),
                   (unsigned int) ucon64.file_size, buf, basename2 (ucon64.fname));
           if (ucon64.fname_arch[0])
-            printf (" (%s)\n", basename2 (ucon64.fname_arch));
+            printf (" (%s)\n", ucon64.fname_arch);
           else
             fputc ('\n', stdout);
         }
       break;
 
     case UCON64_RDAT:
+      ucon64.newline_before_rom = 0;
       ucon64_rename (UCON64_RDAT);
       break;
 
     case UCON64_RROM:
+      ucon64.newline_before_rom = 0;
       ucon64_rename (UCON64_RROM);
       break;
 
     case UCON64_R83:
+      ucon64.newline_before_rom = 0;
       ucon64_rename (UCON64_R83);
       break;
 
     case UCON64_RJOLIET:
+      ucon64.newline_before_rom = 0;
       ucon64_rename (UCON64_RJOLIET);
       break;
 
     case UCON64_RL:
-      {
-#ifdef  AMIGA
-        char tmpbuf[FILENAME_MAX];
-
-        tmpnam2 (tmpbuf, ".");
-        rename2 (ucon64.fname, tmpbuf);
-#endif
-        strcpy (rename_buf, basename2 (ucon64.fname));
-        printf ("Renaming \"%s\" to ", rename_buf);
-        strlwr (rename_buf);
-        ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-        printf ("\"%s\"\n", rename_buf);
-#ifdef  AMIGA
-        x = rename2 (tmpbuf, rename_buf);
-#else
-        x = rename2 (ucon64.fname, rename_buf);
-#endif
-        if (x == 0)
-          ucon64.fname = (const char *) rename_buf;
-        else
-          {
-            fprintf (stderr, "ERROR: Could not rename \"%s\"\n", ucon64.fname);
-#ifdef  AMIGA
-            rename2 (tmpbuf, ucon64.fname);
-#endif
-          }
-      }
+      ucon64.newline_before_rom = 0;
+      ucon64_rename (UCON64_RL);
       break;
 
     case UCON64_RU:
-      {
-#ifdef  AMIGA
-        char tmpbuf[FILENAME_MAX];
-
-        tmpnam2 (tmpbuf, ".");
-        rename2 (ucon64.fname, tmpbuf);
-#endif
-        strcpy (rename_buf, basename2 (ucon64.fname));
-        printf ("Renaming \"%s\" to ", rename_buf);
-        strupr (rename_buf);
-        ucon64_output_fname (rename_buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-        printf ("\"%s\"\n", rename_buf);
-#ifdef  AMIGA
-        x = rename2 (tmpbuf, rename_buf);
-#else
-        x = rename2 (ucon64.fname, rename_buf);
-#endif
-        if (x == 0)
-          ucon64.fname = (const char *) rename_buf;
-        else
-          {
-            fprintf (stderr, "ERROR: Could not rename \"%s\"\n", ucon64.fname);
-#ifdef  AMIGA
-            rename2 (tmpbuf, ucon64.fname);
-#endif
-          }
-      }
+      ucon64.newline_before_rom = 0;
+      ucon64_rename (UCON64_RU);
       break;
 
 #ifdef  USE_DISCMAGE
@@ -1233,8 +1178,7 @@ ucon64_options (st_ucon64_t *p)
           ucon64.crc32 = 0;
           sscanf (option_arg, "%x", &ucon64.crc32);
 
-          if ((ucon64.dat = (st_ucon64_dat_t *)
-                            ucon64_dat_search (ucon64.crc32, NULL)) == NULL)
+          if ((ucon64.dat = ucon64_dat_search (ucon64.crc32)) == NULL)
             {
               printf (ucon64_msg[DAT_NOT_FOUND], ucon64.crc32);
               printf ("TIP: Be sure to install the right DAT files in %s\n",
@@ -1254,6 +1198,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_MKDAT:
+      ucon64.newline_before_rom = 0;
       ucon64_create_dat (option_arg, ucon64.fname,
                          ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
       break;

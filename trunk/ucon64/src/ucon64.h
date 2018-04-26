@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units.
 
 Copyright (c) 1999 - 2004              NoisyB
-Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -170,6 +170,7 @@ typedef struct
   */
   unsigned int backup_header_len;               // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
+  int newline_before_rom;                       // see ucon64_execute_options()
 
 #if 1
   int id;                                       // generate unique name (currently

@@ -71,9 +71,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer,
                         unsigned int rom_size);
 static int snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer);
-static unsigned short int get_internal_sums (st_ucon64_nfo_t *rominfo);
 static int snes_check_bs (void);
-static inline int snes_isprint (char *s, int len);
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 static void reset_header (void *header);
 static void set_nsrt_info (st_ucon64_nfo_t *rominfo, unsigned char *header);
@@ -3677,7 +3675,7 @@ snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer)
       exit (1);
     }
   for (i = 0; i < nblocks * 2; i++)
-    memcpy (rom_buffer2 + i * 0x8000, (*rom_buffer) + blocks[i] * 0x8000, 0x8000);
+    memcpy (rom_buffer2 + i * 0x8000, *rom_buffer + blocks[i] * 0x8000, 0x8000);
 
   free (*rom_buffer);
   *rom_buffer = rom_buffer2;
@@ -4458,8 +4456,9 @@ snes_init (st_ucon64_nfo_t *rominfo)
       rominfo->country = "Country: Your country?";
       rominfo->has_internal_crc = 0;
       ucon64.split = 0;                         // SRAM & RTS files are never split
-      if (x == SWC)
+      switch (x)
         {
+        case SWC:
           rominfo->backup_header_len = SWC_HEADER_LEN;
           rominfo->backup_usage = swc_usage[0].help;
           copier_type = SWC;
@@ -4467,29 +4466,27 @@ snes_init (st_ucon64_nfo_t *rominfo)
             pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card SRAM file");
           else if (header.type == 8)
             pos += sprintf (rominfo->misc + pos, "Type: Super Wild Card RTS file");
-        }
-      else if (x == UFO)
-        {
+          break;
+        case UFO:
           rominfo->backup_header_len = UFO_HEADER_LEN;
           rominfo->backup_usage = ufo_usage[0].help;
           copier_type = UFO;
           pos += sprintf (rominfo->misc + pos, "Type: Super UFO SRAM file");
-        }
-      else if (x == UFOSD)
-        {
+          break;
+        case UFOSD:
           rominfo->backup_header_len = 0;
           rominfo->backup_usage = ufosd_usage[0].help;
           copier_type = UFOSD;
-          pos += sprintf (rominfo->misc + pos, "Type: Super UFO Pro 8 SD SRAM file\n");
-          pos += sprintf (rominfo->misc + pos, "SRAM size: %d kBytes", y / 1024);
-        }
-      else if (x == SMINI)
-        {
+          pos += sprintf (rominfo->misc + pos, "Type: Super UFO Pro 8 SD SRAM file\n"
+                                               "SRAM size: %d kBytes", y / 1024);
+          break;
+        case SMINI:
           rominfo->backup_header_len = 0;
           rominfo->backup_usage = "SNES/Super Famicom Classic Mini";
           copier_type = SMINI;
-          pos += sprintf (rominfo->misc + pos, "Type: SNES/Super Famicom Classic Mini SRAM/save state file\n");
-          pos += sprintf (rominfo->misc + pos, "SRAM size: %d kBytes", y / 1024);
+          pos += sprintf (rominfo->misc + pos, "Type: SNES/Super Famicom Classic Mini SRAM/save state file\n"
+                                               "SRAM size: %d kBytes", y / 1024);
+          break;
         }
       return 0;                                 // rest is nonsense for SRAM/RTS file
     }

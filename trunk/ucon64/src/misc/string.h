@@ -1,8 +1,8 @@
 /*
 string.h - some string functions
 
-Copyright (c) 1999 - 2004 NoisyB
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 1999 - 2008                    NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -68,8 +68,7 @@ extern "C" {
 extern char *strtriml (char *str);
 extern char *strtrimr (char *str);
 extern int strarg (char **argv, char *str, const char *separator_s, int max_args);
-#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__) || \
-        defined __MINGW32__
+#if     !(defined _MSC_VER || defined __CYGWIN__ || defined __MSDOS__)
 extern char *strlwr (char *str);
 extern char *strupr (char *str);
 #endif

@@ -391,6 +391,7 @@ misc/dlopen.obj: config.h misc/dlopen.h misc/dxedll_pub.h misc/map.h
 misc/file.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS)
 misc/getopt.obj: config.h misc/getopt.h
 misc/getopt2.obj: config.h misc/file.h $(GETOPT2_H_DEPS)
+misc/ioapi.obj: config.h misc/ioapi.h
 misc/map.obj: config.h misc/map.h
 misc/misc.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/itypes.h $(MISC_H_DEPS)
 misc/parallel.obj: config.h misc/dlopen.h misc/file.h misc/property.h \

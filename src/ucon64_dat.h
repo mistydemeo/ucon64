@@ -66,14 +66,12 @@ typedef struct
   ucon64_dat_total_entries()  return # of ROMs in all DATs
   ucon64_dat_view()           display the complete DAT collection
   ucon64_dat_indexer()        create or update index file for DATs
-  ucon64_dat_flush()          flush contents of ucon64_dat_t
   ucon64_dat_nfo()            view contents of ucon64_dat_t
 */
-extern st_ucon64_dat_t *ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat);
+extern st_ucon64_dat_t *ucon64_dat_search (uint32_t crc32);
 extern uint32_t ucon64_dat_total_entries (void);
 extern int ucon64_dat_view (int console, int verbose);
 extern int ucon64_dat_indexer (void);
-//extern st_ucon64_dat_t *ucon64_dat_flush (st_ucon64_dat_t *dat);
 extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_dat_file_line);
 extern int ucon64_create_dat (const char *dat_file_name, const char *filename,
                               int backup_header_len);

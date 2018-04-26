@@ -2,7 +2,7 @@
 ucon64_dat.c - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
 Copyright (c) 1999 - 2004              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -171,8 +171,7 @@ const st_getopt2_t ucon64_dat_usage[] =
     },
     {
       "rdat", 0, 0, UCON64_RDAT,
-      NULL, "rename ROMs to their DATabase names\n"
-      "use " OPTION_S "o to specify an output directory",
+      NULL, "rename ROMs to their DATabase names",
       &ucon64_dat_obj[4]
     },
     {
@@ -677,6 +676,101 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
 }
 
 
+static void
+update_fname_field (st_ucon64_dat_t *dat)
+{
+  /*
+    The DAT files are not consistent. Some include the file suffix, but others
+    don't. We want to display the canonical filename only if it really differs
+    from the canonical game name (usually filename without suffix).
+  */
+  const char *p = get_suffix (dat->fname);
+
+  if (strlen (p) < 5)
+    {
+      int suffix = 0;
+
+      switch (dat->console)
+        {
+        case UCON64_SNES:
+          suffix = !(stricmp (p, ".smc") &&     // SNES
+                     stricmp (p, ".sfc") &&     // SNES
+                     stricmp (p, ".bin"));      // enhancement chips
+          break;
+        case UCON64_NES:
+          suffix = !(stricmp (p, ".fds") &&     // NES FDS
+                     stricmp (p, ".nes") &&     // NES
+                     stricmp (p, ".bin"));      // BIOS dumps
+          break;
+        case UCON64_GBA:
+          suffix = !stricmp (p, ".gba");        // Game Boy Advance
+          break;
+        case UCON64_GB:
+          suffix = !(stricmp (p, ".gb") &&      // Game Boy
+                     stricmp (p, ".gbc"));      // Game Boy Color
+          break;
+        case UCON64_GEN:
+          suffix = !(stricmp (p, ".smd") &&     // Genesis
+                     stricmp (p, ".md"));       // Genesis
+          break;
+        case UCON64_SMS:
+          suffix = !(stricmp (p, ".sc") &&      // Sega Master System
+                     stricmp (p, ".sg") &&      // Sega Master System
+                     stricmp (p, ".sms") &&     // Sega Master System
+                     stricmp (p, ".gg"));       // Game Gear
+          break;
+        case UCON64_JAG:
+          suffix = !stricmp (p, ".j64");        // Jaguar
+          break;
+        case UCON64_LYNX:
+          suffix = !stricmp (p, ".lnx");        // Lynx
+          break;
+        case UCON64_N64:
+          suffix = !(stricmp (p, ".v64") &&     // Nintendo 64
+                     stricmp (p, ".z64") &&     // Nintendo 64
+                     stricmp (p, ".ndd"));      // Nintendo 64DD
+          break;
+        case UCON64_PCE:
+          suffix = !stricmp (p, ".pce");        // PC-Engine / TurboGrafx-16
+          break;
+        case UCON64_ATA:
+          suffix = !(stricmp (p, ".a26") &&     // Atari 2600
+                     stricmp (p, ".a52") &&     // Atari 5200
+                     stricmp (p, ".a78"));      // Atari 7800
+          break;
+        case UCON64_VEC:
+          suffix = !(stricmp (p, ".vec") &&     // Vectrex
+                     stricmp (p, ".bin"));      // BIOS dumps
+          break;
+        case UCON64_SWAN:
+          suffix = !(stricmp (p, ".ws") &&      // WonderSwan
+                     stricmp (p, ".wsc"));      // WonderSwan Color
+          break;
+        case UCON64_COLECO:
+          suffix = !stricmp (p, ".col");        // ColecoVision
+          break;
+        case UCON64_VBOY:
+          suffix = !stricmp (p, ".vb");         // Virtual Boy
+          break;
+        case UCON64_INTELLI:
+        case UCON64_NGP:
+        case UCON64_NG:
+        case UCON64_ARCADE:
+        case UCON64_DC:
+        case UCON64_SAT:
+        case UCON64_3DO:
+        case UCON64_CDI:
+        case UCON64_XBOX:
+        case UCON64_CD32:
+        default:
+          break;
+        }
+      if (suffix)
+        *(char *) p = '\0';
+    }
+}
+
+
 int
 ucon64_dat_view (int console, int verbose)
 {
@@ -743,7 +837,10 @@ ucon64_dat_view (int console, int verbose)
               idx_entry = &((st_idx_entry_t *) p)[n];
               printf ("Checksum (CRC32): 0x%08x\n", idx_entry->crc32);
               if (get_dat_entry (fname_dat, &dat, idx_entry->crc32, idx_entry->filepos))
-                ucon64_dat_nfo (&dat, 0);
+                {
+                  update_fname_field (&dat);
+                  ucon64_dat_nfo (&dat, 0);
+                }
               fputc ('\n', stdout);
             }
           fclose_fdat ();
@@ -794,19 +891,18 @@ idx_compare (const void *key, const void *found)
 
 
 st_ucon64_dat_t *
-ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
+ucon64_dat_search (uint32_t crc32)
 {
   char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX];
   unsigned char *p = NULL;
   int32_t fsize = 0;
   st_idx_entry_t *idx_entry, key;
   static st_ucon64_dat_t dat;
-  st_ucon64_dat_t *dat_p = NULL;
-
-  memset (&dat, 0, sizeof (st_ucon64_dat_t));
 
   if (!crc32)
     return NULL;
+
+  reset_dat (&dat);
 
   while (get_next_file (fname_dat))
     {
@@ -844,21 +940,17 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
                                               sizeof (st_idx_entry_t), idx_compare);
       if (idx_entry)                            // CRC32 value found
         {
-          if (!datinfo)
-            dat_p = (st_ucon64_dat_t *) &dat;   // TODO?: malloc()
-          else
-            dat_p = (st_ucon64_dat_t *) &datinfo;
-
           // open dat file and read entry
-          if (get_dat_entry (fname_dat, dat_p, crc32, idx_entry->filepos) &&
-              crc32 == dat_p->crc32)
+          if (get_dat_entry (fname_dat, &dat, crc32, idx_entry->filepos) &&
+              crc32 == dat.crc32)
             {
-              strcpy (dat_p->datfile, basename2 (fname_dat));
-              get_dat_header (fname_dat, dat_p);
+              strcpy (dat.datfile, basename2 (fname_dat));
+              get_dat_header (fname_dat, &dat);
               closedir_ddat ();
               fclose_fdat ();
               free (p);
-              return dat_p;
+              update_fname_field (&dat);
+              return &dat;
             }
           fclose_fdat ();
         }
@@ -1005,17 +1097,6 @@ ucon64_dat_indexer (void)
 }
 
 
-#if 0
-st_ucon64_dat_t *
-ucon64_dat_flush (st_ucon64_dat_t *dat)
-{
-  memset (dat, 0, sizeof (st_ucon64_dat_t));
-  ucon64.dat = NULL;
-  return NULL;
-}
-#endif
-
-
 void
 ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_dat_file_line)
 {
@@ -1044,43 +1125,6 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_dat_file_line)
 
   if (dat->country)
     printf ("  %s\n", dat->country);
-
-  /*
-    The DAT files are not consistent. Some include the file suffix, but others
-    don't. We want to display the canonical filename only if it really differs
-    from the canonical game name (usually filename without suffix).
-    The following condition should match with the one in ucon64_rename().
-  */
-  p = (char *) get_suffix (dat->fname);
-  if (!(stricmp (p, ".a26") &&                  // Atari 2600
-        stricmp (p, ".a52") &&                  // Atari 5200
-        stricmp (p, ".a78") &&                  // Atari 7800
-        stricmp (p, ".j64") &&                  // Jaguar
-        stricmp (p, ".lnx") &&                  // Lynx
-        stricmp (p, ".ws") &&                   // WonderSwan
-        stricmp (p, ".wsc") &&                  // WonderSwan Color
-        stricmp (p, ".col") &&                  // ColecoVision
-        stricmp (p, ".vec") &&                  // Vectrex
-        stricmp (p, ".pce") &&                  // PC-Engine / TurboGrafx-16
-        stricmp (p, ".bin") &&                  // BIOS dumps
-        stricmp (p, ".fds") &&                  // NES FDS
-        stricmp (p, ".gb") &&                   // Game Boy
-        stricmp (p, ".gba") &&                  // Game Boy Advance
-        stricmp (p, ".gbc") &&                  // Game Boy Color
-        stricmp (p, ".v64") &&                  // Nintendo 64
-        stricmp (p, ".z64") &&                  // Nintendo 64
-        stricmp (p, ".ndd") &&                  // Nintendo 64DD
-        stricmp (p, ".nes") &&                  // NES
-        stricmp (p, ".smc") &&                  // SNES
-        stricmp (p, ".sfc") &&                  // SNES
-        stricmp (p, ".vb") &&                   // Virtual Boy
-        stricmp (p, ".gg") &&                   // Game Gear
-        stricmp (p, ".sc") &&                   // Sega Master System
-        stricmp (p, ".sg") &&                   // Sega Master System
-        stricmp (p, ".sms") &&                  // Sega Master System
-        stricmp (p, ".smd") &&                  // Genesis
-        stricmp (p, ".md")))                    // Genesis
-    ((char *) dat->fname)[strlen (dat->fname) - strlen (p)] = '\0';
 
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);

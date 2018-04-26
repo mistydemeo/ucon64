@@ -526,6 +526,7 @@ misc/dlopen.o: config.h misc/dlopen.h misc/dxedll_pub.h misc/map.h
 misc/file.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS)
 misc/getopt.o: config.h misc/getopt.h
 misc/getopt2.o: config.h misc/file.h $(GETOPT2_H_DEPS)
+misc/ioapi.o: config.h misc/ioapi.h
 misc/map.o: config.h misc/map.h
 misc/misc.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/itypes.h $(MISC_H_DEPS)
 misc/parallel.o: config.h misc/dlopen.h misc/file.h misc/property.h \

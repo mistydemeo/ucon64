@@ -253,6 +253,7 @@ format/toc.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
               format/format.h $(DXEDLL_PRIV_H_DEPS)
 format/other.o: config.h $(MISC_H_DEPS) libdiscmage.h libdm_misc.h \
                 format/format.h $(DXEDLL_PRIV_H_DEPS)
+ioapi.o: config.h ioapi.h
 map.o: config.h map.h $(DXEDLL_PRIV_H_DEPS)
 misc_z.o: config.h $(MISC_Z_H_DEPS) $(MISC_H_DEPS) map.h $(DXEDLL_PRIV_H_DEPS)
 unzip.o: config.h crypt.h ioapi.h unzip.h

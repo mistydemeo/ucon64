@@ -896,24 +896,26 @@ main (int argc, char **argv)
   ucon64.parport_needed =
   ucon64.io_mode = 0;
 
+  ucon64.backup_header_len =
   ucon64.battery =
   ucon64.bs_dump =
-  ucon64.backup_header_len =
-  ucon64.org_console =
   ucon64.controller =
   ucon64.controller2 =
   ucon64.do_not_calc_crc =
   ucon64.id =
   ucon64.interleaved =
   ucon64.mirror =
+  ucon64.org_console =
   ucon64.part_size =
   ucon64.region =
   ucon64.snes_header_base =
   ucon64.snes_hirom =
-  ucon64.org_split =
   ucon64.tv_standard =
+  ucon64.org_split =
   ucon64.use_dump_info =
   ucon64.vram = UCON64_UNKNOWN;
+
+  ucon64.newline_before_rom = 1;
 
   ucon64.flags = WF_DEFAULT;
 
@@ -1256,16 +1258,16 @@ ucon64_process_rom (const char *fname)
             than by looking at the filename. Paths in ZIP files should contain
             forward slashes. ucon64_fname_arch() changes forward slashes into
             backslashes (DIR_SEPARATORs) when uCON64 is compiled with Visual
-            C++ or MinGW so that basename2() always produces a correct base
-            name. So, if the entry in the ZIP file is a directory
-            ucon64.fname_arch will be an empty string.
+            C++ so that basename2() always produces a correct base name. So, if
+            the entry in the ZIP file is a directory ucon64.fname_arch will be
+            an empty string.
           */
           if (ucon64.fname_arch[0] == '\0')
             continue;
 
           ucon64.fname = fname;
 
-          ucon64_execute_options();
+          ucon64_execute_options ();
           if (ucon64.flags & WF_STOP)
             break;
         }
@@ -1280,7 +1282,7 @@ ucon64_process_rom (const char *fname)
     {
       ucon64.fname = fname;
 
-      ucon64_execute_options();
+      ucon64_execute_options ();
       if (ucon64.flags & WF_STOP)
         return 1;
     }
@@ -1327,7 +1329,7 @@ ucon64_execute_options (void)
 
         opts++;
 
-        if (!first_file)
+        if (!first_file && ucon64.newline_before_rom)
           fputc ('\n', stdout);
         first_file = 0;
         // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
@@ -1506,7 +1508,7 @@ ucon64_rom_handling (void)
   ucon64.dat = NULL;
   if (ucon64.crc32 != 0 && ucon64.dat_enabled)
     {
-      ucon64.dat = ucon64_dat_search (ucon64.crc32, NULL);
+      ucon64.dat = ucon64_dat_search (ucon64.crc32);
       if (ucon64.dat)
         {
           // detected file size must match DAT file size
@@ -1691,7 +1693,7 @@ ucon64_nfo (void)
 
 
 static inline char *
-to_func (char *s, int len, char (*func) (char))
+tofunc (char *s, int len, char (*func) (char))
 {
   char *p = s;
 
@@ -1703,7 +1705,7 @@ to_func (char *s, int len, char (*func) (char))
 
 
 static inline char
-toprint (char c)
+nfo_toprint (char c)
 {
   if (isprint ((int) c))
     return c;
@@ -1821,7 +1823,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   if (nfo->misc[0])
     {
       strcpy (buf, nfo->misc);
-      printf ("%s\n", to_func (buf, strlen (buf), toprint));
+      printf ("%s\n", tofunc (buf, strlen (buf), nfo_toprint));
     }
 
   // internal checksums?
@@ -1882,14 +1884,16 @@ ucon64_fname_arch (const char *fname)
         name[n] = DIR_SEPARATOR;
   }
 #endif
-  {
-    const char *p = basename2 (name);
-    size_t len = strlen (p);
+  if (basename2 (name)[0])
+    { // name does not refer to a directory
+      size_t len = strlen (name);
 
-    if (len >= FILENAME_MAX)
-      len = FILENAME_MAX - 1;
-    strncpy (ucon64.fname_arch, p, len)[len] = '\0';
-  }
+      if (len >= FILENAME_MAX)
+        len = FILENAME_MAX - 1;
+      strncpy (ucon64.fname_arch, name, len)[len] = '\0';
+    }
+  else
+    ucon64.fname_arch[0] = '\0';
 }
 #endif
 

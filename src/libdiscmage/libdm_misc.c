@@ -765,13 +765,13 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
   if (image->console_usage != NULL)
     {
       strcpy (buf, rominfo->console_usage[0].desc);
-      puts (to_func (buf, strlen (buf), toprint2));
+      puts (tofunc (buf, strlen (buf), toprint2));
 
 #if 0
       if (image->console_usage[1].desc)
         {
           strcpy (buf, rominfo->console_usage[1].desc);
-          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
+          printf ("  %s\n", tofunc (buf, strlen (buf), toprint2));
         }
 #endif
     }
@@ -877,31 +877,31 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
                 // some have a name with control chars in it -> replace control chars
                 strncpy2 (buf, iso_header.volume_id,
                           sizeof iso_header.volume_id);
-                to_func (buf, strlen (buf), toprint2);
+                tofunc (buf, strlen (buf), toprint2);
                 if (*strtrim (buf))
                   printf ("  %s\n", buf);
 
                 strncpy2 (buf, iso_header.publisher_id,
                           sizeof iso_header.publisher_id);
-                to_func (buf, strlen (buf), toprint2);
+                tofunc (buf, strlen (buf), toprint2);
                 if (*strtrim (buf))
                   printf ("  %s\n", buf);
 
                 strncpy2 (buf, iso_header.preparer_id,
                           sizeof iso_header.preparer_id);
-                to_func (buf, strlen (buf), toprint2);
+                tofunc (buf, strlen (buf), toprint2);
                 if (*strtrim (buf))
                   printf ("  %s\n", buf);
 #if 0
                 strncpy2 (buf, iso_header.logical_block_size,
                           sizeof iso_header.logical_block_size);
-                to_func (buf, strlen (buf), toprint2);
+                tofunc (buf, strlen (buf), toprint2);
                 if (*strtrim (buf))
                   printf ("  %s\n", buf);
 #endif
                 strncpy2 (buf, iso_header.application_id,
                           sizeof iso_header.application_id);
-                to_func (buf, strlen (buf), toprint2);
+                tofunc (buf, strlen (buf), toprint2);
                 if (*strtrim (buf))
                   printf ("  %s\n", buf);
               }

@@ -50,8 +50,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 
 
-#define SUFFIX_MAX 80
-
 #ifdef  USE_DISCMAGE
 #ifdef  DLOPEN
 #include "misc/dlopen.h"
@@ -916,7 +914,7 @@ remove_temp_file (void)
 char *
 ucon64_output_fname (char *requested_fname, int flags)
 {
-  char suffix[SUFFIX_MAX + 1];
+  char suffix[FILENAME_MAX];
   const char *p;
   size_t len;
 
@@ -926,7 +924,7 @@ ucon64_output_fname (char *requested_fname, int flags)
   len = strlen (p);
   if (len >= sizeof suffix)
     len = sizeof suffix - 1;
-  strncpy (suffix, p, len)[len] = '\0';         // in case suffix is >= SUFFIX_MAX chars
+  strncpy (suffix, p, len)[len] = '\0';         // in case suffix is >= sizeof suffix - 1 chars
 
   // OF_FORCE_BASENAME is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
@@ -948,10 +946,11 @@ ucon64_output_fname (char *requested_fname, int flags)
     }
   else                                          // an archive (for now: zip file)
     {
-      len = strlen (ucon64.output_path) + strlen (ucon64.fname_arch);
+      p = basename2 (ucon64.fname_arch);
+      len = strlen (ucon64.output_path) + strlen (p);
       if (len >= FILENAME_MAX)
         len = FILENAME_MAX - 1;
-      snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, ucon64.fname_arch);
+      snprintf (requested_fname, len + 1, "%s%s", ucon64.output_path, p);
       requested_fname[len] = '\0';
     }
 
@@ -1296,7 +1295,7 @@ ucon64_set_property_array (const char *org_configfile)
 
 
 static inline char *
-to_func (char *s, int len, int (*func) (int))
+tofunc (char *s, int len, int (*func) (int))
 {
   char *p = s;
 
@@ -1310,76 +1309,35 @@ to_func (char *s, int len, int (*func) (int))
 int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX], buf2[FILENAME_MAX], suffix[SUFFIX_MAX + 1];
-  const char *p, *p2;
-  unsigned int crc = 0;
-  int good_name;
+  char buf[FILENAME_MAX], buf2[FILENAME_MAX], suffix_buf[65];
+  const char *suffix = NULL, *p, *p2;
+  unsigned int crc;
+  int good_name = 0, add_suffix = 1;
 
-  *buf = '\0';
-  p = get_suffix (ucon64.fname);
-  {
-    size_t len = strlen (p);
-
-    if (len >= sizeof suffix)
-      len = sizeof suffix - 1;
-    strncpy (suffix, p, len)[len] = '\0';       // in case suffix is >= SUFFIX_MAX chars
-  }
+  *buf2 = '\0';
 
   switch (mode)
     {
     case UCON64_RROM:
       if (ucon64.nfo && ucon64.nfo->name[0])
         {
-          strcpy (buf, ucon64.nfo->name);
-          strtriml (strtrimr (buf));
+          suffix = get_suffix (ucon64.fname);
+          strcpy (buf2, ucon64.nfo->name);
+          strtriml (strtrimr (buf2));
         }
       break;
-
     case UCON64_RDAT:                           // GoodXXXX style rename
       if (ucon64.dat && ((st_ucon64_dat_t *) ucon64.dat)->fname[0])
         {
-          p = get_suffix (((st_ucon64_dat_t *) ucon64.dat)->fname);
-          strcpy (buf, ((st_ucon64_dat_t *) ucon64.dat)->fname);
-
-          // the following condition should match with the one in ucon64_dat_nfo()
-          if (p[0] && strlen (p) < 5)
-            if (!(stricmp (p, ".a26") &&        // Atari 2600
-                  stricmp (p, ".a52") &&        // Atari 5200
-                  stricmp (p, ".a78") &&        // Atari 7800
-                  stricmp (p, ".j64") &&        // Jaguar
-                  stricmp (p, ".lnx") &&        // Lynx
-                  stricmp (p, ".ws") &&         // WonderSwan
-                  stricmp (p, ".wsc") &&        // WonderSwan Color
-                  stricmp (p, ".col") &&        // ColecoVision
-                  stricmp (p, ".vec") &&        // Vectrex
-                  stricmp (p, ".pce") &&        // PC-Engine / TurboGrafx-16
-                  stricmp (p, ".bin") &&        // BIOS dumps
-                  stricmp (p, ".fds") &&        // NES FDS
-                  stricmp (p, ".gb") &&         // Game Boy
-                  stricmp (p, ".gba") &&        // Game Boy Advance
-                  stricmp (p, ".gbc") &&        // Game Boy Color
-                  stricmp (p, ".v64") &&        // Nintendo 64
-                  stricmp (p, ".z64") &&        // Nintendo 64
-                  stricmp (p, ".ndd") &&        // Nintendo 64DD
-                  stricmp (p, ".nes") &&        // NES
-                  stricmp (p, ".smc") &&        // SNES
-                  stricmp (p, ".sfc") &&        // SNES
-                  stricmp (p, ".vb") &&         // Virtual Boy
-                  stricmp (p, ".gg") &&         // Game Gear
-                  stricmp (p, ".sc") &&         // Sega Master System
-                  stricmp (p, ".sg") &&         // Sega Master System
-                  stricmp (p, ".sms") &&        // Sega Master System
-                  stricmp (p, ".smd") &&        // Genesis
-                  stricmp (p, ".md")))          // Genesis
-              buf[strlen (buf) - strlen (p)] = '\0';
+          suffix = get_suffix (ucon64.fname);
+          strcpy (buf2, ((st_ucon64_dat_t *) ucon64.dat)->fname);
         }
       break;
-
     case UCON64_RJOLIET:
       /*
-        We *have* to look at the structure of the file name, i.e., handle
+        We *have* to look at the structure of the filename, i.e., handle
         "base name" and suffix differently. This is necessary, because it's
-        usual that file names are identified by their suffix (especially on
+        usual that filenames are identified by their suffix (especially on
         Windows).
         In order to be able to say that the base name and/or the suffix is too
         long, we have to specify a maximum length for both. We chose maximum
@@ -1394,17 +1352,23 @@ ucon64_rename (int mode)
       {
         size_t len, len2;
 
+        p = get_suffix (ucon64.fname);
+        len2 = strlen (p);
+        if (len2 >= sizeof suffix_buf)
+          len2 = sizeof suffix_buf - 1;
+        strncpy (suffix_buf, p, len2)[len2] = '\0';
+        suffix = suffix_buf;
+
         p = basename2 (ucon64.fname);
+        strcpy (buf2, p);
         len = strlen (p);               // it's safe to assume that len is < FILENAME_MAX
-        if (len <= 64)                  // Joliet maximum file name length is 64 chars
-          {
-            printf ("Skipping \"%s\"\n", p);
-            return 0;
-          }
-        strcpy (buf, p);
-        crc = crc32 (0, (unsigned char *) buf, len);
-        len2 = strlen (suffix);
+        crc = crc32 (0, (unsigned char *) buf2, len);
         len -= len2;
+        if (len + len2 <= 64)           // Joliet maximum filename length is 64 chars
+          {
+            buf2[len] = '\0';
+            break;
+          }
         if (len2 <= 16)                 // len > 48
           len = 64 - len2 - 3;
         else                            // len2 > 16
@@ -1416,121 +1380,136 @@ ucon64_rename (int mode)
                 len = 48 - 3;
                 len2 = 16;
               }
-            suffix[len2] = '\0';
+            suffix_buf[len2] = '\0';
           }
         // NOTE: The implementation of snprintf() in glibc 2.3.5-10 (FC4)
         //       terminates the string. So, a size argument of 4 results in 3
         //       characters plus a string terminator.
-        snprintf (buf + len, 4, "%0x", crc);
-        buf[len + 3] = '\0';
+        snprintf (buf2 + len, 4, "%0x", crc);
+        buf2[len + 3] = '\0';
       }
       break;
-
     case UCON64_R83:
       /*
-        The code for handling "FAT" file names is similar to the code that
-        handles Joliet file names, except that the maximum lengths for base
-        name and suffix are fixed (8 and 4 respectively).
-        Note that FAT is quoted, as this code mainly limits the file name
-        length. It doesn't guarantee that the file name is correct for FAT file
-        systems. For example, a file with a name with a leading period (not a
-        valid file name on a FAT file system) doesn't get special treatment.
+        The code for handling "FAT" filenames is similar to the code that
+        handles Joliet filenames, except that the maximum lengths for base name
+        and suffix are fixed (8 and 4 respectively).
+        Note that FAT is quoted, as this code mainly limits the filename length.
+        It doesn't guarantee that the filename is correct for FAT file systems.
+        For example, a file with a name with a leading period (not a valid
+        filename on a FAT file system) doesn't get special treatment.
       */
       {
         size_t len, len2;
 
+        p = get_suffix (ucon64.fname);
+        len2 = strlen (p);
+        if (len2 > 4)
+          len2 = 4;
+        strncpy (suffix_buf, p, len2)[len2] = '\0';
+        suffix = suffix_buf;
+
         p = basename2 (ucon64.fname);
+        strcpy (buf2, p);
         len = strlen (p);               // it's safe to assume that len is < FILENAME_MAX
-        strcpy (buf, p);
-        crc = crc32 (0, (unsigned char *) buf, len);
-        len2 = strlen (suffix);
+        crc = crc32 (0, (unsigned char *) buf2, len);
         len -= len2;
-        if (len <= 8 && len2 <= 4)      // FAT maximum file name length is 8 + 4 chars
+        if (len <= 8 && len2 <= 4)      // FAT maximum filename length is 8 + 4 chars
           {                             //  (we include the period with the suffix)
-            printf ("Skipping \"%s\"\n", p);
-            return 0;
+            buf2[len] = '\0';
+            break;
           }
         if (len > 8 - 3)
           len = 8 - 3;
-        if (len2 > 4)
-          suffix[4] = '\0';
-        snprintf (buf + len, 4, "%0x", crc);
-        buf[len + 3] = '\0';
+        snprintf (buf2 + len, 4, "%0x", crc);
+        buf2[len + 3] = '\0';
       }
       break;
-
+    case UCON64_RL:
+      strcpy (buf2, basename2 (ucon64.fname));
+      strlwr (buf2);
+      break;
+    case UCON64_RU:
+      strcpy (buf2, basename2 (ucon64.fname));
+      strupr (buf2);
+      break;
     default:
       return 0;                                 // invalid mode
     }
 
-  if (!buf[0])
+  if (!buf2[0])
     return 0;
 
   // replace chars the fs might not like
-  strcpy (buf2, to_func (buf, strlen (buf), tofname));
+  tofunc (buf2, strlen (buf2), tofname);
   strcpy (buf, basename2 (ucon64.fname));
 
-  p = get_suffix (buf);
-  // Remove the suffix from buf (ucon64.fname). Note that this isn't fool-proof.
-  //  However, this is the best solution, because several DAT files contain
-  //  "canonical" file names with a suffix. That is a STUPID bug.
-  if (p)
-    buf[strlen (buf) - strlen (p)] = '\0';
+  if (mode != UCON64_RL && mode != UCON64_RU)
+    // Remove the suffix (ucon64.fname). Note that this isn't fool-proof.
+    //  However, this is the best solution, because several DAT files contain
+    //  "canonical" filenames with a suffix. That is a STUPID bug.
+    *(char *) get_suffix (buf) = '\0';
 
-#ifdef  DEBUG
-//  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
-#endif
   if (!strcmp (buf, buf2))
-    // also process files with a correct name, so that -rename can be used to
+    // Also process files with a correct name, so that -rename can be used to
     //  "weed" out good dumps when -o is used (like GoodXXXX without inplace
-    //  command)
+    //  command).
     good_name = 1;
-  else
+  else if (mode != UCON64_RL && mode != UCON64_RU)
     {
       // Another test if the file already has a correct name. This is necessary
       //  for files without a "normal" suffix (e.g. ".smc"). Take for example a
       //  name like "Final Fantasy III (V1.1) (U) [!]".
-      strcat (buf, suffix);
+      size_t len = strlen (buf), len2 = strlen (suffix);
+
+      if (len + len2 >= sizeof buf)
+        len2 = sizeof buf - 1 - len;
+      strncpy (buf + len, suffix, len2)[len2] = '\0';
       if (!strcmp (buf, buf2))
         {
           good_name = 1;
-          suffix[0] = '\0';                     // discard "suffix" (part after period)
+          add_suffix = 0;                       // suffix is part of the correct name
         }
       else
         good_name = 0;
     }
 
-  // DON'T use set_suffix()! Consider file names (in the DAT file) like
-  //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
-  strcat (buf2, suffix);
+  if (add_suffix && mode != UCON64_RL && mode != UCON64_RU)
+    {
+      // DON'T use set_suffix()! Consider filenames (in the DAT file) like
+      //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
+      size_t len = strlen (buf2), len2 = strlen (suffix);
 
-  if (mode == UCON64_R83)
-    buf2[12] = '\0';
+      if (len + len2 >= sizeof buf2)
+        len2 = sizeof buf2 - 1 - len;
+      strncpy (buf2 + len, suffix, len2)[len2] = '\0';
+    }
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
   p = basename2 (ucon64.fname);
   p2 = basename2 (buf2);
 
-  if (one_file (ucon64.fname, buf2) && !strcmp (p, p2))
-    {                                           // skip only if the letter case
-      printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
+  if (one_file (ucon64.fname, buf2))
+    {
+      if (!strcmp (p, p2))                      // skip only if the letter case
+        {                                       //  also matches (Windows...)
+          printf ("Skipping \"%s\"\n", p);
+          return 0;
+        }
+    }
+  else if (!access (buf2, F_OK))
+    // A file with that name already exists? Ignore the letter case, because
+    //  Windows does so too.
+    {
+      printf ("Skipping \"%s\"\n", p);
+      if (!good_name)
+        printf ("  Target filename is \"%s\"\n", p2);
+      printf ("  A file with the same name, but possibly different contents exists in the\n"
+              "  output directory (\"%s\")\n", ucon64.output_path[0] ?
+                ucon64.output_path : "." DIR_SEPARATOR_S);
       return 0;
     }
-
-  if (!good_name)
-    /*
-      Note that the previous statement causes whatever file is present in the
-      dir specified with -o (or the current dir) to be overwritten (if the file
-      already has a correct name). This seems bad, but is actually better than
-      making a backup. It isn't so bad, because the file that gets overwritten
-      is either the same as the file it is overwritten with or doesn't deserve
-      its name.
-      Without this statement repeating a rename action for already renamed
-      files would result in a real mess. And I (dbjh) mean a *real* mess...
-    */
-    if (!access (buf2, F_OK) && !strcmp (p, p2)) // a file with that name exists already?
-      ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
   if (!good_name)
     printf ("Renaming \"%s\" to \"%s\"\n", p, p2);
@@ -2017,9 +1996,9 @@ ucon64_find (const char *filename, size_t start, size_t len,
       char *display_search;
       int n;
 
-      fputs (basename2 (filename), stdout);
+      fputs (filename, stdout);
       if (ucon64.fname_arch[0])
-        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+        printf (" (%s)\n", ucon64.fname_arch);
       else
         fputc ('\n', stdout);
 

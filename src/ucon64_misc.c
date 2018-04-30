@@ -1460,11 +1460,7 @@ ucon64_rename (int mode)
       // Another test if the file already has a correct name. This is necessary
       //  for files without a "normal" suffix (e.g. ".smc"). Take for example a
       //  name like "Final Fantasy III (V1.1) (U) [!]".
-      size_t len = strlen (buf), len2 = strlen (suffix);
-
-      if (len + len2 >= sizeof buf)
-        len2 = sizeof buf - 1 - len;
-      strncpy (buf + len, suffix, len2)[len2] = '\0';
+      strcat (buf, suffix);
       if (!strcmp (buf, buf2))
         {
           good_name = 1;

@@ -1,9 +1,9 @@
 /*
 n64.c - Nintendo 64 support for uCON64
 
-Copyright (c) 1999 - 2001             NoisyB
-Copyright (c) 2002 - 2005, 2015, 2018 dbjh
-Copyright (c) 2005                    Parasyte
+Copyright (c) 1999 - 2001                    NoisyB
+Copyright (c) 2002 - 2005, 2015, 2017 - 2018 dbjh
+Copyright (c) 2005                           Parasyte
 
 05-06-2005 / Parasyte:
   Added support for remaining CIC algorithms in n64_chksum()

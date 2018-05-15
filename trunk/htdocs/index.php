@@ -266,6 +266,8 @@ can be found <a href="http://www.planetmir.de/html/softw.htm#ucon64">here</a> (t
     <td><font size="-1">
 <img src="images/ucon64misc.png" border="0" height="50"><font size="-1"><br>
 <br>
+<img src="images/dosbox.png"><br>
+Please read Megabuild6b.txt for configuration.<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_SVN4067_Megabuild6b-win32.zip?download">DOSBox_SVN4067_Megabuild6b-win32.zip</a><br>
 DOSBox SVN revision 4067 with changes of Megabuild 6b Win32<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-r4067-mb6b.tar.gz?download">dosbox-r4067-mb6b.tar.gz</a><br>

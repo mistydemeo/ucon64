@@ -268,14 +268,17 @@ can be found <a href="http://www.planetmir.de/html/softw.htm#ucon64">here</a> (t
 <br>
 <img src="images/dosbox.png"><br>
 Please read Megabuild6b.txt for configuration.<br>
+<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_SVN4067_Megabuild6b-win32.zip?download">DOSBox_SVN4067_Megabuild6b-win32.zip</a><br>
 DOSBox SVN revision 4067 with changes of Megabuild 6b Win32<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-r4067-mb6b.tar.gz?download">dosbox-r4067-mb6b.tar.gz</a><br>
 DOSBox SVN revision 4067 with changes of Megabuild 6b source code<br>
+<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_Megabuild6b-win32.zip?download">DOSBox_Megabuild6b-win32.zip</a><br>
 Enhanced DOSBox Megabuild 6 Win32<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-mb6b.tar.gz?download">dosbox-mb6b.tar.gz</a><br>
 Enhanced DOSBox Megabuild 6 source code<br>
+<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_Megabuild6-win32.zip?download">DOSBox_Megabuild6-win32.zip</a><br>
 Original DOSBox Megabuild 6 Win32 (repackaged to include PortTalk)<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-mb6.tar.gz?download">dosbox-mb6.tar.gz</a><br>

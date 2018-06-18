@@ -27,7 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 
 
-#define DEX_HEADER_START 0
 #define DEX_HEADER_LEN 0
 
 extern const st_getopt2_t dex_usage[];

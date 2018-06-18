@@ -1,9 +1,9 @@
 /*
 usb.c - USB support
 
-Copyright (c) 2003 Ulrich Hecht <uli@emulinks.de>
-Copyright (c) 2004 NoisyB
-Copyright (c) 2015 dbjh
+Copyright (c) 2003       Ulrich Hecht <uli@emulinks.de>
+Copyright (c) 2004       NoisyB
+Copyright (c) 2015, 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -39,11 +39,11 @@ usb_get_string_ascii (usb_dev_handle *dev, int index, char *buf, int buflen)
     return rval;
   if ((rval = usb_control_msg (dev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
                                (USB_DT_STRING << 8) + index, 0x0409, buffer,
-                               sizeof (buffer), 5000)) < 0)
+                               sizeof buffer, 5000)) < 0)
     return rval;
   if (buffer[1] != USB_DT_STRING)
     {
-      *buf = 0;
+      *buf = '\0';
       return 0;
     }
   if ((unsigned char) buffer[0] < rval)
@@ -55,10 +55,10 @@ usb_get_string_ascii (usb_dev_handle *dev, int index, char *buf, int buflen)
       if (i > buflen)                           // destination buffer overflow
         break;
       buf[i - 1] = buffer[2 * i];
-      if (buffer[2 * i + 1] != 0)               // outside of ISO Latin1 range
+      if (buffer[2 * i + 1] != '\0')            // outside of ISO Latin1 range
         buf[i - 1] = '?';
     }
-  buf[i - 1] = 0;
+  buf[i - 1] = '\0';
   return i - 1;
 }
 
@@ -80,8 +80,8 @@ usbport_open (usb_dev_handle **result_handle, int vendor_id, char *vendor_name,
         if ((vendor_id == 0 || dev->descriptor.idVendor == vendor_id) &&
             (product_id == 0 || dev->descriptor.idProduct == product_id))
           {
-            char vendor[256], product[256], serial[256];
-            int len;
+            char vendor[256];
+            int len = 0;
 
             handle = usb_open (dev);
             if (!handle)
@@ -89,10 +89,10 @@ usbport_open (usb_dev_handle **result_handle, int vendor_id, char *vendor_name,
                 error_code = USBOPEN_ERR_ACCESS;
                 continue;
               }
-            len = vendor[0] = 0;
+            vendor[0] = '\0';
             if (dev->descriptor.iManufacturer > 0)
               len = usb_get_string_ascii (handle, dev->descriptor.iManufacturer,
-                                          vendor, sizeof (vendor));
+                                          vendor, sizeof vendor);
             if (len < 0)
               error_code = USBOPEN_ERR_ACCESS;
             else
@@ -100,10 +100,12 @@ usbport_open (usb_dev_handle **result_handle, int vendor_id, char *vendor_name,
                 error_code = USBOPEN_ERR_NOTFOUND;
                 if (strcmp (vendor, vendor_name) == 0)
                   {
-                    len = product[0] = 0;
+                    char product[256];
+
+                    product[0] = '\0';
                     if (dev->descriptor.iProduct > 0)
                       len = usb_get_string_ascii (handle, dev->descriptor.iProduct,
-                                                  product, sizeof (product));
+                                                  product, sizeof product);
                     if (len < 0)
                       error_code = USBOPEN_ERR_ACCESS;
                     else
@@ -111,11 +113,13 @@ usbport_open (usb_dev_handle **result_handle, int vendor_id, char *vendor_name,
                         error_code = USBOPEN_ERR_NOTFOUND;
                         if (strcmp (product, product_name) == 0)
                           {
-                            len = serial[0] = 0;
+                            char serial[256];
+
+                            serial[0] = '\0';
                             if (dev->descriptor.iSerialNumber > 0)
                               len = usb_get_string_ascii (handle,
                                                           dev->descriptor.iSerialNumber,
-                                                          serial, sizeof (serial));
+                                                          serial, sizeof serial);
                             if (len < 0)
                               error_code = USBOPEN_ERR_ACCESS;
                             else
@@ -139,46 +143,6 @@ usbport_open (usb_dev_handle **result_handle, int vendor_id, char *vendor_name,
 }
 
 
-int
-usbport_close (usb_dev_handle *handle)
-{
-  usb_release_interface (handle, 0);
-  return usb_close (handle);
-}
-
-
-int
-usbport_read (usb_dev_handle *handle, char *buffer, int buffer_size)
-{
-  int result;
-
-  result = usb_bulk_read (handle, 0x83, buffer, buffer_size, 20000);
-  if (result == -1)
-    {
-      fprintf (stderr, "ERROR: Could not read requested number of bytes read from USB\n"
-                       "       %s\n", usb_strerror ());
-      return -1;
-    }
-  return result;
-}
-
-
-int
-usbport_write (usb_dev_handle *handle, char *buffer, int buffer_size)
-{
-  int result;
-
-  result = usb_bulk_write (handle, 0x4, buffer, buffer_size, 20000);
-  if (result == -1)
-    {
-      fprintf (stderr, "ERROR: Could not write requested number of bytes read to USB\n"
-                       "       %s\n", usb_strerror ());
-      return -1;
-    }
-  return result;
-}
-
-
 struct usb_device *
 usbport_probe (int vendor_id, int product_id)
 {
@@ -196,6 +160,34 @@ usbport_probe (int vendor_id, int product_id)
         return dev;
 
   return NULL;
+}
+
+
+int
+usbport_read (usb_dev_handle *handle, int endpoint, char *buffer,
+              int buffer_size, int timeout)
+{
+  int result = usb_bulk_read (handle, endpoint, buffer, buffer_size, timeout);
+
+  if (result < 0)
+    fprintf (stderr, "\n"
+                     "ERROR: Could not read requested number of bytes from USB\n"
+                     "       %s\n", usb_strerror ());
+  return result;
+}
+
+
+int
+usbport_write (usb_dev_handle *handle, int endpoint, char *buffer,
+               int buffer_size, int timeout)
+{
+  int result = usb_bulk_write (handle, endpoint, buffer, buffer_size, timeout);
+
+  if (result < 0)
+    fprintf (stderr, "\n"
+                     "ERROR: Could not write requested number of bytes to USB\n"
+                     "       %s\n", usb_strerror ());
+  return result;
 }
 
 #endif // USE_USB

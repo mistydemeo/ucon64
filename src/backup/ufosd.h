@@ -1,7 +1,7 @@
 /*
 ufosd.h - Super UFO Pro 8 SD support for uCON64
 
-Copyright (c) 2017 dbjh
+Copyright (c) 2017 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UFOSD_H
 #define UFOSD_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "misc/getopt2.h"                       // st_getopt2_t
 
 
@@ -38,7 +41,7 @@ Offset       Content
   8-0xF      "SFCUFOSD"
   0x10       0
   0x11       Internal size in Mbit
-  0x12       SRAM size: 0 = 0 kb, 1 = 16 kb, 2 = 64 kb, 3 = 128 kb, 7 = 1 Mb
+  0x12       SRAM size: 0 = 0 kb, 1 = 16 kb, 2 = 64 kb, 3 = 256 kb, 7 = 1 Mb
   0x13-0x16  Memory map control. Empirical data obtained by dumping cartridges:
 
              LoROM:
@@ -86,8 +89,8 @@ Offset       Content
                                         01 = Not used
                                         10 = Address bit = 0 selects SRAM
                                         11 = Address bit = 1 selects SRAM
-  0x17       SRAM type: 0 = HiROM, 1 = LoROM
-  0x18       0
+  0x17       Bank type: 0 = HiROM, 1 = LoROM
+  0x18       Television standard: 0 = NTSC, 2 = PAL
   0x19       For non-special chip cartridges: 0; for
              Hoshi no Kirby Super Deluxe (J) (V1.1), Star Fox (U) (V1.0),
              Super Mario Kart (J), Wild Trax (J) (V1.1): 0xFF
@@ -100,21 +103,25 @@ typedef struct st_ufosd_header
 {
   unsigned char size;
   unsigned char pad1;
-  unsigned char banktype;
+  unsigned char banktype_copy;
   unsigned char pad2[5];
   unsigned char id[8];
   unsigned char pad3;
   unsigned char internal_size;
   unsigned char sram_size;
   unsigned char map_control[4];
-  unsigned char sram_type;
-  unsigned char pad4;
+  unsigned char banktype;
+  unsigned char tvtype;
   unsigned char special_chip;
-  unsigned char pad5[6];
+  unsigned char pad4[6];
   unsigned char internal_header_data[32];
-  unsigned char pad6[448];
+  unsigned char pad5[448];
 } st_ufosd_header_t;
 
 #define UFOSD_HEADER_LEN (sizeof (st_ufosd_header_t))
+
+#ifdef  USE_USB
+extern int ufosd_write_rom (const char *filename);
+#endif
 
 #endif

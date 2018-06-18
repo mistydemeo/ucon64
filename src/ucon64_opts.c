@@ -80,6 +80,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/smd.h"
 #include "backup/smsgg-pro.h"
 #include "backup/swc.h"
+#include "backup/ufosd.h"
 #include "patch/aps.h"
 #include "patch/bsl.h"
 #include "patch/gg.h"
@@ -325,12 +326,6 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XFIG:
     case UCON64_XFIGC:
     case UCON64_XFIGS:
-    case UCON64_XGD3:
-    case UCON64_XGD3R:
-    case UCON64_XGD3S:
-    case UCON64_XGD6:
-    case UCON64_XGD6R:
-    case UCON64_XGD6S:
     case UCON64_XLIT:
     case UCON64_XMSG:
     case UCON64_XRESET:
@@ -348,6 +343,12 @@ ucon64_switches (st_ucon64_t *p)
         ucon64.parport_mode = PPMODE_SPP;
     case UCON64_XCMC:
     case UCON64_XCMCT:
+    case UCON64_XGD3:
+    case UCON64_XGD3R:
+    case UCON64_XGD3S:
+    case UCON64_XGD6:
+    case UCON64_XGD6R:
+    case UCON64_XGD6S:
     case UCON64_XMCCL:
     case UCON64_XMCD:
       if (!UCON64_ISSET2 (ucon64.parport_mode, parport_mode_t))
@@ -472,6 +473,7 @@ ucon64_switches (st_ucon64_t *p)
 
 #ifdef  USE_USB
     case UCON64_XQD16:
+    case UCON64_XUFOSD:
       /*
         It is possible to perform USB I/O without being root. However, without
         any configuration root privileges are required. By default uCON64 will
@@ -1864,7 +1866,7 @@ ucon64_options (st_ucon64_t *p)
       fputs ("Resetting parallel port...", stdout);
       outportb (ucon64.parport + PARPORT_DATA, 0);
       // Strobe, Auto Linefeed and Select Printer are hardware inverted, so we
-      //  have to write a 1 to bring the associated pins in a low state (0v).
+      //  have to write a 1 to bring the associated pins in a low state (0V).
       outportb (ucon64.parport + PARPORT_CONTROL,
                 (inportb (ucon64.parport + PARPORT_CONTROL) & 0xf0) | 0x0b);
       puts ("done");
@@ -1899,7 +1901,7 @@ ucon64_options (st_ucon64_t *p)
         {
           if (!ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM does not seem to be interleaved, but the Doctor V64 Junior only\n"
-                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
+                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format",
                    stderr);
           else
             doctor64jr_write (ucon64.fname, ucon64.parport);
@@ -1971,11 +1973,11 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format\n",
+            fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format",
                    stderr);
           else if (ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM seems to be interleaved, but the FIG does not support\n"
-                   "       interleaved ROMs. Convert to a FIG compatible format\n",
+                   "       interleaved ROMs. Convert to a FIG compatible format",
                    stderr);
           else // file exists => send it to the copier
             fig_write_rom (ucon64.fname, ucon64.parport);
@@ -2031,7 +2033,7 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
+            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format",
                    stderr);
           else                                  // file exists => send it to the copier
             gd3_write_rom (ucon64.fname, ucon64.parport, ucon64.nfo);
@@ -2061,7 +2063,7 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
+            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format",
                    stderr);
           else
             gd6_write_rom (ucon64.fname, ucon64.parport, ucon64.nfo);
@@ -2091,11 +2093,11 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has a header. Remove it with " OPTION_LONG_S "stp or " OPTION_LONG_S "mgd\n",
+            fputs ("ERROR: This ROM has a header. Remove it with " OPTION_LONG_S "stp or " OPTION_LONG_S "mgd",
                    stderr);
           else if (ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM seems to be interleaved, but uCON64 does not support\n"
-                   "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with " OPTION_LONG_S "mgd\n",
+                   "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with " OPTION_LONG_S "mgd",
                    stderr);
           else
             smsgg_write_rom (ucon64.fname, ucon64.parport);
@@ -2146,11 +2148,11 @@ ucon64_options (st_ucon64_t *p)
       else                                      // file exists => send it to the MD-PRO
         {
           if (ucon64.nfo->backup_header_len)    // binary with header is possible
-            fputs ("ERROR: This ROM has a header. Remove it with " OPTION_LONG_S "stp or " OPTION_LONG_S "bin\n",
+            fputs ("ERROR: This ROM has a header. Remove it with " OPTION_LONG_S "stp or " OPTION_LONG_S "bin",
                    stderr);
           else if (genesis_get_copier_type () != BIN)
             fputs ("ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
-                   "       binary files to the MD-PRO. Convert ROM with " OPTION_LONG_S "bin\n",
+                   "       binary files to the MD-PRO. Convert ROM with " OPTION_LONG_S "bin",
                    stderr);
           else
             md_write_rom (ucon64.fname, ucon64.parport);
@@ -2182,11 +2184,11 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format\n",
+            fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format",
                    stderr);
           else if (ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM seems to be bit-swapped, but the MSG does not support\n"
-                   "       bit-swapped ROMs. Convert to an MSG compatible format\n",
+                   "       bit-swapped ROMs. Convert to an MSG compatible format",
                    stderr);
           else
             msg_write_rom (ucon64.fname, ucon64.parport);
@@ -2233,7 +2235,7 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XSMC: // we don't use WF_NO_ROM => no need to check for file
       if (!ucon64.nfo->backup_header_len)
-        fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with " OPTION_LONG_S "ffe\n",
+        fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with " OPTION_LONG_S "ffe",
                stderr);
       else
         smc_write_rom (ucon64.fname, ucon64.parport);
@@ -2254,11 +2256,11 @@ ucon64_options (st_ucon64_t *p)
       else                                      // file exists => send it to the copier
         {
           if (!ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
+            fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format",
                    stderr);
           else if (!ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM does not seem to be interleaved, but the SMD only supports\n"
-                   "       interleaved ROMs. Convert to an SMD compatible format\n",
+                   "       interleaved ROMs. Convert to an SMD compatible format",
                    stderr);
           else
             smd_write_rom (ucon64.fname, ucon64.parport);
@@ -2282,11 +2284,11 @@ ucon64_options (st_ucon64_t *p)
       else
         {
           if (!ucon64.nfo->backup_header_len)
-            fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
+            fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format",
                    stderr);
           else if (ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM seems to be interleaved, but the SWC does not support\n"
-                   "       interleaved ROMs. Convert to an SWC compatible format\n",
+                   "       interleaved ROMs. Convert to an SWC compatible format",
                    stderr);
           else
             {
@@ -2330,7 +2332,7 @@ ucon64_options (st_ucon64_t *p)
         {
           if (!ucon64.nfo->interleaved)
             fputs ("ERROR: This ROM does not seem to be interleaved, but the Doctor V64 only\n"
-                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
+                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format",
                    stderr);
           else
             doctor64_write (ucon64.fname, ucon64.nfo->backup_header_len,
@@ -2382,10 +2384,23 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_XQD16:
       if (ucon64.nfo->interleaved)
         fputs ("ERROR: This ROM seems to be interleaved, but the Quickdev16 does not support\n"
-               "       interleaved ROMs. Convert to an SWC compatible format\n",
+               "       interleaved ROMs. Convert to an SWC compatible format",
                stderr);
       else
         quickdev16_write_rom (ucon64.fname);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XUFOSD:
+      if (snes_get_copier_type () != UFOSD)
+        fputs ("ERROR: This ROM is not in Super UFO Pro 8 SD format. Convert with " OPTION_LONG_S "ufosd",
+               stderr);
+      else if (ucon64.nfo->interleaved)
+        fputs ("ERROR: This ROM seems to be interleaved, but the Super UFO Pro 8 SD does not\n"
+               "       support interleaved ROMs. Convert with " OPTION_LONG_S "ufosd",
+               stderr);
+      else
+        ufosd_write_rom (ucon64.fname);
       fputc ('\n', stdout);
       break;
 #endif // USE_USB

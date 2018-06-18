@@ -40,7 +40,6 @@ typedef struct st_smc_header
   unsigned char pad2[501];
 } st_smc_header_t;
 
-#define SMC_HEADER_START 0
 #define SMC_HEADER_LEN (sizeof (st_smc_header_t))
 #define SMC_TRAINER 0x40
 

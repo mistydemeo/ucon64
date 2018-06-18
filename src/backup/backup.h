@@ -54,7 +54,6 @@ typedef struct // st_unknown_header
   unsigned char pad2[501];
 } st_unknown_backup_header_t;
 
-#define UNKNOWN_BACKUP_HEADER_START 0
 #define UNKNOWN_BACKUP_HEADER_LEN (sizeof (st_unknown_backup_header_t))
 
 #endif

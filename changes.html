@@ -907,6 +907,16 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated support for OpenBSD (64-bit) (by dbjh)<br>
 - updated (all) made -o also work for --rrom, --r83 and --rjoliet, just like the
   other rename options (--rdat, --rl and --ru) (by dbjh)<br>
+- updated (SNES) improved reliability of GDSF communication for PCs with a
+  parallel port that supports ECP (built-in or PCIe parallel port card). At
+  last. It is essential to correctly specify ecr_offset for this to work (by
+  dbjh; many thanks to Mystic_Merlin for testing)<br>
+- updated (SNES) improved --ufosd by adding specific support for 10 and 12 Mbit
+  HiROMs and implementing a generic way to set the SRAM mapping bytes (by dbjh;
+  thanks to Revenant for the information and Trenton_net for testing)<br>
+- added (SNES) --xufosd send ROM to Super UFO Pro 8 SD. Be sure to use a tool
+  like Zadig to add libusb-0.1 (libusb-win32) support (by dbjh; thanks to
+  Revenant for the information and Trenton_net for testing)<br>
 <br>
 <br>
 <br>

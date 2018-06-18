@@ -31,7 +31,6 @@ typedef struct st_spsc_header
   unsigned char pad[8448];
 } st_spsc_header_t;
 
-#define SPSC_HEADER_START 0
 #define SPSC_HEADER_LEN (sizeof (st_spsc_header_t))
 
 #endif

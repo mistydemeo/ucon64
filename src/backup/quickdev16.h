@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t quickdev16_usage[];
 
-#ifdef USE_USB
+#ifdef  USE_USB
 extern int quickdev16_write_rom (const char *filename);
 #endif
 

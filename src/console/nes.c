@@ -7020,10 +7020,10 @@ nes_init (st_ucon64_nfo_t *rominfo)
       type = FDS;
       result = 0;
 
-      rominfo->backup_header_start = FDS_HEADER_START;
+      rominfo->backup_header_start = 0;
       rominfo->backup_header_len = FDS_HEADER_LEN;
       // we use ffe_header to save some space in the exe
-      ucon64_fread (&ffe_header, FDS_HEADER_START, FDS_HEADER_LEN, ucon64.fname);
+      ucon64_fread (&ffe_header, 0, FDS_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &ffe_header;
     }
   else if (memcmp (magic, "\x01*NINTENDO-HVC*", 15) == 0) // "headerless" FDS/FAM file
@@ -7059,9 +7059,9 @@ nes_init (st_ucon64_nfo_t *rominfo)
     {
     case INES:
       rominfo->backup_usage = ines_usage[0].help;
-      rominfo->backup_header_start = INES_HEADER_START;
+      rominfo->backup_header_start = 0;
       rominfo->backup_header_len = INES_HEADER_LEN;
-      ucon64_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.fname);
+      ucon64_fread (&ines_header, 0, INES_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &ines_header;
       ucon64.split = 0;                         // iNES files are never split
 
@@ -7101,9 +7101,9 @@ nes_init (st_ucon64_nfo_t *rominfo)
       break;
     case UNIF:
       rominfo->backup_usage = unif_usage[0].help;
-      rominfo->backup_header_start = UNIF_HEADER_START;
+      rominfo->backup_header_start = 0;
       rominfo->backup_header_len = UNIF_HEADER_LEN;
-      ucon64_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.fname);
+      ucon64_fread (&unif_header, 0, UNIF_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &unif_header;
 
       rom_size = (int) ucon64.file_size - UNIF_HEADER_LEN;
@@ -7422,9 +7422,9 @@ nes_init (st_ucon64_nfo_t *rominfo)
         still other information about the image structure.
       */
       rominfo->backup_usage = smc_usage[0].help;
-      rominfo->backup_header_start = SMC_HEADER_START;
+      rominfo->backup_header_start = 0;
       rominfo->backup_header_len = SMC_HEADER_LEN;
-      ucon64_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.fname);
+      ucon64_fread (&ffe_header, 0, SMC_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &ffe_header;
 
       pos += sprintf (rominfo->misc + pos, "512-byte trainer: %s",

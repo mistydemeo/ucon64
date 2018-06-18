@@ -2033,7 +2033,7 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
                   UFOSD_HEADER_LEN : rominfo->backup_header_len, ucon64.fname);
   reset_header (&header);
   header.size = (unsigned char) (ufosd_size / MBIT);
-  header.banktype = snes_hirom ? 0 : 1;
+  header.banktype_copy = snes_hirom ? 0 : 1;
   memcpy (header.id, "SFCUFOSD", 8);
   header.internal_size = get_internal_size ();
 
@@ -2055,9 +2055,9 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
   if (header.special_chip == 0 ||
       snes_header.rom_type == 3 || snes_header.rom_type == 5) // DSP
     {
-      if (snes_sram_size > 16 * 1024)
+      if (snes_sram_size > 32 * 1024)
         header.sram_size = 7;
-      else if (snes_sram_size > 8 * 1024)       // 64 kb < size <= 128 kb
+      else if (snes_sram_size > 8 * 1024)       // 64 kb < size <= 256 kb
         header.sram_size = 3;
       else if (snes_sram_size > 2 * 1024)       // 16 kb < size <= 64 kb
         header.sram_size = 2;
@@ -2117,6 +2117,7 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
         }
       if (snes_sram_size)
         {
+#if 1
           switch (ufosd_size)
             {
             case 4 * MBIT:
@@ -2147,11 +2148,17 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
               header.map_control[2] = 0x80;
               break;
             }
+#else
+          header.map_control[2] = ufosd_size <= 16 * MBIT ? 0x10 : 0x50;
+          if (snes_sram_size > 32 * 1024)
+            header.map_control[2] += 0x10;
+          header.map_control[3] = 0x3f;
+#endif
         }
     }
 
-  header.sram_type = snes_hirom ? 0 : 1;
-
+  header.banktype = snes_hirom ? 0 : 1;
+  header.tvtype = snes_header.country == 0 || snes_header.country == 1 ? 0 : 2;
   // copy last 32 bytes of internal header to backup unit header
   memcpy (header.internal_header_data,
           ((char *) &snes_header) + sizeof snes_header - 32, 32);
@@ -3888,9 +3895,9 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
   else if (copier_type == UFOSD)
     {
       st_ufosd_header_t *ufosd_header = (st_ufosd_header_t *) header;
-      unsigned char sram_sizes[] = { 0, 2, 8, 16 };
+      unsigned char sram_sizes[] = { 0, 2, 8, 32 };
 
-      y = ufosd_header->banktype;
+      y = ufosd_header->banktype_copy;
       printf ("[2]      DRAM mapping mode: %s => %s\n",
               y == 1 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
               matches_deviates ((snes_hirom ? 0 : 1) == y));
@@ -3914,16 +3921,23 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       for (x = 0; x < 4; x++)
         {
           int shift = 6 - x * 2;
+
           y = (ufosd_header->map_control[3] & (3 << shift)) >> shift;
           if (y != 1)
             printf ("[16:%d-%d] A%d=%s selects SRAM\n",
                     shift + 1, shift, 23 - x, y == 0 ? "x" : y == 2 ? "0" : "1");
         }
 
-      y = ufosd_header->sram_type;
-      printf ("[17]     SRAM mapping mode: %s => %s\n",
+      y = ufosd_header->banktype;
+      printf ("[17]     DRAM mapping mode: %s => %s\n",
               y == 1 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
               matches_deviates ((snes_hirom ? 0 : 1) == y));
+
+      y = ufosd_header->tvtype;
+      printf ("[18]     Television standard: %s => %s\n",
+              y == 0 ? "NTSC" : y == 2 ? "PAL" : "unknown",
+              matches_deviates (
+                (snes_header.country == 0 || snes_header.country == 1 ? 0 : 2) == y));
 
       printf ("[20-3f]  Copy of last 32 bytes of internal header => %s\n",
               matches_deviates (
@@ -4430,7 +4444,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
   st_dump = 0;                                  // idem
   pos = strlen (rominfo->misc);
 
-  ucon64_fread (&header, UNKNOWN_BACKUP_HEADER_START, UNKNOWN_BACKUP_HEADER_LEN, ucon64.fname);
+  ucon64_fread (&header, 0, UNKNOWN_BACKUP_HEADER_LEN, ucon64.fname);
   if (header.id1 == 0xaa && header.id2 == 0xbb)
     x = SWC;
   else if (!strncmp ((char *) &header + 8, "SUPERUFO", 8))

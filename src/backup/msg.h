@@ -41,7 +41,6 @@ typedef struct st_msg_header
   unsigned char pad2[501];
 } st_msg_header_t;
 
-#define MSG_HEADER_START 0
 #define MSG_HEADER_LEN (sizeof (st_msg_header_t))
 
 #ifdef  USE_PARALLEL

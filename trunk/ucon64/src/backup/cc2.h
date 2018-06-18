@@ -31,7 +31,6 @@ typedef struct st_cc2_header
   unsigned char pad[8448];
 } st_cc2_header_t;
 
-#define CC2_HEADER_START 0
 #define CC2_HEADER_LEN (sizeof (st_cc2_header_t))
 
 #endif

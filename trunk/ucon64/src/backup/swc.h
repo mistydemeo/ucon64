@@ -60,7 +60,6 @@ typedef struct st_swc_header
   unsigned char pad2[501];
 } st_swc_header_t;
 
-#define SWC_HEADER_START 0
 #define SWC_HEADER_LEN (sizeof (st_swc_header_t))
 
 #ifdef  USE_PARALLEL

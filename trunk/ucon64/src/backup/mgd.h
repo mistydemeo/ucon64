@@ -26,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 
 
-#define MGD_HEADER_START 0
 #define MGD_HEADER_LEN 512
 
 extern const st_getopt2_t mgd_usage[];

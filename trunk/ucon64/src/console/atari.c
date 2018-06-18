@@ -57,8 +57,6 @@ const st_getopt2_t atari_usage[] =
 
 
 #define ATARI_ROM_SIZE 0x20000
-#define ATARI_ROM_HEADER_START 0
-#define ATARI_ROM_HEADER_LEN 0
 
 
 typedef struct

@@ -19,12 +19,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include <stdlib.h>
 #include "misc/archive.h"
-#include "misc/itypes.h"
 #include "misc/misc.h"
 #include "misc/term.h"
 #include "misc/usb.h"
@@ -106,7 +102,7 @@ quickdev16_write_rom (const char *filename)
   uint32_t bank_size, address = 0;
   uint16_t bank_shift;
 
-#if     (defined __unix__ || defined __BEOS__ || defined __APPLE__) && !defined __MSDOS__
+#if     defined __unix__ || defined __BEOS__ || defined __APPLE__
   init_conio ();
   if (register_func (deinit_conio) == -1)
     {
@@ -125,15 +121,13 @@ quickdev16_write_rom (const char *filename)
     case USBOPEN_ERR_ACCESS:
       fprintf (stderr,
                "ERROR: Could not access USB device \"%s\" with vendor ID 0x%04x and\n"
-               "       product ID 0x%04x\n",
-               product, vendor_id, product_id);
+               "       product ID 0x%04x\n", product, vendor_id, product_id);
       exit (1);
       break;
     case USBOPEN_ERR_NOTFOUND:
       fprintf (stderr,
                "ERROR: Could not find USB device \"%s\" with vendor ID 0x%04x and\n"
-               "       product ID 0x%04x\n",
-               product, vendor_id, product_id);
+               "       product ID 0x%04x\n", product, vendor_id, product_id);
       exit (1);
       break;
     }
@@ -141,11 +135,14 @@ quickdev16_write_rom (const char *filename)
   if ((file = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      usb_close (handle);
       exit (1);
     }
   if ((buffer = (char *) malloc (READ_BUFFER_SIZE)) == NULL)
     {
       fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], READ_BUFFER_SIZE);
+      fclose (file);
+      usb_close (handle);
       exit (1);
     }
 
@@ -188,6 +185,8 @@ quickdev16_write_rom (const char *filename)
           if (numbytes < 0)
             {
               fprintf (stderr, "\nERROR: USB error: %s\n", usb_strerror ());
+              free (buffer);
+              fclose (file);
               usb_close (handle);
               exit (1);
             }
@@ -210,6 +209,7 @@ quickdev16_write_rom (const char *filename)
 
   free (buffer);
   fclose (file);
+  usb_close (handle);
 
   return 0;
 }

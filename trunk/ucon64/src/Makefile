@@ -439,9 +439,9 @@ backup/pce-pro.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
 backup/pl.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) \
              backup/pl.h $(GETOPT2_H_DEPS)
 backup/psxpblib.o: config.h $(UCON64_H_DEPS) backup/psxpblib.h
-backup/quickdev16.o: config.h $(ARCHIVE_H_DEPS) misc/itypes.h $(MISC_H_DEPS) \
-                     $(TERM_H_DEPS) misc/usb.h $(UCON64_MISC_H_DEPS) \
-                     $(SNES_H_DEPS) backup/quickdev16.h
+backup/quickdev16.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(TERM_H_DEPS) \
+                     misc/usb.h $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) \
+                     backup/quickdev16.h
 backup/sc.o: config.h backup/sc.h $(GETOPT2_H_DEPS)
 backup/sflash.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
                  $(UCON64_MISC_H_DEPS) backup/tototek.h backup/sflash.h \
@@ -460,7 +460,8 @@ backup/swc.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(UCON64_MISC_H_DEPS) \
 backup/tototek.o: config.h $(BSWAP_H_DEPS) $(MISC_H_DEPS) misc/parallel.h \
                   $(TERM_H_DEPS) backup/tototek.h
 backup/ufo.o: config.h backup/ufo.h $(GETOPT2_H_DEPS)
-backup/ufosd.o: config.h backup/ufosd.h $(GETOPT2_H_DEPS)
+backup/ufosd.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(TERM_H_DEPS) \
+                misc/usb.h $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) backup/ufosd.h
 backup/yoko.o: config.h backup/yoko.h $(GETOPT2_H_DEPS)
 backup/z64.o: config.h backup/z64.h $(GETOPT2_H_DEPS)
 console/atari.o: config.h $(ARCHIVE_H_DEPS) misc/file.h misc/string.h \

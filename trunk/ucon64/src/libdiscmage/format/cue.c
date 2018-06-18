@@ -83,7 +83,7 @@ dm_cue_read (dm_image_t *image, const char *cue_file)
   if ((fh = fopen (cue_file, "rb")) == NULL)
     return NULL; // cue_file not found
 
-  for (; fgets (buf, MAXBUFSIZE, fh); t++)
+  while (fgets (buf, MAXBUFSIZE, fh))
     {
       if (strstr (buf, " TRACK "))
         {
@@ -103,6 +103,8 @@ dm_cue_read (dm_image_t *image, const char *cue_file)
               fclose (fh);
               return !t ? NULL : image;
             }
+
+          t++;
         }
 #if 0
       else if (strstr (buf, " INDEX "))
@@ -135,6 +137,14 @@ dm_cue_read (dm_image_t *image, const char *cue_file)
 
   fclose (fh);
 
+  if (t == 1)
+    {
+      dm_track_t *track = (dm_track_t *) &image->track[0];
+
+      track->track_len =
+      track->total_len = q_fsize (image->fname) / track->sector_size;
+    }
+
   return image;
 }
 
@@ -142,7 +152,7 @@ dm_cue_read (dm_image_t *image, const char *cue_file)
 int
 dm_cue_write (const dm_image_t *image)
 {
-  int result = (-1), t = 0;
+  int result = -1, t = 0;
 
   for (t = 0; t < image->tracks; t++)
     {
@@ -233,8 +243,11 @@ cue_init (dm_image_t *image)
 {
   int t = 0;
   FILE *fh = NULL;
-#if 0
   char buf[FILENAME_MAX];
+
+  image->sessions =
+  image->tracks =
+  image->session[0] = 1;
 
   strcpy (buf, image->fname);
   set_suffix (buf, ".CUE");
@@ -243,13 +256,6 @@ cue_init (dm_image_t *image)
       image->desc = "ISO/BIN track (with CUE file)";
       return 0;
     }
-#endif
-
-#if 1
-  image->sessions =
-  image->tracks =
-  image->session[0] = 1;
-#endif
 
   // missing or invalid cue? try the image itself
   if ((fh = fopen (image->fname, "rb")) == NULL)
@@ -267,7 +273,7 @@ cue_init (dm_image_t *image)
       else
         {
           fclose (fh);
-          return !t ? (-1) : 0;
+          return !t ? -1 : 0;
         }
     }
 

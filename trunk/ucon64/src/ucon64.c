@@ -103,6 +103,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/smd.h"
 #include "backup/smsgg-pro.h"
 #include "backup/swc.h"
+#include "backup/ufosd.h"
 #include "patch/aps.h"
 #include "patch/bsl.h"
 #include "patch/gg.h"
@@ -207,6 +208,7 @@ static const st_getopt2_t lf[] =
 #endif
 #ifdef  USE_USB
     quickdev16_usage,
+    ufosd_usage,
 #endif
     lf,
     neogeo_usage,
@@ -616,6 +618,7 @@ TEST_BREAK
       {UCON64_XSWCC,	"ucon64 -xswcc", 0},    // NO TEST: transfer code
       {UCON64_XSWCR,	"ucon64 -xswcr", 0},    // NO TEST: transfer code
       {UCON64_XSWCS,	"ucon64 -xswcs", 0},    // NO TEST: transfer code
+      {UCON64_XUFOSD,	"ucon64 -xufosd", 0},   // NO TEST: transfer code
       {UCON64_XV64,	"ucon64 -xv64", 0},     // NO TEST: transfer code
 
       {0, NULL, 0}
@@ -1299,7 +1302,7 @@ ucon64_execute_options (void)
   ucon64_rom_handling().
 */
 {
-  int c = 0, result = 0, x = 0, opts = 0;
+  int x = 0, opts = 0;
   static int first_file = 1;
 
   // these members of ucon64 can change per file
@@ -1331,16 +1334,18 @@ ucon64_execute_options (void)
         if (!first_file && ucon64.newline_before_rom)
           fputc ('\n', stdout);
         first_file = 0;
-        // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
-        result = ucon64_rom_handling ();
-        if (result == -1)                       // no rom, but WF_NO_ROM
-          return -1;
+        {
+          // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
+          int result = ucon64_rom_handling ();
 
-        if ((ucon64.flags & WF_NFO) && ucon64.quiet < 1)
-          fputc ('\n', stdout);
+          if (result < 0)
+            return -1;
+          else if (result > 0)
+            fputc ('\n', stdout);
+        }
         if (ucon64_options (&ucon64) == -1)
           {
-            const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
+            const st_getopt2_t *p = getopt2_get_index_by_val (options, 0);
             const char *opt = p ? p->name : NULL;
 
             fprintf (stderr, "ERROR: %s%s encountered a problem\n"
@@ -1370,8 +1375,8 @@ ucon64_execute_options (void)
         fputc ('\n', stdout);
       first_file = 0;
       // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
-      if (ucon64_rom_handling () == -1)
-        return -1;                              // no rom, but WF_NO_ROM
+      if (ucon64_rom_handling () < 0)
+        return -1;
     }
 
   fflush (stdout);
@@ -1553,7 +1558,10 @@ ucon64_rom_handling (void)
 
   // display info
   if ((ucon64.flags & WF_NFO) && ucon64.quiet < 1)
-    ucon64_nfo ();
+    {
+      ucon64_nfo ();
+      return 1;
+    }
 
   return 0;
 }
@@ -1858,8 +1866,8 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
 #endif
     }
   if (nfo->internal_crc2[0])
-    printf ("%s\n", nfo->internal_crc2);
-
+    printf ("%s\n", nfo->internal_crc2);        // don't use puts() here, we
+                                                //  may want to call printf2()
   fflush (stdout);
 }
 
@@ -1984,7 +1992,7 @@ ucon64_usage (int argc, char *argv[], int view)
 //        getopt2_usage (ssc_usage);
         getopt2_usage (swc_usage);
 //        getopt2_usage (ufo_usage);
-//        getopt2_usage (ufosd_usage);
+        getopt2_usage (ufosd_usage);
 //        getopt2_usage (yoko_usage);
 //        getopt2_usage (z64_usage);
         break;

@@ -88,7 +88,6 @@ typedef struct st_fig_header
   unsigned char pad[506];
 } st_fig_header_t;
 
-#define FIG_HEADER_START 0
 #define FIG_HEADER_LEN (sizeof (st_fig_header_t))
 
 #ifdef  USE_PARALLEL

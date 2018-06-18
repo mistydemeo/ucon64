@@ -1,9 +1,9 @@
 /*
 usb.h - USB support
 
-Copyright (c) 2003 Ulrich Hecht <uli@emulinks.de>
-Copyright (c) 2004 NoisyB
-Copyright (c) 2015 dbjh
+Copyright (c) 2003       Ulrich Hecht <uli@emulinks.de>
+Copyright (c) 2004       NoisyB
+Copyright (c) 2015, 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -48,10 +48,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern int usbport_open (usb_dev_handle **result_handle, int vendor_id,
                          char *vendor_name, int product_id, char *product_name);
-extern int usbport_close (usb_dev_handle *handle);
-extern int usbport_read (usb_dev_handle *handle, char *buffer, int buffer_size);
-extern int usbport_write (usb_dev_handle *handle, char *buffer, int buffer_size);
 extern struct usb_device *usbport_probe (int vendor_id, int product_id);
+extern int usbport_read (usb_dev_handle *handle, int endpoint, char *buffer,
+                         int buffer_size, int timeout);
+extern int usbport_write (usb_dev_handle *handle, int endpoint, char *buffer,
+                          int buffer_size, int timeout);
 
 #endif // USE_USB
 

@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/getopt2.h"                       // st_getopt2_t
 
 
-#define GD_HEADER_START 0
 #define GD_HEADER_LEN 512
 #define GD3_MAX_UNITS 16                        // Maximum that the hardware supports
 // Each logical memory unit is 8 Mbit in size (internally it's 2*4 Mbit)

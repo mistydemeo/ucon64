@@ -85,7 +85,6 @@ extern const st_getopt2_t nes_usage[];
 // flags in st_ines_header_t.ctrl3
 #define INES_TVID       0x01
 
-#define INES_HEADER_START 0
 #define INES_HEADER_LEN (sizeof (st_ines_header_t))
 
 typedef struct
@@ -194,7 +193,6 @@ typedef struct
 
 #define BOARDNAME_MAXLEN        32              // chunk length, NOT string length
                                                 //  string lentgh = chunk length - 1
-#define UNIF_HEADER_START 0
 #define UNIF_HEADER_LEN (sizeof (st_unif_header_t))
 
 typedef struct
@@ -223,7 +221,6 @@ typedef struct
 
 
 #define FDS_SIG_S       "FDS\x1A"
-#define FDS_HEADER_START 0
 #define FDS_HEADER_LEN  16
 
 

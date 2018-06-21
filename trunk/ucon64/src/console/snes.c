@@ -2117,7 +2117,7 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
         }
       if (snes_sram_size)
         {
-#if 1
+#if 0
           switch (ufosd_size)
             {
             case 4 * MBIT:
@@ -2149,9 +2149,9 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
               break;
             }
 #else
-          header.map_control[2] = ufosd_size <= 16 * MBIT ? 0x10 : 0x50;
-          if (snes_sram_size > 32 * 1024)
-            header.map_control[2] += 0x10;
+          header.map_control[2] = ufosd_size > 16 * MBIT ?
+            0x60 : snes_sram_size <= 32 * 1024 ?
+              0x10 : 0x20;
           header.map_control[3] = 0x3f;
 #endif
         }

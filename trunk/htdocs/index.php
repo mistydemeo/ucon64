@@ -55,6 +55,7 @@ require_once ("misc/widget.php");
 <center><img src="images/new.png" border="0" width="200"></center>
 <br>
 <!--NEWS-->
+20180626 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox SVN revision 4112 with Megabuild 6b changes released</a><br>
 20180106 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox SVN revision 4067 with Megabuild 6b changes released</a><br>
 20171221 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox Megabuild 6b released</a><br>
 20171123 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.1.0 released</a><br>
@@ -269,6 +270,11 @@ can be found <a href="http://www.planetmir.de/html/softw.htm#ucon64">here</a> (t
 <img src="images/dosbox.png"><br>
 Please read Megabuild6b.txt for configuration.<br>
 <br>
+<a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_SVN4112_Megabuild6b-win32.zip?download">DOSBox_SVN4112_Megabuild6b-win32.zip</a><br>
+DOSBox SVN revision 4112 with changes of Megabuild 6b Win32<br>
+<a href="http://prdownloads.sourceforge.net/ucon64/dosbox-r4112-mb6b.tar.gz?download">dosbox-r4112-mb6b.tar.gz</a><br>
+DOSBox SVN revision 4112 with changes of Megabuild 6b source code<br>
+<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/DOSBox_SVN4067_Megabuild6b-win32.zip?download">DOSBox_SVN4067_Megabuild6b-win32.zip</a><br>
 DOSBox SVN revision 4067 with changes of Megabuild 6b Win32<br>
 <a href="http://prdownloads.sourceforge.net/ucon64/dosbox-r4067-mb6b.tar.gz?download">dosbox-r4067-mb6b.tar.gz</a><br>
@@ -367,14 +373,14 @@ Loader for PCE-PRO (uCON64 options: --multi, --xpce)<br>
 Loader for Super Flash (uCON64 options: --multi, --xsf)<br>
 <br>
 <a href="http://prdownloads.sourceforge.net/ucon64/xmcd-iso.zip?download">xmcd-iso.zip</a><br>
-ISO's containing Genesis binaries to communicate with a Genesis via Mike Pavone's cable (uCON64 option: --xmcd)<br>
+ISOs containing Genesis binaries to communicate with a Genesis via Mike Pavone's cable (uCON64 option: --xmcd)<br>
 See <a href="http://www.retrodev.com">http://www.retrodev.com</a> for more information<br>
 <br>
 <img src="images/n64.png" width="30"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/sram_1bs.zip?download">sram_1bs.zip</a><br>
 Memory Manager 1.0 beta<br>
 By R. Bubba Magillicutty<br>
-16 MBit Version (uCON64 options: --xv64, --xdjr)<br>
+16 Mbit Version (uCON64 options: --xv64, --xdjr)<br>
 <br>
 <img src="images/n64.png" width="30"><br>
 <a href="http://prdownloads.sourceforge.net/ucon64/bb-sram2.zip?download">bb-sram2.zip</a><br>
@@ -443,7 +449,7 @@ If you are using uCON64 you may also consider visiting one of these cool sites<b
 <a href="http://www.dcemulation.com/">DC Emulation</a><br>
 <a href="http://petition.eurolinux.org/"><img src="images/noepat120.png" alt="Eurolinux Petition" border="0"></a><br>
 <a href="http://ukcdr.org/issues/cd/quick/"><img border="0" width="262" height="50" src="images/badcd003.png" alt="Say NO to corrupt audio discs" /></a><br>
-<a href="http://www.anime.org/~sakura/"><img src="images/banner2.png" border="0""></a><br>
+<a href="http://www.anime.org/~sakura/"><img src="images/banner2.png" border="0"></a><br>
 <a href="http://www.eff.org"><img src="images/efflogo-general.png" border="0"></a><br>
 <a href="http://www.eurasia.nu"><img src="images/eurasia_logo3.png" border="0"></a><br>
 <a href="http://www.gamebase64.com/">GB64.COM - C64 Games, Database, Music, Emulation, Frontends, Reviews and Articles</a><br>
@@ -515,7 +521,7 @@ Screenshots: <a href="images/belchblabla_ss.png">1</a>|<a href="images/belchchec
 <font size="-1"><br>
 <br>
 <!--table border="0" bgcolor="#ffffff">
-  <tr>   
+  <tr>
     <td valign="top">
 <?php
 /*

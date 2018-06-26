@@ -172,6 +172,9 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    converting it to RomCenter 2.50 format, but uCON64 does not display DAT
    information for verified Nintento 64 ROMs. What is wrong?</a><br>
 <br>
+Q58: <a href="#58">I tried to upload a game to my Super UFO Pro 8 SD (on
+   Windows), but uCON64 only produced an error message. What is wrong?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -2096,6 +2099,15 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    n64_dat_v64. By default it is 1, meaning Doctor V64 format, for backward
    compatibility. Set it to 0 for Mr. Backup Z64 format if you want to use a
    Nintendo 64 DAT file produced by DAT-o-MATIC.<br>
+<br>
+<p>
+<a name="58"><b>Q58</b>: I tried to upload a game to my Super UFO Pro 8 SD (on
+   Windows), but uCON64 only produced an error message. What is wrong?</a><br>
+<b>A</b>: If this is the error message:<br>
+   &nbsp;&nbsp;ERROR: Could not open Super UFO USB device with vendor ID 0x1292
+   and product ID 0x4653<br>
+   then you should add support for libusb-win32 with
+   <a href="https://zadig.akeo.ie/">Zadig</a>.<br>
 <br>
 <p>
 <br>

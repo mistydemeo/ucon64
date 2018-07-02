@@ -204,12 +204,12 @@ ufosd_write_rom (const char *filename)
       exit (1);
     }
 
-  totalsize = (int) ucon64.file_size - ucon64.nfo->backup_header_len + 64 + 2;
+  totalsize = (int) ucon64.file_size - ucon64.nfo->backup_header_len + 64;
   printf ("Send: %d Bytes\n", totalsize);
   puts ("Press q to abort\n");
   starttime = time (NULL);
 
-  send_data (handle, interface_number, endpoint_address, "", 1, starttime,
+  send_data (handle, interface_number, endpoint_address, buffer, 0, starttime,
              totalsize, file);
   // send first 64 bytes of backup unit header
   if ((bytesread = fread (buffer, 1, 64, file)) > 0)
@@ -229,7 +229,7 @@ ufosd_write_rom (const char *filename)
                  starttime, totalsize, file);
     }
   if (!quit)
-    send_data (handle, interface_number, endpoint_address, "", 1, starttime,
+    send_data (handle, interface_number, endpoint_address, buffer, 0, starttime,
                totalsize, file);
 
   free (buffer);

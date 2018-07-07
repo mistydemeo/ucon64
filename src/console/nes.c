@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/smc.h"
 
 
-#define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
+#define STD_COMMENT     "Processed by uCON64 "  // first part of text to put in READ chunk
 
 
 static st_ucon64_obj_t nes_obj[] =
@@ -5120,7 +5120,6 @@ static const int unif_cck_ids[] = { CCK0_ID, CCK1_ID, CCK2_ID, CCK3_ID,
 
 static char nes_destfname[FILENAME_MAX] = "";
 static const char *internal_name;
-static int rom_size;
 static FILE *nes_destfile;
 
 
@@ -5185,10 +5184,10 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 /*
   The caller is responsible for freeing the memory for the allocated
   st_unif_chunk_t. It should do that by calling free() with the pointer to
-  the st_unif_chunk_t. It should do NOTHING for the struct member `data'.
+  the st_unif_chunk_t. It should do nothing for the struct member `data'.
 */
 {
-// the DEBUG_READ_CHUNK blocks are left here on purpose, don't remove!
+// the DEBUG_READ_CHUNK blocks are left here on purpose, don't remove
 //#define DEBUG_READ_CHUNK
 #ifdef  DEBUG_READ_CHUNK
   char id_str[5] = "    ";
@@ -5199,7 +5198,8 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
      unsigned int length;                       // data length, in little endian format
   } chunk_header;
   st_unif_chunk_t *unif_chunk;
-  static int pos = 0;
+  static unsigned int pos = 0;
+  unsigned int rom_size = (unsigned int) ucon64.file_size - UNIF_HEADER_LEN;
 
   if (!cont)
     pos = 0; // fseek (file, UNIF_HEADER_LEN, SEEK_SET);
@@ -5209,7 +5209,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 #endif
   do
     {
-      // fread (&chunk_header, 1, sizeof (chunk_header), file);
+//      fread (&chunk_header, 1, sizeof (chunk_header), file);
       memcpy (&chunk_header, rom_buffer + pos, sizeof (chunk_header));
       pos += sizeof (chunk_header);
 #ifdef  WORDS_BIGENDIAN
@@ -5222,12 +5222,12 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 #ifdef  WORDS_BIGENDIAN
       *((int *) id_str) = bswap_32 (*((int *) id_str));
 #endif
-      printf ("chunk header: id=%s, length=%d\n", id_str, chunk_header.length);
+      printf ("chunk header: id=%s, length=%u\n", id_str, chunk_header.length);
 #endif
       if (chunk_header.id != id)
         {
-          // (fseek (file, chunk_header.length, SEEK_CUR) != 0) // fseek() clears EOF indicator
-          if ((int) (pos + chunk_header.length) >= rom_size)
+//          (fseek (file, chunk_header.length, SEEK_CUR) != 0) // fseek() clears EOF indicator
+          if (pos + chunk_header.length >= rom_size)
             break;
           else
             pos += chunk_header.length;
@@ -5247,14 +5247,14 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
          malloc (sizeof (st_unif_chunk_t) + chunk_header.length)) == NULL)
     {
       fprintf (stderr, "ERROR: Not enough memory for chunk (%u bytes)\n",
-               (int) sizeof (st_unif_chunk_t) + chunk_header.length);
+               (unsigned int) sizeof (st_unif_chunk_t) + chunk_header.length);
       exit (1);
     }
   unif_chunk->id = me2le_32 (chunk_header.id);
   unif_chunk->length = chunk_header.length;
   unif_chunk->data = &((unsigned char *) unif_chunk)[sizeof (st_unif_chunk_t)];
 
-  // fread (unif_chunk->data, 1, chunk_header.length, file);
+//  fread (unif_chunk->data, 1, chunk_header.length, file);
   memcpy (unif_chunk->data, rom_buffer + pos, chunk_header.length);
   pos += chunk_header.length;
 #ifdef  DEBUG_READ_CHUNK
@@ -5921,6 +5921,8 @@ nes_unif (void)
     }
   else if (type == UNIF)
     {
+      unsigned int rom_size = (unsigned int) ucon64.file_size - UNIF_HEADER_LEN;
+
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
@@ -6333,6 +6335,8 @@ nes_ines (void)
     }
   else if (type == UNIF)
     {
+      unsigned int rom_size = (unsigned int) ucon64.file_size - UNIF_HEADER_LEN;
+
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
@@ -6990,7 +6994,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
 {
   unsigned char magic[15], *rom_buffer;
   int result = -1, size, x, y, n, crc = 0;
-  unsigned int pos = strlen (rominfo->misc);
+  unsigned int pos = strlen (rominfo->misc), rom_size;
   char *str, *str_list[8];
   st_unif_chunk_t *unif_chunk, *unif_chunk2;
   st_nes_data_t *info, key;
@@ -7106,7 +7110,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       ucon64_fread (&unif_header, 0, UNIF_HEADER_LEN, ucon64.fname);
       rominfo->backup_header = &unif_header;
 
-      rom_size = (int) ucon64.file_size - UNIF_HEADER_LEN;
+      rom_size = (unsigned int) ucon64.file_size - UNIF_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
@@ -7450,7 +7454,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       pos += sprintf (rominfo->misc + pos, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
 
-      rom_size = (int) ucon64.file_size - FAM_HEADER_LEN;
+      rom_size = (unsigned int) ucon64.file_size - FAM_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);

@@ -575,10 +575,8 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
-#include <io.h>
-#include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
-#pragma warning(pop)                            //  come after <sys/types.h>. Yep, that's M$.
-#include <direct.h>
+#include <sys/stat.h>
+#pragma warning(pop)
 
 #define S_IWUSR _S_IWRITE
 #define S_IRUSR _S_IREAD

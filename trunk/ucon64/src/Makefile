@@ -121,7 +121,7 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         console/lynx.o console/n64.o console/nds.o console/neogeo.o \
         console/nes.o console/ngp.o console/pce.o console/psx.o console/sms.o \
         console/snes.o console/swan.o console/vboy.o \
-        backup/backup.o backup/cc2.o backup/cd64.o backup/cmc.o backup/dex.o \
+        backup/backup.o backup/cc2.o backup/cmc.o backup/dex.o \
         backup/doctor64.o backup/doctor64jr.o backup/f2a.o backup/fal.o \
         backup/ffe.o backup/fig.o backup/gbx.o backup/gd.o \
         backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
@@ -134,6 +134,9 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o
 ifneq ($(OSTYPE),cygwin)
 OBJECTS+=misc/getopt.o
+endif
+ifdef USE_LIBCD64
+OBJECTS+=backup/cd64.o
 endif
 ifdef USE_ZLIB
 OBJECTS+=misc/archive.o misc/ioapi.o misc/map.o misc/unzip.o
@@ -192,9 +195,9 @@ ifdef DJGPP
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) clean
-	cd ../backup/libcd64
+	cd ..\backup\libcd64
 	$(MAKE) clean
-	cd ../..
+	cd ..\..
 else                                    # UNIX, BeOS or Mac OS X (Darwin)
 	$(CLEAN_CMD)
 endif                                   # DJGPP
@@ -218,9 +221,9 @@ ifdef DJGPP
 	del config.h
 	cd libdiscmage
 	$(MAKE) distclean
-	cd ../backup/libcd64
+	cd ..\backup\libcd64
 	$(MAKE) clean
-	cd ../..
+	cd ..\..
 else
 	$(DISTCLEAN_CMD)
 endif                                   # DJGPP
@@ -260,11 +263,11 @@ ifeq ($(GCC_WIN),1)
 	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 else
 ifdef DJGPP
-	cd backup/libcd64
+	cd backup\libcd64
 	set CFLAGS=$(CFLAGS0)
 	set LDFLAGS=$(LDFLAGS0)
 	$(MAKE)
-	cd ../..
+	cd ..\..
 else
 	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 endif                                   # DJGPP

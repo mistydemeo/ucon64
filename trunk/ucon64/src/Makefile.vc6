@@ -79,18 +79,21 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         console/lynx.obj console/n64.obj console/nds.obj console/neogeo.obj \
         console/nes.obj console/ngp.obj console/pce.obj console/psx.obj \
         console/sms.obj console/snes.obj console/swan.obj console/vboy.obj \
-        backup/backup.obj backup/cc2.obj backup/cd64.obj backup/cmc.obj \
-        backup/dex.obj backup/doctor64.obj backup/doctor64jr.obj backup/f2a.obj \
-        backup/fal.obj backup/ffe.obj backup/fig.obj backup/gbx.obj \
-        backup/gd.obj backup/interceptor.obj backup/lynxit.obj backup/mccl.obj \
-        backup/mcd.obj backup/md-pro.obj backup/mgd.obj backup/mgh.obj \
-        backup/msg.obj backup/nfc.obj backup/pce-pro.obj backup/pl.obj \
-        backup/psxpblib.obj backup/quickdev16.obj backup/sc.obj \
-        backup/sflash.obj backup/smc.obj backup/smd.obj backup/smsgg-pro.obj \
-        backup/spsc.obj backup/ssc.obj backup/swc.obj backup/tototek.obj \
-        backup/ufo.obj backup/ufosd.obj backup/yoko.obj backup/z64.obj \
+        backup/backup.obj backup/cc2.obj backup/cmc.obj backup/dex.obj \
+        backup/doctor64.obj backup/doctor64jr.obj backup/f2a.obj backup/fal.obj \
+        backup/ffe.obj backup/fig.obj backup/gbx.obj backup/gd.obj \
+        backup/interceptor.obj backup/lynxit.obj backup/mccl.obj backup/mcd.obj \
+        backup/md-pro.obj backup/mgd.obj backup/mgh.obj backup/msg.obj \
+        backup/nfc.obj backup/pce-pro.obj backup/pl.obj backup/psxpblib.obj \
+        backup/quickdev16.obj backup/sc.obj backup/sflash.obj backup/smc.obj \
+        backup/smd.obj backup/smsgg-pro.obj backup/spsc.obj backup/ssc.obj \
+        backup/swc.obj backup/tototek.obj backup/ufo.obj backup/ufosd.obj \
+        backup/yoko.obj backup/z64.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/patch.obj \
         patch/ppf.obj
+!ifdef USE_LIBCD64
+OBJECTS=$(OBJECTS) backup/cd64.obj
+!endif
 !ifdef USE_ZLIB
 OBJECTS=$(OBJECTS) misc/archive.obj misc/ioapi.obj misc/map.obj misc/unzip.obj
 !endif
@@ -149,7 +152,7 @@ libdiscmage/$(FULLLIBNAME_DM): .phony
 
 !ifdef USE_LIBCD64
 backup/libcd64/cd64.lib:
-	cd backup/libcd64
+	cd backup\libcd64
 !ifdef CFLAGS_SET
 	@set CFLAGS=%%CFLAGS0%%
 !endif
@@ -157,7 +160,7 @@ backup/libcd64/cd64.lib:
 	@set LDFLAGS=%%LDFLAGS0%%
 !endif
 	$(MAKE) /NOLOGO /f Makefile.vc6
-	cd ../..
+	cd ..\..
 !endif
 
 

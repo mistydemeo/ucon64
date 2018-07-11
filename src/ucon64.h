@@ -130,16 +130,13 @@ typedef struct
 #endif                                          //  /dev/parport0 or parallel.device)
   int parport_needed;
   uint16_t parport;                             // (parallel) port address
-#ifdef  USE_PARALLEL
-  uint16_t ecr_offset;                          // offset of ECP Extended Control register from parport
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
+#ifdef  USE_PARALLEL
+  uint16_t ecr_offset;                          // offset of ECP Extended Control register from parport
   parport_mode_t parport_mode;                  // parallel port mode: SPP, bidirectional SPP, EPP
-#ifdef  _MSC_VER
-#pragma warning(pop)
-#endif
 #endif // USE_PARALLEL
 #ifdef  USE_USB
   int usbport;                                  // non-zero => use usbport, 1 = USB0, 2 = USB1
@@ -150,6 +147,9 @@ typedef struct
   int ansi_color;
 #endif
   int backup;                                   // flag if backups files should be created
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
   int frontend;                                 // flag if uCON64 was started by a frontend
 #ifdef  USE_DISCMAGE
   int discmage_enabled;                         // flag if discmage DLL is loaded

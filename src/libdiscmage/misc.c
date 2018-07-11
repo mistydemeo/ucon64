@@ -23,16 +23,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
+#include <ctype.h>
+#ifdef  _MSC_VER
+#include <direct.h>
+#endif
+#include <errno.h>
+#include <getopt.h>                             // struct option
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#include <io.h>
+#pragma warning(pop)
+#endif
+#include <stdarg.h>                             // va_arg()
 #include <stddef.h>
 #include <stdlib.h>
-#include <ctype.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <getopt.h>                             // struct option
 #include <string.h>
-#include <errno.h>
-#include <stdarg.h>                             // va_arg()
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>                             // usleep(), microseconds
+#endif
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
@@ -45,8 +54,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
-#elif   defined __unix__
-#include <unistd.h>                             // usleep(), microseconds
 #elif   defined __BEOS__
 #include <OS.h>                                 // snooze(), microseconds
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which

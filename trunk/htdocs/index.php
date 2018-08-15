@@ -125,7 +125,7 @@ Screenshots: <a href="images/ucon64_ss1.png">1</a>|<a href="images/ucon64_ss2.pn
 <a name="download"></a>
 <img src="images/download.png"><br>
 <b>SVN</b><br>
-To get the latest uCON64 version from SVN read <a href="ucon64/developers.html#3">this</a><br>
+To get the latest uCON64 version from SVN read <a href="ucon64/developers.html#3">this</a> or click <a href="https://sourceforge.net/p/ucon64/svn/HEAD/tarball?path=/trunk/ucon64">here</a> to download a snapshot<br>
 <br>
 <b>Sources</b><br><font size="-1">
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-src.tar.gz/download">ucon64-2.1.0-src.tar.gz</a><br>
@@ -300,8 +300,8 @@ These specifications were made for you if your console lacks S-Video or RGB
 and IF you have some knowledge about electronics<br>
 <br>
 <a href="http://prdownloads.sourceforge.net/ucon64/faqs.zip?download">faqs.zip</a> (~1.1 MB)<br>
-A loose collection of FAQ's about Hardware, modifications like PAL/NTSC
-switches, or backup unit manuals<br>
+A loose collection of FAQs about hardware, modifications like PAL/NTSC
+switches or backup unit manuals<br>
 <br>
 <a href="http://prdownloads.sourceforge.net/ucon64/custom.zip?download">custom.zip</a><br>
 Selfmade read-only backup unit for Super Nintendo and Sega Mega Drive with sources and PCB layouts (not tested)<br>

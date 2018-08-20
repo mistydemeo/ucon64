@@ -779,7 +779,7 @@ mkbak (const char *filename, backup_t type)
     len = sizeof buf - 1;
   strncpy (buf, filename, len)[len] = '\0';
   set_suffix (buf, ".bak");
-  if (strcmp (filename, buf) != 0)
+  if (stricmp (filename, buf) != 0)
     remove (buf);                               // *try* to remove or rename() will fail
   else                                          // keep file attributes like date, etc. 
     {                                           // handle the case where filename has the suffix ".bak".

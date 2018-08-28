@@ -59,6 +59,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/misc.h"                          // getenv2()
+#include "misc/string.h"
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
@@ -389,7 +390,7 @@ realpath2 (const char *path, char *full_path)
     /*
       According to "The Open Group Base Specifications Issue 7" realpath() is
       supposed to fail if path refers to a file that does not exist. uCON64
-      however, expects the behavior of realpath() on Linux (which sets
+      however, expects the behavior of realpath() on GNU/Linux (which sets
       full_path to a reasonable path for a nonexisting file).
     */
     {
@@ -830,7 +831,7 @@ fcopy (const char *src, size_t start, size_t len, const char *dest,
   int result = 0;
 
   if (one_file (dest, src))                     // other code depends on this
-    return -1;                                  //  behaviour!
+    return -1;                                  //  behavior!
 
   if ((output = fopen (dest, mode)) == NULL)
     {
@@ -924,7 +925,7 @@ quick_io_open (const char *filename, const char *mode)
           }
       }
 
-  if ((fh = fopen (filename, (const char *) mode)) == NULL)
+  if ((fh = fopen (filename, mode)) == NULL)
     {
 #ifdef  DEBUG
       fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
@@ -947,7 +948,7 @@ quick_io_c (int value, size_t pos, const char *filename, const char *mode)
   int result;
   FILE *fh;
 
-  if ((fh = quick_io_open (filename, (const char *) mode)) == NULL)
+  if ((fh = quick_io_open (filename, mode)) == NULL)
     return -1;
 
   fseek (fh, pos, SEEK_SET);
@@ -969,14 +970,14 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
   int result;
   FILE *fh;
 
-  if ((fh = quick_io_open (filename, (const char *) mode)) == NULL)
+  if ((fh = quick_io_open (filename, mode)) == NULL)
     return -1;
 
   fseek (fh, start, SEEK_SET);
 
   // Note the order of arguments of fread() and fwrite(). Now quick_io()
   //  returns the number of characters read or written. Some code relies on
-  //  this behaviour!
+  //  this behavior!
   if (*mode == 'r' && mode[1] != '+')           // "r+b" always writes
     result = (int) fread (buffer, 1, len, fh);
   else
@@ -1022,7 +1023,7 @@ quick_io_func (int (*func) (void *, int, void *), int func_maxlen, void *object,
   if ((buffer = malloc (func_maxlen)) == NULL)
     return -1;
 
-  if ((fh = quick_io_open (filename, (const char *) mode)) == NULL)
+  if ((fh = quick_io_open (filename, mode)) == NULL)
     {
       free (buffer);
       return -1;

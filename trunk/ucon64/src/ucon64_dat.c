@@ -690,7 +690,7 @@ update_fname_field (st_ucon64_dat_t *dat)
     don't. We want to display the canonical filename only if it really differs
     from the canonical game name (usually filename without suffix).
   */
-  const char *p = get_suffix (dat->fname);
+  char *p = (char *) get_suffix (dat->fname);
 
   if (strlen (p) < 5)
     {
@@ -772,7 +772,7 @@ update_fname_field (st_ucon64_dat_t *dat)
           break;
         }
       if (suffix)
-        *(char *) p = '\0';
+        *p = '\0';
     }
 }
 
@@ -1288,7 +1288,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
           console_name = "Xbox";
           break;
         default:
-          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
+          fputs (ucon64_msg[CONSOLE_WARNING], stderr);
           exit (1);
           break;
         }

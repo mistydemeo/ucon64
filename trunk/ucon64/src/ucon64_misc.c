@@ -163,9 +163,9 @@ const char *ucon64_msg[] =
     "         setup software. \"ECP and EPP 1.9\" should give the best results\n"
     "       Read the backup unit's manual\n",
 
-    "ERROR: Could not auto detect the right ROM/IMAGE/console type\n"   // CONSOLE_ERROR
-    "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
-    "       For example, the force recognition switch for SNES is " OPTION_LONG_S "snes\n",
+    "WARNING: Could not auto detect the right ROM/IMAGE/console type\n" // CONSOLE_WARNING
+    "TIP:     If this is a ROM or CD IMAGE you might try to force the recognition\n"
+    "         For example, the force recognition switch for SNES is " OPTION_LONG_S "snes\n",
 
     "Wrote output to %s\n",                                             // WROTE
     "ERROR: Cannot open \"%s\" for reading\n",                          // OPEN_READ_ERROR
@@ -574,7 +574,7 @@ ucon64_load_discmage (void)
   if (p)
     strcpy (ucon64.discmage_path, p);
   else
-    *(ucon64.discmage_path) = '\0';
+    *ucon64.discmage_path = '\0';
 
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
@@ -650,8 +650,8 @@ ucon64_load_discmage (void)
 #ifdef  DJGPP
   {
     /*
-      The following piece of code makes the DLL "search" behaviour a bit like
-      the search behaviour for Windows programs. A bit, because the import
+      The following piece of code makes the DLL "search" behavior a bit like
+      the search behavior for Windows programs. A bit, because the import
       library just opens the file with the name that is stored in
       djimport_path. It won't search for the DXE in the Windows system
       directory, nor will it search the directories of the PATH environment

@@ -527,7 +527,7 @@ console/vboy.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_MISC_H_DEPS) \
 misc/archive.o: config.h $(ARCHIVE_H_DEPS) misc/map.h
 misc/chksum.o: config.h $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) $(MISC_H_DEPS)
 misc/dlopen.o: config.h misc/dlopen.h misc/dxedll_pub.h misc/map.h
-misc/file.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS)
+misc/file.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) misc/string.h
 misc/getopt.o: config.h misc/getopt.h
 misc/getopt2.o: config.h misc/file.h $(GETOPT2_H_DEPS)
 misc/ioapi.o: config.h misc/ioapi.h

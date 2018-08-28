@@ -2,7 +2,7 @@
 ucon64_misc.h - miscellaneous functions for uCON64
 
 Copyright (c) 1999 - 2006              NoisyB
-Copyright (c) 2001 - 2004, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2018 dbjh
 Copyright (c) 2001                     Caz
 
 
@@ -76,7 +76,7 @@ extern const st_getopt2_t ucon64_padding_usage[];
 enum
 {
   PARPORT_ERROR = 0,
-  CONSOLE_ERROR,
+  CONSOLE_WARNING,
   WROTE,
   OPEN_READ_ERROR,
   OPEN_WRITE_ERROR,

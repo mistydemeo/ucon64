@@ -1066,7 +1066,7 @@ mkdir2 (const char *name)
 
 char *
 basename2 (const char *path)
-// basename() clone (differs from Linux's basename())
+// basename() clone (differs from GNU/Linux's basename())
 {
   char *p1;
 #if     defined DJGPP || defined __CYGWIN__ || defined __MINGW32__
@@ -1097,7 +1097,7 @@ basename2 (const char *path)
 
 char *
 dirname2 (const char *path)
-// dirname() clone (differs from Linux's dirname())
+// dirname() clone (differs from GNU/Linux's dirname())
 {
   size_t len;
   char *p1, *dir;
@@ -1457,7 +1457,7 @@ realpath2 (const char *path, char *full_path)
     /*
       According to "The Open Group Base Specifications Issue 7" realpath() is
       supposed to fail if path refers to a file that does not exist. uCON64
-      however, expects the behavior of realpath() on Linux (which sets
+      however, expects the behavior of realpath() on GNU/Linux (which sets
       full_path to a reasonable path for a nonexisting file).
     */
     {
@@ -2883,8 +2883,8 @@ q_fbackup (const char *filename, int mode)
   set_suffix (buf, ".BAK");
   if (stricmp (filename, buf) != 0)
     remove (buf);                               // *try* to remove or rename() will fail
-  else                                          // keep file attributes like date, etc. 
-    {                                           // handle the case where filename has the suffix ".BAK".
+  else
+    {                                           // handle the case where filename has the suffix ".BAK"
       char *dir = dirname2 (filename), buf2[FILENAME_MAX];
 
       if (dir == NULL)
@@ -2896,7 +2896,7 @@ q_fbackup (const char *filename, int mode)
       free (dir);
       tmpnam2 (buf, buf2);
     }
-  if (rename (filename, buf))
+  if (rename (filename, buf))                   // keep file attributes like date, etc.
     {
       fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
       exit (1);
@@ -2927,7 +2927,7 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
   FILE *fh, *fh2;
 
   if (one_file (dest, src))                     // other code depends on this
-    return -1;                                  //  behaviour!
+    return -1;                                  //  behavior!
 
   if ((fh = fopen (src, "rb")) == NULL)
     {
@@ -3102,7 +3102,7 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
   int result;
   FILE *fh;
 
-  if ((fh = fopen (filename, (const char *) mode)) == NULL)
+  if ((fh = fopen (filename, mode)) == NULL)
     {
 #ifdef  DEBUG
       fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
@@ -3119,7 +3119,7 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
 
   // Note the order of arguments of fread() and fwrite(). Now quick_io()
   //  returns the number of characters read or written. Some code relies on
-  //  this behaviour!
+  //  this behavior!
   if (*mode == 'r' && mode[1] != '+')           // "r+b" always writes
     result = (int) fread (buffer, 1, len, fh);
   else
@@ -3136,7 +3136,7 @@ quick_io_c (int value, size_t start, const char *filename, const char *mode)
   int result;
   FILE *fh;
 
-  if ((fh = fopen (filename, (const char *) mode)) == NULL)
+  if ((fh = fopen (filename, mode)) == NULL)
     {
 #ifdef  DEBUG
       fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"

@@ -782,8 +782,8 @@ mkbak (const char *filename, backup_t type)
   set_suffix (buf, ".bak");
   if (stricmp (filename, buf) != 0)
     remove (buf);                               // *try* to remove or rename() will fail
-  else                                          // keep file attributes like date, etc. 
-    {                                           // handle the case where filename has the suffix ".bak".
+  else
+    {                                           // handle the case where filename has the suffix ".bak"
       char buf2[FILENAME_MAX];
 
       if (!dirname2 (filename, buf2))
@@ -793,7 +793,7 @@ mkbak (const char *filename, backup_t type)
         }
       tmpnam2 (buf, buf2);
     }
-  if (rename (filename, buf))
+  if (rename (filename, buf))                   // keep file attributes like date, etc.
     {
       fprintf (stderr, "ERROR: Cannot rename \"%s\" to \"%s\"\n", filename, buf);
       exit (1);

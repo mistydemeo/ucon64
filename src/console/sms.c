@@ -512,10 +512,9 @@ sms_testinterleaved (st_ucon64_nfo_t *rominfo)
 }
 
 
-#define SEARCHBUFSIZE (SMS_HEADER_START + 12 + 16 * 1024)
-#define N_SEARCH_STR 4
+#define SEARCHBUFSIZE (256 + 16 * 1024 + 12)    // max detected "header" is 16 kB
 static unsigned int
-sms_header_len (void)
+sms_header_len (int *signature_found)
 /*
   At first sight it seems reasonable to also determine whether the file is
   interleaved in this function. However, we run into a chicken-and-egg problem:
@@ -527,6 +526,7 @@ sms_header_len (void)
   In short: this function works only for files that are not interleaved.
 */
 {
+  *signature_found = 0;
   // first two hacks for Majesco Game Gear BIOS (U) [!]
   if (ucon64.file_size == 1024)
     return 0;
@@ -534,14 +534,13 @@ sms_header_len (void)
     return SMD_HEADER_LEN;
   else
     {
-      char buffer[SEARCHBUFSIZE] = { 0 }, *ptr, *ptr2 = NULL,
-           search_str[N_SEARCH_STR][9] = { "TMR SEGA", "TMR ALVS", "TMR SMSC",
-             "TMG SEGA" };
+      unsigned char buffer[SEARCHBUFSIZE] = { 0 }, *ptr, *ptr2 = NULL,
+                    search_str[][9] = { "TMR SEGA", "TMR ALVS", "TMR SMSC", "TMG SEGA" };
       unsigned int n;
 
-      ucon64_fread (buffer, 0, SEARCHBUFSIZE, ucon64.fname);
+      ucon64_fread (buffer, SMS_HEADER_START - 256, SEARCHBUFSIZE, ucon64.fname);
 
-      for (n = 0; n < N_SEARCH_STR; n++)
+      for (n = 0; n < sizeof search_str / sizeof search_str[0]; n++)
         {
           ptr = buffer;
           /*
@@ -552,9 +551,10 @@ sms_header_len (void)
             However, finding *a* occurence is more important than the checksum
             bytes being non-zero.
           */
-          while ((ptr = (char *) memmem2 (ptr, SEARCHBUFSIZE - (ptr - buffer),
-                                          search_str[n], 8, 0)) != NULL)
+          while ((ptr = (unsigned char *) memmem2 (ptr, SEARCHBUFSIZE - (ptr - buffer),
+                                                   search_str[n], 8, 0)) != NULL)
             {
+              *signature_found = 1;
               if (!ptr2 ||
                    (SEARCHBUFSIZE - (ptr - buffer) >= 12 &&
                     ptr[10] != '\0' && ptr[11] != '\0'))
@@ -563,8 +563,15 @@ sms_header_len (void)
             }
           if (ptr2)
             {
-              int offset = ptr2 - buffer - SMS_HEADER_START;
-              return offset < 0 ? 0 : offset;
+              int offset = ptr2 - buffer - 256;
+              unsigned int m;
+
+              // Checking the 256 bytes preceding the found signature is a
+              //  hack for [BIOS] Hang-On (USA, Europe) (v3.4). The block is
+              //  actually larger than 256 bytes, but this is enough.
+              for (m = 0; m < 256 && buffer[m] == 0xff; m++)
+                ;
+              return m == 256 ? 0 : offset >= 0 ? offset : 0;
             }
         }
 
@@ -576,13 +583,12 @@ sms_header_len (void)
     }
 }
 #undef SEARCHBUFSIZE
-#undef N_SEARCH_STR
 
 
 int
 sms_init (st_ucon64_nfo_t *rominfo)
 {
-  int result = -1, x;
+  int result = -1, x = 0;
   unsigned int pos = strlen (rominfo->misc);
   unsigned char buf[16384] = { 0 };
 
@@ -592,7 +598,7 @@ sms_init (st_ucon64_nfo_t *rominfo)
   if (UCON64_ISSET2 (ucon64.backup_header_len, unsigned int)) // -hd, -nhd or -hdn switch was specified
     rominfo->backup_header_len = ucon64.backup_header_len;
   else
-    rominfo->backup_header_len = sms_header_len ();
+    rominfo->backup_header_len = sms_header_len (&x);
 
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
                            ucon64.interleaved : sms_testinterleaved (rominfo);
@@ -617,12 +623,12 @@ sms_init (st_ucon64_nfo_t *rominfo)
   // Note that the identification bytes are the same as for Genesis SMD files.
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0.
-  if ((buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6) ||
+  if (ucon64.console == UCON64_SMS || x ||
+      (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6) ||
       !(memcmp (sms_header.signature, "TMR SEGA", 8) &&  // SMS or GG
         memcmp (sms_header.signature, "TMR ALVS", 8) &&  // SMS
         memcmp (sms_header.signature, "TMR SMSC", 8) &&  // SMS (unofficial)
-        memcmp (sms_header.signature, "TMG SEGA", 8)) || // GG
-      ucon64.console == UCON64_SMS)
+        memcmp (sms_header.signature, "TMG SEGA", 8)))   // GG
     result = 0;
   else
     result = -1;

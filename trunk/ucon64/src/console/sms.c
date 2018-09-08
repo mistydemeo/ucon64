@@ -512,7 +512,9 @@ sms_testinterleaved (st_ucon64_nfo_t *rominfo)
 }
 
 
-#define SEARCHBUFSIZE (256 + 16 * 1024 + 12)    // max detected "header" is 16 kB
+// offset of ID string in [BIOS] Hang-On (USA, Europe) (v3.4) relative to internal header
+#define MAX_ID_OFFSET 0x31a
+#define SEARCHBUFSIZE (256 + 16 * 1024 + MAX_ID_OFFSET + 12) // max detected "header" is 16 kB
 static unsigned int
 sms_header_len (int *signature_found)
 /*
@@ -542,7 +544,7 @@ sms_header_len (int *signature_found)
 
       for (n = 0; n < sizeof search_str / sizeof search_str[0]; n++)
         {
-          ptr = buffer;
+          ptr = buffer + 256;
           /*
             A few games contain several copies of the identification string
             (Alien 3 (UE) [!] (2 copies), Back to the Future 3 (UE) [!] (2
@@ -563,15 +565,14 @@ sms_header_len (int *signature_found)
             }
           if (ptr2)
             {
-              int offset = ptr2 - buffer - 256;
-              unsigned int m;
-
-              // Checking the 256 bytes preceding the found signature is a
+              unsigned int offset = ptr2 - buffer - 256, m = 0;
+              // Checking the 256 bytes preceding the internal header is a
               //  hack for [BIOS] Hang-On (USA, Europe) (v3.4). The block is
               //  actually larger than 256 bytes, but this is enough.
-              for (m = 0; m < 256 && buffer[m] == 0xff; m++)
-                ;
-              return m == 256 ? 0 : offset >= 0 ? offset : 0;
+              if (offset >= MAX_ID_OFFSET)
+                for (; m < 256 && (ptr2 - MAX_ID_OFFSET - 256)[m] == 0xff; m++)
+                  ;
+              return m == 256 ? offset - MAX_ID_OFFSET : offset;
             }
         }
 
@@ -583,6 +584,7 @@ sms_header_len (int *signature_found)
     }
 }
 #undef SEARCHBUFSIZE
+#undef MAX_ID_OFFSET
 
 
 int

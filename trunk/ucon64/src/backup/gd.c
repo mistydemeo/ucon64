@@ -2,7 +2,7 @@
 gd.c - Game Doctor support for uCON64
 
 Copyright (c) 2002 - 2003              John Weidman
-Copyright (c) 2002 - 2006, 2015 - 2017 dbjh
+Copyright (c) 2002 - 2006, 2015 - 2018 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -108,7 +108,7 @@ const st_getopt2_t gd_usage[] =
 #define GD6_RX_SYNC_TIMEOUT_ATTEMPTS 0x2000
 #define GD6_SYNC_RETRIES 16
 
-#define STOCKPPDEV_MSG "WARNING: This will not work with a stock ppdev. Please see the FAQ, question 55"
+#define STOCKPPDEV_MSG "WARNING: This will not work with a stock ppdev on PC. See the FAQ, question 55"
 
 static void init_io (unsigned short port);
 static void deinit_io (void);

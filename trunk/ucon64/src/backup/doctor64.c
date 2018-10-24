@@ -67,7 +67,7 @@ const st_getopt2_t doctor64_usage[] =
 #define REC_LOW_NIBBLE 0x00
 #define REC_MAX_WAIT SEND_MAX_WAIT
 
-#define STOCKPPDEV_MSG "WARNING: This will not work with a stock ppdev. Please see the FAQ, question 55"
+#define STOCKPPDEV_MSG "WARNING: This will not work with a stock ppdev on PC. See the FAQ, question 55"
 
 
 static int

@@ -2061,16 +2061,20 @@ Q58: <a href="#58">I tried to upload a game to my Super UFO Pro 8 SD (on
    parallel ports support input from this register, but most newer ones do not.
    You may happen to have a parallel port that does not support using the
    Control register for input.<br>
-   Another possibility may be that you configured uCON64 to use ppdev. The
-   developers of ppdev decided to target the lowest common denominator and to
-   not support reading from the Control register, which is unhelpful to say the
-   least. So, even if your parallel port supports using the Control register for
-   input, ppdev will not let you. This means that you cannot use ppdev in
-   combination with a Doctor V64, unless you modify ppdev (which is not
-   difficult). For the Game Doctor SF6/SF7 a workaround exists by using the Game
-   Doctor SF3 protocol, but you will lose the saver (RTS) transfer
-   functionality. Of course, you can also avoid this by not configuring uCON64
-   to use ppdev.<br>
+   Another possibility may be that you configured uCON64 to use ppdev on PC. For
+   PC the developers of ppdev decided to target the lowest common denominator
+   and to not support reading from the Control register, which is unhelpful to
+   say the least. So, even if your parallel port supports using the Control
+   register for input, ppdev will not let you. This means that you cannot use
+   ppdev in combination with a Doctor V64, unless you modify ppdev. For PC try
+   replacing the body of parport_pc_read_control() with:<br>
+   &nbsp;&nbsp;return inb (CONTROL (p));<br>
+   Then compile ppdev or Linux depending on whether ppdev should be a module or
+   part of the kernel.<br>
+   For the Game Doctor SF6/SF7 a workaround exists by using the Game Doctor SF3
+   protocol, but you will lose the saver (RTS) transfer and SRAM dumping
+   functionality. Of course, on PC you can also avoid this by not configuring
+   uCON64 to use ppdev.<br>
 <br>
 <p>
 <a name="56"><b>Q56</b>: I installed a DAT file, but every time I run uCON64 it

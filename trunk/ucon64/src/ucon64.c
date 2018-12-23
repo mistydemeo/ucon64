@@ -1664,7 +1664,7 @@ ucon64_nfo (void)
 #else
   if (ucon64.console == UCON64_UNKNOWN)
 #endif
-    fprintf (stderr, "%s\n", ucon64_msg[CONSOLE_WARNING]);
+    fputs (ucon64_msg[CONSOLE_WARNING], stderr);
 
   if (ucon64.nfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.nfo);

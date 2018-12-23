@@ -67,7 +67,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <libraries/lowlevel.h>                 // GetKey()
 #include <proto/dos.h>
 #include <proto/lowlevel.h>
-#elif   defined _WIN32
+#elif   defined _WIN32 || defined __CYGWIN__
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
@@ -75,6 +75,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
 #include <windows.h>                            // Sleep(), milliseconds
+#ifdef  __CYGWIN__
+#undef  _WIN32
+#endif
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
@@ -2846,14 +2849,30 @@ wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
+#elif   defined _WIN32 || defined __CYGWIN__    // make Cygwin port use Win32 API
+  Sleep (nmillis);
+#elif   defined HAVE_CLOCK_NANOSLEEP            // see comment about usleep()
+  struct timespec end;
+
+  clock_gettime (CLOCK_REALTIME, &end);
+  end.tv_sec += nmillis / 1000;
+  end.tv_nsec += (nmillis % 1000) * 1000000;
+  if (end.tv_nsec > 999999999)
+    {
+      end.tv_sec++;
+      end.tv_nsec -= 1000000000;
+    }
+
+  while (clock_nanosleep (CLOCK_REALTIME, TIMER_ABSTIME, &end, NULL) == EINTR)
+    ;
 #elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
+  // NOTE: Apparently usleep() was deprecated in POSIX.1-2001 and removed from
+  //       POSIX.1-2008. clock_nanosleep() will likely give better results.
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
 #elif   defined AMIGA
   Delay (nmillis > 20 ? nmillis / 20 : 1);      // 50Hz clock, so interval is 20ms
-#elif   defined _WIN32
-  Sleep (nmillis);
 #else
 #ifdef  __GNUC__
 #warning Please provide a wait2() implementation

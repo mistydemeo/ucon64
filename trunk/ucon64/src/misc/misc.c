@@ -2,7 +2,7 @@
 misc.c - miscellaneous functions
 
 Copyright (c) 1999 - 2008              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2017 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
 Copyright (c) 2002 - 2005              Jan-Erik Karlsson (Amiga code)
 
 
@@ -31,6 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <io.h>
 #pragma warning(pop)
 #endif
+#ifdef  HAVE_CLOCK_NANOSLEEP
+#include <errno.h>                              // EINTR
+#endif
 #include <stdarg.h>                             // va_arg()
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
@@ -41,11 +44,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dos.h>                                // delay(), milliseconds
 #elif   defined __BEOS__
 #include <OS.h>                                 // snooze(), microseconds
-// OS.h includes StorageDefs.h which includes param.h which unconditionally
-//  defines MIN and MAX.
 #elif   defined AMIGA
 #error Include directives are missing. Please add them and let us know.
-#elif   defined _WIN32
+#elif   defined _WIN32 || defined __CYGWIN__
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
@@ -53,6 +54,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #endif
 #include <windows.h>                            // Sleep(), milliseconds
+#ifdef  __CYGWIN__
+#undef  _WIN32
+#endif
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
@@ -122,14 +126,30 @@ wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
+#elif   defined _WIN32 || defined __CYGWIN__    // make Cygwin port use Win32 API
+  Sleep (nmillis);
+#elif   defined HAVE_CLOCK_NANOSLEEP            // see comment about usleep()
+  struct timespec end;
+
+  clock_gettime (CLOCK_REALTIME, &end);
+  end.tv_sec += nmillis / 1000;
+  end.tv_nsec += (nmillis % 1000) * 1000000;
+  if (end.tv_nsec > 999999999)
+    {
+      end.tv_sec++;
+      end.tv_nsec -= 1000000000;
+    }
+
+  while (clock_nanosleep (CLOCK_REALTIME, TIMER_ABSTIME, &end, NULL) == EINTR)
+    ;
 #elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
+  // NOTE: Apparently usleep() was deprecated in POSIX.1-2001 and removed from
+  //       POSIX.1-2008. clock_nanosleep() will likely give better results.
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
 #elif   defined AMIGA
   Delay (nmillis > 20 ? nmillis / 20 : 1);      // 50Hz clock, so interval is 20ms
-#elif   defined _WIN32
-  Sleep (nmillis);
 #else
 #ifdef  __GNUC__
 #warning Please provide a wait2() implementation
@@ -141,6 +161,56 @@ wait2 (int nmillis)
     ;
 #endif
 }
+
+
+#if     (defined __unix__ && !defined __MSDOS__) || defined __APPLE__ || \
+        defined __BEOS__ || defined _WIN32
+void
+microwait (int nmicros)
+{
+#if     defined _WIN32 || defined __CYGWIN__    // make Cygwin port use Win32 API
+#if 0 // very inaccurate, but sleeping implementation
+  HANDLE timer;
+  LARGE_INTEGER interval;
+
+  interval.QuadPart = -10 * nmicros;
+  if ((timer = CreateWaitableTimer (NULL, TRUE, NULL)) != NULL)
+    {
+      if (SetWaitableTimer (timer, &interval, 0, NULL, NULL, FALSE))
+        WaitForSingleObject (timer, INFINITE);
+      CloseHandle (timer);
+    }
+#else // busy-waiting, but much more accurate
+  LARGE_INTEGER frequency, start, end;
+
+  if (QueryPerformanceFrequency (&frequency) && QueryPerformanceCounter (&start))
+    while (QueryPerformanceCounter (&end) &&
+           ((end.QuadPart - start.QuadPart) * 1000000) / frequency.QuadPart < nmicros)
+      ;
+#endif
+#elif   defined HAVE_CLOCK_NANOSLEEP            // see comment about usleep()
+  struct timespec end;
+
+  clock_gettime (CLOCK_REALTIME, &end);
+  end.tv_sec += nmicros / 1000000;
+  end.tv_nsec += (nmicros % 1000000) * 1000;
+  if (end.tv_nsec > 999999999)
+    {
+      end.tv_sec++;
+      end.tv_nsec -= 1000000000;
+    }
+
+  while (clock_nanosleep (CLOCK_REALTIME, TIMER_ABSTIME, &end, NULL) == EINTR)
+    ;
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
+  // NOTE: Apparently usleep() was deprecated in POSIX.1-2001 and removed from
+  //       POSIX.1-2008. clock_nanosleep() will likely give better results.
+  usleep (nmicros);
+#elif   defined __BEOS__
+  snooze (nmicros);
+#endif
+}
+#endif
 
 
 void

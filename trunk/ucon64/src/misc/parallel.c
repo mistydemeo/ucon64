@@ -241,11 +241,6 @@ inportb (unsigned short port)
   switch (ppreg)
     {
     case 0:                                     // data
-      if (parport_io_direction == FORWARD)      // dir is forward?
-        {
-          parport_io_direction = REVERSE;       // change it to reverse
-          ioctl (parport_io_fd, PPDATADIR, &parport_io_direction);
-        }
       ioctl (parport_io_fd, PPRDATA, &byte);
       break;
     case 1:                                     // status
@@ -400,14 +395,15 @@ outportb (unsigned short port, unsigned char byte)
   switch (ppreg)
     {
     case 0:                                     // data
-      if (parport_io_direction == REVERSE)      // dir is reverse?
-        {
-          parport_io_direction = FORWARD;       // change it to forward
-          ioctl (parport_io_fd, PPDATADIR, &parport_io_direction);
-        }
       ioctl (parport_io_fd, PPWDATA, &byte);
       break;
     case 2:                                     // control
+      if (((byte & 0x20) >> 5) ^ parport_io_direction) // change direction?
+        {
+          parport_io_direction = byte & 0x20 ? REVERSE : FORWARD;
+          ioctl (parport_io_fd, PPDATADIR, &parport_io_direction);
+        }
+      byte &= ~0x20;                            // prevent ppdev from repeating the above
       ioctl (parport_io_fd, PPWCONTROL, &byte);
       break;
     case 3:                                     // EPP address

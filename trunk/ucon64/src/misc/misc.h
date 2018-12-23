@@ -156,6 +156,7 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
                   returns -1 if it fails, 0 if it was successful
   handle_registered_funcs() calls all the registered functions
   wait2()         wait (sleep) a specified number of milliseconds
+  microwait()     wait (sleep) a specified number of microseconds
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
 */
 typedef struct st_cm_set
@@ -198,6 +199,10 @@ extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);
 extern void wait2 (int nmillis);
+#if     (defined __unix__ && !defined __MSDOS__) || defined __APPLE__ || \
+        defined __BEOS__ || defined _WIN32
+extern void microwait (int nmicros);
+#endif
 extern char *getenv2 (const char *variable);
 extern int misc_digits (unsigned long value);
 

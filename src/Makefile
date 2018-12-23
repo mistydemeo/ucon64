@@ -415,7 +415,7 @@ backup/gbx.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
               misc/parallel.h $(TERM_H_DEPS) $(UCON64_MISC_H_DEPS) \
               console/gb.h backup/gbx.h $(GETOPT2_H_DEPS)
 backup/gd.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
-             misc/parallel.h misc/string.h $(TERM_H_DEPS) \
+             misc/parallel.h misc/property.h misc/string.h $(TERM_H_DEPS) \
              $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) backup/gd.h
 backup/interceptor.o: config.h backup/interceptor.h $(GETOPT2_H_DEPS)
 backup/lynxit.o: config.h $(ARCHIVE_H_DEPS) misc/parallel.h $(TERM_H_DEPS) \

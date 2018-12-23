@@ -32,6 +32,9 @@
 /* Define to 1 if you have the `realpath' function. */
 /* #undef HAVE_REALPATH */
 
+/* Define to 1 if you have the `clock_nanosleep' function. */
+/* #undef HAVE_CLOCK_NANOSLEEP */
+
 /* Define to 1 if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */
 

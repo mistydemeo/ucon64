@@ -1187,7 +1187,7 @@ ucon64_set_property (st_property_t *prop, const char *org_configfile,
 int
 ucon64_set_property_array (const char *org_configfile)
 {
-  st_property_t props[45];
+  st_property_t props[46];
   int i = 0, result;
 
   ucon64_set_property (&props[i++], org_configfile, "backups", "1",
@@ -1210,6 +1210,12 @@ ucon64_set_property_array (const char *org_configfile)
                        "offset of ECP Extended Control register relative to Data register (parport)");
 #endif
 #endif
+  ucon64_set_property (&props[i++], org_configfile, "gd6_send_byte_delay", "0",
+                       "GDSF6/7 specific: delay in microseconds to simulate synchronizing (based on\n"
+                       "reading bit 1 of the parallel port Control register) before sending a byte.\n"
+                       "Also signifies that all synchronization involving reads from the Control\n"
+                       "register should be simulated\n"
+                       "(0=do not simulate, but read from the Control register)");
   ucon64_set_property (&props[i++], org_configfile, "n64_dat_v64", "1",
                        "calculate CRC32 value of N64 ROM in Doctor V64 format for DAT files\n"
                        "(1=Doctor V64; 0=Mr. Backup Z64)");

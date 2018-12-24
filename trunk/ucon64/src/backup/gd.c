@@ -570,10 +570,6 @@ gd3_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *ro
 int
 gd6_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo)
 {
-#ifdef  USE_PPDEV
-  puts (STOCKPPDEV_MSG);
-#endif
-
   gd_send_prolog_byte = gd6_send_prolog_byte;   // for gd_send_unit_prolog()
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
   gd_send_bytes = gd6_send_bytes;
@@ -601,6 +597,11 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   st_add_filename_data_t add_filename_data = { 0, NULL };
 
   init_io (parport);
+
+#ifdef  USE_PPDEV
+  if (gd6_protocol && !gd6_send_byte_delay)
+    puts (STOCKPPDEV_MSG);
+#endif
 
   // we don't want to malloc() ridiculously small chunks (of 12 bytes)
   for (i = 0; i < GD3_MAX_UNITS; i++)
@@ -774,11 +775,12 @@ gd6_read_sram (const char *filename, unsigned short parport)
   int len, bytesreceived = 0, transfer_size;
   time_t starttime;
 
-#ifdef  USE_PPDEV
-  puts (STOCKPPDEV_MSG);
-#endif
-
   init_io (parport);
+
+#ifdef  USE_PPDEV
+  if (!gd6_send_byte_delay)
+    puts (STOCKPPDEV_MSG);
+#endif
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
@@ -864,10 +866,6 @@ gd3_write_sram (const char *filename, unsigned short parport)
 int
 gd6_write_sram (const char *filename, unsigned short parport)
 {
-#ifdef  USE_PPDEV
-  puts (STOCKPPDEV_MSG);
-#endif
-
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
   gd_send_bytes = gd6_send_bytes;
 
@@ -885,6 +883,11 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
   time_t starttime;
 
   init_io (parport);
+
+#ifdef  USE_PPDEV
+  if (gd6_protocol && !gd6_send_byte_delay)
+    puts (STOCKPPDEV_MSG);
+#endif
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
@@ -976,11 +979,12 @@ gd6_read_saver (const char *filename, unsigned short parport)
   int len, bytesreceived = 0, transfer_size;
   time_t starttime;
 
-#ifdef  USE_PPDEV
-  puts (STOCKPPDEV_MSG);
-#endif
-
   init_io (parport);
+
+#ifdef  USE_PPDEV
+  if (!gd6_send_byte_delay)
+    puts (STOCKPPDEV_MSG);
+#endif
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
@@ -1069,10 +1073,6 @@ gd3_write_saver (const char *filename, unsigned short parport)
 int
 gd6_write_saver (const char *filename, unsigned short parport)
 {
-#ifdef  USE_PPDEV
-  puts (STOCKPPDEV_MSG);
-#endif
-
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
   gd_send_bytes = gd6_send_bytes;
 
@@ -1091,6 +1091,11 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
   time_t starttime;
 
   init_io (parport);
+
+#ifdef  USE_PPDEV
+  if (gd6_protocol && !gd6_send_byte_delay)
+    puts (STOCKPPDEV_MSG);
+#endif
 
   /*
     Check that filename is a valid Game Doctor saver filename.

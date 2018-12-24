@@ -2849,12 +2849,13 @@ wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
-#elif   defined _WIN32 || defined __CYGWIN__    // make Cygwin port use Win32 API
+#elif   defined _WIN32
   Sleep (nmillis);
 #elif   defined HAVE_CLOCK_NANOSLEEP            // see comment about usleep()
+#if 0 // very inaccurate, but sleeping implementation
   struct timespec end;
 
-  clock_gettime (CLOCK_REALTIME, &end);
+  clock_gettime (CLOCK_MONOTONIC, &end);
   end.tv_sec += nmillis / 1000;
   end.tv_nsec += (nmillis % 1000) * 1000000;
   if (end.tv_nsec > 999999999)
@@ -2863,8 +2864,33 @@ wait2 (int nmillis)
       end.tv_nsec -= 1000000000;
     }
 
-  while (clock_nanosleep (CLOCK_REALTIME, TIMER_ABSTIME, &end, NULL) == EINTR)
+  while (clock_nanosleep (CLOCK_MONOTONIC, TIMER_ABSTIME, &end, NULL) == EINTR)
     ;
+#else // busy-waiting, but much more accurate
+  struct timespec end, current;
+
+  clock_gettime (CLOCK_MONOTONIC, &end);
+  end.tv_sec += nmillis / 1000;
+  end.tv_nsec += (nmillis % 1000) * 1000000;
+  if (end.tv_nsec > 999999999)
+    {
+      end.tv_sec++;
+      end.tv_nsec -= 1000000000;
+    }
+
+  do
+    {
+      clock_gettime (CLOCK_MONOTONIC, &current);
+      current.tv_sec -= end.tv_sec;
+      current.tv_nsec -= end.tv_nsec;
+      if (current.tv_nsec < 0)
+        {
+          current.tv_sec--;
+          current.tv_nsec += 1000000000;
+        }
+    }
+  while (current.tv_sec < 0);
+#endif
 #elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
   // NOTE: Apparently usleep() was deprecated in POSIX.1-2001 and removed from
   //       POSIX.1-2008. clock_nanosleep() will likely give better results.

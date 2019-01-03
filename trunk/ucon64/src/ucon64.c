@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units.
 
 Copyright (c) 1999 - 2005              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -869,7 +869,7 @@ main (int argc, char **argv)
   if (argc == 1)
     ucon64_test ();
 #else
-  puts ("uCON64 " UCON64_VERSION_S " WIP " CURRENT_OS_S " 1999-2018\n"
+  puts ("uCON64 " UCON64_VERSION_S " WIP " CURRENT_OS_S " 1999-2019\n"
         "Uses code from various people. See 'developers.html' for more!\n"
         "This may be freely redistributed under the terms of the GNU Public License\n");
 #endif

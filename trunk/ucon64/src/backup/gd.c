@@ -2,7 +2,7 @@
 gd.c - Game Doctor support for uCON64
 
 Copyright (c) 2002 - 2003              John Weidman
-Copyright (c) 2002 - 2006, 2015 - 2018 dbjh
+Copyright (c) 2002 - 2006, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <ctype.h>
 #include <stdlib.h>
+#ifdef  HAVE_CLOCK_NANOSLEEP
+#include <errno.h>                              // EINTR
+#endif
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/misc.h"
@@ -310,6 +313,57 @@ microwait2 (int nmicros)
 }
 
 
+#define X86_PLATFORM (__i386__ || __x86_64__ || _M_IX86 || _M_X64) // GCC or Visual C++ and x86
+
+#if     !X86_PLATFORM && defined HAVE_CLOCK_NANOSLEEP
+void
+microsleep (int nmicros)
+/*
+  The current implementation of microwait() in case of HAVE_CLOCK_NANOSLEEP
+  busily waits in order to have microsecond (+2us) accuracy. The commented
+  sleeping implementation of microwait() in case of HAVE_CLOCK_NANOSLEEP can
+  easily have an error of +50us, depending on the system load. However, at
+  least on Raspberry Pi (3B+) we *have* to call clock_nanosleep() (or probably
+  any other sleeping function) in order to make dumping with -xgd6s work.
+*/
+{
+  struct timespec end;
+
+  clock_gettime (CLOCK_MONOTONIC, &end);
+  end.tv_sec += nmicros / 1000000;
+  end.tv_nsec += (nmicros % 1000000) * 1000;
+  if (end.tv_nsec > 999999999)
+    {
+      end.tv_sec++;
+      end.tv_nsec -= 1000000000;
+    }
+
+  while (clock_nanosleep (CLOCK_MONOTONIC, TIMER_ABSTIME, &end, NULL) == EINTR)
+    ;
+}
+#endif
+
+
+static inline unsigned char
+inportb2 (unsigned short port)
+{
+#if     !X86_PLATFORM && defined HAVE_CLOCK_NANOSLEEP
+  microsleep (1);
+#endif
+  return inportb (port);
+}
+
+
+static inline void
+outportb2 (unsigned short port, unsigned char byte)
+{
+  outportb (port, byte);
+#if     !X86_PLATFORM && defined HAVE_CLOCK_NANOSLEEP
+  microsleep (1);
+#endif
+}
+
+
 static int
 gd6_sync_hardware (void)
 // sets the SF7 up for an SF6/SF7 protocol transfer
@@ -321,61 +375,61 @@ gd6_sync_hardware (void)
     {
       int timeout = GD6_TIMEOUT_ATTEMPTS;
 
-      outportb (gd_port + PARPORT_CONTROL, 4);
-      outportb (gd_port + PARPORT_DATA, 0);
-      outportb (gd_port + PARPORT_CONTROL, 4);
+      outportb2 (gd_port + PARPORT_CONTROL, 4);
+      outportb2 (gd_port + PARPORT_DATA, 0);
+      outportb2 (gd_port + PARPORT_CONTROL, 4);
 
       for (delay = 0x1000; delay > 0; delay--)  // a delay may not be necessary here
         ;
 
-      outportb (gd_port + PARPORT_DATA, 0xaa);
-      outportb (gd_port + PARPORT_CONTROL, 0);
+      outportb2 (gd_port + PARPORT_DATA, 0xaa);
+      outportb2 (gd_port + PARPORT_CONTROL, 0);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb (gd_port + PARPORT_CONTROL) & 8) == 0)
+          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) == 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
             continue;
         }
 
-      outportb (gd_port + PARPORT_CONTROL, 4);
+      outportb2 (gd_port + PARPORT_CONTROL, 4);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb (gd_port + PARPORT_CONTROL) & 8) != 0)
+          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) != 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
             continue;
         }
 
-      outportb (gd_port + PARPORT_DATA, 0x55);
-      outportb (gd_port + PARPORT_CONTROL, 0);
+      outportb2 (gd_port + PARPORT_DATA, 0x55);
+      outportb2 (gd_port + PARPORT_CONTROL, 0);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb (gd_port + PARPORT_CONTROL) & 8) == 0)
+          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) == 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
             continue;
         }
 
-      outportb (gd_port + PARPORT_CONTROL, 4);
+      outportb2 (gd_port + PARPORT_CONTROL, 4);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb (gd_port + PARPORT_CONTROL) & 8) != 0)
+          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) != 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
@@ -397,15 +451,15 @@ gd6_sync_receive_start (void)
   if (gd6_send_byte_delay)
     microwait2 (2000);
   else
-    while (((inportb (gd_port + PARPORT_CONTROL) & 3) != 3) &&
-           ((inportb (gd_port + PARPORT_CONTROL) & 3) != 0))
+    while (((inportb2 (gd_port + PARPORT_CONTROL) & 3) != 3) &&
+           ((inportb2 (gd_port + PARPORT_CONTROL) & 3) != 0))
       if (--timeout == 0)
         return GD_ERROR;
 
-  outportb (gd_port + PARPORT_DATA, 0);
+  outportb2 (gd_port + PARPORT_DATA, 0);
 
   timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
-  while ((inportb (gd_port + PARPORT_STATUS) & 0x80) != 0)
+  while ((inportb2 (gd_port + PARPORT_STATUS) & 0x80) != 0)
     if (--timeout == 0)
       return GD_ERROR;
 
@@ -414,7 +468,7 @@ gd6_sync_receive_start (void)
 
 
 static inline int
-gd6_send_byte_helper (unsigned char data)
+gd6_send_byte (unsigned char data)
 {
   static unsigned char send_toggle = 0;
   unsigned int timeout = 0x1e0000;
@@ -422,22 +476,15 @@ gd6_send_byte_helper (unsigned char data)
   if (gd6_send_byte_delay)
     microwait2 (gd6_send_byte_delay);
   else
-    while (((inportb (gd_port + PARPORT_CONTROL) >> 1) & 1) != send_toggle)
+    while (((inportb2 (gd_port + PARPORT_CONTROL) >> 1) & 1) != send_toggle)
       if (--timeout == 0)
         return GD_ERROR;
 
   send_toggle ^= 1;
-  outportb (gd_port + PARPORT_DATA, data);
-  outportb (gd_port + PARPORT_CONTROL, 4 | send_toggle);
+  outportb2 (gd_port + PARPORT_DATA, data);
+  outportb2 (gd_port + PARPORT_CONTROL, 4 | send_toggle);
 
   return GD_OK;
-}
-
-
-static int
-gd6_send_prolog_byte (unsigned char data)
-{
-  return gd6_send_byte_helper (data);
 }
 
 
@@ -447,7 +494,7 @@ gd6_send_prolog_bytes (unsigned char *data, int len)
   int i;
 
   for (i = 0; i < len; i++)
-    if (gd6_send_byte_helper (data[i]) != GD_OK)
+    if (gd6_send_byte (data[i]) != GD_OK)
       return GD_ERROR;
   return GD_OK;
 }
@@ -460,7 +507,7 @@ gd6_send_bytes (unsigned char *data, int len)
 
   for (i = 0; i < len; i++)
     {
-      if (gd6_send_byte_helper (data[i]) != GD_OK)
+      if (gd6_send_byte (data[i]) != GD_OK)
         return GD_ERROR;
 
       gd_bytessent++;
@@ -480,25 +527,25 @@ gd6_receive_bytes (unsigned char *buffer, int len)
   int i;
   unsigned int timeout = 0x1e0000;
 
-  outportb (gd_port + PARPORT_DATA, 0x80);      // signal the SF6/SF7 to send the next nibble
+  outportb2 (gd_port + PARPORT_DATA, 0x80);     // signal the SF6/SF7 to send the next nibble
   for (i = 0; i < len; i++)
     {
       unsigned char nibble1, nibble2;
 
-      while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0)
+      while ((inportb2 (gd_port + PARPORT_STATUS) & 0x80) == 0)
         if (--timeout == 0)
           return GD_ERROR;
 
-      nibble1 = (inportb (gd_port + PARPORT_STATUS) >> 3) & 0x0f;
-      outportb (gd_port + PARPORT_DATA, 0x00);  // signal the SF6/SF7 to send the next nibble
+      nibble1 = (inportb2 (gd_port + PARPORT_STATUS) >> 3) & 0x0f;
+      outportb2 (gd_port + PARPORT_DATA, 0x00); // signal the SF6/SF7 to send the next nibble
 
-      while ((inportb (gd_port + PARPORT_STATUS) & 0x80) != 0)
+      while ((inportb2 (gd_port + PARPORT_STATUS) & 0x80) != 0)
         if (--timeout == 0)
           return GD_ERROR;
 
-      nibble2 = (inportb (gd_port + PARPORT_STATUS) << 1) & 0xf0;
+      nibble2 = (inportb2 (gd_port + PARPORT_STATUS) << 1) & 0xf0;
       buffer[i] = nibble2 | nibble1;
-      outportb (gd_port + PARPORT_DATA, 0x80);
+      outportb2 (gd_port + PARPORT_DATA, 0x80);
     }
   return GD_OK;
 }
@@ -570,7 +617,7 @@ gd3_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *ro
 int
 gd6_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo)
 {
-  gd_send_prolog_byte = gd6_send_prolog_byte;   // for gd_send_unit_prolog()
+  gd_send_prolog_byte = gd6_send_byte;          // for gd_send_unit_prolog()
   gd_send_prolog_bytes = gd6_send_prolog_bytes;
   gd_send_bytes = gd6_send_bytes;
 

@@ -2,7 +2,7 @@
 parallel.c - miscellaneous parallel port functions
 
 Copyright (c) 1999 - 2004                    NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 - 2018 dbjh
+Copyright (c) 2001 - 2004, 2015, 2017 - 2019 dbjh
 Copyright (c) 2001                           Caz (original BeOS code)
 Copyright (c) 2002 - 2004                    Jan-Erik Karlsson (Amiga code)
 
@@ -589,7 +589,7 @@ parport_open (unsigned short port)
   if (port == PARPORT_UNKNOWN)
     port = 0;
 
-  parport_io_fd = open (ucon64.parport_dev, O_RDWR | O_NONBLOCK);
+  parport_io_fd = open (ucon64.parport_dev, O_RDWR);
   if (parport_io_fd == -1)
     {
       fprintf (stderr, "ERROR: Could not open parallel port device (%s)\n"

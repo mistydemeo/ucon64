@@ -316,7 +316,7 @@ microwait2 (int nmicros)
 #define X86_PLATFORM (__i386__ || __x86_64__ || _M_IX86 || _M_X64) // GCC or Visual C++ and x86
 
 #if     !X86_PLATFORM && defined HAVE_CLOCK_NANOSLEEP
-void
+static void
 microsleep (int nmicros)
 /*
   The current implementation of microwait() in case of HAVE_CLOCK_NANOSLEEP

@@ -35,6 +35,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
+#ifdef  _POSIX_PRIORITY_SCHEDULING
+// if _POSIX_PRIORITY_SCHEDULING is defined in unistd.h it indicates
+//  availability of sched_get_priority_max() and sched_setscheduler()
+#include <sched.h>
+#endif
 #endif
 #ifdef  _MSC_VER
 #pragma warning(push)
@@ -1144,6 +1149,26 @@ main (int argc, char **argv)
   if (ucon64.dat_enabled)
     ucon64_dat_indexer ();              // update cache (index) files if necessary
 
+#ifdef  _POSIX_PRIORITY_SCHEDULING
+  if (get_property_int (ucon64.configfile, "gd6_send_byte_delay"))
+    {
+      struct sched_param sp;
+
+      memset (&sp, 0, sizeof (sp));
+      sp.sched_priority = sched_get_priority_max (SCHED_FIFO);
+      if (sp.sched_priority != -1)
+        {
+          // the next statement makes it possible to have a higher priority process if (on GNU/Linux)
+          //  /proc/sys/kernel/sched_rt_runtime_us is -1, so that the uCON64 process can be killed
+          --sp.sched_priority;
+          // SCHED_RESET_ON_FORK is specific to Linux and we ignore fork() for now
+          if (sched_setscheduler (0, SCHED_FIFO /* | SCHED_RESET_ON_FORK */, &sp) >= 0)
+            printf ("Set the scheduling policy to SCHED_FIFO and scheduling priority to %d\n", sp.sched_priority);
+          else
+            printf ("NOTE: Could not set scheduling policy to SCHED_FIFO with scheduling priority %d\n", sp.sched_priority);
+        }
+    }
+#endif
 #ifdef  USE_PARALLEL
   /*
     The copier options need root privileges for parport_open(). We can't use

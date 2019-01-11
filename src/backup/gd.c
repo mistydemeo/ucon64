@@ -132,17 +132,16 @@ typedef struct st_gd3_memory_unit
 
 typedef struct st_add_filename_data
 {
-  int index;
+  unsigned int index;
   char **names;
 } st_add_filename_data_t;
 
 static int (*gd_send_prolog_byte) (unsigned char data);
-static int (*gd_send_prolog_bytes) (unsigned char *data, int len);
-static int (*gd_send_bytes) (unsigned char *data, int len);
+static int (*gd_send_prolog_bytes) (unsigned char *data, unsigned int len);
+static int (*gd_send_bytes) (unsigned char *data, unsigned int len);
 static st_gd3_memory_unit_t gd3_dram_unit[GD3_MAX_UNITS];
 static unsigned short gd_port;
-static int gd6_send_byte_delay;
-static int gd_bytessent, gd_fsize;
+static unsigned int gd6_send_byte_delay, gd_bytessent, gd_fsize;
 static time_t gd_starttime;
 static char gd_destfname[FILENAME_MAX] = "";
 static FILE *gd_destfile;
@@ -243,9 +242,9 @@ gd3_send_prolog_byte (unsigned char data)
 
 
 static int
-gd3_send_prolog_bytes (unsigned char *data, int len)
+gd3_send_prolog_bytes (unsigned char *data, unsigned int len)
 {
-  int i;
+  unsigned int i;
 
   for (i = 0; i < len; i++)
     if (gd3_send_prolog_byte (data[i]) == GD_ERROR)
@@ -274,9 +273,9 @@ gd3_send_byte (unsigned char data)
 
 
 static int
-gd3_send_bytes (unsigned char *data, int len)
+gd3_send_bytes (unsigned char *data, unsigned int len)
 {
-  int i;
+  unsigned int i;
 
   for (i = 0; i < len; i++)
     {
@@ -368,12 +367,12 @@ static int
 gd6_sync_hardware (void)
 // sets the SF7 up for an SF6/SF7 protocol transfer
 {
-  int retries;
+  unsigned int retries;
   volatile int delay;
 
   for (retries = GD6_SYNC_RETRIES; retries > 0; retries--)
     {
-      int timeout = GD6_TIMEOUT_ATTEMPTS;
+      unsigned int timeout = GD6_TIMEOUT_ATTEMPTS;
 
       outportb2 (gd_port + PARPORT_CONTROL, 4);
       outportb2 (gd_port + PARPORT_DATA, 0);
@@ -446,7 +445,7 @@ static int
 gd6_sync_receive_start (void)
 // sync with the start of the received data
 {
-  int timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
+  unsigned int timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
 
   if (gd6_send_byte_delay)
     microwait2 (2000);
@@ -489,9 +488,9 @@ gd6_send_byte (unsigned char data)
 
 
 static int
-gd6_send_prolog_bytes (unsigned char *data, int len)
+gd6_send_prolog_bytes (unsigned char *data, unsigned int len)
 {
-  int i;
+  unsigned int i;
 
   for (i = 0; i < len; i++)
     if (gd6_send_byte (data[i]) != GD_OK)
@@ -501,9 +500,9 @@ gd6_send_prolog_bytes (unsigned char *data, int len)
 
 
 static int
-gd6_send_bytes (unsigned char *data, int len)
+gd6_send_bytes (unsigned char *data, unsigned int len)
 {
-  int i;
+  unsigned int i;
 
   for (i = 0; i < len; i++)
     {
@@ -522,10 +521,9 @@ gd6_send_bytes (unsigned char *data, int len)
 
 
 static int
-gd6_receive_bytes (unsigned char *buffer, int len)
+gd6_receive_bytes (unsigned char *buffer, unsigned int len)
 {
-  int i;
-  unsigned int timeout = 0x1e0000;
+  unsigned int i, timeout = 0x1e0000;
 
   outportb2 (gd_port + PARPORT_DATA, 0x80);     // signal the SF6/SF7 to send the next nibble
   for (i = 0; i < len; i++)
@@ -639,8 +637,8 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   unsigned char *buffer;
   char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12] = { { 0 } },
        *filenames[GD3_MAX_UNITS], dir[FILENAME_MAX];
-  int num_units, i, split, hirom = snes_get_snes_hirom (),
-      gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
+  unsigned int num_units, i, split, hirom = snes_get_snes_hirom (),
+               gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
   st_add_filename_data_t add_filename_data = { 0, NULL };
 
   init_io (parport);
@@ -656,7 +654,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   add_filename_data.names = names;
 
   split = ucon64_testsplit (filename, gd_add_filename, &add_filename_data);
-  if (UCON64_ISSET (ucon64.split) ? ucon64.split : split)
+  if (UCON64_ISSET (ucon64.split) ? ucon64.split : (int) split)
     num_units = split;
   else
     {
@@ -668,7 +666,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   gd_fsize = 0;
   for (i = 0; i < num_units; i++)
     {
-      int x;
+      unsigned int x;
 
       // No suffix is necessary but the name entry must be upper case and MUST
       //  be 11 characters long, padded at the end with spaces if necessary.
@@ -697,7 +695,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
       else
         {
           if (!gd_fsize)
-            gd_fsize = (int) ucon64.file_size;
+            gd_fsize = (unsigned int) ucon64.file_size;
           if (hirom)
             gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
           else
@@ -819,7 +817,7 @@ gd6_read_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
-  int len, bytesreceived = 0, transfer_size;
+  unsigned int len, bytesreceived = 0, transfer_size;
   time_t starttime;
 
   init_io (parport);
@@ -866,11 +864,20 @@ gd6_read_sram (const char *filename, unsigned short parport)
     io_error ("gd6_receive_bytes(16)");
 
   transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
-  if (transfer_size != 0x8000)
+  if (transfer_size == 0)
     {
-      fprintf (stderr, "ERROR: SRAM transfer size from Game Doctor != 0x8000 bytes\n");
+      fputs ("ERROR: SRAM transfer size from Game Doctor is 0 bytes\n", stderr);
       exit (1);
     }
+  else if (transfer_size > 0x8000)
+    {
+      fprintf (stderr, "ERROR: SRAM transfer size from Game Doctor > 0x8000 bytes (0x%x bytes)\n",
+               transfer_size);
+      exit (1);
+    }
+  else if (transfer_size < 0x8000)
+    printf ("WARNING: SRAM transfer size from Game Doctor < 0x8000 bytes (0x%x bytes)\n",
+            transfer_size);
 
   printf ("Receive: %d Bytes\n", transfer_size);
   puts ("Press q to abort\n");
@@ -878,7 +885,7 @@ gd6_read_sram (const char *filename, unsigned short parport)
   starttime = time (NULL);
   while (bytesreceived < transfer_size)
     {
-      if (transfer_size - bytesreceived >= BUFFERSIZE)
+      if (transfer_size >= bytesreceived + BUFFERSIZE)
         len = BUFFERSIZE;
       else
         len = transfer_size - bytesreceived;
@@ -888,7 +895,7 @@ gd6_read_sram (const char *filename, unsigned short parport)
       fwrite (buffer, 1, len, file);
 
       bytesreceived += len;
-      ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+      ucon64_gauge (starttime, bytesreceived, transfer_size);
       gd_checkabort (2);
     }
 
@@ -925,8 +932,8 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
-  int bytesread, bytessent = 0, size, header_size,
-      gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
+  unsigned int bytesread, bytessent = 0, size, header_size,
+               gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
   time_t starttime;
 
   init_io (parport);
@@ -947,7 +954,7 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
       exit (1);
     }
 
-  size = (int) ucon64.file_size;                // GD SRAM is 4*8 KB, emu SRAM often not
+  size = (unsigned int) ucon64.file_size;       // GD SRAM is 4*8 KB, emu SRAM often not
 
   if (size == 0x8000)
     header_size = 0;
@@ -1023,7 +1030,7 @@ gd6_read_saver (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
-  int len, bytesreceived = 0, transfer_size;
+  unsigned int len, bytesreceived = 0, transfer_size;
   time_t starttime;
 
   init_io (parport);
@@ -1073,11 +1080,20 @@ gd6_read_saver (const char *filename, unsigned short parport)
     io_error ("gd6_receive_bytes(16)");
 
   transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
-  if (transfer_size != 0x38000)
+  if (transfer_size == 0)
     {
-      fputs ("ERROR: Saver transfer size from Game Doctor != 0x38000 bytes\n", stderr);
+      fputs ("ERROR: Saver transfer size from Game Doctor is 0 bytes\n", stderr);
       exit (1);
     }
+  else if (transfer_size > 0x38000)
+    {
+      fprintf (stderr, "ERROR: Saver transfer size from Game Doctor > 0x38000 bytes (0x%x bytes)\n",
+               transfer_size);
+      exit (1);
+    }
+  else if (transfer_size < 0x38000)
+    printf ("WARNING: Saver transfer size from Game Doctor < 0x38000 bytes (0x%x bytes)\n",
+            transfer_size);
 
   printf ("Receive: %d Bytes\n", transfer_size);
   puts ("Press q to abort\n");
@@ -1085,7 +1101,7 @@ gd6_read_saver (const char *filename, unsigned short parport)
   starttime = time (NULL);
   while (bytesreceived < transfer_size)
     {
-      if (transfer_size - bytesreceived >= BUFFERSIZE)
+      if (transfer_size >= bytesreceived + BUFFERSIZE)
         len = BUFFERSIZE;
       else
         len = transfer_size - bytesreceived;
@@ -1095,7 +1111,7 @@ gd6_read_saver (const char *filename, unsigned short parport)
       fwrite (buffer, 1, len, file);
 
       bytesreceived += len;
-      ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+      ucon64_gauge (starttime, bytesreceived, transfer_size);
       gd_checkabort (2);
     }
 
@@ -1133,8 +1149,8 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
   FILE *file;
   unsigned char *buffer, gdfilename[12];
   const char *p;
-  int bytesread, bytessent = 0, size, fn_length,
-      gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
+  unsigned int bytesread, bytessent = 0, size, fn_length,
+               gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
   time_t starttime;
 
   init_io (parport);
@@ -1176,7 +1192,7 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
       exit (1);
     }
 
-  size = (int) ucon64.file_size;
+  size = (unsigned int) ucon64.file_size;
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
       fputs ("ERROR: GD saver file size must be 229376 bytes\n", stderr);

@@ -2,7 +2,7 @@
 snes.c - Super NES support for uCON64
 
 Copyright (c) 1999 - 2002              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 Copyright (c) 2002 - 2003              John Weidman
 Copyright (c) 2004                     JohnDie
 
@@ -3989,7 +3989,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
           else if (x == 20)
             y = 0xc0;
 
-          printf ("[%02x]     SNES 0x%02x-0x%02x:0x%04x-0x%x: ",
+          printf ("[%x]     SNES 0x%02x-0x%02x:0x%04x-0x%x: ",
                   0x11 + x, y, y + 0x0f, bank_offset, bank_offset + 0x7fff);
 
           if (mapping == 0x60)
@@ -4029,14 +4029,14 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
           if (pos)
             {
               bank_str[pos - 1] = '\0';
-              printf ("[%02x]     SRAM (HiROM) mapped to %s:0x6000-0x7fff => %s\n",
+              printf ("[%x]     SRAM (HiROM) mapped to %s:0x6000-0x7fff => %s\n",
                       0x29 + y, bank_str,
                       matches_deviates (snes_sram_size && snes_hirom));
             }
           else
             // stating that the value matches with what snes_init() found
             //  actually applies to the combination of header[0x29] and header[0x2a]
-            printf ("[%02x]     no SRAM (HiROM) mapped to 0x%xx-0x%xx:0x6000-0x7fff => %s\n",
+            printf ("[%x]     no SRAM (HiROM) mapped to 0x%xx-0x%xx:0x6000-0x7fff => %s\n",
                     0x29 + y, y * 8, y * 8 + 7,
                     matches_deviates (!snes_sram_size || !snes_hirom ||
                                       (header[0x29] | header[0x2a])));

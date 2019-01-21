@@ -1341,7 +1341,7 @@ void
 snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header)
 {
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      uses_DSP;
+               uses_DSP;
 
   reset_header (header);
   header->size_low = (unsigned char) (size / 8192);
@@ -1354,7 +1354,7 @@ snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header)
   if ((snes_header.rom_type & 0xf0) == 0x10)    // uses FX(2) chip
     {
       header->emulation1 = 0x11;
-      header->emulation2 = 2;
+      header->emulation2 = 0x02;
     }
   else
     {
@@ -1377,7 +1377,7 @@ snes_set_fig_header (st_ucon64_nfo_t *rominfo, st_fig_header_t *header)
           header->emulation2 |= 2;
           if (uses_DSP)
             header->emulation1 |= 0xf0;
-          if (snes_sram_size != 0)
+          if (snes_sram_size)
             header->emulation1 |= 0xdd;
         }
       else if (uses_DSP)                        // LoROM
@@ -1586,7 +1586,7 @@ snes_set_gd3_header (unsigned int total4Mbparts, unsigned char *header)
       else
         memcpy (&header[0x11], gd3_hirom_48mb_map, GD3_HEADER_MAPSIZE);
 
-      if (snes_sram_size != 0)
+      if (snes_sram_size)
         {
           if (snes_header_base == SNES_EROM)
             {
@@ -1620,7 +1620,14 @@ snes_set_gd3_header (unsigned int total4Mbparts, unsigned char *header)
       else
         memcpy (&header[0x11], gd3_lorom_32mb_map, GD3_HEADER_MAPSIZE);
 
-      if (snes_sram_size != 0)
+      if (snes_header.rom_type == 3 || snes_header.rom_type == 5 || // DSP
+          snes_header.rom_type == 0xf6)         // Seta DSP
+        {
+          header[0x14] = 0x60;
+          header[0x1c] = 0x60;
+        }
+
+      if (snes_sram_size)
         {
           header[0x24] = 0x40;
           header[0x28] = 0x40;
@@ -1926,7 +1933,7 @@ snes_ufo (st_ucon64_nfo_t *rominfo)
       header.size_high = (unsigned char) (newsize / 8192 >> 8);
       header.size = (unsigned char) (newsize / MBIT);
 
-      if (snes_sram_size != 0)
+      if (snes_sram_size)
         header.sram_a20_a21 = 0x0c;             // try 3 if game gives protection message
       header.sram_a22_a23 = 2;
       // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J) [14-17]: 0 0x0e 0 0
@@ -2011,9 +2018,9 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
 {
   st_ufosd_header_t header;
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      ufosd_size = 0, n, rom_sizes[] =
-                        { 4 * MBIT,  8 * MBIT, 10 * MBIT, 12 * MBIT,
-                         16 * MBIT, 20 * MBIT, 24 * MBIT, 32 * MBIT };
+               ufosd_size = 0, n, rom_sizes[] =
+                 { 4 * MBIT,  8 * MBIT, 10 * MBIT, 12 * MBIT,
+                  16 * MBIT, 20 * MBIT, 24 * MBIT, 32 * MBIT };
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   // The Super UFO Pro 8 SD only accepts files with certain sizes.
@@ -2053,7 +2060,8 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
     header.special_chip = 0xff;
 
   if (header.special_chip == 0 ||
-      snes_header.rom_type == 3 || snes_header.rom_type == 5) // DSP
+      snes_header.rom_type == 3 || snes_header.rom_type == 5 || // DSP
+      snes_header.rom_type == 0xf6)             // Seta DSP
     {
       if (snes_sram_size > 32 * 1024)
         header.sram_size = 7;
@@ -2150,8 +2158,8 @@ snes_ufosd (st_ucon64_nfo_t *rominfo)
             }
 #else
           header.map_control[2] = ufosd_size > 16 * MBIT ?
-            0x60 : snes_sram_size <= 32 * 1024 ?
-              0x10 : 0x20;
+                                    0x60 : snes_sram_size <= 32 * 1024 ?
+                                      0x10 : 0x20;
           header.map_control[3] = 0x3f;
 #endif
         }
@@ -2512,7 +2520,7 @@ int
 snes_s (st_ucon64_nfo_t *rominfo)
 {
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      part_size;
+               part_size;
 
   if (UCON64_ISSET (ucon64.part_size) &&
       !(copier_type == GD3 || (copier_type == UFO && snes_hirom) ||
@@ -2584,7 +2592,7 @@ int
 snes_smgh (st_ucon64_nfo_t *rominfo)
 {
   unsigned int size = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
-                      part_size, nparts, surplus, n;
+               part_size, nparts, surplus, n;
   const char *p0;
   char dest_name[FILENAME_MAX], *p, *suffix;
 
@@ -3818,7 +3826,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
           if ((fig_header->emulation1 == 0x77 || fig_header->emulation1 == 0xf7) &&
               fig_header->emulation2 == 0x83)
             y = 0;
-          else if ((fig_header->emulation1 == 0xfd || fig_header->emulation1 == 0xdd) &&
+          else if ((fig_header->emulation1 == 0xdd || fig_header->emulation1 == 0xfd) &&
                    fig_header->emulation2 == 0x82)
             y = 8; // or 2
           else if (fig_header->emulation1 == 0xdd && fig_header->emulation2 == 0x02)
@@ -3829,9 +3837,11 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
           if ((fig_header->emulation1 == 0x77 || fig_header->emulation1 == 0x47) &&
               fig_header->emulation2 == 0x83)
             y = 0;
-          else if (fig_header->emulation1 == 0x00 && fig_header->emulation2 == 0x80)
+          else if ((fig_header->emulation1 == 0x00 || fig_header->emulation1 == 0x40) &&
+                   fig_header->emulation2 == 0x80)
             y = 8; // or 2
-          else if ((fig_header->emulation1 == 0x00 && fig_header->emulation2 == 0x00) ||
+          else if (((fig_header->emulation1 == 0x00 || fig_header->emulation1 == 0x40) &&
+                    fig_header->emulation2 == 0x00) ||
                    (fig_header->emulation1 == 0x11 && fig_header->emulation2 == 0x02))
             y = 32;
         }
@@ -3950,6 +3960,8 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
     }
   else if (copier_type == GD3)
     {
+      unsigned int bank_offset = 0x8000;
+
       y = -1;
       if (header[0x10] == 0x81)
         y = 8 * 1024;
@@ -3963,6 +3975,72 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
       else
         printf ("[10]     SRAM size: %d kB => %s\n",
                 y / 1024, matches_deviates (snes_sram_size == y));
+
+      y = 0;
+      for (x = 0; x < 24; x++)
+        {
+          unsigned char mapping = header[0x11 + x];
+
+          if (x == 16)
+            {
+              y = 0x40;
+              bank_offset = 0;
+            }
+          else if (x == 20)
+            y = 0xc0;
+
+          printf ("[%02x]     SNES 0x%02x-0x%02x:0x%04x-0x%x: ",
+                  0x11 + x, y, y + 0x0f, bank_offset, bank_offset + 0x7fff);
+
+          if (mapping == 0x60)
+            fputs ("pass-through to/from cartridge\n", stdout);
+          else if (mapping == 0x40)
+            // extended ROM check to match the (tested) header of Tales of Phantasia...
+            printf ("SRAM (LoROM) => %s\n",
+                    matches_deviates (snes_sram_size &&
+                                      (!snes_hirom || snes_header_base == SNES_EROM)));
+          else if (mapping < 0x40 && mapping >= 0x20)
+            {
+              unsigned int offset = (mapping - 0x20) * 4 * MBIT,
+                           size = (unsigned int) ucon64.file_size - rominfo->backup_header_len;
+
+              printf ("mapped from ROM data 0x%06x-0x%06x\n",
+                      offset, offset + 4 * MBIT - 1);
+              if (offset + 4 * MBIT > size)
+                printf ("                                       "
+                        "(beyond end of ROM data (0x%06x))\n", size - 1);
+            }
+          else if (mapping == 0x00)
+            fputs ("unmapped\n", stdout);
+          else
+            printf ("invalid mapping value: 0x%02x\n", mapping);
+
+          y += 0x10;
+        }
+
+      for (y = 0; y < 2; y++)
+        {
+          char bank_str[8 * 5 + 1];
+          int pos = 0;
+
+          for (x = 0; x < 8; x++)
+            if (header[0x29 + y] & (1 << x))
+              pos += sprintf (bank_str + pos, "0x%xx,", y * 8 + x);
+          if (pos)
+            {
+              bank_str[pos - 1] = '\0';
+              printf ("[%02x]     SRAM (HiROM) mapped to %s:0x6000-0x7fff => %s\n",
+                      0x29 + y, bank_str,
+                      matches_deviates (snes_sram_size && snes_hirom));
+            }
+          else
+            // stating that the value matches with what snes_init() found
+            //  actually applies to the combination of header[0x29] and header[0x2a]
+            printf ("[%02x]     no SRAM (HiROM) mapped to 0x%xx-0x%xx:0x6000-0x7fff => %s\n",
+                    0x29 + y, y * 8, y * 8 + 7,
+                    matches_deviates (!snes_sram_size || !snes_hirom ||
+                                      (header[0x29] | header[0x2a])));
+        }
     }
 
   copier_type = org_copier_type;
@@ -4053,21 +4131,20 @@ snes_handle_backup_header (st_ucon64_nfo_t *rominfo, st_unknown_backup_header_t 
   else if (!strncmp ((char *) header + 8, "SFCUFOSD", 8))
     copier_type = UFOSD;
   else if ((header->hirom == 0x80 &&            // HiROM
-             ((header->emulation1 == 0x77 && header->emulation2 == 0x83) ||
-              (header->emulation1 == 0xdd && header->emulation2 == 0x82) ||
-              (header->emulation1 == 0xdd && header->emulation2 == 0x02) ||
-              (header->emulation1 == 0xf7 && header->emulation2 == 0x83) ||
+             (((header->emulation1 == 0x77 || header->emulation1 == 0xf7) &&
+                header->emulation2 == 0x83) ||
+              (header->emulation1 == 0xdd &&
+                (header->emulation2 == 0x82 || header->emulation2 == 0x02)) ||
               (header->emulation1 == 0xfd && header->emulation2 == 0x82)))
             ||
            (header->hirom == 0x00 &&            // LoROM
-             ((header->emulation1 == 0x77 && header->emulation2 == 0x83) ||
-              (header->emulation1 == 0x00 && header->emulation2 == 0x80) ||
-#if 1
-              // This makes NES FFE ROMs & Game Boy ROMs be detected as SNES
-              //  ROMs, see src/console/nes.c & src/console/gb.c.
-              (header->emulation1 == 0x00 && header->emulation2 == 0x00) ||
-#endif
-              (header->emulation1 == 0x47 && header->emulation2 == 0x83) ||
+             (((header->emulation1 == 0x77 || header->emulation1 == 0x47) &&
+                header->emulation2 == 0x83) ||
+              // Testing for emulation1 & emulation2 being 0 makes NES FFE ROMs
+              //  & Game Boy ROMs be detected as SNES ROMs, see
+              //  src/console/nes.c & src/console/gb.c.
+              ((header->emulation1 == 0x00 || header->emulation1 == 0x40) &&
+                (header->emulation2 == 0x80 || header->emulation2 == 0x00)) ||
               (header->emulation1 == 0x11 && header->emulation2 == 0x02)))
           )
     copier_type = FIG;

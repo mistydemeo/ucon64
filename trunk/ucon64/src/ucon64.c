@@ -50,7 +50,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #if     defined _WIN32 || defined __CYGWIN__
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4255) // 'function' : no function prototype given: converting '()' to '(void)'
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
+#endif
 #include <windows.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #ifdef  __CYGWIN__
 #undef  _WIN32
 #endif

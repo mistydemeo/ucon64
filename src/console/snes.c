@@ -610,8 +610,8 @@ possible $0000-$7fff).
 
 Colour data is made up of 3 components (Red,Green,Blue) each of 5 bits (The
 Amiga uses exactly the same system, but only using 4 bits per component).
-Saying that, Nintendo being the stupid japanese idiots they are decided that
-R,G,B wasn't alphabetically correct and so opted to store the bits as B,G,R.
+Saying that, Nintendo decided that R,G,B wasn't alphabetically correct and so
+opted to store the bits as B,G,R.
 
                       00000 00000 00000
                       \   / \   / \   /
@@ -3581,14 +3581,14 @@ snes_check_interleaved (unsigned char *rom_buffer, int size, int banktype_score)
         Lufia II - Rise of the Sinistrals (H)
         Super Mario All-Stars & World (E) [!]
       */
-      if (!interleaved && size == 24 * MBIT)
-        if (check_banktype (rom_buffer, 16 * MBIT) > banktype_score)
-          {
-            interleaved = 1;
-            snes_hirom = 0;
-            snes_hirom_ok = 2;                  // fix for snes_deinterleave()
-            check_map_type = 0;
-          }
+      if (!interleaved && size == 24 * MBIT &&
+          check_banktype (rom_buffer, 16 * MBIT) > banktype_score)
+        {
+          interleaved = 1;
+          snes_hirom = 0;
+          snes_hirom_ok = 2;                    // fix for snes_deinterleave()
+          check_map_type = 0;
+        }
 #endif
     }
   if (check_map_type && !snes_hirom)
@@ -3993,7 +3993,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
                   0x11 + x, y, y + 0x0f, bank_offset, bank_offset + 0x7fff);
 
           if (mapping == 0x60)
-            fputs ("pass-through to/from cartridge\n", stdout);
+            puts ("pass-through to/from cartridge");
           else if (mapping == 0x40)
             // extended ROM check to match the (tested) header of Tales of Phantasia...
             printf ("SRAM (LoROM) => %s\n",
@@ -4011,7 +4011,7 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
                         "(beyond end of ROM data (0x%06x))\n", size - 1);
             }
           else if (mapping == 0x00)
-            fputs ("unmapped\n", stdout);
+            puts ("unmapped");
           else
             printf ("invalid mapping value: 0x%02x\n", mapping);
 
@@ -4927,6 +4927,7 @@ snes_check_bs (void)
       (snes_header.map_type == 0 || (snes_header.map_type & 0x83) == 0x80))
     {
       int date = (snes_header.bs_day << 8) | snes_header.bs_month;
+
       if (date == 0)
         return 2;                               // BS add-on cartridge dump
       else if (date == 0xffff ||
@@ -4953,19 +4954,17 @@ check_char (unsigned char c)
 static int
 snes_bs_name (void)
 {
-  unsigned int value;
+  unsigned char value;
   int n, n_valid = 0;
 
   for (n = 0; n < 16; n++)
     {
       value = snes_header.name[n];
-      if (check_char ((unsigned char) value) != 0)
+      if (check_char (value) != 0)
         {
           value = snes_header.name[n + 1];
-          if (value < 0x20)
-            if ((n_valid != 11) || (value != 0)) // Dr. Mario Hack
-              break;
-
+          if (value < 0x20 && (n_valid != 11 || value != 0)) // Dr. Mario Hack
+            break;
           n_valid++;
           n++;
         }
@@ -4977,13 +4976,8 @@ snes_bs_name (void)
                 break;
               continue;
             }
-
-          if (value < 0x20)
+          if (value < 0x20 || (value >= 0x80 && value < 0xa0) || value >= 0xf0)
             break;
-
-          if (value >= 0x80)
-            if (value < 0xa0 || value >= 0xf0)
-              break;
           n_valid++;
         }
     }
@@ -5217,11 +5211,11 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
     }
   else
     {
-      if (snes_hirom_ok)
-        // map type, HiROM flag
-        if ((rom_buffer[SNES_HEADER_START + header_offset + 40] & 1) ==
-            ((header_offset >= snes_header_base + SNES_HIROM) ? 1 : 0))
-          score += 1;
+      // map type, HiROM flag
+      if (snes_hirom_ok &&
+          (rom_buffer[SNES_HEADER_START + header_offset + 40] & 1) ==
+            (header_offset >= snes_header_base + SNES_HIROM ? 1 : 0))
+        score += 1;
     }
 
   // publisher "escape code"

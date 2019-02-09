@@ -223,8 +223,8 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
 - speed --rrom, --rr83 and --ls have been sped up significantly<br>
 - updated (N64) added 512 Mb ROM support for transfers to Doctor V64 Junior
   (by NoisyB; thanks to TenOfTen (tenoften@jahej.com))<br>
-- updated (SNES) fixed -fig to give the same output as a Super Pro Fighter (by
-  dbjh; thanks to JohnDie for the information)<br>
+- updated (SNES) fixed -fig to produce the same output as a Super Pro Fighter
+  (by dbjh; thanks to JohnDie for the information)<br>
 - updated (all) parallel port is only accessed for copier I/O (by dbjh)<br>
 - added (SNES) -bs &amp; -nbs force ROM is a Broadcast Satellaview dump/regular
   cartridge dump (by dbjh)<br>
@@ -423,7 +423,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   ucon64_configdir and datdir is named ucon64_datdir (by dbjh)<br>
 - updated (SNES) changed checksum calculation function so that it is stricter
   (by dbjh; thanks to Nach)<br>
-- updated (SNES) added more verbose BS info (by dbjh, based on info of Derrick
+- updated (SNES) added more verbose BS info (by dbjh, based on info from Derrick
   Sobodash)<br>
 - updated (GB) fixed -n2gb, -gbx &amp; -sgb (by dbjh)<br>
 - updated (SNES) replaced -ehi with -erom (force ROM is "Extended") in order to
@@ -490,10 +490,9 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   without -gba anymore (by dbjh; thanks to Enemy and acem77 for testing)<br>
 - added (Genesis) -f can fix region protections, addendum files are genpal.txt
   and mdntsc.txt (by dbjh)<br>
-- added (SNES) -id force -gd3 to produce a unique file name. This switch
-  doesn't show in the help, because it "fails" for 130 dumps of the GoodSNES
-  "0.999.6--" set. 128 IDs are each shared by 2 games, 2 IDs are shared by 3
-  games (by dbjh)<br>
+- added (SNES) -id force -gd3 to produce a unique filename. This switch doesn't
+  show in the help, because it "fails" for 130 dumps of the GoodSNES "0.999.6--"
+  set. 128 IDs are each shared by 2 games, 2 IDs are shared by 3 games (by dbjh)<br>
 - updated (all) the patch generation options (-mka, -mki, -mkppf) use the
   modified ROM name for the patch to create. They used to use the name of the
   original ROM (by dbjh)<br>
@@ -511,7 +510,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   Special thanks go to Leo of ToToTEK for being very helpful and willing to
   answer our questions)<br>
 - added (Genesis) -ssize=SIZE specify split part size in Mbit (by dbjh)<br>
-- updated (SNES, SMS, PCE &amp; Genesis) -mgd produces correct file names (by
+- updated (SNES, SMS, PCE &amp; Genesis) -mgd produces correct filenames (by
   dbjh; thanks to acem77 for testing and feedback)<br>
 - updated (Genesis) -mgd automatically pads files to the right size (by dbjh)<br>
 - added (PCE) -swap invert/swap bits of all bytes of a file. This effectively
@@ -527,7 +526,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (PCE) -mgd automatically bit-swaps the file if it is detected as
   being in Japan "mode" (by dbjh)<br>
 - updated (PCE) -smg automatically bit-swaps the file if it is detected as being
-  in U.S.A. "mode" (by dbjh) I don't know if this correct. Please give feedback<br>
+  in U.S.A. "mode" (by dbjh) I don't know if this is correct. Please give
+  feedback<br>
 - added (GB) -logo restore ROM logo character data (offset: 0x104-0x134)
   (by NoisyB)<br>
 <p>
@@ -540,7 +540,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (Genesis) fixed problem with -multi that caused problems with some
   games when run on the MD-PRO (by dbjh)<br>
 - updated (SNES, Genesis, PCE, SMS, Game Gear &amp; GB) -mgd now produces
-  correct file names. This time for real! :-) (by dbjh; thanks to acem77 for
+  correct filenames. This time for real! :-) (by dbjh; thanks to acem77 for
   testing and feedback)<br>
 - added (SNES) -xswcr send/receive RTS data to/from Super Wild Card*/(all)SWC
   (by dbjh)<br>
@@ -761,7 +761,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   anymore. As far as we know, no backup unit produces or is able to handle
   interleaved SMS or Game Gear files (by dbjh; thanks to Matthias for verifying
   this with his SMD)<br>
-- added (SNES) --idnum=NUM make --gd3 produce file names where first file has
+- added (SNES) --idnum=NUM make --gd3 produce filenames where first file has
   numerical identifier NUM, next NUM + 1, etc. (by dbjh)<br>
 - updated (all) added alternative options for --rr83 &amp; --force63 (--r83
   &amp; --rjoliet respectively) (by NoisyB)<br>

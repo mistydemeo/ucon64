@@ -1557,7 +1557,6 @@ ucon64_rom_handling (void)
         return -1;
       }
 
-
   /*
     CRC32
 
@@ -1576,7 +1575,6 @@ ucon64_rom_handling (void)
       !(ucon64.flags & WF_NO_CRC32) && ucon64.file_size <= MAXROMSIZE)
     ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.fname, (int) ucon64.file_size,
                    ucon64.nfo ? ucon64.nfo->backup_header_len : 0);
-
 
   // DATabase
   ucon64.dat = NULL;

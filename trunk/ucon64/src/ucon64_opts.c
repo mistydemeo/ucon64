@@ -2,7 +2,7 @@
 ucon64_opts.c - switches for all uCON64 options
 
 Copyright (c) 2002 - 2005              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2019 dbjh
 Copyright (c) 2005                     Jan-Erik Karlsson (Amiga)
 
 
@@ -806,8 +806,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
-          '?' : (char) strtol (values[x], NULL, 16);
+        buf[x] = (char) strtol (values[x], NULL, 16);
       buf[x] = '\0';
       ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, buf, value,
                    MEMCMP2_REL);
@@ -828,8 +827,7 @@ ucon64_options (st_ucon64_t *p)
       strcpy (buf, option_arg);
       value = strarg (values, buf, " ", UCON64_MAX_ARGS);
       for (x = 0; x < value; x++)
-        buf[x] = values[x][0] == '?' && values[x][1] == '\0' ?
-          '?' : (char) strtol (values[x], NULL, 10);
+        buf[x] = (char) strtol (values[x], NULL, 10);
       buf[x] = '\0';
       ucon64_find (ucon64.fname, 0, (size_t) ucon64.file_size, buf, value,
                    MEMCMP2_REL);

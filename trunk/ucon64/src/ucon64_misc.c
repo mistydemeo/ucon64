@@ -2,7 +2,7 @@
 ucon64_misc.c - miscellaneous functions for uCON64
 
 Copyright (c) 1999 - 2006              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 Copyright (c) 2001                     Caz
 Copyright (c) 2002 - 2003              Jan-Erik Karlsson (Amiga)
 
@@ -1127,13 +1127,14 @@ ucon64_testsplit (const char *filename,
                   void (*testsplit_cb) (const char *, void *), void *cb_data)
 // test if ROM is split into parts based on the name of files
 {
-  int x;
+  int x, parts;
 
   for (x = -1; x < 2; x += 2)
     {
-      int parts = 0, l;
+      int l;
       char buf[FILENAME_MAX], *p;
 
+      parts = 0;
       strcpy (buf, filename);
       p = strrchr (buf, '.');
       l = strlen (buf);
@@ -1160,12 +1161,12 @@ ucon64_testsplit (const char *filename,
               (*p)++;
               parts++;
             }
+          if (parts)
+            break;
         }
-
-      return parts;
     }
 
-  return 0;
+  return parts;
 }
 
 
@@ -1910,8 +1911,8 @@ ucon64_find_func (void *buffer, int n, void *object)
           o->found = o->pos - matchlen;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, compare, len + matchlen, o->found, DUMPER_HEX);
               fputc ('\n', stdout);
+              dumper (stdout, compare, len + matchlen, o->found, DUMPER_HEX);
             }
         }
     }
@@ -1926,10 +1927,10 @@ ucon64_find_func (void *buffer, int n, void *object)
           o->found = o->pos + ptr1 - ptr0;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
+              fputc ('\n', stdout);
               dumper (stdout, ptr1,
                       MIN (n - (ptr1 - ptr0), (o->searchlen + 0x0f) & ~0x0f),
                       o->found, DUMPER_HEX);
-              fputc ('\n', stdout);
             }
           ptr1++;
         }
@@ -1995,8 +1996,8 @@ ucon64_find (const char *filename, size_t start, size_t len,
 
   if (!(flags & UCON64_FIND_QUIET))
     {
-      char *display_search;
-      int n;
+      char *display_search, *dest;
+      const char *src = search;
 
       fputs (filename, stdout);
       if (ucon64.fname_arch[0])
@@ -2004,23 +2005,30 @@ ucon64_find (const char *filename, size_t start, size_t len,
       else
         fputc ('\n', stdout);
 
-      if ((display_search = (char *) malloc (searchlen + 1)) == NULL)
+      if ((display_search = (char *) malloc (searchlen * 4 + 1)) == NULL)
         {
-          fprintf (stderr, ucon64_msg[BUFFER_ERROR], searchlen + 1);
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], searchlen * 4 + 1);
           exit (1);
         }
-      memcpy (display_search, search, searchlen);
-      for (n = 0; n < searchlen; n++)
-        if (!isprint ((int) display_search[n]))
-          display_search[n] = '.';
-      display_search[searchlen] = '\0';         // terminate string
+      dest = display_search;
+      while (src - search < searchlen)
+        {
+          if (isprint ((int) *src))
+            *dest++ = *src;
+          else
+            dest += sprintf (dest, "\\x%02x", (unsigned char) *src);
+          src++;
+        }
+      *dest = '\0';                             // terminate string
 
       if (!(flags & (MEMCMP2_CASE | MEMCMP2_REL)))
-        printf ("Searching: \"%s\"\n\n", display_search);
+        printf ("Searching: \"%s\"\n", display_search);
       else if (flags & MEMCMP2_CASE)
-        printf ("Case insensitive searching: \"%s\"\n\n", display_search);
+        printf ("Case insensitive searching: \"%s\"\n", display_search);
       else if (flags & MEMCMP2_REL)
         {
+          int n;
+
           printf ("Relative searching: \"%s\"\n\n", display_search);
           for (n = 0; n + 1 < searchlen; n++)
             {
@@ -2032,7 +2040,6 @@ ucon64_find (const char *filename, size_t start, size_t len,
               printf (format, search[n] & 0xff, search[n + 1] & 0xff,
                       (unsigned char) search[n] - (unsigned char) search[n + 1]);
             }
-          fputc ('\n', stdout);
         }
 
       free (display_search);

@@ -2088,14 +2088,11 @@ Q58: <a href="#58">I tried to upload a game to my Super UFO Pro 8 SD (on
    value as high as 30&micro;s. However, for dumping saver data and SRAM the
    functionality is good enough. Start with a larger value like 30 to be on the
    safe side, i.e., the delay is long enough for the Game Doctor SF6/SF7 to be
-   ready for the next byte, but it has not timed-out either. 22 has been used
-   successfully on GNU/Linux running on a Raspberry Pi 3B+ with a pi-parport in
-   combination with a Game Doctor SF7. You may have to try a few times before a
-   transfer succeeds. Performing a transfer directly after booting may also
-   increase the chance of success.<br>
-   On 64-bit Windows you will have to use giveio64 and on 32-bit Windows
-   AllowIO, which is part of PortTalk. Making the I/O go through a driver like
-   inpout32.dll appears to cause too much interference from Windows.<br>
+   ready for the next byte. 22 has been used successfully on GNU/Linux running
+   on a Raspberry Pi 2B and a Raspberry Pi 3B+ with a pi-parport in combination
+   with a Game Doctor SF7. You may have to try a few times before a transfer
+   succeeds. Performing a transfer directly after uploading a ROM greatly
+   increases the chance of success.<br>
 <br>
 <p>
 <a name="56"><b>Q56</b>: I installed a DAT file, but every time I run uCON64 it

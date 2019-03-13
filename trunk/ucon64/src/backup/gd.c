@@ -24,9 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <ctype.h>
 #include <stdlib.h>
-#ifdef  HAVE_CLOCK_NANOSLEEP
-#include <errno.h>                              // EINTR
-#endif
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/misc.h"
@@ -304,65 +301,10 @@ microwait2 (int nmicros)
     microsecond (for both in and out) and a rough test performed by myself
     suggested around 600 nanoseconds for inb for an unmapped address.
   */
-  int n;
+  unsigned int n;
 
   for (n = 0; n < nmicros * 2; n++)
     inportb (gd_port + PARPORT_STATUS);
-#endif
-}
-
-
-// GCC or Visual C++ and x86
-#define X86_PLATFORM ((defined (__i386__) && __i386__) || \
-                      (defined (__x86_64__) && __x86_64__) || \
-                      (defined (_M_IX86) && _M_IX86) || \
-                      (defined (_M_X64) && _M_X64))
-
-#if     !X86_PLATFORM && defined HAVE_CLOCK_NANOSLEEP
-static void
-microsleep (int nmicros)
-/*
-  The current implementation of microwait() in case of HAVE_CLOCK_NANOSLEEP
-  busily waits in order to have microsecond (+2us) accuracy. The commented
-  sleeping implementation of microwait() in case of HAVE_CLOCK_NANOSLEEP can
-  easily have an error of +50us, depending on the system load. However, at
-  least on Raspberry Pi (3B+) we *have* to call clock_nanosleep() (or probably
-  any other sleeping function) in order to make dumping with -xgd6s work.
-*/
-{
-  struct timespec end;
-
-  clock_gettime (CLOCK_MONOTONIC, &end);
-  end.tv_sec += nmicros / 1000000;
-  end.tv_nsec += (nmicros % 1000000) * 1000;
-  if (end.tv_nsec > 999999999)
-    {
-      end.tv_sec++;
-      end.tv_nsec -= 1000000000;
-    }
-
-  while (clock_nanosleep (CLOCK_MONOTONIC, TIMER_ABSTIME, &end, NULL) == EINTR)
-    ;
-}
-#endif
-
-
-static inline unsigned char
-inportb2 (unsigned short port)
-{
-#if     !X86_PLATFORM && defined HAVE_CLOCK_NANOSLEEP
-  microsleep (1);
-#endif
-  return inportb (port);
-}
-
-
-static inline void
-outportb2 (unsigned short port, unsigned char byte)
-{
-  outportb (port, byte);
-#if     !X86_PLATFORM && defined HAVE_CLOCK_NANOSLEEP
-  microsleep (1);
 #endif
 }
 
@@ -378,61 +320,61 @@ gd6_sync_hardware (void)
     {
       unsigned int timeout = GD6_TIMEOUT_ATTEMPTS;
 
-      outportb2 (gd_port + PARPORT_CONTROL, 4);
-      outportb2 (gd_port + PARPORT_DATA, 0);
-      outportb2 (gd_port + PARPORT_CONTROL, 4);
+      outportb (gd_port + PARPORT_CONTROL, 4);
+      outportb (gd_port + PARPORT_DATA, 0);
+      outportb (gd_port + PARPORT_CONTROL, 4);
 
       for (delay = 0x1000; delay > 0; delay--)  // a delay may not be necessary here
         ;
 
-      outportb2 (gd_port + PARPORT_DATA, 0xaa);
-      outportb2 (gd_port + PARPORT_CONTROL, 0);
+      outportb (gd_port + PARPORT_DATA, 0xaa);
+      outportb (gd_port + PARPORT_CONTROL, 0);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) == 0)
+          while ((inportb (gd_port + PARPORT_CONTROL) & 8) == 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
             continue;
         }
 
-      outportb2 (gd_port + PARPORT_CONTROL, 4);
+      outportb (gd_port + PARPORT_CONTROL, 4);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) != 0)
+          while ((inportb (gd_port + PARPORT_CONTROL) & 8) != 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
             continue;
         }
 
-      outportb2 (gd_port + PARPORT_DATA, 0x55);
-      outportb2 (gd_port + PARPORT_CONTROL, 0);
+      outportb (gd_port + PARPORT_DATA, 0x55);
+      outportb (gd_port + PARPORT_CONTROL, 0);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) == 0)
+          while ((inportb (gd_port + PARPORT_CONTROL) & 8) == 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
             continue;
         }
 
-      outportb2 (gd_port + PARPORT_CONTROL, 4);
+      outportb (gd_port + PARPORT_CONTROL, 4);
 
       if (gd6_send_byte_delay)
         microwait2 (2000);
       else
         {
-          while ((inportb2 (gd_port + PARPORT_CONTROL) & 8) != 0)
+          while ((inportb (gd_port + PARPORT_CONTROL) & 8) != 0)
             if (--timeout == 0)
               break;
           if (timeout == 0)
@@ -454,15 +396,15 @@ gd6_sync_receive_start (void)
   if (gd6_send_byte_delay)
     microwait2 (2000);
   else
-    while (((inportb2 (gd_port + PARPORT_CONTROL) & 3) != 3) &&
-           ((inportb2 (gd_port + PARPORT_CONTROL) & 3) != 0))
+    while (((inportb (gd_port + PARPORT_CONTROL) & 3) != 3) &&
+           ((inportb (gd_port + PARPORT_CONTROL) & 3) != 0))
       if (--timeout == 0)
         return GD_ERROR;
 
-  outportb2 (gd_port + PARPORT_DATA, 0);
+  outportb (gd_port + PARPORT_DATA, 0);
 
   timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
-  while ((inportb2 (gd_port + PARPORT_STATUS) & 0x80) != 0)
+  while ((inportb (gd_port + PARPORT_STATUS) & 0x80) != 0)
     if (--timeout == 0)
       return GD_ERROR;
 
@@ -479,13 +421,13 @@ gd6_send_byte (unsigned char data)
   if (gd6_send_byte_delay)
     microwait2 (gd6_send_byte_delay);
   else
-    while (((inportb2 (gd_port + PARPORT_CONTROL) >> 1) & 1) != send_toggle)
+    while (((inportb (gd_port + PARPORT_CONTROL) >> 1) & 1) != send_toggle)
       if (--timeout == 0)
         return GD_ERROR;
 
   send_toggle ^= 1;
-  outportb2 (gd_port + PARPORT_DATA, data);
-  outportb2 (gd_port + PARPORT_CONTROL, 4 | send_toggle);
+  outportb (gd_port + PARPORT_DATA, data);
+  outportb (gd_port + PARPORT_CONTROL, 4 | send_toggle);
 
   return GD_OK;
 }
@@ -529,25 +471,25 @@ gd6_receive_bytes (unsigned char *buffer, unsigned int len)
 {
   unsigned int i, timeout = 0x1e0000;
 
-  outportb2 (gd_port + PARPORT_DATA, 0x80);     // signal the SF6/SF7 to send the next nibble
+  outportb (gd_port + PARPORT_DATA, 0x80);      // signal the SF6/SF7 to send the next nibble
   for (i = 0; i < len; i++)
     {
       unsigned char nibble1, nibble2;
 
-      while ((inportb2 (gd_port + PARPORT_STATUS) & 0x80) == 0)
+      while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0)
         if (--timeout == 0)
           return GD_ERROR;
 
-      nibble1 = (inportb2 (gd_port + PARPORT_STATUS) >> 3) & 0x0f;
-      outportb2 (gd_port + PARPORT_DATA, 0x00); // signal the SF6/SF7 to send the next nibble
+      nibble1 = (inportb (gd_port + PARPORT_STATUS) >> 3) & 0x0f;
+      outportb (gd_port + PARPORT_DATA, 0x00);  // signal the SF6/SF7 to send the next nibble
 
-      while ((inportb2 (gd_port + PARPORT_STATUS) & 0x80) != 0)
+      while ((inportb (gd_port + PARPORT_STATUS) & 0x80) != 0)
         if (--timeout == 0)
           return GD_ERROR;
 
-      nibble2 = (inportb2 (gd_port + PARPORT_STATUS) << 1) & 0xf0;
+      nibble2 = (inportb (gd_port + PARPORT_STATUS) << 1) & 0xf0;
       buffer[i] = nibble2 | nibble1;
-      outportb2 (gd_port + PARPORT_DATA, 0x80);
+      outportb (gd_port + PARPORT_DATA, 0x80);
     }
   return GD_OK;
 }
@@ -632,6 +574,8 @@ gd6_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *ro
         the ROM to the unit is to hold down the R key on the controller while
         resetting the SNES. You will see the Game Doctor menu has a message that
         says "LINKING..".
+  My Game Doctor SF7 V7.11 enters link mode automatically if it is connected to
+  a parallel port -- no controller input is required. - dbjh
 */
 static int
 gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo,
@@ -820,8 +764,8 @@ int
 gd6_read_sram (const char *filename, unsigned short parport)
 {
   FILE *file;
-  unsigned char *buffer, gdfilename[12];
-  unsigned int len, bytesreceived = 0, transfer_size;
+  unsigned char *buffer;
+  unsigned int retry = 0, transfer_size, len, bytesreceived = 0;
   time_t starttime;
 
   init_io (parport);
@@ -847,25 +791,100 @@ gd6_read_sram (const char *filename, unsigned short parport)
   gd_destfile = file;
   register_func (remove_destfile);
 
-  if (gd6_sync_hardware () == GD_ERROR)
-    io_error ("gd6_sync_hardware()");
-  if (gd6_send_prolog_bytes ((unsigned char *) GD6_WRITE_PROLOG_STRING, 4) == GD_ERROR)
-    io_error ("gd6_send_prolog_bytes(4)");
+  for (;;)
+    {
+      if (gd6_sync_hardware () == GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          io_error ("gd6_sync_hardware()");
+        }
+      if (gd6_send_prolog_bytes ((unsigned char *) GD6_WRITE_PROLOG_STRING, 4) == GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          io_error ("gd6_send_prolog_bytes(4)");
+        }
 
-  /*
-    The BRAM (SRAM) filename doesn't have to exactly match any game loaded in
-    the SF7. It needs to match any valid Game Doctor filename AND have an
-    extension of .B## (where # is a digit from 0-9).
-  */
-  strcpy ((char *) gdfilename, "SF16497 B00");  // TODO: we might need to make a GD filename from the real one
-  if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
-    io_error ("gd6_send_prolog_bytes(11)");
+      /*
+        The BRAM (SRAM) filename doesn't have to exactly match any game loaded
+        in the SF7. It needs to match any valid Game Doctor filename AND have an
+        extension of .B## (where # is a digit from 0-9).
 
-  if (gd6_sync_receive_start () == GD_ERROR)
-    io_error ("gd6_sync_receive_start()");
+        TODO: We might need to make a GD filename from the real one.
+      */
+      if (gd6_send_prolog_bytes ((unsigned char *) "SF16497 B00", 11) == GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          io_error ("gd6_send_prolog_bytes(11)");
+        }
 
-  if (gd6_receive_bytes (buffer, 16) == GD_ERROR)
-    io_error ("gd6_receive_bytes(16)");
+      /*
+        On Raspberry Pi 3B+, when microwait() was implemented using
+        clock_nanosleep(CLOCK_MONOTONIC, ...) -xgd6s would successfully dump
+        SRAM data only the first time after booting. After microwait() was
+        implemented using only clock_gettime(CLOCK_MONOTONIC, ...) in order to
+        improve its accuracy, it would never work. It worked again after adding
+        calls to clock_nanosleep() during the transfer .
+        On Raspberry Pi 2B the behavior is different in that only resetting the
+        SNES was usually enough to be able to dump SRAM data again after having
+        used -xgd6s once. However, sometimes resetting the SNES would no longer
+        be enough and a reboot would be required. Another difference is that
+        calling clock_nanosleep() during the transfer made no difference in the
+        success rate of -xgd6s.
+        On both Raspberry models first uploading either ROM or SRAM data using
+        -xgd3 or -xgd3s respectively, would make dumping SRAM data with -xgd6s
+        work again, once, provided there would be a delay of at least 3 seconds
+        before dumping.
+        Ultimately, the result proved to be restarting the transfer after the
+        first call to gd6_receive_bytes() fails. This makes -xgd6s work at least
+        as well as after first uploading data, if not better. It can easily take
+        10 retries before a transfer succeeds. If the first call to
+        gd6_receive_bytes() succeeds the transfer of the actual SRAM data will
+        usually also succeed. Since gd6_send_byte_delay needs to be specified
+        (the pi-parport does not support reading from the Control register),
+        several opportunites offered by the GD to detect an error cannot be
+        taken. The first opportunity that can be taken is offered by
+        gd6_sync_receive_start(), but synchronization errors are more often
+        detected in gd6_receive_bytes().
+      */
+      if (gd6_sync_receive_start () == GD_ERROR)
+        {
+          if (retry < GD6_SYNC_RETRIES)
+            {
+              retry++;
+              printf ("\rWARNING: Failed to synchronize with Game Doctor. Retrying... (%d/%d)",
+                      retry, GD6_SYNC_RETRIES);
+              fflush (stdout);
+              continue;
+            }
+          else
+            {
+              fputc ('\n', stdout);
+              io_error ("gd6_sync_receive_start()");
+            }
+        }
+
+      if (gd6_receive_bytes (buffer, 16) != GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          break;
+        }
+      else if (retry < GD6_SYNC_RETRIES)
+        {
+          retry++;
+          printf ("\rWARNING: Failed to synchronize with Game Doctor. Retrying... (%d/%d)",
+                  retry, GD6_SYNC_RETRIES);
+          fflush (stdout);
+        }
+      else
+        {
+          fputc ('\n', stdout);
+          io_error ("gd6_receive_bytes(16)");
+        }
+    }
 
   transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
   if (transfer_size == 0)
@@ -883,16 +902,14 @@ gd6_read_sram (const char *filename, unsigned short parport)
     printf ("WARNING: SRAM transfer size from Game Doctor < 0x8000 bytes (0x%x bytes)\n",
             transfer_size);
 
-  printf ("Receive: %d Bytes\n", transfer_size);
-  puts ("Press q to abort\n");
+  printf ("Receive: %d Bytes\n"
+          "Press q to abort\n\n", transfer_size);
 
   starttime = time (NULL);
   while (bytesreceived < transfer_size)
     {
-      if (transfer_size >= bytesreceived + BUFFERSIZE)
-        len = BUFFERSIZE;
-      else
-        len = transfer_size - bytesreceived;
+      len = transfer_size >= bytesreceived + BUFFERSIZE ?
+        BUFFERSIZE : transfer_size - bytesreceived;
 
       if (gd6_receive_bytes (buffer, len) == GD_ERROR)
         io_error ("gd6_receive_bytes()");
@@ -935,7 +952,7 @@ static int
 gd_write_sram (const char *filename, unsigned short parport, const char *prolog_str)
 {
   FILE *file;
-  unsigned char *buffer, gdfilename[12];
+  unsigned char *buffer;
   unsigned int bytesread, bytessent = 0, size, header_size,
                gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
   time_t starttime;
@@ -969,7 +986,8 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
     }
   else
     {
-      fputs ("ERROR: GD SRAM file size must be 32768 or 33280 bytes\n", stderr);
+      fputs ("ERROR: Game Doctor SRAM file size must be 32768 or 33280 bytes\n",
+             stderr);
       exit (1);
     }
 
@@ -994,9 +1012,10 @@ gd_write_sram (const char *filename, unsigned short parport, const char *prolog_
     The BRAM (SRAM) filename doesn't have to exactly match any game loaded in
     the SF7. It needs to match any valid Game Doctor filename AND have an
     extension of .B## (where # is a digit from 0-9).
+
+    TODO: We might need to make a GD filename from the real one.
   */
-  strcpy ((char *) gdfilename, "SF8123  B00");  // TODO: we might need to make a GD filename from the real one
-  if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
+  if (gd_send_prolog_bytes ((unsigned char *) "SF8123  B00", 11) == GD_ERROR)
     io_error (gd6_protocol ? "gd6_send_prolog_bytes(11)" : "gd3_send_prolog_bytes(11)");
 
   puts ("Press q to abort\n");                  // print here, NOT before first GD I/O,
@@ -1033,8 +1052,8 @@ int
 gd6_read_saver (const char *filename, unsigned short parport)
 {
   FILE *file;
-  unsigned char *buffer, gdfilename[12];
-  unsigned int len, bytesreceived = 0, transfer_size;
+  unsigned char *buffer;
+  unsigned int retry = 0, transfer_size, len, bytesreceived = 0;
   time_t starttime;
 
   init_io (parport);
@@ -1060,28 +1079,72 @@ gd6_read_saver (const char *filename, unsigned short parport)
   gd_destfile = file;
   register_func (remove_destfile);
 
-  if (gd6_sync_hardware () == GD_ERROR)
-    io_error ("gd6_sync_hardware()");
-  if (gd6_send_prolog_bytes ((unsigned char *) GD6_WRITE_PROLOG_STRING, 4) == GD_ERROR)
-    io_error ("gd6_send_prolog_bytes(4)");
+  for (;;)
+    {
+      if (gd6_sync_hardware () == GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          io_error ("gd6_sync_hardware()");
+        }
+      if (gd6_send_prolog_bytes ((unsigned char *) GD6_WRITE_PROLOG_STRING, 4) == GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          io_error ("gd6_send_prolog_bytes(4)");
+        }
 
-  /*
-    TODO: Graceful handling of an abort because of a name error?
-          Currently we fail with a generic error.
+      /*
+        TODO: Graceful handling of an abort because of a name error?
+              Currently we fail with a generic error.
 
-    TODO: We could make a GD filename from the real one but a valid dummy name
-          seems to work OK here. The user must have the proper game selected in
-          the SF7 menu even if the real name is used.
-  */
-  strcpy ((char *) gdfilename, "SF16497 S00");
-  if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
-    io_error ("gd6_send_prolog_bytes(11)");
+        TODO: We could make a GD filename from the real one but a valid dummy
+              name seems to work OK here. The user must have the proper game
+              selected in the SF7 menu even if the real name is used.
+      */
+      if (gd6_send_prolog_bytes ((unsigned char *) "SF16497 S00", 11) == GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          io_error ("gd6_send_prolog_bytes(11)");
+        }
 
-  if (gd6_sync_receive_start () == GD_ERROR)
-    io_error ("gd6_sync_receive_start()");
+      if (gd6_sync_receive_start () == GD_ERROR)
+        {
+          if (retry < GD6_SYNC_RETRIES)
+            {
+              retry++;
+              printf ("\rWARNING: Failed to synchronize with Game Doctor. Retrying... (%d/%d)",
+                      retry, GD6_SYNC_RETRIES);
+              fflush (stdout);
+              continue;
+            }
+          else
+            {
+              fputc ('\n', stdout);
+              io_error ("gd6_sync_receive_start()");
+            }
+        }
 
-  if (gd6_receive_bytes (buffer, 16) == GD_ERROR)
-    io_error ("gd6_receive_bytes(16)");
+      if (gd6_receive_bytes (buffer, 16) != GD_ERROR)
+        {
+          if (retry)
+            fputc ('\n', stdout);
+          break;
+        }
+      else if (retry < GD6_SYNC_RETRIES)
+        {
+          retry++;
+          printf ("\rWARNING: Failed to synchronize with Game Doctor. Retrying... (%d/%d)",
+                  retry, GD6_SYNC_RETRIES);
+          fflush (stdout);
+        }
+      else
+        {
+          fputc ('\n', stdout);
+          io_error ("gd6_receive_bytes(16)");
+        }
+    }
 
   transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
   if (transfer_size == 0)
@@ -1099,16 +1162,14 @@ gd6_read_saver (const char *filename, unsigned short parport)
     printf ("WARNING: Saver transfer size from Game Doctor < 0x38000 bytes (0x%x bytes)\n",
             transfer_size);
 
-  printf ("Receive: %d Bytes\n", transfer_size);
-  puts ("Press q to abort\n");
+  printf ("Receive: %d Bytes\n"
+          "Press q to abort\n\n", transfer_size);
 
   starttime = time (NULL);
   while (bytesreceived < transfer_size)
     {
-      if (transfer_size >= bytesreceived + BUFFERSIZE)
-        len = BUFFERSIZE;
-      else
-        len = transfer_size - bytesreceived;
+      len = transfer_size >= bytesreceived + BUFFERSIZE ?
+        BUFFERSIZE : transfer_size - bytesreceived;
 
       if (gd6_receive_bytes (buffer, len) == GD_ERROR)
         io_error ("gd6_receive_bytes()");
@@ -1199,7 +1260,8 @@ gd_write_saver (const char *filename, unsigned short parport, const char *prolog
   size = (unsigned int) ucon64.file_size;
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
-      fputs ("ERROR: GD saver file size must be 229376 bytes\n", stderr);
+      fputs ("ERROR: Game Doctor saver file size must be 229376 bytes\n",
+             stderr);
       exit (1);
     }
 

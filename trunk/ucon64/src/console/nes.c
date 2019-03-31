@@ -5613,13 +5613,13 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   else
     {
       char ucon64_name[] = "uCON64";
-      int ucon64_name_len = strlen (ucon64_name), sig_added = 0;
+      int sig_added = 0;
+      x = strlen (ucon64_name);
       // find uCON64 WRTR chunk and modify it if it is present
       do
         {
-          x = strnlen ((const char *) unif_chunk1->data, unif_chunk1->length);
-          if (!strncmp ((const char *) unif_chunk1->data, ucon64_name,
-                        ucon64_name_len < x ? ucon64_name_len : x))
+          if (strnlen ((const char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
+              !strncmp ((const char *) unif_chunk1->data, ucon64_name, x))
             {
               unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
               unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -5648,9 +5648,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     }
   else
     {
-      x = strnlen ((const char *) unif_chunk1->data, unif_chunk1->length);
-      y = strlen (STD_COMMENT);
-      if (!strncmp ((const char *) unif_chunk1->data, STD_COMMENT, y < x ? y : x))
+      x = strlen (STD_COMMENT);
+      if (strnlen ((const char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
+          !strncmp ((const char *) unif_chunk1->data, STD_COMMENT, x))
         { // overwrite uCON64 comment -> OS and version match with the used exe
           unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
           unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -7150,8 +7150,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
               */
               y = strnlen ((const char *) unif_chunk->data, unif_chunk->length);
               x = 0;
-              if (!strncmp ((const char *) unif_chunk->data, ucon64_name,
-                            ucon64_name_len < y ? ucon64_name_len : y))
+              if (y >= ucon64_name_len &&
+                  !strncmp ((const char *) unif_chunk->data, ucon64_name, ucon64_name_len))
                 {
                   while (x < y)
                     {

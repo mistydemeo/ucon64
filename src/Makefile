@@ -54,14 +54,8 @@ endif
 
 else                                    # UNIX, BeOS or Mac OS X (Darwin)
 
-ifdef USE_PARALLEL
-ifeq ($(findstring openbsd,$(OSTYPE)),openbsd) # for example "openbsd3.4"
-# i386_iopl() is located in libi386.a. Use -lamd64 for amd64_iopl().
-LDFLAGS+=$(LIBIOPL_OPENBSD)
-endif
-ifeq ($(findstring netbsd,$(OSTYPE)),netbsd)
-LDFLAGS+=$(LIBIOPL_NETBSD)
-endif
+ifdef LIBIOPL_BSD
+LDFLAGS+=$(LIBIOPL_BSD)
 endif
 
 ifdef USE_DISCMAGE

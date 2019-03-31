@@ -1564,15 +1564,15 @@ snes_set_gd3_header (unsigned int total4Mbparts, unsigned char *header)
   reset_header (header);
   memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
+  if (snes_sram_size == 8 * 1024)
+    header[0x10] = 0x81;                        // 64 kb
+  else if (snes_sram_size == 2 * 1024)
+    header[0x10] = 0x82;                        // 16 kb
+  else
+    header[0x10] = 0x80;                        // 0 kb or 256 kb
+
   if (snes_hirom)
     {
-      if (snes_sram_size == 8 * 1024)
-        header[0x10] = 0x81;                    // 64 kb
-      else if (snes_sram_size == 2 * 1024)
-        header[0x10] = 0x82;                    // 16 kb
-      else
-        header[0x10] = 0x80;                    // 0 kb or 256 kb
-
       if (total4Mbparts <= 2)
         memcpy (&header[0x11], gd3_hirom_8mb_map, GD3_HEADER_MAPSIZE);
       else if (total4Mbparts <= 4)
@@ -1599,18 +1599,11 @@ snes_set_gd3_header (unsigned int total4Mbparts, unsigned char *header)
               header[0x2a] = 0x0c;
             }
         }
-      // Adjust sram map for exceptions - a couple of 10-12 Mb HiROM games
+      // Adjust SRAM map for exceptions - a couple of 10-12 Mb HiROM games
       //  (Liberty or Death, Brandish). May not be necessary.
     }
   else
     {
-      if (snes_sram_size == 8 * 1024)
-        header[0x10] = 0x81;                    // 64 kb
-      else if (snes_sram_size == 2 * 1024)
-        header[0x10] = 0x82;                    // 16 kb
-      else
-        header[0x10] = 0x80;                    // 0 kb or 256 kb
-
       if (total4Mbparts <= 1)
         memcpy (&header[0x11], gd3_lorom_4mb_map, GD3_HEADER_MAPSIZE);
       else if (total4Mbparts <= 2)
@@ -3704,13 +3697,12 @@ snes_deinterleave (st_ucon64_nfo_t *rominfo, unsigned char **rom_buffer)
 static const char *
 matches_deviates (int equal)
 {
-  return
+  return equal ?
 #ifdef  USE_ANSI_COLOR
-    ucon64.ansi_color ?
-      (equal ? "\x1b[01;32mMatches\x1b[0m" : "\x1b[01;33mDeviates\x1b[0m") :
-      (equal ? "Matches" : "Deviates");
+    ucon64.ansi_color ? "\x1b[01;32mMatches\x1b[0m" : "Matches" :
+    ucon64.ansi_color ? "\x1b[01;33mDeviates\x1b[0m" : "Deviates";
 #else
-      (equal ? "Matches" : "Deviates");
+    "Matches" : "Deviates";
 #endif
 }
 
@@ -4439,12 +4431,12 @@ check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
                "SRAM checksum: %s, 0x%s (calculated)\n"
                "               %s  0x%s (internal)\n"
                "Checksum file:     %s0x%s",
+               i ?
 #ifdef  USE_ANSI_COLOR
-               ucon64.ansi_color ?
-                 (i ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
-                 (i ? "OK" : "Bad"),
+                 ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                 ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad",
 #else
-               i ? "OK" : "Bad",
+                 "OK" : "Bad",
 #endif
                calculated_hash_str, i ? "==" : "!= ", internal_hash_str,
                i ? "" : " ", internal_hash2_str);
@@ -4692,14 +4684,14 @@ snes_init (st_ucon64_nfo_t *rominfo)
       y = ~rominfo->current_internal_crc & 0xffff;
       sprintf (rominfo->internal_crc2,
                "Inverse checksum: %s, 0x%04x (calculated) %c= 0x%04x (internal)",
+               y == x ?
 #ifdef  USE_ANSI_COLOR
-               ucon64.ansi_color ?
-                 ((y == x) ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
-                 ((y == x) ? "OK" : "Bad"),
+                 ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                 ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad",
 #else
-               (y == x) ? "OK" : "Bad",
+                 "OK" : "Bad",
 #endif
-               y, (y == x) ? '=' : '!', x);
+               y, y == x ? '=' : '!', x);
       if (bs_dump == 1)                         // bs_dump == 2 for BS add-on dumps
         {
           unsigned short int *bs_date_ptr = (unsigned short int *)
@@ -5388,8 +5380,9 @@ snes_multi (unsigned int truncate_size)
       return -1;
     }
 
-  strcpy (destname, ucon64.argv[ucon64.argc - 1]);
   n_files = ucon64.argc - 1;
+  snprintf (destname, FILENAME_MAX, "%s", ucon64.argv[n_files]);
+  destname[FILENAME_MAX - 1] = '\0';
 
   ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (destname, "wb")) == NULL)

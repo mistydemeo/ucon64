@@ -2,7 +2,7 @@
 string.h - some string functions
 
 Copyright (c) 1999 - 2008                    NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 - 2018 dbjh
+Copyright (c) 2001 - 2004, 2015, 2017 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -64,6 +64,7 @@ extern "C" {
   stricmp()     same as strcasecmp()
   strnicmp()    same as strncasecmp()
   strcasestr2() strcasestr() clone for non-GNU platforms
+  strnlen()     strnlen() clone
 */
 extern char *strtriml (char *str);
 extern char *strtrimr (char *str);
@@ -87,6 +88,9 @@ extern char *strcasestr2 (const char *str, const char *search);
 #ifndef _WIN32
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
+#endif
+#ifndef HAVE_STRNLEN
+size_t strnlen (const char *str, size_t maxlen);
 #endif
 
 #ifdef  __cplusplus

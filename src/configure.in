@@ -3,6 +3,10 @@ AC_INIT(uCON64, 2.1.1, ucon64-main@lists.sourceforge.net)
 AC_CONFIG_HEADER(config.h libdiscmage/config.h)
 
 
+dnl Set target, target_cpu, target_os.
+AC_CANONICAL_TARGET
+
+
 dnl Checks for programs.
 AC_PROG_CC(gcc egcs cc)
 AC_PROG_GCC_TRADITIONAL
@@ -38,18 +42,6 @@ if test $disable_parallel = no; then
 fi
 AC_MSG_RESULT($disable_parallel)
 AC_SUBST(DEFINE_PARALLEL_MAKE)
-
-
-dnl AC_MSG_CHECKING(whether support for serial port backup units is enabled)
-dnl AC_ARG_ENABLE(serial,
-dnl               AC_HELP_STRING([--enable-serial],
-dnl                              [enable support for serial port backup units (default: no)]),
-dnl               enable_serial=$enableval,
-dnl               enable_serial=no)
-dnl if test $enable_serial = yes; then
-dnl   AC_DEFINE(USE_SERIAL, 1, [enable support for serial port backup units (default: no)])
-dnl fi
-dnl AC_MSG_RESULT($enable_serial)
 
 
 AC_MSG_CHECKING(whether to use ppdev)
@@ -138,17 +130,25 @@ fi
 if test $with_libcd64 = yes; then
   AC_DEFINE(USE_LIBCD64, 1, [build with libcd64 support (default: no)])
   DEFINE_LIBCD64_MAKE="USE_LIBCD64=1"
-else
-  dnl libi386 or libamd64 is necessary on OpenBSD, but only if libcd64 isn't
-  dnl  enabled, because libcd64 already links to libi386 or libamd64.
-dnl  LIBIOPL_MAKE="-li386"
-  LIBIOPL_OPENBSD_MAKE="-lamd64"
-  LIBIOPL_NETBSD_MAKE="-lx86_64"
+elif test $disable_parallel = no; then
+  dnl On OpenBSD linking to libi386 or libamd64 is necessary, but only if
+  dnl  libcd64 is not enabled, because libcd64 already links to libi386 or
+  dnl  libamd64. On NetBSD it is similar, but with libi386 and libx86_64.
+  case "$target" in
+    i*86-*-openbsd* | i*86-*-netbsd*)
+      LIBIOPL_BSD_MAKE="-li386"
+      ;;
+    x86_64-*-openbsd*)
+      LIBIOPL_BSD_MAKE="-lamd64"
+      ;;
+    x86_64-*-netbsd*)
+      LIBIOPL_BSD_MAKE="-lx86_64"
+      ;;
+  esac
 fi
 AC_MSG_RESULT($with_libcd64)
 AC_SUBST(DEFINE_LIBCD64_MAKE)
-AC_SUBST(LIBIOPL_OPENBSD_MAKE)
-AC_SUBST(LIBIOPL_NETBSD_MAKE)
+AC_SUBST(LIBIOPL_BSD_MAKE)
 
 
 AC_MSG_CHECKING(whether to build without gzip and zip support)
@@ -215,7 +215,7 @@ dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(realpath clock_nanosleep)
+AC_CHECK_FUNCS(realpath clock_nanosleep strnlen)
 
 AC_PROG_RANLIB
 AC_PROG_INSTALL

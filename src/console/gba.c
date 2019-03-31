@@ -2,7 +2,7 @@
 gba.c - Game Boy Advance support for uCON64
 
 Copyright (c) 2001 - 2005              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -685,25 +685,14 @@ gba_init (st_ucon64_nfo_t *rominfo)
           (gba_header.start[2] << 18 | gba_header.start[1] << 10 | gba_header.start[0] << 2);
   pos += sprintf (rominfo->misc + pos, "Start address: 0x%08x\n", value);
 
-  pos += sprintf (rominfo->misc + pos, "Logo data: ");
-  if (memcmp (gba_header.logo, gba_logodata, GBA_LOGODATA_LEN) == 0)
-    {
+  pos += sprintf (rominfo->misc + pos, "Logo data: %s",
+                  memcmp (gba_header.logo, gba_logodata, GBA_LOGODATA_LEN) == 0 ?
 #ifdef  USE_ANSI_COLOR
-      if (ucon64.ansi_color)
-        pos += sprintf (rominfo->misc + pos, "\x1b[01;32mOK\x1b[0m");
-      else
+                    ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                    ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad");
+#else
+                    "OK" : "Bad");
 #endif
-        pos += sprintf (rominfo->misc + pos, "OK");
-    }
-  else
-    {
-#ifdef  USE_ANSI_COLOR
-      if (ucon64.ansi_color)
-        pos += sprintf (rominfo->misc + pos, "\x1b[01;31mBad\x1b[0m");
-      else
-#endif
-        pos += sprintf (rominfo->misc + pos, "Bad");
-    }
 
   // internal ROM crc
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
@@ -768,14 +757,15 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
 
   if (multi_fname != NULL)                      // -xfalmulti
     {
-      strcpy (fname, multi_fname);
       n_files = ucon64.argc;
+      snprintf (fname, FILENAME_MAX, "%s", multi_fname);
     }
   else                                          // -multi
     {
-      strcpy (fname, ucon64.argv[ucon64.argc - 1]);
       n_files = ucon64.argc - 1;
+      snprintf (fname, FILENAME_MAX, "%s", ucon64.argv[n_files]);
     }
+  fname[FILENAME_MAX - 1] = '\0';
 
   ucon64_file_handler (fname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (fname, "wb")) == NULL)

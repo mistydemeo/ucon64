@@ -1180,16 +1180,16 @@ main (int argc, char **argv)
           */
           DWORD priority_class = GetPriorityClass (GetCurrentProcess ());
 
-          printf ("Set the scheduling priority class to 0x%08x",
+          printf ("Set scheduling priority class to 0x%08x",
                   (unsigned int) priority_class);
           if (priority_class == REALTIME_PRIORITY_CLASS)
             fputs (" (REALTIME_PRIORITY_CLASS)", stdout);
           else if ((priority_class == HIGH_PRIORITY_CLASS))
             fputs (" (HIGH_PRIORITY_CLASS)", stdout);
-          fputc ('\n', stdout);
+          puts ("\n");
         }
       else
-        puts ("NOTE: Could not set scheduling priority class to REALTIME_PRIORITY_CLASS");
+        puts ("NOTE: Could not set scheduling priority class to REALTIME_PRIORITY_CLASS\n");
 #else
       struct sched_param sp;
 
@@ -1205,10 +1205,10 @@ main (int argc, char **argv)
           --sp.sched_priority;
           // SCHED_RESET_ON_FORK is specific to Linux and we ignore fork() for now
           if (sched_setscheduler (0, SCHED_FIFO /* | SCHED_RESET_ON_FORK */, &sp) >= 0)
-            printf ("Set scheduling policy to SCHED_FIFO and scheduling priority to %d\n",
+            printf ("Set scheduling policy to SCHED_FIFO and scheduling priority to %d\n\n",
                     sp.sched_priority);
           else
-            printf ("NOTE: Could not set scheduling policy to SCHED_FIFO with scheduling priority %d\n",
+            printf ("NOTE: Could not set scheduling policy to SCHED_FIFO with scheduling priority %d\n\n",
                     sp.sched_priority);
         }
 #endif // _WIN32 || __CYGWIN__
@@ -1904,34 +1904,21 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   // internal checksums?
   if (nfo->has_internal_crc)
     {
-      char *fstr;
-
       // the internal checksum of GBA ROMs stores only the checksum of the
       //  internal header
-      if (ucon64.console != UCON64_GBA)
-        fstr = "Checksum: %%s, 0x%%0%ulx (calculated) %%c= 0x%%0%ulx (internal)\n";
-      else
-        fstr = "Header checksum: %%s, 0x%%0%ulx (calculated) %%c= 0x%%0%ulx (internal)\n";
-
-      sprintf (buf, fstr,
+      sprintf (buf, "%s: %%s, 0x%%0%ulx (calculated) %%c= 0x%%0%ulx (internal)\n",
+               ucon64.console != UCON64_GBA ? "Checksum" : "Header checksum",
                nfo->internal_crc_len * 2, nfo->internal_crc_len * 2);
+      printf (buf, nfo->current_internal_crc == nfo->internal_crc ?
 #ifdef  USE_ANSI_COLOR
-      printf (buf,
-              ucon64.ansi_color ?
-                (nfo->current_internal_crc == nfo->internal_crc ?
-                   "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
-                :
-                nfo->current_internal_crc == nfo->internal_crc ? "OK" : "Bad",
-              nfo->current_internal_crc,
-              nfo->current_internal_crc == nfo->internal_crc ? '=' : '!',
-              nfo->internal_crc);
+                ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad",
 #else
-      printf (buf,
-              nfo->current_internal_crc == nfo->internal_crc ? "OK" : "Bad",
+                "OK" : "Bad",
+#endif
               nfo->current_internal_crc,
               nfo->current_internal_crc == nfo->internal_crc ? '=' : '!',
               nfo->internal_crc);
-#endif
     }
   if (nfo->internal_crc2[0])
     printf ("%s\n", nfo->internal_crc2);        // don't use puts() here, we

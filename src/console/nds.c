@@ -2,6 +2,7 @@
 nds.c - Nintendo DS support for uCON64
 
 Copyright (c) 2005 NoisyB
+Copyright (c) 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -268,25 +269,14 @@ nds_init (st_ucon64_nfo_t *rominfo)
   pos += sprintf (rominfo->misc + pos, "Device capacity: %d Mb\n",
                   1 << nds_header.devicecap);
 
-  pos += sprintf (rominfo->misc + pos, "Logo data: ");
-  if (memcmp (nds_header.logo, nds_logodata, NDS_LOGODATA_LEN) == 0)
-    {
+  pos += sprintf (rominfo->misc + pos, "Logo data: %s",
+                  memcmp (nds_header.logo, nds_logodata, NDS_LOGODATA_LEN) == 0 ?
 #ifdef  USE_ANSI_COLOR
-      if (ucon64.ansi_color)
-        pos += sprintf (rominfo->misc + pos, "\x1b[01;32mOK\x1b[0m");
-      else
+                    ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                    ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad");
+#else
+                    "OK" : "Bad");
 #endif
-        pos += sprintf (rominfo->misc + pos, "OK");
-    }
-  else
-    {
-#ifdef  USE_ANSI_COLOR
-      if (ucon64.ansi_color)
-        pos += sprintf (rominfo->misc + pos, "\x1b[01;31mBad\x1b[0m");
-      else
-#endif
-        pos += sprintf (rominfo->misc + pos, "Bad");
-    }
 
   // internal ROM crc
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)

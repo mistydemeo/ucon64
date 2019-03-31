@@ -2,7 +2,7 @@
 gb.c - Game Boy support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -626,17 +626,15 @@ gb_gp2bmp (void)
                   printf ("Checksum of image data at 0x%04x: ", n2 + 4);
                   for (m = 0; n2 < n; n2++)
                     m += gp_data[n2];
-                  m = ((unsigned int) (gp_data[n + 1] << 8) | gp_data[n]) ==
-                        (m & 0xffff);
                   printf ("%s\n", // NOTE: We have to use printf2() for ANSI colors.
+                          ((unsigned int) (gp_data[n + 1] << 8) | gp_data[n]) ==
+                            (m & 0xffff) ?
 #ifdef  USE_ANSI_COLOR
-                          ucon64.ansi_color ?
-                            (m ? "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m") :
-                            (m ? "OK" : "Bad")
+                            ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                            ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad");
 #else
-                          m ? "OK" : "Bad"
+                            "OK" : "Bad");
 #endif
-                         );
                 }
               n += 4;
             }
@@ -832,28 +830,17 @@ gb_init (st_ucon64_nfo_t *rominfo)
   value += gb_header.start_low;
   pos += sprintf (rominfo->misc + pos, "Start address: 0x%04x\n", value);
 
-  pos += sprintf (rominfo->misc + pos, "Logo data: ");
-  if (memcmp (gb_header.logo,
-              (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99) ?
-                rocket_logodata : gb_logodata,
-              GB_LOGODATA_LEN) == 0)
-    {
+  pos += sprintf (rominfo->misc + pos, "Logo data: %s",
+                  memcmp (gb_header.logo,
+                    (gb_header.rom_type >= 0x97 && gb_header.rom_type <= 0x99) ?
+                      rocket_logodata : gb_logodata,
+                    GB_LOGODATA_LEN) == 0 ?
 #ifdef  USE_ANSI_COLOR
-      if (ucon64.ansi_color)
-        pos += sprintf (rominfo->misc + pos, "\x1b[01;32mOK\x1b[0m");
-      else
+                    ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                    ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad");
+#else
+                    "OK" : "Bad");
 #endif
-        pos += sprintf (rominfo->misc + pos, "OK");
-    }
-  else
-    {
-#ifdef  USE_ANSI_COLOR
-      if (ucon64.ansi_color)
-        pos += sprintf (rominfo->misc + pos, "\x1b[01;31mBad\x1b[0m");
-      else
-#endif
-        pos += sprintf (rominfo->misc + pos, "Bad");
-    }
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
@@ -868,16 +855,14 @@ gb_init (st_ucon64_nfo_t *rominfo)
       x = gb_header.header_checksum;
       sprintf (rominfo->internal_crc2,
                "Header checksum: %s, 0x%02x (calculated) %c= 0x%02x (internal)",
+               checksum.header == x ?
 #ifdef  USE_ANSI_COLOR
-               ucon64.ansi_color ?
-                 ((checksum.header == x) ?
-                   "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
-                 :
-                 ((checksum.header == x) ? "OK" : "Bad"),
+                 ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                 ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad",
 #else
-               (checksum.header == x) ? "OK" : "Bad",
+                 "OK" : "Bad",
 #endif
-               checksum.header, (checksum.header == x) ? '=' : '!', x);
+               checksum.header, checksum.header == x ? '=' : '!', x);
     }
 
   rominfo->console_usage = gb_usage[0].help;

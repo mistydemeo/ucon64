@@ -2,7 +2,7 @@
 nes.c - Nintendo Entertainment System support for uCON64
 
 Copyright (c) 1999 - 2003              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -5196,43 +5196,41 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 // the DEBUG_READ_CHUNK blocks are left here on purpose, don't remove
 //#define DEBUG_READ_CHUNK
 #ifdef  DEBUG_READ_CHUNK
-  char id_str[5] = "    ";
+  char id_str[4];
 #endif
   struct
   {
      unsigned int id;                           // chunk identification string
      unsigned int length;                       // data length, in little endian format
-  } chunk_header;
+  } chunk_header = { 0, 0 };
   st_unif_chunk_t *unif_chunk;
   static unsigned int pos = 0;
   unsigned int rom_size = (unsigned int) ucon64.file_size - UNIF_HEADER_LEN;
 
   if (!cont)
-    pos = 0; // fseek (file, UNIF_HEADER_LEN, SEEK_SET);
+    pos = 0;
 
 #ifdef  WORDS_BIGENDIAN
   id = bswap_32 (id);                           // swap id once instead of chunk_header.id often
 #endif
   do
     {
-//      fread (&chunk_header, 1, sizeof (chunk_header), file);
-      memcpy (&chunk_header, rom_buffer + pos, sizeof (chunk_header));
-      pos += sizeof (chunk_header);
+      if (pos + sizeof chunk_header >= rom_size)
+        break;
+      memcpy (&chunk_header, rom_buffer + pos, sizeof chunk_header);
+      pos += sizeof chunk_header;
 #ifdef  WORDS_BIGENDIAN
       chunk_header.length = bswap_32 (chunk_header.length);
 #endif
-//      if (feof (file))
-//        break;
 #ifdef  DEBUG_READ_CHUNK
       memcpy (id_str, &chunk_header.id, 4);
 #ifdef  WORDS_BIGENDIAN
       *((int *) id_str) = bswap_32 (*((int *) id_str));
 #endif
-      printf ("chunk header: id=%s, length=%u\n", id_str, chunk_header.length);
+      printf ("chunk header: id=%.4s, length=%u\n", id_str, chunk_header.length);
 #endif
       if (chunk_header.id != id)
         {
-//          (fseek (file, chunk_header.length, SEEK_CUR) != 0) // fseek() clears EOF indicator
           if (pos + chunk_header.length >= rom_size)
             break;
           else
@@ -5241,7 +5239,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
     }
   while (chunk_header.id != id);
 
-  if (chunk_header.id != id || pos >= rom_size) // || feof (file))
+  if (chunk_header.id != id || pos >= rom_size)
     {
 #ifdef  DEBUG_READ_CHUNK
       puts ("exit1");
@@ -5260,7 +5258,6 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
   unif_chunk->length = chunk_header.length;
   unif_chunk->data = &((unsigned char *) unif_chunk)[sizeof (st_unif_chunk_t)];
 
-//  fread (unif_chunk->data, 1, chunk_header.length, file);
   memcpy (unif_chunk->data, rom_buffer + pos, chunk_header.length);
   pos += chunk_header.length;
 #ifdef  DEBUG_READ_CHUNK
@@ -5400,13 +5397,9 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
       fputs ("ERROR: No board name specified\n", stderr);
       return -1;
     }
-  unif_chunk.length = strlen (ucon64.mapr) + 1; // +1 to include ASCII-z
+  unif_chunk.length = strnlen (ucon64.mapr, BOARDNAME_MAXLEN - 1) + 1; // +1 to include ASCII-z
   unif_chunk.data = (void *) ucon64.mapr;
-  if (unif_chunk.length > BOARDNAME_MAXLEN)
-    {                                           // Should we give a warning?
-      unif_chunk.length = BOARDNAME_MAXLEN;
-      ((char *) unif_chunk.data)[BOARDNAME_MAXLEN - 1] = '\0';
-    }                                           // make it an ASCII-z string
+  ((char *) unif_chunk.data)[BOARDNAME_MAXLEN - 1] = '\0';
   write_chunk (&unif_chunk, destfile);
 
 #if     UNIF_REVISION > 7
@@ -5453,7 +5446,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
               info.year = bswap_16 (info.year);
 #endif
               unif_chunk.id = DINF_ID;
-              unif_chunk.length = 204;
+              unif_chunk.length = sizeof info;
               unif_chunk.data = &info;
               write_chunk (&unif_chunk, destfile);
             }
@@ -5584,13 +5577,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         }
 
       // ucon64.mapr != NULL && strlen (ucon64.mapr) > 0
-      unif_chunk2.length = strlen (ucon64.mapr) + 1; // +1 to include ASCII-z
+      unif_chunk2.length = strnlen (ucon64.mapr, BOARDNAME_MAXLEN - 1) + 1; // +1 to include ASCII-z
       unif_chunk2.data = (void *) ucon64.mapr;
-      if (unif_chunk2.length > BOARDNAME_MAXLEN)
-        {
-          unif_chunk2.length = BOARDNAME_MAXLEN;
-          ((char *) unif_chunk2.data)[BOARDNAME_MAXLEN - 1] = '\0';
-        }                                       // make it an ASCII-z string
+      ((char *) unif_chunk2.data)[BOARDNAME_MAXLEN - 1] = '\0';
       write_chunk (&unif_chunk2, destfile);
     }
   else                                          // MAPR chunk, but no board name specified
@@ -5624,12 +5613,13 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   else
     {
       char ucon64_name[] = "uCON64";
-      size_t ucon64_name_len = strlen (ucon64_name);
-      int sig_added = 0;
+      int ucon64_name_len = strlen (ucon64_name), sig_added = 0;
       // find uCON64 WRTR chunk and modify it if it is present
       do
         {
-          if (!strncmp ((const char *) unif_chunk1->data, ucon64_name, ucon64_name_len))
+          x = strnlen ((const char *) unif_chunk1->data, unif_chunk1->length);
+          if (!strncmp ((const char *) unif_chunk1->data, ucon64_name,
+                        ucon64_name_len < x ? ucon64_name_len : x))
             {
               unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
               unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -5658,7 +5648,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     }
   else
     {
-      if (!strncmp ((const char *) unif_chunk1->data, STD_COMMENT, strlen (STD_COMMENT)))
+      x = strnlen ((const char *) unif_chunk1->data, unif_chunk1->length);
+      y = strlen (STD_COMMENT);
+      if (!strncmp ((const char *) unif_chunk1->data, STD_COMMENT, y < x ? y : x))
         { // overwrite uCON64 comment -> OS and version match with the used exe
           unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
           unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -5717,7 +5709,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
               info.year = bswap_16 (info.year);
 #endif
               unif_chunk2.id = DINF_ID;
-              unif_chunk2.length = 204;
+              unif_chunk2.length = sizeof info;
               unif_chunk2.data = &info;
               write_chunk (&unif_chunk2, destfile);
             }
@@ -6093,7 +6085,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
 
 
 static int
-nes_mapper_number (const char *board_name)
+nes_mapper_number (const char *board_name, unsigned int board_name_len)
 {
   typedef struct
   {
@@ -6138,7 +6130,9 @@ nes_mapper_number (const char *board_name)
   n = 0;
   while (name_to_mapr[n].string != NULL)
     {
-      if (!strncmp (board_name, name_to_mapr[n].string, BOARDNAME_MAXLEN - 1))
+      size_t len1 = strlen (name_to_mapr[n].string);
+      size_t len2 = strnlen (board_name, board_name_len);
+      if (len1 == len2 && !memcmp (board_name, name_to_mapr[n].string, len1))
         return name_to_mapr[n].value;
       n++;
     }
@@ -6167,7 +6161,8 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
     {                                           // no mapper specified, try autodetection
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
-          if ((x = nes_mapper_number ((const char *) unif_chunk->data)) == -1)
+          if ((x = nes_mapper_number ((const char *) unif_chunk->data,
+                                      unif_chunk->length)) == -1)
             {
               puts ("WARNING: Could not determine mapper number, writing \"0\"");
               x = 0;
@@ -6191,7 +6186,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
     }
   else if ((unif_chunk = read_chunk (TVCI_ID, rom_buffer, 0)) != NULL)
     {
-      ines_header.ctrl3 |= *((unsigned char *) unif_chunk->data) == 1 ?
+      ines_header.ctrl3 |= *((unsigned char *) unif_chunk->data) == INES_TVID ?
         INES_TVID : 0;
       free (unif_chunk);
     }
@@ -7001,7 +6996,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
   unsigned char magic[15], *rom_buffer;
   int result = -1, size, x, y, n, crc = 0;
   unsigned int pos = strlen (rominfo->misc), rom_size;
-  char *str, *str_list[8];
+  const char *str, *str_list[8];
   st_unif_chunk_t *unif_chunk, *unif_chunk2;
   st_nes_data_t *info, key;
 
@@ -7047,7 +7042,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
   if (type == PASOFAMI)                         // INES, UNIF, FDS and FAM are much
     {                                           //  more reliable than stricmp()s
-      str = (char *) get_suffix (ucon64.fname);
+      str = get_suffix (ucon64.fname);
       if (!stricmp (str, ".prm") ||
           !stricmp (str, ".700") ||
           !stricmp (str, ".prg") ||
@@ -7130,18 +7125,21 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
       if ((unif_chunk = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
         {
-          pos += sprintf (rominfo->misc + pos, "Comment: %s\n", (char *) unif_chunk->data);
+          char format[80];
+          sprintf (format, "Comment: %%.%us\n", unif_chunk->length);
+          pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
           free (unif_chunk);
         }
 #if     UNIF_REVISION > 7
       if ((unif_chunk = read_chunk (WRTR_ID, rom_buffer, 0)) != NULL)
         {
           char ucon64_name[] = "uCON64";
-          size_t ucon64_name_len = strlen (ucon64_name);
+          int ucon64_name_len = strlen (ucon64_name);
           pos += sprintf (rominfo->misc + pos, "Processed by: ");
           y = 0;
           do
             {
+              char format[80];
               if (y)
                 pos += sprintf (rominfo->misc + pos, ", ");
               /*
@@ -7150,9 +7148,10 @@ nes_init (st_ucon64_nfo_t *rominfo)
                 but other tools needn't use the same format. We can only be
                 sure that the string starts with the tool name.
               */
-              y = strlen ((const char *) unif_chunk->data);
+              y = strnlen ((const char *) unif_chunk->data, unif_chunk->length);
               x = 0;
-              if (!strncmp ((const char *) unif_chunk->data, ucon64_name, ucon64_name_len))
+              if (!strncmp ((const char *) unif_chunk->data, ucon64_name,
+                            ucon64_name_len < y ? ucon64_name_len : y))
                 {
                   while (x < y)
                     {
@@ -7173,7 +7172,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
                       x++;
                     }
                 }
-              pos += sprintf (rominfo->misc + pos, (const char *) unif_chunk->data);
+              sprintf (format, "%%.%us", unif_chunk->length);
+              pos += sprintf (rominfo->misc + pos, format, (const char *) unif_chunk->data);
               y = 1;
               free (unif_chunk);
             }
@@ -7210,15 +7210,12 @@ nes_init (st_ucon64_nfo_t *rominfo)
 #ifdef  WORDS_BIGENDIAN
                 x = bswap_32 (x);
 #endif
-                str = (char *)
+                str = unif_chunk2->length == 4 && x == *((int32_t *) unif_chunk2->data) ?
 #ifdef  USE_ANSI_COLOR
-                  (ucon64.ansi_color ?
-                    ((x == *((int *) unif_chunk2->data)) ?
-                      "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
-                    :
-                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad"));
+                        ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                        ucon64.ansi_color ? "\x1b[01;31mbad\x1b[0m" : "bad";
 #else
-                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad");
+                        "OK" : "bad";
 #endif
                 free (unif_chunk2);
               }
@@ -7241,15 +7238,12 @@ nes_init (st_ucon64_nfo_t *rominfo)
 #ifdef  WORDS_BIGENDIAN
                 x = bswap_32 (x);
 #endif
-                str = (char *)
+                str = unif_chunk2->length == 4 && x == *((int32_t *) unif_chunk2->data) ?
 #ifdef  USE_ANSI_COLOR
-                  (ucon64.ansi_color ?
-                    ((x == *((int *) unif_chunk2->data)) ?
-                      "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
-                    :
-                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad"));
+                        ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                        ucon64.ansi_color ? "\x1b[01;31mbad\x1b[0m" : "bad";
 #else
-                    ((x == *((int *) unif_chunk2->data)) ? "OK" : "bad");
+                        "OK" : "bad";
 #endif
                 free (unif_chunk2);
               }
@@ -7265,13 +7259,20 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
-          pos += sprintf (rominfo->misc + pos, "Board name: %s\n", (char *) unif_chunk->data);
+          // Spec is unclear whether strings should be null terminated, so
+          // don't simply do:
+          //   ((char *) unif_chunk.data)[unif_chunk.length - 1] = '\0';
+          char format[80];
+          sprintf (format, "Board name: %%.%us\n", BOARDNAME_MAXLEN);
+          pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
           free (unif_chunk);
         }
       if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
         {
 #if 0
-          pos += sprintf (rominfo->misc + pos, "Internal name: %s\n", (char *) unif_chunk->data);
+          char format[80];
+          sprintf (format, "Internal name: %%.%us\n", unif_chunk->length);
+          pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
 #endif
           memcpy (rominfo->name, unif_chunk->data,
                   unif_chunk->length > sizeof rominfo->name ?
@@ -7315,6 +7316,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
           // currently 92 bytes is enough for ctrl_str, but extra space avoids
           //  introducing bugs when controller type text would be changed
           char ctrl_str[200];
+          int pos2 = 0;
 
           str_list[0] = "Regular joypad";
           str_list[1] = "Zapper";
@@ -7327,15 +7329,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
           ctrl_str[0] = '\0';
 
           x = *((unsigned char *) unif_chunk->data);
-          y = 0;
           for (n = 0; n < 8; n++)
             if (x & (1 << n))
-              {
-                if (y)
-                  strcat (ctrl_str, ", ");
-                strcat (ctrl_str, str_list[n]);
-                y = 1;
-              }
+              pos2 += sprintf (ctrl_str + pos2, "%s, ", str_list[n]);
+          if (pos2)
+            str_list[pos2 - 2] = '\0';
           pos += sprintf (rominfo->misc + pos, "Supported controllers: %s\n", ctrl_str);
           free (unif_chunk);
         }
@@ -7497,14 +7495,14 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
           if (month)
             {
-              sprintf (format, "\nDate: %%d/19%%d");
-              strcat (format, (year == 8 || year == 9) ? "x" : "");
+              sprintf (format, "\nDate: %%d/19%%d%s",
+                       (year == 8 || year == 9) ? "x" : "");
               pos += sprintf (rominfo->misc + pos, format, month, year);
             }
           else
             {
-              sprintf (format, "\nDate: 19%%d");
-              strcat (format, (year == 8 || year == 9) ? "x" : "");
+              sprintf (format, "\nDate: 19%%d%s",
+                       (year == 8 || year == 9) ? "x" : "");
               pos += sprintf (rominfo->misc + pos, format, year);
             }
         }
@@ -7633,7 +7631,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
             }
           /*
             Some FDS files contain control characters in their names. sprintf()
-            won't print those character, so we have to use tofunc() with
+            won't print those characters, so we have to use tofunc() with
             fdsl_toprint().
           */
           info_pos += sprintf (info + info_pos, "%03u $%02x '%-8s' $%04x-$%04x [%s]\n",

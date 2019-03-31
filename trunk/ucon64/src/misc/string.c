@@ -2,7 +2,7 @@
 string.c - some string functions
 
 Copyright (c) 1999 - 2008                    NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 - 2018 dbjh
+Copyright (c) 2001 - 2004, 2015, 2017 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -191,3 +191,16 @@ memmem2 (const void *buffer, size_t bufferlen,
 
   return NULL;
 }
+
+
+#ifndef HAVE_STRNLEN
+size_t
+strnlen (const char *str, size_t maxlen)
+{
+  size_t n;
+
+  for (n = 0; n < maxlen && str[n]; n++)
+    ;
+  return n;
+}
+#endif

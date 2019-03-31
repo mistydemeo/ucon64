@@ -103,7 +103,7 @@ typedef struct
 #define UNIF_SIG_S      "UNIF"
 #define UNIF_REVISION   8                       // the "official" spec is at version 7 (10/08/2002)
 
-// numeric values of id strings in little endian format, e.g.
+// numeric values of ID strings in little endian format, e.g.
 //  UNIF_ID == 'F' << 24 | 'I' << 16 | 'N' << 8 | 'U'
 #define UNIF_ID 0x46494E55
 #define MAPR_ID 0x5250414D
@@ -191,8 +191,8 @@ typedef struct
 #define WRTR_MARKER_S   ";"
 #endif
 
-#define BOARDNAME_MAXLEN        32              // chunk length, NOT string length
-                                                //  string lentgh = chunk length - 1
+#define BOARDNAME_MAXLEN        32U             // chunk length, NOT string length
+                                                //  string length = chunk length - 1
 #define UNIF_HEADER_LEN (sizeof (st_unif_header_t))
 
 typedef struct

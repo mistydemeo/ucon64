@@ -2,7 +2,7 @@
 pce.c - PC-Engine support for uCON64
 
 Copyright (c) 1999 - 2001              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -893,8 +893,9 @@ pce_multi (unsigned int truncate_size)
       return -1;
     }
 
-  strcpy (destname, ucon64.argv[ucon64.argc - 1]);
   n_files = ucon64.argc - 1;
+  snprintf (destname, FILENAME_MAX, "%s", ucon64.argv[n_files]);
+  destname[FILENAME_MAX - 1] = '\0';
 
   ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
   if ((destfile = fopen (destname, "wb")) == NULL)

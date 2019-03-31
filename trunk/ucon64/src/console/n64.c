@@ -2,7 +2,7 @@
 n64.c - Nintendo 64 support for uCON64
 
 Copyright (c) 1999 - 2001                    NoisyB
-Copyright (c) 2002 - 2005, 2015, 2017 - 2018 dbjh
+Copyright (c) 2002 - 2005, 2015, 2017 - 2019 dbjh
 Copyright (c) 2005                           Parasyte
 
 05-06-2005 / Parasyte:
@@ -540,14 +540,12 @@ n64_init (st_ucon64_nfo_t *rominfo)
 
       sprintf (rominfo->internal_crc2,
                "2nd Checksum: %s, 0x%08x (calculated) %c= 0x%08x (internal)",
+               n64crc.crc2 == value ?
 #ifdef  USE_ANSI_COLOR
-               ucon64.ansi_color ?
-                 ((n64crc.crc2 == value) ?
-                   "\x1b[01;32mOK\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
-                 :
-                 ((n64crc.crc2 == value) ? "OK" : "Bad"),
+                 ucon64.ansi_color ? "\x1b[01;32mOK\x1b[0m" : "OK" :
+                 ucon64.ansi_color ? "\x1b[01;31mBad\x1b[0m" : "Bad",
 #else
-               (n64crc.crc2 == value) ? "OK" : "Bad",
+                 "OK" : "Bad",
 #endif
                n64crc.crc2,
                (n64crc.crc2 == value) ? '=' : '!', value);

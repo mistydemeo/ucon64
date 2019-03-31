@@ -10,6 +10,9 @@
 /* Define to 1 if you have the <byteswap.h> header file. */
 /* #undef HAVE_BYTESWAP_H */
 
+/* Define to 1 if you have the `clock_nanosleep' function. */
+/* #undef HAVE_CLOCK_NANOSLEEP */
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 /* #undef HAVE_DIRENT_H */
@@ -32,9 +35,6 @@
 /* Define to 1 if you have the `realpath' function. */
 /* #undef HAVE_REALPATH */
 
-/* Define to 1 if you have the `clock_nanosleep' function. */
-/* #undef HAVE_CLOCK_NANOSLEEP */
-
 /* Define to 1 if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */
 
@@ -49,6 +49,9 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
+
+/* Define to 1 if you have the `strnlen' function. */
+#define HAVE_STRNLEN 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */

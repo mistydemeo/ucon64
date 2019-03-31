@@ -301,7 +301,7 @@ microwait2 (int nmicros)
     microsecond (for both in and out) and a rough test performed by myself
     suggested around 600 nanoseconds for inb for an unmapped address.
   */
-  unsigned int n;
+  int n;
 
   for (n = 0; n < nmicros * 2; n++)
     inportb (gd_port + PARPORT_STATUS);

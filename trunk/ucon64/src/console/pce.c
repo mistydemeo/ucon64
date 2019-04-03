@@ -1041,18 +1041,18 @@ pce_check (unsigned char *buf, unsigned int len)
     return 1;
 */
   // super mario pirate conversion
-  if (len > 65000 && !strncmp ((const char*) &buf[0x77f0], "JGGKGKGGGGGGJGJG", 16))
+  if (len > 65000 && !strncmp ((char *) &buf[0x77f0], "JGGKGKGGGGGGJGJG", 16))
     return 1;
   if (buf[0x20] == 0x7c && buf[0x21] == 0xe3 && buf[0x22] == 0xe6) // 5 in 1
     return 1;
   if (buf[0x10] == 0xc7 && buf[0x30] == 0xe9 && buf[0x50] == 0xa1) // Sekikehara
     return 1;
-  if (!strncmp ((const char *) &buf[0], "!BM FORMAT!", 11)) // boxy boy (U)
+  if (!strncmp ((char *) &buf[0], "!BM FORMAT!", 11)) // boxy boy (U)
     return 1;
-  if (!strncmp ((const char *) &buf[0], "PUSH RUN BUTTON", 15)) // boxy boy (J)
+  if (!strncmp ((char *) &buf[0], "PUSH RUN BUTTON", 15)) // boxy boy (J)
     return 1;
   // US CD sys 2.01
-  if (len > 0x3ffc7 && !strncmp ((const char *) &buf[0x3ffb6], "PC Engine CD-ROM", 16))
+  if (len > 0x3ffc7 && !strncmp ((char *) &buf[0x3ffb6], "PC Engine CD-ROM", 16))
     return 1;
 
   for (i = 0 ; i < 0x200; i++)

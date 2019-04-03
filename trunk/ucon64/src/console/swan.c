@@ -156,7 +156,7 @@ swan_init (st_ucon64_nfo_t *rominfo)
   // misc stuff
   sprintf ((char *) buf, "Minimum supported system: %s",
            (!OFFSET (swan_header, 1) ? "WS Monochrome" : "WS Color"));
-  strcat (rominfo->misc, (const char *) buf);
+  strcat (rominfo->misc, (char *) buf);
 
   if ((rom_buffer = (unsigned char *) malloc ((size_t) ucon64.file_size)) == NULL)
     {

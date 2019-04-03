@@ -75,8 +75,8 @@ ngp_init (st_ucon64_nfo_t *rominfo)
   ucon64_fread (&ngp_header, NGP_HEADER_START + rominfo->backup_header_len,
     NGP_HEADER_LEN, ucon64.fname);
 
-  if (!strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ||
-      !strncmp ((const char *) &OFFSET (ngp_header, 0), third_code, strlen (third_code)))
+  if (!strncmp ((char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ||
+      !strncmp ((char *) &OFFSET (ngp_header, 0), third_code, strlen (third_code)))
     result = 0;
   else
     result = -1;
@@ -88,12 +88,12 @@ ngp_init (st_ucon64_nfo_t *rominfo)
   rominfo->header = &ngp_header;
 
   // internal ROM name
-  strncpy (rominfo->name, (const char *) &OFFSET (ngp_header, 0x24), 12);
+  strncpy (rominfo->name, (char *) &OFFSET (ngp_header, 0x24), 12);
   rominfo->name[12] = 0;
 
   // ROM maker
   rominfo->maker =
-    !strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ?
+    !strncmp ((char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ?
       "SNK" : "Third party";
 
   // misc stuff

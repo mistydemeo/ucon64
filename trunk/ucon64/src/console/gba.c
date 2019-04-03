@@ -651,7 +651,7 @@ gba_init (st_ucon64_nfo_t *rominfo)
   rominfo->header = &gba_header;
 
   // internal ROM name
-  strncpy (rominfo->name, (const char *) gba_header.name, GBA_NAME_LEN);
+  strncpy (rominfo->name, (char *) gba_header.name, GBA_NAME_LEN);
   rominfo->name[GBA_NAME_LEN] = '\0';
 
   // ROM maker

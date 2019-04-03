@@ -5618,8 +5618,8 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       // find uCON64 WRTR chunk and modify it if it is present
       do
         {
-          if (strnlen ((const char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
-              !strncmp ((const char *) unif_chunk1->data, ucon64_name, x))
+          if (strnlen ((char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
+              !strncmp ((char *) unif_chunk1->data, ucon64_name, x))
             {
               unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
               unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -5649,8 +5649,8 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   else
     {
       x = strlen (STD_COMMENT);
-      if (strnlen ((const char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
-          !strncmp ((const char *) unif_chunk1->data, STD_COMMENT, x))
+      if (strnlen ((char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
+          !strncmp ((char *) unif_chunk1->data, STD_COMMENT, x))
         { // overwrite uCON64 comment -> OS and version match with the used exe
           unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
           unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -6161,7 +6161,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
     {                                           // no mapper specified, try autodetection
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
-          if ((x = nes_mapper_number ((const char *) unif_chunk->data,
+          if ((x = nes_mapper_number ((char *) unif_chunk->data,
                                       unif_chunk->length)) == -1)
             {
               puts ("WARNING: Could not determine mapper number, writing \"0\"");
@@ -7148,10 +7148,10 @@ nes_init (st_ucon64_nfo_t *rominfo)
                 but other tools needn't use the same format. We can only be
                 sure that the string starts with the tool name.
               */
-              y = strnlen ((const char *) unif_chunk->data, unif_chunk->length);
+              y = strnlen ((char *) unif_chunk->data, unif_chunk->length);
               x = 0;
               if (y >= ucon64_name_len &&
-                  !strncmp ((const char *) unif_chunk->data, ucon64_name, ucon64_name_len))
+                  !strncmp ((char *) unif_chunk->data, ucon64_name, ucon64_name_len))
                 {
                   while (x < y)
                     {
@@ -7173,7 +7173,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
                     }
                 }
               sprintf (format, "%%.%us", unif_chunk->length);
-              pos += sprintf (rominfo->misc + pos, format, (const char *) unif_chunk->data);
+              pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
               y = 1;
               free (unif_chunk);
             }
@@ -7611,7 +7611,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
             info_pos += sprintf (info + info_pos, "WARNING: Invalid file header block ID (0x%02x)\n", buffer[0]);
 
           // get name, data location, and size
-          strncpy (name, (const char *) buffer + 3, 8);
+          strncpy (name, (char *) buffer + 3, 8);
           name[8] = '\0';
           start = buffer[11] + 256 * buffer[12];
           size = buffer[13] + 256 * buffer[14];

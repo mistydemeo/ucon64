@@ -236,7 +236,7 @@ nds_init (st_ucon64_nfo_t *rominfo)
   rominfo->header = &nds_header;
 
   // internal ROM name
-  strncpy (rominfo->name, (const char *) nds_header.title, NDS_NAME_LEN);
+  strncpy (rominfo->name, (char *) nds_header.title, NDS_NAME_LEN);
   rominfo->name[NDS_NAME_LEN] = '\0';
 
   // ROM maker

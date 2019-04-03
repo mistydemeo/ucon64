@@ -697,7 +697,7 @@ gb_init (st_ucon64_nfo_t *rominfo)
   // internal ROM name
   x = (gb_header.gb_type == 0x80 || gb_header.gb_type == 0xc0) ?
          GB_NAME_LEN : GB_NAME_LEN + 1;
-  strncpy (rominfo->name, (const char *) gb_header.name, x);
+  strncpy (rominfo->name, (char *) gb_header.name, x);
   rominfo->name[x] = '\0';                      // terminate string
 
   // ROM maker

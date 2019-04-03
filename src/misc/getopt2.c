@@ -612,7 +612,7 @@ main (int argc, char **argv)
         {
         case OPTION_A:
           printf ("option a with object '%s'\n",
-                  (const char *) getopt2_get_index_by_val (option, OPTION_A)->object);
+                  (char *) getopt2_get_index_by_val (option, OPTION_A)->object);
           break;
 
         case OPTION_BBB:

@@ -936,6 +936,10 @@ ucon64_options (st_ucon64_t *p)
       remove_temp_file ();
       break;
 
+    case UCON64_SPLIT:
+      ucon64_split ((size_t) strtol (option_arg, NULL, 10));
+      break;
+
     case UCON64_A:
       aps_apply (ucon64.fname, ucon64.file);
       break;
@@ -1438,6 +1442,10 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_GP2BMP:
       gb_gp2bmp ();
+      break;
+
+    case UCON64_IC2:
+      snes_ic2 (ucon64.nfo);
       break;
 
     case UCON64_INES:

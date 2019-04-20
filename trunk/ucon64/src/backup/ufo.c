@@ -1,7 +1,7 @@
 /*
-ufo.c - Super UFO support for uCON64
+ufo.c - Super UFO Super Drive PRO 7/8 support for uCON64
 
-Copyright (c) 2003 dbjh
+Copyright (c) 2003, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@ const st_getopt2_t ufo_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super UFO Pro 8"/*"UFO Enterprises"*/,
+      NULL, "Super UFO Super Drive PRO 7/8"/*"UFO Enterprises"*/,
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}

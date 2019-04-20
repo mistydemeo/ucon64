@@ -2,7 +2,7 @@
 ucon64_misc.h - miscellaneous functions for uCON64
 
 Copyright (c) 1999 - 2006              NoisyB
-Copyright (c) 2001 - 2004, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2019 dbjh
 Copyright (c) 2001                     Caz
 
 
@@ -143,6 +143,7 @@ extern int ucon64_pattern (const char *pattern_fname);
   ucon64_chksum()   file oriented wrapper for chksum()
                       if (!sha1) {sha1 won't be calculated!}
   ucon64_filefile() compare file with ucon64.fname for similarities or differencies
+  ucon64_split()    split file
 */
 #define ucon64_fgetc(f, p)           (quick_io_c(0, p, f, "rb"))
 #define ucon64_fputc(f, p, b, m)     (quick_io_c(b, p, f, m))
@@ -162,4 +163,5 @@ extern int ucon64_chksum (char *sha1, char *md5, unsigned int *crc32, // uint16_
                           const char *filename, int file_size, size_t start);
 extern void ucon64_filefile (const char *filename1, unsigned int start1,
                              unsigned int start2, int similar);
+extern int ucon64_split (size_t part_size);
 #endif // #ifndef UCON64_MISC_H

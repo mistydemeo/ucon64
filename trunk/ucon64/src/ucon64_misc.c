@@ -560,6 +560,12 @@ const st_getopt2_t ucon64_padding_usage[] =
       "most backup units use a header with a size of 512 Bytes",
       NULL
     },
+    {
+      "split", 1, 0, UCON64_SPLIT,
+      "N", "split ROM in parts of N Bytes (including possible header)\n"
+      "use " OPTION_S "s/" OPTION_LONG_S "ssize to split for a specific console or backup unit",
+      NULL
+    },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
@@ -1125,7 +1131,8 @@ ucon64_gauge (time_t start_time, int pos, int size)
 int
 ucon64_testsplit (const char *filename,
                   void (*testsplit_cb) (const char *, void *), void *cb_data)
-// test if ROM is split into parts based on the name of files
+// test if ROM is split into parts (for one of the supported backup units)
+//  based on the name of files
 {
   int x, parts;
 
@@ -2388,3 +2395,73 @@ ucon64_filefile (const char *filename1, unsigned int start1,
   return;
 }
 #endif
+
+
+int
+ucon64_split (size_t part_size)
+{
+  size_t size = (size_t) ucon64.file_size, n, nparts, surplus;
+  char dest_name[FILENAME_MAX], suffix[5] = ".001";
+
+  if (part_size >= size)
+    {
+      fprintf (stderr,
+               "ERROR: A part size was specified that is larger than or equal to the file size\n"
+               "       (%u >= %u)\n", (unsigned) part_size, (unsigned) size);
+      return -1;
+    }
+  else if (part_size == 0)
+    {
+      fputs ("ERROR: Part size must be larger than 0 bytes\n", stderr);
+      return -1;
+    }
+
+  nparts = size / part_size;
+  surplus = size % part_size;
+  if (nparts + (surplus ? 1 : 0) > 999)
+    {
+      fprintf (stderr,
+               "ERROR: A part size was specified that would result in more than 999\n"
+               "       (%u) files. Specify a size of %u bytes or larger\n",
+               (unsigned) (nparts + (surplus ? 1 : 0)),
+               (unsigned) (size + 998U) / 999);
+      return -1;
+    }
+
+  strcpy (dest_name, ucon64.fname);
+  set_suffix (dest_name, suffix);
+  ucon64_output_fname (dest_name, 0);
+
+  for (n = 0; n < nparts; n++)
+    {
+      // don't write backups of parts, because one name is used
+      fcopy (ucon64.fname, n * part_size, part_size, dest_name, "wb");
+      printf (ucon64_msg[WROTE], dest_name);
+
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4777)
+/*
+  In this case Visual Studio Community 2015 warns with: '_snprintf' : format
+  string '%03u' requires an argument of type 'unsigned int', but variadic
+  argument 1 has type 'size_t'
+  This is a bug in Visual Studio Community 2015.
+*/
+#endif
+      snprintf (suffix, sizeof suffix, ".%03u", (unsigned int) n + 2);
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
+      suffix[sizeof suffix - 1] = '\0';
+      set_suffix (dest_name, suffix);
+    }
+
+  if (surplus)
+    {
+      // don't write backups of parts, because one name is used
+      fcopy (ucon64.fname, n * part_size, surplus, dest_name, "wb");
+      printf (ucon64_msg[WROTE], dest_name);
+    }
+
+  return 0;
+}

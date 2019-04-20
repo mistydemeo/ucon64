@@ -2,7 +2,7 @@
 ucon64_defines.h - definitions for uCON64
 
 Copyright (c) 2002 - 2005              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -206,6 +206,7 @@ enum
   UCON64_HFINDR,
   UCON64_HI,
   UCON64_I,
+  UCON64_IC2,
   UCON64_ID,
   UCON64_IDNUM,
   UCON64_IDPPF,
@@ -298,6 +299,7 @@ enum
   UCON64_SMGH,
   UCON64_SMINI2SRM,
   UCON64_SMINIS,
+  UCON64_SPLIT,
   UCON64_SRAM,
   UCON64_SSC,
   UCON64_SSIZE,

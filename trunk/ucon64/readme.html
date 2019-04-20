@@ -70,6 +70,8 @@ Padding
   --insn=N      insert N Bytes (0x00) before ROM
   --ins         same as --insn=512
                   most backup units use a header with a size of 512 Bytes
+  --split=N     split ROM in parts of N Bytes (including possible header)
+                  use -s/--ssize to split for a specific console or backup unit
 
 DATabase (support for DAT files)
   --db          DATabase statistics
@@ -278,10 +280,11 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --smc         convert to Super Magicom/SMC
   --swc         convert to Super Wild Card*/SWC
   --swcs        convert *.srm (SRAM) file to Super Wild Card*/SWC
-  --ufo         convert to Super UFO
-  --ufos        convert *.srm (SRAM) file to Super UFO
+  --ufo         convert to Super UFO Super Drive PRO 7/8
+  --ufos        convert *.srm (SRAM) file to Super UFO Super Drive PRO 7/8
   --ufosd       convert to Super UFO Pro 8 SD
   --ufosds      convert *.srm (SRAM) file to Super UFO Pro 8 SD
+  --ic2         convert to Super Magicom/SMC IC2
   --sminis=ID   convert *.srm (SRAM) file to SNES/Super Famicom Classic Mini
                   (hakchi2) format for game with identifier ID
   --smini2srm   convert SNES/Super Famicom Classic Mini (hakchi2) SRAM data to

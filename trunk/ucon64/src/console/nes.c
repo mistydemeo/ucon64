@@ -5239,7 +5239,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
     }
   while (chunk_header.id != id);
 
-  if (chunk_header.id != id || pos >= rom_size)
+  if (chunk_header.id != id || pos + chunk_header.length > rom_size)
     {
 #ifdef  DEBUG_READ_CHUNK
       puts ("exit1");
@@ -5248,7 +5248,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
     }
 
   if ((unif_chunk = (st_unif_chunk_t *)
-         malloc (sizeof (st_unif_chunk_t) + chunk_header.length)) == NULL)
+        malloc (sizeof (st_unif_chunk_t) + chunk_header.length)) == NULL)
     {
       fprintf (stderr, "ERROR: Not enough memory for chunk (%u bytes)\n",
                (unsigned int) sizeof (st_unif_chunk_t) + chunk_header.length);
@@ -5651,7 +5651,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       x = strlen (STD_COMMENT);
       if (strnlen ((char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
           !strncmp ((char *) unif_chunk1->data, STD_COMMENT, x))
-        { // overwrite uCON64 comment -> OS and version match with the used exe
+        { // overwrite uCON64 comment => OS and version match with the used exe
           unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
           unif_chunk1->data = (char *) unif_ucon64_sig;
         }
@@ -5890,18 +5890,14 @@ nes_unif (void)
       return -1;
     }
 
-  /*
-    remove possible temp file created by ucon64_file_handler ()
-    nes_ines_unif() and nes_unif_unif() might exit() so we use register_func()
-  */
+  // remove possible temp file created by ucon64_file_handler()
+  // nes_ines_unif() and nes_unif_unif() might exit() so we use register_func()
   register_func (remove_temp_file);
   strcpy (nes_destfname, dest_name);
   nes_destfile = destfile;
   register_func (remove_destfile);
-  /*
-    Converting from UNIF to UNIF should be allowed, because the user might want
-    to change some parameters.
-  */
+  // Converting from UNIF to UNIF should be allowed, because the user might
+  //  want to change some parameters.
   if (type == INES)
     {
       FILE *srcfile;
@@ -6703,10 +6699,10 @@ nes_j (unsigned char **mem_image)
       parse_prm (&ines_header, src_name);
       nparts++;
     }
-  else if (write_file)                          // Don't print this from nes_init()
+  else if (write_file)                          // don't print this from nes_init()
     printf ("WARNING: No %s, using default values\n", src_name);
 
-  // Don't do this in parse_prm(), because there might be no .PRM file available
+  // don't do this in parse_prm(), because there might be no .PRM file available
   if (UCON64_ISSET (ucon64.battery))
     {
       if (ucon64.battery)
@@ -6762,7 +6758,7 @@ nes_j (unsigned char **mem_image)
 
   if (ucon64.mapr == NULL || ucon64.mapr[0] == '\0')
     {                                           // maybe .PRM contained mapper
-      if (write_file)                           // Don't print this from nes_init()
+      if (write_file)                           // don't print this from nes_init()
         printf ("WARNING: No mapper number specified, writing \"%d\"\n",
                 (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0));
     }
@@ -7120,12 +7116,12 @@ nes_init (st_ucon64_nfo_t *rominfo)
       ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.fname);
       ucon64.split = 0;                         // UNIF files are never split
 
-      x = me2le_32 (unif_header.revision);      // Don't modify header data
+      x = me2le_32 (unif_header.revision);      // don't modify header data
       pos += sprintf (rominfo->misc + pos, "UNIF revision: %d\n", x);
 
       if ((unif_chunk = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
         {
-          char format[80];
+          char format[80]; // properly handle string that is not null-terminated
           sprintf (format, "Comment: %%.%us\n", unif_chunk->length);
           pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
           free (unif_chunk);
@@ -7253,16 +7249,13 @@ nes_init (st_ucon64_nfo_t *rominfo)
           }
       ucon64.crc32 = crc;
       rominfo->data_size = size;
-      // Don't introduce extra code just to make this line be printed above
+      // don't introduce extra code just to make this line be printed above
       //  the previous two line types (PRG & CHR)
       pos += sprintf (rominfo->misc + pos, "Size: %.4f Mb\n", TOMBIT_F (rominfo->data_size));
 
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
-          // Spec is unclear whether strings should be null terminated, so
-          // don't simply do:
-          //   ((char *) unif_chunk.data)[unif_chunk.length - 1] = '\0';
-          char format[80];
+          char format[80]; // properly handle string that is not null-terminated
           sprintf (format, "Board name: %%.%us\n", BOARDNAME_MAXLEN);
           pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
           free (unif_chunk);
@@ -7270,7 +7263,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
         {
 #if 0
-          char format[80];
+          char format[80]; // properly handle string that is not null-terminated
           sprintf (format, "Internal name: %%.%us\n", unif_chunk->length);
           pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
 #endif
@@ -7349,10 +7342,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
       free (rom_buffer);
       break;
     case PASOFAMI:
-      /*
-        Either a *.PRM header file, a 512-byte *.700 trainer file, a *.PRG
-        ROM data file or a *.CHR VROM data file.
-      */
+      // Either a *.PRM header file, a 512-byte *.700 trainer file, a *.PRG
+      //  ROM data file or a *.CHR VROM data file.
       {
         char prm_fname[FILENAME_MAX];
 
@@ -7590,7 +7581,7 @@ nes_fdsl (st_ucon64_nfo_t *rominfo, char *output_str)
         {
           fputs ("ERROR: Invalid disk header\n", stderr);
           fclose (srcfile);
-          return -1;                            // should we return?
+          return -1;                            // Should we return?
         }
 
       if (buffer[56] != 2)

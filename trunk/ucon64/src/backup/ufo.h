@@ -1,7 +1,7 @@
 /*
-ufo.h - Super UFO support for uCON64
+ufo.h - Super UFO Super Drive PRO 7/8 support for uCON64
 
-Copyright (c) 2003, 2015 - 2017 dbjh
+Copyright (c) 2003, 2015 - 2017, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t ufo_usage[];
 
 /*
-Super UFO Pro 8 Header Format (researched by John Weidman)
+Super UFO Super Drive PRO 8 Header Format (researched by John Weidman)
 
 Byte-Offset  Function
 -----------  ---------------------------------------------------
@@ -39,7 +39,7 @@ Byte-Offset  Function
                           0x00 == This is the last chunk.
 03-07        0x00
 08-0F        53 55 50 45 52 55 46 4F  ("SUPERUFO")
-10           0x01 == This file is a ROM image file
+10           0x01 == This game uses SRAM
 11           ROM size: 04 == 4 Mb, 0x18 == 24 Mb, 0x20 == 32 Mb, etc.
 12           ROM format:  00 == HiROM,  01 == LoROM
 
@@ -130,9 +130,9 @@ typedef struct st_ufo_header
   unsigned char size_low;
   unsigned char size_high;
   unsigned char multi;
-  unsigned char pad[5];
+  unsigned char pad1[5];
   unsigned char id[8];
-  unsigned char isrom;
+  unsigned char uses_sram;
   unsigned char size;
   unsigned char banktype;
   unsigned char sram_size;

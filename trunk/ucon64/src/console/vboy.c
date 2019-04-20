@@ -96,7 +96,7 @@ vboy_init (st_ucon64_nfo_t *rominfo)
       rominfo->header = &vboy_header;
 
       // internal ROM name
-      strncpy (rominfo->name, (char *) vboy_header.name, VBOY_NAME_LEN);
+      strncpy (rominfo->name, vboy_header.name, VBOY_NAME_LEN);
       rominfo->name[VBOY_NAME_LEN] = '\0';
 
       // ROM maker

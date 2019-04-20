@@ -775,7 +775,7 @@ ucon64_runtime_debug (void)
       y++;
   printf ("DEBUG: Total options (with dupes): %d\n", y);
   printf ("DEBUG: UCON64_MAX_ARGS == %d, %s\n", UCON64_MAX_ARGS,
-          y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options");
+          y < UCON64_MAX_ARGS ? "good" : "\nERROR: Too small; must be larger than options");
 #endif
 
 #if 1
@@ -851,7 +851,7 @@ ucon64_runtime_debug (void)
                 ((st_ucon64_obj_t *) options[y].object)->console != ((st_ucon64_obj_t *) options[x].object)->console // (NOT allowed)
                 ((st_ucon64_obj_t *) options[x].object)->flags != ((st_ucon64_obj_t *) options[x].object)->flags) // (NOT allowed)
               {
-                fputs ("ERROR: different dupe options found\n  ", stdout);
+                fputs ("ERROR: Different dupe options found\n  ", stdout);
                 ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
                 fputs ("  ", stdout);
                 ucon64_runtime_debug_output ((st_getopt2_t *) &options[y]);
@@ -1547,7 +1547,8 @@ ucon64_rom_handling (void)
       Test for split files only if the console type knows about split files at
       all. However we only know the console type after probing.
     */
-    if ((ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
+    if ((ucon64.console == UCON64_NES ||
+         (ucon64.console == UCON64_SNES && snes_get_copier_type () != IC2) ||
          ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG) &&
         (UCON64_ISSET (ucon64.split) ?
            ucon64.split : ucon64_testsplit (ucon64.fname, NULL, NULL)))
@@ -1888,9 +1889,13 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   if (split)
     {
       printf ("Split: Yes, %d part%s\n", split, split != 1 ? "s" : "");
-      // nes.c calculates the correct checksum for split ROMs (=Pasofami
-      //  format), so there is no need to join the files
-      if (ucon64.console != UCON64_NES)
+      /*
+        nes.c calculates the correct checksum for split ROMs (=Pasofami format),
+        so there is no need to join the files. Likewise, snes.c calculates the
+        correct checksum for files in SMC IC2 format.
+      */
+      if (ucon64.console != UCON64_NES &&
+          !(ucon64.console == UCON64_SNES && snes_get_copier_type () == IC2))
         puts ("NOTE: To get the correct checksum the ROM parts must be joined");
     }
 

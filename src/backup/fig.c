@@ -1,9 +1,9 @@
 /*
 fig.c - Super PRO Fighter support for uCON64
 
-Copyright (c) 1999 - 2002             NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 dbjh
-Copyright (c) 2003 - 2004             JohnDie
+Copyright (c) 1999 - 2002                   NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017, 2019 dbjh
+Copyright (c) 2003 - 2004                   JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -368,7 +368,7 @@ fig_read_rom (const char *filename, unsigned short parport)
 
   fflush (file);
   snes_init (&rominfo);
-  snes_set_fig_header (&rominfo, (st_fig_header_t *) buffer);
+  snes_set_fig_header ((st_fig_header_t *) buffer, rominfo.backup_header_len);
   fseek (file, 0, SEEK_SET);
   fwrite (buffer, 1, FIG_HEADER_LEN, file);     // write correct header
 

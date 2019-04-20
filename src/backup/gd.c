@@ -604,7 +604,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   else
     {
       split = 0;
-      num_units = snes_gd_make_names (filename, rominfo, names);
+      num_units = snes_gd_make_names (filename, rominfo->backup_header_len, names);
     }
 
   dirname2 (filename, dir);

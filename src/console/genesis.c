@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-// NOTE: The people at Sega refer to their company as Sega in normal text (not as SEGA)
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -519,10 +518,8 @@ write_mgh_name_file (st_ucon64_nfo_t *rominfo, const char *dest_name)
         mgh_data[(x + 2) * 16 + y + 244] = mgh_charset[(rominfo->name[x] & 0x7f) * 8 + y];
     }
 
-  /*
-    If a backup would be created it would overwrite the backup of the ROM. The
-    ROM backup is more important, so we don't write a backup of the MGH file.
-  */
+  // If a backup would be created it would overwrite the backup of the ROM. The
+  //  ROM backup is more important, so we don't write a backup of the MGH file.
   ucon64_fwrite (mgh_data, 0, sizeof mgh_data, dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
 }
@@ -605,7 +602,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
       for (x = 0; x < nparts; x++)
         {
           if (surplus == 0 && x == nparts - 1)
-            smd_header.split &= ~0x40;          // last file -> clear bit 6
+            smd_header.split &= ~0x40;          // last file => clear bit 6
 
           // don't write backups of parts, because one name is used
           ucon64_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
@@ -618,7 +615,7 @@ genesis_s (st_ucon64_nfo_t *rominfo)
       if (surplus)
         {
           smd_header.size = (unsigned char) (surplus / 16384);
-          smd_header.split &= ~0x40;            // last file -> clear bit 6
+          smd_header.split &= ~0x40;            // last file => clear bit 6
 
           // don't write backups of parts, because one name is used
           ucon64_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
@@ -991,10 +988,8 @@ genesis_chk (st_ucon64_nfo_t *rominfo)
 
 static int
 genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
-/*
-  This function searches for PAL protection codes. If it finds one it will
-  fix the code so that the game will run on a Genesis (NTSC).
-*/
+// This function searches for PAL protection codes. If it finds one it will
+//  fix the code so that the game will run on a Genesis (NTSC).
 {
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
@@ -1049,10 +1044,8 @@ genesis_fix_pal_protection (st_ucon64_nfo_t *rominfo)
 
 static int
 genesis_fix_ntsc_protection (st_ucon64_nfo_t *rominfo)
-/*
-  This function searches for NTSC protection codes. If it finds one it will
-  fix the code so that the game will run on a Mega Drive (PAL).
-*/
+// This function searches for NTSC protection codes. If it finds one it will
+//  fix the code so that the game will run on a Mega Drive (PAL).
 {
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
@@ -1796,10 +1789,8 @@ genesis_init (st_ucon64_nfo_t *rominfo)
   else
     pos += sprintf (rominfo->misc + pos, "Cartridge RAM: No\n");
 
-  /*
-    Only checking for 'G' seems to give better results than checking for "GM".
-    "Officially" "GM" indicates it's a game and "Al" that it's educational.
-  */
+  // Only checking for 'G' seems to give better results than checking for "GM".
+  //  "Officially" "GM" indicates it's a game and "Al" that it's educational.
   pos += sprintf (rominfo->misc + pos, "Product type: %s\n",
                   (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Educational");
   pos += sprintf (rominfo->misc + pos, "I/O device(s): %s",

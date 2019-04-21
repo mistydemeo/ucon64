@@ -2420,7 +2420,7 @@ snes_split_gd3 (size_t backup_header_len, size_t size)
       fprintf (stderr,
                "ERROR: Splitting this ROM would result in %u parts (of 8 Mbit).\n"
                "       %u is the maximum number of parts for GD3 and MGD2\n",
-               (unsigned) (nparts + (surplus ? 1 : 0)),
+               (unsigned) nparts + (surplus ? 1 : 0),
                (unsigned) (sizeof names / sizeof names[0]));
       return;
     }
@@ -4672,7 +4672,7 @@ check_split (const char *filename, void *cb_data)
 }
 
 
-int
+static int
 check_smc_ic2_rom (int nparts, st_split_info_t *info, size_t backup_header_len)
 {
   if (nparts == 2 && info->parts[0].fname && info->parts[1].fname)
@@ -5354,12 +5354,24 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, size_t rom_siz
 #else
 // Calculate the checksum of a SNES ROM.
 {
-  size_t i;
+  // largest known cart size is 48 Mbit (internal size 64 Mbit)
+  size_t internal_rom_size =
+           snes_header.rom_size > 0 && snes_header.rom_size <= 13 ?
+             1U << (snes_header.rom_size + 10) : st_dump ?
+               rom_size - 8 * MBIT : rom_size,
+         blocksize = internal_rom_size - rom_size <= rom_size ?
+                       internal_rom_size - rom_size : 0,
+         i, i_end = (snes_header.rom_type == 0xf5 &&
+                     snes_header.map_type == 0x3a && rom_size == 24 * MBIT) ||
+                    bs_dump ||
+                    snes_header.rom_type == 0xf9 || // Far East of Eden Zero (J)
+                    internal_rom_size <= rom_size ?
+                      rom_size : rom_size - (blocksize % (3 * MBIT) ?
+                                               blocksize : blocksize / 3);
   unsigned short int sum = 0;
 
-  for (i = st_dump ? 8 * MBIT : 0; i < rom_size; i++)
+  for (i = st_dump ? 8 * MBIT : 0; i < i_end; i++)
     sum += rom_buffer[i];
-
   if (snes_header.rom_type == 0xf5 && snes_header.map_type == 0x3a &&
       rom_size == 24 * MBIT)                    // Momotaro Dentetsu Happy (J)
     sum *= 2;
@@ -5367,30 +5379,15 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, size_t rom_siz
     for (i = rominfo->header_start;
          i < rominfo->header_start + SNES_HEADER_LEN; i++)
       sum -= rom_buffer[i];
-  else if (snes_header.rom_type != 0xf9)        // not Far East of Eden Zero (J)
+  else if (snes_header.rom_type != 0xf9 && internal_rom_size > rom_size)
+    // not Far East of Eden Zero (J)
     {
-      // largest known cart size is 48 Mbit (internal size 64 Mbit)
-      size_t internal_rom_size =
-               snes_header.rom_size > 0 && snes_header.rom_size <= 13 ?
-                 1U << (snes_header.rom_size + 10) : st_dump ?
-                   rom_size - 8 * MBIT : rom_size;
-
-      if (internal_rom_size > rom_size)
-        {
-          size_t blocksize = internal_rom_size - rom_size <= rom_size ?
-                               internal_rom_size - rom_size : 0;
-
-          if (blocksize % (3 * MBIT) == 0)      // 6 (16 - 10), 12 (32 - 20), 24 (64 - 40)
-            {
-              blocksize /= 3;
-              for (i = 0; i < blocksize; i++)
-                sum += 3 * (rom_buffer + rom_size - blocksize)[i];
-            }
-          // next condition is to match the snes_chksum() above (28 Mbit ROMs)
-          else if (blocksize >= internal_rom_size / 4)
-            for (i = 0; i < blocksize; i++)
-              sum += (rom_buffer + rom_size - blocksize)[i];
-        }
+      // blocksize >= internal_rom_size / 4 to match the snes_chksum() above (28 Mbit ROMs)
+      unsigned char factor = blocksize % (3 * MBIT) == 0 ? // 6(16-10),12(32-20),24(64-40)
+                      4 : blocksize >= internal_rom_size / 4 ?
+                        2 : 1;
+      for (i = i_end; i < rom_size; i++)
+        sum += factor * rom_buffer[i];
     }
 
   return sum;

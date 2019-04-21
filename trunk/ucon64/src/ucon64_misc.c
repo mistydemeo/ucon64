@@ -2423,7 +2423,7 @@ ucon64_split (size_t part_size)
       fprintf (stderr,
                "ERROR: A part size was specified that would result in more than 999\n"
                "       (%u) files. Specify a size of %u bytes or larger\n",
-               (unsigned) (nparts + (surplus ? 1 : 0)),
+               (unsigned) nparts + (surplus ? 1 : 0),
                (unsigned) (size + 998U) / 999);
       return -1;
     }

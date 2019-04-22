@@ -5359,15 +5359,15 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, size_t rom_siz
            snes_header.rom_size > 0 && snes_header.rom_size <= 13 ?
              1U << (snes_header.rom_size + 10) : st_dump ?
                rom_size - 8 * MBIT : rom_size,
-         blocksize = internal_rom_size - rom_size <= rom_size ?
+         diff_size = internal_rom_size - rom_size <= rom_size ?
                        internal_rom_size - rom_size : 0,
          i, i_end = (snes_header.rom_type == 0xf5 &&
                      snes_header.map_type == 0x3a && rom_size == 24 * MBIT) ||
                     bs_dump ||
                     snes_header.rom_type == 0xf9 || // Far East of Eden Zero (J)
                     internal_rom_size <= rom_size ?
-                      rom_size : rom_size - (blocksize % (3 * MBIT) ?
-                                               blocksize : blocksize / 3);
+                      rom_size : rom_size - (diff_size % (6 * MBIT) ?
+                                               diff_size : diff_size / 3);
   unsigned short int sum = 0;
 
   for (i = st_dump ? 8 * MBIT : 0; i < i_end; i++)
@@ -5379,13 +5379,12 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, size_t rom_siz
     for (i = rominfo->header_start;
          i < rominfo->header_start + SNES_HEADER_LEN; i++)
       sum -= rom_buffer[i];
-  else if (snes_header.rom_type != 0xf9 && internal_rom_size > rom_size)
-    // not Far East of Eden Zero (J)
+  else if (i_end < rom_size)
     {
-      // blocksize >= internal_rom_size / 4 to match the snes_chksum() above (28 Mbit ROMs)
-      unsigned char factor = blocksize % (3 * MBIT) == 0 ? // 6(16-10),12(32-20),24(64-40)
-                      4 : blocksize >= internal_rom_size / 4 ?
-                        2 : 1;
+      // diff_size >= internal_rom_size / 4 to match the snes_chksum() above (28 Mbit ROMs)
+      unsigned char factor = diff_size % (6 * MBIT) == 0 ? // 6(16-10),12(32-20),24(64-40)
+                               4 : diff_size >= internal_rom_size / 4 ?
+                                 2 : 1;
       for (i = i_end; i < rom_size; i++)
         sum += factor * rom_buffer[i];
     }

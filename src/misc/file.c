@@ -2,7 +2,7 @@
 file.c - miscellaneous file functions
 
 Copyright (c) 1999 - 2004                    NoisyB
-Copyright (c) 2001 - 2005, 2015, 2017 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015, 2017 - 2019 dbjh
 Copyright (c) 2002 - 2004                    Jan-Erik Karlsson (Amiga)
 
 
@@ -706,6 +706,7 @@ rename2 (const char *oldname, const char *newname)
 int
 truncate2 (const char *filename, off_t new_size)
 {
+  int result;
   off_t size = fsizeof (filename);
   struct stat fstate;
 
@@ -733,11 +734,12 @@ truncate2 (const char *filename, off_t new_size)
         }
 
       fclose (file);
+      result = 0;                               // success
     }
   else
-    truncate (filename, new_size);
+    result = truncate (filename, new_size);
 
-  return 0;                                     // success
+  return result;
 }
 
 

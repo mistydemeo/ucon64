@@ -34,7 +34,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 #ifdef  USE_PPDEV                               // ppdev is a Linux parallel
-#include <fcntl.h>                              //  port device driver
+#include <errno.h>                              //  port device driver
+#include <fcntl.h>
+#include <string.h>                             // strerror()
 #include <linux/parport.h>
 #include <linux/ppdev.h>
 #include <sys/ioctl.h>
@@ -231,6 +233,54 @@ i386_output_word (unsigned short port, unsigned short word)
 #endif // __i386__ || __x86_64__
 
 
+#ifdef  USE_PPDEV
+static inline ssize_t
+read2 (int fd, void *buf, size_t nbytes)
+{
+  size_t i = 0;
+  ssize_t n;
+
+  do
+    {
+      n = read (fd, &((unsigned char *) buf)[i], nbytes - i);
+      if (n >= 0)
+        i += n;
+      else if (errno != EINTR)
+        {
+          fprintf (stderr, "ERROR: read() failed: %s\n", strerror (errno));
+          exit (1);
+        }
+    }
+  while (i < nbytes);
+
+  return i;
+}
+
+
+static inline ssize_t
+write2 (int fd, const void *buf, size_t nbytes)
+{
+  size_t i = 0;
+  ssize_t n;
+
+  do
+    {
+      n = write (fd, &((unsigned char *) buf)[i], nbytes - i);
+      if (n >= 0)
+        i += n;
+      else if (errno != EINTR)
+        {
+          fprintf (stderr, "ERROR: write() failed: %s\n", strerror (errno));
+          exit (1);
+        }
+    }
+  while (i < nbytes);
+
+  return i;
+}
+#endif
+
+
 unsigned char
 inportb (unsigned short port)
 {
@@ -255,7 +305,7 @@ inportb (unsigned short port)
           parport_io_mode |= IEEE1284_ADDR;
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (parport_io_fd, &byte, 1);
+      read2 (parport_io_fd, &byte, 1);
       break;
     case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
@@ -263,7 +313,7 @@ inportb (unsigned short port)
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (parport_io_fd, &byte, 1);
+      read2 (parport_io_fd, &byte, 1);
       break;
     default:
       fprintf (stderr,
@@ -337,7 +387,7 @@ inportw (unsigned short port)
           parport_io_mode |= IEEE1284_ADDR;
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (parport_io_fd, buf, 2);
+      read2 (parport_io_fd, buf, 2);
       break;
     case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
@@ -345,7 +395,7 @@ inportw (unsigned short port)
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (parport_io_fd, buf, 2);
+      read2 (parport_io_fd, buf, 2);
       break;
     default:
       fprintf (stderr,
@@ -412,7 +462,7 @@ outportb (unsigned short port, unsigned char byte)
           parport_io_mode |= IEEE1284_ADDR;
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (parport_io_fd, &byte, 1);
+      write2 (parport_io_fd, &byte, 1);
       break;
     case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
@@ -420,7 +470,7 @@ outportb (unsigned short port, unsigned char byte)
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (parport_io_fd, &byte, 1);
+      write2 (parport_io_fd, &byte, 1);
       break;
     default:
       fprintf (stderr,
@@ -476,7 +526,7 @@ outportw (unsigned short port, unsigned short word)
           parport_io_mode |= IEEE1284_ADDR;
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (parport_io_fd, buf, 2);
+      write2 (parport_io_fd, buf, 2);
       break;
     case 4:                                     // EPP data
       if (parport_io_mode & IEEE1284_ADDR)
@@ -484,7 +534,7 @@ outportw (unsigned short port, unsigned short word)
           parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
           ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (parport_io_fd, buf, 2);
+      write2 (parport_io_fd, buf, 2);
       break;
     default:
       fprintf (stderr,

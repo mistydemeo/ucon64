@@ -3,7 +3,7 @@ bsl.c - Baseline patcher support for uCON64
 
 Copyright (c) ???? - ???? The White Knight
 Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2003        dbjh
+Copyright (c) 2003, 2019  dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -71,30 +71,51 @@ bsl_apply (const char *mod, const char *bslname)
 
   while (!feof (bslfile))
     {
-      fscanf (bslfile, "%d\n", &offset);
-      fscanf (bslfile, "%d\n", &data);
-      if ((offset == -1) && (data == -1))
+      if (fscanf (bslfile, "%d\n", &offset) != 1 ||
+          fscanf (bslfile, "%d\n", &data) != 1)
+        {
+          fprintf (stderr, ucon64_msg[READ_ERROR], bslname);
+          fclose (bslfile);
+          fclose (modfile);
+          return -1;
+        }
+      if (offset == -1 && data == -1)
         break;
 
       fseek (modfile, offset, SEEK_SET);
       fputc (data, modfile);
     }
 
-  fscanf (bslfile, "%d\n", &offset);
-  fscanf (bslfile, "%d\n", &nbytes);
+  if (fscanf (bslfile, "%d\n", &offset) != 1 ||
+      fscanf (bslfile, "%d\n", &nbytes) != 1)
+    {
+      fprintf (stderr, ucon64_msg[READ_ERROR], bslname);
+      fclose (bslfile);
+      fclose (modfile);
+      return -1;
+    }
   fseek (modfile, offset, SEEK_SET);
   if (nbytes > 0)
     {
-      while (nbytes > 4096)
-        {
-          char buf[4096];
+      char buf[4096];
 
-          fread (buf, 4096, 1, bslfile);
-          fwrite (buf, 4096, 1, modfile);
-          nbytes -= 4096;
+      while (nbytes > (int) sizeof buf)
+        {
+          size_t nbytes2 = fread (buf, 1, sizeof buf, bslfile);
+          nbytes -= nbytes2;
+          if (nbytes2 == 0)
+            {
+              nbytes = -1;
+              break;
+            }
+          fwrite (buf, 1, nbytes2, modfile);
         }
       while (nbytes-- >= 0)                     // yes, one byte more than the
-        fputc (fgetc (bslfile), modfile);       //  _value_ read from the BSL file
+        {                                       //  _value_ read from the BSL file
+          if ((data = fgetc (bslfile)) == EOF)
+            break;
+          fputc (data, modfile);
+        }
     }
 
   puts ("Patching complete\n");

@@ -1,7 +1,7 @@
 /*
 archive.c - g(un)zip and unzip support
 
-Copyright (c) 2001 - 2004, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -58,10 +58,12 @@ fsizeof (const char *filename)
 #undef  fopen
 #undef  fread
 #undef  fclose
-  if ((file = fopen (filename, "rb")) == NULL)
-    return -1;
-  fread (magic, 1, sizeof magic, file);
-  fclose (file);
+  if ((file = fopen (filename, "rb")) != NULL)
+    {
+      size_t nbytes = fread (magic, 1, sizeof magic, file);
+      (void) nbytes;
+      fclose (file);
+    }
 #define fopen   fopen2
 #define fclose  fclose2
 #define fread   fread2
@@ -178,6 +180,7 @@ unzip_get_number_entries (const char *filename)
 {
   FILE *file;
   unsigned char magic[4] = { 0 };
+  size_t nbytes;
 
 #undef  fopen
 #undef  fread
@@ -187,7 +190,8 @@ unzip_get_number_entries (const char *filename)
       errno = ENOENT;
       return -1;
     }
-  fread (magic, 1, sizeof magic, file);
+  nbytes = fread (magic, 1, sizeof magic, file);
+  (void) nbytes;
   fclose (file);
 #define fopen   fopen2
 #define fclose  fclose2
@@ -304,8 +308,8 @@ fopen2 (const char *filename, const char *mode)
       if ((file = fopen (filename, "rb")) != NULL)
         {
           unsigned char magic[4] = { 0 };
-
-          fread (magic, sizeof magic, 1, file);
+          size_t nbytes = fread (magic, 1, sizeof magic, file);
+          (void) nbytes;
           if (magic[0] == 0x1f && magic[1] == 0x8b && magic[2] == 0x08)
             {                           // ID1, ID2 and CM. gzip uses Compression Method 8
               fmode = FM_GZIP;

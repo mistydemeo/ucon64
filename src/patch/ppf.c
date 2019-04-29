@@ -504,7 +504,6 @@ ppf_set_fid (const char *ppf, const char *fidname)
                      (uint32_t) (MEMCMP2_CASE | UCON64_FIND_QUIET));
   if (pos == -1)
     pos = ppfsize;
-  truncate (ppfname, pos);
 
   ucon64_fwrite (fidbuf, pos, fidsize + 18 + 16, ppfname, "r+b");
   pos += fidsize + 18 + 16;
@@ -512,6 +511,9 @@ ppf_set_fid (const char *ppf, const char *fidname)
   fidsize = bswap_32 (fidsize);                 // Write file size in little-endian format
 #endif
   ucon64_fwrite (&fidsize, pos, 4, ppfname, "r+b");
+  pos += 4;
+  if (ppfsize > pos && truncate (ppfname, pos))
+    fprintf (stderr, "ERROR: Truncating \"%s\" failed", ppfname);
 
   printf (ucon64_msg[WROTE], ppfname);
   return 0;

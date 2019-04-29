@@ -4,7 +4,7 @@ f2a.c - Flash 2 Advance support for uCON64
 Copyright (c) 2003                     Ulrich Hecht <uli@emulinks.de>
 Copyright (c) 2003 - 2004              David Voswinkel <d.voswinkel@netcologne.de>
 Copyright (c) 2004                     NoisyB
-Copyright (c) 2004 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2004 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -467,8 +467,9 @@ f2a_connect_usb (void)
                   //  (later versions of?) Linux 2.4...
                   if ((fp = open (EZDEV, O_WRONLY)) == -1)
                     {
-                      fprintf (stderr, "ERROR: Could not upload EZUSB firmware (opening "
-                                 EZDEV": %s)\n", strerror (errno));
+                      fprintf (stderr, "ERROR: Could not upload EZUSB firmware"
+                                         " (opening "EZDEV": %s)\n",
+                               strerror (errno));
                       return -1;
                     }
 
@@ -476,13 +477,20 @@ f2a_connect_usb (void)
                   //  an Intel hex record file at a time...
                   for (wrote = 0; wrote < F2A_FIRM_SIZE; wrote += w)
                     {
-                      if ((w = write (fp, f2afirmware + wrote, F2A_FIRM_SIZE - wrote)) == -1)
+                      if ((w = write (fp, f2afirmware + wrote,
+                                      F2A_FIRM_SIZE - wrote)) == -1)
                         {
-                          fprintf (stderr, "ERROR: Could not upload EZUSB firmware (writing "
-                                     EZDEV": %s)\n", strerror (errno));
-                          return -1;
+                          if (errno != EINTR)
+                            {
+                              fprintf (stderr, "ERROR: Could not upload EZUSB firmware"
+                                                 " (writing "EZDEV": %s)\n",
+                                       strerror (errno));
+                              return -1;
+                            }
+                          else
+                            w = 0;
                         }
-                      if (ucon64.quiet < 0)
+                      if (w && ucon64.quiet < 0)
                         printf ("Wrote %d bytes (%d-%d of %d) to "EZDEV"\n",
                                 w, wrote, wrote + w, F2A_FIRM_SIZE);
                     }

@@ -2,7 +2,7 @@
 misc.c - miscellaneous functions
 
 Copyright (c) 1999 - 2008              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 Copyright (c) 2002 - 2005              Jan-Erik Karlsson (Amiga code)
 
 
@@ -1640,6 +1640,7 @@ rename2 (const char *oldname, const char *newname)
 int
 truncate2 (const char *filename, off_t new_size)
 {
+  int result;
   off_t size = q_fsize (filename);
   struct stat fstate;
 
@@ -1667,11 +1668,12 @@ truncate2 (const char *filename, off_t new_size)
         }
 
       fclose (file);
+      result = 0;                               // success
     }
   else
-    truncate (filename, new_size);
+    result = truncate (filename, new_size);
 
-  return 0;                                     // success
+  return result;
 }
 
 
@@ -2294,12 +2296,16 @@ getenv2 (const char *variable)
             {
               char c;
 
-              getcwd (value, FILENAME_MAX);
-              c = (char) toupper ((int) *value);
-              // if current dir is root dir strip problematic ending slash (DJGPP)
-              if (c >= 'A' && c <= 'Z' &&
-                  value[1] == ':' && value[2] == '/' && value[3] == '\0')
-                value[2] = '\0';
+              if (getcwd (value, FILENAME_MAX) != NULL)
+                {
+                  c = (char) toupper ((int) *value);
+                  // if current dir is root dir strip problematic ending slash (DJGPP)
+                  if (c >= 'A' && c <= 'Z' &&
+                      value[1] == ':' && value[2] == '/' && value[3] == '\0')
+                    value[2] = '\0';
+                }
+              else
+                *value = '\0';
             }
         }
 
@@ -2322,7 +2328,8 @@ getenv2 (const char *variable)
 #endif
             strcpy (value, DIR_SEPARATOR_S "tmp");
           else
-            getcwd (value, FILENAME_MAX);
+            if (getcwd (value, FILENAME_MAX) == NULL)
+              *value = '\0';
         }
     }
 
@@ -2333,7 +2340,8 @@ getenv2 (const char *variable)
     /cygdrive/<drive letter> or simply a drive letter should be used.
   */
   if (!strcmp (variable, "HOME") && !strcmp (value, "/"))
-    getcwd (value, FILENAME_MAX);
+    if (getcwd (value, FILENAME_MAX) == NULL)
+      *value = '\0';
 #endif
 
   return value;

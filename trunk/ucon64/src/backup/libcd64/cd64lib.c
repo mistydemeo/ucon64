@@ -5,7 +5,7 @@
  * Library routines for CD64 handling
  *
  * (c) 2004 Ryan Underwood
- * Portions (c) 2004 Daniel Horchner (Win32, read/write/seek callbacks)
+ * Portions (c) 2004, 2019 Daniel Horchner (Win32, read/write/seek callbacks)
  *
  * May be distributed under the terms of the GNU Lesser/Library General
  * Public License, or any later version of the same, as published by the Free
@@ -853,7 +853,9 @@ int cd64_download_cart(struct cd64_t *cd64, FILE *outfile, uint32_t length,
 			 * outfile may not be a real FILE *. */
 			if (cd64->read_callback == cd64_read) {
 				cd64->notice_callback("Truncating to %dMbits.", i/BYTES_IN_MBIT);
-				ftruncate(fileno(outfile), curpos+i);
+				if (ftruncate(fileno(outfile), curpos+i)) {
+					cd64->notice_callback2("Truncating failed.");
+				}
 			}
 #endif
 		}

@@ -5,7 +5,7 @@
  * I/O routines for CD64 device
  *
  * (c) 2004 Ryan Underwood
- * Portions (c) 2004 - 2005, 2015 - 2018 Daniel Horchner (OpenBSD, NetBSD,
+ * Portions (c) 2004 - 2005, 2015 - 2019 Daniel Horchner (OpenBSD, NetBSD,
  *                                       FreeBSD, BeOS, Win32, DOS)
  *
  * May be distributed under the terms of the GNU Lesser/Library General Public
@@ -206,7 +206,7 @@ static INLINE int cd64_wait_ieee(struct cd64_t *cd64) {
 	while (i < 10000) i++; /* FIXME is this necessary? */
 	i = 0;
 
-	while((ieee1284_read_status(cd64->ppdev)^S1284_INVERTED) & S1284_BUSY) {
+	while ((ieee1284_read_status(cd64->ppdev)^S1284_INVERTED) & S1284_BUSY) {
 		i++;
 		if (i >= BUSY_THRESHOLD) {
 			/* The PPA is in a weird state.
@@ -334,7 +334,7 @@ static INLINE int cd64_wait_ppdev(struct cd64_t *cd64) {
 
 	if (ioctl(cd64->ppdevfd, PPRSTATUS, &status) != 0) cd64->notice_callback2("PPRSTATUS: %s", strerror(errno));
 
-	while(status & 0x80) {
+	while (status & 0x80) {
 		i++;
 		if (i >= BUSY_THRESHOLD) {
 			/* The PPA is in a weird state.
@@ -444,6 +444,40 @@ int cd64_close_portdev(struct cd64_t *cd64) {
 	return 1;
 }
 
+static INLINE ssize_t read2(struct cd64_t *cd64, void *buf) {
+
+	size_t i = 0;
+
+	do {
+		ssize_t n = read(cd64->portdevfd, buf, 1);
+		if (n >= 0) i += n;
+		else if (errno != EINTR) {
+			cd64->notice_callback2("read: %s\n", strerror(errno));
+			break;
+		}
+	}
+	while (i < 1);
+
+	return i;
+}
+
+static INLINE ssize_t write2(struct cd64_t *cd64, const void *buf) {
+
+	size_t i = 0;
+
+	do {
+		ssize_t n = write(cd64->portdevfd, buf, 1);
+		if (n >= 0) i += n;
+		else if (errno != EINTR) {
+			cd64->notice_callback2("write: %s\n", strerror(errno));
+			break;
+		}
+	}
+	while (i < 1);
+
+	return i;
+}
+
 static INLINE int cd64_wait_portdev(struct cd64_t *cd64) {
 
 	int i = 0;
@@ -454,9 +488,9 @@ static INLINE int cd64_wait_portdev(struct cd64_t *cd64) {
 
 	if (cd64->using_ppa) {
 		lseek(cd64->portdevfd, cd64->port+1, SEEK_SET);
-		read(cd64->portdevfd, &status, 1);
+		read2(cd64, &status);
 
-		while(status & 0x80) {
+		while (status & 0x80) {
 			i++;
 			if (i >= BUSY_THRESHOLD) {
 				/* The PPA is in a weird state.
@@ -464,18 +498,18 @@ static INLINE int cd64_wait_portdev(struct cd64_t *cd64) {
 				dir = 1;
 				status = 0x06 | (dir << 5);
 				lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-				write(cd64->portdevfd, &status, 1);
+				write2(cd64, &status);
 
 				dir = 0;
 				status = 0x04 | (dir << 5);
 				lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-				write(cd64->portdevfd, &status, 1);
+				write2(cd64, &status);
 				status = 0x05 | (dir << 5);
 				lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-				write(cd64->portdevfd, &status, 1);
+				write2(cd64, &status);
 				status = 0x04 | (dir << 5);
 				lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-				write(cd64->portdevfd, &status, 1);
+				write2(cd64, &status);
 
 				reset_tries++;
 				i = 0;
@@ -487,16 +521,16 @@ static INLINE int cd64_wait_portdev(struct cd64_t *cd64) {
 			}
 
 			lseek(cd64->portdevfd, cd64->port+1, SEEK_SET);
-			read(cd64->portdevfd, &status, 1);
+			read2(cd64, &status);
 		}
 	}
 	else { /* Comms link */
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-		read(cd64->portdevfd, &status, 1);
+		read2(cd64, &status);
 		while (status & 1) {
 			/* Do we need to handle a stuck situation here? */
 			lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-			read(cd64->portdevfd, &status, 1);
+			read2(cd64, &status);
 		}
 	}
 
@@ -516,11 +550,11 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 		dir = 1;
 		ctl = 0x06 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-		write(cd64->portdevfd, &ctl, 1);
+		write2(cd64, &ctl);
 		if (delayms) MSLEEP(delayms);
 		if (rd) {
 			lseek(cd64->portdevfd, cd64->port, SEEK_SET);
-			read(cd64->portdevfd, rd, 1);
+			read2(cd64, rd);
 #if DEBUG_LOWLEVEL
 			printf("got %xh", *rd);
 			if (*rd > 0x20) printf(" (%c)", *rd);
@@ -532,11 +566,11 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 		dir = 0;
 		ctl = 0x04 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-		write(cd64->portdevfd, &ctl, 1);
+		write2(cd64, &ctl);
 		if (delayms) MSLEEP(delayms);
 		if (wr) {
 			lseek(cd64->portdevfd, cd64->port, SEEK_SET);
-			write(cd64->portdevfd, wr, 1);
+			write2(cd64, wr);
 #if DEBUG_LOWLEVEL
 			printf("put %xh", *wr);
 			if (*wr > 0x20) printf(" (%c)", *wr);
@@ -546,18 +580,18 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 		if (delayms) MSLEEP(delayms);
 		ctl = 0x05 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-		write(cd64->portdevfd, &ctl, 1);
+		write2(cd64, &ctl);
 		if (delayms) MSLEEP(delayms);
 		ctl = 0x04 | (dir << 5);
 		lseek(cd64->portdevfd, cd64->port+2, SEEK_SET);
-		write(cd64->portdevfd, &ctl, 1);
+		write2(cd64, &ctl);
 	}
 	else { /* Comms link */
 		lseek(cd64->portdevfd, cd64->port, SEEK_SET);
-		write(cd64->portdevfd, wr, 1);
+		write2(cd64, wr);
 		if (!cd64_wait_portdev(cd64)) { return 0; }
 		lseek(cd64->portdevfd, cd64->port, SEEK_SET);
-		read(cd64->portdevfd, rd, 1);
+		read2(cd64, rd);
 	}
 
 	return 1;
@@ -1071,7 +1105,7 @@ static INLINE int cd64_wait_rawio(struct cd64_t *cd64) {
 	if (cd64->using_ppa) {
 		status = inb((uint16_t) (cd64->port+1));
 
-		while(status & 0x80) {
+		while (status & 0x80) {
 			i++;
 			if (i >= BUSY_THRESHOLD) {
 				/* The PPA is in a weird state.

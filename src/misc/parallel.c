@@ -238,11 +238,10 @@ static inline ssize_t
 read2 (int fd, void *buf, size_t nbytes)
 {
   size_t i = 0;
-  ssize_t n;
 
   do
     {
-      n = read (fd, &((unsigned char *) buf)[i], nbytes - i);
+      ssize_t n = read (fd, &((unsigned char *) buf)[i], nbytes - i);
       if (n >= 0)
         i += n;
       else if (errno != EINTR)
@@ -261,11 +260,10 @@ static inline ssize_t
 write2 (int fd, const void *buf, size_t nbytes)
 {
   size_t i = 0;
-  ssize_t n;
 
   do
     {
-      n = write (fd, &((unsigned char *) buf)[i], nbytes - i);
+      ssize_t n = write (fd, &((unsigned char *) buf)[i], nbytes - i);
       if (n >= 0)
         i += n;
       else if (errno != EINTR)

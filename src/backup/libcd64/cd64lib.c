@@ -276,10 +276,10 @@ int cd64_bios_grab(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time-sec)*1000000)+((tb.millitm*1000)-usec);
 #else
 		gettimeofday(&tv, 0);
-		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);
+		*elapsed = ((tv.tv_sec-sec)*1000000)+(tv.tv_usec-usec);
 #endif
 	}
 
@@ -430,10 +430,10 @@ int cd64_bios_send(struct cd64_t *cd64, void *io_id, uint32_t addr,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time-sec)*1000000)+((tb.millitm*1000)-usec);
 #else
 		gettimeofday(&tv, 0);
-		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);
+		*elapsed = ((tv.tv_sec-sec)*1000000)+(tv.tv_usec-usec);
 #endif
 	}
 
@@ -524,10 +524,10 @@ int cd64_ghemor_grab(struct cd64_t *cd64, void *io_id, uint8_t slow, int *elapse
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time-sec)*1000000)+((tb.millitm*1000)-usec);
 #else
 		gettimeofday(&tv, 0);
-		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);
+		*elapsed = ((tv.tv_sec-sec)*1000000)+(tv.tv_usec-usec);
 #endif
 	}
 
@@ -590,10 +590,10 @@ int cd64_ghemor_send(struct cd64_t *cd64, void *io_id, uint32_t length,
 	if (elapsed != NULL) {
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 		ftime(&tb);
-		*elapsed = (((unsigned long int) tb.time - sec)*1000000) + ((tb.millitm*1000) - usec);
+		*elapsed = (((unsigned long int) tb.time-sec)*1000000)+((tb.millitm*1000)-usec);
 #else
 		gettimeofday(&tv, 0);
-		*elapsed = ((tv.tv_sec - sec)*1000000) + (tv.tv_usec - usec);
+		*elapsed = ((tv.tv_sec-sec)*1000000)+(tv.tv_usec-usec);
 #endif
 	}
 
@@ -811,7 +811,7 @@ int cd64_download_cart(struct cd64_t *cd64, FILE *outfile, uint32_t length,
 
 			curpos = cd64->tell_callback(outfile);
 
-			while(i+j < length) {
+			while (i+j < length) {
 				cd64->read_callback(outfile, &buf, 4);
 
 				/* To elaborate on what we are checking here:

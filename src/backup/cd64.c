@@ -1,7 +1,7 @@
 /*
 cd64.c - CD64 support for uCON64
 
-Copyright (c) 2004, 2015, 2017 - 2018 dbjh
+Copyright (c) 2004, 2015, 2017 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -189,7 +189,7 @@ cd64_port_print_info (void)
   printf ("Using parallel port device: %s\n", ucon64.parport_dev);
 #elif   defined AMIGA
   printf ("Using parallel port device: %s, port %u\n", ucon64.parport_dev, ucon64.parport);
-#elif   defined PARALLEL
+#elif   defined USE_PARALLEL
   printf ("Using I/O port base: 0x%x; I/O port Extended Control register: 0x%x\n",
           ucon64.parport, ucon64.parport + ucon64.ecr_offset);
 #else

@@ -108,8 +108,8 @@ endif
 ifeq ($(shell if test -r /usr/include/linux/ppdev.h; then echo 1; else echo 0; fi),1)
 PPDEV=1
 endif
-PORTDEV=1
-RAWIO=1
+#PORTDEV=1
+#RAWIO=1
 endif
 
 endif # DEFAULT_BUILD = 1

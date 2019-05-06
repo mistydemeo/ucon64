@@ -4,6 +4,7 @@ DLOPEN=1
 USE_DISCMAGE=1
 #USE_USB=1
 USE_LIBCD64=1
+USE_LIBCD64_RAWIO=1
 #WINXP_TARGETING=1
 
 TARGETS=
@@ -158,6 +159,9 @@ backup/libcd64/cd64.lib:
 !endif
 !ifdef LDFLAGS_SET
 	@set LDFLAGS=%%LDFLAGS0%%
+!endif
+!ifdef USE_LIBCD64_RAWIO
+	@set RAWIO=1
 !endif
 	$(MAKE) /NOLOGO /f Makefile.vc6
 	cd ..\..

@@ -5366,7 +5366,7 @@ snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer, size_t rom_siz
                     bs_dump ||
                     snes_header.rom_type == 0xf9 || // Far East of Eden Zero (J)
                     internal_rom_size <= rom_size ?
-                      rom_size : rom_size - (diff_size % (6 * MBIT) ?
+                      rom_size : rom_size - ((diff_size % (6 * MBIT)) ?
                                                diff_size : diff_size / 3);
   unsigned short int sum = 0;
 

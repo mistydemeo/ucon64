@@ -146,7 +146,7 @@ int cd64_open_ieee1284(struct cd64_t *cd64) {
 	if (cd64->ppdev || !cd64->using_ppa) return 0;
 
 	if (ieee1284_find_ports(&pplist, 0) < 0) {
-		cd64->notice_callback2("could not get port list\n");
+		cd64->notice_callback2("Could not get port list.");
 		return 0;
 	}
 
@@ -165,7 +165,7 @@ int cd64_open_ieee1284(struct cd64_t *cd64) {
 
 	if (cd64->ppdev) {
 		if (ieee1284_open(cd64->ppdev, ppflags, &ppcaps) < 0) {
-			cd64->notice_callback2("failed opening ieee1284 port %d\n", cd64->port);
+			cd64->notice_callback2("Failed opening ieee1284 port %d.", cd64->port);
 			cd64->ppdev = NULL;
 		}
 		else {
@@ -240,7 +240,7 @@ int cd64_xfer_ieee1284(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delaym
 #if DEBUG_LOWLEVEL
 		printf("got %xh", *rd);
 		if (*rd > 0x20) printf(" (%c)", *rd);
-		printf("\n");
+		fputc('\n', stdout);
 #endif
 	}
 
@@ -254,7 +254,7 @@ int cd64_xfer_ieee1284(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delaym
 #if DEBUG_LOWLEVEL
 		printf("put %xh", *wr);
 		if (*wr > 0x20) printf(" (%c)", *wr);
-		printf("\n");
+		fputc('\n', stdout);
 #endif
 	}
 	if (delayms) MSLEEP(delayms);
@@ -384,7 +384,7 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 #if DEBUG_LOWLEVEL
 		printf("got %xh", *rd);
 		if (*rd > 0x20) printf(" (%c)", *rd);
-		printf("\n");
+		fputc('\n', stdout);
 #endif
 	}
 
@@ -400,7 +400,7 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 #if DEBUG_LOWLEVEL
 		printf("put %xh", *wr);
 		if (*wr > 0x20) printf(" (%c)", *wr);
-		printf("\n");
+		fputc('\n', stdout);
 #endif
 	}
 	if (delayms) MSLEEP(delayms);
@@ -452,7 +452,7 @@ static INLINE ssize_t read2(struct cd64_t *cd64, void *buf) {
 		ssize_t n = read(cd64->portdevfd, buf, 1);
 		if (n >= 0) i += n;
 		else if (errno != EINTR) {
-			cd64->notice_callback2("read: %s\n", strerror(errno));
+			cd64->notice_callback2("read: %s", strerror(errno));
 			break;
 		}
 	}
@@ -469,7 +469,7 @@ static INLINE ssize_t write2(struct cd64_t *cd64, const void *buf) {
 		ssize_t n = write(cd64->portdevfd, buf, 1);
 		if (n >= 0) i += n;
 		else if (errno != EINTR) {
-			cd64->notice_callback2("write: %s\n", strerror(errno));
+			cd64->notice_callback2("write: %s", strerror(errno));
 			break;
 		}
 	}
@@ -558,7 +558,7 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #if DEBUG_LOWLEVEL
 			printf("got %xh", *rd);
 			if (*rd > 0x20) printf(" (%c)", *rd);
-			printf("\n");
+			fputc('\n', stdout);
 #endif
 		}
 
@@ -574,7 +574,7 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 #if DEBUG_LOWLEVEL
 			printf("put %xh", *wr);
 			if (*wr > 0x20) printf(" (%c)", *wr);
-			printf("\n");
+			fputc('\n', stdout);
 #endif
 		}
 		if (delayms) MSLEEP(delayms);
@@ -739,27 +739,35 @@ static void dlportio_output_byte(uint8_t byte, uint16_t port) {
 	DlPortWritePortUchar(port, byte);
 }
 
-#define NODRIVER_MSG "ERROR: No (working) I/O port driver\n"
+#define NODRIVER_MSG "No (working) I/O port driver"
 
-#ifdef __CYGWIN__
+#if defined __CYGWIN__ && defined __i386__      /* 32-bit */
 static EXCEPTION_DISPOSITION NTAPI new_exception_handler(PEXCEPTION_RECORD exception_record,
 		void *establisher_frame, PCONTEXT context_record, void *dispatcher_context) {
 
 	(void) establisher_frame;
-	(void) context_record;
 	(void) dispatcher_context;
-	if (exception_record->ExceptionCode == EXCEPTION_PRIV_INSTRUCTION) {
-		fputs(NODRIVER_MSG, stderr);
+	if (exception_record->ExceptionCode == EXCEPTION_PRIV_INSTRUCTION &&
+			*(uint8_t *) context_record->Eip == 0xec) { /* in al, dx */
+		io_driver_found = -1;
+		context_record->Eip++;
+#if 1 /* EXCEPTION_CONTINUE_EXECUTION does not work with Cygwin... */
+		fputs("ERROR: "NODRIVER_MSG"\n", stderr);
 		exit(1);
+#else
+		return EXCEPTION_CONTINUE_EXECUTION; /* continue at context_record->Eip */
+#endif
 	}
 	return EXCEPTION_CONTINUE_SEARCH;
 }
-#elif defined _WIN32
+#elif defined _WIN32 && (defined __i386__ || defined _M_IX86) /* 32-bit */
 static LONG new_exception_filter(LPEXCEPTION_POINTERS exception_pointers) {
 
-	if (exception_pointers->ExceptionRecord->ExceptionCode == EXCEPTION_PRIV_INSTRUCTION) {
-		fputs(NODRIVER_MSG, stderr);
-		exit(1);
+	if (exception_pointers->ExceptionRecord->ExceptionCode == EXCEPTION_PRIV_INSTRUCTION &&
+			*(uint8_t *) exception_pointers->ContextRecord->Eip == 0xec) { /* in al, dx */
+		io_driver_found = -1;
+		exception_pointers->ContextRecord->Eip++;
+		return EXCEPTION_CONTINUE_EXECUTION; /* continue at ContextRecord->Eip */
 	}
 	return EXCEPTION_CONTINUE_SEARCH;
 }
@@ -781,7 +789,9 @@ static INLINE uint8_t inb(uint16_t port) {
 	if (io_driver_found) return input_byte(port);
 	else {
 #ifdef _MSC_VER
+#ifdef _M_IX86
 		return (unsigned char) _inp(port);
+#endif
 #else
 		unsigned char byte;
 		__asm__ __volatile__
@@ -807,7 +817,9 @@ static INLINE void outb(uint8_t byte, uint16_t port) {
 	if (io_driver_found) output_byte(byte, port);
 	else {
 #ifdef _MSC_VER
+#ifdef _M_IX86
 		_outp(port, byte);
+#endif
 #else
 		__asm__ __volatile__
 		("outb %1, %0"
@@ -893,7 +905,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		io_portfd = 0;
 		cd64->notice_callback2("open: %s", strerror(errno));
 		cd64->notice_callback2("Could not open I/O port device (no driver)");
-		exit(1);
+		return 0;
 	}
 #elif defined _WIN32 || defined __CYGWIN__
 #ifdef _MSC_VER
@@ -990,6 +1002,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		 * currently have. Cygwin does something stupid which breaks
 		 * SetUnhandledExceptionFilter()... */
 #ifdef __CYGWIN__                               /* Cygwin */
+#ifdef __i386__                                 /* 32-bit */
 		EXCEPTION_REGISTRATION exception_registration;
 		exception_registration.handler = new_exception_handler;
 
@@ -1000,19 +1013,30 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		  : "b" (&exception_registration)
 		);
 		input_byte(0x378 + 0x402);                  /* 0x378 + 0x402 is okay */
-		/* if we get here accessing the I/O port did not cause an exception */
 		__asm__ __volatile__
 		("movl %0, %%fs:0"
 		  :
 		  : "r" (exception_registration.prev)
 		);
+#else                                           /* 64-bit */
+		if (!io_driver_found) io_driver_found = -1;
+#endif /* __i386__ */
 #elif defined _WIN32                            /* MinGW & Visual C++ */
+#if defined __i386__ || defined _M_IX86         /* 32-bit */
 		LPTOP_LEVEL_EXCEPTION_FILTER org_exception_filter =
 			SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) new_exception_filter);
 		input_byte(0x378 + 0x402);                  /* 0x378 + 0x402 is okay */
-		/* if we get here accessing the I/O port did not cause an exception */
 		SetUnhandledExceptionFilter(org_exception_filter);
+#else                                           /* 64-bit */
+		if (!io_driver_found) io_driver_found = -1;
+#endif /* __i386__ || _M_IX86 */
 #endif
+		/* input_byte() can succeed without triggering an exception with giveio64. */
+		if (io_driver_found == -1) {
+			io_driver_found = 0;
+			cd64->notice_callback2(NODRIVER_MSG);
+			return 0;
+		}
 	}
 #ifdef _MSC_VER
 #undef  access
@@ -1164,7 +1188,7 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 #if DEBUG_LOWLEVEL
 			printf("got %xh", *rd);
 			if (*rd > 0x20) printf(" (%c)", *rd);
-			printf("\n");
+			fputc('\n', stdout);
 #endif
 		}
 
@@ -1178,7 +1202,7 @@ int cd64_xfer_rawio(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 #if DEBUG_LOWLEVEL
 			printf("put %xh", *wr);
 			if (*wr > 0x20) printf(" (%c)", *wr);
-			printf("\n");
+			fputc('\n', stdout);
 #endif
 		}
 		if (delayms) MSLEEP(delayms);

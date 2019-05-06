@@ -627,13 +627,14 @@ INSTALL_SCRIPT
 INSTALL_PROGRAM
 RANLIB
 LIBOBJS
-DEFINE_USB_MAKE
-DEFINE_ZLIB_MAKE
-LIBIOPL_BSD_MAKE
-DEFINE_LIBCD64_MAKE
-DEFINE_DISCMAGE_MAKE
-DEFINE_DLOPEN_MAKE
-DEFINE_PARALLEL_MAKE
+USE_USB
+USE_ZLIB
+LIBIOPL_BSD
+USE_LIBCD64_RAWIO
+USE_LIBCD64
+USE_DISCMAGE
+DLOPEN
+USE_PARALLEL
 EGREP
 GREP
 CPP
@@ -3284,7 +3285,7 @@ if test $disable_parallel = no; then
 
 $as_echo "#define USE_PARALLEL 1" >>confdefs.h
 
-  DEFINE_PARALLEL_MAKE="USE_PARALLEL=1"
+  USE_PARALLEL=1
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $disable_parallel" >&5
 $as_echo "$disable_parallel" >&6; }
@@ -3369,7 +3370,7 @@ if test $disable_dload = no; then
 
 $as_echo "#define DLOPEN 1" >>confdefs.h
 
-  DEFINE_DLOPEN_MAKE="DLOPEN=1"
+  DLOPEN=1
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $disable_dload" >&5
 $as_echo "$disable_dload" >&6; }
@@ -3411,7 +3412,7 @@ if test $without_libdiscmage = no; then
 
 $as_echo "#define USE_DISCMAGE 1" >>confdefs.h
 
-  DEFINE_DISCMAGE_MAKE="USE_DISCMAGE=1"
+  USE_DISCMAGE=1
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $without_libdiscmage" >&5
 $as_echo "$without_libdiscmage" >&6; }
@@ -3454,22 +3455,28 @@ if test $with_libcd64 = yes; then
 
 $as_echo "#define USE_LIBCD64 1" >>confdefs.h
 
-  DEFINE_LIBCD64_MAKE="USE_LIBCD64=1"
+  USE_LIBCD64=1
+  case "$target_cpu" in
+    i*86 | x86_64)
+      USE_LIBCD64_RAWIO=1
+      ;;
+  esac
 elif test $disable_parallel = no; then
         case "$target" in
     i*86-*-openbsd* | i*86-*-netbsd*)
-      LIBIOPL_BSD_MAKE="-li386"
+      LIBIOPL_BSD="-li386"
       ;;
     x86_64-*-openbsd*)
-      LIBIOPL_BSD_MAKE="-lamd64"
+      LIBIOPL_BSD="-lamd64"
       ;;
     x86_64-*-netbsd*)
-      LIBIOPL_BSD_MAKE="-lx86_64"
+      LIBIOPL_BSD="-lx86_64"
       ;;
   esac
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_libcd64" >&5
 $as_echo "$with_libcd64" >&6; }
+
 
 
 
@@ -3509,7 +3516,7 @@ if test $without_zlib = no; then
 
 $as_echo "#define USE_ZLIB 1" >>confdefs.h
 
-  DEFINE_ZLIB_MAKE="USE_ZLIB=1"
+  USE_ZLIB=1
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $without_zlib" >&5
 $as_echo "$without_zlib" >&6; }
@@ -3574,7 +3581,7 @@ if test $with_libusb = yes; then
 
 $as_echo "#define USE_USB 1" >>confdefs.h
 
-  DEFINE_USB_MAKE="USE_USB=1"
+  USE_USB=1
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_libusb" >&5
 $as_echo "$with_libusb" >&6; }

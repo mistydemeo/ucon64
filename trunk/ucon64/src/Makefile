@@ -68,14 +68,8 @@ endif
 
 ifdef DLOPEN
 
-ifneq ($(OSTYPE),beos)
-ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
-ifeq ($(findstring openbsd,$(OSTYPE)),) # false if OSTYPE contains "openbsd"
-ifeq ($(findstring netbsd,$(OSTYPE)),)  # false if OSTYPE contains "netbsd"
+ifeq ($(findstring linux,$(OSTYPE)),linux) # for example "linux-gnueabihf"
 LDFLAGS+=-ldl
-endif
-endif
-endif
 endif
 
 else                                    # DLOPEN
@@ -250,20 +244,29 @@ endif                                   # GCC_WIN
 endif                                   # USE_DISCMAGE
 
 
+ifdef USE_LIBCD64_RAWIO
+DEFINE_RAWIO=RAWIO=1
+else
+DEFINE_RAWIO=
+endif
+
 ifdef USE_LIBCD64
 #.PHONY: backup/libcd64/libcd64.a  Do not force linking an executable.
 backup/libcd64/libcd64.a:
 ifeq ($(GCC_WIN),1)
-	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
+	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(DEFINE_RAWIO) $(MAKE)
 else
 ifdef DJGPP
 	cd backup\libcd64
 	set CFLAGS=$(CFLAGS0)
 	set LDFLAGS=$(LDFLAGS0)
+ifdef USE_LIBCD64_RAWIO
+	set $(DEFINE_RAWIO)
+endif
 	$(MAKE)
 	cd ..\..
 else
-	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
+	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(DEFINE_RAWIO) $(MAKE)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_LIBCD64

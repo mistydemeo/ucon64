@@ -40,6 +40,16 @@ typedef signed __int64 int64_t;
 #include <stdio.h> /* FILE, FILENAME_MAX */
 #include <ultra64/rom.h>
 
+// GCC or Visual C++ and x86
+#define X86_PLATFORM ((defined __i386__ && __i386__) || \
+			(defined __x86_64__ && __x86_64__) || \
+			(defined _M_IX86 && _M_IX86) || \
+			(defined _M_X64 && _M_X64))
+#if !X86_PLATFORM && (defined _WIN32 || defined __BEOS__ || \
+	defined __FreeBSD__ || defined __OpenBSD__ || defined __NetBSD__)
+#error libcd64 works only for x86 (32-bit and 64-bit) for this OS
+#endif
+
 typedef enum {
 	CD64BIOS = 0,
 	GHEMOR = 1,

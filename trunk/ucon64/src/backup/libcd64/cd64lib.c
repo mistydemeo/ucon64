@@ -630,7 +630,7 @@ int cd64_upload_bootemu(struct cd64_t *cd64, FILE *infile, uint32_t length, int 
 	if (cd64->protocol == CD64BIOS) {
 
 		if (length == 0) {
-			cd64->notice_callback2("CD64 BIOS needs a file length.\n");
+			cd64->notice_callback2("CD64 BIOS needs a file length.");
 			return 0;
 		}
 

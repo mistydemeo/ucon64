@@ -1,10 +1,17 @@
 .PHONY: all clean distclean install uninstall
 
+ifndef DJGPP
+# uname is not available by default under DOS
+OSTYPE=$(shell uname -s)
+else
+OSTYPE=DJGPP
+endif
+
 CC=gcc
 CFLAGS0:=$(CFLAGS)
 CFLAGS+=-I. -Wall -W -O3 -fsigned-char
 LDFLAGS0:=$(LDFLAGS)
-ifeq ($(findstring darwin,$(OSTYPE)),) # false if OSTYPE contains "darwin"
+ifeq ($(findstring Darwin,$(OSTYPE)),) # false if OSTYPE contains "Darwin"
 # On Mac OS X using -s gives the following warning:
 # ld: warning: option -s is obsolete and being ignored
 LDFLAGS+=-s
@@ -24,12 +31,10 @@ endif
 # both GCC (and friends) ports.
 
 GCC_WIN=0
-# test cygwin before DJGPP; OSTYPE is not exported
-ifeq ($(OSTYPE),cygwin)
+ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
 GCC_WIN=1
 endif
-# test msys before DJGPP; OSTYPE is not exported; MSYS, MinGW's POSIX build environment
-ifeq ($(OSTYPE),msys)
+ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
 GCC_WIN=1
 endif
 
@@ -43,7 +48,7 @@ endif
 endif
 
 else
-ifdef DJGPP
+ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
 
 ifdef USE_DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dxe
@@ -59,7 +64,7 @@ LDFLAGS+=$(LIBIOPL_BSD)
 endif
 
 ifdef USE_DISCMAGE
-ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+ifeq ($(findstring Darwin,$(OSTYPE)),Darwin)
 FULLLIBNAME_DM=$(LIBNAME_DM).dylib
 else
 FULLLIBNAME_DM=$(LIBNAME_DM).so
@@ -68,7 +73,7 @@ endif
 
 ifdef DLOPEN
 
-ifeq ($(findstring linux,$(OSTYPE)),linux) # for example "linux-gnueabihf"
+ifeq ($(findstring Linux,$(OSTYPE)),Linux)
 LDFLAGS+=-ldl
 endif
 
@@ -120,7 +125,7 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/tototek.o backup/ufo.o backup/ufosd.o backup/yoko.o \
         backup/z64.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o
-ifneq ($(OSTYPE),cygwin)
+ifeq ($(findstring CYGWIN,$(OSTYPE)),)
 OBJECTS+=misc/getopt.o
 endif
 ifdef USE_LIBCD64
@@ -141,7 +146,7 @@ OBJECTS+=misc/dlopen.o
 ifndef USE_ZLIB
 ifeq ($(GCC_WIN),1)
 else
-ifdef DJGPP                             # DJGPP code in dlopen needs map code
+ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP) # DJGPP code in dlopen needs map code
 OBJECTS+=misc/map.o
 endif                                   # DJGPP
 endif                                   # GCC_WIN
@@ -157,7 +162,7 @@ TARGET=ucon64
 ifeq ($(GCC_WIN),1)
 TARGET:=$(addsuffix .exe,$(TARGET))     # adding .exe avoids "problems" with Cygwin/MinGW
 else
-ifdef DJGPP                             # OSTYPE is not defined by default on DOS
+ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
 TARGET:=$(addsuffix .exe,$(TARGET))
 endif                                   # DJGPP
 endif                                   # GCC_WIN
@@ -174,7 +179,7 @@ clean:
 ifeq ($(GCC_WIN),1)
 	$(CLEAN_CMD)
 else
-ifdef DJGPP
+ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
 	del *.o
 	del patch\*.o
 	del console\*.o
@@ -201,7 +206,7 @@ distclean: clean
 ifeq ($(GCC_WIN),1)
 	$(DISTCLEAN_CMD)
 else
-ifdef DJGPP
+ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
 	del config.mak
 	del config.log
 	del config.status
@@ -231,7 +236,7 @@ libdiscmage/$(FULLLIBNAME_DM):
 ifeq ($(GCC_WIN),1)
 	cd libdiscmage && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 else
-ifdef DJGPP
+ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
 	cd libdiscmage
 	set CFLAGS=$(CFLAGS0)
 	set LDFLAGS=$(LDFLAGS0)
@@ -256,7 +261,7 @@ backup/libcd64/libcd64.a:
 ifeq ($(GCC_WIN),1)
 	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(DEFINE_RAWIO) $(MAKE)
 else
-ifdef DJGPP
+ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
 	cd backup\libcd64
 	set CFLAGS=$(CFLAGS0)
 	set LDFLAGS=$(LDFLAGS0)
@@ -281,40 +286,26 @@ endif                                   # USE_LIBCD64
 
 
 install:
-ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-else
-ifdef DJGPP
-else
-ifeq ($(OSTYPE),beos)
+ifeq ($(findstring DJGPP,$(OSTYPE)),)
+ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
 	./install_beos.sh
 else
 	./install.sh
-endif                                   # beos
+endif                                   # BeOS
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
 ifndef DLOPEN
 	cd libdiscmage && $(MAKE) install
 endif
 
 
 uninstall:
-ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-else
-ifdef DJGPP
-else
-ifeq ($(OSTYPE),beos)
+ifeq ($(findstring DJGPP,$(OSTYPE)),)
+ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
 	rm -f $(HOME)/config/bin/$(TARGET)
 else
 	rm -f /usr/local/bin/$(TARGET)
-endif                                   # beos
+endif                                   # BeOS
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
 ifndef DLOPEN
 	cd libdiscmage && $(MAKE) uninstall
 endif

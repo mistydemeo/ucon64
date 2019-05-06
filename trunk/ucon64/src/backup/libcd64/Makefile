@@ -15,15 +15,14 @@ OSTYPE=DJGPP
 endif
 
 GCC_WIN=0
-ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
-GCC_WIN=1
-endif
 ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
 GCC_WIN=1
 endif
+ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
+GCC_WIN=1
+endif
 
-ifdef DJGPP
-else
+ifeq ($(findstring DJGPP,$(OSTYPE)),)
 ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
 LDFLAGS+=-nostart
 else # UNIX or Win GCC

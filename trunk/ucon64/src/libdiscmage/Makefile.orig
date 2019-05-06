@@ -1,5 +1,12 @@
 .PHONY: all clean install
 
+ifndef DJGPP
+# uname is not available by default under DOS
+OSTYPE=$(shell uname -s)
+else
+OSTYPE=DJGPP
+endif
+
 DLOPEN=1
 #USE_ZLIB=1
 
@@ -20,12 +27,12 @@ ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 
-ifeq ($(findstring darwin,$(OSTYPE)),)  # for example "darwin7.0"
+ifeq ($(findstring Darwin,$(OSTYPE)),)  # false if OSTYPE contains "Darwin"
 # On Mac OS X using -s gives the following warning:
 # /usr/bin/libtool: -static not specified, -s invalid
 LDFLAGS+=-s
 endif
-ifneq ($(OSTYPE),beos)
+ifeq ($(findstring BeOS,$(OSTYPE)),)
 LDFLAGS+=-lm
 endif
 
@@ -38,10 +45,10 @@ endif
 # both GCC (and friends) ports.
 
 GCC_WIN=0
-ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
+ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
 GCC_WIN=1
 endif
-ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
+ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
 GCC_WIN=1
 endif
 
@@ -62,7 +69,7 @@ endif                                   # GCC_WIN
 endif                                   # USE_ZLIB
 
 
-ifeq ($(OSTYPE),cygwin)                 # test cygwin before DJGPP
+ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
 
 FULLLIBNAME=$(LIBNAME).dll
 GCCA_DIR=/lib/gcc/i686-pc-cygwin/6.4.0/
@@ -77,12 +84,12 @@ LDFLAGS+=-L$(GCCA_DIR) -lgcc -lcygwin -lkernel32 --dll -e $(ENTRY)
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
 
 else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
 
 FULLLIBNAME=$(LIBNAME).dll
 GCCA_DIR=/mingw/lib/gcc/mingw32/6.3.0/
 LDFLAGS+=-L$(GCCA_DIR) -lgcc -L/mingw/lib -lkernel32 -lmsvcrt --dll -e _DllMain@12
-# MSYS problem: Specifying the library directory is necessary when compiling on
+# Msys problem: Specifying the library directory is necessary when compiling on
 # a different filesystem than the filesystem that MinGW is installed on.
 
 else
@@ -97,7 +104,7 @@ else                                    # UNIX, BeOS or Mac OS X (Darwin)
 
 CFLAGS+=-fPIC
 
-ifeq ($(findstring darwin,$(OSTYPE)),darwin)
+ifeq ($(findstring Darwin,$(OSTYPE)),Darwin)
 FULLLIBNAME=$(LIBNAME).dylib
 else
 FULLLIBNAME=$(LIBNAME).so
@@ -107,19 +114,19 @@ ifndef DLOPEN                           # GNU specific: "simply expanded variabl
 FULLLIBNAME:=$(addprefix lib,$(FULLLIBNAME))
 endif
 
-ifeq ($(OSTYPE),beos)
+ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
 LDFLAGS+=-nostart
 else
-ifeq ($(findstring darwin,$(OSTYPE)),darwin)
+ifeq ($(findstring Darwin,$(OSTYPE)),Darwin)
 LDFLAGS+=-dynamiclib
 else
 LDFLAGS+=-shared
-endif                                   # darwin
-endif                                   # beos
+endif                                   # Darwin
+endif                                   # BeOS
 
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # MINGW
+endif                                   # CYGWIN
 
 
 all: $(FULLLIBNAME)

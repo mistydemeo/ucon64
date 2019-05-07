@@ -11,7 +11,7 @@ echo "$DESTDIR does not exist, installing to /usr/local/bin"
 fi
 DESTDIR=/usr/local/bin
 if [ ! -e "$DESTDIR" ]; then
-echo "/usr/local/bin does not exist, trying to create it"
+echo "$DESTDIR does not exist, trying to create it"
 mkdir -p "$DESTDIR"
 fi
 fi
@@ -38,9 +38,7 @@ fi
 
 if [ ${OSTYPE:0:6} == darwin ]; then
 LIBSUFFIX=.dylib
-elif [ $OSTYPE == cygwin ]; then
-LIBSUFFIX=.dll
-elif [ $OSTYPE == msys ]; then
+elif [ $OSTYPE == cygwin -o $OSTYPE == msys ]; then
 LIBSUFFIX=.dll
 else
 LIBSUFFIX=.so

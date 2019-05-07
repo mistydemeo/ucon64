@@ -11,7 +11,7 @@ CC=gcc
 CFLAGS0:=$(CFLAGS)
 CFLAGS+=-I. -Wall -W -O3 -fsigned-char
 LDFLAGS0:=$(LDFLAGS)
-ifeq ($(findstring Darwin,$(OSTYPE)),) # false if OSTYPE contains "Darwin"
+ifneq ($(OSTYPE),Darwin)
 # On Mac OS X using -s gives the following warning:
 # ld: warning: option -s is obsolete and being ignored
 LDFLAGS+=-s

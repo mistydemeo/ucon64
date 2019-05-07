@@ -22,15 +22,15 @@ ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
 GCC_WIN=1
 endif
 
-ifeq ($(findstring DJGPP,$(OSTYPE)),)
-ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
+ifneq ($(OSTYPE),DJGPP)
+ifeq ($(OSTYPE),BeOS)
 LDFLAGS+=-nostart
 else # UNIX or Win GCC
 LDFLAGS+=-shared
 endif
 endif
 
-ifeq ($(findstring DJGPP,$(OSTYPE)),)
+ifneq ($(OSTYPE),DJGPP)
 ifneq ($(GCC_WIN),1)
 CFLAGS+=-fPIC
 else
@@ -63,7 +63,7 @@ endif
 ifeq ($(DEFAULT_BUILD),1)
 # Put default build options for each OS here
 
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 RAWIO=1
 endif
 
@@ -75,11 +75,11 @@ ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
 RAWIO=1
 endif
 
-ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
+ifeq ($(OSTYPE),BeOS)
 RAWIO=1
 endif
 
-ifeq ($(findstring OpenBSD,$(OSTYPE)),OpenBSD)
+ifeq ($(OSTYPE),OpenBSD)
 # i386_iopl() is located in libi386.a (note the .a)
 #LIBS+=/usr/lib/libi386.a
 #LDFLAGS+=-li386
@@ -88,7 +88,7 @@ LDFLAGS+=-lamd64
 RAWIO=1
 endif
 
-ifeq ($(findstring NetBSD,$(OSTYPE)),NetBSD)
+ifeq ($(OSTYPE),NetBSD)
 #LIBS+=/usr/lib/libi386.a
 #LDFLAGS+=-li386
 LIBS+=/usr/lib/libx86_64.a
@@ -96,11 +96,11 @@ LDFLAGS+=-lx86_64
 RAWIO=1
 endif
 
-ifeq ($(findstring FreeBSD,$(OSTYPE)),FreeBSD)
+ifeq ($(OSTYPE),FreeBSD)
 RAWIO=1
 endif
 
-ifeq ($(findstring Linux,$(OSTYPE)),Linux)
+ifeq ($(OSTYPE),Linux)
 ifeq ($(shell if test -r /usr/include/ieee1284.h; then echo 1; else echo 0; fi),1)
 LIBIEEE1284=1
 endif
@@ -135,7 +135,7 @@ endif
 
 default: all
 
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 all: libcd64.a
 else
 ifeq ($(GCC_WIN),1)

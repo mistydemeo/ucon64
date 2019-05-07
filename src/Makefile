@@ -26,10 +26,6 @@ ifdef USE_DISCMAGE
 LIBNAME_DM=discmage
 endif
 
-# The test for Cygwin should be done before the test for DJGPP, because the
-# environment variable DJGPP can be set in Bash for people who have installed
-# both GCC (and friends) ports.
-
 GCC_WIN=0
 ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
 GCC_WIN=1
@@ -48,7 +44,7 @@ endif
 endif
 
 else
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 
 ifdef USE_DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dxe
@@ -64,7 +60,7 @@ LDFLAGS+=$(LIBIOPL_BSD)
 endif
 
 ifdef USE_DISCMAGE
-ifeq ($(findstring Darwin,$(OSTYPE)),Darwin)
+ifeq ($(OSTYPE),Darwin)
 FULLLIBNAME_DM=$(LIBNAME_DM).dylib
 else
 FULLLIBNAME_DM=$(LIBNAME_DM).so
@@ -73,7 +69,7 @@ endif
 
 ifdef DLOPEN
 
-ifeq ($(findstring Linux,$(OSTYPE)),Linux)
+ifeq ($(OSTYPE),Linux)
 LDFLAGS+=-ldl
 endif
 
@@ -146,7 +142,7 @@ OBJECTS+=misc/dlopen.o
 ifndef USE_ZLIB
 ifeq ($(GCC_WIN),1)
 else
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP) # DJGPP code in dlopen needs map code
+ifeq ($(OSTYPE),DJGPP)                  # DJGPP code in dlopen needs map code
 OBJECTS+=misc/map.o
 endif                                   # DJGPP
 endif                                   # GCC_WIN
@@ -162,7 +158,7 @@ TARGET=ucon64
 ifeq ($(GCC_WIN),1)
 TARGET:=$(addsuffix .exe,$(TARGET))     # adding .exe avoids "problems" with Cygwin/MinGW
 else
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 TARGET:=$(addsuffix .exe,$(TARGET))
 endif                                   # DJGPP
 endif                                   # GCC_WIN
@@ -179,7 +175,7 @@ clean:
 ifeq ($(GCC_WIN),1)
 	$(CLEAN_CMD)
 else
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 	del *.o
 	del patch\*.o
 	del console\*.o
@@ -206,7 +202,7 @@ distclean: clean
 ifeq ($(GCC_WIN),1)
 	$(DISTCLEAN_CMD)
 else
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 	del config.mak
 	del config.log
 	del config.status
@@ -236,7 +232,7 @@ libdiscmage/$(FULLLIBNAME_DM):
 ifeq ($(GCC_WIN),1)
 	cd libdiscmage && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(MAKE)
 else
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 	cd libdiscmage
 	set CFLAGS=$(CFLAGS0)
 	set LDFLAGS=$(LDFLAGS0)
@@ -261,7 +257,7 @@ backup/libcd64/libcd64.a:
 ifeq ($(GCC_WIN),1)
 	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(DEFINE_RAWIO) $(MAKE)
 else
-ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
+ifeq ($(OSTYPE),DJGPP)
 	cd backup\libcd64
 	set CFLAGS=$(CFLAGS0)
 	set LDFLAGS=$(LDFLAGS0)
@@ -286,8 +282,8 @@ endif                                   # USE_LIBCD64
 
 
 install:
-ifeq ($(findstring DJGPP,$(OSTYPE)),)
-ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
+ifneq ($(OSTYPE),DJGPP)
+ifeq ($(OSTYPE),BeOS)
 	./install_beos.sh
 else
 	./install.sh
@@ -299,8 +295,8 @@ endif
 
 
 uninstall:
-ifeq ($(findstring DJGPP,$(OSTYPE)),)
-ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
+ifneq ($(OSTYPE),DJGPP)
+ifeq ($(OSTYPE),BeOS)
 	rm -f $(HOME)/config/bin/$(TARGET)
 else
 	rm -f /usr/local/bin/$(TARGET)

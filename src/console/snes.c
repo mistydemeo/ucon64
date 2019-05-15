@@ -2294,14 +2294,7 @@ snes_ic2 (st_ucon64_nfo_t *rominfo)
   reset_header (&header);
 
   header.size_low = (unsigned char) (8 * MBIT / 8192); // header.size_high == 0
-  header.emulation = 0x70;
-  // bit 3 & 2 are already OK for 32 kB SRAM size
-  if (snes_sram_size == 8 * 1024)
-    header.emulation |= 0x04;
-  else if (snes_sram_size == 2 * 1024)
-    header.emulation |= 0x08;
-  else if (snes_sram_size == 0)
-    header.emulation |= 0x0c;
+  header.emulation = 0x40;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 4;
@@ -2318,7 +2311,7 @@ snes_ic2 (st_ucon64_nfo_t *rominfo)
   ucon64_fwrite (&header, 0, SWC_HEADER_LEN, dest_name[0], "wb");
 
   header.size_low = (unsigned char) (size / (8192 * 2)); // header.size_high == 0
-  header.emulation &= ~0x40;                    // last file => clear bit 6
+  header.emulation = 0;                         // last file => clear bit 6
 
   ucon64_fwrite (&header, 0, SWC_HEADER_LEN, dest_name[1], "wb");
 
@@ -3890,13 +3883,14 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
   else
     {
       printf ("Backup unit header info (%s)\n\n",
-              (copier_type == SWC || copier_type == IC2) ? "SWC" :
+              copier_type == SWC ? "SWC" :
+              copier_type == IC2 ? "IC2" :
               copier_type == FIG ? "FIG" :
               copier_type == GD3 ? "GD3" :
               copier_type == UFO ? "UFO" :
               copier_type == UFOSD ? "UFOSD" :
               "unknown header type, but interpreted as SWC");
-      if (copier_type == SMC || copier_type == IC2)
+      if (copier_type == SMC)
         copier_type = SWC;
     }
 
@@ -3904,7 +3898,8 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
   dumper (stdout, header, 64, 0, DUMPER_HEX);   // show only the part that is
   fputc ('\n', stdout);                         //  interpreted by copier
 
-  if (copier_type == SWC || copier_type == FIG || copier_type == UFO)
+  if (copier_type == SWC || copier_type == IC2 || copier_type == FIG ||
+      copier_type == UFO)
     {
       x = (int) ucon64.file_size - rominfo->backup_header_len;
       y = (header[0] + (header[1] << 8)) * 8 * 1024;
@@ -3964,6 +3959,15 @@ snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 
       printf ("[2:0]    External cartridge memory: %s\n",
               swc_header->emulation & 0x01 ? "Enabled" : "Disabled");
+    }
+  else if (copier_type == IC2)
+    {
+      st_swc_header_t *swc_header = (st_swc_header_t *) header;
+
+      y = swc_header->emulation & 0x40 ? 1 : 0;
+      // ucon64.split is always set at this point, see snes_init()
+      printf ("[2:6]    Split: %s => %s\n",
+              y ? "Yes" : "No", matches_deviates ((ucon64.split ? 1 : 0) == y));
     }
   else if (copier_type == FIG)
     {
@@ -5008,9 +5012,9 @@ snes_init (st_ucon64_nfo_t *rominfo)
         case FIG:
           rominfo->backup_usage = fig_usage[0].help;
           break;
-        case IC2:
-          // The UFO 6 is the only "officially" supporting copier I know of. - dbjh
-          rominfo->backup_usage = "UFO Super Drive PRO 6 HYPER VERSION/(Modified) Super Magicom";
+        case IC2: // not Future Supercom Hyper Effect Pro.9, unsure about Supercom Pro 2
+          rominfo->backup_usage = "UFO Super Drive PRO 6 HYPER VERSION/Future Supercom Pro.9/Twin Supercom\n"
+                                  "(Modified) Supercom/(Modified) Super Magicom";
           break;
         // just assume it's in SWC format... (there are _many_ ROMs on the
         //  internet with incorrect headers)

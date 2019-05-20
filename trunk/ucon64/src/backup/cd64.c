@@ -227,6 +227,9 @@ cd64_init (void)
   if (port >= 0x300 && port <= 0x330)
     is_parallel = 0;
 
+#if     defined __unix__ && !defined __MSDOS__ && !defined __CYGWIN__
+  regain_privileges ();
+#endif
 #ifdef  USE_PARALLEL
   /*
     I will not copy the following functionality to libcd64. Just do not
@@ -263,13 +266,32 @@ cd64_init (void)
       fputs ("ERROR: Could not open I/O device for CD64\n", stderr);
       exit (1);
     }
-#if     defined __unix__ && !defined __MSDOS__
+#ifdef  USE_PPDEV
   drop_privileges ();
+#elif   defined __unix__ && !defined __MSDOS__
+  drop_privileges_temp ();
 #endif
 
   cd64_port_print_info ();
 
   return cd64;
+}
+
+
+static void
+cd64_deinit (struct cd64_t *cd64, FILE *file)
+{
+#if     !defined USE_PPDEV && \
+        defined __unix__ && !defined __MSDOS__ && !defined __CYGWIN__
+  regain_privileges ();
+#endif
+  cd64->devclose (cd64);
+  fclose (file);
+  free (cd64);
+#if     !defined USE_PPDEV && \
+        defined __unix__ && !defined __MSDOS__ && !defined __CYGWIN__
+  drop_privileges ();
+#endif
 }
 
 
@@ -288,9 +310,7 @@ cd64_read_rom (const char *filename, int size)
   cd64_starttime = time (NULL);
   cd64_download_cart (cd64, file, size * MBIT, NULL);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -311,9 +331,7 @@ cd64_write_rom (const char *filename)
   cd64_starttime = time (NULL);
   cd64_upload_dram (cd64, file, (uint32_t) ucon64.file_size, NULL, 1);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -334,9 +352,7 @@ cd64_write_bootemu (const char *filename)
   cd64_starttime = time (NULL);
   cd64_upload_bootemu (cd64, file, (uint32_t) ucon64.file_size, NULL);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -357,9 +373,7 @@ cd64_read_sram (const char *filename)
   cd64_starttime = time (NULL);
   cd64_download_sram (cd64, file);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -380,9 +394,7 @@ cd64_write_sram (const char *filename)
   cd64_starttime = time (NULL);
   cd64_upload_sram (cd64, file);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -403,9 +415,7 @@ cd64_read_flashram (const char *filename)
   cd64_starttime = time (NULL);
   cd64_download_flashram (cd64, file);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -426,9 +436,7 @@ cd64_write_flashram (const char *filename)
   cd64_starttime = time (NULL);
   cd64_upload_flashram (cd64, file);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -449,9 +457,7 @@ cd64_read_eeprom (const char *filename)
   cd64_starttime = time (NULL);
   cd64_download_eeprom (cd64, file);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -472,9 +478,7 @@ cd64_write_eeprom (const char *filename)
   cd64_starttime = time (NULL);
   cd64_upload_eeprom (cd64, file);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -497,9 +501,7 @@ cd64_read_mempack (const char *filename, int index)
   cd64_starttime = time (NULL);
   cd64_download_mempak (cd64, file, (int8_t) index);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }
@@ -522,9 +524,7 @@ cd64_write_mempack (const char *filename, int index)
   cd64_starttime = time (NULL);
   cd64_upload_mempak (cd64, file, (int8_t) index);
 
-  cd64->devclose (cd64);
-  fclose (file);
-  free (cd64);
+  cd64_deinit (cd64, file);
 
   return 0;
 }

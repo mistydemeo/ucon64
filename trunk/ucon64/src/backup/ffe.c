@@ -1,8 +1,8 @@
 /*
 ffe.c - General Front Far East copier routines for uCON64
 
-Copyright (c) 2002 - 2004, 2015, 2017 dbjh
-Copyright (c) 2003                    JohnDie
+Copyright (c) 2002 - 2004, 2015, 2017, 2019 dbjh
+Copyright (c) 2003                          JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -35,10 +35,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 static void ffe_sendb (unsigned char byte);
+static unsigned char ffe_receiveb (void);
 static unsigned char ffe_wait_while_busy (void);
+static void ffe_wait_for_ready (void);
 
 static unsigned short ffe_port;
-
+// default value to write to control port, see parport_setup()
+static unsigned char transfer_ack = 0x04;
 
 void
 ffe_init_io (unsigned short port)
@@ -156,8 +159,8 @@ ffe_sendb (unsigned char byte)
 {
   ffe_wait_for_ready ();
   outportb (ffe_port + PARPORT_DATA, byte);
-  outportb (ffe_port + PARPORT_CONTROL,
-            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
+  transfer_ack ^= PARPORT_STROBE;               // invert strobe
+  outportb (ffe_port + PARPORT_CONTROL, transfer_ack);
   ffe_wait_for_ready ();                        // necessary if followed by ffe_receiveb()
 }
 
@@ -228,11 +231,11 @@ ffe_receiveb (void)
   unsigned char byte;
 
   byte = (ffe_wait_while_busy () & PARPORT_INPUT_MASK) >> 3; // receive low nibble
-  outportb (ffe_port + PARPORT_CONTROL,
-            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
+  transfer_ack ^= PARPORT_STROBE;               // invert strobe
+  outportb (ffe_port + PARPORT_CONTROL, transfer_ack);
   byte |= (ffe_wait_while_busy () & PARPORT_INPUT_MASK) << 1; // receive high nibble
-  outportb (ffe_port + PARPORT_CONTROL,
-            inportb (ffe_port + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
+  transfer_ack ^= PARPORT_STROBE;               // invert strobe
+  outportb (ffe_port + PARPORT_CONTROL, transfer_ack);
 
   return byte;
 }

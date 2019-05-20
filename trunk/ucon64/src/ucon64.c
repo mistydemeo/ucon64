@@ -1234,19 +1234,21 @@ main (int argc, char **argv)
 #if     defined __unix__ && !defined __MSDOS__
   /*
     We can drop privileges after we have set up parallel port access. We cannot
-    drop privileges if the user wants to communicate with the USB version of the
-    F2A or with a CD64. However, for the CD64 privileges will be dropped by
-    cd64_init().
-    SECURITY WARNING: We stay in root mode if the user specified a USB port! We
-    could of course drop privileges which requires the user to run uCON64 as
-    root (not setuid root), but we want to be user friendly. Besides, doing
-    things as root is bad anyway (from a security viewpoint).
+    permanently drop privileges if the user wants to communicate with the USB
+    version of the F2A or with a CD64.
+    SECURITY WARNING: We retain the option to regain root privileges (if setuid
+    root) if the user specified a USB port!
+    We could of course drop privileges permanently which would require the user
+    to run uCON64 as root (not setuid root), but we want to be user friendly.
+    Besides, doing things as root is bad anyway (from a security viewpoint).
   */
-  if (ucon64.parport_needed != 2
+  if (ucon64.parport_needed == 2
 #ifdef  USE_USB
-      && !ucon64.usbport
+      || ucon64.usbport
 #endif
      )
+    drop_privileges_temp ();
+  else
     drop_privileges ();
 #endif // __unix__ && !__MSDOS__
 
@@ -1381,14 +1383,10 @@ ucon64_execute_options (void)
   ucon64.image = NULL;
 #endif
   ucon64.nfo = NULL;
-
-  ucon64.split = ucon64.org_split;
-
-  ucon64.file_size =
-  ucon64.crc32 =
-  ucon64.fcrc32 = 0;
+  ucon64.file_size = 0;
 
   ucon64.console = ucon64.org_console;
+  ucon64.split = ucon64.org_split;
 
   for (x = 0; arg[x].val; x++)
     if (!(arg[x].flags & WF_SWITCH))
@@ -1695,10 +1693,7 @@ ucon64_probe (st_ucon64_nfo_t *nfo)
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].console == ucon64.console)
           {
-            ucon64_clear_nfo (nfo);
-
             probe[x].init (nfo);
-
             return nfo;
           }
     }
@@ -1708,6 +1703,7 @@ ucon64_probe (st_ucon64_nfo_t *nfo)
         if (probe[x].flags & AUTO)
           {
             ucon64_clear_nfo (nfo);
+            ucon64.split = ucon64.org_split;
 
             if (!probe[x].init (nfo))
               {

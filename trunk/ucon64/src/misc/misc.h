@@ -2,7 +2,7 @@
 misc.h - miscellaneous functions
 
 Copyright (c) 1999 - 2008              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 Copyright (c) 2002 - 2004              Jan-Erik Karlsson (Amiga code)
 
 
@@ -150,6 +150,11 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
   misc_percent()  returns percentage of progress (useful in combination with
                   gauge())
   drop_privileges() switch to the real user and group ID (leave "root mode")
+  drop_privileges_temp() change effective user and group ID to the real user and
+                  group ID respectively, thus retaining the option to regain
+                  privileges (if any)
+  regain_privileges() regain root privileges after drop_privileges_temp() if
+                  setuid root
   register_func() atexit() replacement
                   returns -1 if it fails, 0 if it was successful
   unregister_func() unregisters a previously registered function
@@ -192,8 +197,10 @@ extern int cm_verbose;
 
 extern int bytes_per_second (time_t start_time, int nbytes);
 extern int misc_percent (int pos, int len);
-#if     defined __unix__ && !defined __MSDOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __APPLE__
 extern int drop_privileges (void);
+extern int drop_privileges_temp (void);
+extern int regain_privileges (void);
 #endif
 extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));

@@ -1,11 +1,11 @@
 /*
 swc.c - Super Wild Card support for uCON64
 
-Copyright (c) 1999 - 2001             NoisyB
-Copyright (c) 2001 - 2005, 2015, 2017 dbjh
-Copyright (c) 2001                    Caz
-Copyright (c) 2003                    John Weidman
-Copyright (c) 2004                    JohnDie
+Copyright (c) 1999 - 2001                   NoisyB
+Copyright (c) 2001 - 2005, 2015, 2017, 2019 dbjh
+Copyright (c) 2001                          Caz
+Copyright (c) 2003                          John Weidman
+Copyright (c) 2004                          JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -903,13 +903,6 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
   ffe_send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8 K L, #8 K H, 0
   ffe_send_command (6, 1 | (emu_mode_select << 8), enableRTS); // last arg = 1 enables RTS
                                                                //  mode, 0 disables it
-#if 0
-  ffe_wait_for_ready ();
-  outportb (parport + PARPORT_DATA, 0);
-  outportb (parport + PARPORT_CONTROL,
-            inportb (parport + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
-#endif
-
   free (buffer);
   fclose (file);
 

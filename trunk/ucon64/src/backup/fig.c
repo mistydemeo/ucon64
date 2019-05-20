@@ -467,13 +467,6 @@ fig_write_rom (const char *filename, unsigned short parport)
   ffe_send_command (5, 0, 0);
   ffe_send_command (6, 1 | (emu_mode_select << 8), 0);
 
-#if 0
-  ffe_wait_for_ready ();
-  outportb (parport + PARPORT_DATA, 0);
-  outportb (parport + PARPORT_CONTROL,
-            inportb (parport + PARPORT_CONTROL) ^ PARPORT_STROBE); // invert strobe
-#endif
-
   free (buffer);
   fclose (file);
 

@@ -1,7 +1,7 @@
 /*
 ufosd.c - Super UFO Pro 8 SD support for uCON64
 
-Copyright (c) 2017 - 2018 dbjh
+Copyright (c) 2017 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -130,13 +130,18 @@ ufosd_write_rom (const char *filename)
   char *buffer;
   time_t starttime;
 
-#if     defined __unix__ || defined __BEOS__ || defined __APPLE__
+#if     defined __unix__ || defined __APPLE__
+#ifdef  __BEOS__
   init_conio ();
   if (register_func (deinit_conio) == -1)
     {
       fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit (1);
     }
+#endif
+#ifndef __CYGWIN__
+  regain_privileges ();
+#endif
 #endif
 
   if ((device = usbport_probe (vendor_id, product_id)) == NULL ||
@@ -236,6 +241,9 @@ ufosd_write_rom (const char *filename)
   fclose (file);
   usb_release_interface (handle, interface_number);
   usb_close (handle);
+#if     defined __unix__ || defined __APPLE__
+  drop_privileges ();
+#endif
 
   return 0;
 }

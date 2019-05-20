@@ -231,7 +231,9 @@ gd3_send_prolog_byte (unsigned char data)
 
   outportb (gd_port + PARPORT_DATA, data);      // set data
   outportb (gd_port + PARPORT_CONTROL, 5);      // clock data out to SF3
+#if 0
   inportb (gd_port + PARPORT_CONTROL);          // let data "settle down"
+#endif
   outportb (gd_port + PARPORT_CONTROL, 4);
 
   return GD_OK;
@@ -264,7 +266,9 @@ gd3_send_byte (unsigned char data)
 
   outportb (gd_port + PARPORT_DATA, data);      // set data
   outportb (gd_port + PARPORT_CONTROL, 5);      // clock data out to SF3
+#if 0
   inportb (gd_port + PARPORT_CONTROL);          // let data "settle down"
+#endif
   outportb (gd_port + PARPORT_CONTROL, 4);
 }
 
@@ -572,7 +576,9 @@ gd6_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *ro
         resetting the SNES. You will see the Game Doctor menu has a message that
         says "LINKING..".
   My Game Doctor SF7 V7.11 enters link mode automatically if it is connected to
-  a parallel port -- no controller input is required. - dbjh
+  a parallel port -- no controller input is required. Holding down R while
+  _starting_ the SNES prevents the Game Doctor from starting the first game that
+  has already been uploaded. - dbjh
 */
 static int
 gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rominfo,

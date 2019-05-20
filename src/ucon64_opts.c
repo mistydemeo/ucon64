@@ -484,9 +484,9 @@ ucon64_switches (st_ucon64_t *p)
         It is possible to perform USB I/O without being root. However, without
         any configuration root privileges are required. By default uCON64 will
         be installed setuid root (on UNIX), so we just have to make sure
-        privileges will not be dropped. One way to do that is assigning a
-        non-zero value to ucon64.parport_needed. A more appropriate way for USB
-        devices is using ucon64.usbport.
+        privileges will not be dropped. One way to do that is assigning 2 to
+        ucon64.parport_needed. A more appropriate way for USB devices is using
+        ucon64.usbport.
       */
       if (!ucon64.usbport)
         ucon64.usbport = 1;

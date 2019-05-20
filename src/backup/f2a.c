@@ -349,6 +349,10 @@ f2a_init_usb (void)
 
   memset (&rm, 0, sizeof (rm));
 
+#if     defined __unix__ && !defined __CYGWIN__
+  regain_privileges ();
+#endif
+
   if (f2a_connect_usb ())
     {
       fputs ("ERROR: Could not connect to F2A USB linker\n", stderr);
@@ -1566,6 +1570,9 @@ f2a_read_rom (const char *filename, int size)
       f2a_read_usb (0x8000000 + offset * MBIT, size * MBIT, filename);
       usb_release_interface (f2a_handle, 0);
       usb_close (f2a_handle);
+#ifdef  __unix__
+      drop_privileges_temp ();
+#endif
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1649,6 +1656,9 @@ f2a_write_rom (const char *filename, int size)
       f2a_write_usb (n_files, files, 0x8000000);
       usb_release_interface (f2a_handle, 0);
       usb_close (f2a_handle);
+#ifdef  __unix__
+      drop_privileges_temp ();
+#endif
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1698,6 +1708,9 @@ f2a_read_sram (const char *filename, int bank)
       f2a_read_usb (0xe000000 + bank * 64 * 1024, size, filename);
       usb_release_interface (f2a_handle, 0);
       usb_close (f2a_handle);
+#ifdef  __unix__
+      drop_privileges_temp ();
+#endif
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1738,6 +1751,9 @@ f2a_write_sram (const char *filename, int bank)
       f2a_write_usb (1, files, 0xe000000 + bank * 64 * 1024);
       usb_release_interface (f2a_handle, 0);
       usb_close (f2a_handle);
+#ifdef  __unix__
+      drop_privileges_temp ();
+#endif
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB

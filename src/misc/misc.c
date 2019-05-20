@@ -1002,7 +1002,7 @@ getenv2 (const char *variable)
 }
 
 
-#if     defined __unix__ && !defined __MSDOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __APPLE__
 int
 drop_privileges (void)
 {
@@ -1012,13 +1012,53 @@ drop_privileges (void)
   uid = getuid ();
   if (setuid (uid) == -1)
     {
-      fputs ("ERROR: Could not set uid\n", stderr);
+      fprintf (stderr, "ERROR: Could not set user ID to %d\n", (int) uid);
       return 1;
     }
-  gid = getgid ();                              // this shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if "make install" was used,
-    {                                           //  but just in case (root did
-      fputs ("ERROR: Could not set gid\n", stderr); //  "chmod +s")
+
+  gid = getgid ();
+  if (setgid (gid) == -1)
+    {
+      fprintf (stderr, "ERROR: Could not set group ID to %d\n", (int) gid);
+      return 1;
+    }
+
+  return 0;
+}
+
+
+int
+drop_privileges_temp (void)
+{
+  uid_t uid;
+  gid_t gid;
+
+  uid = getuid ();
+  if (seteuid (uid) == -1)
+    {
+      fprintf (stderr, "ERROR: Could not set effective user ID to %d\n",
+               (int) uid);
+      return 1;
+    }
+
+  gid = getgid ();
+  if (setegid (gid) == -1)
+    {
+      fprintf (stderr, "ERROR: Could not set effective group ID to %d\n",
+               (int) gid);
+      return 1;
+    }
+
+  return 0;
+}
+
+
+int
+regain_privileges (void)
+{
+  if (seteuid ((uid_t) 0) == -1)
+    {
+      puts ("WARNING: Could not set effective user ID to 0");
       return 1;
     }
 

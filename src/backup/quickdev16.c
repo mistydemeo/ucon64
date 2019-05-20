@@ -102,13 +102,18 @@ quickdev16_write_rom (const char *filename)
   uint32_t bank_size, address = 0;
   uint16_t bank_shift;
 
-#if     defined __unix__ || defined __BEOS__ || defined __APPLE__
+#if     defined __unix__ || defined __APPLE__
+#ifdef  __BEOS__
   init_conio ();
   if (register_func (deinit_conio) == -1)
     {
       fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit (1);
     }
+#endif
+#ifndef __CYGWIN__
+  regain_privileges ();
+#endif
 #endif
 
   usb_init ();
@@ -210,6 +215,9 @@ quickdev16_write_rom (const char *filename)
   free (buffer);
   fclose (file);
   usb_close (handle);
+#if     defined __unix__ || defined __APPLE__
+  drop_privileges ();
+#endif
 
   return 0;
 }

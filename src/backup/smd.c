@@ -1,8 +1,8 @@
 /*
 smd.c - Super Magic Drive support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2001 - 2003 dbjh
+Copyright (c) 1999 - 2001       NoisyB
+Copyright (c) 2001 - 2003, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -111,7 +111,7 @@ int
 smd_read_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
-  unsigned char *buffer, byte;
+  unsigned char *buffer;
   int size, blocksdone = 0, blocksleft, bytesreceived = 0;
   time_t starttime;
 
@@ -128,12 +128,7 @@ smd_read_rom (const char *filename, unsigned short parport)
       exit (1);
     }
 
-  ffe_send_command (1, 0xdff1, 1);
-  byte = ffe_receiveb ();
-  if ((0x81 ^ byte) != ffe_receiveb ())
-    printf ("received data is corrupt\n");
-
-  blocksleft = 8 * byte;
+  blocksleft = 8 * ffe_send_command1 (0xdff1);
   if (blocksleft == 0)
     {
       fprintf (stderr, "ERROR: There is no cartridge present in the Super Magic Drive\n");

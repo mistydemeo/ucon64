@@ -1,7 +1,7 @@
 /*
 ffe.h - General Front Far East copier routines for uCON64
 
-Copyright (c) 2002 - 2005, 2015, 2017 dbjh
+Copyright (c) 2002 - 2005, 2015, 2017, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -81,8 +81,6 @@ extern void ffe_receive_block (unsigned short address, unsigned char *buffer,
                                unsigned short len);
 extern void ffe_receive_block2 (unsigned short address, unsigned char *buffer,
                                 unsigned short len);
-extern unsigned char ffe_receiveb (void);
-extern void ffe_wait_for_ready (void);
 extern void ffe_checkabort (int status);
 #endif
 

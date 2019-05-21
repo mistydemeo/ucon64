@@ -1012,14 +1012,14 @@ drop_privileges (void)
   uid = getuid ();
   if (setuid (uid) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set user ID to %d\n", (int) uid);
+      fprintf (stderr, "ERROR: Could not set user ID to %u\n", uid);
       return 1;
     }
 
   gid = getgid ();
   if (setgid (gid) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set group ID to %d\n", (int) gid);
+      fprintf (stderr, "ERROR: Could not set group ID to %u\n", gid);
       return 1;
     }
 
@@ -1036,16 +1036,14 @@ drop_privileges_temp (void)
   uid = getuid ();
   if (seteuid (uid) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set effective user ID to %d\n",
-               (int) uid);
+      fprintf (stderr, "ERROR: Could not set effective user ID to %u\n", uid);
       return 1;
     }
 
   gid = getgid ();
   if (setegid (gid) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set effective group ID to %d\n",
-               (int) gid);
+      fprintf (stderr, "ERROR: Could not set effective group ID to %u\n", gid);
       return 1;
     }
 

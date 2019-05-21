@@ -130,16 +130,14 @@ ufosd_write_rom (const char *filename)
   char *buffer;
   time_t starttime;
 
-#if     defined __unix__ || defined __APPLE__
-#ifdef  __BEOS__
+#if     defined __unix__ || defined __BEOS__ || defined __APPLE__
   init_conio ();
   if (register_func (deinit_conio) == -1)
     {
       fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit (1);
     }
-#endif
-#ifndef __CYGWIN__
+#if     !defined __BEOS__ && !defined __CYGWIN__
   regain_privileges ();
 #endif
 #endif

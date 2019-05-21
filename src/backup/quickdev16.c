@@ -2,7 +2,7 @@
 quickdev16.c - Quickdev16 support for uCON64
 
 Copyright (c) 2009        david@optixx.org
-Copyright (c) 2015 - 2018 dbjh
+Copyright (c) 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -102,16 +102,14 @@ quickdev16_write_rom (const char *filename)
   uint32_t bank_size, address = 0;
   uint16_t bank_shift;
 
-#if     defined __unix__ || defined __APPLE__
-#ifdef  __BEOS__
+#if     defined __unix__ || defined __BEOS__ || defined __APPLE__
   init_conio ();
   if (register_func (deinit_conio) == -1)
     {
       fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit (1);
     }
-#endif
-#ifndef __CYGWIN__
+#if     !defined __BEOS__ && !defined __CYGWIN__
   regain_privileges ();
 #endif
 #endif

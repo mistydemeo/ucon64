@@ -150,9 +150,9 @@ extern void dumper (FILE *output, const void *buffer, size_t bufferlen,
   misc_percent()  returns percentage of progress (useful in combination with
                   gauge())
   drop_privileges() switch to the real user and group ID (leave "root mode")
-  drop_privileges_temp() change effective user and group ID to the real user and
-                  group ID respectively, thus retaining the option to regain
-                  privileges (if any)
+  drop_privileges_temp() change only effective user and group ID to the real
+                  user and group ID respectively, thus retaining the option to
+                  regain privileges (if any)
   regain_privileges() regain root privileges after drop_privileges_temp() if
                   setuid root
   register_func() atexit() replacement

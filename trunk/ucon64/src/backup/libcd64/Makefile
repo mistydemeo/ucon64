@@ -101,9 +101,9 @@ RAWIO=1
 endif
 
 ifeq ($(OSTYPE),Linux)
-ifeq ($(shell if test -r /usr/include/ieee1284.h; then echo 1; else echo 0; fi),1)
-LIBIEEE1284=1
-endif
+#ifeq ($(shell if test -r /usr/include/ieee1284.h; then echo 1; else echo 0; fi),1)
+#LIBIEEE1284=1
+#endif
 ifeq ($(shell if test -r /usr/include/linux/ppdev.h; then echo 1; else echo 0; fi),1)
 PPDEV=1
 endif

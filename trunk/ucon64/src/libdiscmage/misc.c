@@ -616,7 +616,8 @@ ansi_init (void)
 {
   int result = isatty (STDOUT_FILENO);
 
-#ifdef  DJGPP
+// disabled ANSI.SYS installation check, because it "fails" on DOSBox
+#if     defined DJGPP && 0
   if (result)
     {
       // don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific

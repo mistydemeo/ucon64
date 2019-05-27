@@ -1,8 +1,8 @@
 /*
 nes.h - Nintendo Entertainment System support for uCON64
 
-Copyright (c) 1999 - 2001 NoisyB
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 1999 - 2001       NoisyB
+Copyright (c) 2002 - 2005, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -191,21 +191,20 @@ typedef struct
 #define WRTR_MARKER_S   ";"
 #endif
 
-#define BOARDNAME_MAXLEN        32U             // chunk length, NOT string length
-                                                //  string length = chunk length - 1
+#define BOARDNAME_MAXLEN        32U
 #define UNIF_HEADER_LEN (sizeof (st_unif_header_t))
 
 typedef struct
 {
   char signature[4];                            // 0x55,0x4e,0x49,0x46 ("UNIF")
-  unsigned int revision;                        // revision number
-  unsigned char expansion[24];                  // reserved
+  uint32_t revision;                            // revision number
+  uint8_t expansion[24];                        // reserved
 } st_unif_header_t;
 
 typedef struct
 {
-  unsigned int id;                              // chunk identification string
-  unsigned int length;                          // data length, in little endian format
+  uint32_t id;                                  // chunk identification string
+  uint32_t length;                              // data length, in little endian format
   void *data;
 } st_unif_chunk_t;
 
@@ -213,9 +212,9 @@ typedef struct
 typedef struct
 {
   char dumper_name[100];                        // name of the person who dumped the cart
-  unsigned char day;                            // day of the month when cartridge was dumped
-  unsigned char month;                          // month of the year when cartridge was dumped
-  unsigned short year;                          // year during which the cartridge was dumped
+  uint8_t day;                                  // day of the month when cartridge was dumped
+  uint8_t month;                                // month of the year when cartridge was dumped
+  uint16_t year;                                // year during which the cartridge was dumped
   char dumper_agent[100];                       // name of the ROM-dumping means used (ASCII-Z string)
 } st_dumper_info_t;
 

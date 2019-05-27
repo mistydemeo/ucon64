@@ -4895,6 +4895,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : snes_check_interleaved (rom_buffer, size, x);
 
+  // check_smc_ic2_rom() only sets split_info.parts[n].size if ucon64.split is 2
   if (rominfo->interleaved &&
       split_info.parts[0].size == 8 * MBIT + rominfo->backup_header_len &&
       split_info.parts[1].size == 8 * MBIT + rominfo->backup_header_len)

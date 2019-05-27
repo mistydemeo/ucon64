@@ -5107,22 +5107,22 @@ static const char unif_ucon64_sig[] =
 #else
 static const char unif_ucon64_sig[] = STD_COMMENT UCON64_VERSION_S " " CURRENT_OS_S;
 #endif
-static const int unif_prg_ids[] = { PRG0_ID, PRG1_ID, PRG2_ID, PRG3_ID,
-                                    PRG4_ID, PRG5_ID, PRG6_ID, PRG7_ID,
-                                    PRG8_ID, PRG9_ID, PRGA_ID, PRGB_ID,
-                                    PRGC_ID, PRGD_ID, PRGE_ID, PRGF_ID };
-static const int unif_pck_ids[] = { PCK0_ID, PCK1_ID, PCK2_ID, PCK3_ID,
-                                    PCK4_ID, PCK5_ID, PCK6_ID, PCK7_ID,
-                                    PCK8_ID, PCK9_ID, PCKA_ID, PCKB_ID,
-                                    PCKC_ID, PCKD_ID, PCKE_ID, PCKF_ID };
-static const int unif_chr_ids[] = { CHR0_ID, CHR1_ID, CHR2_ID, CHR3_ID,
-                                    CHR4_ID, CHR5_ID, CHR6_ID, CHR7_ID,
-                                    CHR8_ID, CHR9_ID, CHRA_ID, CHRB_ID,
-                                    CHRC_ID, CHRD_ID, CHRE_ID, CHRF_ID };
-static const int unif_cck_ids[] = { CCK0_ID, CCK1_ID, CCK2_ID, CCK3_ID,
-                                    CCK4_ID, CCK5_ID, CCK6_ID, CCK7_ID,
-                                    CCK8_ID, CCK9_ID, CCKA_ID, CCKB_ID,
-                                    CCKC_ID, CCKD_ID, CCKE_ID, CCKF_ID };
+static const uint32_t unif_prg_ids[] = { PRG0_ID, PRG1_ID, PRG2_ID, PRG3_ID,
+                                         PRG4_ID, PRG5_ID, PRG6_ID, PRG7_ID,
+                                         PRG8_ID, PRG9_ID, PRGA_ID, PRGB_ID,
+                                         PRGC_ID, PRGD_ID, PRGE_ID, PRGF_ID };
+static const uint32_t unif_pck_ids[] = { PCK0_ID, PCK1_ID, PCK2_ID, PCK3_ID,
+                                         PCK4_ID, PCK5_ID, PCK6_ID, PCK7_ID,
+                                         PCK8_ID, PCK9_ID, PCKA_ID, PCKB_ID,
+                                         PCKC_ID, PCKD_ID, PCKE_ID, PCKF_ID };
+static const uint32_t unif_chr_ids[] = { CHR0_ID, CHR1_ID, CHR2_ID, CHR3_ID,
+                                         CHR4_ID, CHR5_ID, CHR6_ID, CHR7_ID,
+                                         CHR8_ID, CHR9_ID, CHRA_ID, CHRB_ID,
+                                         CHRC_ID, CHRD_ID, CHRE_ID, CHRF_ID };
+static const uint32_t unif_cck_ids[] = { CCK0_ID, CCK1_ID, CCK2_ID, CCK3_ID,
+                                         CCK4_ID, CCK5_ID, CCK6_ID, CCK7_ID,
+                                         CCK8_ID, CCK9_ID, CCKA_ID, CCKB_ID,
+                                         CCKC_ID, CCKD_ID, CCKE_ID, CCKF_ID };
 
 static char nes_destfname[FILENAME_MAX] = "";
 static const char *internal_name;
@@ -5186,7 +5186,7 @@ read_block (unsigned char **data, unsigned int size, FILE *file, const char *for
 
 
 static st_unif_chunk_t *
-read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
+read_chunk (uint32_t id, unsigned char *rom_buffer, int cont)
 /*
   The caller is responsible for freeing the memory for the allocated
   st_unif_chunk_t. It should do that by calling free() with the pointer to
@@ -5200,8 +5200,8 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 #endif
   struct
   {
-     unsigned int id;                           // chunk identification string
-     unsigned int length;                       // data length, in little endian format
+     uint32_t id;                               // chunk identification string
+     uint32_t length;                           // data length, in little endian format
   } chunk_header = { 0, 0 };
   st_unif_chunk_t *unif_chunk;
   static unsigned int pos = 0;
@@ -5225,7 +5225,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
 #ifdef  DEBUG_READ_CHUNK
       memcpy (id_str, &chunk_header.id, 4);
 #ifdef  WORDS_BIGENDIAN
-      *((int *) id_str) = bswap_32 (*((int *) id_str));
+      *((uint32_t *) id_str) = bswap_32 (*((uint32_t *) id_str));
 #endif
       printf ("chunk header: id=%.4s, length=%u\n", id_str, chunk_header.length);
 #endif
@@ -5327,7 +5327,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
   number[n - prev_n] = '\0';
-  info->day = (unsigned char) strtol (number, NULL, 10);
+  info->day = (uint8_t) strtol (number, NULL, 10);
 
   n++;
   prev_n = n;
@@ -5336,7 +5336,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
   number[n - prev_n] = '\0';
-  info->month = (unsigned char) strtol (number, NULL, 10);
+  info->month = (uint8_t) strtol (number, NULL, 10);
 
   n++;
   prev_n = n;
@@ -5345,7 +5345,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
   number[n - prev_n] = '\0';
-  info->year = (unsigned short) strtol (number, NULL, 10);
+  info->year = (uint16_t) strtol (number, NULL, 10);
 
   // handle newline, possibly in DOS format
   prev_n = n;
@@ -5395,6 +5395,8 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   if (ucon64.mapr == NULL || ucon64.mapr[0] == '\0')
     {
       fputs ("ERROR: No board name specified\n", stderr);
+      free (prg_data);
+      free (chr_data);                          // free() accepts case "chr_data == NULL"
       return -1;
     }
   unif_chunk.length = strnlen (ucon64.mapr, BOARDNAME_MAXLEN - 1) + 1; // +1 to include ASCII-z
@@ -5407,22 +5409,19 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
     {
       unif_chunk.id = READ_ID;
       unif_chunk.length = strlen (ucon64.comment) + 1; // +1 to include ASCII-z
-      unif_chunk.data = (void *) ucon64.comment;
+      unif_chunk.data = (void *) ucon64.comment;       //  (spec is not clear)
       write_chunk (&unif_chunk, destfile);
     }
 
   // WRTR chunk can be helpful for debugging
   unif_chunk.id = WRTR_ID;
-  unif_chunk.length = strlen (unif_ucon64_sig) + 1;
-  unif_chunk.data = (char *) unif_ucon64_sig;
-  write_chunk (&unif_chunk, destfile);
 #else
   // READ chunk can be helpful for debugging
   unif_chunk.id = READ_ID;
-  unif_chunk.length = strlen (unif_ucon64_sig) + 1;
-  unif_chunk.data = (char *) unif_ucon64_sig;   // assume ASCII-z (spec is not clear)
-  write_chunk (&unif_chunk, destfile);
 #endif
+  unif_chunk.length = strlen (unif_ucon64_sig) + 1;
+  unif_chunk.data = (char *) unif_ucon64_sig;
+  write_chunk (&unif_chunk, destfile);
 
   if (UCON64_ISSET (ucon64.tv_standard))
     b = (unsigned char) ucon64.tv_standard;     // necessary for big endian machines
@@ -5618,7 +5617,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       // find uCON64 WRTR chunk and modify it if it is present
       do
         {
-          if (strnlen ((char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
+          if (unif_chunk1->length >= (size_t) x &&
               !strncmp ((char *) unif_chunk1->data, ucon64_name, x))
             {
               unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
@@ -5649,7 +5648,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   else
     {
       x = strlen (STD_COMMENT);
-      if (strnlen ((char *) unif_chunk1->data, unif_chunk1->length) >= (size_t) x &&
+      if (unif_chunk1->length >= (size_t) x &&
           !strncmp ((char *) unif_chunk1->data, STD_COMMENT, x))
         { // overwrite uCON64 comment => OS and version match with the used exe
           unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
@@ -5761,7 +5760,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
 #ifdef  WORDS_BIGENDIAN
             x = bswap_32 (x);
 #endif
-            if (x != *((int *) unif_chunk3->data))
+            if ((uint32_t) x != *((uint32_t *) unif_chunk3->data))
               printf ("WARNING: PRG chunk %d has a bad checksum, writing new checksum\n", n);
             unif_chunk3->length = 4;
             unif_chunk3->data = &x;
@@ -5793,7 +5792,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
 #ifdef  WORDS_BIGENDIAN
             x = bswap_32 (x);
 #endif
-            if (x != *((int *) unif_chunk3->data))
+            if ((uint32_t) x != *((uint32_t *) unif_chunk3->data))
               printf ("WARNING: CHR chunk %d has a bad checksum, writing new checksum\n", n);
             unif_chunk3->length = 4;
             unif_chunk3->data = &x;
@@ -5866,7 +5865,6 @@ int
 nes_unif (void)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char *rom_buffer;
   FILE *destfile;
 
   if (type != INES && type != UNIF)
@@ -5905,17 +5903,29 @@ nes_unif (void)
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+          unregister_func (remove_destfile);
+          unregister_func (remove_temp_file);
+          remove_destfile ();
+          remove_temp_file ();
           return -1;
         }
 
       if (nes_ines_unif (srcfile, destfile) == -1) // -1 == error
-        exit (1);
+        {
+          fclose (srcfile);
+          unregister_func (remove_destfile);
+          unregister_func (remove_temp_file);
+          remove_destfile ();
+          remove_temp_file ();
+          return -1;
+        }
 
       fclose (srcfile);
     }
   else if (type == UNIF)
     {
       unsigned int rom_size = (unsigned int) ucon64.file_size - UNIF_HEADER_LEN;
+      unsigned char *rom_buffer;
 
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
@@ -5925,7 +5935,14 @@ nes_unif (void)
       ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
 
       if (nes_unif_unif (rom_buffer, destfile) == -1) // -1 == error
-        exit (1);
+        {
+          free (rom_buffer);
+          unregister_func (remove_destfile);
+          unregister_func (remove_temp_file);
+          remove_destfile ();
+          remove_temp_file ();
+          return -1;
+        }
 
       free (rom_buffer);
     }
@@ -5945,20 +5962,19 @@ set_mapper (st_ines_header_t *header, unsigned int mapper)
   header->ctrl1 &= 0x0f;                        // clear mapper bits
   header->ctrl2 &= 0x03;                        // clear reserved and mapper bits
 
+  if (mapper > 0xff && mapper <= 0xfff)
+    // We can't just clear bits 0 & 1 of ctrl2, because they have their own
+    //  meaning. So, a warning is in place here.
+    puts ("WARNING: Mapper number is greater than 255");
+  else if (mapper > 0xfff)
+    {
+      puts ("WARNING: Mapper number is greater than 4095, writing \"4095\"");
+      mapper = 0xfff;
+    }
   header->ctrl1 |= mapper << 4;
   header->ctrl2 |= mapper & 0xf0;
   if (mapper > 0xff)                            // we support mapper numbers > 255
-    {
-      if (mapper > 0xfff)
-        {
-          fputs ("ERROR: Mapper numbers greater than 4095 cannot be stored\n", stderr);
-          exit (1);
-        }
-      // We can't just clear bits 0 & 1 of ctrl2, because they have their own
-      //  meaning. So, a warning is in place here.
-      puts ("WARNING: Mapper number is greater than 255");
-      header->ctrl2 |= (mapper >> 8) & 0xf;
-    }
+    header->ctrl2 |= (mapper >> 8) & 0xf;
 }
 
 
@@ -6283,7 +6299,6 @@ int
 nes_ines (void)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char *rom_buffer;
   FILE *destfile;
 
   if (type == FFE)
@@ -6322,17 +6337,29 @@ nes_ines (void)
       if ((srcfile = fopen (src_name, "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+          unregister_func (remove_destfile);
+          unregister_func (remove_temp_file);
+          remove_destfile ();
+          remove_temp_file ();
           return -1;
         }
 
       if (nes_ines_ines (srcfile, destfile, 0) == -1) // -1 == error
-        exit (1);                       // calls remove_temp_file() & remove_destfile()
+        {
+          fclose (srcfile);
+          unregister_func (remove_destfile);
+          unregister_func (remove_temp_file);
+          remove_destfile ();
+          remove_temp_file ();
+          return -1;
+        }
 
       fclose (srcfile);
     }
   else if (type == UNIF)
     {
       unsigned int rom_size = (unsigned int) ucon64.file_size - UNIF_HEADER_LEN;
+      unsigned char *rom_buffer;
 
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
@@ -6342,7 +6369,14 @@ nes_ines (void)
       ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
 
       if (nes_unif_ines (rom_buffer, destfile) == -1) // -1 == error
-        exit (1);                       // calls remove_temp_file() & remove_destfile()
+        {
+          free (rom_buffer);
+          unregister_func (remove_destfile);
+          unregister_func (remove_temp_file);
+          remove_destfile ();
+          remove_temp_file ();
+          return -1;
+        }
 
       free (rom_buffer);
     }
@@ -6589,7 +6623,14 @@ nes_dint (void)
   register_func (remove_destfile);
   // type == INES
   if (nes_ines_ines (srcfile, destfile, 1) == -1) // -1 == error
-    exit (1);                           // calls remove_temp_file() & remove_destfile()
+    {
+      fclose (srcfile);
+      unregister_func (remove_destfile);
+      unregister_func (remove_temp_file);
+      remove_destfile ();
+      remove_temp_file ();
+      return -1;
+    }
 
   unregister_func (remove_destfile);
   fclose (srcfile);
@@ -6738,7 +6779,7 @@ nes_j (unsigned char **mem_image)
       if (write_file)
         {
           fprintf (stderr, "ERROR: No %s -- cannot make image without it\n", src_name);
-          exit (1);
+          return -1;
         }
     }
   else
@@ -6903,7 +6944,9 @@ nes_s (void)
                       "ERROR: Not enough memory for trainer buffer (%d bytes)\n", 512) != 512)
         {
           fprintf (stderr, "ERROR: %s is not a valid iNES file", ucon64.fname);
-          exit (1);
+          free (trainer_data);
+          fclose (srcfile);
+          return -1;
         }
     }
   prg_size = ines_header.prg_size << 14;
@@ -6963,7 +7006,7 @@ nes_s (void)
   free (trainer_data);
   free (prg_data);
   free (chr_data);
-  fclose(srcfile);
+  fclose (srcfile);
   return 0;
 }
 
@@ -7111,7 +7154,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
-          return -1; //exit (1); please don't use exit () in init
+          return -1; //exit (1); please don't use exit() in init()
         }
       ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.fname);
       ucon64.split = 0;                         // UNIF files are never split
@@ -7121,9 +7164,9 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
       if ((unif_chunk = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
         {
-          char format[80]; // properly handle string that is not null-terminated
-          sprintf (format, "Comment: %%.%us\n", unif_chunk->length);
-          pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
+          // properly handle string that is not null-terminated
+          pos += sprintf (rominfo->misc + pos, "Comment: %.*s\n",
+                          unif_chunk->length, (char *) unif_chunk->data);
           free (unif_chunk);
         }
 #if     UNIF_REVISION > 7
@@ -7135,7 +7178,6 @@ nes_init (st_ucon64_nfo_t *rominfo)
           y = 0;
           do
             {
-              char format[80];
               if (y)
                 pos += sprintf (rominfo->misc + pos, ", ");
               /*
@@ -7168,8 +7210,8 @@ nes_init (st_ucon64_nfo_t *rominfo)
                       x++;
                     }
                 }
-              sprintf (format, "%%.%us", unif_chunk->length);
-              pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
+              pos += sprintf (rominfo->misc + pos, "%.*s",
+                              unif_chunk->length, (char *) unif_chunk->data);
               y = 1;
               free (unif_chunk);
             }
@@ -7180,14 +7222,15 @@ nes_init (st_ucon64_nfo_t *rominfo)
       if ((unif_chunk = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
         {
           st_dumper_info_t *dumper_info = (st_dumper_info_t *) unif_chunk->data;
-          pos += sprintf (rominfo->misc + pos, "Dump info:\n"
-                                               "  Dumper: %s\n"
-                                               "  Date: %u-%u-%02u\n"
-                                               "  Agent: %s\n",
-                                               dumper_info->dumper_name,
-                                               dumper_info->day, dumper_info->month,
-                                                 le2me_16 (dumper_info->year),
-                                               dumper_info->dumper_agent);
+          if (unif_chunk->length == sizeof (st_dumper_info_t))
+            pos += sprintf (rominfo->misc + pos, "Dump info:\n"
+                                                 "  Dumper: %.99s\n"
+                                                 "  Date: %u-%u-%02u\n"
+                                                 "  Agent: %.99s\n",
+                                                 dumper_info->dumper_name,
+                                                 dumper_info->day, dumper_info->month,
+                                                   le2me_16 (dumper_info->year),
+                                                 dumper_info->dumper_agent);
           free (unif_chunk);
         }
 
@@ -7255,17 +7298,17 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
-          char format[80]; // properly handle string that is not null-terminated
-          sprintf (format, "Board name: %%.%us\n", BOARDNAME_MAXLEN);
-          pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
+          // properly handle string that is not null-terminated
+          pos += sprintf (rominfo->misc + pos, "Board name: %.*s\n",
+                          BOARDNAME_MAXLEN, (char *) unif_chunk->data);
           free (unif_chunk);
         }
       if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
         {
 #if 0
-          char format[80]; // properly handle string that is not null-terminated
-          sprintf (format, "Internal name: %%.%us\n", unif_chunk->length);
-          pos += sprintf (rominfo->misc + pos, format, (char *) unif_chunk->data);
+          // properly handle string that is not null-terminated
+          pos += sprintf (rominfo->misc + pos, "Internal name: %.*s\n",
+                          unif_chunk->length, (char *) unif_chunk->data);
 #endif
           memcpy (rominfo->name, unif_chunk->data,
                   unif_chunk->length > sizeof rominfo->name ?
@@ -7326,7 +7369,7 @@ nes_init (st_ucon64_nfo_t *rominfo)
             if (x & (1 << n))
               pos2 += sprintf (ctrl_str + pos2, "%s, ", str_list[n]);
           if (pos2)
-            str_list[pos2 - 2] = '\0';
+            ctrl_str[pos2 - 2] = '\0';
           pos += sprintf (rominfo->misc + pos, "Supported controllers: %s\n", ctrl_str);
           free (unif_chunk);
         }

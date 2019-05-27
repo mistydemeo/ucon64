@@ -1,9 +1,9 @@
 /*
 term.c - terminal functions
 
-Copyright (c) 1999 - 2006       NoisyB
-Copyright (c) 2001 - 2005, 2015 dbjh
-Copyright (c) 2002 - 2004       Jan-Erik Karlsson (Amiga code)
+Copyright (c) 1999 - 2006                    NoisyB
+Copyright (c) 2001 - 2005, 2015 - 2017, 2019 dbjh
+Copyright (c) 2002 - 2004                    Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -377,7 +377,8 @@ ansi_init (void)
 {
   int result = isatty (STDOUT_FILENO);
 
-#ifdef  DJGPP
+// disabled ANSI.SYS installation check, because it "fails" on DOSBox
+#if     defined DJGPP && 0
   if (result)
     {
       // don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific

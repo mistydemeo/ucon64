@@ -45,7 +45,7 @@ CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
        /D_USING_V110_SDK71_ /arch:IA32
 !endif
 
-LDFLAGS=$(LDFLAGS) /NOLOGO /VERSION:2.1 setargv.obj
+LDFLAGS=$(LDFLAGS) /NOLOGO /VERSION:2.2 setargv.obj
 !ifdef WINXP_TARGETING
 LDFLAGS=$(LDFLAGS) /SUBSYSTEM:CONSOLE,5.01 \
         /LIBPATH:"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Lib"

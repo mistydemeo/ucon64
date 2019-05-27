@@ -1,8 +1,8 @@
 /*
 md-pro.c - MD-PRO support for uCON64
 
-Copyright (c) 2003 - 2005, 2015 - 2017 dbjh
-Copyright (c) 2003                     NoisyB
+Copyright (c) 2003 - 2005, 2015 - 2017, 2019 dbjh
+Copyright (c) 2003                           NoisyB
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -257,7 +257,7 @@ md_write_rom (const char *filename, unsigned short parport)
   fseek (file, 0x83f4, SEEK_SET);
   buffer[0] = 0;
   fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
-  // currently we ignore the version string (full string is "uCON64 2.1.1")
+  // currently we ignore the version string
   multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
 
   if (multi_game)

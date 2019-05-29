@@ -43,7 +43,7 @@ const st_getopt2_t smd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Com Pro/Super Magic Drive/SMD"/*"19XX Front Far East/FFE http://www.front.com.tw"*/,
+      NULL, "Super Com Pro/Magic Drive Plus/Super Magic Drive/SMD"/*"19XX Front Far East/FFE http://www.front.com.tw"*/,
       NULL
     },
 #ifdef  USE_PARALLEL

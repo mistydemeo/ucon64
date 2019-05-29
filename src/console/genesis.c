@@ -115,7 +115,7 @@ const st_getopt2_t genesis_usage[] =
     },
     {
       "smd", 0, 0, UCON64_SMD,
-      NULL, "convert to Super Magic Drive/SMD",
+      NULL, "convert to Magic Drive Plus/Super Magic Drive/SMD",
       &genesis_obj[2]
     },
     {

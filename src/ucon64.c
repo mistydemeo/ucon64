@@ -1184,7 +1184,7 @@ main (int argc, char **argv)
                   (unsigned int) priority_class);
           if (priority_class == REALTIME_PRIORITY_CLASS)
             fputs (" (REALTIME_PRIORITY_CLASS)", stdout);
-          else if ((priority_class == HIGH_PRIORITY_CLASS))
+          else if (priority_class == HIGH_PRIORITY_CLASS)
             fputs (" (HIGH_PRIORITY_CLASS)", stdout);
           puts ("\n");
         }

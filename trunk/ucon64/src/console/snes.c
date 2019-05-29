@@ -183,7 +183,7 @@ const st_getopt2_t snes_usage[] =
     },
     {
       "gd3", 0, 0, UCON64_GD3,
-      NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)",
+      NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF 2)",
       &snes_obj[8]
     },
     {
@@ -471,7 +471,7 @@ static st_snes_header_t snes_header;
 static int snes_sram_size, snes_sfx_sram_size, snes_header_base, snes_hirom,
            snes_hirom_ok, nsrt_header, bs_dump, st_dump;
 static snes_copier_t copier_type;
-static st_split_info_t split_info = { 0 };
+static st_split_info_t split_info = { 0, { { 0, 0 }, { 0, 0 } } };
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] =
   {

@@ -48,7 +48,7 @@ const st_getopt2_t gd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
+      NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF 2)"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
       NULL
     },
 #ifdef  USE_PARALLEL

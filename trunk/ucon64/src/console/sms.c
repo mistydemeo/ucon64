@@ -104,7 +104,7 @@ const st_getopt2_t sms_usage[] =
     },
     {
       "smd", 0, 0, UCON64_SMD,
-      NULL, "convert to Super Magic Drive/SMD",
+      NULL, "convert to Magic Drive Plus/Super Magic Drive/SMD",
       &sms_obj[2]
     },
     {

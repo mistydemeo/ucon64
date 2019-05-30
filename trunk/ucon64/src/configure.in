@@ -55,8 +55,10 @@ if test $enable_ppdev = yes; then
 fi
 if test $enable_ppdev = yes; then
   AC_DEFINE(USE_PPDEV, 1, [use ppdev for parallel port I/O (default: no)])
+  USE_PPDEV=1
 fi
 AC_MSG_RESULT($enable_ppdev)
+AC_SUBST(USE_PPDEV)
 
 
 AC_MSG_CHECKING(whether the use of color is disabled)

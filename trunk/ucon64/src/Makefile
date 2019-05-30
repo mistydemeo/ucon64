@@ -245,6 +245,11 @@ endif                                   # GCC_WIN
 endif                                   # USE_DISCMAGE
 
 
+ifdef USE_PPDEV
+DEFINE_PPDEV=PPDEV=1
+else
+DEFINE_PPDEV=
+endif
 ifdef USE_LIBCD64_RAWIO
 DEFINE_RAWIO=RAWIO=1
 else
@@ -267,7 +272,7 @@ endif
 	$(MAKE)
 	cd ..\..
 else
-	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(DEFINE_RAWIO) $(MAKE)
+	cd backup/libcd64 && CFLAGS="$(CFLAGS0)" LDFLAGS="$(LDFLAGS0)" $(DEFINE_RAWIO) $(DEFINE_PPDEV) $(MAKE)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_LIBCD64

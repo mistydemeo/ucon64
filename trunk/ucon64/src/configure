@@ -634,6 +634,7 @@ USE_LIBCD64_RAWIO
 USE_LIBCD64
 USE_DISCMAGE
 DLOPEN
+USE_PPDEV
 USE_PARALLEL
 EGREP
 GREP
@@ -3324,9 +3325,11 @@ if test $enable_ppdev = yes; then
 
 $as_echo "#define USE_PPDEV 1" >>confdefs.h
 
+  USE_PPDEV=1
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_ppdev" >&5
 $as_echo "$enable_ppdev" >&6; }
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the use of color is disabled" >&5

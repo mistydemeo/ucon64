@@ -1143,7 +1143,7 @@ ucon64_testsplit (const char *filename,
 
       parts = 0;
       strcpy (buf, filename);
-      p = strrchr (buf, '.');
+      p = strrchr (basename2 (buf), '.');
       l = strlen (buf);
 
       if (p == NULL)                            // filename doesn't contain a period

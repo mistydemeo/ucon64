@@ -1,0 +1,564 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\backup">
+      <UniqueIdentifier>{7c4cc316-edbc-443e-abe8-060e3b0b3fff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\console">
+      <UniqueIdentifier>{c677e6ca-6201-4b64-900a-75f6699100b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\patch">
+      <UniqueIdentifier>{7a4f8494-d9b7-432e-a58c-3a57e106b845}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\misc">
+      <UniqueIdentifier>{b9178222-f9d3-4f3d-9f83-2489dadc6356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\backup">
+      <UniqueIdentifier>{1f4a65c5-bede-4387-9b0f-a2ae132fd8b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\console">
+      <UniqueIdentifier>{bf8e271c-4364-4e81-a5ef-32fe8d4db1cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\misc">
+      <UniqueIdentifier>{142d483f-7543-425c-a447-5b318b7adbd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\patch">
+      <UniqueIdentifier>{4375a5b2-c45e-4ba2-95a5-9191a5f81a8d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ucon64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ucon64_dat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ucon64_defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ucon64_misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ucon64_opts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\backup.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\cc2.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\cd64.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\cmc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\dex.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\doctor64.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\doctor64jr.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\f2a.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\fal.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\ffe.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\fig.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\gbx.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\gd.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\interceptor.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\lynxit.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\mccl.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\mcd.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\md-pro.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\mgd.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\mgh.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\msg.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\nfc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\pce-pro.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\pl.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\psxpblib.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\quickdev16.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\sc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\sflash.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\smc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\smd.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\smsgg-pro.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\spsc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\ssc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\swc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\tototek.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\ufo.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\ufosd.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\yoko.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\z64.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\atari.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\coleco.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\console.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\dc.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\gb.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\gba.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\genesis.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\jaguar.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\lynx.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\n64.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\nds.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\neogeo.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\nes.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\ngp.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\pce.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\psx.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\sms.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\snes.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\swan.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console\vboy.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\archive.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\bswap.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\chksum.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\crypt.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\dlopen.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\file.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\getopt.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\getopt2.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\ioapi.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\itypes.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\map.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\misc.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\parallel.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\property.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\string.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\term.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\unzip.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\usb.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch\aps.h">
+      <Filter>Header Files\patch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch\bsl.h">
+      <Filter>Header Files\patch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch\gg.h">
+      <Filter>Header Files\patch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch\ips.h">
+      <Filter>Header Files\patch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch\patch.h">
+      <Filter>Header Files\patch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch\ppf.h">
+      <Filter>Header Files\patch</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\ucon64.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ucon64_dat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ucon64_misc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ucon64_opts.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\archive.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\chksum.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\dlopen.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\file.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\getopt.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\getopt2.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\ioapi.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\map.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\misc.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\parallel.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\property.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\string.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\term.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\unzip.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\usb.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\backup.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\cc2.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\cd64.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\cmc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\dex.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\doctor64.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\doctor64jr.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\f2a.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\fal.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\ffe.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\fig.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\gbx.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\gd.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\interceptor.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\lynxit.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\mccl.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\mcd.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\md-pro.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\mgd.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\mgh.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\msg.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\nfc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\pce-pro.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\pl.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\psxpblib.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\quickdev16.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\sc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\sflash.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\smc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\smd.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\smsgg-pro.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\spsc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\ssc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\swc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\tototek.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\ufo.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\ufosd.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\yoko.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\z64.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\atari.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\coleco.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\console.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\dc.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\gb.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\gba.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\genesis.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\jaguar.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\lynx.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\n64.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\nds.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\neogeo.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\nes.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\ngp.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\pce.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\psx.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\sms.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\snes.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\swan.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console\vboy.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch\aps.c">
+      <Filter>Source Files\patch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch\bsl.c">
+      <Filter>Source Files\patch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch\gg.c">
+      <Filter>Source Files\patch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch\ips.c">
+      <Filter>Source Files\patch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch\patch.c">
+      <Filter>Source Files\patch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch\ppf.c">
+      <Filter>Source Files\patch</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

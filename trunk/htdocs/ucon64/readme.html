@@ -1,7 +1,7 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - ReadMe</title></head><body bgcolor="#ffffff"><tt><pre>
-uCON64 2.1.0 UNIX (Linux) 1999-2017
+uCON64 2.2.0 UNIX (Linux) 1999-2019
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -70,6 +70,8 @@ Padding
   --insn=N      insert N Bytes (0x00) before ROM
   --ins         same as --insn=512
                   most backup units use a header with a size of 512 Bytes
+  --split=N     split ROM in parts of N Bytes (including possible header)
+                  use -s/--ssize to split for a specific console or backup unit
 
 DATabase (support for DAT files)
   --db          DATabase statistics
@@ -80,7 +82,6 @@ DATabase (support for DAT files)
   --lsd         same as --scan
   --mkdat=DATFILE create DAT file; use -o to specify an output directory
   --rdat        rename ROMs to their DATabase names
-                  use -o to specify an output directory
   --rrom        rename ROMs to their internal names (if any)
   --r83         rename to 8.3 filenames
   --rjoliet     rename to Joliet compatible filenames
@@ -269,7 +270,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
    -n=NEW_NAME  change internal ROM name to NEW_NAME
   --fig         convert to *Pro Fighter*/FIG
   --figs        convert *.srm (SRAM) file to *Pro Fighter*/FIG
-  --gd3         convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
+  --gd3         convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF 2)
   --id          force --gd3 to produce a unique filename
   --idnum=NUM   make --gd3 produce filenames where first file has numerical
                   identifier NUM, next NUM + 1, etc.
@@ -279,10 +280,15 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --smc         convert to Super Magicom/SMC
   --swc         convert to Super Wild Card*/SWC
   --swcs        convert *.srm (SRAM) file to Super Wild Card*/SWC
-  --ufo         convert to Super UFO
-  --ufos        convert *.srm (SRAM) file to Super UFO
+  --ufo         convert to Super UFO Super Drive PRO 7/8
+  --ufos        convert *.srm (SRAM) file to Super UFO Super Drive PRO 7/8
   --ufosd       convert to Super UFO Pro 8 SD
   --ufosds      convert *.srm (SRAM) file to Super UFO Pro 8 SD
+  --ic2         convert to Super Magicom/SMC IC2
+  --sminis=ID   convert *.srm (SRAM) file to SNES/Super Famicom Classic Mini
+                  (hakchi2) format for game with identifier ID
+  --smini2srm   convert SNES/Super Famicom Classic Mini (hakchi2) SRAM data to
+                  *.srm (SRAM) file
   --ctrl=TYPE   specify type of controller in port 1 for emu when converting
                   TYPE=0 gamepad
                   TYPE=1 mouse
@@ -339,7 +345,7 @@ Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC
                   receives automatically when SRAM does not exist
   --xswcr       send/receive RTS data to/from Super Wild Card*/SWC; --port=PORT
                   receives automatically when RTS file does not exist
-Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
+Game Doctor SF3(SF6/SF7)/Professor SF(SF 2)
   --xgd3        send ROM to Game Doctor SF3/SF6/SF7; --port=PORT
                   this option uses the Game Doctor SF3 protocol
   --xgd6        send ROM to Game Doctor SF6/SF7; --port=PORT
@@ -365,6 +371,8 @@ Super Flash
                   receives automatically when SRAM does not exist
 Quickdev16
   --xqd16       send ROM to Quickdev16
+Super UFO Pro 8 SD
+  --xufosd      send ROM to Super UFO Pro 8 SD
 
 Neo Geo/Neo Geo CD(Z)/MVS
   --ng          force recognition
@@ -378,7 +386,7 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --nint        force ROM is not in interleaved format (BIN/RAW)
    -n=NEW_NAME  change foreign ROM name to NEW_NAME
   --n2=NEW_NAME change Japanese ROM name to NEW_NAME
-  --smd         convert to Super Magic Drive/SMD
+  --smd         convert to Magic Drive Plus/Super Magic Drive/SMD
   --smds        convert *.srm (SRAM) file to Super Magic Drive/SMD
   --bin         convert to Magicom/BIN/RAW
   --mgd         convert to Multi Game Doctor 2/MGD2
@@ -401,7 +409,7 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
                   CODE=1 force NTSC/U.S.A. for all games
                   CODE=2 force PAL for all games
                   CODE=x use whatever setting games expect
-Super Com Pro/Super Magic Drive/SMD
+Super Com Pro/Magic Drive Plus/Super Magic Drive/SMD
   --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when ROM does not exist
   --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --port=PORT
@@ -439,6 +447,7 @@ Game Boy/(Super GB)/GB Pocket/Color GB
                   ROM should be KAMI's FC Emulator ROM image
                   NESROM should contain 16 kB of PRG data and 8 kB of CHR data
   --chk         fix ROM checksum
+  --gp2bmp      convert Game Boy Printer data (produced by --xmccl) to BMP
 Game Boy Xchanger/GBDoctor
   --xgbx        send/receive ROM to/from GB Xchanger; --port=PORT
                   receives automatically when ROM does not exist
@@ -533,7 +542,7 @@ Sega Master System(II/III)/Game Gear (Handheld)
   --nint        force ROM is not in interleaved format
   --mgd         convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)
   --mgdgg       same as --mgd, but gives GG name
-  --smd         convert to Super Magic Drive/SMD
+  --smd         convert to Magic Drive Plus/Super Magic Drive/SMD
   --smds        convert *.srm (SRAM) file to Super Magic Drive/SMD
   --chk         fix ROM checksum (SMS only)
   --multi=SIZE  make multi-game file for use with SMS-PRO/GG-PRO flash card,

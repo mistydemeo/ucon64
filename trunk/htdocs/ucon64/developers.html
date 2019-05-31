@@ -22,7 +22,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <a name="1"><b>Q1</b>: Who develops uCON64?</a><br>
 <b>A</b>: Written/modified by:<br>
    1999 - 2009 NoisyB<br>
-   2001 - 2005, 2015 - 2017 dbjh<br>
+   2001 - 2005, 2015 - 2019 dbjh<br>
 <br>
    Additional developers:<br>
    2002 - 2004 John Weidman <a href="mailto:jweidman AT sonic.net">&#60;jweidman AT sonic.net&#62;</a><br>
@@ -35,7 +35,8 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <br>
    2003 - 2004 JohnDie<br><!--  It's a nick name, no space between John and Die -->
    Also contributed several SNES-related features like Pro Fighter and Super
-   Flash support and Super Wild Card transfer code improvements.<br>
+   Flash support and Super Wild Card transfer code improvements (e.g. dumping
+   special chip cartridges).<br>
 <br>
 <br>
    uCON64 uses code (or at least ideas) from:<br>
@@ -57,7 +58,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><tt>IPS patcher</tt></td>
 </tr>
 <tr>
-  <td><tt>The&nbsp;White&nbsp;Knight&nbsp;/ ATX</tt></td><!-- yes, breaking space -->
+  <td><tt>The&nbsp;White&nbsp;Knight&nbsp;/&nbsp;ATX</tt></td>
   <td></td>
   <td><tt>BSL patcher</tt></td>
 </tr>
@@ -103,8 +104,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <tr>
   <td><tt>Jeff&nbsp;Frohwein</tt></td>
   <td><a href="mailto:info AT devrs.com"><tt>info AT devrs.com</tt></a><br>
-      <a href="http://www.devrs.com">
-        <tt>http://www.devrs.com</tt></a></td>
+      <a href="http://www.devrs.com"><tt>http://www.devrs.com</tt></a></td>
   <td><tt>Flash Advance Linker transfer code</tt></td>
 </tr>
 <tr>
@@ -113,7 +113,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><tt>Game Boy Advance SRAM patching and "crash patching" code</tt></td>
 </tr>
 <tr>
-  <td><tt>Richard Davies</tt></td>
+  <td><tt>Richard&nbsp;Davies</tt></td>
   <td><a href="mailto:richard AT debaser.force9.co.uk"><tt>richard AT debaser.force9.co.uk</tt></a><br>
       <a href="http://www.debaser.force9.co.uk">
         <tt>http://www.debaser.force9.co.uk</tt></a></td>
@@ -134,15 +134,13 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <tr>
   <td><tt>Jerremy&nbsp;Koot</tt></td>
   <td><a href="mailto:jkoot AT snes9x.com"><tt>jkoot AT snes9x.com</tt></a><br>
-      <a href="http://www.snes9x.com">
-        <tt>http://www.snes9x.com</tt></a></td>
+      <a href="http://www.snes9x.com"><tt>http://www.snes9x.com</tt></a></td>
   <td><tt>old interleave detection and old deinterleave code (SNES)</tt></td>
 </tr>
 <tr>
   <td><tt>Gary&nbsp;Henderson</tt></td>
   <td><a href="mailto:gary AT snes9x.com"><tt>gary AT snes9x.com</tt></a><br>
-      <a href="http://www.snes9x.com">
-        <tt>http://www.snes9x.com</tt></a></td>
+      <a href="http://www.snes9x.com"><tt>http://www.snes9x.com</tt></a></td>
   <td><tt>old interleave detection and old deinterleave code (SNES)</tt></td>
 </tr>
 <tr>
@@ -153,15 +151,18 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <tr>
   <td><tt>NSRT&nbsp;authors</tt></td>
   <td><a href="mailto:joecool22us AT yahoo.com"><tt>joecool22us AT yahoo.com</tt></a><br>
-      <a href="http://nsrt.edgeemu.com"><tt>http://nsrt.edgeemu.com</tt></a></td>
+      <a href="http://nsrt.nachsoftware.org/files.php">
+        <tt>http://nsrt.nachsoftware.org/files.php</tt></a></td>
   <td><tt>checksum algorithm for Momotaro Dentetsu Happy, their SNES add-on
           chip information page, SNES cracks (thanks to CL), third version of
           BS detection code (thanks to Nach) and general help and ideas</tt></td>
 </tr>
 <tr>
   <td><tt>Gilles&nbsp;Vollant</tt></td>
-  <td><a href="mailto:info AT winimage.com"><tt>info AT winimage.com</tt></a></td>
-  <td><tt>unzip.c &amp; unzip.h</tt></td>
+  <td><a href="mailto:info AT winimage.com"><tt>info AT winimage.com</tt></a><br>
+      <a href="http://www.winimage.com/zLibDll/minizip.html">
+        <tt>http://www.winimage.com/zLibDll/minizip.html</tt></a></td>
+  <td><tt>crypt.h, ioapi.c, ioapi.h, unzip.c &amp; unzip.h</tt></td>
 </tr>
 <tr>
   <td><tt>Tiptonium</tt></td>
@@ -179,10 +180,9 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><tt>GameCube image specs</tt></td>
 </tr>
 <tr>
-  <td><tt>ToToTEK Multi Media</tt></td>
+  <td><tt>ToToTEK&nbsp;Multi&nbsp;Media</tt></td>
   <td><a href="mailto:rayman AT tototek.com"><tt>rayman AT tototek.com</tt></a><br>
-      <a href="http://www.tototek.com">
-        <tt>http://www.tototek.com</tt></a></td>
+      <a href="http://www.tototek.com"><tt>http://www.tototek.com</tt></a></td>
   <td><tt>MD-PRO, SMS-PRO/GG-PRO &amp; PCE-PRO transfer code (Delphi) and help
           with that code</tt></td>
 </tr>
@@ -218,8 +218,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <tr>
   <td><tt>Mike&nbsp;Pavone</tt></td>
   <td><a href="mailto:mask_of_destiny AT hotmail.com"><tt>mask_of_destiny AT hotmail.com</tt></a><br>
-      <a href="http://www.retrodev.com">
-        <tt>http://www.retrodev.com</tt></a></td>
+      <a href="http://www.retrodev.com"><tt>http://www.retrodev.com</tt></a></td>
   <td><tt>Genesis/Sega CD transfer code</tt></td>
 </tr>
 <tr>
@@ -233,6 +232,14 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
  <td><tt>Parasyte</tt></td>
   <td></td><!-- private -->
   <td><tt>Support for remaining N64 CIC algorithms (6101, 6103, and 6106)</tt></td>
+</tr>
+<tr>
+  <td><tt>Revenant</tt></td>
+  <td><a href="mailto:d AT revenant1.net"><tt>d AT revenant1.net</tt></a><br>
+      <a href="http://revenant1.net"><tt>http://revenant1.net</tt></a></td>
+  <td><tt>Super UFO Pro 8 SD header and USB communication information and code
+          from his <a href="https://github.com/devinacker/roswell">GitHub
+          Roswell repository</a>.</tt></td>
 </tr>
 </table><br>
    and others...<br>

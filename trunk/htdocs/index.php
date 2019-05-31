@@ -55,14 +55,12 @@ require_once ("misc/widget.php");
 <center><img src="images/new.png" border="0" width="200"></center>
 <br>
 <!--NEWS-->
+20190531 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.2.0 released</a><br>
 20180626 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox SVN revision 4112 with Megabuild 6b changes released</a><br>
 20180106 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox SVN revision 4067 with Megabuild 6b changes released</a><br>
 20171221 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64misc">DOSBox Megabuild 6b released</a><br>
 20171123 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.1.0 released</a><br>
 20171026 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">moved to SVN</a><br>
-20170121 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.3 released</a><br>
-20160227 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.2 released</a><br>
-20151231 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#ucon64">uCON64 2.0.1 released</a><br>
 <br>
     </td>
   </tr>
@@ -128,24 +126,23 @@ Screenshots: <a href="images/ucon64_ss1.png">1</a>|<a href="images/ucon64_ss2.pn
 To get the latest uCON64 version from SVN read <a href="ucon64/developers.html#3">this</a> or click <a href="https://sourceforge.net/p/ucon64/svn/HEAD/tarball?path=/trunk/ucon64">here</a> to download a snapshot<br>
 <br>
 <b>Sources</b><br><font size="-1">
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-src.tar.gz/download">ucon64-2.1.0-src.tar.gz</a><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-src.zip/download">ucon64-2.1.0-src.zip</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.2.0/ucon64-2.2.0-src.tar.gz/download">ucon64-2.2.0-src.tar.gz</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.2.0/ucon64-2.2.0-src.zip/download">ucon64-2.2.0-src.zip</a><br>
 <br>
 <b>Binaries</b><br><font size="-1">
 <br><img src="images/linux.png"><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-linux-x86_64-bin.tar.gz/download">ucon64-2.1.0-linux-x86_64-bin.tar.gz</a><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.3/ucon64-2.0.3-usb-linux-x86_64-bin.tar.gz/download">ucon64-2.0.3-usb-linux-x86_64-bin.tar.gz</a> (with USB support, for USB version of F2A and Quickdev16)<br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.2.0/ucon64-2.2.0-linux-x86_64-bin.tar.gz/download">ucon64-2.2.0-linux-x86_64-bin.tar.gz</a><br>
 <br><img src="images/win32.png"> (MinGW)<br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-win32-mingw-bin.zip/download">ucon64-2.1.0-win32-mingw-bin.zip</a><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-usb-win32-mingw-bin.zip/download">ucon64-2.1.0-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16)<br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.2.0/ucon64-2.2.0-win32-mingw-bin.zip/download">ucon64-2.2.0-win32-mingw-bin.zip</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.2.0/ucon64-2.2.0-usb-win32-mingw-bin.zip/download">ucon64-2.2.0-usb-win32-mingw-bin.zip</a> (with USB support, for Quickdev16 and Super UFO Pro 8 SD)<br>
 <br><img src="images/win32.png"> (Visual C++)<br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-win32-vc-bin.zip/download">ucon64-2.1.0-win32-vc-bin.zip</a><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-usb-win32-vc-bin.zip/download">ucon64-2.1.0-usb-win32-vc-bin.zip</a> (with USB support, for Quickdev16)<br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.2.0-win32-vc-bin.zip/download">ucon64-2.2.0-win32-vc-bin.zip</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.2.0-usb-win32-vc-bin.zip/download">ucon64-2.2.0-usb-win32-vc-bin.zip</a> (with USB support, for Quickdev16 and Super UFO Pro 8 SD)<br>
 <br><img src="images/cygwin-icon.png"> (Cygwin)<br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-win32-cygwin-bin.zip/download">ucon64-2.1.0-win32-cygwin-bin.zip</a><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-usb-win32-cygwin-bin.zip/download">ucon64-2.1.0-usb-win32-cygwin-bin.zip</a> (with USB support, for Quickdev16)<br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.2.0-win32-cygwin-bin.zip/download">ucon64-2.2.0-win32-cygwin-bin.zip</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.2.0-usb-win32-cygwin-bin.zip/download">ucon64-2.2.0-usb-win32-cygwin-bin.zip</a> (with USB support, for Quickdev16 and Super UFO Pro 8 SD)<br>
 <br><img src="images/dos.png"><br>
-<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.1.0/ucon64-2.1.0-dos-bin.zip/download">ucon64-2.1.0-dos-bin.zip</a><br>
+<a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.2.0/ucon64-2.2.0-dos-bin.zip/download">ucon64-2.2.0-dos-bin.zip</a><br>
 <br><img src="images/beos.png"><br>
 <a href="http://sourceforge.net/projects/ucon64/files/ucon64/ucon64-2.0.0/ucon64-2.0.0-beos-bin.zip/download">ucon64-2.0.0-beos-bin.zip</a><br>
 <br><img src="images/solaris.png"><br>

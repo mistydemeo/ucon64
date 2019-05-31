@@ -22,7 +22,7 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
 - -xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)<br>
 - removed -xmp3 option for SongBoy (latest information says that it will
   be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)<br>
-- TODO:  -xmp3 send MP3 file(s) to SongBoy (MP3 player for Game Boy)<br>
+- TODO: -xmp3 send MP3 file(s) to SongBoy (MP3 player for Game Boy)<br>
 - removed options which were added by mistake (like parallel transfer for Z64)<br>
 - added -ispad (looks for repeating bytes at the end of a probably padded ROM)<br>
 - added -rn (some people might find it useful)<br>
@@ -223,8 +223,8 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
 - speed --rrom, --rr83 and --ls have been sped up significantly<br>
 - updated (N64) added 512 Mb ROM support for transfers to Doctor V64 Junior
   (by NoisyB; thanks to TenOfTen (tenoften@jahej.com))<br>
-- updated (SNES) fixed -fig to give the same output as a Super Pro Fighter (by
-  dbjh; thanks to JohnDie for the information)<br>
+- updated (SNES) fixed -fig to produce the same output as a Super Pro Fighter
+  (by dbjh; thanks to JohnDie for the information)<br>
 - updated (all) parallel port is only accessed for copier I/O (by dbjh)<br>
 - added (SNES) -bs &amp; -nbs force ROM is a Broadcast Satellaview dump/regular
   cartridge dump (by dbjh)<br>
@@ -300,7 +300,7 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
 - updated (all) fixed subtle bug in function that is used for -k, -f, -l &amp;
   -crp (by dbjh)<br>
 - updated (SNES) added crack for BS The Legend of Zelda Remix &amp; Demon's
-  Crest (by dbjh, based on info of John Weidman)<br>
+  Crest (by dbjh, based on info from John Weidman)<br>
 <!-- beta6 -->
 - updated (SNES) added crack for at least the following games: Breath of Fire II,
   Kirby's Dream Course (many thanks to John Weidman), Lufia II - Rise of the
@@ -423,7 +423,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   ucon64_configdir and datdir is named ucon64_datdir (by dbjh)<br>
 - updated (SNES) changed checksum calculation function so that it is stricter
   (by dbjh; thanks to Nach)<br>
-- updated (SNES) added more verbose BS info (by dbjh, based on info of Derrick
+- updated (SNES) added more verbose BS info (by dbjh, based on info from Derrick
   Sobodash)<br>
 - updated (GB) fixed -n2gb, -gbx &amp; -sgb (by dbjh)<br>
 - updated (SNES) replaced -ehi with -erom (force ROM is "Extended") in order to
@@ -490,10 +490,9 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   without -gba anymore (by dbjh; thanks to Enemy and acem77 for testing)<br>
 - added (Genesis) -f can fix region protections, addendum files are genpal.txt
   and mdntsc.txt (by dbjh)<br>
-- added (SNES) -id force -gd3 to produce a unique file name. This switch
-  doesn't show in the help, because it "fails" for 130 dumps of the GoodSNES
-  "0.999.6--" set. 128 IDs are each shared by 2 games, 2 IDs are shared by 3
-  games (by dbjh)<br>
+- added (SNES) -id force -gd3 to produce a unique filename. This switch doesn't
+  show in the help, because it "fails" for 130 dumps of the GoodSNES "0.999.6--"
+  set. 128 IDs are each shared by 2 games, 2 IDs are shared by 3 games (by dbjh)<br>
 - updated (all) the patch generation options (-mka, -mki, -mkppf) use the
   modified ROM name for the patch to create. They used to use the name of the
   original ROM (by dbjh)<br>
@@ -511,7 +510,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   Special thanks go to Leo of ToToTEK for being very helpful and willing to
   answer our questions)<br>
 - added (Genesis) -ssize=SIZE specify split part size in Mbit (by dbjh)<br>
-- updated (SNES, SMS, PCE &amp; Genesis) -mgd produces correct file names (by
+- updated (SNES, SMS, PCE &amp; Genesis) -mgd produces correct filenames (by
   dbjh; thanks to acem77 for testing and feedback)<br>
 - updated (Genesis) -mgd automatically pads files to the right size (by dbjh)<br>
 - added (PCE) -swap invert/swap bits of all bytes of a file. This effectively
@@ -527,7 +526,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (PCE) -mgd automatically bit-swaps the file if it is detected as
   being in Japan "mode" (by dbjh)<br>
 - updated (PCE) -smg automatically bit-swaps the file if it is detected as being
-  in U.S.A. "mode" (by dbjh) I don't know if this correct. Please give feedback<br>
+  in U.S.A. "mode" (by dbjh) I don't know if this is correct. Please give
+  feedback<br>
 - added (GB) -logo restore ROM logo character data (offset: 0x104-0x134)
   (by NoisyB)<br>
 <p>
@@ -540,7 +540,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (Genesis) fixed problem with -multi that caused problems with some
   games when run on the MD-PRO (by dbjh)<br>
 - updated (SNES, Genesis, PCE, SMS, Game Gear &amp; GB) -mgd now produces
-  correct file names. This time for real! :-) (by dbjh; thanks to acem77 for
+  correct filenames. This time for real! :-) (by dbjh; thanks to acem77 for
   testing and feedback)<br>
 - added (SNES) -xswcr send/receive RTS data to/from Super Wild Card*/(all)SWC
   (by dbjh)<br>
@@ -761,7 +761,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   anymore. As far as we know, no backup unit produces or is able to handle
   interleaved SMS or Game Gear files (by dbjh; thanks to Matthias for verifying
   this with his SMD)<br>
-- added (SNES) --idnum=NUM make --gd3 produce file names where first file has
+- added (SNES) --idnum=NUM make --gd3 produce filenames where first file has
   numerical identifier NUM, next NUM + 1, etc. (by dbjh)<br>
 - updated (all) added alternative options for --rr83 &amp; --force63 (--r83
   &amp; --rjoliet respectively) (by NoisyB)<br>
@@ -867,32 +867,87 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   omitted in the output file (by dbjh)<br>
 - added (SNES &amp; Genesis) --smgh split ROM for MGH. Its main purpose is
   splitting SNES HiROM games in MGH format. Splitting is required to make them
-  run with an MGH (by dbjh, thanks to Mystic_Merlin for information and testing)<br>
+  run with an MGH (by dbjh; thanks to Mystic_Merlin for information and testing)<br>
 - added (SNES &amp; Genesis) --mgh convert to Magic Game Hunter/MGH format. For
   SNES this does the same as --gd3, except that the resulting file will have an
   MGH name and no header. For Genesis this does something very similar to --mgd,
   but the resulting file will have an MGH name. For both consoles an MGH name
-  file will be produced (by dbjh, thanks to Mystic_Merlin for information and
+  file will be produced (by dbjh; thanks to Mystic_Merlin for information and
   testing)<br>
-- updated (NES, SNES, Genesis &amp; NeoGeo Pocket) fixed --ns (by dbjh)<br>
+- updated (NES, SNES &amp; Genesis) fixed --ns (by dbjh)<br>
 - updated (SNES) fixed bug in checksum calculation code if the cartridge size
-  byte of the internal header is 0 (by dbjh, thanks to Mystic_Merlin for
+  byte of the internal header is 0 (by dbjh; thanks to Mystic_Merlin for
   providing the PD ROM that triggered the bug)<br>
 - updated (SNES) added support for a few more cartridge configurations to
   --ufosd. Still more information is needed, specifically about the header of 8
-  Mbit HiROMs (by dbjh, thanks to Mystic_Merlin for sending the output of
+  Mbit HiROMs (by dbjh; thanks to Mystic_Merlin for sending the output of
   --dbuh for dumps made with his UFO SD)<br>
 - updated (SNES) --ufosd fixes the checksum and pads the output to a valid size
-  for the UFO SD (by dbjh, thanks to Mystic_Merlin for information and testing)<br>
+  for the UFO SD (by dbjh; thanks to Mystic_Merlin for information and testing)<br>
 - added (N64) support for Nintendo 64 DAT files containing CRC32 values of ROMs
   in Mr. Backup Z64 format, like what
   <a href="http://datomatic.no-intro.org/">DAT-o-MATIC</a> produces. It can be
-  turned on by setting the  property variable n64_dat_v64 to 0. See the FAQ
+  turned on by setting the property variable n64_dat_v64 to 0. See the FAQ
   question 57 (by dbjh)<br>
 - updated (all) fixed double suffix issue when using DAT-o-MATIC DAT files (by
   dbjh; thanks to eadmaster for reporting the issue)<br>
-- updated (SNES) completed --ufosd by adding support for 8 Mbit HiROM (by dbjh,
+- updated (SNES) completed --ufosd by adding support for 8 Mbit HiROM (by dbjh;
   thanks to Mystic_Merlin and cage for the information)<br>
+<p>
+<a name="220">2.2.0</a><br> <!-- 2.1.1 -->
+- added (GB) --gp2bmp convert Game Boy Printer data (produced by --xmccl) to BMP
+  (by dbjh; based on version of gblnk (by Chris McCormick) improved by Difegue.
+  Many thanks to Difegue for providing me with Game Boy Printer data. Thanks to
+  Martin Eyre for documenting his findings about Game Boy Printer commands)<br>
+- added (SNES) --sminis=ID convert *.srm (SRAM) file to SNES/Super Famicom
+  Classic Mini (hakchi2) format for game with identifier ID (by dbjh)<br>
+- added (SNES) --smini2srm convert SNES/Super Famicom Classic Mini (hakchi2)
+  SRAM data to *.srm (SRAM) file (by dbjh)<br>
+- added support for NetBSD (by dbjh; thanks to Thomas Klausner for his help)<br>
+- updated support for OpenBSD (64-bit) (by dbjh)<br>
+- updated (all) made -o also work for --rrom, --r83 and --rjoliet, just like the
+  other rename options (--rdat, --rl and --ru) (by dbjh)<br>
+- updated (SNES) improved reliability of GDSF communication for PCs with a
+  parallel port that supports ECP (built-in or PCIe parallel port card). At
+  last. It is essential to correctly specify ecr_offset for this to work (by
+  dbjh; many thanks to Mystic_Merlin for testing)<br>
+- updated (SNES) improved --ufosd by adding specific support for 10 and 12 Mbit
+  HiROMs and implementing a generic way to set the SRAM mapping bytes (by dbjh;
+  thanks to Revenant for the information and Trenton_net for testing)<br>
+- added (SNES) --xufosd send ROM to Super UFO Pro 8 SD. Be sure to use a tool
+  like <a href="https://zadig.akeo.ie/">Zadig</a> to add libusb-0.1
+  (libusb-win32) support (by dbjh; thanks to Revenant for the information and
+  Trenton_net and Revenant for testing)<br>
+- updated (SNES) added NTSC/PAL fix for Soul Blazer F/G and Super Metroid E (by
+  dbjh; thanks to Mystic_Merlin)<br>
+- added (SNES) work-around for using the Game Doctor SF6 protocol for parallel
+  ports that do not support reading from the Control register. It is good enough
+  to at least allow dumping saver data and SRAM. To enable the new
+  functionality assign a value other than 0 to the variable gd6_send_byte_delay.
+  See the FAQ question 55 for details (by dbjh; many thanks to NorQue and
+  Mystic_Merlin for testing)<br>
+- updated (SNES) made --gd3 specify a pass-through mapping for LoROM DSP games
+  (by dbjh)<br>
+- updated (SNES) added proper recognition of Pro Fighter headers of LoROM DSP
+  games with 2, 8 or 32 kB SRAM (by dbjh)<br>
+- updated (SNES) added interpretation of remaining part of GD3 header (DRAM and
+  SRAM mapping) to --dbuh (by dbjh)<br>
+- updated (SNES &amp; Genesis) fixed split file detection for formats other than
+  (M)GD and MGH which I broke in 2.1.0 (by dbjh)<br>
+- added (all) --split=N split ROM in parts of N Bytes (including possible
+  header). This is a generic file splitting option. Use -s, optionally in
+  combination with --ssize=SIZE to split files for use with a specific console
+  or backup unit (by dbjh)<br>
+- added (SNES) support for Super Magicom/SMC IC2 file format. This format is
+  used by several ancient backup units, including the Twin Supercom, Future
+  Supercom Pro.9 and UFO Super Drive PRO 6 HYPER VERSION in order to run HiROM
+  games up to 16 Mbit. Use --ic2 to convert a file to Super Magicom/SMC IC2
+  format (by dbjh; thanks to Mystic_Merlin for info and testing)<br>
+- updated (SNES) fixed bug in --ufo that caused it to produce incorrect headers
+  for games that do not use SRAM (by dbjh; thanks to Mystic_Merlin for feedback
+  and testing)<br>
+- updated (SNES) fixed bug in -j for files in UFO format smaller than or equal
+  to 8 Mbit (by dbjh)<br>
 <br>
 <br>
 <br>

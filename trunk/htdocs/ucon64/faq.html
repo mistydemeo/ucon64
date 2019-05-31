@@ -172,6 +172,9 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    converting it to RomCenter 2.50 format, but uCON64 does not display DAT
    information for verified Nintento 64 ROMs. What is wrong?</a><br>
 <br>
+Q58: <a href="#58">I tried to upload a game to my Super UFO Pro 8 SD (on
+   Windows), but uCON64 only produced an error message. What is wrong?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -210,9 +213,9 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
-   uCON64 can be compiled for UNIX (GNU/Linux, FreeBSD, OpenBSD, Solaris,
-   Mac OS X), DOS, BeOS, Windows (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1/10) and
-   AmigaOS (PPC/68K).<br>
+   uCON64 can be compiled for UNIX (GNU/Linux, FreeBSD, OpenBSD, NetBSD,
+   Solaris, Mac OS X), DOS, BeOS, Windows
+   (95/98/ME/NT/2000/XP/2003/Vista/7/8/8.1/10) and AmigaOS (PPC/68K).<br>
    To compile uCON64 you need a compiler :-) You can use either GCC (GNU
    Compiler Collection) or the Visual C++ compiler. GCC can be downloaded from
    <a href="http://www.gnu.org/order/ftp.html">
@@ -357,12 +360,6 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    Now read the relevant section for the compiler you are using.<br>
 <br>
    <b>GCC</b> (including DJGPP, Cygwin and MinGW)<br>
-   If you use Bash you have to take one extra step before running make. By
-   default the environment variable OSTYPE is not exported, but that variable is
-   needed to let make use the correct settings for the platform you are
-   compiling for. Export OSTYPE with the following command:<br>
-   &nbsp;&nbsp;export OSTYPE<br>
-<br>
    If you have compiled uCON64 in the same directory before, first type:<br>
    &nbsp;&nbsp;make clean<br>
 <br>
@@ -443,7 +440,7 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    information specific for your operating system. Then continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>UNIX (GNU/Linux, FreeBSD, OpenBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
+   <b>UNIX (GNU/Linux, FreeBSD, OpenBSD, NetBSD, Solaris, Mac OS X) &amp; BeOS</b><br>
    Start a command line shell like Bash. Then extract the binary package.
    To extract or unpack a package in .tar.gz format use a command like this:<br>
    &nbsp;&nbsp;tar xvzf ucon64-1.9.8-1-linux-bin.tar.gz<br>
@@ -648,6 +645,15 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
     <td><tt>ecr_offset</tt></td>
     <td><tt>offset of ECP Extended Control register relative to Data register
    (parport)</tt></td>
+  </tr>
+  <tr>
+    <td><tt>gd6_send_byte_delay</tt></td>
+    <td><tt>Game Doctor SF6/SF7 specific: delay in microseconds to simulate
+   synchronizing (based on reading bit 1 of the parallel port Control register)
+   before sending a byte. Also signifies that all synchronization involving
+   reads from the Control register should be simulated. Do not simulate, but
+   read from the Control register if it is 0
+    </tt></td>
   </tr>
   <tr>
     <td><tt>n64_dat_v64</tt></td>
@@ -1997,10 +2003,8 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    By using the --xreset command <i>before</i> attaching your device, power is
    removed from the parallel port, eliminating the hazard.<br>
    Likewise, a danger exists when you have finished using your device and
-   switch the power off.<br>
-   Normally, uCON64 will remove power from the parallel port when the transfer
-   has finished, but if you abort uCON64 part-way, power may still be present.
-   In this case, use --xreset before switching the device off.<br>
+   switch the power off. In this case, use --xreset before switching the device
+   off.<br>
    Additionally, after switching the device off, aim to disconnect it as soon
    as possible. Printing, rebooting, and running certain applications may cause
    power to be re-applied to the parallel port -- a back-feed hazard.<br>
@@ -2021,8 +2025,8 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    the Data register. Fortunately, starting with uCON64 2.1.0 this problem can
    be solved for all supported platforms on which the parallel port can be
    accessed directly. So, GNU/Linux, all Windows versions (including Windows
-   10), MS-DOS, FreeBSD, OpenBSD and BeOS. First determine the offset of the ECP
-   Extended Control register relative to the Data register.<br>
+   10), MS-DOS, FreeBSD, OpenBSD, NetBSD and BeOS. First determine the offset of
+   the ECP Extended Control register relative to the Data register.<br>
    On GNU/Linux use lspci -v to find out what I/O ports are being used by your
    PCIe parallel port card. On Windows you can use Device Manager. You should
    see two I/O ranges. One of them should start with the I/O port you specified
@@ -2034,6 +2038,9 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    that order</u>.<br>
    Find the line starting with ecr_offset= in the configuration file and update
    it with the value you just calculated.<br>
+   Another way to determine which of the two I/O ranges is the ECP range is by
+   looking at the size. The ECP range is likely 4 bytes, while the other is 8
+   bytes.<br>
 <br>
 <p>
 <a name="54"><b>Q54</b>: My PCIe parallel port card has its ECP Extended Control
@@ -2055,16 +2062,37 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    parallel ports support input from this register, but most newer ones do not.
    You may happen to have a parallel port that does not support using the
    Control register for input.<br>
-   Another possibility may be that you configured uCON64 to use ppdev. The
-   developers of ppdev decided to target the lowest common denominator and to
-   not support reading from the Control register, which is unhelpful to say the
-   least. So, even if your parallel port supports using the Control register for
-   input, ppdev will not let you. This means that you cannot use ppdev in
-   combination with a Doctor V64, unless you modify ppdev (which is not
-   difficult). For the Game Doctor SF6/SF7 a workaround exists by using the Game
-   Doctor SF3 protocol, but you will lose the saver (RTS) transfer
-   functionality. Of course, you can also avoid this by not configuring uCON64
-   to use ppdev.<br>
+   Another possibility may be that you configured uCON64 to use ppdev on PC. For
+   PC the developers of ppdev decided to target the lowest common denominator
+   and to not support reading from the Control register, which is unhelpful to
+   say the least. So, even if your parallel port supports using the Control
+   register for input, ppdev will not let you. This means that you cannot use
+   ppdev in combination with a Doctor V64, unless you modify ppdev. For PC try
+   replacing the body of parport_pc_read_control() with:<br>
+   &nbsp;&nbsp;return inb (CONTROL (p));<br>
+   Then compile ppdev or Linux depending on whether ppdev should be a module or
+   part of the kernel.<br>
+   For the Game Doctor SF6/SF7 a workaround exists by using the Game Doctor SF3
+   protocol, but you will lose the saver (RTS) transfer and SRAM dumping
+   functionality. Of course, on PC you can also avoid this by not configuring
+   uCON64 to use ppdev.<br>
+   Alternatively, starting with uCON64 2.1.1 you can try your luck with the
+   variable gd6_send_byte_delay which works even in combination with a stock
+   ppdev. Transferring ROM data is unfortunately unlikely to succeed even with a
+   value as high as 30&micro;s. However, for dumping saver data and SRAM the
+   functionality is good enough. Start with a larger value like 30 to be on the
+   safe side, i.e., the delay is long enough for the Game Doctor SF6/SF7 to be
+   ready for the next byte. 22 has been used successfully on GNU/Linux running
+   on a Raspberry Pi 2B, a Raspberry Pi 3B+ and a Raspberry Pi Zero with a
+   pi-parport in combination with a Game Doctor SF7. 25 has been used
+   successfully on Windows 7 with giveio64 also in combination with a Game
+   Doctor SF7. 14 has been used successfully on plain DOS in combination with
+   the same Game Doctor. Note that on DOS the value is a rough approximation of
+   the delay in microseconds and the actual delay can vary between different
+   machines. On the same machine the delay is constant for a particular value.
+   You may have to try a few times before a transfer succeeds. Uploading a ROM
+   with --xgd3 greatly increases the chance of successfully dumping saver data
+   and SRAM with --xgd6r and --xgd6s respectively.<br>
 <br>
 <p>
 <a name="56"><b>Q56</b>: I installed a DAT file, but every time I run uCON64 it
@@ -2093,6 +2121,15 @@ Q57: <a href="#57">I installed a Nintendo 64 DAT file from DAT-o-MATIC, after
    n64_dat_v64. By default it is 1, meaning Doctor V64 format, for backward
    compatibility. Set it to 0 for Mr. Backup Z64 format if you want to use a
    Nintendo 64 DAT file produced by DAT-o-MATIC.<br>
+<br>
+<p>
+<a name="58"><b>Q58</b>: I tried to upload a game to my Super UFO Pro 8 SD (on
+   Windows), but uCON64 only produced an error message. What is wrong?</a><br>
+<b>A</b>: If this is the error message:<br>
+   &nbsp;&nbsp;ERROR: Could not open Super UFO USB device with vendor ID 0x1292
+   and product ID 0x4653<br>
+   then you should add support for libusb-win32 with
+   <a href="https://zadig.akeo.ie/">Zadig</a>.<br>
 <br>
 <p>
 <br>

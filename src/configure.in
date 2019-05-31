@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(uCON64, 2.2.0, ucon64-main@lists.sourceforge.net)
+AC_INIT(uCON64, 2.2.1, ucon64-main@lists.sourceforge.net)
 AC_CONFIG_HEADER(config.h libdiscmage/config.h)
 
 

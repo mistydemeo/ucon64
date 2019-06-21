@@ -2,15 +2,16 @@
 
 CC=cl.exe
 !ifdef DEBUG
-CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /Oi /MT /GZ /Zi \
+CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /wd5045 /Oi /MT /GZ /Zi \
        /DDEBUG /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 !else
-CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /O2 /MT \
+CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /wd5045 /O2 /MT \
        /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 !endif
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
 # /wd4710, 'function' : function not inlined
 # /wd4711, function 'function' selected for inline expansion
+# /wd5045: Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
 !ifdef WINXP_TARGETING
 CFLAGS=$(CFLAGS) /I"%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Include" \
        /D_USING_V110_SDK71_ /arch:IA32

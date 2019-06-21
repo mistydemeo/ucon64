@@ -24,7 +24,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #ifdef  USE_USB
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdio.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <string.h>
 #include "misc/usb.h"
 

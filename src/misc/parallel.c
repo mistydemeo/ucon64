@@ -27,7 +27,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  USE_PARALLEL
 
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdio.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>                             // ioperm() (libc5)
@@ -669,7 +676,7 @@ parport_open (unsigned short port)
   parport_io_direction = FORWARD;               // set forward direction as default
   ioctl (parport_io_fd, PPDATADIR, &parport_io_direction);
 #elif   defined __BEOS__
-  parport_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
+  parport_io_fd = open ("/dev/misc/ioport", O_RDWR);
   if (parport_io_fd == -1)
     {
       fputs ("ERROR: Could not open I/O port device (no driver)\n"

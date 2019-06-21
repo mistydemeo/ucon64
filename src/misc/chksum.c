@@ -31,7 +31,14 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdlib.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/bswap.h"
 #include "misc/chksum.h"
 #include "misc/misc.h"

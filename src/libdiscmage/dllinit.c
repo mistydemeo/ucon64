@@ -26,7 +26,14 @@ DECLARE_CYGWIN_DLL(DllMain);
 #endif
 
 
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdio.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <string.h>
 #include "libdiscmage.h"
 
@@ -142,10 +149,10 @@ dxe_init (void)
     handle = open_module (MODULE_NAME);
     function1 = ((st_symbol_t *) handle)->function1;
 
-  However, by adding a symbol loading function, st_symbol_t doesn't have to be
-  updated if the DXE should export more or other symbols, which makes using a
-  DXE less error prone. Changing st_symbol_t would also require a recompile of
-  the code that uses the DXE (which is a *bad* thing).
+  However, by adding a symbol searching function, st_symbol_t does not have to
+  be updated if the DXE should export more or other symbols, which makes using
+  a DXE less error prone. Changing st_symbol_t would also require a recompile
+  of the code that uses the DXE (which is a *bad* thing).
   A symbol loading function also makes an "extension API" a bit more elegant,
   because the extension functions needn't be hardcoded in st_symbol_t.
 */

@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #ifdef  _MSC_VER
 #pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #include <io.h>
 #pragma warning(pop)

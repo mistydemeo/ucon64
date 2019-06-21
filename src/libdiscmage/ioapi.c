@@ -6,7 +6,14 @@
    Copyright (C) 1998-2005 Gilles Vollant
 */
 
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdio.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <stdlib.h>
 #include <string.h>
 

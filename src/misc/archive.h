@@ -33,7 +33,14 @@ extern "C" {
 // make sure ZLIB support is enabled everywhere
 //#warning USE_ZLIB is defined
 
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdio.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/unzip.h"
 
 
@@ -59,7 +66,7 @@ extern off_t fsizeof2 (const char *filename);
 #define fread(BUF, SIZE, NUM, FILE) fread2(BUF, SIZE, NUM, FILE)
 #define fgetc(FILE) fgetc2(FILE)
 #define fgets(BUF, MAXLEN, FILE) fgets2(BUF, MAXLEN, FILE)
-#undef  feof                                    // necessary on (at least) Cygwin
+#undef  feof                                    // necessary for (at least) Cygwin
 #define feof(FILE) feof2(FILE)
 #define fwrite(BUF, SIZE, NUM, FILE) fwrite2(BUF, SIZE, NUM, FILE)
 #define fputc(CHAR, FILE) fputc2(CHAR, FILE)

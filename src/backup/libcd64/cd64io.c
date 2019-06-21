@@ -13,7 +13,14 @@
  * Foundation.
  */
 
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdlib.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdarg.h>

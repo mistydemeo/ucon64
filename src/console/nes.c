@@ -22,8 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <ctype.h>
 #ifdef  _MSC_VER
+#pragma warning(pop)
 #pragma warning(push)
 #pragma warning(disable: 4820) // 'bytes' bytes padding added after construct 'member_name'
 #include <io.h>
@@ -7164,9 +7169,10 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
       if ((unif_chunk = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
         {
+          uint32_t length = unif_chunk->length < 4000 ? unif_chunk->length : 4000;
           // properly handle string that is not null-terminated
           pos += sprintf (rominfo->misc + pos, "Comment: %.*s\n",
-                          unif_chunk->length, (char *) unif_chunk->data);
+                          length, (char *) unif_chunk->data);
           free (unif_chunk);
         }
 #if     UNIF_REVISION > 7
@@ -7210,8 +7216,9 @@ nes_init (st_ucon64_nfo_t *rominfo)
                       x++;
                     }
                 }
+              x = unif_chunk->length < 4000 ? unif_chunk->length : 4000;
               pos += sprintf (rominfo->misc + pos, "%.*s",
-                              unif_chunk->length, (char *) unif_chunk->data);
+                              x, (char *) unif_chunk->data);
               y = 1;
               free (unif_chunk);
             }
@@ -7298,9 +7305,11 @@ nes_init (st_ucon64_nfo_t *rominfo)
 
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
+          uint32_t length = unif_chunk->length < BOARDNAME_MAXLEN ?
+                              unif_chunk->length : BOARDNAME_MAXLEN;
           // properly handle string that is not null-terminated
           pos += sprintf (rominfo->misc + pos, "Board name: %.*s\n",
-                          BOARDNAME_MAXLEN, (char *) unif_chunk->data);
+                          length, (char *) unif_chunk->data);
           free (unif_chunk);
         }
       if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)

@@ -47,7 +47,14 @@
 Portions copyright (c) 2001 - 2002       NoisyB
 Portions copyright (c) 2002, 2016 - 2017 dbjh
 */
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <ctype.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "misc/misc.h"

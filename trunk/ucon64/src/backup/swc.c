@@ -25,7 +25,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdlib.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/archive.h"
 #include "misc/misc.h"
 #include "ucon64_misc.h"
@@ -1041,13 +1048,15 @@ sub (void)
 static int
 mram_helper (unsigned short x)
 {
+  unsigned char y;
+
   ffe_send_command (5, x, 0);
-  x = ffe_send_command1 (0x8000);
-  ffe_send_command0 (0x8000, (unsigned char) (x ^ 0xff));
-  if (ffe_send_command1 (0x8000) != (unsigned char) (x ^ 0xff))
+  y = ffe_send_command1 (0x8000);
+  ffe_send_command0 (0x8000, y ^ 0xff);
+  if (ffe_send_command1 (0x8000) != (y ^ 0xff))
     return 0;
 
-  ffe_send_command0 (0x8000, (unsigned char) x);
+  ffe_send_command0 (0x8000, y);
   return 1;
 }
 

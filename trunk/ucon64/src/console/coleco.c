@@ -20,7 +20,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <string.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/archive.h"
 #include "misc/file.h"
 #include "ucon64_misc.h"

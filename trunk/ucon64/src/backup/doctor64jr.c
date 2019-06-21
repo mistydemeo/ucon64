@@ -131,7 +131,14 @@ void mainproc(void *arg) {
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+#endif
 #include <stdlib.h>
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
 #include "misc/archive.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"

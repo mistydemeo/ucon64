@@ -59,7 +59,7 @@ extern off_t q_fsize2 (const char *filename);
 #define fread(BUF, SIZE, NUM, FILE) fread2(BUF, SIZE, NUM, FILE)
 #define fgetc(FILE) fgetc2(FILE)
 #define fgets(BUF, MAXLEN, FILE) fgets2(BUF, MAXLEN, FILE)
-#undef  feof                                    // necessary on (at least) Cygwin
+#undef  feof                                    // necessary for (at least) Cygwin
 #define feof(FILE) feof2(FILE)
 #define fwrite(BUF, SIZE, NUM, FILE) fwrite2(BUF, SIZE, NUM, FILE)
 #define fputc(CHAR, FILE) fputc2(CHAR, FILE)

@@ -1215,9 +1215,7 @@ main (int argc, char **argv)
             GNU/Linux /proc/sys/kernel/sched_rt_runtime_us is -1).
           */
           --sp.sched_priority;
-#if     defined __unix__ && !(defined __MSDOS__ || defined __CYGWIN__ || defined USE_PPDEV)
           regain_privileges ();
-#endif
           // SCHED_RESET_ON_FORK is specific to Linux and we ignore fork() for now
           if (sched_setscheduler (0, SCHED_FIFO /* | SCHED_RESET_ON_FORK */, &sp) >= 0)
             printf ("Set scheduling policy to SCHED_FIFO and scheduling priority to %d\n\n",

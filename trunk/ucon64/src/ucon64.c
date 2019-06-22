@@ -407,6 +407,7 @@ ucon64_test (void)
       {UCON64_GG,	"ucon64 -gg", TEST_TODO},
       {UCON64_GGD,	"ucon64 -ggd", TEST_TODO},
       {UCON64_GGE,	"ucon64 -gge", TEST_TODO},
+      {UCON64_GP2BMP,	"ucon64 -gp2bmp", TEST_TODO},
       {UCON64_HD,	"ucon64 -snes -hd /tmp/test/test.1mb", 0x9ea45865},
       {UCON64_HDN,	"ucon64 -snes -hdn=1024 /tmp/test/test.1mb", 0x37812a26},
       {UCON64_HEX,	"ucon64 -hex /tmp/test/test.txt", 0x90d0b764},
@@ -414,6 +415,7 @@ ucon64_test (void)
       {UCON64_HFINDR,	"ucon64 -hfindr \"01 02 03 04\" /tmp/test/test.txt", 0x88a6f737},
       {UCON64_HI,	"ucon64 -snes -hi /tmp/test/test.1mb", 0x086266b1},
       {UCON64_I,	"ucon64 -i", TEST_TODO},
+      {UCON64_IC2,	"ucon64 -ic2", TEST_TODO},
       {UCON64_IDNUM,	"ucon64 -idnum", TEST_TODO},
       {UCON64_IDPPF,	"ucon64 -idppf", TEST_TODO},
       {UCON64_INES,	"ucon64 -ines", TEST_TODO},
@@ -443,6 +445,7 @@ ucon64_test (void)
       {UCON64_MD5,	"ucon64 -md5", TEST_TODO},
       {UCON64_MGD,	"ucon64 -mgd", TEST_TODO},
       {UCON64_MGDGG,	"ucon64 -mgdgg", TEST_TODO},
+      {UCON64_MGH,	"ucon64 -mgh", TEST_TODO},
       {UCON64_MIRR,	"ucon64 -mirr", TEST_TODO},
       {UCON64_MKA,	"ucon64 -mka", TEST_TODO},
       {UCON64_MKDAT,	"ucon64 -mkdat", TEST_TODO},
@@ -515,8 +518,12 @@ ucon64_test (void)
       {UCON64_SMC,	"ucon64 -smc", TEST_TODO},
       {UCON64_SMD,	"ucon64 -smd", TEST_TODO},
       {UCON64_SMDS,	"ucon64 -smds", TEST_TODO},
+      {UCON64_SMGH,	"ucon64 -smgh", TEST_TODO},
+      {UCON64_SMINIS,	"ucon64 -sminis=CLV-P-VAAQJ", TEST_TODO},
+      {UCON64_SMINI2SRM,	"ucon64 -smini2srm", TEST_TODO},
       {UCON64_SMS,	"ucon64 -sms /tmp/test/test.1mb", 0x73996f1d},
       {UCON64_SNES,	"ucon64 -snes /tmp/test/test.1mb", 0xf3091231},
+      {UCON64_SPLIT,	"ucon64 -split=32768", TEST_TODO},
       {UCON64_SRAM,	"ucon64 -sram", TEST_TODO},
       {UCON64_SSC,	"ucon64 -ssc", TEST_TODO},
       {UCON64_SSIZE,	"ucon64 -ssize", TEST_TODO},
@@ -901,6 +908,10 @@ main (int argc, char **argv)
         "This may be freely redistributed under the terms of the GNU Public License\n");
 #endif
 
+#if     defined __unix__ && !defined __MSDOS__
+  drop_privileges_temp ();
+#endif
+
   if (atexit (ucon64_exit) == -1)
     {
       fputs ("ERROR: Could not register function with atexit()\n", stderr);
@@ -967,12 +978,6 @@ main (int argc, char **argv)
 #endif
 
   // configfile handling
-#ifdef  __unix__
-  // We need to modify the umask, because the configfile is made while we are
-  //  still running as root. Maybe 0 is even better (in case root did
-  //  "chmod +s").
-  umask (002);
-#endif
   realpath2 (PROPERTY_HOME_RC ("ucon64"), ucon64.configfile);
 
   {
@@ -1229,6 +1234,9 @@ main (int argc, char **argv)
   */
   if (ucon64.parport_needed == 1)
     {
+#if     defined __unix__ && !(defined __MSDOS__ || defined __CYGWIN__ || defined USE_PPDEV)
+      regain_privileges ();
+#endif
       ucon64.parport = parport_open (ucon64.parport);
       if (register_func (parport_close) == -1)
         {
@@ -1237,7 +1245,7 @@ main (int argc, char **argv)
         }
       ucon64.parport_mode = parport_setup (ucon64.parport, ucon64.parport_mode);
     }
-#endif
+#endif // USE_PARALLEL
 #if     defined __unix__ && !defined __MSDOS__
   /*
     We can drop privileges after we have set up parallel port access. We cannot

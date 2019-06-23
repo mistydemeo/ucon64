@@ -6,8 +6,8 @@ CC=cl.exe
 CFLAGS=$(CFLAGS) /nologo /I. /W4 /Wall /wd4710 /wd4711 /wd5045 /O2 /MT /DDLL \
        /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /DHAVE_CONFIG_H
 # Place /Wall *after* /W<n>. /W<n> after /Wall will adjust the effect of /Wall.
-# /wd4710, 'function' : function not inlined
-# /wd4711, function 'function' selected for inline expansion
+# /wd4710: 'function' : function not inlined
+# /wd4711: function 'function' selected for inline expansion
 # /wd5045: Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
 !ifdef DLOPEN
 CFLAGS=$(CFLAGS) /DDLOPEN

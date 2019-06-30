@@ -630,6 +630,22 @@ ucon64_switches (st_ucon64_t *p)
       ucon64.dump_info = option_arg;
       break;
 
+    case UCON64_RANGE:
+      {
+        unsigned int offset1, offset2;
+        // %ll is supported for sscanf() since C99...
+        sscanf (option_arg, "%x:%x", &offset1, &offset2);
+        if (offset1 >= offset2)
+          {
+            fputs ("ERROR: When specifying a range O2 (offset 2) must be larger than O1 (offset 1)\n",
+                   stderr);
+            exit (1);
+          }
+        ucon64.range_start = offset1;
+        ucon64.range_length = offset2 - offset1 + 1;
+      }
+      break;
+
     case UCON64_Q:
     case UCON64_QQ:                             // for now -qq is equivalent to -q
       ucon64.quiet = 1;

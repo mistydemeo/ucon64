@@ -947,6 +947,8 @@ main (int argc, char **argv)
   ucon64.mirror =
   ucon64.org_console =
   ucon64.part_size =
+  ucon64.range_start =
+  ucon64.range_length =
   ucon64.region =
   ucon64.snes_header_base =
   ucon64.snes_hirom =
@@ -1170,8 +1172,8 @@ main (int argc, char **argv)
 
   /*
     Call ucon64_dat_indexer() after handling the switches and after calling
-    ansi_init() so that the progress bar is displayed correctly (colour/no
-    colour).
+    ansi_init() so that the progress bar is displayed correctly (color/no
+    color).
   */
   if (ucon64.dat_enabled)
     ucon64_dat_indexer ();              // update cache (index) files if necessary
@@ -1205,7 +1207,7 @@ main (int argc, char **argv)
 #else
       struct sched_param sp;
 
-      memset (&sp, 0, sizeof (sp));
+      memset (&sp, 0, sizeof sp);
       sp.sched_priority = sched_get_priority_max (SCHED_FIFO);
       if (sp.sched_priority != -1)
         {
@@ -1529,7 +1531,7 @@ ucon64_rom_handling (void)
   if (!(ucon64.flags & WF_INIT))
     return 0;
 
-  // try to find the correct console by analysing the ROM
+  // try to find the correct console by analyzing the ROM
   if (ucon64.flags & WF_PROBE)
     {
       if (ucon64.nfo)
@@ -1846,7 +1848,7 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
   if (nfo->header && nfo->header_len)
     {
       dumper (stdout, nfo->header, nfo->header_len,
-        nfo->header_start + nfo->backup_header_len, DUMPER_HEX);
+              nfo->header_start + nfo->backup_header_len, DUMPER_HEX);
       fputc ('\n', stdout);
     }
 
@@ -1885,9 +1887,9 @@ ucon64_rom_nfo (const st_ucon64_nfo_t *nfo)
     // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
     //  nonsense for others
     printf ("Interleaved/Swapped: %s\n",
-      nfo->interleaved ?
-        (nfo->interleaved > 1 ? "Yes (2)" : "Yes") :
-        "No");
+            nfo->interleaved ?
+              (nfo->interleaved > 1 ? "Yes (2)" : "Yes") :
+              "No");
 
   // backup unit header?
   if (nfo->backup_header_len)

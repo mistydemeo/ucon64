@@ -116,10 +116,7 @@ typedef struct
   unsigned int crc32;                           // CRC32 value of ROM (used for DAT files) (NOT console specific)
   unsigned int fcrc32;                          // if non-zero: CRC32 of ROM as it is on disk (NOT console specific)
 
-  /*
-    if console == UCON64_UNKNOWN or st_ucon64_nfo_t == NULL ucon64_rom_nfo() won't
-    be shown
-  */
+  // if console == UCON64_UNKNOWN or st_ucon64_nfo_t == NULL ucon64_rom_nfo() won't be shown
   int console;                                  // the detected console system
   int org_console;                              // the value of console before processing the first file
 
@@ -180,9 +177,11 @@ typedef struct
   int newline_before_rom;                       // see ucon64_execute_options()
 
 #if 1
+  // the following values are for SNES, NES, Genesis and Nintendo 64
+  off_t range_start;
+  size_t range_length;
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
-  // the following values are for SNES, NES, Genesis and Nintendo 64
   int battery;                                  // NES UNIF/iNES/Pasofami
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   const char *comment;                          // NES UNIF

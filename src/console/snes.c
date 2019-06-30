@@ -73,6 +73,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                                                 //  interleaved LoROM "format"
 //#define PAD_40MBIT_GD3_DUMPS                  // padding works for
                                                 //  Dai Kaiju Monogatari 2 (J)
+// default maximum block size used for calculating the SRAM checksum of special
+//  chip games on the SNES/Super Famicom Classic Mini
+#define DEFAULT_MAX_BLOCK_SIZE 0x280
 
 static int snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer,
                         size_t rom_size);
@@ -267,6 +270,14 @@ const st_getopt2_t snes_usage[] =
       &snes_obj[10]
     },
 #endif
+    {
+      "range", 1, 0, UCON64_RANGE,
+      "O1:O2", "specify range for calculating checksum of SNES/Super Famicom\n"
+      "Classic Mini (hakchi2) SRAM data\n"
+      "O1" OPTARG_S "offset (hexadecimal) of first byte of range\n"
+      "O2" OPTARG_S "offset (hexadecimal) of last byte of range",
+      &snes_obj[6]
+    },
     {
       "smini2srm", 0, 0, UCON64_SMINI2SRM,
       NULL, "convert SNES/Super Famicom Classic Mini (hakchi2) SRAM data to\n"
@@ -644,19 +655,18 @@ update_chksum (st_ucon64_nfo_t *rominfo, unsigned char *sum, unsigned int size,
 int
 snes_col (const char *color)
 /*
-The Nintendo Super Famicom is capable of displaying 256 colours from a
-palette of 32,768. These 256 colours are split into 8 palettes of 32 colours
-each.
+The Nintendo Super Famicom is capable of displaying 256 colors from a palette
+of 32,768. These 256 colors are split into 8 palettes of 32 colors each.
 
-To change the colours the following needs to be done:
+To change the colors the following needs to be done:
 
-Loading the palette control register ($2121) with the colour number you wish
-to change (0-255, 0=background).
-Then load the colour into the palette data register first the low 8 bits,
-followed by the high 7 bits (this gives you the maximum 32768 colours
-possible $0000-$7fff).
+Loading the palette control register ($2121) with the color number you wish to
+change (0-255, 0=background).
+Then load the color into the palette data register first the low 8 bits,
+followed by the high 7 bits (this gives you the maximum 32768 colors possible
+$0000-$7fff).
 
-Colour data is made up of 3 components (Red,Green,Blue) each of 5 bits (The
+Color data is made up of 3 components (Red,Green,Blue) each of 5 bits (The
 Amiga uses exactly the same system, but only using 4 bits per component).
 Saying that, Nintendo decided that R,G,B wasn't alphabetically correct and so
 opted to store the bits as B,G,R.
@@ -728,7 +738,7 @@ snes_convert_sramfile (size_t org_header_len, const void *new_header)
 {
   FILE *srcfile, *destfile;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buffer[32 * 1024];
-  size_t blocksize, byteswritten, new_header_len;
+  size_t block_size, byteswritten, new_header_len;
 
   strcpy (src_name, ucon64.fname);
   if (new_header)
@@ -771,15 +781,15 @@ snes_convert_sramfile (size_t org_header_len, const void *new_header)
   else
     byteswritten = 0;
 
-  blocksize = fread (buffer, 1, 32 * 1024, srcfile); // read 32 kB at max
+  block_size = fread (buffer, 1, 32 * 1024, srcfile); // read 32 kB at max
   while (byteswritten < 32 * 1024 + new_header_len)
     {
       // Pad SRAM data to 32 kB by repeating it. At least the SWC DX2 does
       //  something similar.
-      if (byteswritten + blocksize > 32 * 1024 + new_header_len)
-        blocksize = 32 * 1024 + new_header_len - byteswritten;
-      fwrite (buffer, 1, blocksize, destfile);
-      byteswritten += blocksize;
+      if (byteswritten + block_size > 32 * 1024 + new_header_len)
+        block_size = 32 * 1024 + new_header_len - byteswritten;
+      fwrite (buffer, 1, block_size, destfile);
+      byteswritten += block_size;
     }
 
   fclose (srcfile);
@@ -1075,6 +1085,44 @@ display_ustar_header (const st_ustar_header_t *header)
 #endif
 
 
+static int
+set_smini_chksum_range (unsigned int *base, unsigned int *size,
+                        unsigned int sram_data_size, int check_max_block_size)
+{
+  int range_start_set = UCON64_ISSET (ucon64.range_start),
+      range_length_set = UCON64_ISSET2 (ucon64.range_length, size_t);
+  *base = range_start_set ? ucon64.range_start : 0;
+  *size = range_length_set ? ucon64.range_length : sram_data_size - *base;
+
+  // largest valid offset is sram_data_size - 1
+  if (*base >= (unsigned int) sram_data_size)
+    {
+      fprintf (stderr,
+               "ERROR: A range was specified where the offset of the first byte is beyond the\n"
+               "       end of the SRAM data (0x%04x > 0x%04x)\n", *base,
+               (unsigned int) sram_data_size - 1);
+      return -1;
+    }
+  if (*base + *size > (unsigned int) sram_data_size)
+    {
+      fprintf (stderr,
+               "ERROR: A range was specified where the offset of the last byte is beyond the\n"
+               "       end of the SRAM data (0x%04x > 0x%04x)\n", *base + *size - 1,
+               (unsigned int) sram_data_size - 1);
+      return -1;
+    }
+  // The warning below does not apply to Super Mario RPG. See check_smini_save().
+  if (check_max_block_size && range_start_set && range_length_set && *size > DEFAULT_MAX_BLOCK_SIZE)
+    printf ("WARNING: A range was specified that is larger than the default maximum block\n"
+            "         size (0x%04x > 0x%04x). uCON64 may not be able to correctly calculate\n"
+            "         the SRAM checksum unless you specify " OPTION_LONG_S "range=%04x:%04x whenever it\n"
+            "         operates on this file. You can avoid this by specifying a smaller\n"
+            "         range or increasing the value of DEFAULT_MAX_BLOCK_SIZE in snes.c\n",
+            *size, DEFAULT_MAX_BLOCK_SIZE, *base, *base + *size - 1);
+  return 0;
+}
+
+
 #ifdef  USE_ZLIB
 int
 snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
@@ -1086,6 +1134,7 @@ snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
   FILE *destfile;
   st_ustar_header_t header;
   struct stat fstate;
+  unsigned int base, size;
 
   if ((buffer = (unsigned char *) malloc (128 * 1024 + 20)) == NULL)
     {
@@ -1100,9 +1149,13 @@ snes_sminis (st_ucon64_nfo_t *rominfo, const char *id)
       free (buffer);
       return -1;
     }
-
+  if (set_smini_chksum_range (&base, &size, sram_data_size, 1))
+    {
+      free (buffer);
+      return -1;
+    }
   sha1_begin (&sha1_ctx);
-  sha1 (&sha1_ctx, buffer, sram_data_size);
+  sha1 (&sha1_ctx, buffer + base, size);
   sha1_end (buffer + sram_data_size, &sha1_ctx);
 
   strcpy (dest_name, ucon64.fname);
@@ -4525,14 +4578,14 @@ check_ufosd_sram (int *sram_size)
 
           while ((n = fread (buffer, 1, sizeof buffer, file)) != 0)
             {
-              unsigned int m = 0, blocksize = sizeof pattern <= n ? sizeof pattern : n;
-              while (memcmp (buffer + m, pattern, blocksize) == 0)
+              unsigned int m = 0, block_size = sizeof pattern <= n ? sizeof pattern : n;
+              while (memcmp (buffer + m, pattern, block_size) == 0)
                 {
-                  m += blocksize;
+                  m += block_size;
                   if (m == n)
                     break;
-                  if (m + blocksize > n)
-                    blocksize = n - m;
+                  if (m + block_size > n)
+                    block_size = n - m;
                 }
               if (m < n)
                 {
@@ -4580,7 +4633,7 @@ check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
       unsigned char calculated_hash[20];
       char calculated_hash_str[41], internal_hash_str[41],
            internal_hash2_str[41], *p;
-      int i;
+      int i = 0;
 
       // get the game ID and put it in rominfo->name
       snprintf (rominfo->name, sizeof header.name + 9, "Game ID: %.99s",
@@ -4592,9 +4645,71 @@ check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
 
       *sram_size = sram_data_size - 20;
 
-      sha1_begin (&sha1_ctx);
-      sha1 (&sha1_ctx, buffer, *sram_size);
-      sha1_end (calculated_hash, &sha1_ctx);
+      {
+        unsigned int base, size;
+
+        if (set_smini_chksum_range (&base, &size, *sram_size, 0) == 0)
+          {
+            sha1_begin (&sha1_ctx);
+            sha1 (&sha1_ctx, buffer + base, size);
+            sha1_end (calculated_hash, &sha1_ctx);
+          }
+        else
+          memset (calculated_hash, 0, sizeof calculated_hash);
+      }
+      if (!(UCON64_ISSET (ucon64.range_start) &&
+            UCON64_ISSET2 (ucon64.range_length, size_t)) &&
+          *sram_size > 0 && memcmp (calculated_hash, buffer + *sram_size, 20))
+        {
+          int max_block_size = 0x2000; // Super Mario RPG is an exception
+
+          while (i < *sram_size)
+            {
+              int j, j_max = i + max_block_size < *sram_size ?
+                    i + max_block_size : *sram_size, match_found = 0;
+
+              printf ("\rScanning SNES Classic Mini SRAM data, base 0x%04x", i);
+              fflush (stdout);
+              // smallest block size is 0xff bytes for Hoshi no Kirby Super Deluxe
+              for (j = i + 0xff; j <= j_max; j++)
+                {
+                  unsigned char calculated_hash2[20];
+
+                  sha1_begin (&sha1_ctx);
+                  sha1 (&sha1_ctx, buffer + i, j - i);
+                  sha1_end (calculated_hash2, &sha1_ctx);
+                  if (!memcmp (calculated_hash2, buffer + *sram_size, 20))
+                    {
+                      match_found = 1;
+                      memcpy (calculated_hash, calculated_hash2, 20);
+                      // Super Mario RPG: --range=0000:1ffc
+                      // Super Mario World 2 - Yoshi's Island: --range=7c00:7e7b
+                      // Hoshi no Kirby Super Deluxe (J)(/Kirby Super Star (U)/Kirby's Fun Pak (E)): --range=1f00:1ffe
+                      // Star Fox 2: --range=3912:3a45
+                      printf (", block size 0x%04x bytes\n"
+                              "Found block with matching checksum. Use "
+                              OPTION_LONG_S "range" OPTARG_S "%04x:%04x with "
+                              OPTION_LONG_S "sminis", j - i, i, j - 1);
+                      break;
+                    }
+                }
+              if (match_found)
+                break;
+              // All the cases with base > 0 use a very small range for the checksum (< 0x280).
+              max_block_size = DEFAULT_MAX_BLOCK_SIZE;
+#if 1
+              if (i % 0x100 == 0) // Star Fox 2 uses an odd base
+                i += 0x12;
+#else
+              // a bit less specific, but significantly slower
+              if (i % 0x100 < 0x12) // Star Fox 2 uses an odd base
+                i++;
+#endif
+              else
+                i = i + 0x100 - i % 0x100;
+            }
+          puts ("\n");
+        }
 
       p = calculated_hash_str;
       for (i = 0; i < 20; i++, p = strchr (p, 0))

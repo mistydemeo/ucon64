@@ -1095,7 +1095,7 @@ set_smini_chksum_range (unsigned int *base, unsigned int *size,
   *size = range_length_set ? ucon64.range_length : sram_data_size - *base;
 
   // largest valid offset is sram_data_size - 1
-  if (*base >= (unsigned int) sram_data_size)
+  if (sram_data_size && *base >= (unsigned int) sram_data_size)
     {
       fprintf (stderr,
                "ERROR: A range was specified where the offset of the first byte is beyond the\n"

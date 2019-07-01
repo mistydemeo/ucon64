@@ -947,8 +947,6 @@ main (int argc, char **argv)
   ucon64.mirror =
   ucon64.org_console =
   ucon64.part_size =
-  ucon64.range_start =
-  ucon64.range_length =
   ucon64.region =
   ucon64.snes_header_base =
   ucon64.snes_hirom =
@@ -956,6 +954,9 @@ main (int argc, char **argv)
   ucon64.org_split =
   ucon64.use_dump_info =
   ucon64.vram = UCON64_UNKNOWN;
+
+  ucon64.range_start = UCON64_UNKNOWN;
+  ucon64.range_length = UCON64_UNKNOWN;
 
   ucon64.newline_before_rom = 1;
 

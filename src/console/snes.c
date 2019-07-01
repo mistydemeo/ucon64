@@ -73,9 +73,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                                                 //  interleaved LoROM "format"
 //#define PAD_40MBIT_GD3_DUMPS                  // padding works for
                                                 //  Dai Kaiju Monogatari 2 (J)
-// default maximum block size used for calculating the SRAM checksum of special
-//  chip games on the SNES/Super Famicom Classic Mini
+// block sizes used for calculating the SRAM checksum of special chip games on
+//  the SNES/Super Famicom Classic Mini
+#define INITIAL_MAX_BLOCK_SIZE 0x2000
 #define DEFAULT_MAX_BLOCK_SIZE 0x280
+#define MIN_BLOCK_SIZE 0xff
 
 static int snes_chksum (st_ucon64_nfo_t *rominfo, unsigned char *rom_buffer,
                         size_t rom_size);
@@ -656,7 +658,7 @@ int
 snes_col (const char *color)
 /*
 The Nintendo Super Famicom is capable of displaying 256 colors from a palette
-of 32,768. These 256 colors are split into 8 palettes of 32 colors each.
+of 32768. These 256 colors are split into 8 palettes of 32 colors each.
 
 To change the colors the following needs to be done:
 
@@ -1095,30 +1097,30 @@ set_smini_chksum_range (unsigned int *base, unsigned int *size,
   *size = range_length_set ? ucon64.range_length : sram_data_size - *base;
 
   // largest valid offset is sram_data_size - 1
-  if (sram_data_size && *base >= (unsigned int) sram_data_size)
+  if (sram_data_size && *base >= sram_data_size)
     {
       fprintf (stderr,
                "ERROR: A range was specified where the offset of the first byte is beyond the\n"
                "       end of the SRAM data (0x%04x > 0x%04x)\n", *base,
-               (unsigned int) sram_data_size - 1);
+               sram_data_size - 1);
       return -1;
     }
-  if (*base + *size > (unsigned int) sram_data_size)
+  if (*base + *size > sram_data_size)
     {
       fprintf (stderr,
                "ERROR: A range was specified where the offset of the last byte is beyond the\n"
                "       end of the SRAM data (0x%04x > 0x%04x)\n", *base + *size - 1,
-               (unsigned int) sram_data_size - 1);
+               sram_data_size - 1);
       return -1;
     }
-  // The warning below does not apply to Super Mario RPG. See check_smini_save().
-  if (check_max_block_size && range_start_set && range_length_set && *size > DEFAULT_MAX_BLOCK_SIZE)
-    printf ("WARNING: A range was specified that is larger than the default maximum block\n"
-            "         size (0x%04x > 0x%04x). uCON64 may not be able to correctly calculate\n"
-            "         the SRAM checksum unless you specify " OPTION_LONG_S "range=%04x:%04x whenever it\n"
-            "         operates on this file. You can avoid this by specifying a smaller\n"
-            "         range or increasing the value of DEFAULT_MAX_BLOCK_SIZE in snes.c\n",
-            *size, DEFAULT_MAX_BLOCK_SIZE, *base, *base + *size - 1);
+  if (check_max_block_size && range_start_set && range_length_set &&
+      ((*base == 0 && *size > INITIAL_MAX_BLOCK_SIZE && *size < sram_data_size) ||
+       (*base > 0 && (*size < MIN_BLOCK_SIZE || *size > DEFAULT_MAX_BLOCK_SIZE ||
+                      (*base % 0x100 != 0 && *base % 0x100 != 0x12)))))
+    printf ("WARNING: A range was specified that uCON64 will not automatically detect.\n"
+            "         uCON64 will not be able to correctly calculate the SRAM checksum\n"
+            "         unless you specify " OPTION_LONG_S "range=%04x:%04x whenever it operates on this\n"
+            "         file\n", *base, *base + *size - 1);
   return 0;
 }
 
@@ -4605,7 +4607,7 @@ check_ufosd_sram (int *sram_size)
 
 
 static int
-check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
+check_smini_save (unsigned int *sram_size, st_ucon64_nfo_t *rominfo)
 {
   st_ustar_header_t header;
   unsigned char *buffer, sram_checksum[20] = { 0 };
@@ -4633,7 +4635,7 @@ check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
       unsigned char calculated_hash[20];
       char calculated_hash_str[41], internal_hash_str[41],
            internal_hash2_str[41], *p;
-      int i = 0;
+      unsigned int i = 0;
 
       // get the game ID and put it in rominfo->name
       snprintf (rominfo->name, sizeof header.name + 9, "Game ID: %.99s",
@@ -4661,17 +4663,17 @@ check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
             UCON64_ISSET2 (ucon64.range_length, size_t)) &&
           *sram_size > 0 && memcmp (calculated_hash, buffer + *sram_size, 20))
         {
-          int max_block_size = 0x2000; // Super Mario RPG is an exception
+          unsigned int max_block_size = INITIAL_MAX_BLOCK_SIZE; // Super Mario RPG is an exception
 
           while (i < *sram_size)
             {
-              int j, j_max = i + max_block_size < *sram_size ?
-                    i + max_block_size : *sram_size, match_found = 0;
+              unsigned int j, j_max = i + max_block_size < *sram_size ?
+                             i + max_block_size : *sram_size, match_found = 0;
 
               printf ("\rScanning SNES Classic Mini SRAM data, base 0x%04x", i);
               fflush (stdout);
               // smallest block size is 0xff bytes for Hoshi no Kirby Super Deluxe
-              for (j = i + 0xff; j <= j_max; j++)
+              for (j = i + MIN_BLOCK_SIZE; j <= j_max; j++)
                 {
                   unsigned char calculated_hash2[20];
 
@@ -4706,7 +4708,7 @@ check_smini_save (int *sram_size, st_ucon64_nfo_t *rominfo)
                 i++;
 #endif
               else
-                i = i + 0x100 - i % 0x100;
+                i += 0x100 - i % 0x100;
             }
           puts ("\n");
         }
@@ -4897,7 +4899,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
         return -1;
     }
   else
-    x = check_smini_save (&y, rominfo);
+    x = check_smini_save ((unsigned int *) &y, rominfo);
 
   if ((x == SWC && (header.type == 5 || header.type == 8)) ||
       (x == UFO && OFFSET (header, 0x11) == 0) ||

@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units.
 
 Copyright (c) 1999 - 2004              NoisyB
-Copyright (c) 2001 - 2004, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2004, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
+#include <sys/types.h>                          // off_t
 #include "misc/itypes.h"
 #include "misc/parallel.h"
 #include "ucon64_defines.h"                     // MAXBUFSIZE, etc..

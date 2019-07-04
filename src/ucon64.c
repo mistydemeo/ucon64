@@ -492,6 +492,7 @@ ucon64_test (void)
       {UCON64_R83,      "cp /tmp/test/1234567890.abcd .;"
                         "ucon64 -r83 1234567890.abcd;"
                         "rm 12345eeb.abc", 0x1f791880},
+      {UCON64_RANGE,	"ucon64 -smini=CLV-P-VADKJ -range=3912:3a45 /tmp/test/starfox2.srm", TEST_TODO},
       {UCON64_RDAT,	"ucon64 -rdat", TEST_TODO},
       {UCON64_REGION,	"ucon64 -region", TEST_TODO},
       {UCON64_RJOLIET,  "cp /tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd .;"
@@ -519,8 +520,8 @@ ucon64_test (void)
       {UCON64_SMD,	"ucon64 -smd", TEST_TODO},
       {UCON64_SMDS,	"ucon64 -smds", TEST_TODO},
       {UCON64_SMGH,	"ucon64 -smgh", TEST_TODO},
-      {UCON64_SMINIS,	"ucon64 -sminis=CLV-P-VAAQJ", TEST_TODO},
-      {UCON64_SMINI2SRM,	"ucon64 -smini2srm", TEST_TODO},
+      {UCON64_SMINIS,	"ucon64 -sminis=CLV-P-VAAAJ /tmp/test/mario.srm", TEST_TODO},
+      {UCON64_SMINI2SRM,	"ucon64 -smini2srm /tmp/test/mario.clvs", TEST_TODO},
       {UCON64_SMS,	"ucon64 -sms /tmp/test/test.1mb", 0x73996f1d},
       {UCON64_SNES,	"ucon64 -snes /tmp/test/test.1mb", 0xf3091231},
       {UCON64_SPLIT,	"ucon64 -split=32768", TEST_TODO},
@@ -956,7 +957,7 @@ main (int argc, char **argv)
   ucon64.vram = UCON64_UNKNOWN;
 
   ucon64.range_start = UCON64_UNKNOWN;
-  ucon64.range_length = UCON64_UNKNOWN;
+  ucon64.range_length = (size_t) UCON64_UNKNOWN;
 
   ucon64.newline_before_rom = 1;
 

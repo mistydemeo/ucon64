@@ -125,7 +125,7 @@ AC_ARG_WITH(libcd64,
             with_libcd64=no)
 if test $with_libcd64 = yes; then
   CFLAGS0=$CFLAGS
-  CFLAGS+=" -Ibackup/libcd64"
+  CFLAGS="$CFLAGS -Ibackup/libcd64"
   AC_TRY_COMPILE([#include "ultra64/host/cd64lib.h"], , with_libcd64=yes, with_libcd64=no)
   CFLAGS=$CFLAGS0
 fi

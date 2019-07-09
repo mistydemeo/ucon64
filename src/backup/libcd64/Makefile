@@ -80,19 +80,10 @@ RAWIO=1
 endif
 
 ifeq ($(OSTYPE),OpenBSD)
-# i386_iopl() is located in libi386.a (note the .a)
-#LIBS+=/usr/lib/libi386.a
-#LDFLAGS+=-li386
-LIBS+=/usr/lib/libamd64.a
-LDFLAGS+=-lamd64
 RAWIO=1
 endif
 
 ifeq ($(OSTYPE),NetBSD)
-#LIBS+=/usr/lib/libi386.a
-#LDFLAGS+=-li386
-LIBS+=/usr/lib/libx86_64.a
-LDFLAGS+=-lx86_64
 RAWIO=1
 endif
 
@@ -131,6 +122,21 @@ endif
 
 ifdef RAWIO
 CFLAGS+=-DCD64_USE_RAWIO
+
+ifeq ($(OSTYPE),OpenBSD)
+# i386_iopl() is located in libi386.a (note the .a)
+#LIBS+=/usr/lib/libi386.a
+#LDFLAGS+=-li386
+LIBS+=/usr/lib/libamd64.a
+LDFLAGS+=-lamd64
+endif
+
+ifeq ($(OSTYPE),NetBSD)
+#LIBS+=/usr/lib/libi386.a
+#LDFLAGS+=-li386
+LIBS+=/usr/lib/libx86_64.a
+LDFLAGS+=-lx86_64
+endif
 endif
 
 default: all

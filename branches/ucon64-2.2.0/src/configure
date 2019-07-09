@@ -3434,7 +3434,7 @@ fi
 
 if test $with_libcd64 = yes; then
   CFLAGS0=$CFLAGS
-  CFLAGS+=" -Ibackup/libcd64"
+  CFLAGS="$CFLAGS -Ibackup/libcd64"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include "ultra64/host/cd64lib.h"

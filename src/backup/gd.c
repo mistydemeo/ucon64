@@ -595,7 +595,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
   unsigned char *buffer;
   char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12] = { { 0 } },
        *filenames[GD3_MAX_UNITS], dir[FILENAME_MAX];
-  unsigned int num_units, i, split, hirom = snes_get_snes_hirom (),
+  unsigned int num_units, i, hirom = snes_get_snes_hirom (),
                gd6_protocol = !memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4);
   st_add_filename_data_t add_filename_data = { 0, NULL };
 
@@ -611,14 +611,10 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
     names[i] = names_mem[i];
   add_filename_data.names = names;
 
-  split = ucon64_testsplit (filename, gd_add_filename, &add_filename_data);
-  if (UCON64_ISSET (ucon64.split) ? ucon64.split : (int) split)
-    num_units = split;
+  if (ucon64.split)                             // snes_init() sets ucon64.split
+    num_units = ucon64_testsplit (filename, gd_add_filename, &add_filename_data);
   else
-    {
-      split = 0;
-      num_units = snes_gd_make_names (filename, rominfo->backup_header_len, names);
-    }
+    num_units = snes_gd_make_names (filename, rominfo->backup_header_len, names);
 
   dirname2 (filename, dir);
   gd_fsize = 0;
@@ -642,7 +638,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
         }
       sprintf (filenames[i], "%s" DIR_SEPARATOR_S "%s.078", dir, names[i]); // should match with what code of -s does
 
-      if (split)
+      if (ucon64.split)
         {
           x = fsizeof (filenames[i]);
           gd_fsize += x;
@@ -692,10 +688,11 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
       unsigned char send_header = i == 0 ? 1 : 0;
 
 #ifdef  DEBUG
-      printf ("\nfilename (%u): \"%s\", ", split, split ? (char *) filenames[i] : filename);
-      printf ("name: \"%s\", size: %u\n", gd3_dram_unit[i].name, gd3_dram_unit[i].size);
+      printf ("\nfilename (%u): \"%s\", name: \"%s\", size: %u\n",
+              ucon64.split, ucon64.split ? (char *) filenames[i] : filename,
+              gd3_dram_unit[i].name, gd3_dram_unit[i].size);
 #endif
-      if (split)
+      if (ucon64.split)
         {
           if ((file = fopen (filenames[i], "rb")) == NULL)
             {
@@ -749,7 +746,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
             }
           gd_bytessent += GD_HEADER_LEN;
         }
-      if (!split)                               // not pre-split -- have to split it ourselves
+      if (!ucon64.split)                        // not pre-split -- have to split it ourselves
         {
           if (hirom)
             fseek (file, i * gd3_dram_unit[0].size + GD_HEADER_LEN, SEEK_SET);
@@ -764,7 +761,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
           io_error (gd6_protocol ? "gd6_send_bytes()" : "gd3_send_bytes()");
         }
 
-      if (split || i == num_units - 1)
+      if (ucon64.split || i == num_units - 1)
         fclose (file);
     }
 

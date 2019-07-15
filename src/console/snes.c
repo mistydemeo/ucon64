@@ -58,6 +58,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/gd.h"
 #include "backup/mgd.h"
 #include "backup/mgh.h"
+#include "backup/smcic2.h"
 #include "backup/swc.h"
 #include "backup/ufo.h"
 #include "backup/ufosd.h"
@@ -2531,7 +2532,7 @@ snes_split_ufo (size_t backup_header_len, size_t size, size_t part_size)
 {
   st_ufo_header_t header;
   char dest_name[FILENAME_MAX], *p;
-  size_t nparts, surplus, n, nbytesdone;
+  size_t nparts = 0, surplus = 0, n, nbytesdone;
 
   if (snes_hirom)
     {
@@ -2542,6 +2543,21 @@ snes_split_ufo (size_t backup_header_len, size_t size, size_t part_size)
         }
       if (UCON64_ISSET (ucon64.part_size))
         puts ("NOTE: Splitting Super UFO HiROM, ignoring switch " OPTION_LONG_S "ssize");
+    }
+  else
+    {
+      nparts = size / part_size;
+      surplus = size % part_size;
+      if (nparts + (surplus ? 1 : 0) > 9)
+        {
+          fprintf (stderr,
+                   "ERROR: This part size (%u Mbit) would result in more than the maximum number\n"
+                   "       of parts (%u). Specify a part size of %u Mbit or larger with " OPTION_LONG_S "ssize\n",
+                   (unsigned) part_size / MBIT,
+                   (unsigned) nparts + (surplus ? 1 : 0),
+                   (unsigned) (size + 9 * MBIT - 1) / (9 * MBIT));
+          return;
+        }
     }
 
   strcpy (dest_name, ucon64.fname);
@@ -2624,9 +2640,6 @@ snes_split_ufo (size_t backup_header_len, size_t size, size_t part_size)
     }
   else
     {
-      nparts = size / part_size;
-      surplus = size % part_size;
-
       header.size_low = (unsigned char) (part_size / 8192);
       header.size_high = (unsigned char) (part_size / 8192 >> 8);
       header.multi = 0x40;
@@ -2666,6 +2679,17 @@ snes_split_smc (size_t backup_header_len, size_t size, size_t part_size)
   st_swc_header_t header;
   char dest_name[FILENAME_MAX], *p;
   size_t nparts = size / part_size, surplus = size % part_size, n;
+
+  if (nparts + (surplus ? 1 : 0) > 9)
+    {
+      fprintf (stderr,
+               "ERROR: This part size (%u Mbit) would result in more than the maximum number\n"
+               "       of parts (%u). Specify a part size of %u Mbit or larger with " OPTION_LONG_S "ssize\n",
+               (unsigned) part_size / MBIT,
+               (unsigned) nparts + (surplus ? 1 : 0),
+               (unsigned) (size + 9 * MBIT - 1) / (9 * MBIT));
+      return;
+    }
 
   strcpy (dest_name, ucon64.fname);
   set_suffix (dest_name, ".1");
@@ -2715,7 +2739,7 @@ snes_s (st_ucon64_nfo_t *rominfo)
 
   if (UCON64_ISSET (ucon64.part_size) &&
       !(copier_type == GD3 || (copier_type == UFO && snes_hirom) ||
-        copier_type == UFOSD))
+        copier_type == UFOSD || copier_type == IC2))
     {
       part_size = ucon64.part_size;
       /*
@@ -5019,7 +5043,7 @@ snes_init (st_ucon64_nfo_t *rominfo)
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : snes_check_interleaved (rom_buffer, size, x);
 
-  // check_smc_ic2_rom() only sets split_info.parts[n].size if ucon64.split is 2
+  // check_smc_ic2_rom() sets split_info.parts[n].size only if ucon64.split is 2
   if (rominfo->interleaved &&
       split_info.parts[0].size == 8 * MBIT + rominfo->backup_header_len &&
       split_info.parts[1].size == 8 * MBIT + rominfo->backup_header_len)
@@ -5137,9 +5161,8 @@ snes_init (st_ucon64_nfo_t *rominfo)
         case FIG:
           rominfo->backup_usage = fig_usage[0].help;
           break;
-        case IC2: // not Future Supercom Hyper Effect Pro.9, unsure about Supercom Pro 2
-          rominfo->backup_usage = "UFO Super Drive PRO 6 HYPER VERSION/Future Supercom Pro.9/Twin Supercom\n"
-                                  "(Modified) Supercom/(Modified) Super Magicom";
+        case IC2:
+          rominfo->backup_usage = smcic2_usage[0].help;
           break;
         // just assume it's in SWC format... (there are _many_ ROMs on the
         //  internet with incorrect headers)

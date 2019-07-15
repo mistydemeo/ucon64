@@ -127,6 +127,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/quickdev16.h"
 #include "backup/sflash.h"
 #include "backup/smc.h"
+#include "backup/smcic2.h"
 #include "backup/smd.h"
 #include "backup/smsgg-pro.h"
 #include "backup/swc.h"
@@ -230,6 +231,7 @@ static const st_getopt2_t lf[] =
     swc_usage,
     gd_usage,
     fig_usage,
+    smcic2_usage,
     sflash_usage,
 //    mgd_usage,
 #endif
@@ -492,7 +494,7 @@ ucon64_test (void)
       {UCON64_R83,      "cp /tmp/test/1234567890.abcd .;"
                         "ucon64 -r83 1234567890.abcd;"
                         "rm 12345eeb.abc", 0x1f791880},
-      {UCON64_RANGE,	"ucon64 -smini=CLV-P-VADKJ -range=3912:3a45 /tmp/test/starfox2.srm", TEST_TODO},
+      {UCON64_RANGE,	"ucon64 -sminis=CLV-P-VADKJ -range=3912:3a45 /tmp/test/starfox2.srm", TEST_TODO},
       {UCON64_RDAT,	"ucon64 -rdat", TEST_TODO},
       {UCON64_REGION,	"ucon64 -region", TEST_TODO},
       {UCON64_RJOLIET,  "cp /tmp/test/1234567890123456789012345678901234567890123456789012345678901234567890.abcd .;"
@@ -2063,6 +2065,7 @@ ucon64_usage (int argc, char *argv[], int view)
 //        getopt2_usage (sc_usage);
         getopt2_usage (sflash_usage);
         getopt2_usage (smc_usage);
+        getopt2_usage (smcic2_usage);
         getopt2_usage (smd_usage);
         getopt2_usage (smsggpro_usage);
 //        getopt2_usage (spsc_usage);

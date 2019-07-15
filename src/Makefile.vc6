@@ -88,9 +88,9 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
         backup/md-pro.obj backup/mgd.obj backup/mgh.obj backup/msg.obj \
         backup/nfc.obj backup/pce-pro.obj backup/pl.obj backup/psxpblib.obj \
         backup/quickdev16.obj backup/sc.obj backup/sflash.obj backup/smc.obj \
-        backup/smd.obj backup/smsgg-pro.obj backup/spsc.obj backup/ssc.obj \
-        backup/swc.obj backup/tototek.obj backup/ufo.obj backup/ufosd.obj \
-        backup/yoko.obj backup/z64.obj \
+        backup/smcic2.obj backup/smd.obj backup/smsgg-pro.obj backup/spsc.obj \
+        backup/ssc.obj backup/swc.obj backup/tototek.obj backup/ufo.obj \
+        backup/ufosd.obj backup/yoko.obj backup/z64.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/patch.obj \
         patch/ppf.obj
 !ifdef USE_LIBCD64
@@ -226,8 +226,8 @@ ucon64.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
           backup/doctor64.h backup/doctor64jr.h backup/f2a.h backup/fal.h \
           backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h backup/mcd.h \
           backup/md-pro.h backup/msg.h backup/pce-pro.h backup/pl.h \
-          backup/quickdev16.h backup/sflash.h backup/smc.h backup/smd.h \
-          backup/smsgg-pro.h backup/swc.h \
+          backup/quickdev16.h backup/sflash.h backup/smc.h backup/smcic2.h \
+          backup/smd.h backup/smsgg-pro.h backup/swc.h \
           patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/patch.h \
           patch/ppf.h
 ucon64_dat.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
@@ -254,7 +254,7 @@ ucon64_opts.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h \
                backup/mcd.h backup/md-pro.h backup/msg.h backup/pce-pro.h \
                backup/pl.h backup/quickdev16.h backup/sflash.h backup/smc.h \
-               backup/smd.h backup/smsgg-pro.h backup/swc.h \
+               backup/smcic2.h backup/smd.h backup/smsgg-pro.h backup/swc.h \
                patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h
 backup/backup.obj: config.h backup/backup.h $(GETOPT2_H_DEPS)
 backup/cc2.obj: config.h $(UCON64_H_DEPS) backup/cc2.h $(GETOPT2_H_DEPS)
@@ -321,6 +321,9 @@ backup/sflash.obj: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
                  $(GETOPT2_H_DEPS)
 backup/smc.obj: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
               $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smc.h $(GETOPT2_H_DEPS)
+backup/smcic2.obj: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
+                 $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smcic2.h \
+                 backup/swc.h $(GETOPT2_H_DEPS)
 backup/smd.obj: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(UCON64_H_DEPS) \
               $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smd.h $(GETOPT2_H_DEPS)
 backup/smsgg-pro.obj: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
@@ -388,7 +391,7 @@ console/snes.obj: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
                 misc/file.h $(MISC_H_DEPS) misc/string.h $(TERM_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) $(SNES_H_DEPS) \
                 backup/backup.h backup/gd.h backup/mgd.h backup/mgh.h \
-                backup/swc.h backup/ufo.h backup/ufosd.h
+                backup/smcic2.h backup/swc.h backup/ufo.h backup/ufosd.h
 console/swan.obj: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) console/swan.h backup/backup.h \
                 $(CONSOLE_DEPS)

@@ -116,7 +116,7 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
         backup/md-pro.o backup/mgd.o backup/mgh.o backup/msg.o backup/nfc.o \
         backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/quickdev16.o \
-        backup/sc.o backup/sflash.o backup/smc.o backup/smd.o \
+        backup/sc.o backup/sflash.o backup/smc.o backup/smcic2.o backup/smd.o \
         backup/smsgg-pro.o backup/spsc.o backup/ssc.o backup/swc.o \
         backup/tototek.o backup/ufo.o backup/ufosd.o backup/yoko.o \
         backup/z64.o \
@@ -148,8 +148,10 @@ endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_ZLIB
 else
-ifeq ($(GCC_WIN),1)                     # Cygwin/MinGW code in ucon64_misc needs dlopen code
+ifeq ($(GCC_WIN),1)                     # Win32 code in parallel.c needs dlopen code
+ifdef USE_PARALLEL
 OBJECTS+=misc/dlopen.o
+endif
 endif                                   # GCC_WIN
 endif                                   # DLOPEN
 
@@ -345,8 +347,8 @@ ucon64.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
           backup/doctor64.h backup/doctor64jr.h backup/f2a.h backup/fal.h \
           backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h backup/mcd.h \
           backup/md-pro.h backup/msg.h backup/pce-pro.h backup/pl.h \
-          backup/quickdev16.h backup/sflash.h backup/smc.h backup/smd.h \
-          backup/smsgg-pro.h backup/swc.h \
+          backup/quickdev16.h backup/sflash.h backup/smc.h backup/smcic2.h \
+          backup/smd.h backup/smsgg-pro.h backup/swc.h \
           patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/patch.h \
           patch/ppf.h
 ucon64_dat.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
@@ -373,7 +375,7 @@ ucon64_opts.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h \
                backup/mcd.h backup/md-pro.h backup/msg.h backup/pce-pro.h \
                backup/pl.h backup/quickdev16.h backup/sflash.h backup/smc.h \
-               backup/smd.h backup/smsgg-pro.h backup/swc.h \
+               backup/smcic2.h backup/smd.h backup/smsgg-pro.h backup/swc.h \
                patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h
 backup/backup.o: config.h backup/backup.h $(GETOPT2_H_DEPS)
 backup/cc2.o: config.h $(UCON64_H_DEPS) backup/cc2.h $(GETOPT2_H_DEPS)
@@ -440,6 +442,9 @@ backup/sflash.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
                  $(GETOPT2_H_DEPS)
 backup/smc.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
               $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smc.h $(GETOPT2_H_DEPS)
+backup/smcic2.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
+                 $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smcic2.h \
+                 backup/swc.h $(GETOPT2_H_DEPS)
 backup/smd.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(UCON64_H_DEPS) \
               $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smd.h $(GETOPT2_H_DEPS)
 backup/smsgg-pro.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
@@ -507,7 +512,7 @@ console/snes.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(CHKSUM_H_DEPS) \
                 misc/file.h $(MISC_H_DEPS) misc/string.h $(TERM_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) $(CONSOLE_H_DEPS) $(SNES_H_DEPS) \
                 backup/backup.h backup/gd.h backup/mgd.h backup/mgh.h \
-                backup/swc.h backup/ufo.h backup/ufosd.h
+                backup/smcic2.h backup/swc.h backup/ufo.h backup/ufosd.h
 console/swan.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                 $(UCON64_MISC_H_DEPS) console/swan.h backup/backup.h \
                 $(CONSOLE_DEPS)

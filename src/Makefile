@@ -442,7 +442,7 @@ backup/sflash.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
                  $(GETOPT2_H_DEPS)
 backup/smc.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
               $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smc.h $(GETOPT2_H_DEPS)
-backup/smcic2.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
+backup/smcic2.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_H_DEPS) \
                  $(UCON64_MISC_H_DEPS) backup/ffe.h backup/smcic2.h \
                  backup/swc.h $(GETOPT2_H_DEPS)
 backup/smd.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(UCON64_H_DEPS) \

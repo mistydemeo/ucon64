@@ -835,9 +835,9 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
 {
   FILE *file;
   unsigned char *buffer, emu_mode_select;
-  int bytesread, bytessent, blocksdone = 0, fsize;
-  unsigned short totalblocks, address;
-  time_t starttime;
+  int bytesread, bytessent, fsize;
+  unsigned short blocksdone = 0, address = 0x200; // VGS '00 uses 0x200, VGS '96 uses
+  time_t starttime;                               //  0, but then some ROMs don't work
 
   ffe_init_io (parport);
 
@@ -887,8 +887,7 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
 
   puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
-  address = 0x200;                              // VGS '00 uses 0x200, VGS '96 uses 0,
-  starttime = time (NULL);                      //  but then some ROMs don't work
+  starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
     {
       ffe_send_command0 (0xc010, (unsigned char) (blocksdone >> 9));
@@ -906,8 +905,7 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
     ffe_send_command0 (0xc010, 2);
 
   ffe_send_command (5, 0, 0);
-  totalblocks = (unsigned short) ((fsize - SWC_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE); // round up
-  ffe_send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8 K L, #8 K H, 0
+  ffe_send_command (6, 5 | (blocksdone << 8), blocksdone >> 8); // bytes: 6, 5, #8 K L, #8 K H, 0
   ffe_send_command (6, 1 | (emu_mode_select << 8), enableRTS); // last arg = 1 enables RTS
                                                                //  mode, 0 disables it
   free (buffer);

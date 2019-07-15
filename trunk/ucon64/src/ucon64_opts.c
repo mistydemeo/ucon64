@@ -88,6 +88,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/quickdev16.h"
 #include "backup/sflash.h"
 #include "backup/smc.h"
+#include "backup/smcic2.h"
 #include "backup/smd.h"
 #include "backup/smsgg-pro.h"
 #include "backup/swc.h"
@@ -337,6 +338,7 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XFIG:
     case UCON64_XFIGC:
     case UCON64_XFIGS:
+    case UCON64_XIC2:
     case UCON64_XLIT:
     case UCON64_XMSG:
     case UCON64_XRESET:
@@ -408,7 +410,7 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XCD64S:
 #ifdef  USE_PARALLEL
       if (!UCON64_ISSET2 (ucon64.parport_mode, parport_mode_t))
-        ucon64.parport_mode = PPMODE_SPP;
+        ucon64.parport_mode = PPMODE_SPP_BIDIR;
 #endif
       // We don't really need the parallel port. We just have to make sure that
       //  privileges aren't dropped.
@@ -2153,6 +2155,11 @@ ucon64_options (st_ucon64_t *p)
       else
         smsgg_write_sram (ucon64.fname, ucon64.parport,
                           strtol (option_arg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XIC2:
+      smcic2_write_rom (ucon64.fname, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

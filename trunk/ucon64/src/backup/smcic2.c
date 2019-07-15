@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #include "misc/archive.h"
+#include "misc/file.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/ffe.h"
@@ -136,6 +137,8 @@ smcic2_write_rom (const char *filename, unsigned short parport)
       FILE *file;
       int bytesread;
 
+      if (fname == NULL)
+        exit (1); // error message has already been printed, see add_filename()
       if ((file = fopen (fname, "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);

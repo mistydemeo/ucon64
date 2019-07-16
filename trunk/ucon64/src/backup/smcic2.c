@@ -124,7 +124,13 @@ smcic2_write_rom (const char *filename, unsigned short parport)
     }
 
   for (n = 0; n < nparts; n++)
-    fsize += fsizeof (add_filename_data.names[n]);
+    {
+      char *fname = add_filename_data.names[n];
+
+      if (fname == NULL)
+        exit (1); // error message has already been printed, see add_filename()
+      fsize += fsizeof (fname);
+    }
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
@@ -137,8 +143,6 @@ smcic2_write_rom (const char *filename, unsigned short parport)
       FILE *file;
       int bytesread;
 
-      if (fname == NULL)
-        exit (1); // error message has already been printed, see add_filename()
       if ((file = fopen (fname, "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);

@@ -35,6 +35,9 @@
 /* Define to 1 if you have the `realpath' function. */
 /* #undef HAVE_REALPATH */
 
+/* Define to 1 if you have the `sched_setscheduler' function. */
+/* #undef HAVE_SCHED_SETSCHEDULER */
+
 /* Define to 1 if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */
 

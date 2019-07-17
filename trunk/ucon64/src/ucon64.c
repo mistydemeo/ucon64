@@ -42,11 +42,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
-#ifdef  _POSIX_PRIORITY_SCHEDULING
-// if _POSIX_PRIORITY_SCHEDULING is defined in unistd.h it indicates
-//  availability of sched_get_priority_max() and sched_setscheduler()
-#include <sched.h>
 #endif
+#ifdef  HAVE_SCHED_SETSCHEDULER
+#include <sched.h>
 #endif
 #ifdef  _MSC_VER
 #pragma warning(push)
@@ -1182,11 +1180,11 @@ main (int argc, char **argv)
   if (ucon64.dat_enabled)
     ucon64_dat_indexer ();              // update cache (index) files if necessary
 
-#if     defined _POSIX_PRIORITY_SCHEDULING || defined _WIN32
+#if     defined HAVE_SCHED_SETSCHEDULER || defined _WIN32
   if (get_property_int (ucon64.configfile, "gd6_send_byte_delay"))
     {
-      // Cygwin defines _POSIX_PRIORITY_SCHEDULING, but sched_setscheduler()
-      //  fails for SCHED_FIFO, even when running as Administrator.
+      // Cygwin has sched_setscheduler() but it fails for SCHED_FIFO, even when
+      //  running as Administrator.
 #if     defined _WIN32 || defined __CYGWIN__
       if (SetPriorityClass (GetCurrentProcess (), REALTIME_PRIORITY_CLASS))
         {
@@ -1232,7 +1230,7 @@ main (int argc, char **argv)
         }
 #endif // _WIN32 || __CYGWIN__
     }
-#endif // _POSIX_PRIORITY_SCHEDULING || _WIN32
+#endif // HAVE_SCHED_SETSCHEDULER || _WIN32
 
 #ifdef  USE_PARALLEL
   /*

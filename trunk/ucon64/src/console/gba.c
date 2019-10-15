@@ -447,7 +447,7 @@ gba_sram (void)
   ptr = (unsigned char *) memmem2 (bufferptr, fsize, "EEPROM_", 7, 0);
   if (ptr == NULL)
     {
-      printf ("This ROM does not appear to use EEPROM saving\n");
+      puts ("This ROM does not appear to use EEPROM saving");
       free (buffer);
       fclose (destfile);
       return -1;
@@ -568,7 +568,7 @@ gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
 
   if (wait_time % 4 != 0 || wait_time > 28 || wait_time < 0)
     {
-      fprintf (stderr, "ERROR: You specified an incorrect WAIT_TIME value\n");
+      fputs ("ERROR: You specified an incorrect WAIT_TIME value\n", stderr);
       return -1;
     }
 
@@ -590,7 +590,7 @@ gba_crp (st_ucon64_nfo_t *rominfo, const char *value)
     }
   if (rominfo->backup_header_len)               // copy header (if present)
     {
-      fread (buffer, 1, rominfo->backup_header_len, srcfile);
+      fread_checked (buffer, 1, rominfo->backup_header_len, srcfile);
       fwrite (buffer, 1, rominfo->backup_header_len, destfile);
     }
 
@@ -742,7 +742,7 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Cannot make multi-game file of 0 bytes\n");
+      fputs ("ERROR: Cannot make multi-game file of 0 bytes\n", stderr);
       return -1;
     }
 
@@ -751,7 +751,7 @@ gba_multi (unsigned int truncate_size, char *multi_fname)
       truncate_size != 256 * MBIT && truncate_size != 512 * MBIT &&
       truncate_size != 1024 * MBIT)
     {
-      fprintf (stderr, "ERROR: Truncate size must be 64, 128, 256, 512 or 1024\n");
+      fputs ("ERROR: Truncate size must be 64, 128, 256, 512 or 1024\n", stderr);
       return -1;
     }
 #endif

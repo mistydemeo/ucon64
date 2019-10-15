@@ -2,7 +2,7 @@
 misc.h - miscellaneous functions
 
 Copyright (c) 1999 - 2004              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
 Copyright (c) 2002 - 2004              Jan-Erik Karlsson (Amiga code)
 
 
@@ -320,6 +320,9 @@ extern int strarg (char **argv, char *str, const char *separator_s, int max_args
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
   tmpnam2()       replacement for tmpnam() first argument must be at least
                   FILENAME_MAX bytes large
+  fread_checked() calls exit() if fread_checked2() returns -1
+  fread_checked2() returns 0 if fread() read the requested number of bytes,
+                  otherwise it returns -1
   renlwr()        renames all files tolower()
   drop_privileges() switch to the real user and group ID (leave "root mode")
   register_func() atexit() replacement
@@ -366,6 +369,8 @@ extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);
 extern char *getenv2 (const char *variable);
 extern char *tmpnam2 (char *tmpname, const char *basedir);
+extern void fread_checked (void *buffer, size_t size, size_t number, FILE *file);
+extern int fread_checked2 (void *buffer, size_t size, size_t number, FILE *file);
 //extern int renlwr (const char *path);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);

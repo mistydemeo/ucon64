@@ -1,9 +1,9 @@
 /*
 file.h - miscellaneous file functions
 
-Copyright (c) 1999 - 2004             NoisyB
-Copyright (c) 2001 - 2004, 2015, 2017 dbjh
-Copyright (c) 2002 - 2004             Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2004                   NoisyB
+Copyright (c) 2001 - 2004, 2015, 2017, 2019 dbjh
+Copyright (c) 2002 - 2004                   Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
 #endif
 #include <stddef.h>                             // size_t (VC++)
+#include <stdio.h>
 #ifdef  _MSC_VER
 #pragma warning(pop)
 #endif
@@ -69,6 +70,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                 undefined (by POSIX) use truncate2() instead which does both
   tmpnam2()   replacement for tmpnam() first argument must be at least
                 FILENAME_MAX bytes large
+  fread_checked() calls exit() if fread_checked2() returns -1
+  fread_checked2() returns 0 if fread() read the requested number of bytes,
+                otherwise it returns -1
   mkbak()     modes
                 BAK_DUPE (default)
                   rename file to keep attributes and copy it back to old name
@@ -106,6 +110,8 @@ extern int one_filesystem (const char *filename1, const char *filename2);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, off_t new_size);
 extern char *tmpnam2 (char *tmpname, const char *basedir);
+extern void fread_checked (void *buffer, size_t size, size_t number, FILE *file);
+extern int fread_checked2 (void *buffer, size_t size, size_t number, FILE *file);
 typedef enum { BAK_DUPE, BAK_MOVE } backup_t;
 extern char *mkbak (const char *filename, backup_t type);
 extern int fcopy (const char *src, size_t start, size_t len, const char *dest,

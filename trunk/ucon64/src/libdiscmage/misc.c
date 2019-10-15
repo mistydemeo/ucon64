@@ -446,7 +446,6 @@ vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ and MinGW ports support "ANSI colors".
 //  Cheap, because it only supports the ANSI escape sequences uCON64 uses.
 {
-#undef  printf
 #undef  fprintf
   int n_chars = 0;
   char output[MAXBUFSIZE], *ptr, *ptr2;
@@ -528,9 +527,9 @@ vprintf2 (const char *format, va_list argptr)
             {
               new_attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
               SetConsoleTextAttribute (stdout_handle, new_attr);
-              printf ("\n"
-                      "INTERNAL WARNING: vprintf2() encountered an unsupported ANSI escape sequence\n"
-                      "                  Please send a bug report\n");
+              puts ("\n"
+                    "INTERNAL WARNING: vprintf2() encountered an unsupported ANSI escape sequence\n"
+                    "                  Please send a bug report");
               n_ctrl = 0;
             }
           SetConsoleTextAttribute (stdout_handle, new_attr);
@@ -552,7 +551,6 @@ vprintf2 (const char *format, va_list argptr)
         }
     }
   return n_chars;
-#define printf  printf2
 #define fprintf fprintf2
 }
 
@@ -1340,7 +1338,8 @@ realpath (const char *path, char *full_path)
             {
               // make sure it's null terminated
               *new_path = '\0';
-              strcpy (full_path, got_path);
+              if (full_path)
+                strcpy (full_path, got_path);
               return NULL;
             }
         }
@@ -1391,14 +1390,42 @@ realpath (const char *path, char *full_path)
     }
   // make sure it's null terminated
   *new_path = '\0';
+  if (!full_path && (full_path = malloc (strlen (got_path) + 1)) == NULL)
+    {
+      errno = ENOMEM;
+      return NULL;
+    }
   strcpy (full_path, got_path);
 
   return full_path;
 #elif   defined _WIN32
   char *p, c;
-  size_t n;
+  size_t n, len = strlen (path);
+  DWORD result;
 
-  if (GetFullPathName (path, FILENAME_MAX, full_path, &p) == 0)
+  if (len >= FILENAME_MAX)
+    {
+      errno = ENAMETOOLONG;
+      return NULL;
+    }
+  else if (len == 0)
+    {
+      errno = ENOENT;
+      return NULL;
+    }
+
+  if (!full_path && (full_path = malloc (FILENAME_MAX)) == NULL)
+    {
+      errno = ENOMEM;
+      return NULL;
+    }
+  result = GetFullPathName (path, FILENAME_MAX, full_path, &p);
+  if (result >= FILENAME_MAX)
+    {
+      errno = ENAMETOOLONG;
+      return NULL;
+    }
+  else if (result == 0)
     return NULL;
 
   c = (char) toupper (full_path[0]);
@@ -1415,6 +1442,24 @@ realpath (const char *path, char *full_path)
 
   return full_path;
 #elif   defined AMIGA
+  size_t len = strlen (path);
+
+  if (len >= FILENAME_MAX)
+    {
+      errno = ENAMETOOLONG;
+      return NULL;
+    }
+  else if (len == 0)
+    {
+      errno = ENOENT;
+      return NULL;
+    }
+
+  if (!full_path && (full_path = malloc (FILENAME_MAX)) == NULL)
+    {
+      errno = ENOMEM;
+      return NULL;
+    }
   strcpy (full_path, path);
   return full_path;
 #endif
@@ -2127,7 +2172,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
 
           if (cm_verbose)
             {
-              printf ("set:          ");
+              fputs ("set:          ", stdout);
               for (n = 0; n < (*patterns)[n_codes].sets[n_sets].size; n++)
                 printf ("%02x ", (unsigned char) (*patterns)[n_codes].sets[n_sets].data[n]);
               printf ("(%u)\n", (*patterns)[n_codes].sets[n_sets].size);
@@ -2594,6 +2639,48 @@ tmpnam2 (char *tmpname, const char *basedir)
 }
 
 
+void
+fread_checked (void *buffer, size_t size, size_t number, FILE *file)
+{
+  if (fread_checked2 (buffer, size, number, file) != 0)
+    exit (1);
+}
+
+
+int
+fread_checked2 (void *buffer, size_t size, size_t number, FILE *file)
+{
+  size_t result = fread (buffer, size, number, file);
+  if (result != number)
+    {
+#ifdef  _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4777)
+/*
+  In this case Visual Studio Community 2015 warns with: '_snprintf' : format
+  string '%u' requires an argument of type 'unsigned int', but variadic
+  argument 1 has type 'size_t'
+  This is a bug in Visual Studio Community 2015.
+*/
+#endif
+      fprintf (stderr,
+               "ERROR: Could read only %u of %u bytes from file handle %p\n",
+               (unsigned) (result * size), (unsigned) (number * size), file);
+#ifdef  _MSC_VER
+#pragma warning(pop)
+#endif
+      if (feof (file))
+        fputs ("       (end of file)\n", stderr);
+      else if (ferror (file))
+        fputs ("       (I/O error)\n", stderr);
+      else
+        fputs ("       (unknown error)\n", stderr);
+      return -1;
+    }
+  return 0;
+}
+
+
 #if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
         defined __APPLE__                       // Mac OS X actually
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a TTY, 0 => it's not
@@ -2605,7 +2692,7 @@ set_tty (tty_t *param)
 {
   if (stdin_tty && tcsetattr (STDIN_FILENO, TCSANOW, param) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set TTY parameters\n");
+      fputs ("ERROR: Could not set TTY parameters\n", stderr);
       exit (100);
     }
 }
@@ -2627,14 +2714,14 @@ init_conio (void)
 
   if (tcgetattr (STDIN_FILENO, &oldtty) == -1)
     {
-      fprintf (stderr, "ERROR: Could not get TTY parameters\n");
+      fputs ("ERROR: Could not get TTY parameters\n", stderr);
       exit (101);
     }
   oldtty_set = 1;
 
   if (register_func (deinit_conio) == -1)
     {
-      fprintf (stderr, "ERROR: Could not register function with register_func()\n");
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit (102);
     }
 
@@ -2732,13 +2819,14 @@ drop_privileges (void)
   uid = getuid ();
   if (setuid (uid) == -1)
     {
-      fputs ("ERROR: Could not set uid\n", stderr);
+      fprintf (stderr, "ERROR: Could not set user ID to %u\n", uid);
       return 1;
     }
-  gid = getgid ();                              // this shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if "make install" was used,
-    {                                           //  but just in case (root did
-      fputs ("ERROR: Could not set gid\n", stderr); //  "chmod +s")
+
+  gid = getgid ();
+  if (setgid (gid) == -1)
+    {
+      fprintf (stderr, "ERROR: Could not set group ID to %u\n", gid);
       return 1;
     }
 
@@ -2948,7 +3036,7 @@ q_fbackup (const char *filename, int mode)
 
       if (dir == NULL)
         {
-          fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
+          fputs ("INTERNAL ERROR: dirname2() returned NULL\n", stderr);
           exit (1);
         }
       strcpy (buf2, dir);
@@ -3028,7 +3116,7 @@ q_rfcpy (const char *src, const char *dest)
 #undef  fclose
 #endif
   FILE *fh, *fh2;
-  int seg_len;
+  size_t seg_len;
   char buf[MAXBUFSIZE];
 
   if (one_file (dest, src))

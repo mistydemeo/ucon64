@@ -35,6 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <string.h>
 #include "misc/archive.h"
+#include "misc/file.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/tototek.h"
@@ -229,6 +230,7 @@ smsgg_write_rom (const char *filename, unsigned short parport)
       multi_game;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
+
   (void) write_rom_by_byte;
 
   if ((file = fopen (filename, "rb")) == NULL)
@@ -239,8 +241,7 @@ smsgg_write_rom (const char *filename, unsigned short parport)
   ttt_init_io (parport);
 
   fseek (file, 0x21f4, SEEK_SET);
-  buffer[0] = 0;
-  fread (buffer, 1, 12, file);                  // it's OK to not verify if we can read
+  fread_checked (buffer, 1, 12, file);
   // currently we ignore the version string
   multi_game = strncmp ((char *) buffer, "uCON64", 6) ? 0 : 1;
 

@@ -129,7 +129,8 @@ dm_track_init (dm_track_t *track, FILE *fh)
 
   fseek (fh, track->track_start, SEEK_SET);
 #if 1
-  fread (value_s, 1, 16, fh);
+  if (fread_checked2 (value_s, 1, 16, fh) != 0)
+    return -1;
 #else
 // callibrate
   fseek (fh, -15, SEEK_CUR);
@@ -155,7 +156,8 @@ dm_track_init (dm_track_t *track, FILE *fh)
             int pos = (track_probe[x].sector_size * 16) +
                       track_probe[x].seek_header + track->track_start;
             fseek (fh, pos, SEEK_SET);
-            fread (value_s, 1, 16, fh);
+            if (fread_checked2 (value_s, 1, 16, fh) != 0)
+              return -1;
             if (!memcmp (pvd_magic, &value_s, 8) ||
                 !memcmp (svd_magic, &value_s, 8) ||
                 !memcmp (vdt_magic, &value_s, 8))
@@ -171,11 +173,12 @@ dm_track_init (dm_track_t *track, FILE *fh)
     {
       x = 0;
       if (track_probe[x].sector_size != 2048)
-        fprintf (stderr, "ERROR: dm_track_init()\n");
+        fputs ("ERROR: dm_track_init()\n", stderr);
 
       fseek (fh, (track_probe[x].sector_size * 16) +
              track_probe[x].seek_header + track->track_start, SEEK_SET);
-      fread (value_s, 1, 16, fh);
+      if (fread_checked2 (value_s, 1, 16, fh) != 0)
+        return -1;
 
       if (!memcmp (pvd_magic, &value_s, 8) ||
           !memcmp (svd_magic, &value_s, 8) ||
@@ -185,7 +188,7 @@ dm_track_init (dm_track_t *track, FILE *fh)
 
   if (!identified)
     {
-      fprintf (stderr, "ERROR: could not find iso header of current track\n");
+      fputs ("ERROR: could not find iso header of current track\n", stderr);
       return -1;
     }
 

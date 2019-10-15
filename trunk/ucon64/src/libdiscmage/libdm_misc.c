@@ -481,7 +481,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 #if 0
   if (track->total_len < track->track_len + track->pregap_len)
     {
-      fprintf (stderr, "SKIPPING: track seems truncated\n");
+      fputs ("SKIPPING: track seems truncated\n", stderr);
       return -1;
     }
 #endif
@@ -526,7 +526,8 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   for (x = 0; x < track->track_len; x++)
     {
       memset (buf, 0, sizeof (buf));
-      fread (&buf, 1, track->sector_size, fh);
+      if (fread_checked2 (&buf, 1, track->sector_size, fh) != 0)
+        return -1;
 
       if (flags & DM_2048)
         result = fwrite (&buf[track->seek_header], 1, 2048, fh2);
@@ -596,7 +597,7 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
 
   if (start_lba <= 0)
     {
-      fprintf (stderr, "ERROR: Bad LBA value");
+      fputs ("ERROR: Bad LBA value", stderr);
       return -1;
     }
 
@@ -674,7 +675,7 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
           memcmp (svd_magic, buf, 8) != 0 &&
           memcmp (vdt_magic, buf, 8) != 0)
         {
-          fprintf (stderr, "ERROR: Found unknown Volume Descriptor");
+          fputs ("ERROR: Found unknown Volume Descriptor", stderr);
 // which sector?
           return -1;
         }
@@ -715,9 +716,9 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
     }
 
   if (start_lba < 11700)
-    fprintf (stderr,
-             "WARNING: LBA value should be greater or equal to 11700 for multisession\n"
-             "         images\n");
+    fputs ("WARNING: LBA value should be greater or equal to 11700 for multisession\n"
+           "         images\n",
+           stderr);
 
   // adding padding data up to start LBA value...
   size_left = start_lba - (last_pos / track->sector_size);
@@ -798,7 +799,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
     {
       int s = 0, x = 0;
 
-      printf ("Layout: ");
+      fputs ("Layout: ", stdout);
 
       for (s = t = 0; s < image->sessions; s++)
         {

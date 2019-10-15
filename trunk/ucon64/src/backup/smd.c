@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #include "misc/archive.h"
+#include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -50,7 +51,7 @@ const st_getopt2_t smd_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Com Pro/Magic Drive Plus/Super Magic Drive/SMD"/*"19XX Front Far East/FFE http://www.front.com.tw"*/,
+      NULL, "Supercom PRO/Magic Drive Plus/Super Magic Drive/SMD"/*"19XX Front Far East/FFE http://www.front.com.tw"*/,
       NULL
     },
 #ifdef  USE_PARALLEL
@@ -138,7 +139,7 @@ smd_read_rom (const char *filename, unsigned short parport)
   blocksleft = 8 * ffe_send_command1 (0xdff1);
   if (blocksleft == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Super Magic Drive\n");
+      fputs ("ERROR: There is no cartridge present in the Super Magic Drive\n", stderr);
       fclose (file);
       remove (filename);
       exit (1);
@@ -158,7 +159,7 @@ smd_read_rom (const char *filename, unsigned short parport)
   wait2 (32);
   ffe_send_command0 (0x2001, 0);
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   starttime = time (NULL);
   while (blocksleft > 0)
@@ -205,13 +206,13 @@ smd_write_rom (const char *filename, unsigned short parport)
   fsize = (int) ucon64.file_size;
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
-  fread (buffer, 1, SMD_HEADER_LEN, file);
+  fread_checked (buffer, 1, SMD_HEADER_LEN, file);
   ffe_send_block (0xdc00, buffer, SMD_HEADER_LEN); // send header
   bytessent = SMD_HEADER_LEN;
 
   ffe_send_command0 (0x2001, 0);
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)
@@ -266,7 +267,7 @@ smd_read_sram (const char *filename, unsigned short parport)
 
   ffe_send_command0 (0x2001, 4);
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   blocksleft = 2;                               // SRAM is 2*16 KB
   address = 0x4000;
@@ -318,7 +319,7 @@ smd_write_sram (const char *filename, unsigned short parport)
 
   ffe_send_command0 (0x2001, 4);
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   address = 0x4000;
   starttime = time (NULL);

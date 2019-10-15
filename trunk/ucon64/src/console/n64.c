@@ -184,7 +184,7 @@ typedef struct st_n64_header
 #endif
 } st_n64_header_t;
 
-st_n64_header_t n64_header;
+static st_n64_header_t n64_header;
 
 typedef struct st_n64_chksum
 {
@@ -310,14 +310,14 @@ n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
   if (access (sramfile, F_OK))
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], sramfile);
-      exit (1);
+      return -1;
     }
 
   if (fsizeof (sramfile) != N64_SRAM_SIZE || ucon64.file_size != LAC_ROM_SIZE)
     {
       fprintf (stderr, "ERROR: ROM is not %d bytes and/or SRAM is not %d bytes\n",
                LAC_ROM_SIZE, N64_SRAM_SIZE);
-      exit (1);
+      return -1;
     }
 
   ucon64_fread (sram, 0, N64_SRAM_SIZE, sramfile);
@@ -329,8 +329,8 @@ n64_sram (st_ucon64_nfo_t *rominfo, const char *sramfile)
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.fname, 0, (size_t) ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (sram, 0x286c0, N64_SRAM_SIZE, dest_name, "r+b");
-  n64_chksum (rominfo, dest_name);              // calculate the checksum of the modified file
-  n64_update_chksum (rominfo, dest_name, buf);
+  if (n64_chksum (rominfo, dest_name) == 0)     // calculate the checksum of the modified file
+    n64_update_chksum (rominfo, dest_name, buf);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -383,7 +383,7 @@ n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
   if (access (smsrom, F_OK))
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], smsrom);
-      exit (1);
+      return -1;
     }
 
   size = fsizeof (smsrom);
@@ -391,8 +391,8 @@ n64_usms (st_ucon64_nfo_t *rominfo, const char *smsrom)
   //  from 0x1b410 to 0x9b40f (0x7ffff)
   if (size > 4 * MBIT)
     {
-      fprintf (stderr, "ERROR: The Sega Master System/Game Gear ROM must be 524288 bytes or less\n");
-      exit (1);
+      fputs ("ERROR: The Sega Master System/Game Gear ROM must be 524288 bytes or less\n", stderr);
+      return -1;
     }
 
   if ((usmsbuf = (char *) malloc (4 * MBIT)) == NULL)
@@ -527,8 +527,10 @@ n64_init (st_ucon64_nfo_t *rominfo)
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 4;
 
-      n64_chksum (rominfo, ucon64.fname);
-      rominfo->current_internal_crc = n64crc.crc1;
+      if (n64_chksum (rominfo, ucon64.fname) == 0)
+        rominfo->current_internal_crc = n64crc.crc1;
+      else
+        rominfo->current_internal_crc = 0;
 
       value = 0;
       for (x = 0; x < 4; x++)
@@ -566,10 +568,6 @@ n64_init (st_ucon64_nfo_t *rominfo)
   Nintendo 64 ROMs.
 */
 #define ROL(i, b) (((i) << (b)) | ((i) >> (32 - (b))))
-#define BYTES2LONG(b, s) ( (b)[0^(s)] << 24 | \
-                           (b)[1^(s)] << 16 | \
-                           (b)[2^(s)] <<  8 | \
-                           (b)[3^(s)] )
 
 #define CHECKSUM_START   0x1000 //(N64_HEADER_LEN + N64_BC_SIZE)
 #define CHECKSUM_LENGTH  0x100000
@@ -579,24 +577,25 @@ n64_init (st_ucon64_nfo_t *rominfo)
 #define CHECKSUM_CIC6106 0x1fea617a
 #define CALC_CRC32                              // see this as a marker, don't disable
 
-int
+static int
 n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 {
-  unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
+  unsigned char bootcode_buf[N64_BC_SIZE], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
   unsigned int i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
                rlen = (unsigned int) ucon64.file_size - rominfo->backup_header_len,
                n = rlen, bootcode; // using ucon64.file_size is OK for n64_init() & n64_sram()
   FILE *file;
 #ifdef  CALC_CRC32
   unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32
-  unsigned char *crc32_mem;
   int swap_data = ucon64.n64_dat_v64 ? !rominfo->interleaved : rominfo->interleaved;
 #endif
 
   rlen -= rlen >= CHECKSUM_START ? CHECKSUM_START : rlen;
-  if (rlen < CHECKSUM_START + CHECKSUM_LENGTH)
+  if (rlen < CHECKSUM_LENGTH)
     {
 #ifdef  CALC_CRC32
+      unsigned char *crc32_mem;
+
       if ((crc32_mem = (unsigned char *) malloc (n)) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], n);
@@ -615,33 +614,26 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     }
 
   if ((file = fopen (filename, "rb")) == NULL)
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      return -1;
+    }
 
 #ifdef  CALC_CRC32
-  if (swap_data)
-    {
-      if ((crc32_mem = (unsigned char *) malloc (MAXBUFSIZE)) == NULL)
-        {
-          fprintf (stderr, ucon64_msg[BUFFER_ERROR], MAXBUFSIZE);
-          fclose (file);
-          return -1;
-        }
-    }
-  else
-    crc32_mem = chunk;
-
   fseek (file, rominfo->backup_header_len, SEEK_SET);
-  fread (crc32_mem, 1, CHECKSUM_START, file);
-  memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
+  n = fread (chunk, 1, N64_HEADER_LEN + N64_BC_SIZE, file);
+  if (n < N64_HEADER_LEN + N64_BC_SIZE)
+    {
+      fprintf (stderr, ucon64_msg[READ_ERROR], filename);
+      return -1;
+    }
+  memcpy (bootcode_buf, chunk + N64_HEADER_LEN, N64_BC_SIZE);
   if (swap_data)
     {
-      fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
-      ucon64_bswap16_n (crc32_mem, CHECKSUM_START);
+      fcrc32 = crc32 (0, chunk, n);
+      ucon64_bswap16_n (chunk, n);
     }
-  scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
-#else
-  fseek (file, rominfo->backup_header_len + N64_HEADER_LEN, SEEK_SET);
-  fread (bootcode_buf, 1, N64_BC_SIZE, file);
+  scrc32 = crc32 (0, chunk, n);
 #endif
   if (rominfo->interleaved)
     ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
@@ -683,11 +675,10 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
 #ifdef  CALC_CRC32
               if (swap_data)
                 {
-                  memcpy (crc32_mem, chunk, n);
-                  fcrc32 = crc32 (fcrc32, crc32_mem, n);
-                  ucon64_bswap16_n (crc32_mem, n);
+                  fcrc32 = crc32 (fcrc32, chunk, n);
+                  ucon64_bswap16_n (chunk, n);
                 }
-              scrc32 = crc32 (scrc32, crc32_mem, n);
+              scrc32 = crc32 (scrc32, chunk, n);
 #endif
             }
         }
@@ -699,7 +690,8 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
         break;
       for (i = 0; i < n; i += 4)
         {
-          c1 = BYTES2LONG (&chunk[i], rominfo->interleaved);
+          c1 = (chunk[i] << 24) | (chunk[i + 1] << 16) |
+               (chunk[i + 2] <<  8) | chunk[i + 3];
           k1 = t6 + c1;
           if (k1 < t6)
             t4++;
@@ -716,9 +708,8 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
           if (bootcode == 6105)
             {
               k1 = 0x710 + (i & 0xff);
-//              t1 += BYTES2LONG (&bootcode_buf[k1], 0) ^ c1;
               t1 += ((bootcode_buf[k1] << 24) | (bootcode_buf[k1 + 1] << 16) |
-                     (bootcode_buf[k1 + 2] <<  8) | (bootcode_buf[k1 + 3])) ^ c1;
+                     (bootcode_buf[k1 + 2] <<  8) | bootcode_buf[k1 + 3]) ^ c1;
             }
           else
             t1 += c1 ^ t5;
@@ -748,19 +739,14 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
     }
 
 #ifdef  CALC_CRC32
-  if (swap_data)
-    {
-      free (crc32_mem);
-      crc32_mem = chunk;
-    }
-  while ((n = fread (crc32_mem, 1, sizeof chunk, file)) != 0)
+  while ((n = fread (chunk, 1, sizeof chunk, file)) != 0)
     {
       if (swap_data)
         {
-          fcrc32 = crc32 (fcrc32, crc32_mem, n);
-          ucon64_bswap16_n (crc32_mem, n);
+          fcrc32 = crc32 (fcrc32, chunk, n);
+          ucon64_bswap16_n (chunk, n);
         }
-      scrc32 = crc32 (scrc32, crc32_mem, n);
+      scrc32 = crc32 (scrc32, chunk, n);
     }
 
   ucon64.crc32 = scrc32;

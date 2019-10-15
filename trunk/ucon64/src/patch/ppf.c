@@ -1,9 +1,9 @@
 /*
 ppf.c - Playstation Patch File support for uCON64
 
-Copyright (c) ???? - ????             Icarus/Paradox
-Copyright (c) 2001                    NoisyB
-Copyright (c) 2002 - 2005, 2015, 2017 dbjh
+Copyright (c) ???? - ????                   Icarus/Paradox
+Copyright (c) 2001                          NoisyB
+Copyright (c) 2002 - 2005, 2015, 2017, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -190,9 +190,10 @@ ppf_apply (const char *mod, const char *ppfname)
       exit (1);
     }
 
+  ppfsize = fsizeof (ppfname);
+
   // Is it a PPF File?
-  fread (buffer, 3, 1, ppffile);
-  if (memcmp ("PPF", buffer, 3))
+  if (ppfsize < 56 || !fread (buffer, 3, 1, ppffile) || memcmp ("PPF", buffer, 3))
     {
       fprintf (stderr, "ERROR: %s is not a valid PPF file\n", ppfname);
       exit (1);
@@ -203,15 +204,13 @@ ppf_apply (const char *mod, const char *ppfname)
   method = fgetc (ppffile);
   if (method != 0 && method != 1)
     {
-      fprintf (stderr, "ERROR: Unknown encoding method! Check for updates\n");
+      fputs ("ERROR: Unknown encoding method\n", stderr);
       exit (1);
     }
 
-  ppfsize = fsizeof (ppfname);
-
   // Show PPF information
   fseek (ppffile, 6, SEEK_SET);                 // Read description line
-  fread (desc, 50, 1, ppffile);
+  fread_checked (desc, 50, 1, ppffile);
   desc[50] = '\0';                              // terminate string
   printf ("\n"                                  // print a newline between
           "Filename        : %s\n", ppfname);   //  backup message and PPF info
@@ -220,7 +219,7 @@ ppf_apply (const char *mod, const char *ppfname)
 
   if (method == 0)                              // PPF 1.0
     {
-      printf ("FILE_ID.DIZ     : No\n\n");
+      puts ("FILE_ID.DIZ     : No\n");
       x = 56;                                   // file pointer is at right position (56)
     }
   else // method == 1                           // PPF 2.0
@@ -229,17 +228,17 @@ ppf_apply (const char *mod, const char *ppfname)
       int modlen;
 
       fseek (ppffile, ppfsize - 8, SEEK_SET);
-      fread (buffer, 4, 1, ppffile);
+      fread_checked (buffer, 4, 1, ppffile);
 
       // Is there a file id?
       if (memcmp (".DIZ", buffer, 4))
-        printf ("FILE_ID.DIZ     : No\n\n");
+        puts ("FILE_ID.DIZ     : No\n");
       else
         {
           char diz[MAX_ID_SIZE + 1];
 
-          printf ("FILE_ID.DIZ     : Yes, showing...\n");
-          fread (&dizlen, 4, 1, ppffile);
+          puts ("FILE_ID.DIZ     : Yes, showing...");
+          fread_checked (&dizlen, 4, 1, ppffile);
 #ifdef  WORDS_BIGENDIAN
           dizlen = bswap_32 (dizlen);           // FILE_ID.DIZ size is in little-endian format
 #endif
@@ -247,14 +246,14 @@ ppf_apply (const char *mod, const char *ppfname)
           bytes_to_skip = dizlen + 18 + 16 + 4; // +4 for FILE_ID.DIZ size integer
           if (dizlen > MAX_ID_SIZE)
             dizlen = MAX_ID_SIZE;               // do this after setting bytes_to_skip!
-          fread (diz, dizlen, 1, ppffile);
-          diz[dizlen] = 0;                      // terminate string
+          fread_checked (diz, dizlen, 1, ppffile);
+          diz[dizlen] = '\0';                   // terminate string
           puts (diz);
         }
 
       // Do the file size check
       fseek (ppffile, 56, SEEK_SET);
-      fread (&x, 4, 1, ppffile);
+      fread_checked (&x, 4, 1, ppffile);
 #ifdef  WORDS_BIGENDIAN
       x = bswap_32 (x);                         // file size is stored in little-endian format
 #endif
@@ -267,13 +266,13 @@ ppf_apply (const char *mod, const char *ppfname)
 
       // Do the binary block check
       fseek (ppffile, 60, SEEK_SET);
-      fread (ppfblock, 1024, 1, ppffile);
+      fread_checked (ppfblock, 1024, 1, ppffile);
       fseek (modfile, 0x9320, SEEK_SET);
       memset (buffer, 0, 1024);                 // one little hack that makes PPF
-      fread (buffer, 1024, 1, modfile);         //  suitable for files < 38688 bytes
+      fread_checked2 (buffer, 1024, 1, modfile);//  suitable for files < 38688 bytes
       if (memcmp (ppfblock, buffer, 1024))
         {
-          fprintf (stderr, "ERROR: This patch does not belong to this image\n");
+          fputs ("ERROR: This patch does not belong to this image\n", stderr);
           exit (1);
         }
 
@@ -282,10 +281,10 @@ ppf_apply (const char *mod, const char *ppfname)
     }
 
   // Patch the image
-  printf ("Patching...\n");
+  puts ("Patching...");
   for (; x < ppfsize - bytes_to_skip; x += 4 + 1 + n_changes)
     {
-      fread (&pos, 4, 1, ppffile);              // Get position for modfile
+      fread_checked2 (&pos, 4, 1, ppffile);     // Get position for modfile
 #ifdef  WORDS_BIGENDIAN
       pos = bswap_32 (pos);
 #endif
@@ -300,12 +299,12 @@ ppf_apply (const char *mod, const char *ppfname)
           remove (modname);
           return -1;
         }
-      fread (buffer, n_changes, 1, ppffile);    // And this is what we have to write
+      fread_checked (buffer, n_changes, 1, ppffile); // And this is what we have to write
       fseek (modfile, pos, SEEK_SET);           // Go to the right position in the modfile
       fwrite (buffer, n_changes, 1, modfile);   // Write n_changes bytes to that pos
     }
 
-  printf ("Done\n");
+  puts ("Done");
   fclose (ppffile);
   fclose (modfile);
 
@@ -331,7 +330,7 @@ ppf_create (const char *orgname, const char *modname)
 #ifndef DIFF_FSIZE
   if (osize != msize)
     {
-      fprintf (stderr, "ERROR: File sizes do not match\n");
+      fputs ("ERROR: File sizes do not match\n", stderr);
       return -1;
     }
 #endif
@@ -368,10 +367,10 @@ ppf_create (const char *orgname, const char *modname)
 #endif
   fseek (orgfile, 0x9320, SEEK_SET);
   memset (buffer, 0, 1024);                     // one little hack that makes PPF
-  fread (buffer, 1024, 1, orgfile);             //  suitable for files < 38688 bytes
+  fread_checked2 (buffer, 1024, 1, orgfile);    //  suitable for files < 38688 bytes
   fwrite (buffer, 1024, 1, ppffile);            // 1024 byte block
 
-  printf ("Writing patch data, please wait...\n");
+  puts ("Writing patch data, please wait...");
   // finding changes
   fseek (orgfile, 0, SEEK_SET);
   fseek (modfile, 0, SEEK_SET);

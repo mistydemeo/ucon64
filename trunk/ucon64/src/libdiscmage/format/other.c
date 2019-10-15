@@ -123,9 +123,17 @@ dm_other_gc_init (dm_image_t *image)
   if ((fh = fopen (image->fname, "rb")) == NULL)
     return NULL;
 
-  fread (&boot_bin, sizeof (st_boot_bin_t), 1, fh);
+  if (fread_checked2 (&boot_bin, sizeof (st_boot_bin_t), 1, fh) != 0)
+    {
+      fclose (fh);
+      return NULL;
+    }
   fseek (fh, header_start, SEEK_SET);
-  fread (&opening_bnr, sizeof (st_opening_bnr_t), 1, fh);
+  if (fread_checked2 (&opening_bnr, sizeof (st_opening_bnr_t), 1, fh) != 0)
+    {
+      fclose (fh);
+      return NULL;
+    }
 
   fclose (fh);
 

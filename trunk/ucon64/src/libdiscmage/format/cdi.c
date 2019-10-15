@@ -75,7 +75,8 @@ cdi_track_init (dm_track_t *track, FILE *fh)
 #endif
 
 #if 0
-  fread (&value32, 4, 1, fh);    // [   8    unkown data (not NULL)      3.00.780 only  (may not be present)]
+  if (fread_checked2 (&value32, 4, 1, fh) != 0)    // [   8    unkown data (not NULL)      3.00.780 only  (may not be present)]
+    return -1;
   if (le2me_32 (value32))
     fseek (fh, 2, SEEK_CUR);   //          skip
 #else
@@ -98,7 +99,8 @@ cdi_track_init (dm_track_t *track, FILE *fh)
 
   for (x = 0; x < 2; x++)      //    20    00 00 01 00  00 00 FF FF  FF FF
     {                          //          00 00 01 00  00 00 FF FF  FF FF    track start mark?
-      fread (&value_s, 1, 10, fh);
+      if (fread_checked2 (&value_s, 1, 10, fh) != 0)
+        return -1;
       if (memcmp (track_header_magic, value_s, 10))
         {
           fprintf (stderr, "ERROR: could not locate the track start mark (pos: %08lx)\n", ftell (fh));
@@ -107,8 +109,10 @@ cdi_track_init (dm_track_t *track, FILE *fh)
     }
 
   fseek (fh, 4, SEEK_CUR);     //     4    discjuggler settings        no idea of internal bit fields
-  fread (&value8, 1, 1, fh);    //     1    filename_length
-  fread (&value_s, 1, value8, fh); //  [fl]    [filename]
+  if (fread_checked2 (&value8, 1, 1, fh) != 0) //     1    filename_length
+    return -1;
+  if (fread_checked2 (&value_s, 1, value8, fh) != 0) //  [fl]    [filename]
+    return -1;
 #ifdef  DEBUG
   value_s[value8] = 0;
   puts (value_s);
@@ -118,26 +122,30 @@ cdi_track_init (dm_track_t *track, FILE *fh)
                                //    10    NULL  (ISRC?)
                                //     4    2   (always?)
                                //     4    NULL
-  fread (&value32, 4, 1, fh);  // [   4    0x80000000 (4.x only)]
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) // [   4    0x80000000 (4.x only)]
+    return -1;
 
 //  fseek (fh, 4, SEEK_CUR);     //     4    max_cd_length = 0x514C8 (333000 dec) or 0x57E40 (360000 dec)
   if (le2me_32 (value32) == 0x80000000)
     fseek (fh, 4, SEEK_CUR);   // [   4    0x980000 (4.x only)]
   fseek (fh, 2, SEEK_CUR);     //     2    2   (always?)
-  fread (&value32, 4, 1, fh);  //     4    track->pregap_len = 0x96 (150 dec) in sectors
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) //     4    track->pregap_len = 0x96 (150 dec) in sectors
+    return -1;
   track->pregap_len = (int16_t) le2me_32 (value32);
 #ifdef  DEBUG
   printf ("pregap: %x\n", track->pregap_len);
   fflush (stdout);
 #endif
-  fread (&value32, 4, 1, fh);  //     4    track_length (in sectors)
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) //     4    track_length (in sectors)
+    return -1;
   track->track_len = le2me_32 (value32);
 #ifdef  DEBUG
   printf ("track len: %d\n", track->track_len);
   fflush (stdout);
 #endif
   fseek (fh, 6, SEEK_CUR);     // NULL
-  fread (&value32, 4, 1, fh);  //     4    track_mode (0 = audio, 1 = mode1, 2 = mode2)
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) //     4    track_mode (0 = audio, 1 = mode1, 2 = mode2)
+    return -1;
   track->mode = (int8_t) le2me_32 (value32);
 #ifdef  DEBUG
   printf ("track mode: %d\n", track->mode);
@@ -146,23 +154,27 @@ cdi_track_init (dm_track_t *track, FILE *fh)
   fseek (fh, 12, SEEK_CUR);    //     4    NULL
                                //     4    session_number (starting at 0)
                                //     4    track_number (in current session, starting at 0)
-  fread (&value32, 4, 1, fh);  //     4    start_lba
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) //     4    start_lba
+    return -1;
   track->start_lba = (int16_t) le2me_32 (value32);
-  fread (&value32, 4, 1, fh);  //     4    total_length (pregap+track), less if truncated
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) //     4    total_length (pregap+track), less if truncated
+    return -1;
   track->total_len = le2me_32 (value32);
 #if 1
   fseek (fh, 16, SEEK_CUR);    //    16    NULL
-  fread (&value32, 4, 1, fh);  //     4    sector_size (0 = 2048, 1 = 2336, 2 = 2352)
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) //     4    sector_size (0 = 2048, 1 = 2336, 2 = 2352)
+    return -1;
   value32 = le2me_32 (value32);
   if (/* value8 < 0 || */ value32 > 2)
     {
-      fprintf (stderr, "ERROR: unsupported sector size (%u)\n", (unsigned int) value32);
+      fprintf (stderr, "ERROR: unsupported sector size (%u)\n", value32);
       return -1;
     }
   track->sector_size = (uint16_t) cdi_track_modes[value32];
 #else
   fseek (fh, 19, SEEK_CUR);    //    19    NULL
-  fread (&value8, 1, 1, fh);  //     1    sector_size (0 = 2048, 1 = 2336, 2 = 2352)
+  if (fread_checked2 (&value8, 1, 1, fh) != 0) //     1    sector_size (0 = 2048, 1 = 2336, 2 = 2352)
+    return -1;
 //  value32 = le2me_32 (value32);
   if (/* value8 < 0 || */ value8 > 2)
     {
@@ -182,7 +194,8 @@ cdi_track_init (dm_track_t *track, FILE *fh)
   if (version != CDI_V2)
     {
       fseek (fh, 5, SEEK_CUR);
-      fread (&value32, 4, 1, fh); //     9    unknown data           3.0 only (build 780+: 00FFFFFFFFFFFFFFFF)
+      if (fread_checked2 (&value32, 4, 1, fh) != 0) //     9    unknown data           3.0 only (build 780+: 00FFFFFFFFFFFFFFFF)
+        return -1;
       if (le2me_32 (value32) == 0xffffffff)
         fseek (fh, 78, SEEK_CUR); //    78    unknown data      3.00.780 only (not NULL)
     }
@@ -244,9 +257,11 @@ cdi_init (dm_image_t *image)
     return -1;
 
   fseek (fh, size - 8, SEEK_SET);
-  fread (&value_32, 1, 4, fh);
+  if (fread_checked2 (&value_32, 1, 4, fh) != 0)
+    return -1;
   image->version = version = value_32;
-  fread (&value_32, 1, 4, fh);
+  if (fread_checked2 (&value_32, 1, 4, fh) != 0)
+    return -1;
   image->header_start = header_start = value_32;
 
   if (!image->header_start)
@@ -287,7 +302,8 @@ cdi_init (dm_image_t *image)
 
   fseek (fh, image->header_start, SEEK_SET);
 
-  fread (&value_16, 2, 1, fh); // how many sessions?
+  if (fread_checked2 (&value_16, 2, 1, fh) != 0) // how many sessions?
+    return -1;
   image->sessions = value_16;
 
   if (!image->sessions)
@@ -303,7 +319,8 @@ cdi_init (dm_image_t *image)
       printf ("track# offset: %lx\n", ftell (fh));
       fflush (stdout);
 #endif
-      fread (&value_16, 1, 2, fh); // how many tracks in this session?
+      if (fread_checked2 (&value_16, 1, 2, fh) != 0) // how many tracks in this session?
+        return -1;
 
       for (t = 0; t < value_16; t++)
         if (!cdi_track_init (&image->track[image->tracks], fh))

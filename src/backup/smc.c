@@ -1,7 +1,7 @@
 /*
 smc.c - Super Magic Card support for uCON64
 
-Copyright (c) 2003 dbjh
+Copyright (c) 2003, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <string.h>
 #include "misc/archive.h"
+#include "misc/file.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "backup/ffe.h"
@@ -160,7 +161,7 @@ smc_write_rom (const char *filename, unsigned short parport)
   ffe_send_command0 (0x42fd, 0x20);
   ffe_send_command0 (0x43fc, 0);
 
-  fread (buffer, 1, SMC_HEADER_LEN, file);
+  fread_checked (buffer, 1, SMC_HEADER_LEN, file);
 
   n_blocks1 = get_blocks1 (buffer);
   n_blocks2 = get_blocks2 (buffer);
@@ -180,12 +181,12 @@ smc_write_rom (const char *filename, unsigned short parport)
 
   if (buffer[0] & SMC_TRAINER)                  // send trainer if present
     {
-      fread (buffer, 1, 512, file);
+      fread_checked (buffer, 1, 512, file);
       ffe_send_block (0x600, buffer, 512);
       bytessent += 512;
     }
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
   starttime = time (NULL);
 
   for (n = 0; n < n_blocks1; n++)
@@ -283,7 +284,7 @@ smc_read_rts (const char *filename, unsigned short parport)
   buffer[9] = 0xbb;
   buffer[10] = 1;
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
   starttime = time (NULL);
 
   ffe_send_command (5, 3, 0);
@@ -357,9 +358,9 @@ smc_write_rts (const char *filename, unsigned short parport)
 
   size = 0x68 + 4 * 1024 + 5 * 8 * 1024;
   printf ("Send: %d Bytes\n", size);
-  fread (buffer, 1, SMC_HEADER_LEN, file);
+  fread_checked (buffer, 1, SMC_HEADER_LEN, file);
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
   starttime = time (NULL);
 
   ffe_send_command (5, 3, 0);
@@ -368,7 +369,7 @@ smc_write_rts (const char *filename, unsigned short parport)
 
   ffe_send_command0 (0x4500, 0x32);
   ffe_send_command0 (0x42ff, 0x30);
-  fread (buffer, 1, BUFFERSIZE / 2, file);
+  fread_checked (buffer, 1, BUFFERSIZE / 2, file);
   ffe_send_block (0x6000, buffer, BUFFERSIZE / 2); // 0x1000
 
   bytessent += BUFFERSIZE / 2;
@@ -378,7 +379,7 @@ smc_write_rts (const char *filename, unsigned short parport)
   for (n = 2; n <= 0x22; n += 0x20)
     {
       ffe_send_command0 (0x4500, (unsigned char) n);
-      fread (buffer, 1, BUFFERSIZE, file);
+      fread_checked (buffer, 1, BUFFERSIZE, file);
       ffe_send_block (0x6000, buffer, BUFFERSIZE); // 0x2000
 
       bytessent += BUFFERSIZE;
@@ -391,7 +392,7 @@ smc_write_rts (const char *filename, unsigned short parport)
       ffe_send_command0 (0x43fc, (unsigned char) n);
       if (n == 1)
         ffe_send_command0 (0x2001, 0);
-      fread (buffer, 1, BUFFERSIZE, file);
+      fread_checked (buffer, 1, BUFFERSIZE, file);
       ffe_send_block2 (0, buffer, BUFFERSIZE); // 0x2000
 
       bytessent += BUFFERSIZE;

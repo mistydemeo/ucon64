@@ -578,7 +578,7 @@ get_internal_size (void)
 {
   unsigned int size = !bs_dump ?
                         (1 << snes_header.rom_size) >> 7 :
-                        8 - (snes_header.bs_type >> (4 + 1)) * 4;
+                        8 - ((snes_header.bs_type & 0x20) >> 3);
   return size <= 128 ? (unsigned char) size : 128;
 }
 
@@ -1068,7 +1068,7 @@ display_ustar_header (const st_ustar_header_t *header)
   printf ("file_type: %c\n", buffer[0]);
 
   ustar_string_mkprint (header->link_name, sizeof header->link_name, buffer);
-  printf ("link_name: \"%s\"\n", header->link_name);
+  printf ("link_name: \"%s\"\n", buffer);
 
   ustar_field_mkprint (header->magic, sizeof header->magic, buffer);
   printf ("magic: \"%s\"\n", buffer);
@@ -1090,7 +1090,7 @@ display_ustar_header (const st_ustar_header_t *header)
 
 static int
 set_smini_chksum_range (unsigned int *base, unsigned int *size,
-                        unsigned int sram_data_size, int check_max_block_size)
+                        unsigned int sram_data_size, int check_block_size)
 {
   int range_start_set = UCON64_ISSET (ucon64.range_start),
       range_length_set = UCON64_ISSET2 (ucon64.range_length, size_t);
@@ -1114,7 +1114,7 @@ set_smini_chksum_range (unsigned int *base, unsigned int *size,
                sram_data_size - 1);
       return -1;
     }
-  if (check_max_block_size && range_start_set && range_length_set &&
+  if (check_block_size && range_start_set && range_length_set &&
       ((*base == 0 && *size > INITIAL_MAX_BLOCK_SIZE && *size < sram_data_size) ||
        (*base > 0 && (*size < MIN_BLOCK_SIZE || *size > DEFAULT_MAX_BLOCK_SIZE ||
                       (*base % 0x100 != 0 && *base % 0x100 != 0x12)))))
@@ -1272,7 +1272,8 @@ get_smini_sram_data (const char *src_name, unsigned char *sram_data,
                                         max_sram_data_size : file_size,
                                       srcfile);
             else if (sram_chksum && !strcmp (p + 1, "cartridge.sram.hash"))
-              fread (sram_chksum, 1, file_size > 20 ? 20 : file_size, srcfile);
+              fread_checked (sram_chksum, 1, file_size > 20 ?
+                               20 : file_size, srcfile);
           }
 
         // align on 512-byte boundary (size of st_ustar_header_t)
@@ -2597,8 +2598,6 @@ snes_split_ufo (size_t backup_header_len, size_t size, size_t part_size)
         }, *size_to_flags_ptr = NULL;
       int x = size / MBIT;
 
-      nparts = 0;                               // warning remover
-      surplus = 0;                              // warning remover
       for (n = 0; n < 4; n++)
         if (size_to_partsizes[n].value == x)
           {
@@ -3148,9 +3147,10 @@ when it has been patched with -f.
     }
   if (rominfo->backup_header_len)               // copy header (if present)
     {
-      unsigned char header[SWC_HEADER_LEN];
+      unsigned char header[SWC_HEADER_LEN] = { 0 };
 
-      fread (header, 1, SWC_HEADER_LEN, srcfile);
+      fread_checked (header, 1, rominfo->backup_header_len > SWC_HEADER_LEN ?
+                       SWC_HEADER_LEN : rominfo->backup_header_len, srcfile);
       fseek (srcfile, rominfo->backup_header_len, SEEK_SET);
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
@@ -3312,9 +3312,10 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
     }
   if (rominfo->backup_header_len)               // copy header (if present)
     {
-      unsigned char header[SWC_HEADER_LEN];
+      unsigned char header[SWC_HEADER_LEN] = { 0 };
 
-      fread (header, 1, SWC_HEADER_LEN, srcfile);
+      fread_checked (header, 1, rominfo->backup_header_len > SWC_HEADER_LEN ?
+                       SWC_HEADER_LEN : rominfo->backup_header_len, srcfile);
       fseek (srcfile, rominfo->backup_header_len, SEEK_SET);
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
@@ -3429,9 +3430,10 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
     }
   if (rominfo->backup_header_len)               // copy header (if present)
     {
-      unsigned char header[SWC_HEADER_LEN];
+      unsigned char header[SWC_HEADER_LEN] = { 0 };
 
-      fread (header, 1, SWC_HEADER_LEN, srcfile);
+      fread_checked (header, 1, rominfo->backup_header_len > SWC_HEADER_LEN ?
+                       SWC_HEADER_LEN : rominfo->backup_header_len, srcfile);
       fseek (srcfile, rominfo->backup_header_len, SEEK_SET);
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
@@ -3572,9 +3574,10 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
     }
   if (rominfo->backup_header_len)               // copy header (if present)
     {
-      unsigned char header[SWC_HEADER_LEN];
+      unsigned char header[SWC_HEADER_LEN] = { 0 };
 
-      fread (header, 1, SWC_HEADER_LEN, srcfile);
+      fread_checked (header, 1, rominfo->backup_header_len > SWC_HEADER_LEN ?
+                       SWC_HEADER_LEN : rominfo->backup_header_len, srcfile);
       fseek (srcfile, rominfo->backup_header_len, SEEK_SET);
       fwrite (header, 1, SWC_HEADER_LEN, destfile);
     }
@@ -3957,7 +3960,7 @@ int
 snes_backup_header_info (st_ucon64_nfo_t *rominfo)
 // -dbuh
 {
-  unsigned char header[512];
+  unsigned char header[512] = { 0 };
   int x = 0, y;
   snes_copier_t org_copier_type = copier_type;
 
@@ -4581,7 +4584,7 @@ check_ufosd_sram (int *sram_size)
   set_ufosd_sram_pattern (pattern, sizeof pattern);
 
   fseek (file, (long) ucon64.file_size - 64 * 1024, SEEK_SET);
-  fread (buffer, 1, sizeof pattern, file);
+  fread_checked (buffer, 1, sizeof pattern, file);
   if (memcmp (buffer, pattern, sizeof pattern) == 0) // pattern at 64 kB?
     {
       unsigned int next_step = 0;
@@ -4589,7 +4592,7 @@ check_ufosd_sram (int *sram_size)
       do
         {
           fseek (file, *sram_size, SEEK_SET);
-          fread (buffer, 1, sizeof pattern, file);
+          fread_checked (buffer, 1, sizeof pattern, file);
           // check offsets 0, 2, 4, 8, 16, 32 and 64 kB
           if (memcmp (buffer, pattern, sizeof pattern) != 0)
             *sram_size = *sram_size ? *sram_size * 2 : 2 * 1024;
@@ -5914,7 +5917,7 @@ snes_densrt (st_ucon64_nfo_t *rominfo)
 {
   size_t size = (size_t) ucon64.file_size - rominfo->backup_header_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char backup_header[512], *buffer;
+  unsigned char backup_header[512] = { 0 }, *buffer;
 
   if (!nsrt_header)
     {

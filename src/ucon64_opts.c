@@ -192,8 +192,8 @@ ucon64_switches (st_ucon64_t *p)
 #endif
 
 #ifdef  USE_ZLIB
-      printf ("gzip and zip support:              yes, zlib %d.%d.%d\n",
-              ZLIB_VER_MAJOR, ZLIB_VER_MINOR, ZLIB_VER_REVISION);
+      printf ("gzip and zip support:              yes, zlib %s\n",
+              ZLIB_VERSION);
 #else
       puts ("gzip and zip support:              no");
 #endif

@@ -391,8 +391,7 @@ fig_write_rom (const char *filename, unsigned short parport)
 {
   FILE *file;
   unsigned char *buffer, emu_mode_select;
-  int bytesread = 0, bytessent, totalblocks, blocksdone = 0, blocksleft, fsize,
-      n;
+  int bytesread = 0, bytessent, blocksdone = 0, blocksleft, fsize, n;
   unsigned short address1, address2;
   time_t starttime;
 
@@ -413,7 +412,7 @@ fig_write_rom (const char *filename, unsigned short parport)
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
-  fread (buffer, 1, FIG_HEADER_LEN, file);
+  fread_checked (buffer, 1, FIG_HEADER_LEN, file);
 
   if (snes_get_copier_type () == SWC)
     handle_swc_header (buffer);
@@ -429,8 +428,7 @@ fig_write_rom (const char *filename, unsigned short parport)
                                                 //  value doesn't seem to matter
   puts ("Press q to abort\n");                  // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
-  totalblocks = (fsize - FIG_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
-  blocksleft = totalblocks;
+  blocksleft = (fsize - FIG_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
   address1 = 0x300;
   address2 = 0x200;
   starttime = time (NULL);

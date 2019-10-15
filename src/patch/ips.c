@@ -1,9 +1,9 @@
 /*
 ips.c - IPS support for uCON64
 
-Copyright (c) ???? - ????       madman
-Copyright (c) 1999 - 2001       NoisyB
-Copyright (c) 2002 - 2004, 2017 dbjh
+Copyright (c) ???? - ????             madman
+Copyright (c) 1999 - 2001             NoisyB
+Copyright (c) 2002 - 2004, 2017, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -103,7 +103,7 @@ int
 ips_apply (const char *mod, const char *ipsname)
 {
   unsigned char byte, byte2, byte3;
-  char modname[FILENAME_MAX], magic[6];
+  char modname[FILENAME_MAX], magic[6] = { 0 };
   unsigned int length, i;
 
   if ((ipsfile = fopen (ipsname, "rb")) == NULL)
@@ -111,8 +111,7 @@ ips_apply (const char *mod, const char *ipsname)
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ipsname);
       exit (1);
     }
-  fgets (magic, 6, ipsfile);
-  if (strcmp (magic, "PATCH") != 0)
+  if (fgets (magic, 6, ipsfile) == NULL || strcmp (magic, "PATCH") != 0)
     {                                           // perform at least one test for validity
       fprintf (stderr, "ERROR: %s is not a valid IPS file\n", ipsname);
       fclose (ipsfile);

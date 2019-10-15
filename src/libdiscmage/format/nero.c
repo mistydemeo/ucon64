@@ -199,7 +199,8 @@ nrg_chunk_size (const dm_image_t *image, const char *chunk_id)
 
   fseek (fh, pos, SEEK_SET);
 
-  fread (&value_32, 4, 1, fh);
+  if (fread_checked2 (&value_32, 4, 1, fh) != 0)
+    return -1;
   fclose (fh);
 
   return be2me_32 (value_32); // return chunk length
@@ -240,7 +241,8 @@ nrg_track_init (dm_track_t *track, FILE *fh)
   uint8_t value8;
   uint32_t value32;
 
-  fread (&value8, 1, 1, fh);
+  if (fread_checked2 (&value8, 1, 1, fh) != 0)
+    return -1;
   if (value8 == 42)
     track->mode = 2;
   else if (value8 == 01)
@@ -248,11 +250,15 @@ nrg_track_init (dm_track_t *track, FILE *fh)
   else
     track->mode = 1;
 
-  fread (&value8, 1, 1, fh); // track #
-  fread (&value8, 1, 1, fh); // index?
-  fread (&value8, 1, 1, fh); // pad byte
+  if (fread_checked2 (&value8, 1, 1, fh) != 0) // track #
+    return -1;
+  if (fread_checked2 (&value8, 1, 1, fh) != 0) // index?
+    return -1;
+  if (fread_checked2 (&value8, 1, 1, fh) != 0) // pad byte
+    return -1;
 
-  fread (&value32, 4, 1, fh); // start_lba
+  if (fread_checked2 (&value32, 4, 1, fh) != 0) // start_lba
+    return -1;
   track->start_lba = (int16_t) be2me_32 (value32);
 
   return 0;
@@ -268,7 +274,8 @@ nrg_init (dm_image_t * image)
     char *version_s;
   } st_probe_t;
 
-  static const st_probe_t probe[] = {
+  static const st_probe_t probe[] =
+    {
       {NRG_NERO, "Nero/NRG image (<=v5.0)"},
       {NRG_NER5, "Nero/NRG image (v5.5)"},
       {NULL, NULL}
@@ -294,7 +301,8 @@ nrg_init (dm_image_t * image)
     return -1;
 
   fseek (fh, -4, SEEK_END);
-  fread (&value_32, 1, 4, fh);
+  if (fread_checked2 (&value_32, 1, 4, fh) != 0)
+    return -1;
   image->header_start = header_start = be2me_32 (value_32);
   if (image->header_start < 1)
     {
@@ -317,7 +325,8 @@ nrg_init (dm_image_t * image)
     }
 
   fseek (fh, image->header_start, SEEK_SET);
-  fread (&value_s, 1, 4, fh);
+  if (fread_checked2 (&value_s, 1, 4, fh) != 0)
+    return -1;
   if (!nrg_ident_chunk (value_s))
     {
       fclose (fh);
@@ -329,7 +338,8 @@ nrg_init (dm_image_t * image)
 #ifdef  DEBUG
   fseek (fh, image->header_start, SEEK_SET);
   memset (&buf, 0, MAXBUFSIZE);
-  result = fread (buf, 1, MAXBUFSIZE, fh);
+  if (fread_checked2 (buf, 1, MAXBUFSIZE, fh) != 0)
+    return -1;
   mem_hexdump (buf, result, image->header_start);
 #endif
 
@@ -341,7 +351,7 @@ nrg_init (dm_image_t * image)
       return -1;
     }
 
-//  fread (&value_16, 2, 1, fh); // how many sessions?
+//  if (fread_checked2 (&value_16, 2, 1, fh) != 0) return -1; // how many sessions?
   image->sessions = 1;
   image->tracks = (result / 16) - 1;
 

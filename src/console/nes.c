@@ -5169,7 +5169,8 @@ remove_destfile (void)
 
 
 static unsigned int
-read_block (unsigned char **data, unsigned int size, FILE *file, const char *format, ...)
+read_block (unsigned char **data, unsigned int size, FILE *file,
+            const char *format, ...)
 {
   va_list argptr;
   unsigned int real_size;
@@ -5378,7 +5379,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   st_unif_chunk_t unif_chunk;
 
   // read iNES file
-  fread (&ines_header, 1, INES_HEADER_LEN, srcfile);
+  fread_checked (&ines_header, 1, INES_HEADER_LEN, srcfile);
   if (ines_header.ctrl1 & INES_TRAINER)
     fseek (srcfile, 512, SEEK_CUR);             // discard trainer data (lib_unif does the same)
 
@@ -5990,7 +5991,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
   unsigned char *prg_data = NULL, *chr_data = NULL;
 
   // read iNES file
-  fread (&ines_header, 1, INES_HEADER_LEN, srcfile);
+  fread_checked (&ines_header, 1, INES_HEADER_LEN, srcfile);
   if (ines_header.ctrl1 & INES_TRAINER)
     {
       fseek (srcfile, 512, SEEK_CUR);           // discard trainer data
@@ -6087,7 +6088,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
       else if (ucon64.mirror == 4)
         ines_header.ctrl1 |= INES_4SCREEN;
       else
-        printf ("WARNING: Invalid mirroring type specified, using \"0\"\n");
+        puts ("WARNING: Invalid mirroring type specified, using \"0\"");
     }
 
   memset (ines_header.reserved, 0, sizeof (ines_header.reserved));
@@ -6942,7 +6943,7 @@ nes_s (void)
     }
 
   // read iNES file
-  fread (&ines_header, 1, INES_HEADER_LEN, srcfile);
+  fread_checked (&ines_header, 1, INES_HEADER_LEN, srcfile);
   if (ines_header.ctrl1 & INES_TRAINER)
     {
       if (read_block (&trainer_data, 512, srcfile,

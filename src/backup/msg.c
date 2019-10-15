@@ -1,7 +1,7 @@
 /*
 msg.c - Magic Super Griffin support for uCON64
 
-Copyright (c) 2003 dbjh
+Copyright (c) 2003, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #include "misc/archive.h"
+#include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -158,7 +159,7 @@ msg_read_rom (const char *filename, unsigned short parport)
   set_header (buffer);
   if (buffer[0] == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Magic Super Griffin\n");
+      fputs ("ERROR: There is no cartridge present in the Magic Super Griffin\n", stderr);
       fclose (file);
       remove (filename);
       exit (1);
@@ -173,7 +174,7 @@ msg_read_rom (const char *filename, unsigned short parport)
   ffe_send_command (5, 0, 0);
   ffe_send_command0 (0xbff0, 0);
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   starttime = time (NULL);
   while (blocksleft > 0)
@@ -224,11 +225,11 @@ msg_write_rom (const char *filename, unsigned short parport)
   size = (int) ucon64.file_size - MSG_HEADER_LEN;
   printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
 
-  fread (buffer, 1, MSG_HEADER_LEN, file);
+  fread_checked (buffer, 1, MSG_HEADER_LEN, file);
   emu_mode_select = buffer[1];                  // this byte is needed later
 
   ffe_send_command0 (0xe008, 0);
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
 
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) != 0)

@@ -78,70 +78,7 @@ const st_getopt2_t neogeo_usage[] =
   };
 
 
-static int sam2wav (const char *filename);
-
-#define NEOGEO_HEADER_START 0
 #define NEOGEO_HEADER_LEN 0
-
-
-int
-neogeo_bios (const char *fname)
-{
-  char dest_name[FILENAME_MAX];
-
-  strcpy (dest_name, fname);
-  set_suffix (dest_name, ".tmp");
-
-  ucon64_file_handler (dest_name, NULL, 0);
-  fcopy (fname, 0, MBIT, dest_name, "wb");
-  ucon64_fbswap16 (dest_name, 0, MBIT);
-
-  printf (ucon64_msg[WROTE], dest_name);
-  return 0;
-}
-
-
-int
-neogeo_sam (const char *fname)
-{
-  if (sam2wav (fname) == -1)
-    fprintf (stderr, "ERROR: SAM header seems to be corrupt\n");
-
-  return 0;
-}
-
-
-int
-neogeo_mgd (void)
-{
-  return 0;
-}
-
-
-int
-neogeo_mvs (void)
-{
-  return 0;
-}
-
-
-int
-neogeo_s (void)
-{
-  return 0;
-}
-
-
-int
-neogeo_init (st_ucon64_nfo_t *rominfo)
-{
-  int result = -1;
-
-  rominfo->console_usage = neogeo_usage[0].help;
-  rominfo->backup_usage = unknown_backup_usage[0].help;
-
-  return result;
-}
 
 
 static int
@@ -164,7 +101,7 @@ sam2wav (const char *filename)
       fclose (fh);
       return -1;
     }
-  fread (buf, 1, 4, fh);
+  fread_checked (buf, 1, 4, fh);
 
   if (strncmp ((char *) buf, "MAME", 4) != 0)
     {
@@ -172,7 +109,7 @@ sam2wav (const char *filename)
       fclose (fh);
       return -1;
     }
-  fread (buf, 1, 4, fh);
+  fread_checked (buf, 1, 4, fh);
 
   datasize = buf[0] + (buf[1] << 8) + (buf[2] << 16) + (buf[3] << 24);
   wavesize = /* "fmt " */ 4 + 4 + 4 + 2 + 2;
@@ -199,14 +136,14 @@ sam2wav (const char *filename)
   fwrite ("\001\000\001\000", 1, 4, fh2);
 
   /* read frequency */
-  fread (buf, 1, 4, fh);
+  fread_checked (buf, 1, 4, fh);
   freq = buf[0] + (buf[1] << 8) + (buf[2] << 16) + (buf[3] << 24);
 
   /* write frequency */
   fwrite (buf, 1, 4, fh2);
 
   /* read bits, amplitude and extension */
-  fread (buf, 1, 4, fh);
+  fread_checked (buf, 1, 4, fh);
 
   bits = buf[0];
 
@@ -264,4 +201,67 @@ sam2wav (const char *filename)
   fclose (fh2);
   fclose (fh);
   return 0;
+}
+
+
+int
+neogeo_bios (const char *fname)
+{
+  char dest_name[FILENAME_MAX];
+
+  strcpy (dest_name, fname);
+  set_suffix (dest_name, ".tmp");
+
+  ucon64_file_handler (dest_name, NULL, 0);
+  fcopy (fname, 0, MBIT, dest_name, "wb");
+  ucon64_fbswap16 (dest_name, 0, MBIT);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}
+
+
+int
+neogeo_sam (const char *fname)
+{
+  if (sam2wav (fname) == -1)
+    {
+      fputs ("ERROR: SAM header seems to be corrupt\n", stderr);
+      return -1;
+    }
+
+  return 0;
+}
+
+
+int
+neogeo_mgd (void)
+{
+  return 0;
+}
+
+
+int
+neogeo_mvs (void)
+{
+  return 0;
+}
+
+
+int
+neogeo_s (void)
+{
+  return 0;
+}
+
+
+int
+neogeo_init (st_ucon64_nfo_t *rominfo)
+{
+  int result = -1;
+
+  rominfo->console_usage = neogeo_usage[0].help;
+  rominfo->backup_usage = unknown_backup_usage[0].help;
+
+  return result;
 }

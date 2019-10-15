@@ -219,7 +219,7 @@ typedef struct
 } st_dumper_info_t;
 
 
-#define FDS_SIG_S       "FDS\x1A"
+#define FDS_SIG_S       "FDS\x1a"
 #define FDS_HEADER_LEN  16
 
 

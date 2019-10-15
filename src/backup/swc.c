@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma warning(pop)
 #endif
 #include "misc/archive.h"
+#include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64_misc.h"
 #include "console/snes.h"                       // for snes_get_copier_type()
@@ -54,7 +55,7 @@ const st_getopt2_t swc_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC"
+      NULL, "Supercom PRO/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC"
       /*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/,
       NULL
     },
@@ -467,7 +468,8 @@ handle_fig_header (unsigned char *header)
   else if (header[4] == 0xfd && header[5] == 0x82)
     header[2] = 0x08;                           // 2 kB
   else if ((header[4] == 0xdd && header[5] == 0x82) ||
-           (header[4] == 0x00 && header[5] == 0x80))
+           (header[4] == 0x00 && header[5] == 0x80) ||
+           (header[4] == 0x40 && header[5] == 0x80))
     /*
       8 kB *or* 2 kB (shortcoming of FIG header format). We give the emu mode
       select byte a value as if the game uses 8 kB. At least this makes games
@@ -479,6 +481,7 @@ handle_fig_header (unsigned char *header)
     header[2] = 0x04;
   else // if ((header[4] == 0xdd && header[5] == 0x02) ||
        //     (header[4] == 0x00 && header[5] == 0x00) ||
+       //     (header[4] == 0x40 && header[5] == 0x00) ||
        //     (header[4] == 0x11 && header[5] == 0x02))
     header[2] = 0;                              // 32 kB
 
@@ -856,7 +859,7 @@ swc_write_rom (const char *filename, unsigned short parport, unsigned short enab
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
-  fread (buffer, 1, SWC_HEADER_LEN, file);
+  fread_checked (buffer, 1, SWC_HEADER_LEN, file);
 
   if (snes_get_copier_type () == FIG)
     handle_fig_header (buffer);

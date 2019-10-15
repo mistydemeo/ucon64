@@ -1,9 +1,9 @@
 /*
 aps.c - Advanced Patch System support for uCON64
 
-Copyright (c) 1998                    Silo/BlackBag
-Copyright (c) 1999 - 2001             NoisyB
-Copyright (c) 2002 - 2005, 2015, 2017 dbjh
+Copyright (c) 1998                          Silo/BlackBag
+Copyright (c) 1999 - 2001                   NoisyB
+Copyright (c) 2002 - 2005, 2015, 2017, 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -84,7 +84,7 @@ readstdheader (void)
 {
   char magic[N64APS_MAGICLENGTH], description[N64APS_DESCRIPTION_LEN + 1];
 
-  fread (magic, 1, N64APS_MAGICLENGTH, n64aps_apsfile);
+  fread_checked (magic, 1, N64APS_MAGICLENGTH, n64aps_apsfile);
   if (memcmp (magic, n64aps_magic, N64APS_MAGICLENGTH) != 0)
     {
       fputs ("ERROR: Not a valid APS file\n", stderr);
@@ -110,7 +110,7 @@ readstdheader (void)
     }
 
   memset (description, ' ', N64APS_DESCRIPTION_LEN);
-  fread (description, 1, N64APS_DESCRIPTION_LEN, n64aps_apsfile);
+  fread_checked (description, 1, N64APS_DESCRIPTION_LEN, n64aps_apsfile);
   description[N64APS_DESCRIPTION_LEN] = '\0';
   printf ("Description: %s\n", description);
 }
@@ -123,7 +123,7 @@ readN64header (void)
   unsigned char buffer[8], APSbuffer[8], cartid[2], teritory, APSteritory;
 
   fseek (n64aps_modfile, 0, SEEK_SET);
-  fread (&n64aps_magictest, 4, 1, n64aps_modfile);
+  fread_checked (&n64aps_magictest, 4, 1, n64aps_modfile);
 #ifdef  WORDS_BIGENDIAN
   n64aps_magictest = bswap_32 (n64aps_magictest);
 #endif
@@ -139,8 +139,8 @@ readN64header (void)
     }
 
   fseek (n64aps_modfile, 60, SEEK_SET);         // cart id
-  fread (cartid, 1, 2, n64aps_modfile);
-  fread (buffer, 1, 2, n64aps_apsfile);
+  fread_checked (cartid, 1, 2, n64aps_modfile);
+  fread_checked (buffer, 1, 2, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
     {
       unsigned char temp = cartid[0];
@@ -175,8 +175,8 @@ readN64header (void)
     }
 
   fseek (n64aps_modfile, 16, SEEK_SET);         // CRC header position
-  fread (buffer, 1, 8, n64aps_modfile);
-  fread (APSbuffer, 1, 8, n64aps_apsfile);
+  fread_checked (buffer, 1, 8, n64aps_modfile);
+  fread_checked (APSbuffer, 1, 8, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
     ucon64_bswap16_n (buffer, 8);
   if (memcmp (APSbuffer, buffer, 8))
@@ -202,7 +202,7 @@ readsizeheader (int modsize, const char *modname)
 {
   int orgsize;
 
-  fread (&orgsize, 4, 1, n64aps_apsfile);
+  fread_checked (&orgsize, 4, 1, n64aps_apsfile);
 #ifdef  WORDS_BIGENDIAN
   orgsize = bswap_32 (orgsize);
 #endif
@@ -247,7 +247,7 @@ readpatch (void)
 #endif
       if ((size = (unsigned char) fgetc (n64aps_apsfile)) != 0)
         {
-          fread (buffer, 1, size, n64aps_apsfile);
+          fread_checked (buffer, 1, size, n64aps_apsfile);
           if ((fseek (n64aps_modfile, offset, SEEK_SET)) != 0)
             {
               fputs ("ERROR: Seek failed\n", stderr);
@@ -316,7 +316,7 @@ n64caps_checkfile (FILE *file, const char *filename)
 {
   unsigned int n64aps_magictest;
 
-  fread (&n64aps_magictest, 4, 1, file);
+  fread_checked (&n64aps_magictest, 4, 1, file);
 #ifdef  WORDS_BIGENDIAN
   n64aps_magictest = bswap_32 (n64aps_magictest);
 #endif
@@ -352,7 +352,7 @@ writeN64header (void)
   unsigned int n64aps_magictest;
   unsigned char buffer[8], teritory, cartid[2];
 
-  fread (&n64aps_magictest, 4, 1, n64aps_orgfile);
+  fread_checked (&n64aps_magictest, 4, 1, n64aps_orgfile);
 #ifdef  WORDS_BIGENDIAN
   n64aps_magictest = bswap_32 (n64aps_magictest);
 #endif
@@ -363,7 +363,7 @@ writeN64header (void)
     fputc (1, n64aps_apsfile);
 
   fseek (n64aps_orgfile, 60, SEEK_SET);
-  fread (cartid, 1, 2, n64aps_orgfile);
+  fread_checked (cartid, 1, 2, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
     {
       unsigned char temp;
@@ -382,7 +382,7 @@ writeN64header (void)
   fputc (teritory, n64aps_apsfile);
 
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
-  fread (buffer, 1, 8, n64aps_orgfile);
+  fread_checked (buffer, 1, 8, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
     ucon64_bswap16_n (buffer, 8);
 

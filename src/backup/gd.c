@@ -700,13 +700,11 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
               exit (1);
             }
         }
-      else
-        if (file == NULL)                       // don't open the file more than once
-          if ((file = fopen (filename, "rb")) == NULL)
-            {
-              fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
-              exit (1);
-            }
+      else if (file == NULL && (file = fopen (filename, "rb")) == NULL)
+        { // don't open the file more than once
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+          exit (1);
+        }
       /*
         When sending a "pre-split" file, opening the next file often causes
         enough of a delay for the GDSF7. Sending an unsplit file without an
@@ -737,7 +735,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
       if (send_header)
         {
           // send the Game Doctor 512 byte header
-          fread (buffer, 1, GD_HEADER_LEN, file);
+          fread_checked (buffer, 1, GD_HEADER_LEN, file);
           if (gd_send_prolog_bytes (buffer, GD_HEADER_LEN) == GD_ERROR)
             {
               if (i)
@@ -753,7 +751,7 @@ gd_write_rom (const char *filename, unsigned short parport, st_ucon64_nfo_t *rom
           else
             fseek (file, i * 8 * MBIT + GD_HEADER_LEN, SEEK_SET);
         }
-      fread (buffer, 1, gd3_dram_unit[i].size, file);
+      fread_checked (buffer, 1, gd3_dram_unit[i].size, file);
       if (gd_send_bytes (buffer, gd3_dram_unit[i].size) == GD_ERROR)
         {
           if (i)

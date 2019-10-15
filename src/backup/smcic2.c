@@ -49,9 +49,9 @@ const st_getopt2_t smcic2_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      // not Future Supercom Hyper Effect Pro.9, unsure about Supercom Pro 2
-      NULL, "UFO Super Drive PRO 6 HYPER VERSION/Future Supercom Pro.9/Twin Supercom\n"
-            "(Modified) Supercom/(Modified) Super Magicom",
+      // not Future Supercom Hyper Effect Pro.9, unsure about Supercom PRO.2
+      NULL, "UFO Super Drive PRO 6 HYPER VERSION/Future Supercom Pro.9/Twin Supercom Pro.5\n"
+            "(Modified) Supercom PRO.1/(Modified) Super Magicom",
       NULL
     },
 #ifdef  USE_PARALLEL
@@ -87,7 +87,7 @@ add_filename (const char *filename, void *cb_data)
       if ((*fname = (char *) malloc (FILENAME_MAX)) == NULL)
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], FILENAME_MAX);
-          return;
+          exit (1);
         }
       snprintf (*fname, FILENAME_MAX, "%s", filename);
       (*fname)[FILENAME_MAX - 1] = '\0';
@@ -124,13 +124,7 @@ smcic2_write_rom (const char *filename, unsigned short parport)
     }
 
   for (n = 0; n < nparts; n++)
-    {
-      char *fname = add_filename_data.names[n];
-
-      if (fname == NULL)
-        exit (1); // error message has already been printed, see add_filename()
-      fsize += fsizeof (fname);
-    }
+    fsize += fsizeof (add_filename_data.names[n]);
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
@@ -149,7 +143,7 @@ smcic2_write_rom (const char *filename, unsigned short parport)
           exit (1);
         }
 
-      fread (buffer, 1, SWC_HEADER_LEN, file);
+      fread_checked (buffer, 1, SWC_HEADER_LEN, file);
       emu_mode_select = buffer[2];              // this byte is needed later
       ffe_send_command (5, 0, 0);
       ffe_send_block (0x400, buffer, SWC_HEADER_LEN); // send header

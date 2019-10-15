@@ -815,7 +815,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename)
 
           if (cm_verbose)
             {
-              printf ("set:          ");
+              fputs ("set:          ", stdout);
               for (n = 0; n < (*patterns)[n_codes].sets[n_sets].size; n++)
                 printf ("%02x ", (unsigned char) (*patterns)[n_codes].sets[n_sets].data[n]);
               printf ("(%u)\n", (*patterns)[n_codes].sets[n_sets].size);

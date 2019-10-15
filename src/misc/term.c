@@ -209,7 +209,6 @@ vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ and MinGW ports support "ANSI colors".
 //  Cheap, because it only supports the ANSI escape sequences uCON64 uses.
 {
-#undef  printf
 #undef  fprintf
   int n_chars = 0;
   char output[MAXBUFSIZE], *ptr, *ptr2;
@@ -291,9 +290,9 @@ vprintf2 (const char *format, va_list argptr)
             {
               new_attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
               SetConsoleTextAttribute (stdout_handle, new_attr);
-              printf ("\n"
-                      "INTERNAL WARNING: vprintf2() encountered an unsupported ANSI escape sequence\n"
-                      "                  Please send a bug report\n");
+              puts ("\n"
+                    "INTERNAL WARNING: vprintf2() encountered an unsupported ANSI escape sequence\n"
+                    "                  Please send a bug report");
               n_ctrl = 0;
             }
           SetConsoleTextAttribute (stdout_handle, new_attr);
@@ -315,7 +314,6 @@ vprintf2 (const char *format, va_list argptr)
         }
     }
   return n_chars;
-#define printf  printf2
 #define fprintf fprintf2
 }
 
@@ -453,7 +451,7 @@ set_tty (tty_t *param)
 {
   if (stdin_tty && tcsetattr (STDIN_FILENO, TCSANOW, param) == -1)
     {
-      fprintf (stderr, "ERROR: Could not set TTY parameters\n");
+      fputs ("ERROR: Could not set TTY parameters\n", stderr);
       exit (100);
     }
 }
@@ -475,7 +473,7 @@ init_conio (void)
 
   if (tcgetattr (STDIN_FILENO, &oldtty) == -1)
     {
-      fprintf (stderr, "ERROR: Could not get TTY parameters\n");
+      fputs ("ERROR: Could not get TTY parameters\n", stderr);
       exit (101);
     }
   oldtty_set = 1;
@@ -483,7 +481,7 @@ init_conio (void)
 #if 0
   if (register_func (deinit_conio) == -1)
     {
-      fprintf (stderr, "ERROR: Could not register function with register_func()\n");
+      fputs ("ERROR: Could not register function with register_func()\n", stderr);
       exit (102);
     }
 #endif

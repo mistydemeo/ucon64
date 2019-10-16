@@ -2657,7 +2657,7 @@ fread_checked2 (void *buffer, size_t size, size_t number, FILE *file)
 #pragma warning(push)
 #pragma warning(disable: 4777)
 /*
-  In this case Visual Studio Community 2015 warns with: '_snprintf' : format
+  In this case Visual Studio Community 2015 warns with: 'fprintf' : format
   string '%u' requires an argument of type 'unsigned int', but variadic
   argument 1 has type 'size_t'
   This is a bug in Visual Studio Community 2015.

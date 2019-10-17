@@ -24,11 +24,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  USE_LIBCD64
 
-#include <stdarg.h>
 #ifdef  _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4668) // 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
 #endif
+#include <stdarg.h>
 #include <stdlib.h>
 #ifdef  _MSC_VER
 #pragma warning(pop)

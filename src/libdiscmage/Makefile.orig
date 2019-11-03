@@ -65,28 +65,13 @@ endif                                   # GCC_WIN
 endif                                   # USE_ZLIB
 
 
-ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
+ifeq ($(GCC_WIN),1)
 
 FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/lib/gcc/i686-pc-cygwin/6.4.0/
-
-ifdef DLOPEN
-ENTRY=__cygwin_dll_entry@12
-else
-ENTRY=_DllMain@12
+LDFLAGS+=-shared -static-libgcc
+ifndef DLOPEN
+LDFLAGS+=-Wl,--out-implib,$(LIBNAME).a
 endif
-
-LDFLAGS+=-L$(GCCA_DIR) -lgcc -lcygwin -lkernel32 --dll -e $(ENTRY)
-# kernel32 for DLOPEN and DisableThreadLibraryCalls()
-
-else
-ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
-
-FULLLIBNAME=$(LIBNAME).dll
-GCCA_DIR=/mingw/lib/gcc/mingw32/6.3.0/
-LDFLAGS+=-L$(GCCA_DIR) -lgcc -L/mingw/lib -lkernel32 -lmsvcrt --dll -e _DllMain@12
-# Msys problem: Specifying the library directory is necessary when compiling on
-# a different filesystem than the filesystem that MinGW is installed on.
 
 else
 ifeq ($(OSTYPE),DJGPP)
@@ -121,8 +106,7 @@ endif                                   # Darwin
 endif                                   # BeOS
 
 endif                                   # DJGPP
-endif                                   # MINGW
-endif                                   # CYGWIN
+endif                                   # GCC_WIN
 
 
 all: $(FULLLIBNAME)
@@ -130,7 +114,7 @@ all: $(FULLLIBNAME)
 
 clean:
 ifeq ($(GCC_WIN),1)
-	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o tmp.*
+	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o
 else
 ifeq ($(OSTYPE),DJGPP)
 	del $(FULLLIBNAME)
@@ -167,24 +151,17 @@ endif                                   # GCC_WIN
 
 ifeq ($(GCC_WIN),1)
 
-DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(FULLLIBNAME)
+OBJECTS2=$(OBJECTS)
 ifndef DLOPEN
-DLLTOOLFLAGS+=-l $(LIBNAME).a
 $(FULLLIBNAME) $(LIBNAME).a: $(OBJECTS)
 else
+OBJECTS2+=exports.o
 $(FULLLIBNAME): $(OBJECTS)
+# Using dlltool is not really necessary, because by default all symbols are
+# exported. By using a .def file we can control the export of symbols
+	dlltool -e exports.o -d $(LIBNAME).def -D $@ $^
 endif
-#	echo EXPORTS > tmp.def
-##	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
-#	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
-# We use nm instead of dlltool --output-def, so that we don't have to
-# specify explicitly (in the source code) which symbols should be exported.
-# We don't create the .def file automatically anymore. Using nm resulted in a
-# (too large?) .def file which resulted in a non-working DLL when using Cygwin.
-
-	ld --base-file tmp.base $(OBJECTS) $(LDFLAGS) -o $(FULLLIBNAME)
-	dlltool $(DLLTOOLFLAGS)
-	ld tmp.exp $(OBJECTS) $(LDFLAGS) -o $(FULLLIBNAME)
+	$(CC) $(OBJECTS2) $(LDFLAGS) -o $@
 
 else
 ifeq ($(OSTYPE),DJGPP)
@@ -207,7 +184,7 @@ else                                    # UNIX, BeOS or Mac OS X (Darwin)
 # uses LD_LIBRARY_PATH, DYLD_LIBRARY_PATH and DYLD_FALLBACK_LIBRARY_PATH
 
 $(FULLLIBNAME): $(OBJECTS)
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $(FULLLIBNAME)
+	$(CC) $^ $(LDFLAGS) -o $@
 
 endif                                   # DJGPP
 endif                                   # GCC_WIN

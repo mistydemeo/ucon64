@@ -1,7 +1,7 @@
 /*
 dllinit.c - DLL initialization code
 
-Copyright (c) 2002 - 2005 dbjh
+Copyright (c) 2002 - 2005, 2019 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -62,7 +62,10 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE h, DWORD reason, LPVOID ptr);
 BOOL WINAPI
 DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
 {
+  (void) h;                                     // warning remover
+  (void) reason;                                // warning remover
   (void) ptr;                                   // warning remover
+#if 0
   switch (reason)
     {
     case DLL_PROCESS_ATTACH:
@@ -75,6 +78,7 @@ DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
     case DLL_THREAD_DETACH:
       break;
     }
+#endif
   return TRUE;
 }
 

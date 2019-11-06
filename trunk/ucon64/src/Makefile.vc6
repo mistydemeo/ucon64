@@ -107,30 +107,6 @@ OBJECTS=$(OBJECTS) misc/usb.obj
 !endif
 
 
-clean:
-	del *.obj
-	del patch\*.obj
-	del console\*.obj
-	del backup\*.obj
-	del misc\*.obj
-	del $(TARGET)
-	cd libdiscmage
-	$(MAKE) /NOLOGO /f Makefile.vc6 clean
-	cd ..\backup\libcd64
-	$(MAKE) /NOLOGO /f Makefile.vc6 clean
-	cd ..\..
-
-
-distclean: clean
-	del config.h
-	cd libdiscmage
-	$(MAKE) /NOLOGO /f Makefile.vc6 distclean
-	cd ..\backup\libcd64
-# libcd64 makefile has no distclean target
-	$(MAKE) /NOLOGO /f Makefile.vc6 clean
-	cd ..\..
-
-
 .c.obj:
 	$(CC) $(CFLAGS) /c $< /Fo$@
 
@@ -187,6 +163,30 @@ uninstall:
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6 uninstall
 	cd ..
+
+
+clean:
+	del *.obj
+	del patch\*.obj
+	del console\*.obj
+	del backup\*.obj
+	del misc\*.obj
+	del $(TARGET)
+	cd libdiscmage
+	$(MAKE) /NOLOGO /f Makefile.vc6 clean
+	cd ..\backup\libcd64
+	$(MAKE) /NOLOGO /f Makefile.vc6 clean
+	cd ..\..
+
+
+distclean: clean
+	del config.h
+	cd libdiscmage
+	$(MAKE) /NOLOGO /f Makefile.vc6 distclean
+	cd ..\backup\libcd64
+# libcd64 makefile has no distclean target
+	$(MAKE) /NOLOGO /f Makefile.vc6 clean
+	cd ..\..
 
 
 # pseudotarget to force NMAKE to run discmage's makefile

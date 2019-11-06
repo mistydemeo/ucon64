@@ -153,11 +153,8 @@ endif # DJGPP
 
 # libcd64 stuff
 
-cd64io.o: cd64io.c
-	$(CC) $(CFLAGS) $^ -c -o $@
-
-cd64lib.o: cd64lib.c
-	$(CC) $(CFLAGS) $^ -c -o $@
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
 
 libcd64.a: cd64lib.o cd64io.o
 	ld -r $^ $(LIBS) -o $*.o

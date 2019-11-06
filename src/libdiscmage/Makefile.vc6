@@ -43,6 +43,21 @@ OBJECTS=$(OBJECTS) ioapi.obj map.obj misc_z.obj unzip.obj
 all: $(FULLLIBNAME)
 
 
+.c.obj:
+	$(CC) $(CFLAGS) /c $< /Fo$@
+
+
+$(FULLLIBNAME): $(OBJECTS)
+	link.exe $** $(LDFLAGS) /OUT:$(FULLLIBNAME)
+# link.exe automatically creates the import library. "/IMPLIB:filename.lib"
+#  could be used to give the import library another name
+#	lib.exe $** $(LDFLAGS) /OUT:$(LIBNAME).lib
+
+install:
+
+uninstall:
+
+
 clean:
 	del $(FULLLIBNAME)
 	del $(LIBNAME).lib
@@ -53,21 +68,6 @@ clean:
 
 distclean: clean
 	del config.h
-
-
-.c.obj:
-	$(CC) $(CFLAGS) /c $< /Fo$@
-
-
-$(FULLLIBNAME): $(OBJECTS)
-	link.exe $(OBJECTS) $(LDFLAGS) /OUT:$(FULLLIBNAME)
-# link.exe automatically creates the import library. "/IMPLIB:filename.lib"
-#  could be used to give the import library another name
-#	lib.exe $(OBJECTS) $(LDFLAGS) /OUT:$(LIBNAME).lib
-
-install:
-
-uninstall:
 
 
 # Dependencies

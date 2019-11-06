@@ -59,11 +59,8 @@ all: cd64.lib cd64.dll
 
 # libcd64 stuff
 
-cd64io.obj: cd64io.c
-	$(CC) $(CFLAGS) $** /c /Fo$@
-
-cd64lib.obj: cd64lib.c
-	$(CC) $(CFLAGS) $** /c /Fo$@
+.c.obj:
+	$(CC) $(CFLAGS) /c $< /Fo$@
 
 cd64.lib: cd64lib.obj cd64io.obj
 	lib.exe $** $(LDFLAGS) /OUT:$@

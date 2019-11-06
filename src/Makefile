@@ -169,63 +169,11 @@ TARGETS+=$(TARGET)
 all: $(TARGETS)
 
 
-CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
-cd libdiscmage && $(MAKE) clean; \
-cd ../backup/libcd64 && $(MAKE) clean
-
-clean:
-ifeq ($(GCC_WIN),1)
-	$(CLEAN_CMD)
-else
-ifeq ($(OSTYPE),DJGPP)
-	del *.o
-	del patch\*.o
-	del console\*.o
-	del backup\*.o
-	del misc\*.o
-	del $(TARGET)
-	cd libdiscmage
-	$(MAKE) clean
-	cd ..\backup\libcd64
-	$(MAKE) clean
-	cd ..\..
-else                                    # UNIX, BeOS or Mac OS X (Darwin)
-	$(CLEAN_CMD)
-endif                                   # DJGPP
-endif                                   # GCC_WIN
-
-
-DISTCLEAN_CMD=rm -f config.mak config.log config.status config.cache config.h; \
-cd libdiscmage && $(MAKE) distclean; \
-cd ../backup/libcd64 && $(MAKE) clean
-# libcd64 Makefile has no distclean target
-
-distclean: clean
-ifeq ($(GCC_WIN),1)
-	$(DISTCLEAN_CMD)
-else
-ifeq ($(OSTYPE),DJGPP)
-	del config.mak
-	del config.log
-	del config.status
-	del config.cache
-	del config.h
-	cd libdiscmage
-	$(MAKE) distclean
-	cd ..\backup\libcd64
-	$(MAKE) clean
-	cd ..\..
-else
-	$(DISTCLEAN_CMD)
-endif                                   # DJGPP
-endif                                   # GCC_WIN
-
-
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
-backup/cd64.o: backup/cd64.c
-	$(CC) $(CFLAGS) -Ibackup/libcd64 -c $< -o $@
+backup/cd64.o:
+	$(CC) $(CFLAGS) -Ibackup/libcd64 -c $*.c -o $@
 
 
 ifdef USE_DISCMAGE
@@ -312,6 +260,58 @@ endif                                   # DJGPP
 ifndef DLOPEN
 	cd libdiscmage && $(MAKE) uninstall
 endif
+
+
+CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
+cd libdiscmage && $(MAKE) clean; \
+cd ../backup/libcd64 && $(MAKE) clean
+
+clean:
+ifeq ($(GCC_WIN),1)
+	$(CLEAN_CMD)
+else
+ifeq ($(OSTYPE),DJGPP)
+	del *.o
+	del patch\*.o
+	del console\*.o
+	del backup\*.o
+	del misc\*.o
+	del $(TARGET)
+	cd libdiscmage
+	$(MAKE) clean
+	cd ..\backup\libcd64
+	$(MAKE) clean
+	cd ..\..
+else                                    # UNIX, BeOS or Mac OS X (Darwin)
+	$(CLEAN_CMD)
+endif                                   # DJGPP
+endif                                   # GCC_WIN
+
+
+DISTCLEAN_CMD=rm -f config.mak config.log config.status config.cache config.h; \
+cd libdiscmage && $(MAKE) distclean; \
+cd ../backup/libcd64 && $(MAKE) clean
+# libcd64 Makefile has no distclean target
+
+distclean: clean
+ifeq ($(GCC_WIN),1)
+	$(DISTCLEAN_CMD)
+else
+ifeq ($(OSTYPE),DJGPP)
+	del config.mak
+	del config.log
+	del config.status
+	del config.cache
+	del config.h
+	cd libdiscmage
+	$(MAKE) distclean
+	cd ..\backup\libcd64
+	$(MAKE) clean
+	cd ..\..
+else
+	$(DISTCLEAN_CMD)
+endif                                   # DJGPP
+endif                                   # GCC_WIN
 
 
 # Dependencies

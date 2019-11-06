@@ -112,39 +112,6 @@ endif                                   # GCC_WIN
 all: $(FULLLIBNAME)
 
 
-clean:
-ifeq ($(GCC_WIN),1)
-	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o
-else
-ifeq ($(OSTYPE),DJGPP)
-	del $(FULLLIBNAME)
-ifndef DLOPEN
-	del $(LIBNAME).a
-endif
-	del *.o
-	del format\*.o
-else                                    # UNIX, BeOS or Mac OS X (Darwin)
-	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
-endif                                   # DJGPP
-endif                                   # GCC_WIN
-
-
-distclean: clean
-ifeq ($(GCC_WIN),1)
-	rm -f Makefile config.log config.status config.cache config.h
-else
-ifeq ($(OSTYPE),DJGPP)
-	del Makefile
-	del config.log
-	del config.status
-	del config.cache
-	del config.h
-else
-	rm -f Makefile config.log config.status config.cache config.h
-endif                                   # DJGPP
-endif                                   # GCC_WIN
-
-
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -176,7 +143,7 @@ ifndef DLOPEN
 # Recompile map.c, because it has to be a normal object file for the import
 # library (no references to import_export)
 	$(CC) $(CFLAGS0) -c map.c -o map.o
-	ar rs $(LIBNAME).a djimport.o map.o dlopen.o
+	ar crs $(LIBNAME).a djimport.o map.o dlopen.o
 endif
 
 else                                    # UNIX, BeOS or Mac OS X (Darwin)
@@ -207,6 +174,39 @@ ifndef DLOPEN
 	rm -f $(DESTDIR)$(libdir)/$(FULLLIBNAME)
 	rm -f $(DESTDIR)$(includedir)/lib$(LIBNAME).h
 endif
+
+
+clean:
+ifeq ($(GCC_WIN),1)
+	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o
+else
+ifeq ($(OSTYPE),DJGPP)
+	del $(FULLLIBNAME)
+ifndef DLOPEN
+	del $(LIBNAME).a
+endif
+	del *.o
+	del format\*.o
+else                                    # UNIX, BeOS or Mac OS X (Darwin)
+	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
+endif                                   # DJGPP
+endif                                   # GCC_WIN
+
+
+distclean: clean
+ifeq ($(GCC_WIN),1)
+	rm -f Makefile config.log config.status config.cache config.h
+else
+ifeq ($(OSTYPE),DJGPP)
+	del Makefile
+	del config.log
+	del config.status
+	del config.cache
+	del config.h
+else
+	rm -f Makefile config.log config.status config.cache config.h
+endif                                   # DJGPP
+endif                                   # GCC_WIN
 
 
 # Dependencies

@@ -235,7 +235,10 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 #endif
 
   if (image)
-    dm_close (image);
+    {
+      dm_close (image);
+      image = NULL;
+    }
 
   if (access (fname, F_OK) != 0)
     return NULL;

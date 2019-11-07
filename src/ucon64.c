@@ -1763,7 +1763,6 @@ ucon64_nfo (void)
               ucon64.ansi_color ? 1 :
 #endif
                                   0);
-      fputc ('\n', stdout);
 
       return 0; // no crc calc. for disc images and therefore no DAT entry either
     }

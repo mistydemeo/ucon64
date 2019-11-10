@@ -1013,10 +1013,14 @@ mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
 
       *(buf + (pos & 15)) = isprint (*p) ? *p : '.';
       if (!((pos + 1) & 15))
-        puts (buf);
+        {
+          fflush (stdout);
+          puts (buf);
+        }
     }
   if (pos & 15)
     {
+      fflush (stdout);
       *(buf + (pos & 15)) = '\0';
       puts (buf);
     }

@@ -568,6 +568,10 @@ n64_init (st_ucon64_nfo_t *rominfo)
   Nintendo 64 ROMs.
 */
 #define ROL(i, b) (((i) << (b)) | ((i) >> (32 - (b))))
+#define BYTES2LONG(b, s) ( (b)[0^(s)] << 24 | \
+                           (b)[1^(s)] << 16 | \
+                           (b)[2^(s)] <<  8 | \
+                           (b)[3^(s)] )
 
 #define CHECKSUM_START   0x1000 //(N64_HEADER_LEN + N64_BC_SIZE)
 #define CHECKSUM_LENGTH  0x100000
@@ -690,8 +694,7 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
         break;
       for (i = 0; i < n; i += 4)
         {
-          c1 = (chunk[i] << 24) | (chunk[i + 1] << 16) |
-               (chunk[i + 2] <<  8) | chunk[i + 3];
+          c1 = BYTES2LONG (&chunk[i], !swap_data);
           k1 = t6 + c1;
           if (k1 < t6)
             t4++;

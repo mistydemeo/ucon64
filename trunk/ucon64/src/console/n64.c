@@ -694,7 +694,8 @@ n64_chksum (st_ucon64_nfo_t *rominfo, const char *filename)
         break;
       for (i = 0; i < n; i += 4)
         {
-          c1 = BYTES2LONG (&chunk[i], !swap_data);
+          c1 = BYTES2LONG (&chunk[i], (rominfo->interleaved && !swap_data) ||
+                                      (!rominfo->interleaved && swap_data));
           k1 = t6 + c1;
           if (k1 < t6)
             t4++;

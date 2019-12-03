@@ -867,9 +867,10 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
   fputc (0xff, destfile);                       // 0x0 = 0xff (= valid entry)
   p = basename2 (ucon64.fname);
   n = strlen (p);
-  if (n > 0x1c)
+  if (n >= 0x1c)
     n = 0x1c;
-  memset (name + n, ' ', 0x1c - n);
+  else // n < 0x1c (some versions of GCC complain about memset(..., ..., 0))
+    memset (name + n, ' ', 0x1c - n);
   for (n--; n >= 0; n--)                        // loader only supports upper case characters
     name[n] = isprint ((int) p[n]) ? (unsigned char) toupper ((int) p[n]) : '.';
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name

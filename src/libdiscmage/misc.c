@@ -2820,18 +2820,18 @@ drop_privileges (void)
   uid_t uid;
   gid_t gid;
 
-  uid = getuid ();
-  if (setuid (uid) == -1)
-    {
-      fprintf (stderr, "ERROR: Could not set user ID to %u\n", uid);
-      return 1;
-    }
-
   gid = getgid ();
   if (setgid (gid) == -1)
     {
       fprintf (stderr, "ERROR: Could not set group ID to %u\n", gid);
-      return 1;
+      return -1;
+    }
+
+  uid = getuid ();
+  if (setuid (uid) == -1)
+    {
+      fprintf (stderr, "ERROR: Could not set user ID to %u\n", uid);
+      return -1;
     }
 
   return 0;

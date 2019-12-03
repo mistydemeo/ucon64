@@ -1014,18 +1014,22 @@ drop_privileges (void)
   uid_t uid;
   gid_t gid;
 
-  uid = getuid ();
-  if (setuid (uid) == -1)
-    {
-      fprintf (stderr, "ERROR: Could not set user ID to %u\n", uid);
-      return 1;
-    }
+#ifndef __CYGWIN__
+  regain_privileges (); // the saved UID and GID must be changed too
+#endif
 
   gid = getgid ();
   if (setgid (gid) == -1)
     {
       fprintf (stderr, "ERROR: Could not set group ID to %u\n", gid);
-      return 1;
+      return -1;
+    }
+
+  uid = getuid ();
+  if (setuid (uid) == -1)
+    {
+      fprintf (stderr, "ERROR: Could not set user ID to %u\n", uid);
+      return -1;
     }
 
   return 0;
@@ -1038,18 +1042,18 @@ drop_privileges_temp (void)
   uid_t uid;
   gid_t gid;
 
-  uid = getuid ();
-  if (seteuid (uid) == -1)
-    {
-      fprintf (stderr, "ERROR: Could not set effective user ID to %u\n", uid);
-      return 1;
-    }
-
   gid = getgid ();
   if (setegid (gid) == -1)
     {
       fprintf (stderr, "ERROR: Could not set effective group ID to %u\n", gid);
-      return 1;
+      return -1;
+    }
+
+  uid = getuid ();
+  if (seteuid (uid) == -1)
+    {
+      fprintf (stderr, "ERROR: Could not set effective user ID to %u\n", uid);
+      return -1;
     }
 
   return 0;
@@ -1062,7 +1066,7 @@ regain_privileges (void)
   if (seteuid ((uid_t) 0) == -1)
     {
       puts ("WARNING: Could not set effective user ID to 0");
-      return 1;
+      return -1;
     }
 
   return 0;

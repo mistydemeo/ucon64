@@ -299,9 +299,10 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize, int size)
   fputc (0xff, destfile);                       // 0x0 = 0xff
   p = basename2 (ucon64.fname);
   n = strlen (p);
-  if (n > 0x0b)
+  if (n >= 0x0b)
     n = 0x0b;
-  memset (name + n, ' ', 0x0b - n);
+  else // n < 0x0b (some versions of GCC complain about memset(..., ..., 0))
+    memset (name + n, ' ', 0x0b - n);
   for (n--; n >= 0; n--)                        // loader only supports upper case characters
     name[n] = isprint ((int) p[n]) ? (unsigned char) toupper ((int) p[n]) : '.';
   // See comment in genesis.c/write_game_table_entry(). Avoid possible silliness.

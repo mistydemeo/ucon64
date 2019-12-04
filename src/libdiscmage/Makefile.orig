@@ -21,7 +21,8 @@ INSTALL_DATA=${INSTALL} -m 644
 #RANLIB=ranlib
 
 CC=gcc
-CFLAGS0:=$(CFLAGS) -I. -Wall -W -O3 -DHAVE_CONFIG_H
+CFLAGS0:=$(CFLAGS) -I. -Wall -W -Wno-implicit-fallthrough \
+-Wno-stringop-overflow -O3 -DHAVE_CONFIG_H
 CFLAGS=$(CFLAGS0) -DDLL
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN

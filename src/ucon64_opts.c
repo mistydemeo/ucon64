@@ -1121,7 +1121,7 @@ ucon64_options (st_ucon64_t *p)
 
               printf ("Writing track: %d\n\n", track + 1);
 
-              dm_set_gauge ((void (*)(int, int)) &discmage_gauge);
+              dm_set_gauge (&discmage_gauge);
               dm_rip ((dm_image_t *) ucon64.image, track, flags);
               fputc ('\n', stdout);
             }
@@ -1167,7 +1167,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_XCDRW:
       if (ucon64.discmage_enabled)
         {
-//          dm_set_gauge ((void *) &discmage_gauge);
+//          dm_set_gauge (&discmage_gauge);
           if (!access (ucon64.fname, F_OK))
             dm_disc_write ((dm_image_t *) ucon64.image);
           else

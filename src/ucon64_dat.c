@@ -2,7 +2,7 @@
 ucon64_dat.c - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
 Copyright (c) 1999 - 2004              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2018 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2019 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -292,13 +292,13 @@ get_next_file (char *fname)
     {
       char search_pattern[FILENAME_MAX];
 
-      // Note that FindFirstFile() & FindNextFile() are case insensitive
+      // NOTE: FindFirstFile() & FindNextFile() are case insensitive.
       snprintf (search_pattern, FILENAME_MAX, "%s" DIR_SEPARATOR_S "*.dat",
                 ucon64.datdir);
       search_pattern[FILENAME_MAX - 1] = '\0';
       if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
         {
-          // Not being able to find a DAT file is not a real error
+          // Not being able to find a DAT file is not a real error.
           if (GetLastError () != ERROR_FILE_NOT_FOUND)
             {
               fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
@@ -1146,9 +1146,10 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_dat_file_line)
       char format[80];
       int display_version = stristr (dat->datfile, dat->version) ? 0 : 1;
 
-      sprintf (format, "  %%s (%s%s%s%s%%s)\n",
-               display_version ? dat->version : "", display_version ? ", " : "",
-               dat->date, dat->date[0] ? ", " : "");
+      snprintf (format, 80, "  %%s (%s%s%s%s%%s)\n",
+                display_version ? dat->version : "", display_version ? ", " : "",
+                dat->date, dat->date[0] ? ", " : "");
+      format[80 - 1] = '\0';
       printf (format, dat->datfile, dat->refname);
     }
 }

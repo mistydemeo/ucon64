@@ -57,7 +57,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t discmage_usage[];
 extern int ucon64_load_discmage (void);
-extern int discmage_gauge (int pos, int size);
+extern void discmage_gauge (int pos, int size);
 #endif
 
 

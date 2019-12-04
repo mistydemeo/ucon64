@@ -21,7 +21,8 @@ INSTALL_DATA=@INSTALL_DATA@
 #RANLIB=@RANLIB@
 
 CC=@CC@
-CFLAGS0:=$(CFLAGS) -I. -Wall -W -O3 @DEFS@
+CFLAGS0:=$(CFLAGS) -I. -Wall -W -Wno-implicit-fallthrough \
+-Wno-stringop-overflow -O3 @DEFS@
 CFLAGS=$(CFLAGS0) -DDLL
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN

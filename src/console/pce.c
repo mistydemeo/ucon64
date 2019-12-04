@@ -1003,7 +1003,7 @@ pce_multi (unsigned int truncate_size)
   // make it possible for pce_write_rom() to detect that the file is a
   //  multi-game file
   fseek (destfile, 0xb3f4, SEEK_SET);
-  strncpy ((char *) buffer, "uCON64 " UCON64_VERSION_S, 12);
+  strcpy ((char *) buffer, "uCON64 " UCON64_VERSION_S);
   buffer[12] = 0;
   fwrite (buffer, 1, strlen ((char *) buffer), destfile);
 

@@ -709,7 +709,7 @@ ucon64_load_discmage (void)
 }
 
 
-int
+void
 discmage_gauge (int pos, int size)
 {
   static time_t init_time = 0;
@@ -717,7 +717,7 @@ discmage_gauge (int pos, int size)
   if (!init_time || !pos /* || !size */)
     init_time = time (NULL);
 
-  return ucon64_gauge (init_time, pos, size);
+  ucon64_gauge (init_time, pos, size);
 }
 
 

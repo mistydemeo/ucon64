@@ -9,7 +9,10 @@ endif
 
 CC=gcc
 CFLAGS0:=$(CFLAGS)
-CFLAGS+=-I. -Wall -W -O3 -fsigned-char
+CFLAGS+=-I. -Wall -W -Wno-implicit-fallthrough -Wno-format-truncation \
+-Wno-stringop-overflow -O3 -fsigned-char
+# Enable -Wstringop-overflow[=type] when it is no longer a broken, partial
+# implementation with false positives for trivial cases.
 LDFLAGS0:=$(LDFLAGS)
 ifneq ($(OSTYPE),Darwin)
 # On Mac OS X using -s gives the following warning:

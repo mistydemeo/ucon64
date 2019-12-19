@@ -298,7 +298,7 @@ int cd64_open_ppdev(struct cd64_t *cd64) {
 	if (cd64->port > PARPORT_MAX) return 0;
 
 	snprintf(realdev, 128+1, device, cd64->port);
-	realdev[128] = 0;
+	realdev[128] = '\0';
 
 	if ((cd64->ppdevfd = open(realdev, O_RDWR)) == -1) {
 		cd64->notice_callback2("open: %s", strerror(errno));
@@ -808,6 +808,8 @@ static INLINE uint8_t inb2(uint16_t port) {
 #ifdef _MSC_VER
 #ifdef _M_IX86
 		return (uint8_t) _inp(port);
+#else
+		; /* NOTE: Silent failure for now. */
 #endif
 #endif
 #endif /* _WIN32 || __CYGWIN__ */
@@ -840,6 +842,8 @@ static INLINE void outb2(uint8_t byte, uint16_t port) {
 #ifdef _MSC_VER
 #ifdef _M_IX86
 		_outp(port, byte);
+#else
+		; /* NOTE: Silent failure for now. */
 #endif
 #endif
 #endif /* _WIN32 || __CYGWIN__ */
@@ -942,7 +946,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		if (!cd64->io_driver_dir[0]) strcpy(cd64->io_driver_dir, ".");
 		snprintf(fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s",
 		         cd64->io_driver_dir, "dlportio.dll");
-		fname[FILENAME_MAX-1] = 0;
+		fname[FILENAME_MAX-1] = '\0';
 		if (access(fname, F_OK) == 0) {
 			io_driver = open_module(fname, cd64);
 
@@ -961,7 +965,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		if (!io_driver_found) {
 			snprintf(fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s",
 			         cd64->io_driver_dir, "io.dll");
-			fname[FILENAME_MAX-1] = 0;
+			fname[FILENAME_MAX-1] = '\0';
 			if (access(fname, F_OK) == 0) {
 				io_driver = open_module(fname, cd64);
 
@@ -985,7 +989,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		if (!io_driver_found) {
 			snprintf(fname, FILENAME_MAX, "%s" DIR_SEPARATOR_S "%s",
 			         cd64->io_driver_dir, "inpout32.dll");
-			fname[FILENAME_MAX-1] = 0;
+			fname[FILENAME_MAX-1] = '\0';
 			if (access(fname, F_OK) == 0) {
 				io_driver = open_module(fname, cd64);
 

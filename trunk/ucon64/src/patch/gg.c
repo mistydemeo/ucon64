@@ -292,7 +292,7 @@ gameGenieEncodeGameBoy (const char *in, char *out)
   out[4] = (char) toupper ((int) in[2]);
   out[5] = (char) toupper ((int) in[3]);
   out[6] = hexDigit (~hexValue (in[0]) & 0xf);
-  out[7] = 0;
+  out[7] = '\0';
 
   if (haveCheck)
     {
@@ -308,7 +308,7 @@ gameGenieEncodeGameBoy (const char *in, char *out)
       out[8] = hexDigit (i & 0xf);
       out[9] = hexDigit ((i ^ 8) & 0xf);
       out[10] = hexDigit (check & 0xf);
-      out[11] = 0;
+      out[11] = '\0';
     }
 
   return 0;
@@ -405,7 +405,7 @@ gameGenieEncodeMegadrive (const char *in, char *out)
   out[4] = '-';
   for (i = 5; i < 9; ++i)
     out[i] = genesisChars[data[i - 1]];
-  out[9] = 0;
+  out[9] = '\0';
 
   return 0;
 }

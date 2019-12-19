@@ -96,7 +96,7 @@ ngp_init (st_ucon64_nfo_t *rominfo)
 
   // internal ROM name
   strncpy (rominfo->name, (char *) &OFFSET (ngp_header, 0x24), 12);
-  rominfo->name[12] = 0;
+  rominfo->name[12] = '\0';
 
   // ROM maker
   rominfo->maker =

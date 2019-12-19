@@ -6118,7 +6118,7 @@ handle_nsrt_header (st_ucon64_nfo_t *rominfo, unsigned char *header,
       name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
 
   memcpy (name, header + 0x1d1, name_len);
-  name[name_len] = 0;
+  name[name_len] = '\0';
   for (x = 0; x < name_len; x++)
     if (!isprint ((int) name[x]))
       name[x] = '.';

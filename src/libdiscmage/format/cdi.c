@@ -114,7 +114,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
   if (fread_checked2 (&value_s, 1, value8, fh) != 0) //  [fl]    [filename]
     return -1;
 #ifdef  DEBUG
-  value_s[value8] = 0;
+  value_s[value8] = '\0';
   puts (value_s);
   fflush (stdout);
 #endif

@@ -509,7 +509,7 @@ n64_init (st_ucon64_nfo_t *rominfo)
   strncpy (rominfo->name, (char *) &OFFSET (n64_header, 32), N64_NAME_LEN);
   if (rominfo->interleaved)
     ucon64_bswap16_n (rominfo->name, N64_NAME_LEN);
-  rominfo->name[N64_NAME_LEN] = 0;
+  rominfo->name[N64_NAME_LEN] = '\0';
 
   // ROM maker
   rominfo->maker = NULL_TO_UNKNOWN_S (n64_maker[MIN (OFFSET

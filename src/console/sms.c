@@ -461,7 +461,7 @@ sms_multi (unsigned int truncate_size)
   //  multi-game file
   fseek (destfile, 0x21f4, SEEK_SET);
   strcpy ((char *) buffer, "uCON64 " UCON64_VERSION_S);
-  buffer[12] = 0;
+  buffer[12] = '\0';
   fwrite (buffer, 1, strlen ((char *) buffer), destfile);
 
   /*

@@ -101,7 +101,6 @@
     <ClInclude Include="..\backup\cc2.h" />
     <ClInclude Include="..\backup\cd64.h" />
     <ClInclude Include="..\backup\cmc.h" />
-    <ClInclude Include="..\backup\dex.h" />
     <ClInclude Include="..\backup\doctor64.h" />
     <ClInclude Include="..\backup\doctor64jr.h" />
     <ClInclude Include="..\backup\f2a.h" />
@@ -121,11 +120,11 @@
     <ClInclude Include="..\backup\nfc.h" />
     <ClInclude Include="..\backup\pce-pro.h" />
     <ClInclude Include="..\backup\pl.h" />
-    <ClInclude Include="..\backup\psxpblib.h" />
     <ClInclude Include="..\backup\quickdev16.h" />
     <ClInclude Include="..\backup\sc.h" />
     <ClInclude Include="..\backup\sflash.h" />
     <ClInclude Include="..\backup\smc.h" />
+    <ClInclude Include="..\backup\smcic2.h" />
     <ClInclude Include="..\backup\smd.h" />
     <ClInclude Include="..\backup\smsgg-pro.h" />
     <ClInclude Include="..\backup\spsc.h" />
@@ -192,7 +191,6 @@
     <ClCompile Include="..\backup\cc2.c" />
     <ClCompile Include="..\backup\cd64.c" />
     <ClCompile Include="..\backup\cmc.c" />
-    <ClCompile Include="..\backup\dex.c" />
     <ClCompile Include="..\backup\doctor64.c" />
     <ClCompile Include="..\backup\doctor64jr.c" />
     <ClCompile Include="..\backup\f2a.c" />
@@ -212,11 +210,11 @@
     <ClCompile Include="..\backup\nfc.c" />
     <ClCompile Include="..\backup\pce-pro.c" />
     <ClCompile Include="..\backup\pl.c" />
-    <ClCompile Include="..\backup\psxpblib.c" />
     <ClCompile Include="..\backup\quickdev16.c" />
     <ClCompile Include="..\backup\sc.c" />
     <ClCompile Include="..\backup\sflash.c" />
     <ClCompile Include="..\backup\smc.c" />
+    <ClCompile Include="..\backup\smcic2.c" />
     <ClCompile Include="..\backup\smd.c" />
     <ClCompile Include="..\backup\smsgg-pro.c" />
     <ClCompile Include="..\backup\spsc.c" />

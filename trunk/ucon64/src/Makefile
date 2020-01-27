@@ -113,16 +113,15 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
         console/lynx.o console/n64.o console/nds.o console/neogeo.o \
         console/nes.o console/ngp.o console/pce.o console/psx.o console/sms.o \
         console/snes.o console/swan.o console/vboy.o \
-        backup/backup.o backup/cc2.o backup/cmc.o backup/dex.o \
-        backup/doctor64.o backup/doctor64jr.o backup/f2a.o backup/fal.o \
-        backup/ffe.o backup/fig.o backup/gbx.o backup/gd.o \
-        backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
-        backup/md-pro.o backup/mgd.o backup/mgh.o backup/msg.o backup/nfc.o \
-        backup/pce-pro.o backup/pl.o backup/psxpblib.o backup/quickdev16.o \
-        backup/sc.o backup/sflash.o backup/smc.o backup/smcic2.o backup/smd.o \
-        backup/smsgg-pro.o backup/spsc.o backup/ssc.o backup/swc.o \
-        backup/tototek.o backup/ufo.o backup/ufosd.o backup/yoko.o \
-        backup/z64.o \
+        backup/backup.o backup/cc2.o backup/cmc.o backup/doctor64.o \
+        backup/doctor64jr.o backup/f2a.o backup/fal.o backup/ffe.o \
+        backup/fig.o backup/gbx.o backup/gd.o backup/interceptor.o \
+        backup/lynxit.o backup/mccl.o backup/mcd.o backup/md-pro.o \
+        backup/mgd.o backup/mgh.o backup/msg.o backup/nfc.o backup/pce-pro.o \
+        backup/pl.o backup/quickdev16.o backup/sc.o backup/sflash.o \
+        backup/smc.o backup/smcic2.o backup/smd.o backup/smsgg-pro.o \
+        backup/spsc.o backup/ssc.o backup/swc.o backup/tototek.o backup/ufo.o \
+        backup/ufosd.o backup/yoko.o backup/z64.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/patch.o patch/ppf.o
 ifeq ($(findstring CYGWIN,$(OSTYPE)),)
 OBJECTS+=misc/getopt.o
@@ -346,9 +345,9 @@ ucon64.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
           console/lynx.h console/n64.h console/nds.h console/neogeo.h \
           console/nes.h console/ngp.h console/pce.h console/psx.h \
           console/sms.h $(SNES_H_DEPS) console/swan.h console/vboy.h \
-          backup/backup.h backup/cd64.h backup/cmc.h backup/dex.h \
-          backup/doctor64.h backup/doctor64jr.h backup/f2a.h backup/fal.h \
-          backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h backup/mcd.h \
+          backup/backup.h backup/cd64.h backup/cmc.h backup/doctor64.h \
+          backup/doctor64jr.h backup/f2a.h backup/fal.h backup/gbx.h \
+          backup/gd.h backup/lynxit.h backup/mccl.h backup/mcd.h \
           backup/md-pro.h backup/msg.h backup/pce-pro.h backup/pl.h \
           backup/quickdev16.h backup/sflash.h backup/smc.h backup/smcic2.h \
           backup/smd.h backup/smsgg-pro.h backup/swc.h \
@@ -373,11 +372,11 @@ ucon64_opts.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(MISC_H_DEPS) \
                console/lynx.h console/n64.h console/nds.h console/neogeo.h \
                console/nes.h console/pce.h console/sms.h $(SNES_H_DEPS) \
                console/swan.h \
-               backup/backup.h backup/cd64.h backup/cmc.h backup/dex.h \
-               backup/doctor64.h backup/doctor64jr.h backup/f2a.h backup/fal.h \
-               backup/gbx.h backup/gd.h backup/lynxit.h backup/mccl.h \
-               backup/mcd.h backup/md-pro.h backup/msg.h backup/pce-pro.h \
-               backup/pl.h backup/quickdev16.h backup/sflash.h backup/smc.h \
+               backup/backup.h backup/cd64.h backup/cmc.h backup/doctor64.h \
+               backup/doctor64jr.h backup/f2a.h backup/fal.h backup/gbx.h \
+               backup/gd.h backup/lynxit.h backup/mccl.h backup/mcd.h \
+               backup/md-pro.h backup/msg.h backup/pce-pro.h backup/pl.h \
+               backup/quickdev16.h backup/sflash.h backup/smc.h \
                backup/smcic2.h backup/smd.h backup/smsgg-pro.h backup/swc.h \
                patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/ppf.h
 backup/backup.o: config.h backup/backup.h $(GETOPT2_H_DEPS)
@@ -388,9 +387,6 @@ backup/cd64.o: config.h $(CD64LIB_H_DEPS) $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) \
 backup/cmc.o: config.h $(ARCHIVE_H_DEPS) $(BSWAP_H_DEPS) $(MISC_H_DEPS) \
               $(TERM_H_DEPS) $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) \
               backup/cmc.h $(GETOPT2_H_DEPS)
-backup/dex.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_H_DEPS) \
-              $(UCON64_MISC_H_DEPS) backup/dex.h backup/psxpblib.h \
-              $(GETOPT2_H_DEPS)
 backup/doctor64jr.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) \
                      $(UCON64_MISC_H_DEPS) backup/doctor64jr.h $(GETOPT2_H_DEPS)
 backup/doctor64.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_H_DEPS) \
@@ -436,7 +432,6 @@ backup/pce-pro.o: config.h $(ARCHIVE_H_DEPS) misc/file.h $(UCON64_H_DEPS) \
                   $(GETOPT2_H_DEPS)
 backup/pl.o: config.h $(ARCHIVE_H_DEPS) $(UCON64_H_DEPS) $(UCON64_MISC_H_DEPS) \
              backup/pl.h $(GETOPT2_H_DEPS)
-backup/psxpblib.o: config.h $(UCON64_H_DEPS) backup/psxpblib.h
 backup/quickdev16.o: config.h $(ARCHIVE_H_DEPS) $(MISC_H_DEPS) $(TERM_H_DEPS) \
                      misc/usb.h $(UCON64_MISC_H_DEPS) $(SNES_H_DEPS) \
                      backup/quickdev16.h

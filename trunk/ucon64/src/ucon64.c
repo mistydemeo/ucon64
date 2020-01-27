@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units.
 
 Copyright (c) 1999 - 2005              NoisyB
-Copyright (c) 2001 - 2005, 2015 - 2019 dbjh
+Copyright (c) 2001 - 2005, 2015 - 2020 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -108,7 +108,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/backup.h"
 #include "backup/cd64.h"
 #include "backup/cmc.h"
-#include "backup/dex.h"
 #include "backup/doctor64.h"
 #include "backup/doctor64jr.h"
 #include "backup/f2a.h"
@@ -192,9 +191,6 @@ static const st_getopt2_t lf[] =
     dc_usage,
     lf,
     psx_usage,
-#ifdef  USE_PARALLEL
-    dex_usage,
-#endif
     lf,
     gba_usage,
 #if     defined USE_PARALLEL || defined USE_USB
@@ -220,9 +216,6 @@ static const st_getopt2_t lf[] =
 #ifdef  USE_LIBCD64
     cd64_usage,
 #endif
-#ifdef  USE_PARALLEL
-    dex_usage,
-#endif // USE_PARALLEL
     lf,
     snes_usage,
 #ifdef  USE_PARALLEL
@@ -599,7 +592,6 @@ TEST_BREAK
       {UCON64_XCMC,	"ucon64 -xcmc", 0},     // NO TEST: transfer code
       {UCON64_XCMCM,	"ucon64 -xcmcm", 0},    // NO TEST: transfer code
       {UCON64_XCMCT,	"ucon64 -xcmct", 0},    // NO TEST: transfer code
-      {UCON64_XDEX,	"ucon64 -xdex", 0},     // NO TEST: transfer code
       {UCON64_XDJR,	"ucon64 -xdjr", 0},     // NO TEST: transfer code
       {UCON64_XF2A,	"ucon64 -xf2a", 0},     // NO TEST: transfer code
       {UCON64_XF2AB,	"ucon64 -xf2ab", 0},    // NO TEST: transfer code
@@ -2040,7 +2032,6 @@ ucon64_usage (int argc, char *argv[], int view)
         getopt2_usage (cd64_usage);
 #endif
         getopt2_usage (cmc_usage);
-        getopt2_usage (dex_usage);
         getopt2_usage (doctor64_usage);
         getopt2_usage (doctor64jr_usage);
         getopt2_usage (f2a_usage);

@@ -69,9 +69,6 @@
     <ClInclude Include="..\backup\cmc.h">
       <Filter>Header Files\backup</Filter>
     </ClInclude>
-    <ClInclude Include="..\backup\dex.h">
-      <Filter>Header Files\backup</Filter>
-    </ClInclude>
     <ClInclude Include="..\backup\doctor64.h">
       <Filter>Header Files\backup</Filter>
     </ClInclude>
@@ -129,9 +126,6 @@
     <ClInclude Include="..\backup\pl.h">
       <Filter>Header Files\backup</Filter>
     </ClInclude>
-    <ClInclude Include="..\backup\psxpblib.h">
-      <Filter>Header Files\backup</Filter>
-    </ClInclude>
     <ClInclude Include="..\backup\quickdev16.h">
       <Filter>Header Files\backup</Filter>
     </ClInclude>
@@ -142,6 +136,9 @@
       <Filter>Header Files\backup</Filter>
     </ClInclude>
     <ClInclude Include="..\backup\smc.h">
+      <Filter>Header Files\backup</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backup\smcic2.h">
       <Filter>Header Files\backup</Filter>
     </ClInclude>
     <ClInclude Include="..\backup\smd.h">
@@ -377,9 +374,6 @@
     <ClCompile Include="..\backup\cmc.c">
       <Filter>Source Files\backup</Filter>
     </ClCompile>
-    <ClCompile Include="..\backup\dex.c">
-      <Filter>Source Files\backup</Filter>
-    </ClCompile>
     <ClCompile Include="..\backup\doctor64.c">
       <Filter>Source Files\backup</Filter>
     </ClCompile>
@@ -437,9 +431,6 @@
     <ClCompile Include="..\backup\pl.c">
       <Filter>Source Files\backup</Filter>
     </ClCompile>
-    <ClCompile Include="..\backup\psxpblib.c">
-      <Filter>Source Files\backup</Filter>
-    </ClCompile>
     <ClCompile Include="..\backup\quickdev16.c">
       <Filter>Source Files\backup</Filter>
     </ClCompile>
@@ -450,6 +441,9 @@
       <Filter>Source Files\backup</Filter>
     </ClCompile>
     <ClCompile Include="..\backup\smc.c">
+      <Filter>Source Files\backup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backup\smcic2.c">
       <Filter>Source Files\backup</Filter>
     </ClCompile>
     <ClCompile Include="..\backup\smd.c">

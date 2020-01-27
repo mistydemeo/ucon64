@@ -2,7 +2,7 @@
 ucon64_opts.c - switches for all uCON64 options
 
 Copyright (c) 2002 - 2005              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2019 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2020 dbjh
 Copyright (c) 2005                     Jan-Erik Karlsson (Amiga)
 
 
@@ -71,7 +71,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/backup.h"
 #include "backup/cd64.h"
 #include "backup/cmc.h"
-#include "backup/dex.h"
 #include "backup/doctor64.h"
 #include "backup/doctor64jr.h"
 #include "backup/f2a.h"
@@ -334,7 +333,6 @@ ucon64_switches (st_ucon64_t *p)
       privileges before libcd64 is initialised (after cd64_t.devopen() has been
       called).
     */
-    case UCON64_XDEX:
     case UCON64_XFIG:
     case UCON64_XFIGC:
     case UCON64_XFIGS:
@@ -1916,16 +1914,6 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XCMCT:
       cmc_test (strtol (option_arg, NULL, 10), ucon64.parport, ucon64.io_mode);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XDEX:
-      if (access (ucon64.fname, F_OK) != 0)
-        dex_read_block (ucon64.fname, strtol (option_arg, NULL, 10),
-                        ucon64.parport);
-      else
-        dex_write_block (ucon64.fname, strtol (option_arg, NULL, 10),
-                         ucon64.parport);
       fputc ('\n', stdout);
       break;
 

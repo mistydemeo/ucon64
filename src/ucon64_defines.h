@@ -2,7 +2,7 @@
 ucon64_defines.h - definitions for uCON64
 
 Copyright (c) 2002 - 2005              NoisyB
-Copyright (c) 2002 - 2005, 2015 - 2019 dbjh
+Copyright (c) 2002 - 2005, 2015 - 2020 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -336,7 +336,6 @@ enum
   UCON64_XCMC,
   UCON64_XCMCM,
   UCON64_XCMCT,
-  UCON64_XDEX,
   UCON64_XDJR,
   UCON64_XF2A,
   UCON64_XF2AB,

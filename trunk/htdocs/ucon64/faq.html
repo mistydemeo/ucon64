@@ -223,8 +223,8 @@ Q58: <a href="#58">I tried to upload a game to my Super UFO Pro 8 SD (on
    installed.<br>
    Visual C++ is part of Visual Studio. A free version of Visual Studio, Visual
    Studio Community 2015, can be downloaded from
-   <a href="https://www.visualstudio.com/products/visual-studio-community-vs">
-   https://www.visualstudio.com/products/visual-studio-community-vs</a>. In
+   <a href="https://visualstudio.microsoft.com/vs/older-downloads/">
+   https://visualstudio.microsoft.com/vs/older-downloads/</a>. In
    order to compile uCON64, in the set up program of Visual Studio you need to
    select at least Programming Languages -&#62; Visual C++ -&#62; Common Tools
    for Visual C++ 2015. If you want to build a version of uCON64 that can run on
@@ -347,11 +347,10 @@ Q58: <a href="#58">I tried to upload a game to my Super UFO Pro 8 SD (on
    SNES functions. Skip the next step if you do not want uCON64 to use
    discmage.<br>
 <br>
-   If you do not have a reason not to compile discmage and you are using DJGPP,
-   Cygwin or MinGW you need the library libgcc.a. This library comes with those
-   compilers but is usually not located in the standard library directory.
-   However, the compiler needs to know where to find it. There are two possible
-   ways to solve this problem:<br>
+   If you do not have a reason not to compile discmage and you are using DJGPP
+   you need the library libgcc.a. This library comes with DJGPP but is usually
+   not located in the standard library directory. However, the compiler needs to
+   know where to find it. There are two possible ways to solve this problem:<br>
    1.) Copy the file libgcc.a to the standard library directory.<br>
    2.) Edit the file libdiscmage/Makefile so that the variable GCCA_DIR points
    to the directory containing libgcc.a.<br>

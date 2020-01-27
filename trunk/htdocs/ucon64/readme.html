@@ -1,7 +1,7 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - ReadMe</title></head><body bgcolor="#ffffff"><tt><pre>
-uCON64 2.2.0 UNIX (Linux) 1999-2019
+uCON64 2.2.1 UNIX (Linux) 1999-2019
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -152,9 +152,6 @@ Dreamcast
 
 Playstation (One)
   --psx         force recognition
-DexDrive
-  --xdex=N      send/receive Block N to/from DexDrive; --port=PORT
-                  receives automatically when SRAM does not exist
 
 Game Boy Advance (SP)
   --gba         force recognition
@@ -253,9 +250,6 @@ CD64
                   PROT=0 CD64 BIOS
                   PROT=1 Ghemor
                   PROT=2 UltraLink
-DexDrive
-  --xdex=N      send/receive Block N to/from DexDrive; --port=PORT
-                  receives automatically when SRAM does not exist
 
 Super Nintendo Entertainment System/SNES/Super Famicom
   --snes        force recognition
@@ -287,6 +281,10 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --ic2         convert to Super Magicom/SMC IC2
   --sminis=ID   convert *.srm (SRAM) file to SNES/Super Famicom Classic Mini
                   (hakchi2) format for game with identifier ID
+  --range=O1:O2 specify range for calculating checksum of SNES/Super Famicom
+                  Classic Mini (hakchi2) SRAM data
+                  O1=offset (hexadecimal) of first byte of range
+                  O2=offset (hexadecimal) of last byte of range
   --smini2srm   convert SNES/Super Famicom Classic Mini (hakchi2) SRAM data to
                   *.srm (SRAM) file
   --ctrl=TYPE   specify type of controller in port 1 for emu when converting
@@ -322,7 +320,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --dmirr       "de-mirror" ROM (strip mirrored block from end of ROM)
   --dnsrt       "de-NSRT" ROM (restore name and checksum from NSRT header)
   --mksrm       create *.srm (SRAM) file with size based on ROM information
-Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC
+Supercom PRO/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC
   --xswc        send/receive ROM to/from Super Wild Card*/SWC; --port=PORT
                   receives automatically when ROM does not exist
   --xswc2       same as --xswc, but enables Real Time Save mode (SWC only)
@@ -364,6 +362,9 @@ Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)
   --xfigc       send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;
                   --port=PORT
                   receives automatically when SRAM does not exist
+UFO Super Drive PRO 6 HYPER VERSION/Future Supercom Pro.9/Twin Supercom Pro.5
+(Modified) Supercom PRO.1/(Modified) Super Magicom
+  --xic2        send ROM to SMC IC2 compatible backup unit; --port=PORT
 Super Flash
   --xsf         send/receive ROM to/from Super Flash; --port=PORT
                   receives automatically (64 Mbits) when ROM does not exist
@@ -409,7 +410,7 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
                   CODE=1 force NTSC/U.S.A. for all games
                   CODE=2 force PAL for all games
                   CODE=x use whatever setting games expect
-Super Com Pro/Magic Drive Plus/Super Magic Drive/SMD
+Supercom PRO/Magic Drive Plus/Super Magic Drive/SMD
   --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when ROM does not exist
   --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --port=PORT
